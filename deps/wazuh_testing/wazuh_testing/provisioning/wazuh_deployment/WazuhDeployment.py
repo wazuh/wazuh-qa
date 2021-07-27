@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.provisioning.ansible.AnsibleRunner import AnsibleRunner
+import sys
 
 
 class WazuhDeployment(ABC):
@@ -11,7 +12,6 @@ class WazuhDeployment(ABC):
                  services=[]):
         self.installation_files = installation_files
         self.configuration = configuration
-        self.system = system
         self.inventory = inventory
         self.install_mode = install_mode
         self.install_dir = install_dir
@@ -23,51 +23,68 @@ class WazuhDeployment(ABC):
     def install(self, install_type):
         tasks_list = []
         if self.install_mode == 'sources':
-            if self.system == 'linux':
-                tasks_list.append(AnsibleTask({
+            tasks_list.append(AnsibleTask({
                     'name': 'Install dependencies to build Wazuh packages',
                     'package': {'name': ['make', 'gcc', 'automake', 'autoconf', 'libtool',
                                          'tar', 'libc6-dev', 'curl', 'policycoreutils'],
                                 'state': 'present'}}))
 
-                tasks_list.append(AnsibleTask({
-                    'name': 'Clean remaining files from others builds',
-                    'command': 'make -C src {{ item }}',
-                    'args': {'chdir': f'{self.installation_files}'},
-                    'with_items': ['clean', 'clean-deps']}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Clean remaining files from others builds',
+                'command': 'make -C src {{ item }}',
+                'args': {'chdir': f'{self.installation_files}'},
+                'with_items': ['clean', 'clean-deps'],
+                'when': 'ansible_system == "Linux"'}))
 
-                tasks_list.append(AnsibleTask({
-                    'name': 'Render the "preloaded-vars.conf" file',
-                    'template': {'src': 'wazuh_install/templates/preloaded_vars.conf.j2',
-                                 'dest': f'{self.installation_files}/etc/preloaded-vars.conf',
-                                 'owner': 'root',
-                                 'group': 'root',
-                                 'mode': '0644'},
-                    'vars': {'install_type': install_type,
-                             'install_dir': f'{self.install_dir}',
-                             'ip_server': f'{self.ip_server}',
-                             'ca_store': f'{self.installation_files}/wpk_root.pem',
-                             'make_cert': 'y' if install_type == 'server' else 'n'}}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Render the "preloaded-vars.conf" file',
+                'template': {'src': 'wazuh_testing/provisioning/wazuh_install/templates/preloaded_vars.conf.j2',
+                             'dest': f'{self.installation_files}/etc/preloaded-vars.conf',
+                             'owner': 'root',
+                             'group': 'root',
+                             'mode': '0644'},
+                'vars': {'install_type': install_type,
+                         'install_dir': f'{self.install_dir}',
+                         'ip_server': f'{self.ip_server}',
+                         'ca_store': f'{self.installation_files}/wpk_root.pem',
+                         'make_cert': 'y' if install_type == 'server' else 'n'},
+                'when': 'ansible_system == "Linux"'}))
 
-                tasks_list.append(AnsibleTask({
-                    'name': 'Executing "install.sh" script to build and install the Wazuh Agent',
-                    'shell': './install.sh > /tmp/wazuh_install_log.txt',
-                    'args': {'chdir': f'{self.installation_files}'}}))
-
-            elif self.system == 'windows':
-                pass
+            tasks_list.append(AnsibleTask({
+                'name': 'Executing "install.sh" script to build and install Wazuh',
+                'shell': './install.sh > /tmp/wazuh_install_log.txt',
+                'args': {'chdir': f'{self.installation_files}'},
+                'when': 'ansible_system == "Linux"'}))
 
         elif self.install_mode == 'package':
-            if self.system == 'linux':
-                tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .deb packages',
-                                               'apt': {'deb': f'{self.installation_files}'}}))
-            elif self.system == 'windows':
-                tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from Windows packages',
-                                               'win_package': {'path': f'{self.installation_files}'}}))
-            elif self.system == 'macos':
-                tasks_list.append(AnsibleTask({'name': 'Install macOS wazuh package',
-                                               'shell': 'installer -pkg wazuh-* -target /',
-                                               'args': {'chdir': f'{self.installation_files}'}}))
+            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .deb packages',
+                                           'apt': {'deb': f'{self.installation_files}'},
+                                           'when': 'ansible_os_family|lower == "debian"'}))
+
+            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | yum',
+                                           'yum': {'name': f'{self.installation_files}'},
+                                           'when': ['ansible_os_family|lower == "redhat"',
+                                                    'not (ansible_distribution|lower == "centos" and ' +
+                                                    'ansible_distribution_major_version >= "8")',
+                                                    'not (ansible_distribution|lower == "redhat" and ' +
+                                                    'ansible_distribution_major_version >= "8")']}))
+
+            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | dnf',
+                                           'dnf': {'name': f'{self.installation_files}'},
+                                           'when': ['ansible_os_family|lower == "redhat"',
+                                                    '(ansible_distribution|lower == "centos" and ' +
+                                                    'ansible_distribution_major_version >= "8") or' +
+                                                    '(ansible_distribution|lower == "redhat" and ' +
+                                                    'ansible_distribution_major_version >= "8")']}))
+
+            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from Windows packages',
+                                           'win_package': {'path': f'{self.installation_files}'},
+                                           'when': 'ansible_system == "Windows"'}))
+
+            tasks_list.append(AnsibleTask({'name': 'Install macOS wazuh package',
+                                           'shell': 'installer -pkg wazuh-* -target /',
+                                           'args': {'chdir': f'{self.installation_files}'},
+                                           'when': 'ansible_system == "Darwin"'}))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
@@ -84,22 +101,19 @@ class WazuhDeployment(ABC):
                                                    'state': f'{service_command}'},
                                        'register': 'output_command',
                                        'ignore_errors': 'true',
-                                       'when': 'os == "linux"',
-                                       'vars': {'os': self.system}}))
+                                       'when': 'ansible_system == "Linux"'}))
 
         tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service',
                                        'become': True,
                                        'command': f'{self.install_dir}/bin/wazuh-control {command}',
-                                       'when': 'os == "macos" or os == "solaris-11" or ' +
-                                               'os == "solaris-10" or output_command.failed == true',
-                                       'vars': {'os': self.system}}))
+                                       'when': 'ansible_system == "darwin" or ansible_system == "SunOS" or ' +
+                                               'output_command.failed == true'}))
 
         tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service',
                                        'win_shell': 'Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue |' +
                                                     f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
                                        'args': {'executable': 'powershell.exe'},
-                                       'when': 'os == "windows"',
-                                       'vars': {'os': self.system}}))
+                                       'when': 'ansible_system == "Windows"'}))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
