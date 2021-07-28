@@ -3,7 +3,7 @@ import os
 import re
 import json
 import ast
-
+from Utils import check_existance
 class Sanity():
     def __init__(self,):
         self.conf = Config()
@@ -23,13 +23,7 @@ class Sanity():
 
     def validate_fields(self, required_fields, available_fields):
         for field in required_fields:
-            if isinstance(field, dict):
-                for key in field:
-                    if key in available_fields:
-                        self.validate_fields(field[key], available_fields[key])
-                    else:
-                        self.add_report(f"Mandatory field '{key}' is missing in file {self.scan_file}")
-            elif not field in available_fields:
+            if not check_existance(available_fields, field):
                 self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
 
     def validate_module_fields(self, fields):
@@ -40,7 +34,7 @@ class Sanity():
             self.validate_fields(self.conf.test_fields.mandatory, test_fields)
 
     def identify_tags(self, content):
-        if 'Tags' in content['Metadata']:
+        if 'Metadata' in content and 'Tags' in content['Metadata']:
             for tag in content['Metadata']['Tags']:
                 self.found_tags.add(tag)
 
