@@ -64,8 +64,8 @@ def clone_wazuh_repository(pytestconfig):
 @pytest.mark.parametrize("directory_to_check", DIRECTORIES_TO_CHECK)
 def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
     # Wazuh is cloned from GitHub using the clone_wazuh_repository fixture
-    assert clone_wazuh_repository, f"Error while cloning the Wazuh repository from GitHub, " \
-                                   f"please check the Wazuh branch set in the parameter."
+    assert clone_wazuh_repository, "Error while cloning the Wazuh repository from GitHub, " \
+                                   "please check the Wazuh branch set in the parameter."
 
     # Run Bandit to check possible security flaws
     # b_conf = b_config.BanditConfig()
