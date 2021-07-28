@@ -4,11 +4,12 @@ from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime
 from json import dumps, loads
+from os import environ
 
 from safety.formatter import report
 from safety.safety import check
 
-python_bin = subprocess.run(['which', 'python3'], stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+python_bin = environ['_']
 package_list = []
 package_tuple = namedtuple('Package', ['key', 'version'])
 
@@ -27,11 +28,11 @@ def get_args():
     return parser.parse_args()
 
 
-def run_report(output_file_path):
+def run_report():
     """Perform vulnerability scan using Safety to check all packages listed.
 
-    Args:
-        output_file_path (str): file path where results will be saved.
+    Returns:
+        json: information about packages and vulnerabilities.
     """
     json_report = []
     vulns = check(packages=package_list, key='', db_mirror='', cached=False, ignore_ids=(), proxy={})
@@ -50,11 +51,7 @@ def run_report(output_file_path):
         'vulnerabilities_found': len(json_report),
         'packages': json_report
     }
-    if output_file_path:
-        with open(output_file_path, mode='w') as output_file:
-            output_file.write(dumps(json_data, indent=4))
-    else:
-        print(dumps(json_data, indent=4))
+    return dumps(json_data, indent=4)
 
 
 def prepare_input(pip_mode, input_file_path):
@@ -65,14 +62,14 @@ def prepare_input(pip_mode, input_file_path):
         input_file_path (str): path to the input file (used if pip_mode is disabled).
     """
     python_process = subprocess.run([python_bin, '--version'], stdout=subprocess.PIPE, universal_newlines=True)
-    aux = python_process.stdout.strip().split()
-    package_list.append(package_tuple(aux[0], aux[1]))
+    pkg = python_process.stdout.strip().split()
+    package_list.append(package_tuple(pkg[0], pkg[1]))
     if pip_mode:
         pip_mode_pocess = subprocess.run([python_bin, '-m', 'pip', 'freeze'], stdout=subprocess.PIPE,
                                          universal_newlines=True)
         for package_line in pip_mode_pocess.stdout.strip().split('\n'):
-            aux = package_line.strip().split('==')
-            package_list.append(package_tuple(aux[0], aux[1]))
+            pkg = package_line.strip().split('==')
+            package_list.append(package_tuple(pkg[0], pkg[1]))
     else:
         with open(input_file_path, mode='r') as input_file:
             lines = input_file.readlines()
@@ -84,8 +81,35 @@ def prepare_input(pip_mode, input_file_path):
                     line = f'{package_name}=={package_version}\n'
                 if ';' in line:
                     line = line.split(';')[0] + '\n'
-                aux = line.strip().split('==')
-                package_list.append(package_tuple(aux[0], aux[1]))
+                pkg = line.strip().split('==')
+                package_list.append(package_tuple(pkg[0], pkg[1]))
+
+
+def export_report(output, output_file_path):
+    """Export report to a file or console as a message.
+
+    Args:
+        output (json): information about packages and vulnerabilities.
+        output_file_path (str): path to file.
+    """
+    if output_file_path:
+        with open(output_file_path, mode='w') as output_file:
+            output_file.write(output)
+    else:
+        print(output)
+
+
+def report_for_pytest(requirements_file):
+    """Method used by pytest since it does not use this as a script.
+
+    Args:
+        requirements_file (str): path to the input file.
+
+    Returns:
+        json: information about packages and vulnerabilities.
+    """
+    prepare_input(False, requirements_file)
+    return run_report()
 
 
 if __name__ == '__main__':
@@ -95,4 +119,5 @@ if __name__ == '__main__':
     opt_input_file_path = options.input
 
     prepare_input(opt_pip_mode, opt_input_file_path)
-    run_report(opt_output_file_path)
+    output_data = run_report()
+    export_report(output_data, opt_output_file_path)
