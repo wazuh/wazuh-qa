@@ -1,19 +1,18 @@
 import os
 import subprocess
-import subprocess as sb
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
 
 
 def list_agents_ids():
-    wazuhdb_result = query_wdb("global get-all-agents last_id -1")
+    wazuhdb_result = query_wdb('global get-all-agents last_id -1')
     list_agents = [agent['id'] for agent in wazuhdb_result if not (0 == agent.get('id'))]
 
     return list_agents
 
 
 def remove_agents(agents_id, remove_type='wazuhdb'):
-    if remove_type not in ['wazuhdb','manage_agents']:
+    if remove_type not in ['wazuhdb', 'manage_agents']:
         raise ValueError("Invalid type of agent removal: %s" % remove_type)
 
     if agents_id:
@@ -26,5 +25,4 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
 
 
 def remove_all_agents(remove_type):
-    agent_ids_list = list_agents_ids()
-    remove_agents(agent_ids_list, remove_type)
+    remove_agents(list_agents_ids(), remove_type)
