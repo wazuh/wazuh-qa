@@ -1,4 +1,3 @@
-import copy
 import json
 import os
 import re
@@ -13,14 +12,27 @@ DIRECTORIES_TO_CHECK = ['wodles', 'framework', 'api']
 FORMAT = "json"
 TEST_PYTHON_CODE_PATH = os.path.dirname(__file__)
 KNOWN_FLAWS_DIRECTORY = os.path.join(TEST_PYTHON_CODE_PATH, 'known_flaws')
-WAZUH_BRANCH_FILE = os.path.join(TEST_PYTHON_CODE_PATH, 'wazuh_branch')
+
+
+def update_known_flaws(known_flaws, results):
+    for key in known_flaws.keys():
+        for i in range(len(known_flaws[key])):
+            next_flaw = next(flaw for flaw in results
+                             if (flaw['code'] == known_flaws[key][i]['code']
+                                 and flaw['filename'] == known_flaws[key][i]['filename']
+                                 and flaw['test_id'] == known_flaws[key][i]['test_id']))
+            if next_flaw:
+                known_flaws[key][i] = next_flaw
+            else:
+                del known_flaws[key][i]
+
+    return known_flaws
 
 
 @pytest.fixture(scope='session', autouse=True)
-def clone_wazuh_repository():
+def clone_wazuh_repository(pytestconfig):
     # Get Wazuh branch
-    with open(WAZUH_BRANCH_FILE, mode='r') as f:
-        branch = f.read()
+    branch = pytestconfig.getoption('branch')
 
     # Create temporary dir
     t = tempfile.mkdtemp()
@@ -29,15 +41,19 @@ def clone_wazuh_repository():
         # Clone into temporary dir
         current_process = subprocess.Popen(["git", "clone", "https://github.com/wazuh/wazuh.git", f"{t}"])
         current_process.wait()
-
-        # Checkout to given branch
-        current_working_dir = os.getcwd()
-        os.chdir(t)
-        current_process = subprocess.Popen(["git", "checkout", f"{branch}"])
-        current_process.wait()
-        os.chdir(current_working_dir)
-
-        yield t
+        if current_process.returncode == 0:
+            # Checkout to given branch
+            current_working_dir = os.getcwd()
+            os.chdir(t)
+            current_process = subprocess.Popen(["git", "checkout", f"{branch}"])
+            current_process.wait()
+            if current_process.returncode == 0:
+                os.chdir(current_working_dir)
+                yield t
+            else:
+                yield None
+        else:
+            yield None
     except:
         yield None
 
@@ -49,9 +65,17 @@ def clone_wazuh_repository():
 def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
     # Wazuh is cloned from GitHub using the clone_wazuh_repository fixture
     assert clone_wazuh_repository, f"Error while cloning the Wazuh repository from GitHub, " \
-                                   f"please check the wazuh branch in the {WAZUH_BRANCH_FILE} file"
+                                   f"please check the Wazuh branch set in the parameter."
 
-    # run Bandit to check possible security flaws
+    # Run Bandit to check possible security flaws
+    # b_conf = b_config.BanditConfig()
+    # agg_type = _log_option_source(
+    #     args.agg_type,
+    #     ini_options.get('aggregate'),
+    #     'aggregate output type')
+    # b_mgr = b_manager.BanditManager(b_conf, agg_type,
+    #                                 quiet=True,)
+
     bandit_output = json.loads(
         os.popen(f"bandit -q -r {clone_wazuh_repository}/{directory_to_check} "
                  f"-ii -f {FORMAT} -x {','.join(DIRECTORIES_TO_EXCLUDE)}").read())
@@ -60,45 +84,39 @@ def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
         f"\nBandit returned errors when trying to get possible vulnerabilities:\n{bandit_output['errors']}"
 
     # We save the results obtained in the report as the rest of information is redundant or not used
-    original_results = bandit_output['results']
+    results = bandit_output['results']
 
     # Delete filenames to make it persistent with tmp directories
-    for result in original_results:
+    for result in results:
         result['filename'] = "/".join(result['filename'].split('/')[3:])
-
-    results = copy.deepcopy(original_results)
 
     # Delete line numbers in code to make it persistent with updates
     for result in results:
-        code = result['code'].split("\n")[:-1]
-        for i in range(len(code)):
-            code[i] = re.sub(r"^\d+", "*", code[i])
-        # Join the modified code as it was done before splitting
-        result['code'] = '\n'.join(code)
+        result['code'] = re.sub(r"^\d+", "", result['code'])  # Delete first line number
+        result['code'] = re.sub(r"\n\d+", "\n", result['code'], re.M)  # Delete line numbers after newline
 
     # Compare the flaws obtained in results with the known flaws
-    with open(f"{KNOWN_FLAWS_DIRECTORY}/known_flaws_{directory_to_check}.txt", mode="r") as f:
-        file_content = f.read().split("\n")
-        known_flaws = []
-        for line in file_content:
-            try:
-                known_flaws.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
+    try:
+        with open(f"{KNOWN_FLAWS_DIRECTORY}/known_flaws_{directory_to_check}.json", mode="r") as f:
+            known_flaws = json.load(f)
+    except json.decoder.JSONDecodeError:
+        known_flaws = {'false_positives': [], 'to_fix': []}
 
     # There are security flaws if there are new possible vulnerabilities detected
-    new_flaws = [flaw for flaw in results if flaw not in known_flaws]
-    if new_flaws:
-        # Change new_flaws to the original flaws reported (with line numbers)
-        for i in range(len(new_flaws)):
-            new_flaws[i] = original_results[results.index(new_flaws[i])]
+    # To compare them, we cannot compare the whole dictionaries containing the flaws as the values of keys like
+    # line_number and line_range will change
+    # Update known flaws with the ones detected in this Bandit run, remove them if they were fixed
+    known_flaws = update_known_flaws(known_flaws, results)
+    with open(f"{KNOWN_FLAWS_DIRECTORY}/known_flaws_{directory_to_check}.json", mode="w") as f:
+        f.write(json.dumps(known_flaws, indent=4, sort_keys=True))
 
+    new_flaws = [flaw for flaw in results if
+                 flaw not in known_flaws['to_fix'] and flaw not in known_flaws['false_positives']]
+    if new_flaws:
         # Write new flaws in a temporal file to analyze them
-        new_flaws_path = os.path.join(TEST_PYTHON_CODE_PATH, f"new_flaws_{directory_to_check}.txt")
+        new_flaws_path = os.path.join(TEST_PYTHON_CODE_PATH, f"new_flaws_{directory_to_check}.json")
         with open(new_flaws_path, mode="w") as f:
-            for flaw in new_flaws:
-                f.write(json.dumps(flaw, indent=4, sort_keys=True))
-                f.write("\n")
+            f.write(json.dumps({'new_flaws': new_flaws}, indent=4, sort_keys=True))
         files_with_flaws = ', '.join(list(dict.fromkeys([res['filename'] for res in new_flaws])))
         assert False, f"\nVulnerabilities found in files:\n{files_with_flaws}" \
                       f"\nCheck them in {new_flaws_path}"
