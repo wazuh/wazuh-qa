@@ -15,18 +15,20 @@ KNOWN_FLAWS_DIRECTORY = os.path.join(TEST_PYTHON_CODE_PATH, 'known_flaws')
 
 
 def update_known_flaws(known_flaws, results):
+    updated_known_flaws = {k: None for k in known_flaws.keys()}
     for key in known_flaws.keys():
         for i in range(len(known_flaws[key])):
-            next_flaw = next(flaw for flaw in results
-                             if (flaw['code'] == known_flaws[key][i]['code']
-                                 and flaw['filename'] == known_flaws[key][i]['filename']
-                                 and flaw['test_id'] == known_flaws[key][i]['test_id']))
+            next_flaw = next((flaw for flaw in results
+                              if (flaw['code'] == known_flaws[key][i]['code']
+                                  and flaw['filename'] == known_flaws[key][i]['filename']
+                                  and flaw['test_id'] == known_flaws[key][i]['test_id'])), {})
             if next_flaw:
                 known_flaws[key][i] = next_flaw
             else:
-                del known_flaws[key][i]
+                known_flaws[key][i] = None
+        updated_known_flaws[key] = [flaw for flaw in known_flaws[key] if flaw]
 
-    return known_flaws
+    return updated_known_flaws
 
 
 @pytest.fixture(scope='session', autouse=True)
