@@ -690,7 +690,7 @@ class Agent:
         """
         return self.get_agent_info('connection_status')
 
-    @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         """Wait until agent status is active in global.db.
 
