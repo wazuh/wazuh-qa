@@ -1,0 +1,17 @@
+FROM amazonlinux:2.0.20200602.0
+
+RUN yum update -y && \
+    yum install -y \
+        openssh-server \
+        nano \
+        openssl \
+        sudo \
+        gcc \
+        git \
+        python3 \
+        python3-devel
+
+ADD entrypoint.sh /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
