@@ -3,23 +3,37 @@ import os
 import re
 import shutil
 import tempfile
+from typing import Union
 
 import pytest
 from bandit.core import config as b_config, manager as b_manager
 from git import Repo
 
-DIRECTORIES_TO_EXCLUDE = ['tests', 'test']
-DIRECTORIES_TO_CHECK = ['wodles', 'framework', 'api']
-FORMAT = "json"
 TEST_PYTHON_CODE_PATH = os.path.dirname(__file__)
 KNOWN_FLAWS_DIRECTORY = os.path.join(TEST_PYTHON_CODE_PATH, 'known_flaws')
+
+DIRECTORIES_TO_EXCLUDE = ['tests', 'test']
+DIRECTORIES_TO_CHECK = ['wodles', 'framework', 'api']
 CONFIDENCE_LEVEL = 'MEDIUM'
 SEVERITY_LEVEL = 'LOW'
-OUTPUT_FORMAT = 'json'
 
 
-def run_bandit_scan(directory_to_check, directories_to_exclude=None, severity_level=SEVERITY_LEVEL,
-                    confidence_level=CONFIDENCE_LEVEL, output_format=OUTPUT_FORMAT):
+def run_bandit_scan(directory_to_check: str, directories_to_exclude: Union[list, None] = None,
+                    severity_level: str = SEVERITY_LEVEL, confidence_level: str = CONFIDENCE_LEVEL):
+    """Run Bandit scan in a specified directory. The directories to exclude, minimum severity and confidence level can
+    also be specified.
+
+    Args:
+        directory_to_check (str): Directory where Bandit will run the scan (recursively).
+        directories_to_exclude (Union[list, None]): List containing the directories that will be excluded in the Bandit
+            scan.
+        severity_level (str): Minimum severity level taken into account in the Bandit scan.
+        confidence_level (str): Minimum confidence level taken into account in the Bandit scan.
+        confidence_level (str): Minimum confidence level taken into account in the Bandit scan.
+
+    Returns:
+        dict: Dictionary with the Bandit scan output.
+    """
     if not directories_to_exclude:
         directories_to_exclude = DIRECTORIES_TO_EXCLUDE
 
@@ -37,7 +51,7 @@ def run_bandit_scan(directory_to_check, directories_to_exclude=None, severity_le
                          severity_level,  # minimum severity level
                          confidence_level,  # minimum confidence level
                          open(filename, mode='w'),  # output file object
-                         output_format,  # output format
+                         'json',  # output format
                          None)  # msg template
 
     # Read the temporary file with the Bandit result and remove it
@@ -48,7 +62,17 @@ def run_bandit_scan(directory_to_check, directories_to_exclude=None, severity_le
     return bandit_output
 
 
-def update_known_flaws(known_flaws, results):
+def update_known_flaws(known_flaws: dict, results: list) -> dict:
+    """Compare the Bandit results of the run with the already known flaws. Update the known flaws with the new line
+    numbers and remove the known flaws that don't appear in the run results (were fixed).
+
+    Args:
+        known_flaws (dict): Dictionary containing already known vulnerabilities or false positives detected by Bandit.
+        results (list): List containing all the possible flaws obtained in the Bandit run.
+
+    Returns:
+        dict: Updated known flaws.
+    """
     updated_known_flaws = {k: None for k in known_flaws.keys()}
     for key in known_flaws.keys():
         for i in range(len(known_flaws[key])):
@@ -67,6 +91,15 @@ def update_known_flaws(known_flaws, results):
 
 @pytest.fixture(scope='session', autouse=True)
 def clone_wazuh_repository(pytestconfig):
+    """Fixture that clones a Wazuh repository in a temporary directory and checkout to the branch given by parameter.
+    Remove the temporary directory once the test session using this fixture has finished.
+
+    Args:
+        pytestconfig (fixture): Session-scoped fixture that returns the :class:`_pytest.config.Config` object.
+
+    Yields:
+        Union[str, None]: The temporary directory name or None if the clone or checkout actions were not successful.
+    """
     # Get Wazuh branch
     branch = pytestconfig.getoption('branch')
 
@@ -87,13 +120,26 @@ def clone_wazuh_repository(pytestconfig):
 
 
 @pytest.mark.parametrize("directory_to_check", DIRECTORIES_TO_CHECK)
-def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
+def test_check_security_flaws(clone_wazuh_repository, directory_to_check: str):
+    """Test whether the directory to check has python files with possible vulnerabilities or not.
+
+    The test passes if there are no new vulnerabilities. The test fails in other case and generates a report.
+
+    In case there is at least one vulnerability, a json file will be generated with the report. If we consider this
+    result or results are false positives, we will move the json object containing each specific result to the
+    `known_flaws/known_flaws_{framework|api|wodles}.json` file.
+
+    Args:
+        clone_wazuh_repository (fixture): Pytest fixture returning the path of the temporary directory path the
+            repository cloned. This directory is removed at the end of the pytest session.
+        directory_to_check (str): Directory containing the Python files where we want to look for vulnerabilities.
+    """
     # Wazuh is cloned from GitHub using the clone_wazuh_repository fixture
     assert clone_wazuh_repository, "Error while cloning the Wazuh repository from GitHub, " \
                                    "please check the Wazuh branch set in the parameter."
 
+    # Run Bandit scan
     bandit_output = run_bandit_scan(f"{clone_wazuh_repository}/{directory_to_check}")
-
     assert not bandit_output['errors'], \
         f"\nBandit returned errors when trying to get possible vulnerabilities:\n{bandit_output['errors']}"
 
@@ -118,7 +164,7 @@ def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
 
     # There are security flaws if there are new possible vulnerabilities detected
     # To compare them, we cannot compare the whole dictionaries containing the flaws as the values of keys like
-    # line_number and line_range will change
+    # line_number and line_range will vary
     # Update known flaws with the ones detected in this Bandit run, remove them if they were fixed
     known_flaws = update_known_flaws(known_flaws, results)
     with open(f"{KNOWN_FLAWS_DIRECTORY}/known_flaws_{directory_to_check}.json", mode="w") as f:
