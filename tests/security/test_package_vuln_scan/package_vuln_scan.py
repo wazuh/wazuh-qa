@@ -32,7 +32,7 @@ def run_report():
     """Perform vulnerability scan using Safety to check all packages listed.
 
     Returns:
-        json: information about packages and vulnerabilities.
+        str: information about packages and vulnerabilities.
     """
     json_report = []
     vulns = check(packages=package_list, key='', db_mirror='', cached=False, ignore_ids=(), proxy={})
@@ -65,9 +65,9 @@ def prepare_input(pip_mode, input_file_path):
     pkg = python_process.stdout.strip().split()
     package_list.append(package_tuple(pkg[0], pkg[1]))
     if pip_mode:
-        pip_mode_pocess = subprocess.run([python_bin, '-m', 'pip', 'freeze'], stdout=subprocess.PIPE,
-                                         universal_newlines=True)
-        for package_line in pip_mode_pocess.stdout.strip().split('\n'):
+        pip_mode_process = subprocess.run([python_bin, '-m', 'pip', 'freeze'], stdout=subprocess.PIPE,
+                                          universal_newlines=True)
+        for package_line in pip_mode_process.stdout.strip().split('\n'):
             pkg = package_line.strip().split('==')
             package_list.append(package_tuple(pkg[0], pkg[1]))
     else:
@@ -89,7 +89,7 @@ def export_report(output, output_file_path):
     """Export report to a file or console as a message.
 
     Args:
-        output (json): information about packages and vulnerabilities.
+        output (str): information about packages and vulnerabilities.
         output_file_path (str): path to file.
     """
     if output_file_path:
@@ -106,7 +106,7 @@ def report_for_pytest(requirements_file):
         requirements_file (str): path to the input file.
 
     Returns:
-        json: information about packages and vulnerabilities.
+        str: information about packages and vulnerabilities.
     """
     prepare_input(False, requirements_file)
     return run_report()
