@@ -53,8 +53,8 @@ def get_configuration(request):
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
     """Test if `wazuh-remoted` sends active response commands to the agent.
 
-    Check if execd sends active response command to the remoted module in the manager. Then, it ensures that the agent receives 
-    the active command message from the manager.
+    Check if execd sends active response command to the remoted module in the manager. Then, it
+    ensures that the agent receives the active command message from the manager.
 
     Raises:
         AssertionError: if `wazuh-remoted` does not send the active response command to the agent.
@@ -88,7 +88,6 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            remote.check_agent_received_message(agent.rcv_msg_queue, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}",
-                                                                     escape=True)
+            remote.check_agent_received_message(agent, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}", escape=True)
         finally:
             injector.stop_receive()
