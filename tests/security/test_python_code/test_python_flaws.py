@@ -2,11 +2,11 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 
 import pytest
 from bandit.core import config as b_config, manager as b_manager
+from git import Repo
 
 DIRECTORIES_TO_EXCLUDE = ['tests', 'test']
 DIRECTORIES_TO_CHECK = ['wodles', 'framework', 'api']
@@ -75,21 +75,10 @@ def clone_wazuh_repository(pytestconfig):
 
     try:
         # Clone into temporary dir
-        current_process = subprocess.Popen(["git", "clone", "https://github.com/wazuh/wazuh.git", f"{t}"])
-        current_process.wait()
-        if current_process.returncode == 0:
-            # Checkout to given branch
-            current_working_dir = os.getcwd()
-            os.chdir(t)
-            current_process = subprocess.Popen(["git", "checkout", f"{branch}"])
-            current_process.wait()
-            if current_process.returncode == 0:
-                os.chdir(current_working_dir)
-                yield t
-            else:
-                yield None
-        else:
-            yield None
+        repo = Repo.clone_from("https://github.com/wazuh/wazuh.git", t)
+        # Checkout to given branch
+        repo.git.checkout(branch)
+        yield t
     except:
         yield None
 
