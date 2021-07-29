@@ -5,7 +5,6 @@ def check_existance(source, key):
     if key in source:
         return True
     elif isinstance(source, dict):
-
         for item in source:
             if check_existance(source[item], key):
                 return True
@@ -18,13 +17,14 @@ def check_existance(source, key):
     else:
         return False
 
-def remove_inexistent(source, keys):
+def remove_inexistent(source, check_list, stop_list=None):
     for element in list(source):
-        if element not in keys:
+        if stop_list and element in stop_list:
+            break
+        if not check_existance(check_list, element):
             del source[element]
-        else:
-            if isinstance(source[element], dict):
-                remove_inexistent(source[element], keys)
+        elif isinstance(source[element], dict):
+            remove_inexistent(source[element], check_list, stop_list)
 
 def get_keys_dict(dic):
     keys = []

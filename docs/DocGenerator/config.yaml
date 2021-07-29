@@ -24,11 +24,11 @@ Output fields:
   Module:
     Mandatory:
       - Brief
-      - Metadata
-      - Modules
-      - Daemons
-      - Operating System
-      - Tiers
+      - Metadata:
+        - Modules
+        - Daemons
+        - Operating System
+        - Tiers
     Optional:
       - Tags
   Test:

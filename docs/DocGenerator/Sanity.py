@@ -22,9 +22,20 @@ class Sanity():
             raise Exception(f"Cannot load {full_path} file")
 
     def validate_fields(self, required_fields, available_fields):
-        for field in required_fields:
-            if not check_existance(available_fields, field):
-                self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+        if isinstance(required_fields, dict):
+            for field in required_fields:
+                if not check_existance(available_fields, field):
+                    self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
+                    self.validate_fields(required_fields[field], available_fields)
+        elif isinstance(required_fields, list):
+            for field in required_fields:
+                if isinstance(field, dict) or isinstance(field, list):
+                    self.validate_fields(field, available_fields)
+                else:
+                    if not check_existance(available_fields, field):
+                        self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+
 
     def validate_module_fields(self, fields):
         self.validate_fields(self.conf.module_fields.mandatory, fields)

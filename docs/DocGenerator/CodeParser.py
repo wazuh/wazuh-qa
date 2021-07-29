@@ -5,11 +5,13 @@ import json
 import yaml
 from Config import Config
 from TestCaseParser import TestCaseParser
+from Utils import remove_inexistent
 from docstring_parser import parse
 from comment_parser import comment_parser
 import warnings
 
-INTERNAL_FIELDS = ['Tests','Test Cases', 'Id', 'Group Id', 'Name']
+INTERNAL_FIELDS = ['Id', 'Group Id', 'Name']
+STOP_FIELDS = ['Tests','Test Cases']
 
 class CodeParser:
     def __init__(self):
@@ -27,14 +29,11 @@ class CodeParser:
 
     def remove_ignored_fields(self, doc):
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
-        for field in list(doc):
-            if field not in allowed_fields:
-                del doc[field]
-        allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
-        for test in list(doc['Tests']):
-            for field in list(test):
-                if field not in allowed_fields:
-                    del test[field]
+        remove_inexistent(doc, allowed_fields, STOP_FIELDS)
+        if 'Tests' in doc:
+            allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
+            for test in doc['Tests']:
+                remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def parse_comment(self, function):
         docstring = ast.get_docstring(function)
@@ -45,7 +44,7 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                warnings.warn(f"Error parsing comment of function {function.name} from module {self.scan_file}")
+                warnings.warn(f"Error parsing comment of function '{function.name}'' from module {self.scan_file}")
             else:
                 warnings.warn(f"Error parsing comment of module {self.scan_file}")
             print(type(inst))
