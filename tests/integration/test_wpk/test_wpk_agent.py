@@ -169,7 +169,7 @@ params = [
 
 def load_tests(path):
     """ Loads a yaml file from a path.
-    
+
     Args:
         String: Full path of yaml file.
     """
@@ -185,6 +185,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            metadata=test_metadata)
 
 remoted_simulator = None
+
 
 def callback_agent_req(id_req):
     msg = '#! req {id_req}'
@@ -371,8 +372,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         if _agent_version == version_to_upgrade and not metadata['simulate_interruption']:
             exp_json = json.loads(upgrade_exec_message)
             upgrade_exec_message = str(exp_json['message'])
-        assert upgrade_exec_message == expected['error_message'], f'Expected error message does not match'
-
+        assert upgrade_exec_message == expected['error_message'], 'Expected error message does not match'
 
     if upgrade_process_result and expected['receive_notification']:
         if sys_platform not in ['win32', 'Windows']:
@@ -386,8 +386,6 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         else:
             truncate_file(tools.LOG_FILE_PATH)
 
-
-
         wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
 
         if metadata['simulate_rollback']:
@@ -396,15 +394,15 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                 wazuh_log_monitor.start(timeout=timeout_agent_exit,
                                         error_message="Error agentd not stopped",
                                         callback=callback_exit_cleaning())
- 
+
             wazuh_log_monitor.start(timeout=timeout_upgrade_module_start,
                                     error_message="Upgrade module did not start",
                                     callback=callback_upgrade_module_up())
-                        
+
             remoted_simulator.change_default_listener = True
 
-        event = json.loads(wazuh_log_monitor.start(timeout=timeout_ack_response, error_message='ACK event not received', 
-                                                   callback=callback_detect_upgrade_ack_event).result())
+        event = wazuh_log_monitor.start(timeout=timeout_ack_response, error_message='ACK event not received',
+                                                   callback=callback_detect_upgrade_ack_event).result()
         result = event['parameters']
 
         if result is not None:

@@ -11,7 +11,7 @@ import threading
 import time
 import zlib
 from struct import pack
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import logger
 
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
@@ -248,7 +248,7 @@ class RemotedSimulator:
     def send_com_message(self, client_address, connection, command, payload=None, interruption_time=None):
         """
         Create a COM message
-        
+
         Args:
             - client_address: client of the connection
             - connection: established connection (tcp only)

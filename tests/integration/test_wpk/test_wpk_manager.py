@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
 import os
 import pytest
 import time
@@ -868,7 +867,7 @@ def remove_current_wpk():
                 os.unlink(file_path)
         except Exception:
             raise Exception(f'Failed to remove {filename} file')
-            
+
 
 def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
@@ -937,7 +936,7 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
         # Checking version or http in logs
         try:
             log_monitor.start(timeout=60, callback=wait_download)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Download wpk log took too much!")
 
         last_log = log_monitor.result()
@@ -961,14 +960,14 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
         # let time to download wpk
         try:
             log_monitor.start(timeout=600, callback=wait_downloaded)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Finish download wpk log took too much!")
 
     if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
         # Checking version in logs
         try:
             log_monitor.start(timeout=60, callback=wait_chunk_size)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Chunk size log tooks too much!")
         chunk = metadata.get('chunk_size')
         last_log = log_monitor.result()
@@ -979,7 +978,7 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
         # Checking version in logs
         try:
             log_monitor.start(timeout=180, callback=wait_wpk_custom)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Custom wpk log tooks too much!")
 
         last_log = log_monitor.result()

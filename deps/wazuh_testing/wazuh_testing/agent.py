@@ -7,10 +7,13 @@ import platform
 import re
 import socket
 import ssl
+import json
 
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import monitoring
+from wazuh_testing import logger
+
 
 DEFAULT_VALUES = {
     'enabled': 'yes',
@@ -277,7 +280,14 @@ def callback_detect_upgrade_ack_event(event_log):
         String: Upgrade result.
     """
     match = re.match(".*Sending upgrade ACK event: '(.*)'", event_log)
-    return None if not match else match.group(1)
+    if not match:
+        return None
+    else:
+        try:
+            json_event = json.loads(match.group(1))
+            return json_event
+        except (json.JSONDecodeError, AttributeError) as e:
+            logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_upgrade_module_up():
