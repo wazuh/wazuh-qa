@@ -6,12 +6,46 @@ import subprocess
 import tempfile
 
 import pytest
+from bandit.core import config as b_config, manager as b_manager
 
 DIRECTORIES_TO_EXCLUDE = ['tests', 'test']
 DIRECTORIES_TO_CHECK = ['wodles', 'framework', 'api']
 FORMAT = "json"
 TEST_PYTHON_CODE_PATH = os.path.dirname(__file__)
 KNOWN_FLAWS_DIRECTORY = os.path.join(TEST_PYTHON_CODE_PATH, 'known_flaws')
+CONFIDENCE_LEVEL = 'MEDIUM'
+SEVERITY_LEVEL = 'LOW'
+OUTPUT_FORMAT = 'json'
+
+
+def run_bandit_scan(directory_to_check, directories_to_exclude=None, severity_level=SEVERITY_LEVEL,
+                    confidence_level=CONFIDENCE_LEVEL, output_format=OUTPUT_FORMAT):
+    if not directories_to_exclude:
+        directories_to_exclude = DIRECTORIES_TO_EXCLUDE
+
+    # Run Bandit to check possible security flaws
+    b_mgr = b_manager.BanditManager(b_config.BanditConfig(),  # default config options object
+                                    None)  # aggregation type
+    b_mgr.discover_files([directory_to_check],  # list of targets
+                         True,  # recursive
+                         ",".join(directories_to_exclude))  # excluded paths
+    b_mgr.run_tests()
+
+    # Trigger output of results by Bandit Manager
+    _, filename = tempfile.mkstemp(suffix='.json')
+    b_mgr.output_results(None,  # context lines
+                         severity_level,  # minimum severity level
+                         confidence_level,  # minimum confidence level
+                         open(filename, mode='w'),  # output file object
+                         output_format,  # output format
+                         None)  # msg template
+
+    # Read the temporary file with the Bandit result and remove it
+    with open(filename, mode="r") as f:
+        bandit_output = json.load(f)
+    os.remove(filename)
+
+    return bandit_output
 
 
 def update_known_flaws(known_flaws, results):
@@ -69,18 +103,7 @@ def test_check_security_flaws(clone_wazuh_repository, directory_to_check):
     assert clone_wazuh_repository, "Error while cloning the Wazuh repository from GitHub, " \
                                    "please check the Wazuh branch set in the parameter."
 
-    # Run Bandit to check possible security flaws
-    # b_conf = b_config.BanditConfig()
-    # agg_type = _log_option_source(
-    #     args.agg_type,
-    #     ini_options.get('aggregate'),
-    #     'aggregate output type')
-    # b_mgr = b_manager.BanditManager(b_conf, agg_type,
-    #                                 quiet=True,)
-
-    bandit_output = json.loads(
-        os.popen(f"bandit -q -r {clone_wazuh_repository}/{directory_to_check} "
-                 f"-ii -f {FORMAT} -x {','.join(DIRECTORIES_TO_EXCLUDE)}").read())
+    bandit_output = run_bandit_scan(f"{clone_wazuh_repository}/{directory_to_check}")
 
     assert not bandit_output['errors'], \
         f"\nBandit returned errors when trying to get possible vulnerabilities:\n{bandit_output['errors']}"
