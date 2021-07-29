@@ -1,0 +1,27 @@
+FROM ubuntu:18.04
+
+RUN apt-get update && \
+    apt-get install -y \
+      software-properties-common \
+      openssl \
+      curl \
+      apt-transport-https \
+      lsb-release \
+      gnupg2 \
+      make \
+      libc6-dev \
+      gcc \
+      g++ \
+      python \
+      policycoreutils \
+      automake \
+      autoconf \
+      libtool \
+      libssl-dev \
+      git \
+      wget
+
+ADD entrypoint.sh /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
