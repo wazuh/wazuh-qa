@@ -1295,10 +1295,8 @@ def callback_registry_count_entries(line):
 def callback_key_event(line):
     event = callback_detect_event(line)
 
-    if event is None:
-        return None
-
-    if event['data']['attributes']['type'] != 'registry_key' or event['data']['path'] == registry_ignore_path:
+    if (event is None or event['data']['attributes']['type'] != 'registry_key' or
+            event['data']['path'] == registry_ignore_path):
         return None
 
     return event
@@ -1307,10 +1305,7 @@ def callback_key_event(line):
 def callback_value_event(line):
     event = callback_detect_event(line)
 
-    if event is None:
-        return None
-
-    if event['data']['attributes']['type'] != 'registry_value':
+    if event is None or event['data']['attributes']['type'] != 'registry_value':
         return None
 
     return event
@@ -1661,8 +1656,10 @@ if sys.platform == 'win32':
                 self.check_events(event_type)
 
         def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
+            timeout_per_registry_estimation = 0.01
             try:
-                result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * 0.01, min_timeout),
+                result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
+                                                            min_timeout),
                                                 callback=self.callback,
                                                 accum_results=len(self.registry_dict),
                                                 timeout_extra=extra_timeout,
@@ -1701,9 +1698,8 @@ if sys.platform == 'win32':
             def check_events_type(events, ev_type, reg_list=['testkey0']):
                 event_types = Counter(filter_events(events, ".[].data.type"))
 
-                msg = f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
-
-                assert (event_types[ev_type] == len(reg_list)), msg
+                assert (event_types[ev_type] == len(reg_list)
+                        ), f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
 
             def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
                 mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
@@ -1838,7 +1834,7 @@ if sys.platform == 'win32':
                 aux_dict[key] = (elem, callback)
 
         else:
-            raise ValueError('It can only be list or dict')
+            raise ValueError('It can only be a list or dictionary')
 
         value_list = aux_dict
 
@@ -1959,7 +1955,7 @@ if sys.platform == 'win32':
             for key, elem in key_list.items():
                 aux_dict[key] = (elem, callback)
         else:
-            raise ValueError('It can only be list or dict')
+            raise ValueError('It can only be a list or dictionary')
 
         key_list = aux_dict
 
