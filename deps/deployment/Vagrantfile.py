@@ -15,7 +15,14 @@ class Vagrantfile():
         REPLACE_PATTERN(str): Pattern to replace inside the vagrantfile_template.
         file_path (str): Path where the vagrantfile will be stored.
         vm_name (str): Name of the VM.
-        parameters(dict): Dictionary with the parameters of the Vagrantfile.
+        file_path (str): Path where the vagrantfile will be stored.
+        box_image (str): URL for the box image or Vagrant Box.
+        vm_label (str): Label for the VM
+        vm_name (str): Name of the VM.
+        cpus (int): Number of CPU cores for the VM.
+        memory (int): Memory assigned to the VM (in MB).
+        system (str): Type of system (/Linux, /Windows, /Solaris....).
+                        It MUST start with '/' to assign properly the group in VirtualBox.
     Args:
         file_path (str): Path where the vagrantfile will be stored.
         box_image (str): URL for the box image or Vagrant Box.
