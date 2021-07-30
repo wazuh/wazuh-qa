@@ -1542,6 +1542,8 @@ class Injector:
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
+        if is_tcp(self.sender.protocol):
+            self.sender.socket.shutdown(socket.SHUT_RDWR)
         self.sender.socket.close()
 
 
