@@ -38,8 +38,8 @@ class Config():
             self.project_path = self.__config_data['Project path']
 
     def __read_documentation_path(self):
-        if 'Documentation path' in self.__config_data:
-            self.documentation_path = self.__config_data['Documentation path']
+        if 'Output path' in self.__config_data:
+            self.documentation_path = self.__config_data['Output path']
 
     def __read_include_paths(self):
         if not 'Include paths' in self.__config_data:
@@ -47,11 +47,7 @@ class Config():
         for include in self.__config_data['Include paths']:
             if not 'path' in include:
                 raise Exception("One include path is missing")
-            element = self.__paths()
-            element.path = include['path']
-            if 'recursive' in include:
-                element.recursive = include['recursive']
-            self.include_paths.append(element)
+            self.include_paths.append(include['path'] )
 
     def __read_include_regex(self):
         if not 'Include regex' in self.__config_data:
@@ -103,12 +99,6 @@ class Config():
             raise Exception("Output fields is missing")
         self.__read_module_fields()
         self.__read_test_fields()
-
-    class __paths:
-        def __init__(self):
-            self.path = []
-            self.recursive = True
-
     class __fields:
         def __init__(self):
             self.mandatory = []

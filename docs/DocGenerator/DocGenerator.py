@@ -94,10 +94,9 @@ class DocGenerator:
             self.parse_folder(os.path.join(root,folder), group_id)
 
     def run(self):
-        for include in self.conf.include_paths:
-            self.scan_path = include.path
-            self.parse_folder(include.path, self.__id_counter)
-
+        for path in self.conf.include_paths:
+            self.scan_path = path
+            self.parse_folder(path, self.__id_counter)
 
 docs = DocGenerator()
 docs.run()

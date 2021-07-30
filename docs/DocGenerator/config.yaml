@@ -1,6 +1,6 @@
 Project path: "../../tests/integration"
 
-Documentation path: "../output"
+Output path: "../output"
 
 Include paths:
   - wazuh_db:
@@ -18,7 +18,6 @@ Function regex:
 
 Ignore paths:
   - "../../tests/integration/test_wazuh_db/data"
-  - "/data/*"
 
 Output fields:
   Module:
