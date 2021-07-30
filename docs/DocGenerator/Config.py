@@ -44,10 +44,7 @@ class Config():
     def __read_include_paths(self):
         if not 'Include paths' in self.__config_data:
             raise Exception("Include paths are empty")
-        for include in self.__config_data['Include paths']:
-            if not 'path' in include:
-                raise Exception("One include path is missing")
-            self.include_paths.append(include['path'] )
+        self.include_paths = self.__config_data['Include paths']
 
     def __read_include_regex(self):
         if not 'Include regex' in self.__config_data:

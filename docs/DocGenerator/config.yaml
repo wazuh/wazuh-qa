@@ -3,11 +3,8 @@ Project path: "../../tests/integration"
 Output path: "../output"
 
 Include paths:
-  - wazuh_db:
-    path: "../../tests/integration/test_wazuh_db"
-
-  - vulnerability_detector:
-    path: "../../tests/integration/test_vulnerability_detector"
+  - "../../tests/integration/test_wazuh_db"
+  - "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
   - "^test_.*py$"
