@@ -27,7 +27,3 @@ class TestCaseParser:
                 test_case = tmp[0]
                 output[test].append(test_case)
         return output
-
-
-test = TestCaseParser()
-test.collect("../../tests/integration/test_wazuh_db/test_wazuh_db.py")

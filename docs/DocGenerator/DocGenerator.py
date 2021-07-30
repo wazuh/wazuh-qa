@@ -5,6 +5,7 @@ import yaml
 import ast
 from Config import Config
 from CodeParser import CodeParser
+from Utils import clean_folder
 
 class DocGenerator:
     def __init__(self):
@@ -94,6 +95,7 @@ class DocGenerator:
             self.parse_folder(os.path.join(root,folder), group_id)
 
     def run(self):
+        clean_folder(self.conf.documentation_path)
         for path in self.conf.include_paths:
             self.scan_path = path
             self.parse_folder(path, self.__id_counter)
