@@ -6,6 +6,7 @@ import ast
 from Config import Config
 from CodeParser import CodeParser
 from Utils import clean_folder
+import warnings
 
 class DocGenerator:
     def __init__(self):
@@ -59,6 +60,9 @@ class DocGenerator:
         return doc_path
 
     def dump_output(self, content, doc_path):
+        if not content:
+            warnings.warn(f"Content for {doc_path} is empty, ignoring it")
+            return
         if not os.path.exists(os.path.dirname(doc_path)):
             os.makedirs(os.path.dirname(doc_path))
         with open(doc_path + ".json", "w+") as outfile:
@@ -81,6 +85,9 @@ class DocGenerator:
         return self.__id_counter
 
     def parse_folder(self, path, group_id):
+        if not os.path.exists(path):
+            warnings.warn(f"Include path '{path}' doesn´t exist")
+            return
         if not self.is_valid_folder(path):
             return
         (root, folders, files) = next(os.walk(path))

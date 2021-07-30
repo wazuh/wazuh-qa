@@ -5,7 +5,9 @@ Output path: "../output"
 Include paths:
   - wazuh_db:
     path: "../../tests/integration/test_wazuh_db"
-    recursive: false
+
+  - vulnerability_detector:
+    path: "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
   - "^test_.*py$"
