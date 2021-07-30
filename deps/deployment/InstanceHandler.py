@@ -18,17 +18,17 @@ class InstanceHandler:
         for host in vm_list:
             for provider in vm_list[host]['provider']:
                 data = vm_list[host]['provider'][provider]
+                if not data['enabled']:
+                    continue
+
                 if provider == 'vagrant':
                     quiet_out = True if 'quiet_out' not in data.keys() else data['quiet_out']
-                    if not data['enabled']:
-                        continue
                     vagrant_instance = VagrantWrapper(data['vagrantfile_path'], data['vagrant_box'], data['label'],
                                                       data['vm_name'], data['vm_cpu'], data['vm_memory'],
                                                       data['vm_system'], data['vm_ip'], quiet_out)
                     self.instances.append(vagrant_instance)
 
                 elif provider == 'docker':
-
                     docker_instance = DockerWrapper(data['dockerfile_path'], data['name'], data['remove'],
                                                     data['ports'], data['detach'], data['stdout'], data['stderr'])
                     self.instances.append(docker_instance)
