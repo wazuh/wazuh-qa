@@ -15,7 +15,7 @@ host1:
 host2:
     provider:
         vagrant:
-            enabled: True
+            enabled: False
             vagrantfile_path: '/tmp'
             vagrant_box: 'jacqinthebox/windowsserver2016'
             vm_memory: 1024
@@ -40,3 +40,16 @@ host3:
             label: 'Label'
             vm_ip: '10.2.0.5'
             quiet_out: False
+
+
+host4:
+    provider:
+        docker:
+            enabled: True
+            dockerfile_path: '/tmp/prueba'
+            name: 'test'
+            remove: False
+            ports:
+            detach: False
+            stdout: True
+            stderr: True
