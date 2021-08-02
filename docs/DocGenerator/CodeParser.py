@@ -68,14 +68,18 @@ class CodeParser:
             module_doc['Id'] = id
             module_doc['Group Id'] = group_id
 
-            test_cases = self.pytest.collect_test_cases(code_file)
+            test_cases = None
+            if self.conf.test_cases_field:
+                test_cases = self.pytest.collect_test_cases(code_file)
+
             functions_doc = []
             for function in functions:
                 if self.is_documentable_function(function):
                     function_doc = self.parse_comment(function)
                     if function_doc:
-                        if test_cases[function.name]:
-                            function_doc["Test Cases"] = test_cases[function.name]
+                        if test_cases and not self.conf.test_cases_field in function_doc \
+                           and test_cases[function.name]:
+                            function_doc[self.conf.test_cases_field] = test_cases[function.name]
                         functions_doc.append(function_doc)
 
             if not functions_doc:

@@ -16,6 +16,7 @@ class Config():
         self.valid_tags = []
         self.module_fields = self.__fields()
         self.test_fields = self.__fields()
+        self.test_cases_field = None
 
         try:
             with open(CONFIG_PATH) as fd:
@@ -33,6 +34,7 @@ class Config():
         self.__read_ignore_paths()
         self.__read_valid_tags()
         self.__read_output_fields()
+        self.__read_test_cases_field()
 
     def __read_project_path(self):
         if 'Project path' in self.__config_data:
@@ -106,6 +108,10 @@ class Config():
             raise Exception("Config output fields is missing")
         self.__read_module_fields()
         self.__read_test_fields()
+
+    def __read_test_cases_field(self):
+        if 'Test cases field' in self.__config_data:
+            self.test_cases_field = self.__config_data['Test cases field']
     class __fields:
         def __init__(self):
             self.mandatory = []
