@@ -68,9 +68,8 @@ class Pytest(Test):
 
         if self.tests_result_path is None:
             self.tests_result_path = os.path.join(tempfile.gettempdir(), '')
-
-        # if not custom_report_file_path:
-        #    custom_report_file_path = os.path.join(self.tests_result_path, f"custom-report-{datetime.now()}")
+        else:
+            self.tests_result_path = os.path.join(self.tests_result_path, '')
 
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
