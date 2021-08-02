@@ -21,7 +21,7 @@ class QAFramework():
     def __init__(self, workdir=gettempdir(), qa_repository='https://github.com/wazuh/wazuh-qa.git', qa_branch='master'):
         self.qa_repository = qa_repository
         self.qa_branch = qa_branch
-        self.workdir = f"{workdir}/wazuh_qa"
+        self.workdir = f"{workdir}/wazuh-qa"
 
     def install_dependencies(self, inventory_file_path, hosts='all'):
         """Install all the necessary dependencies to allow the execution of the tests.

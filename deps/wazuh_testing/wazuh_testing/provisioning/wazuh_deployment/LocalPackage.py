@@ -1,11 +1,14 @@
 from wazuh_testing.provisioning.wazuh_deployment.WazuhPackage import WazuhPackage
 from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
+from pathlib import Path
+import os
 
 
 class LocalPackage(WazuhPackage):
 
-    def __init__(self, wazuh_target, installation_files_path, local_package_path, version, system):
+    def __init__(self, wazuh_target, installation_files_path, local_package_path, version=None, system=None):
         self.local_package_path = local_package_path
+        self.package_name = Path(self.local_package_path).name
         super().__init__(wazuh_target=wazuh_target, installation_files_path=installation_files_path, version=version,
                          system=system)
 
@@ -15,3 +18,5 @@ class LocalPackage(WazuhPackage):
                                                  'copy': {'src': self.local_package_path,
                                                           'dest': self.installation_files_path}})
         super().download_installation_files(inventory_file_path, [copy_ansible_task], hosts)
+
+        return os.path.join(self.installation_files_path, self.package_name)

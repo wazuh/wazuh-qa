@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from tempfile import gettempdir
+import os
 from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.provisioning.ansible.AnsibleRunner import AnsibleRunner
 
@@ -30,7 +30,7 @@ class WazuhDeployment(ABC):
     """
     def __init__(self, installation_files_path, configuration=None, inventory_file_path='/tmp/inventory.yaml',
                  install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None,
-                 preloaded_vars_file=gettempdir()):
+                 preloaded_vars_file="wazuh_testing/provisioning/wazuh_deployment/templates"):
         self.installation_files_path = installation_files_path
         self.configuration = configuration
         self.inventory_file_path = inventory_file_path
@@ -51,7 +51,7 @@ class WazuhDeployment(ABC):
         if self.install_mode == 'sources':
             tasks_list.append(AnsibleTask({
                 'name': 'Render the "preloaded-vars.conf" file',
-                'template': {'src': f'{self.preloaded_vars_file}/preloaded_vars.conf.j2',
+                'template': {'src': f'{os.getcwd()}/{self.preloaded_vars_file}/preloaded_vars.conf.j2',
                              'dest': f'{self.installation_files_path}/etc/preloaded-vars.conf',
                              'owner': 'root',
                              'group': 'root',
