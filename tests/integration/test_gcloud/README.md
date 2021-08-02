@@ -213,6 +213,8 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `--gcp-credentials-file`: required. It indicates the path to the credentials file.
 - `--gcp-topic-name`: optional. It sets the topic name. Some tests will fail if this option is not used although the
   topic name can be written in the tests.
+- `--gcp-configuration-file`: optional. Loads default options from a configuration file. If omitted,
+  `test_gcloud/data/configuration.yaml` will be used if it exists.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 
@@ -230,7 +232,7 @@ cachedir: .pytest_cache
 metadata: {'Python': '3.6.9', 'Platform': 'Linux-5.3.0-45-generic-x86_64-with-Ubuntu-18.04-bionic', 'Packages': {'pytest': '5.3.5', 'py': '1.5.2', 'pluggy': '0.13.1'}, 'Plugins': {'metadata': '1.8.0', 'html': '2.0.1'}}
 rootdir: /home/daniel/Wazuh/wazuh-qa/tests/integration, inifile: pytest.ini
 plugins: metadata-1.8.0, html-2.0.1
-collected 2 items                                                                                    
+collected 2 items
 
 test_gcloud/test_functioning/test_pull_on_start.py::test_pull_on_start[get_configuration0] PASSED               [ 50%]
 test_gcloud/test_functioning/test_pull_on_start.py::test_pull_on_start[get_configuration1] PASSED               [100%]
