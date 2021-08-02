@@ -34,8 +34,9 @@ from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
-AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
+MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
 
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
