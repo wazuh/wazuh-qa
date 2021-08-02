@@ -14,10 +14,13 @@ import yaml
 import ast
 from Config import Config
 from CodeParser import CodeParser
+from Sanity import Sanity
 from Utils import clean_folder
 import warnings
 import logging
+import argparse
 
+VERSION = "0.1"
 
 class DocGenerator:
     """
@@ -182,12 +185,34 @@ class DocGenerator:
             logging.debug(f"Going to parse files on '{path}'")
             self.parse_folder(path, self.__id_counter)
 
+def start_logging(folder, debug_level=logging.INFO):
+    LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log" )
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    logging.basicConfig(filename=LOG_PATH, level=debug_level)
 
-LOG_FOLDER = "logs"
-LOG_PATH = os.path.join(LOG_FOLDER, os.path.splitext(os.path.basename(__file__))[0]+".log" )
-if not os.path.exists(LOG_FOLDER):
-    os.makedirs(LOG_FOLDER)
-logging.basicConfig(filename=LOG_PATH, level=logging.DEBUG)
 
-docs = DocGenerator()
-docs.run()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', help="Run a sanity check", action='store_true', dest='sanity')
+    parser.add_argument('-v', help="Print version", action='store_true', dest="version")
+    parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
+    parser.add_argument('-d', help="Enable debug messages. Use twice to increase verbosity.", action='count',
+                        dest='debug_level')
+    args = parser.parse_args()
+
+    if args.debug_level:
+        start_logging("logs", logging.DEBUG)
+    else:
+        start_logging("logs")
+
+    if args.version:
+        print(f"DocGenerator v{VERSION}")
+    elif args.test_config:
+        conf = Config()
+    elif args.sanity:
+        sanity = Sanity()
+        sanity.run()
+    else:
+        docs = DocGenerator()
+        docs.run()
