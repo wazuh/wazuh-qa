@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 class PytestPlugin:
     def __init__(self):
@@ -8,11 +9,12 @@ class PytestPlugin:
         for item in items:
             self.collected.append(item.nodeid)
 
-class TestCaseParser:
+class PytestWrap:
     def __init__(self):
         self.plugin = PytestPlugin()
 
-    def collect(self, path):
+    def collect_test_cases(self, path):
+        logging.debug(f"Running pytest to collect testcases for '{path}'")
         pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])
         output = {}
         for item in self.plugin.collected:

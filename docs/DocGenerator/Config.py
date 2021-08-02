@@ -1,5 +1,5 @@
-from collections import namedtuple
 import yaml
+import logging
 
 CONFIG_PATH = "config.yaml"
 
@@ -21,6 +21,7 @@ class Config():
             with open(CONFIG_PATH) as fd:
                 self.__config_data = yaml.safe_load(fd)
         except:
+            logging.error("Cannot load config file")
             raise Exception("Cannot load config file")
 
         self.__read_project_path()
@@ -43,22 +44,26 @@ class Config():
 
     def __read_include_paths(self):
         if not 'Include paths' in self.__config_data:
-            raise Exception("Include paths are empty")
+            logging.error("Config include paths are empty")
+            raise Exception("Config include paths are empty")
         self.include_paths = self.__config_data['Include paths']
 
     def __read_include_regex(self):
         if not 'Include regex' in self.__config_data:
-            raise Exception("Include regex is empty")
+            logging.error("Config include regex is empty")
+            raise Exception("Config include regex is empty")
         self.include_regex = self.__config_data['Include regex']
 
     def __read_group_files(self):
         if not 'Group files' in self.__config_data:
-            raise Exception("Group files is empty")
+            logging.error("Config group files is empty")
+            raise Exception("Config group files is empty")
         self.group_files = self.__config_data['Group files']
 
     def __read_function_regex(self):
         if not 'Function regex' in self.__config_data:
-            raise Exception("Function regex is empty")
+            logging.error("Config function regex is empty")
+            raise Exception("Config function regex is empty")
         self.function_regex = self.__config_data['Function regex']
 
     def __read_ignore_paths(self):
@@ -71,10 +76,12 @@ class Config():
 
     def __read_module_fields(self):
         if not 'Module' in self.__config_data['Output fields']:
-            raise Exception("Output module fields is missing")
+            logging.error("Config output module fields is missing")
+            raise Exception("Config output module fields is missing")
         module_fields = self.__config_data['Output fields']['Module']
         if not 'Mandatory' in module_fields and not 'Optional' in module_fields:
-            raise Exception("Output module fields are empty")
+            logging.error("Config output module fields are empty")
+            raise Exception("Config output module fields are empty")
         if 'Mandatory' in module_fields:
             self.module_fields.mandatory = module_fields['Mandatory']
         if 'Optional' in module_fields:
@@ -82,10 +89,12 @@ class Config():
 
     def __read_test_fields(self):
         if not 'Test' in self.__config_data['Output fields']:
-            raise Exception("Output test fields is missing")
+            logging.error("Config output test fields is missing")
+            raise Exception("Config output test fields is missing")
         test_fields = self.__config_data['Output fields']['Test']
         if not 'Mandatory' in test_fields and not 'Optional' in test_fields:
-            raise Exception("Output test fields are empty")
+            logging.error("Config output test fields are empty")
+            raise Exception("Config output test fields are empty")
         if 'Mandatory' in test_fields:
             self.test_fields.mandatory = test_fields['Mandatory']
         if 'Optional' in test_fields:
@@ -93,7 +102,8 @@ class Config():
 
     def __read_output_fields(self):
         if not 'Output fields' in self.__config_data:
-            raise Exception("Output fields is missing")
+            logging.error("Config output fields is missing")
+            raise Exception("Config output fields is missing")
         self.__read_module_fields()
         self.__read_test_fields()
     class __fields:

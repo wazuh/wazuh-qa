@@ -7,6 +7,7 @@ from Config import Config
 from CodeParser import CodeParser
 from Utils import clean_folder
 import warnings
+import logging
 
 class DocGenerator:
     def __init__(self):
@@ -62,6 +63,7 @@ class DocGenerator:
     def dump_output(self, content, doc_path):
         if not content:
             warnings.warn(f"Content for {doc_path} is empty, ignoring it", stacklevel=2)
+            logging.warning(f"Content for {doc_path} is empty, ignoring it")
             return
         if not os.path.exists(os.path.dirname(doc_path)):
             os.makedirs(os.path.dirname(doc_path))
@@ -75,6 +77,7 @@ class DocGenerator:
         group = self.parser.parse_group(path, self.__id_counter, group_id)
         doc_path = self.get_group_doc_path(path)
         self.dump_output(group, doc_path)
+        logging.debug(f"New group file '{doc_path}' was created with ID:{self.__id_counter}")
         return self.__id_counter
 
     def create_test(self, path, group_id):
@@ -82,13 +85,16 @@ class DocGenerator:
         test = self.parser.parse_test(path, self.__id_counter, group_id)
         doc_path = self.get_test_doc_path(path)
         self.dump_output(test, doc_path)
+        logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
         return self.__id_counter
 
     def parse_folder(self, path, group_id):
         if not os.path.exists(path):
             warnings.warn(f"Include path '{path}' doesn´t exist", stacklevel=2)
+            logging.warning(f"Include path '{path}' doesn´t exist")
             return
         if not self.is_valid_folder(path):
+            logging.debug(f"Ignoring files on '{path}'")
             return
         (root, folders, files) = next(os.walk(path))
         for file in files:
@@ -102,10 +108,18 @@ class DocGenerator:
             self.parse_folder(os.path.join(root,folder), group_id)
 
     def run(self):
+        logging.info("\nStarting documentation parsing")
         clean_folder(self.conf.documentation_path)
         for path in self.conf.include_paths:
             self.scan_path = path
+            logging.debug(f"Going to parse files on '{path}'")
             self.parse_folder(path, self.__id_counter)
+
+LOG_FOLDER = "logs"
+LOG_PATH = os.path.join(LOG_FOLDER, os.path.splitext(os.path.basename(__file__))[0]+".log" )
+if not os.path.exists(LOG_FOLDER):
+    os.makedirs(LOG_FOLDER)
+logging.basicConfig(filename=LOG_PATH, level=logging.DEBUG)
 
 docs = DocGenerator()
 docs.run()

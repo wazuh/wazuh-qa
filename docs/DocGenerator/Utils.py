@@ -1,4 +1,6 @@
 import os, shutil
+import logging
+import warnings
 
 def check_existance(source, key):
     if not isinstance(source, dict) and not isinstance(source, list):
@@ -104,6 +106,7 @@ def check_missing_field(source, check):
 def clean_folder(folder):
     if not os.path.exists(folder):
         return
+    logging.debug(f"Going to clean '{folder}' folder")
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -112,4 +115,5 @@ def clean_folder(folder):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+            warnings.warn(f"Failed to delete {file_path}. Reason: {e}")
+            logging.error(f"Failed to delete {file_path}. Reason: {e}")

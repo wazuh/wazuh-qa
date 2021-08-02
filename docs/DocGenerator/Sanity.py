@@ -3,6 +3,7 @@ import os
 import re
 import json
 import ast
+import logging
 from Utils import check_existance
 class Sanity():
     def __init__(self,):
@@ -19,13 +20,15 @@ class Sanity():
             with open(full_path) as file:
                 return json.load(file)
         except:
-            raise Exception(f"Cannot load {full_path} file")
+            logging.error(f"Cannot load '{full_path}' file for sanity check")
+            raise Exception(f"Cannot load '{full_path}' file for sanity check")
 
     def validate_fields(self, required_fields, available_fields):
         if isinstance(required_fields, dict):
             for field in required_fields:
                 if not check_existance(available_fields, field):
                     self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                    logging.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
                 elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
         elif isinstance(required_fields, list):
@@ -35,14 +38,16 @@ class Sanity():
                 else:
                     if not check_existance(available_fields, field):
                         self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                        logging.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
 
 
     def validate_module_fields(self, fields):
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
     def validate_test_fields(self, fields):
-        for test_fields in fields['Tests']:
-            self.validate_fields(self.conf.test_fields.mandatory, test_fields)
+        if 'Tests' in fields:
+            for test_fields in fields['Tests']:
+                self.validate_fields(self.conf.test_fields.mandatory, test_fields)
 
     def identify_tags(self, content):
         if 'Metadata' in content and 'Tags' in content['Metadata']:
@@ -104,6 +109,7 @@ class Sanity():
         print("A {:.2f}% from the tests of {} is covered.".format(tests_percentage, self.conf.project_path))
 
     def run(self):
+        logging.info("\nStarting documentation sanity check")
         for (root, directories, files) in os.walk(self.conf.documentation_path, topdown=True):
             files = list(filter(self.files_regex.match, files))
             for file in files:

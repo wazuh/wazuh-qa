@@ -55,5 +55,7 @@ deps/wazuh_testing/wazuh_testing.egg-info/
 
 # DocGenerator default output path
 docs/output/
+# DocGenerator logs path
+docs/DocGenerator/logs
 
 .idea/

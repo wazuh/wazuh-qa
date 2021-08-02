@@ -4,11 +4,12 @@ import re
 import json
 import yaml
 from Config import Config
-from TestCaseParser import TestCaseParser
+from PytestWrap import PytestWrap
 from Utils import remove_inexistent
 from docstring_parser import parse
 from comment_parser import comment_parser
 import warnings
+import logging
 
 INTERNAL_FIELDS = ['Id', 'Group Id', 'Name']
 STOP_FIELDS = ['Tests','Test Cases']
@@ -16,7 +17,7 @@ STOP_FIELDS = ['Tests','Test Cases']
 class CodeParser:
     def __init__(self):
         self.conf = Config()
-        self.test_case_parser = TestCaseParser()
+        self.pytest = PytestWrap()
         self.function_regexes = []
         for regex in self.conf.function_regex:
             self.function_regexes.append(re.compile(regex))
@@ -44,14 +45,17 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                warnings.warn(f"Error parsing comment of function '{function.name}'' from module {self.scan_file}", stacklevel=2)
+                warnings.warn(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}", stacklevel=2)
+                logging.warning(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}")
             else:
-                warnings.warn(f"Error parsing comment of module {self.scan_file}", stacklevel=2)
+                warnings.warn(f"Failed to parse comment of module {self.scan_file}", stacklevel=2)
+                logging.warning(f"Failed to parse comment of module {self.scan_file}")
             doc = None
 
         return doc
 
     def parse_test(self, code_file, id, group_id):
+        logging.debug(f"Parsing test file '{code_file}'")
         self.scan_file = code_file
         with open(code_file) as fd:
             file_content = fd.read()
@@ -64,8 +68,7 @@ class CodeParser:
             module_doc['Id'] = id
             module_doc['Group Id'] = group_id
 
-            test_cases = self.test_case_parser.collect(code_file)
-
+            test_cases = self.pytest.collect_test_cases(code_file)
             functions_doc = []
             for function in functions:
                 if self.is_documentable_function(function):
@@ -76,15 +79,17 @@ class CodeParser:
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                warnings.warn("Module doesn´t contain any test function", stacklevel=2)
-
-            module_doc['Tests'] = functions_doc
+                warnings.warn(f"Module '{module_doc['Name']}' doesn´t contain any test function", stacklevel=2)
+                logging.warning(f"Module '{module_doc['Name']}' doesn´t contain any test function")
+            else:
+                module_doc['Tests'] = functions_doc
 
             self.remove_ignored_fields(module_doc)
 
         return module_doc
 
     def parse_group(self, group_file, id, group_id):
+        logging.debug(f"Parsing group file '{group_file}'")
         with open(group_file) as fd:
             file_content = fd.read()
         group_doc = {}
