@@ -61,7 +61,7 @@ class DocGenerator:
 
     def dump_output(self, content, doc_path):
         if not content:
-            warnings.warn(f"Content for {doc_path} is empty, ignoring it")
+            warnings.warn(f"Content for {doc_path} is empty, ignoring it", stacklevel=2)
             return
         if not os.path.exists(os.path.dirname(doc_path)):
             os.makedirs(os.path.dirname(doc_path))
@@ -86,7 +86,7 @@ class DocGenerator:
 
     def parse_folder(self, path, group_id):
         if not os.path.exists(path):
-            warnings.warn(f"Include path '{path}' doesn´t exist")
+            warnings.warn(f"Include path '{path}' doesn´t exist", stacklevel=2)
             return
         if not self.is_valid_folder(path):
             return

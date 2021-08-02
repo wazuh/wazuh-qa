@@ -44,12 +44,9 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                warnings.warn(f"Error parsing comment of function '{function.name}'' from module {self.scan_file}")
+                warnings.warn(f"Error parsing comment of function '{function.name}'' from module {self.scan_file}", stacklevel=2)
             else:
-                warnings.warn(f"Error parsing comment of module {self.scan_file}")
-            print(type(inst))
-            print(inst.args)
-            print(inst)
+                warnings.warn(f"Error parsing comment of module {self.scan_file}", stacklevel=2)
             doc = None
 
         return doc
@@ -79,7 +76,7 @@ class CodeParser:
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                warnings.warn("Module doesn´t contain any test function")
+                warnings.warn("Module doesn´t contain any test function", stacklevel=2)
 
             module_doc['Tests'] = functions_doc
 

@@ -13,7 +13,7 @@ class TestCaseParser:
         self.plugin = PytestPlugin()
 
     def collect(self, path):
-        pytest.main(['--collect-only', path], plugins=[self.plugin])
+        pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])
         output = {}
         for item in self.plugin.collected:
             tmp = item.split("::")

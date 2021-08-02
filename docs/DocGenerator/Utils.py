@@ -102,6 +102,8 @@ def check_missing_field(source, check):
     return missing_filed
 
 def clean_folder(folder):
+    if not os.path.exists(folder):
+        return
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
