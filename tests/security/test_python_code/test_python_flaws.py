@@ -158,7 +158,7 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
     # Change to the cloned Wazuh repository directory
     os.chdir(clone_wazuh_repository)
 
-    flaws_found = {directory: None for directory in test_parameters['directories_to_check']}
+    flaws_found = {}
     for directory_to_check in test_parameters['directories_to_check']:
         is_default_check_dir = directory_to_check.replace('/', '') in \
                                DEFAULT_DIRECTORIES_TO_CHECK.replace('/', '').split(',') and test_parameters[
