@@ -78,10 +78,9 @@ class DocGenerator:
                 return True
         return False
 
-    def get_group_doc_path(self, path):
+    def get_group_doc_path(self):
         """
         brief: Returns the name of the group file in the documentation output based on the original file name.
-        args: -"path (str): The original file name"
         returns: "string: The name of the documentation group file"
         """
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
@@ -129,7 +128,7 @@ class DocGenerator:
         """
         self.__id_counter = self.__id_counter + 1
         group = self.parser.parse_group(path, self.__id_counter, group_id)
-        doc_path = self.get_group_doc_path(path)
+        doc_path = self.get_group_doc_path()
         self.dump_output(group, doc_path)
         logging.debug(f"New group file '{doc_path}' was created with ID:{self.__id_counter}")
         return self.__id_counter
@@ -197,8 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', help="Run a sanity check", action='store_true', dest='sanity')
     parser.add_argument('-v', help="Print version", action='store_true', dest="version")
     parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
-    parser.add_argument('-d', help="Enable debug messages. Use twice to increase verbosity.", action='count',
-                        dest='debug_level')
+    parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
     args = parser.parse_args()
 
     if args.debug_level:

@@ -77,8 +77,8 @@ class Sanity():
         brief: Checks if all the mandatory test fields are present.
         args: - "fields(dict): The test fields found in the documentation file."
         """
-        if 'Tests' in fields:
-            for test_fields in fields['Tests']:
+        if 'tests' in fields:
+            for test_fields in fields['tests']:
                 self.validate_fields(self.conf.test_fields.mandatory, test_fields)
 
     def identify_tags(self, content):
@@ -86,8 +86,8 @@ class Sanity():
         brief: Identifies every new tag found in the documentation files and saves it for future reporting.
         args: - "content(dict): The dictionary content of a documentation file."
         """
-        if 'Metadata' in content and 'Tags' in content['Metadata']:
-            for tag in content['Metadata']['Tags']:
+        if 'metadata' in content and 'tags' in content['metadata']:
+            for tag in content['metadata']['tags']:
                 self.found_tags.add(tag)
 
     def identify_tests(self, content):
@@ -95,9 +95,9 @@ class Sanity():
         brief: Identifies every new test found in the documentation files and saves it for future reporting.
         args: - "content(dict): The dictionary content of a documentation file."
         """
-        if 'Tests' in content:
-            for test in content['Tests']:
-                self.found_tests.add(test['Name'])
+        if 'tests' in content:
+            for test in content['tests']:
+                self.found_tests.add(test['name'])
 
     def count_project_tests(self):
         """
@@ -175,7 +175,7 @@ class Sanity():
                     self.validate_test_fields(content)
                     self.identify_tags(content)
                     self.identify_tests(content)
-                    self.found_modules.add(content['Name'])
+                    self.found_modules.add(content['name'])
 
         self.count_project_tests()
         self.print_report()

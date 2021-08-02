@@ -20,8 +20,8 @@ from comment_parser import comment_parser
 import warnings
 import logging
 
-INTERNAL_FIELDS = ['Id', 'Group Id', 'Name']
-STOP_FIELDS = ['Tests','Test Cases']
+INTERNAL_FIELDS = ['id', 'group_id', 'name']
+STOP_FIELDS = ['tests','test_cases']
 
 
 class CodeParser:
@@ -53,9 +53,9 @@ class CodeParser:
         """
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
-        if 'Tests' in doc:
+        if 'tests' in doc:
             allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
-            for test in doc['Tests']:
+            for test in doc['tests']:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def parse_comment(self, function):
@@ -67,7 +67,7 @@ class CodeParser:
         try:
             doc = yaml.safe_load(docstring)
             if hasattr(function, 'name'):
-                doc['Name'] = function.name
+                doc['name'] = function.name
 
         except Exception as inst:
             if hasattr(function, 'name'):
@@ -99,9 +99,9 @@ class CodeParser:
 
         module_doc = self.parse_comment(module)
         if module_doc:
-            module_doc['Name'] = os.path.basename(code_file)
-            module_doc['Id'] = id
-            module_doc['Group Id'] = group_id
+            module_doc['name'] = os.path.basename(code_file)
+            module_doc['id'] = id
+            module_doc['group_id'] = group_id
 
             test_cases = None
             if self.conf.test_cases_field:
@@ -118,10 +118,10 @@ class CodeParser:
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                warnings.warn(f"Module '{module_doc['Name']}' doesn´t contain any test function", stacklevel=2)
-                logging.warning(f"Module '{module_doc['Name']}' doesn´t contain any test function")
+                warnings.warn(f"Module '{module_doc['name']}' doesn´t contain any test function", stacklevel=2)
+                logging.warning(f"Module '{module_doc['name']}' doesn´t contain any test function")
             else:
-                module_doc['Tests'] = functions_doc
+                module_doc['tests'] = functions_doc
 
             self.remove_ignored_fields(module_doc)
 
@@ -139,9 +139,9 @@ class CodeParser:
         with open(group_file) as fd:
             file_content = fd.read()
         group_doc = {}
-        group_doc['Name'] = os.path.basename(os.path.dirname(group_file))
-        group_doc['Id'] = id
-        group_doc['Group id'] = group_id
-        group_doc['Description'] = file_content
+        group_doc['name'] = os.path.basename(os.path.dirname(group_file))
+        group_doc['id'] = id
+        group_doc['group_id'] = group_id
+        group_doc['description'] = file_content
 
         return group_doc

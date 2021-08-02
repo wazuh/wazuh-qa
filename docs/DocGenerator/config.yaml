@@ -21,19 +21,19 @@ Ignore paths:
 Output fields:
   Module:
     Mandatory:
-      - Brief
-      - Metadata:
-        - Modules
-        - Daemons
-        - Operating System
-        - Tiers
+      - brief
+      - metadata:
+        - modules
+        - daemons
+        - operating_system
+        - tiers
     Optional:
-      - Tags
+      - tags
   Test:
     Mandatory:
-      - Test Logic
-      - Checks
+      - test_logic
+      - checks
     Optional:
-      - Expected result
+      - expected_result
 
-Test cases field: "Test Cases"
+Test cases field: "test_cases"
