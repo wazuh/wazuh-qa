@@ -1,0 +1,48 @@
+hosts:
+    host1:
+        host_info:
+            connection_method: ssh
+            host: 10.2.0.13
+            user: vagrant
+            password: vagrant
+            connection_port: 22
+            ansible_python_interpreter: /usr/bin/python2.7
+
+        wazuh_deployment:
+            wazuh_installation:
+                type: sources
+                target: manager
+                wazuh_branch: 4.2
+                install_path: /home/vagrant
+
+        qa_framework:
+            wazuh_qa_branch: master
+            qa_workdir: /home/vagrant/wazuh-qa/
+    host2:
+        host_info:
+            connection_method: ssh
+            host: 10.2.0.12
+            user: vagrant
+            password: vagrant
+            connection_port: 22
+            ansible_python_interpreter: /usr/bin/python2.7
+
+        wazuh_deployment:
+            wazuh_installation:
+                type: sources
+                target: agent
+                manager_ip: 10.2.0.13
+                wazuh_branch: 4.2
+                install_path: /home/vagrant
+
+        qa_framework:
+            wazuh_qa_branch: master
+            qa_workdir: /home/vagrant/wazuh-qa/
+
+groups:
+    manager:
+        hosts:
+            10.2.0.13
+    agent:
+        hosts:
+            10.2.0.12

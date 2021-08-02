@@ -2,6 +2,8 @@ import os
 import yaml
 import copy
 import json
+from tempfile import gettempdir
+from wazuh_testing.tools.time import get_current_timestamp
 
 
 class AnsibleInventory():
@@ -19,9 +21,11 @@ class AnsibleInventory():
         ansible_groups (list(AnsibleGroups)): List of ansible groups to save in the ansible inventory.
 
     """
-    def __init__(self, ansible_instances, inventory_file_path, ansible_groups=None, generate_file=True):
+    def __init__(self, ansible_instances, inventory_file_path=None, ansible_groups=None, generate_file=True):
         self.ansible_instances = ansible_instances
-        self.inventory_file_path = inventory_file_path
+
+        self.inventory_file_path = inventory_file_path if inventory_file_path else \
+            f"{gettempdir()}/{get_current_timestamp()}.yaml"
         self.ansible_groups = ansible_groups
         self.data = {}
         self.__setup_data__()
@@ -53,8 +57,8 @@ class AnsibleInventory():
         ansible_inventory_dict['all']['hosts'] = hosts
 
         if self.ansible_groups:
-            for group in self.ansible_groups:
-                ansible_inventory_dict['all']['children'].update(group.data)
+            for group_key, group_value in self.ansible_groups.items():
+                ansible_inventory_dict['all']['children'][group_key] = group_value
 
         self.data = ansible_inventory_dict
 
@@ -75,5 +79,6 @@ class AnsibleInventory():
             inventory.write(self.__str__())
 
     def delete_playbook_file(self):
-        if os.path.exists(self.inventory_file_path):
-            os.remove(self.inventory_file_path)
+        # if os.path.exists(self.inventory_file_path):
+        #     os.remove(self.inventory_file_path)
+        pass

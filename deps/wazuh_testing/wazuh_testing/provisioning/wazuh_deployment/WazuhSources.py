@@ -1,5 +1,6 @@
 from wazuh_testing.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
 from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
+import os
 
 
 class WazuhSources(WazuhInstallation):
@@ -16,3 +17,5 @@ class WazuhSources(WazuhInstallation):
                                                            'dest': self.installation_files_path,
                                                            'version': self.wazuh_branch}})
         super().download_installation_files(inventory_file_path, [download_wazuh_sources_task], hosts)
+
+        return self.installation_files_path
