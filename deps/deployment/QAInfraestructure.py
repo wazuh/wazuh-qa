@@ -5,7 +5,7 @@ from DockerWrapper import DockerWrapper
 from VagrantWrapper import VagrantWrapper
 
 
-class InstanceHandler:
+class QAInfraestructure:
     """Class to handle multiples instances objects.
     Attributes:
         instances (list): List with the instances to handle.
@@ -22,15 +22,20 @@ class InstanceHandler:
                     continue
 
                 if provider == 'vagrant':
-                    quiet_out = True if 'quiet_out' not in data.keys() else data['quiet_out']
+                    quiet_out = True if 'quiet_out' not in data else data['quiet_out']
                     vagrant_instance = VagrantWrapper(data['vagrantfile_path'], data['vagrant_box'], data['label'],
                                                       data['vm_name'], data['vm_cpu'], data['vm_memory'],
                                                       data['vm_system'], data['vm_ip'], quiet_out)
                     self.instances.append(vagrant_instance)
 
                 elif provider == 'docker':
+                    _ports = None if 'ports' not in data else data['ports']
+                    _detach = True if 'detach' not in data else data['detach']
+                    _stdout = False if 'stdout' not in data else data['stdout']
+                    _stderr = False if 'stderr' not in data else data['stderr']
+
                     docker_instance = DockerWrapper(data['dockerfile_path'], data['name'], data['remove'],
-                                                    data['ports'], data['detach'], data['stdout'], data['stderr'])
+                                                    _ports, _detach, _stdout, _stderr)
                     self.instances.append(docker_instance)
 
     def run(self):

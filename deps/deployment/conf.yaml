@@ -50,6 +50,4 @@ host4:
             name: 'test'
             remove: False
             ports:
-            detach: False
-            stdout: True
-            stderr: True
+            detach: True

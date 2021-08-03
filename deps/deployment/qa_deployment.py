@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import argparse
 import os
-from InstanceHandler import InstanceHandler
+from QAInfraestructure import QAInfraestructure
 import yaml
 
 if __name__ == '__main__':
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     with open(arguments.config) as config_file_fd:
         yaml_config = yaml.safe_load(config_file_fd)
 
-    instance_handler = InstanceHandler(yaml_config)
+    instance_handler = QAInfraestructure(yaml_config)
 
     if arguments.action == 'run':
         instance_handler.run()
