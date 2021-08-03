@@ -1,13 +1,11 @@
 
-import os
-from pdb import set_trace
-from wazuh_testing.provisioning.ansible.AnsibleInstance import AnsibleInstance
-from wazuh_testing.provisioning.ansible.AnsibleInventory import AnsibleInventory
-from wazuh_testing.provisioning.wazuh_deployment.LocalPackage import LocalPackage
-from wazuh_testing.provisioning.wazuh_deployment.WazuhSources import WazuhSources
-from wazuh_testing.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
-from wazuh_testing.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
-from wazuh_testing.provisioning.qa_framework.QAFramework import QAFramework
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
+from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
 
 
 class QAProvisioning():

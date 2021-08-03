@@ -1,7 +1,7 @@
 import argparse
 import os
 import yaml
-from wazuh_testing.provisioning.QAProvisioning import QAProvisioning
+from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

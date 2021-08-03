@@ -1,5 +1,5 @@
-from wazuh_testing.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
-from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 import os
 
 
