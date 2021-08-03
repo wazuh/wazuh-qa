@@ -5,9 +5,13 @@ import json
 import yaml
 from Config import Config
 from TestCaseParser import TestCaseParser
+from Utils import remove_inexistent
 from docstring_parser import parse
 from comment_parser import comment_parser
 import warnings
+
+INTERNAL_FIELDS = ['Id', 'Group Id', 'Name']
+STOP_FIELDS = ['Tests','Test Cases']
 
 class CodeParser:
     def __init__(self):
@@ -24,23 +28,25 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        for field in self.conf.ignored_fields.module:
-            if field in doc:
-                del doc[field]
-        for test in doc['Tests']:
-            for field in self.conf.ignored_fields.tests:
-                if field in test:
-                    del test[field]
+        allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
+        remove_inexistent(doc, allowed_fields, STOP_FIELDS)
+        if 'Tests' in doc:
+            allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
+            for test in doc['Tests']:
+                remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def parse_comment(self, function):
         docstring = ast.get_docstring(function)
         try:
-            doc = yaml.load(docstring)
+            doc = yaml.safe_load(docstring)
             if hasattr(function, 'name'):
                 doc['Name'] = function.name
 
         except Exception as inst:
-            warnings.warn("Error parsing comment of...")
+            if hasattr(function, 'name'):
+                warnings.warn(f"Error parsing comment of function '{function.name}'' from module {self.scan_file}")
+            else:
+                warnings.warn(f"Error parsing comment of module {self.scan_file}")
             print(type(inst))
             print(inst.args)
             print(inst)
@@ -49,6 +55,7 @@ class CodeParser:
         return doc
 
     def parse_test(self, code_file, id, group_id):
+        self.scan_file = code_file
         with open(code_file) as fd:
             file_content = fd.read()
         module = ast.parse(file_content)
@@ -76,7 +83,7 @@ class CodeParser:
 
             module_doc['Tests'] = functions_doc
 
-            #self.remove_ignored_fields(module_doc)
+            self.remove_ignored_fields(module_doc)
 
         return module_doc
 

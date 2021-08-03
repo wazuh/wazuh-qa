@@ -1,6 +1,29 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+Brief: Module description
+
+COPYRIGHT:
+    Copyright (C) 2015-2021, Wazuh Inc.
+
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+Metadata:
+    Modules:
+        - Wazuh DB
+    Daemons:
+        - wazuh_db
+    Operating System:
+        - Windows
+        - Ubuntu
+    Wazuh Max Version: 4.0.0
+    Wazuh Min Version: 4.1.5
+    Tiers:
+        - 0
+        - 1
+    Tags:
+        - Enrollment
+'''
 
 import os
 import re
@@ -83,13 +106,15 @@ def pre_insert_agents():
                               for case in module_data]
                          )
 def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test_case: list):
-    """Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket
-
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
     """
+    Test Logic:
+        "Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket"
+    Parameters:
+        - test_case:
+            type: list
+            brief: List of test_case stages (dicts with input, output and stage keys).
+    """
+
     for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == "yes":
             continue
@@ -106,8 +131,22 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
             .format(index + 1, stage['stage'], expected, response)
 
 
-def test_wazuh_db_create_agent(configure_sockets_environment, connect_to_sockets_module):
-    """Check that Wazuh DB creates the agent database when a query with a new agent ID is sent"""
+def test_wazuh_db_create_agent(test_case, connect_to_sockets_module):
+    """
+    Test Logic:
+        "Check that Wazuh DB creates the agent database when a query with a new agent ID is sent.
+        Also...
+
+        But also..."
+    Checks:
+        - The received output must match with...
+        - The received output with regex must match with...
+    Parameters:
+        - test_case:
+            type: list
+            brief: List of test_case stages (dicts with input, output and stage keys).
+    """
+
     test = {"name": "Create agent",
             "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
                            " ID reaches it. Once the database is created, the query is processed as expected.",

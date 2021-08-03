@@ -6,8 +6,6 @@ Include paths:
   - wazuh_db:
     path: "../../tests/integration/test_wazuh_db"
     recursive: false
-  - vulnerability_detector:
-    path: "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
   - "^test_.*py$"
@@ -22,12 +20,6 @@ Ignore paths:
   - "../../tests/integration/test_wazuh_db/data"
   - "/data/*"
 
-Valid tags:
-  - DB
-  - Feeds
-  - VulDet
-  - Vulnerability Detector
-
 Output fields:
   Module:
     Mandatory:
@@ -37,9 +29,6 @@ Output fields:
         - Daemons
         - Operating System
         - Tiers
-        - Demo:
-          - One
-          - Two
     Optional:
       - Tags
   Test:
