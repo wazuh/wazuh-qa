@@ -1,11 +1,10 @@
 Project path: "../../tests/integration"
 
-Documentation path: "../output"
+Output path: "../output"
 
 Include paths:
-  - wazuh_db:
-    path: "../../tests/integration/test_wazuh_db"
-    recursive: false
+  - "../../tests/integration/test_wazuh_db"
+  - "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
   - "^test_.*py$"
@@ -18,22 +17,23 @@ Function regex:
 
 Ignore paths:
   - "../../tests/integration/test_wazuh_db/data"
-  - "/data/*"
 
 Output fields:
   Module:
     Mandatory:
-      - Brief
-      - Metadata:
-        - Modules
-        - Daemons
-        - Operating System
-        - Tiers
+      - brief
+      - metadata:
+        - modules
+        - daemons
+        - operating_system
+        - tiers
     Optional:
-      - Tags
+      - tags
   Test:
     Mandatory:
-      - Test Logic
-      - Checks
+      - test_logic
+      - checks
     Optional:
-      - Expected result
+      - expected_result
+
+Test cases field: "test_cases"

@@ -1,27 +1,27 @@
 '''
-Brief: Module description
+brief: Module description
 
-COPYRIGHT:
+copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
 
     Created by Wazuh, Inc. <info@wazuh.com>.
 
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-Metadata:
-    Modules:
+metadata:
+    modules:
         - Wazuh DB
-    Daemons:
+    daemons:
         - wazuh_db
-    Operating System:
+    operating_system:
         - Windows
         - Ubuntu
-    Wazuh Max Version: 4.0.0
-    Wazuh Min Version: 4.1.5
-    Tiers:
+    wazuh_max_version: 4.0.0
+    wazuh_min_version: 4.1.5
+    tiers:
         - 0
         - 1
-    Tags:
+    tags:
         - Enrollment
 '''
 
@@ -107,9 +107,9 @@ def pre_insert_agents():
                          )
 def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_module, test_case: list):
     """
-    Test Logic:
+    test_logic:
         "Check that every input message in wazuh-db socket generates the adequate output to wazuh-db socket"
-    Parameters:
+    parameters:
         - test_case:
             type: list
             brief: List of test_case stages (dicts with input, output and stage keys).
@@ -133,15 +133,15 @@ def test_wazuh_db_messages(configure_sockets_environment, connect_to_sockets_mod
 
 def test_wazuh_db_create_agent(test_case, connect_to_sockets_module):
     """
-    Test Logic:
+    test_logic:
         "Check that Wazuh DB creates the agent database when a query with a new agent ID is sent.
         Also...
 
         But also..."
-    Checks:
+    checks:
         - The received output must match with...
         - The received output with regex must match with...
-    Parameters:
+    parameters:
         - test_case:
             type: list
             brief: List of test_case stages (dicts with input, output and stage keys).
