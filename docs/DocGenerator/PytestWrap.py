@@ -34,7 +34,8 @@ class PytestWrap:
     def collect_test_cases(self, path):
         """
         brief: "Executes pytest in 'collect-only' mode to extract all the test cases found for a test file.
-        args: - "path (string): Path of the test file to extract the test cases.
+        args:
+            - "path (string): Path of the test file to extract the test cases.
         returns: "dictionary: The output of pytest parsed into a dictionary"
         """
         logging.debug(f"Running pytest to collect testcases for '{path}'")

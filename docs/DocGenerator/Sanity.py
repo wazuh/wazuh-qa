@@ -6,6 +6,7 @@ license: This program is free software; you can redistribute it
          and/or modify it under the terms of the GNU General Public
          License (version 2) as published by the FSF - Free Software Foundation.
 """
+
 from Config import Config
 import os
 import re
@@ -13,6 +14,8 @@ import json
 import ast
 import logging
 from Utils import check_existance
+
+
 class Sanity():
     """
     brief: Class in charge of performing a general sanity check on the already parsed documentation.
@@ -30,7 +33,8 @@ class Sanity():
     def get_content(self, full_path):
         """
         brief: Loads a documentation file into a JSON dictionary.
-        args: -"full_path (str): The documentation file."
+        args:
+            - "full_path (str): The documentation file."
         """
         try:
             with open(full_path) as file:
@@ -64,18 +68,19 @@ class Sanity():
                         self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
                         logging.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
 
-
     def validate_module_fields(self, fields):
         """
         brief: Checks if all the mandatory module fields are present.
-        args: - "fields(dict): The module fields found in the documentation file."
+        args:
+            - "fields(dict): The module fields found in the documentation file."
         """
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
     def validate_test_fields(self, fields):
         """
         brief: Checks if all the mandatory test fields are present.
-        args: - "fields(dict): The test fields found in the documentation file."
+        args:
+            - "fields(dict): The test fields found in the documentation file."
         """
         if 'tests' in fields:
             for test_fields in fields['tests']:
@@ -84,7 +89,8 @@ class Sanity():
     def identify_tags(self, content):
         """
         brief: Identifies every new tag found in the documentation files and saves it for future reporting.
-        args: - "content(dict): The dictionary content of a documentation file."
+        args:
+            - "content(dict): The dictionary content of a documentation file."
         """
         if 'metadata' in content and 'tags' in content['metadata']:
             for tag in content['metadata']['tags']:
@@ -93,7 +99,8 @@ class Sanity():
     def identify_tests(self, content):
         """
         brief: Identifies every new test found in the documentation files and saves it for future reporting.
-        args: - "content(dict): The dictionary content of a documentation file."
+        args:
+            - "content(dict): The dictionary content of a documentation file."
         """
         if 'tests' in content:
             for test in content['tests']:
@@ -127,7 +134,8 @@ class Sanity():
     def add_report(self, message):
         """
         brief: Adds a new entry to the report.
-        args: - "message (string): Message to be included in the report."
+        args:
+            - "message (string): Message to be included in the report."
         """
         self.error_reports.append(message)
 

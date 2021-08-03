@@ -41,7 +41,8 @@ class DocGenerator:
     def is_valid_folder(self, path):
         """
         brief: Checks if a path should be ignored because its in the ignore list.
-        args: -"path (str): Folder location to be controlled"
+        args:
+            - "path (str): Folder location to be controlled"
         returns: "boolean: False if the path should be ignored. True otherwise."
         """
         for regex in self.ignore_regex:
@@ -52,7 +53,8 @@ class DocGenerator:
     def is_valid_file(self, path):
         """
         brief: Checks if a file path should be ignored because its in the ignore list or doesn´t match with the regexes.
-        args: -"path (str): File location to be controlled"
+        args:
+            - "path (str): File location to be controlled"
         returns: "boolean: False if the path should be ignored. True otherwise."
         """
         for regex in self.ignore_regex:
@@ -70,7 +72,8 @@ class DocGenerator:
     def is_group_file(self, path):
         """
         brief: Checks if a file path should be considered as a file containing group information.
-        args: -"path (str): File location to be controlled"
+        args:
+            - "path (str): File location to be controlled"
         returns: "boolean: True if the file is a group file. False otherwise."
         """
         for group_file in self.conf.group_files:
@@ -91,7 +94,8 @@ class DocGenerator:
     def get_test_doc_path(self, path):
         """
         brief: Returns the name of the test file in the documentation output based on the original file name.
-        args: -"path (str): The original file name"
+        args:
+            - "path (str): The original file name"
         returns: "string: The name of the documentation test file"
         """
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))

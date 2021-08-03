@@ -55,7 +55,8 @@ def remove_inexistent(source, check_list, stop_list=None):
 def get_keys_dict(_dic):
     """
         brief: Flat a dictionary into a list of its keys
-        args: - "_dic (dict): The source dictionary to be flattened."
+        args:
+            - "_dic (dict): The source dictionary to be flattened."
     """
     keys = []
     for item in _dic:
@@ -77,7 +78,8 @@ def get_keys_dict(_dic):
 def get_keys_list(_list):
     """
         brief: Flat a list of dictionaries into a list of its keys
-        args: - "_list (list): The source list to be flattened."
+        args:
+            - "_list (list): The source list to be flattened."
     """
     keys = []
     for item in _list:

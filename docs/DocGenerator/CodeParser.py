@@ -38,7 +38,8 @@ class CodeParser:
     def is_documentable_function(self, function):
         """
         brief: Checks if a specific method match with the regexes to be documented.
-        args: -"function (_ast.FunctionDef): Function class with all the information of the method"
+        args:
+            -"function (_ast.FunctionDef): Function class with all the information of the method"
         returns: "boolean: True if the method should be documentd. False otherwise"
         """
         for regex in self.function_regexes:
@@ -49,7 +50,8 @@ class CodeParser:
     def remove_ignored_fields(self, doc):
         """
         brief: Removes the fields from a parsed test file to delete the fields that are not mandatories or optionals
-        args: -"doc (dict): The parsed documentation block"
+        args:
+            -"doc (dict): The parsed documentation block"
         """
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
@@ -61,7 +63,8 @@ class CodeParser:
     def parse_comment(self, function):
         """
         brief: Parses one self-contained documentation block.
-        args: -"function (_ast.FunctionDef): Function class with all the information of the method"
+        args:
+            -"function (_ast.FunctionDef): Function class with all the information of the method"
         """
         docstring = ast.get_docstring(function)
         try:
