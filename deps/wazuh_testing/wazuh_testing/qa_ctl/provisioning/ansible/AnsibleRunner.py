@@ -2,8 +2,8 @@ import ansible_runner
 
 from tempfile import gettempdir
 
-from wazuh_testing.provisioning.ansible.AnsibleOutput import AnsibleOutput
-from wazuh_testing.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleOutput import AnsibleOutput
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
 
 
 class AnsibleRunner:

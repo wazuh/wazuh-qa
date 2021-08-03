@@ -1,8 +1,8 @@
 
 from abc import ABC, abstractmethod
 import os
-from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 
 
 class WazuhDeployment(ABC):
@@ -30,7 +30,7 @@ class WazuhDeployment(ABC):
     """
     def __init__(self, installation_files_path, configuration=None, inventory_file_path='/tmp/inventory.yaml',
                  install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None,
-                 preloaded_vars_file="wazuh_testing/provisioning/wazuh_deployment/templates"):
+                 preloaded_vars_file="wazuh_testing/qa_ctl/provisioning/wazuh_deployment/templates"):
         self.installation_files_path = installation_files_path
         self.configuration = configuration
         self.inventory_file_path = inventory_file_path

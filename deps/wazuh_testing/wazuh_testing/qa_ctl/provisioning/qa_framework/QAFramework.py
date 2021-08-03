@@ -1,7 +1,7 @@
 from tempfile import gettempdir
 
-from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 
 
 class QAFramework():
