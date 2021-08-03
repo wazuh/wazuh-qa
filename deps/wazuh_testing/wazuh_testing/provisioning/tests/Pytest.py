@@ -9,7 +9,8 @@ from wazuh_testing.provisioning.tests.Test import Test
 
 
 class Pytest(Test):
-    """ The class encapsulates the execution options of an especified set of tests and allows running them on the
+    SHELL = "python3 -m pytest "
+    """ The class encapsulates the execution options of a specified set of tests and allows running them on the
         remote host
 
     Attributes:
@@ -74,13 +75,12 @@ class Pytest(Test):
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
 
-        shell = "python3 -m pytest "
+        shell = Pytest.SHELL
 
         if self.keyword_expression:
             shell += os.path.join(self.tests_path, self.keyword_expression) + " "
         else:
             shell += self.tests_path + " "
-
         if self.tiers:
             shell += ' '.join(['--tier='+str(tier) for tier in self.tiers]) + ' '
         if self.dry_run:

@@ -44,10 +44,12 @@ class RunQATests():
                     for key, value in tests_obj['tests'].items():
                         tests.append(self.__build_test(value))
                 else:
-                    print("Malformed document. No tests root key founded.")
+                    print("Malformed document. No tests root key found.")
+                    exit()
 
             except KeyError as e:
-                print("Error keyword: " + str(e))
+                print(f'Keyword error. Bad tag in document:  {e}')
+                exit()
 
         return tests
 
@@ -55,7 +57,7 @@ class RunQATests():
         self.def_tests_file = def_tests_file
 
 
-run_pytest = RunQATests("tests/tests_def_file.yaml")
+run_pytest = RunQATests('tests/tests_def_file.yaml')
 
 tests = run_pytest.parse_tests_definition_file()
 
