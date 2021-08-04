@@ -107,8 +107,8 @@ def test_delete_registry(key, subkey, arch, value_list,
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
 
-    assert counter_type['deleted'] == len(value_list), f'Number of "deleted" events should be {len(value_list) + 1}'
+    assert counter_type['deleted'] == len(value_list), f'Number of "deleted" events should be {len(value_list)}'
 
-    name_list = set([event['data']['value_name'] for event in event_list[1:]])
+    name_list = set([event['data']['value_name'] for event in event_list])
     for value in value_list:
         assert value in name_list, f'Value {value} not found within the events'
