@@ -103,7 +103,8 @@ class Pytest(Test):
 
         execute_test_task = {'shell': shell, 'vars':
                              {'chdir': self.tests_run_dir},
-                             'register': 'test_output'}
+                             'register': 'test_output',
+                             'ignore_errors': 'yes'}
 
         create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir,
                                plain_report_file_name), 'content': "{{test_output.stdout}}"}}
