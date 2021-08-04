@@ -12,11 +12,8 @@ import os
 import re
 import json
 import yaml
-from Config import Config
-from PytestWrap import PytestWrap
-from Utils import remove_inexistent
-from docstring_parser import parse
-from comment_parser import comment_parser
+from lib.PytestWrap import PytestWrap
+from lib.Utils import remove_inexistent
 import warnings
 import logging
 
@@ -28,8 +25,8 @@ class CodeParser:
     """
     brief: Class that parses the content of the test files.
     """
-    def __init__(self):
-        self.conf = Config()
+    def __init__(self, config):
+        self.conf = config
         self.pytest = PytestWrap()
         self.function_regexes = []
         for regex in self.conf.function_regex:

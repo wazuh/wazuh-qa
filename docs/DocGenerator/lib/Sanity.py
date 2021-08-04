@@ -7,13 +7,12 @@ license: This program is free software; you can redistribute it
          License (version 2) as published by the FSF - Free Software Foundation.
 """
 
-from Config import Config
 import os
 import re
 import json
 import ast
 import logging
-from Utils import check_existance
+from lib.Utils import check_existance
 
 
 class Sanity():
@@ -21,8 +20,8 @@ class Sanity():
     brief: Class in charge of performing a general sanity check on the already parsed documentation.
     It´s in charge of walk every documentation file, and every group file to dump the parsed documentation.
     """
-    def __init__(self,):
-        self.conf = Config()
+    def __init__(self, config):
+        self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)
         self.error_reports = []
         self.found_tags = set()

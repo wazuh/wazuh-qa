@@ -12,24 +12,25 @@ import re
 import json
 import yaml
 import ast
-from Config import Config
-from CodeParser import CodeParser
-from Sanity import Sanity
-from Utils import clean_folder
+from lib.Config import Config
+from lib.CodeParser import CodeParser
+from lib.Sanity import Sanity
+from lib.Utils import clean_folder
 import warnings
 import logging
 import argparse
 
 VERSION = "0.1"
+CONFIG_PATH = "config.yaml"
 
 class DocGenerator:
     """
     brief: Main class of DocGenerator tool.
     It´s in charge of walk every test file, and every group file to dump the parsed documentation
     """
-    def __init__(self):
-        self.conf = Config()
-        self.parser = CodeParser()
+    def __init__(self, config):
+        self.conf = config
+        self.parser = CodeParser(self.conf)
         self.__id_counter = 0
         self.ignore_regex = []
         for ignore_regex in self.conf.ignore_paths:
@@ -207,10 +208,10 @@ if __name__ == '__main__':
     if args.version:
         print(f"DocGenerator v{VERSION}")
     elif args.test_config:
-        conf = Config()
+        Config(CONFIG_PATH)
     elif args.sanity:
-        sanity = Sanity()
+        sanity = Sanity(Config(CONFIG_PATH))
         sanity.run()
     else:
-        docs = DocGenerator()
+        docs = DocGenerator(Config(CONFIG_PATH))
         docs.run()
