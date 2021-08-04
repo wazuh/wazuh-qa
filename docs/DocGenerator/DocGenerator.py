@@ -11,7 +11,6 @@ import os
 import re
 import json
 import yaml
-import ast
 from lib.Config import Config
 from lib.CodeParser import CodeParser
 from lib.Sanity import Sanity

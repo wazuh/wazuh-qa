@@ -10,7 +10,6 @@ license: This program is free software; you can redistribute it
 import ast
 import os
 import re
-import json
 import yaml
 from lib.PytestWrap import PytestWrap
 from lib.Utils import remove_inexistent

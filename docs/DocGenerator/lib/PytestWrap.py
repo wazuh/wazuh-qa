@@ -43,7 +43,6 @@ class PytestWrap:
         output = {}
         for item in self.plugin.collected:
             tmp = item.split("::")
-            file = tmp[0]
             tmp = tmp[1].split("[")
             test = tmp[0]
             if not test in output:
