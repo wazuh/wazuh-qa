@@ -15,6 +15,7 @@ from lib.Config import Config
 from lib.CodeParser import CodeParser
 from lib.Sanity import Sanity
 from lib.Utils import clean_folder
+from lib.IndexData import IndexData
 import warnings
 import logging
 import argparse
@@ -206,6 +207,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', help="Print version", action='store_true', dest="version")
     parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
     parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
+    parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
+    parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launch_app')
     args = parser.parse_args()
 
     if args.debug_level:
@@ -220,6 +223,14 @@ if __name__ == '__main__':
     elif args.sanity:
         sanity = Sanity(Config(CONFIG_PATH))
         sanity.run()
+    elif args.index_name:
+        indexData=IndexData(args.index_name)
+        indexData.run()
+    elif args.launch_app:
+        indexData=IndexData(args.launch_app)
+        indexData.run()
+        os.chdir("Search-UI")
+        os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:
         docs = DocGenerator(Config(CONFIG_PATH))
         docs.run()
