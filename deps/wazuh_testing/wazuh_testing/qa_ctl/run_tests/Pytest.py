@@ -9,7 +9,7 @@ from wazuh_testing.provisioning.tests.Test import Test
 
 
 class Pytest(Test):
-    SHELL = "python3 -m pytest "
+    SHELL = 'python3 -m pytest '
     """ The class encapsulates the execution options of a specified set of tests and allows running them on the
         remote host
 
@@ -75,20 +75,20 @@ class Pytest(Test):
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
 
-        shell = Pytest.SHELL
+        shell = self.SHELL
 
         if self.keyword_expression:
             shell += os.path.join(self.tests_path, self.keyword_expression) + " "
         else:
             shell += self.tests_path + " "
         if self.tiers:
-            shell += ' '.join(['--tier='+str(tier) for tier in self.tiers]) + ' '
+            shell += ' '.join([f"--tier={tier}" for tier in self.tiers]) + ' '
         if self.dry_run:
-            shell += "--collect-only "
+            shell += '--collect-only '
         if self.stop_after_first_failure:
-            shell += "-x "
+            shell += '-x '
         if self.verbose_level:
-            shell += "--verbose "
+            shell += '--verbose '
         if self.custom_args:
             for key, value in self.custom_args:
                 shell += f"--metadata={key} {value} "
