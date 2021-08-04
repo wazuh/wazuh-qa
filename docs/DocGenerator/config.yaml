@@ -25,6 +25,7 @@ Output fields:
       - metadata:
         - modules
         - daemons
+        - component
         - operating_system
         - tiers
     Optional:

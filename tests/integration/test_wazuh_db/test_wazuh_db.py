@@ -9,6 +9,8 @@ copyright:
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 metadata:
+    component:
+        - Manager
     modules:
         - Wazuh DB
     daemons:
