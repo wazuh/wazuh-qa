@@ -8,7 +8,7 @@ from collections import Counter
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_registry, modify_registry_value, delete_registry, \
-    callback_detect_event, check_time_travel, validate_registry_value_event, registry_parser, KEY_WOW64_32KEY, \
+    callback_value_event, check_time_travel, validate_registry_value_event, registry_parser, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, REG_SZ, REG_MULTI_SZ, REG_DWORD
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -87,8 +87,8 @@ def test_delete_registry(key, subkey, arch, value_list,
     modify_registry_value(key_h, value_list[2], REG_DWORD, 1234)
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=len(value_list) + 1, error_message='Did not receive expected '
+    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_value_event,
+                                     accum_results=len(value_list), error_message='Did not receive expected '
                                                                                       '"Sending FIM event: ..." event').result()
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
@@ -98,16 +98,16 @@ def test_delete_registry(key, subkey, arch, value_list,
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Expect deleted events
-    event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_value_event,
                                          error_message='Did not receive expected '
                                                        '"Sending FIM event: ..." event',
-                                         accum_results=len(value_list) + 1).result()
+                                         accum_results=len(value_list)).result()
     counter_type = Counter([event['data']['type'] for event in event_list])
 
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
 
-    assert counter_type['deleted'] == len(value_list) + 1, f'Number of "deleted" events should be {len(value_list) + 1}'
+    assert counter_type['deleted'] == len(value_list), f'Number of "deleted" events should be {len(value_list) + 1}'
 
     name_list = set([event['data']['value_name'] for event in event_list[1:]])
     for value in value_list:
