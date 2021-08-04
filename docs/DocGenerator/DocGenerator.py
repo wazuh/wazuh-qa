@@ -50,24 +50,20 @@ class DocGenerator:
                 return False
         return True
 
-    def is_valid_file(self, path):
+    def is_valid_file(self, file):
         """
-        brief: Checks if a file path should be ignored because its in the ignore list or doesn´t match with the regexes.
+        brief: Checks if a file name should be ignored because it's in the ignore list or doesn´t match with the regexes.
         args:
-            - "path (str): File location to be controlled"
-        returns: "boolean: False if the path should be ignored. True otherwise."
+            - "file (str): File name to be controlled"
+        returns: "boolean: False if the file should be ignored. True otherwise."
         """
         for regex in self.ignore_regex:
-            if regex.match(path):
+            if regex.match(file):
                 return False
         for regex in self.include_regex:
-            match = False
-            if regex.match(path):
-                match = True
-                break
-        if not match:
-            return False
-        return True
+            if regex.match(file):
+                return True
+        return False
 
     def is_group_file(self, path):
         """
