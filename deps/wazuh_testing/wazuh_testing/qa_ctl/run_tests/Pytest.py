@@ -2,10 +2,10 @@ from datetime import datetime
 import tempfile
 import os
 
-from wazuh_testing.provisioning.tests.TestResult import TestResult
-from wazuh_testing.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.provisioning.tests.Test import Test
+from wazuh_testing.qa_ctl.run_tests.TestResult import TestResult
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.run_tests.Test import Test
 
 
 class Pytest(Test):
@@ -120,7 +120,7 @@ class Pytest(Test):
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                '/tmp/playbook_file.yaml'}
 
-        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
         self.result = TestResult(html_report_file_path=os.path.join(self.tests_result_path, html_report_file_name),
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name))

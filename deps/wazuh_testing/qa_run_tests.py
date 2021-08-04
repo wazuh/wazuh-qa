@@ -1,8 +1,8 @@
 import yaml
 import sys
 
-from tests.Pytest import Pytest
-from tests.TestLauncher import TestLauncher
+from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
+from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 
 
 class RunQATests():
