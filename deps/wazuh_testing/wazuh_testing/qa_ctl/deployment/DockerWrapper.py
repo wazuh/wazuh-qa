@@ -1,5 +1,5 @@
 import docker
-from Instance import Instance
+from wazuh_testing.qa_ctl.deployment.Instance import Instance
 from json import dumps
 
 
@@ -91,8 +91,12 @@ class DockerWrapper(Instance):
         Returns
             str: String in JSON format with the parameters of the class.
         """
+        api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+        docker_info = api_client.inspect_container(self.name)
+
         return dumps({'name': self.name, 'parameters': {
             'dockerfile_path': self.dockerfile_path, 'remove': self.remove,
+            'ip': docker_info['NetworkSettings']['IPAddress'],
             'detach': self.detach, 'ports': self.ports, 'stderr': self.stderr,
             'stdout': self.stdout}
         })
