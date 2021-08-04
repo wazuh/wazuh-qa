@@ -135,11 +135,19 @@ class CodeParser:
             -"id (integer): Id of the new group document"
             -"group_id (integer): Id of the group where the new group document belongs."
         """
+        MD_HEADER = "# "
         logging.debug(f"Parsing group file '{group_file}'")
         with open(group_file) as fd:
+            file_header = fd.readline()
             file_content = fd.read()
+
+        if not file_header.startswith(MD_HEADER):
+            warnings.warn(f"Group file '{group_file}' doesn´t contain a valid header", stacklevel=2)
+            logging.warning(f"Group file '{group_file}' doesn´t contain a valid header")
+            return None
+
         group_doc = {}
-        group_doc['name'] = os.path.basename(os.path.dirname(group_file))
+        group_doc['name'] = file_header.replace(MD_HEADER, "").replace("\n", "")
         group_doc['id'] = id
         group_doc['group_id'] = group_id
         group_doc['description'] = file_content

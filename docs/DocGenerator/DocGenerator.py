@@ -78,14 +78,13 @@ class DocGenerator:
                 return True
         return False
 
-    def get_group_doc_path(self):
+    def get_group_doc_path(self, group):
         """
         brief: Returns the name of the group file in the documentation output based on the original file name.
         returns: "string: The name of the documentation group file"
         """
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
-        group_name = os.path.basename(self.scan_path)
-        doc_path = os.path.join(base_path,group_name+".group")
+        doc_path = os.path.join(base_path,group['name']+".group")
         return doc_path
 
     def get_test_doc_path(self, path):
@@ -108,10 +107,6 @@ class DocGenerator:
             - "content (dict): The parsed content of a test file."
             - "doc_path (string): The path where the information should be dumped."
         """
-        if not content:
-            warnings.warn(f"Content for {doc_path} is empty, ignoring it", stacklevel=2)
-            logging.warning(f"Content for {doc_path} is empty, ignoring it")
-            return
         if not os.path.exists(os.path.dirname(doc_path)):
             os.makedirs(os.path.dirname(doc_path))
         with open(doc_path + ".json", "w+") as outfile:
@@ -129,10 +124,15 @@ class DocGenerator:
         """
         self.__id_counter = self.__id_counter + 1
         group = self.parser.parse_group(path, self.__id_counter, group_id)
-        doc_path = self.get_group_doc_path()
-        self.dump_output(group, doc_path)
-        logging.debug(f"New group file '{doc_path}' was created with ID:{self.__id_counter}")
-        return self.__id_counter
+        if group:
+            doc_path = self.get_group_doc_path(group)
+            self.dump_output(group, doc_path)
+            logging.debug(f"New group file '{doc_path}' was created with ID:{self.__id_counter}")
+            return self.__id_counter
+        else:
+            warnings.warn(f"Content for {path} is empty, ignoring it", stacklevel=2)
+            logging.warning(f"Content for {path} is empty, ignoring it")
+            return None
 
     def create_test(self, path, group_id):
         """
@@ -144,10 +144,17 @@ class DocGenerator:
         """
         self.__id_counter = self.__id_counter + 1
         test = self.parser.parse_test(path, self.__id_counter, group_id)
-        doc_path = self.get_test_doc_path(path)
-        self.dump_output(test, doc_path)
-        logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
-        return self.__id_counter
+        if test:
+            doc_path = self.get_test_doc_path(path)
+            self.dump_output(test, doc_path)
+            logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
+            return self.__id_counter
+        else:
+            warnings.warn(f"Content for {path} is empty, ignoring it", stacklevel=2)
+            logging.warning(f"Content for {path} is empty, ignoring it")
+            return None
+
+
 
     def parse_folder(self, path, group_id):
         """
@@ -166,8 +173,10 @@ class DocGenerator:
         (root, folders, files) = next(os.walk(path))
         for file in files:
             if self.is_group_file(file):
-                group_id = self.create_group(os.path.join(root,file), group_id)
-                break
+                new_group = self.create_group(os.path.join(root,file), group_id)
+                if new_group:
+                    group_id = new_group
+                    break
         for file in files:
             if self.is_valid_file(file):
                 self.create_test(os.path.join(root,file), group_id)
