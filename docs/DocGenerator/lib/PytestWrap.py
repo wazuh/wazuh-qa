@@ -12,21 +12,21 @@ import logging
 
 class PytestPlugin:
     """
-    brief: Plugin to extract information from a pytest eecution
+    brief: Plugin to extract information from a pytest execution.
     """
     def __init__(self):
         self.collected = []
 
     def pytest_collection_modifyitems(self, items):
         """
-        brief: Callback to receive the output of a pytest execution
+        brief: Callback to receive the output of a pytest execution.
         """
         for item in items:
             self.collected.append(item.nodeid)
 
 class PytestWrap:
     """
-    brief: Class that wraps the execution of pytest
+    brief: Class that wraps the execution of pytest.
     """
     def __init__(self):
         self.plugin = PytestPlugin()

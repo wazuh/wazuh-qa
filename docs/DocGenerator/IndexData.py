@@ -29,7 +29,7 @@ class IndexData:
 
     def test_connection(self):
         """
-        brief: It verifies with an HTTP request that an OK response is received from elasticsearch.
+        brief: It verifies with an HTTP request that an OK response is received from ElasticSearch.
         """
         try:
             res = requests.get("http://localhost:9200/_cluster/health")
@@ -53,7 +53,7 @@ class IndexData:
 
     def read_files_content(self):
         """
-        brief: Open every file found in the path and append the content into a list.
+        brief: It Opens every file found in the path and appends the content into a list.
         """
         for file in self.files:
             with open(os.path.join(self.path, file)) as f:
@@ -62,15 +62,15 @@ class IndexData:
 
     def remove_index(self):
         """
-        brief: Deletes the index.
+        brief: It Deletes an index.
         """
         delete=self.es.indices.delete(index=self.index, ignore=[400, 404])
         print(f'Delete index {self.index}\n {delete}\n')
 
     def run(self):
         """
-        brief: This calls all the methods of the Class. Finally, uses the index name and the documents
-        data to make a request to BULK API.
+        brief: This calls all the methods of the Class. Finally, it uses the index name and the documents
+        to make a request to the BULK API.
         """
         self.test_connection()
         self.read_files_content()

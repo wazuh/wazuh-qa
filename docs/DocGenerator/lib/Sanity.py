@@ -168,7 +168,7 @@ class Sanity():
 
     def run(self):
         """
-        brief: Run a complete sanity check of each documentation file on the output folder.
+        brief: Runs a complete sanity check of each documentation file on the output folder.
         """
         logging.info("\nStarting documentation sanity check")
         for (root, *_, files) in os.walk(self.conf.documentation_path, topdown=True):

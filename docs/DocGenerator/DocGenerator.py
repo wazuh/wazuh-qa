@@ -26,7 +26,7 @@ CONFIG_PATH = "config.yaml"
 class DocGenerator:
     """
     brief: Main class of DocGenerator tool.
-    It´s in charge of walk every test file, and every group file to dump the parsed documentation
+    It´s in charge of walk every test file, and every group file to dump the parsed documentation.
     """
     def __init__(self, config):
         self.conf = config
@@ -41,7 +41,7 @@ class DocGenerator:
 
     def is_valid_folder(self, path):
         """
-        brief: Checks if a path should be ignored because its in the ignore list.
+        brief: Checks if a path should be ignored because it is in the ignore list.
         args:
             - "path (str): Folder location to be controlled"
         returns: "boolean: False if the path should be ignored. True otherwise."
@@ -158,7 +158,7 @@ class DocGenerator:
 
     def parse_folder(self, path, group_id):
         """
-        brief: Search in a specific folder to parse possible group files and each test file
+        brief: Search in a specific folder to parse possible group files and each test file.
         args:
             - "path (string): The path of the folder to be parsed."
             - "group_id (string): The id of the group where the new elements belong."
