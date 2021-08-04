@@ -1551,7 +1551,7 @@ class EventChecker:
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
             event_types = Counter(filter_events(events, ".[].data.type"))
-            msg = f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            msg = f"Non expected number of events. {event_types[ev_type]} != {len(file_list)}"
             assert (event_types[ev_type] == len(file_list)), msg
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
@@ -1563,7 +1563,7 @@ class EventChecker:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f'Not asserting {expected_path} in event.data.path. '
+                    logger.info(f"Not asserting {expected_path} in event.data.path. "
                                 f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
@@ -1643,7 +1643,7 @@ if sys.platform == 'win32':
             error_msg += " but were not detected." if num_elems > 1 else " but was not detected."
 
             key_error_msg = f"TimeoutError was raised because 1 event was expected for {self.registry_key} "
-            key_error_msg += "but was not detected."
+            key_error_msg += 'but was not detected.'
 
             if event_type == 'modified' or self.is_value:
                 self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
@@ -1875,7 +1875,7 @@ if sys.platform == 'win32':
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                                   update_position=True,
                                   error_message=f'End of scheduled scan not detected after '
-                                  f'{global_parameters.default_timeout} seconds')
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Modify previous registry values
         for name, content in value_list.items():
@@ -1916,7 +1916,7 @@ if sys.platform == 'win32':
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                                   update_position=True,
                                   error_message=f'End of scheduled scan not detected after '
-                                  f'{global_parameters.default_timeout} seconds')
+                                  f"{global_parameters.default_timeout} seconds")
 
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
@@ -2016,7 +2016,7 @@ if sys.platform == 'win32':
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                                   update_position=True,
                                   error_message=f'End of scheduled scan not detected after '
-                                  f'{global_parameters.default_timeout} seconds')
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Modify previous registry subkeys
         for name, _ in key_list.items():
@@ -2037,7 +2037,7 @@ if sys.platform == 'win32':
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                                   update_position=True,
                                   error_message=f'End of scheduled scan not detected after '
-                                  f'{global_parameters.default_timeout} seconds')
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Delete previous registry subkeys
         for name, _ in key_list.items():
@@ -2057,7 +2057,7 @@ if sys.platform == 'win32':
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                                   update_position=True,
                                   error_message=f'End of scheduled scan not detected after '
-                                  f'{global_parameters.default_timeout} seconds')
+                                  f"{global_parameters.default_timeout} seconds")
 
 
 class CustomValidator:
