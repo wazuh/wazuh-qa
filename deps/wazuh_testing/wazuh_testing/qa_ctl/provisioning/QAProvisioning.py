@@ -79,12 +79,12 @@ class QAProvisioning():
 
                 deployment_instance.install()
 
-            elif 'qa_framework' in host_value:
+            if 'qa_framework' in host_value:
                 qa_framework_info = host_value['qa_framework']
-                wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info['qa_framework'] \
-                                          else qa_framework_info['qa_framework']['wazuh_qa_branch']
+                wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
+                                          else qa_framework_info['wazuh_qa_branch']
 
                 qa_instance = QAFramework(qa_branch=wazuh_qa_branch)
-                qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path)
-                qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path)
-                qa_instance.install_framework(inventory_file_path=self.inventory_file_path)
+                qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
+                qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
+                qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
