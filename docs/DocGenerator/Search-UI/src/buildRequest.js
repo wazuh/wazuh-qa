@@ -14,9 +14,9 @@ function buildSort(sortDirection, sortField) {
 function buildMatch(searchTerm) {
   return searchTerm
     ? {
-        multi_match: {
-          query: searchTerm,
-          fields: ["title", "description"]
+        query_string: {
+          query: `*${searchTerm}*`,
+          fields: ["brief", "name"]
         }
       }
     : { match_all: {} };
@@ -64,8 +64,8 @@ export default function buildRequest(state) {
       fragment_size: 200,
       number_of_fragments: 1,
       fields: {
-        title: {},
-        description: {}
+        brief: {},
+        name: {}
       }
     },
     //https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-request-source-filtering.html#search-request-source-filtering

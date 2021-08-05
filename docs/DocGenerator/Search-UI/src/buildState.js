@@ -10,17 +10,33 @@ function buildTotalResults(hits) {
   return hits.total.value;
 }
 
+function getHighlight(hit, fieldName) {
+  if (
+    !hit.highlight ||
+    !hit.highlight[fieldName] ||
+    hit.highlight[fieldName].length < 1
+  ) {
+    return;
+  }
+
+  return hit.highlight[fieldName][0];
+}
+
 function buildResults(hits) {
   const addEachKeyValueToObject = (acc, [key, value]) => ({
     ...acc,
     [key]: value
   });
 
+  const toObject = (value, snippet) => {
+    return { raw: value, ...(snippet && { snippet }) };
+  };
+
   return hits.map(record => {
     return Object.entries(record._source)
       .map(([fieldName, fieldValue]) => [
         fieldName,
-        { raw: JSON.stringify(fieldValue) }
+        toObject(JSON.stringify(fieldValue), getHighlight(record, fieldName))
       ])
       .reduce(addEachKeyValueToObject, {});
   });
