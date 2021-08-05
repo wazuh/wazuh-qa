@@ -12,14 +12,13 @@ import re
 import json
 import requests
 from elasticsearch import Elasticsearch, helpers
-from Config import Config
 
 class IndexData:
     """
     brief: Class that indexes the data from JSON files into ElasticSearch.
     """
-    def __init__(self, index):
-        self.conf = Config()
+    def __init__(self, index, config):
+        self.conf = config
         self.path = self.conf.documentation_path
         self.index = index
         self.regex = ".*json"
@@ -80,4 +79,3 @@ class IndexData:
             helpers.bulk(self.es, self.output, index=self.index)
             out=json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
             print(out)
-

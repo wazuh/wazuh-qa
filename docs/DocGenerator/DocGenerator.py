@@ -224,10 +224,10 @@ if __name__ == '__main__':
         sanity = Sanity(Config(CONFIG_PATH))
         sanity.run()
     elif args.index_name:
-        indexData=IndexData(args.index_name)
+        indexData=IndexData(args.index_name, Config(CONFIG_PATH))
         indexData.run()
     elif args.launch_app:
-        indexData=IndexData(args.launch_app)
+        indexData=IndexData(args.launch_app, Config(CONFIG_PATH))
         indexData.run()
         os.chdir("Search-UI")
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
