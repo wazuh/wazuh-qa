@@ -10,14 +10,12 @@ license: This program is free software; you can redistribute it
 import yaml
 import logging
 
-CONFIG_PATH = "config.yaml"
-
 
 class Config():
     """
     brief: Class that parses the configuration file and exposes the available configurations.
     """
-    def __init__(self):
+    def __init__(self, config_file):
         self.project_path = "../.."
         self.documentation_path = ".."
         self.include_paths = []
@@ -31,7 +29,7 @@ class Config():
         self.test_cases_field = None
 
         try:
-            with open(CONFIG_PATH) as fd:
+            with open(config_file) as fd:
                 self._config_data = yaml.safe_load(fd)
         except:
             logging.error("Cannot load config file")
