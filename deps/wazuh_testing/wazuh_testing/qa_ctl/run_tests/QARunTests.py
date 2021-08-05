@@ -29,38 +29,16 @@ class RunQATests():
 
         return Pytest(**test_dict)
 
-    def parse_tests_definition_file(self):
-
-        tests = []
-        with open(self.def_tests_file) as tests_file:
-            try:
-                tests_obj = yaml.safe_load(tests_file)
-            except yaml.YAMLError as yaml_e:
-                print(f"Error while parsing: {yaml_e}", file=sys.stderr)
+    def __init__(self, tests_obj):
+        self.tests = []
+        try:
+            if 'tests' in tests_obj:
+                for key, value in tests_obj['tests'].items():
+                    self.tests.append(self.__build_test(value))
+            else:
+                print("Malformed document. No tests root key found.")
                 exit()
 
-            try:
-                if 'tests' in tests_obj:
-                    for key, value in tests_obj['tests'].items():
-                        tests.append(self.__build_test(value))
-                else:
-                    print("Malformed document. No tests root key found.")
-                    exit()
-
-            except KeyError as e:
-                print(f'Keyword error. Bad tag in document:  {e}')
-                exit()
-
-        return tests
-
-    def __init__(self, def_tests_file):
-        self.def_tests_file = def_tests_file
-
-
-run_pytest = RunQATests('tests/tests_def_file.yaml')
-
-tests = run_pytest.parse_tests_definition_file()
-
-test_launcher = TestLauncher('/tmp/ansible_inventory.yaml', tests=tests)
-
-test_launcher.run()
+        except KeyError as e:
+            print(f'Keyword error. Bad tag in document:  {e}')
+            exit()

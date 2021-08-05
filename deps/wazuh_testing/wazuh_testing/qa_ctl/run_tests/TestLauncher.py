@@ -20,7 +20,7 @@ class TestLauncher:
         qa_framework_path (str, None): Remote directory path where the qa repository will be download to
 
     """
-    def __init__(self, ansible_inventory_path, tests,
+    def __init__(self, tests, ansible_inventory_path='/tmp/inventory.yaml',
                  qa_framework_path="/tmp/wazuh-qa/"):
         self.qa_framework_path = qa_framework_path
         self.ansible_inventory_path = ansible_inventory_path

@@ -5,13 +5,13 @@ import argparse
 import os
 from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
-# import QAProvisioning
-# import QATest
+from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
+from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 import yaml
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
-TEST_KEY = 'test_key'
+TEST_KEY = 'tests'
 
 
 def main():
@@ -43,9 +43,9 @@ def main():
 
         if TEST_KEY in yaml_config:
             test_dict = yaml_config[TEST_KEY]
-            # qa_test = QATest(test_dict)
-            # qa_test.run()
-            pass
+            qa_test = RunQATests(test_dict)
+            test_launcher = TestLauncher(tests=qa_test.tests)
+            test_launcher.run()
 
 
 if __name__ == '__main__':
