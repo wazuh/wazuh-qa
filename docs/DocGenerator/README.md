@@ -1,5 +1,5 @@
 # Wazuh QA DocGenerator
-Wazuh - Quality assurance automation self-contained documentation parsing tool
+Wazuh - Quality assurance automation self-contained documentation parsing tool.
 
 ## Rational
 Wazuh QA documentation is designed to be self-contained into the source code of each test.
@@ -9,27 +9,27 @@ to be indexed and displayed.
 
 ## Design
 ### Input
-DocGenerator parses the information from a QA repository with test files containing a specific comment format:
+DocGenerator parses the information from test files containing a specific comment format:
 
 Each test file has self-contained documentation comment blocks in **YAML** format.
 
 These blocks can contain **Mandatory**, **Optional**, and **Ignored** fields.
 In the [Configuration section](#configuration) it's explained how to configure these fields.
-- **Mandatory** fields must be present in the documentation block and will be dumped into the final
-documentation output.
-- **Optional** fields, if present, will be parsed and dumped into the final documentation output.
+- **Mandatory** fields must be present in the documentation block and will be added to the final
+documentation output files.
+- **Optional** fields, if present, will be parsed and added to the final documentation output files.
 - **Ignored** fields are the ones not listed in the configuration file. They can be added by the developer to explain
-a functionality of the module or a method without transferring this information to the final documentation output.
+a specific functionality without including this information to the final documentation output files.
 
-A test file has a module documentation block at the top level of the file with information related to the complete
-test file. And each test method inside the file will have a test documentation block with the specific information of
+Each test file has a header docstring that details information related to the whole test file.
+And each test method inside the file will have a test documentation block with the specific information of
 this test.
 
 Additional group information is parsed from the README files found in the repository. Each README file represents
-a group, and every test file at the same or lower folder level than this group is considered as belonging to this group.
+a group, and every test file at the same or lower folder level is considered as belonging to it.
 
-Also, groups could be nested and a README found under the level of another group will generate a new group that belongs
-to the first one and contains any group or tests under it.
+Also, groups could be nested, so a README file found under the level of a group will generate a new group that belongs
+to the first one.
 
 The specific content of each block is defined in the [Documentation schema section](#documentation-schema)
 
@@ -40,7 +40,7 @@ non-documentable field. Also, complementary test-cases information will be extra
 isn´t a description for them.
 
 ### Output
-The parsed and filtered documentation information will be dumped in the Output folder defined by configuration.
+The parsed and filtered documentation information will be added to the Output folder defined by configuration.
 
 Each test file will generate a JSON and a YAML file with the documentation information. Each of these files contains
 a structure with the module description and every test function in the module. Each test function
@@ -49,13 +49,12 @@ contains its description and, if available, the test-cases information.
 These files are ordered in nested folders with the same tree structure as the source code files.
 
 ### Sanity Check
-After the generation of the documentation output, a sanity check can be executed to identify the coverage, tags and
-any missing mandatory field in the documentation output.
+After the generation of the documentation output, a sanity check can be executed to identify coverage, tags and
+any missing mandatory field.
 
 ### Indexing
-The documentation output is intended to be indexed and displayed with SearchUI App. So, DocGenerator has the capability
-to automatically generate the index of the parsed information into React. This will load all the content of the output
-folder with a specific index name. Making them available for visualization.
+The JSON files output are intended to be indexed into elasticsearch to be displayed by the Search-UI App.
+So, DocGenerator treats each JSON file as a document that will be added to elasticsearch index.
 
 ### Local Lunch
 Together with the Indexing functionality, the tool has the capability to locally lunch SearchUI to visualize the
@@ -137,12 +136,13 @@ Here is an example of how this Documentation block should look like and the hier
 The configuration file of the tool is located at **./config.yaml**.
 
 ### Configurable values
-- **Project path**: The path of the complete project from where the documentation will be extracted. This path will be used
-during a sanity check to count every existent test in the project and calculate the coverage of the documentation.
+- **Project path**: The path of the complete project from where the documentation will be extracted. This path will be
+used during a sanity check to count every existent test in the project and calculate the coverage of the documentation.
 
 - **Output path**: The path where all the parsed documentation blocks will be dumped.
 
-- **Include paths**: A list with all the paths from where the tool will look to extract and parse the documentation blocks
+- **Include paths**: A list with all the paths from where the tool will look to extract and parse the documentation
+blocks.
 
 - **Include regex**: A list of regexes to identify which files must be considered a test file.
 
@@ -167,8 +167,8 @@ block, this action is avoided.
 ### Parsing
     python3 DocGenerator.py
 
-Without using any flag, the tool will load the configuration file and run a complete parse of the paths in the configuration
-to dump the content into the output folder.
+Without using any flag, the tool will load the configuration file and run a complete parse of the paths in the
+configuration to dump the content into the output folder.
 
 ### Sanity Check
     python3 DocGenerator.py -s
@@ -183,7 +183,7 @@ It will also list and report every tag found.
 ### Debug
     python3 DocGenerator.py -d
 
-Using **-d**, the tool will run in DEBUG mode, logging extra information in the log file.
+Using **-d**, the tool runs in DEBUG mode, logging extra information in the log file.
 
 ### Version
     python3 DocGenerator.py -v
@@ -194,12 +194,11 @@ Using **-v**, the tool will print its current version.
     python3 DocGenerator.py -t
 Using **-t** option, the tool will load the config file to test the correct content.
 
-## Index output data
+### Index output data
     python3 DocGenerator.py -i <INDEX_NAME>
-Using **-i** option, the tool will load the content of the output folder to index it into Elastic. The name of the index
-must be provided as a parameter
+Using **-i** option, the tool indexes the content of each file output as a document into ElasticSearch. The name of the index
+must be provided as a parameter.
 
-## Local launch output data
+### Local launch output data
     python3 DocGenerator.py -l <INDEX_NAME>
-Using **-l** option, the tool will index the content of the output folder and lunch SearchUI app locally. The name of the index
-must be provided as a parameter
+Using **-l** option, the tool indexes the content of each file output as a document into ElasticSearch and launch the application. The name of the index must be provided as a parameter.
