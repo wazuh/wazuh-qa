@@ -1030,6 +1030,7 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
 
         # Continue with the test validations
         task_ids = [item.get('agent') for item in response['data']]
+        task_ids.sort()
         for index, agent_id in enumerate(task_ids):
             data = {
                 "origin": {
