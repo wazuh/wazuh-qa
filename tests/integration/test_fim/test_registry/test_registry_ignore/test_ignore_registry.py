@@ -6,9 +6,6 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters, fim
-from wazuh_testing.fim import LOG_FILE_PATH, create_registry, registry_parser, \
-    KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, callback_key_event, check_time_travel, \
-    modify_registry_value, REG_SZ, callback_value_event, callback_detect_end_scan
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -27,7 +24,7 @@ ignore_value = "value_ignored"
 ignore_value_regex = "ignored_value$"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 test_regs = [os.path.join(key, subkey_1), os.path.join(key, subkey_2)]
 
 reg1, reg2 = test_regs
@@ -44,7 +41,7 @@ conf_params = {'WINDOWS_REGISTRY_1': reg1,
                'VALUE_IGNORE_REGEX': ignore_value_regex
                }
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_ignore_conf.yaml')
-p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
+p, m = fim.generate_params(extra_params=conf_params, modes=['scheduled'])
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -62,15 +59,15 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('root_key, registry, arch, subkey, triggers_event, tags_to_apply', [
-    (key, subkey_1, KEY_WOW64_32KEY, "some_key", True, {'ignore_registry_key'}),
-    (key, subkey_1, KEY_WOW64_64KEY, "some_key", True, {'ignore_registry_key'}),
-    (key, subkey_1, KEY_WOW64_64KEY, ignore_key, False, {'ignore_registry_key'}),
-    (key, subkey_1, KEY_WOW64_32KEY, ignore_key, False, {'ignore_registry_key'}),
-    (key, subkey_1, KEY_WOW64_64KEY, "regex_ignored_key", False, {'ignore_registry_key'}),
-    (key, subkey_1, KEY_WOW64_32KEY, "regex_ignored_key", False, {'ignore_registry_key'}),
-    (key, subkey_2, KEY_WOW64_64KEY, "some_key", True, {'ignore_registry_key'}),
-    (key, subkey_2, KEY_WOW64_64KEY, ignore_key, False, {'ignore_registry_key'}),
-    (key, subkey_2, KEY_WOW64_64KEY, "regex_ignored_key", False, {'ignore_registry_key'})
+    (key, subkey_1, fim.KEY_WOW64_32KEY, "some_key", True, {'ignore_registry_key'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, "some_key", True, {'ignore_registry_key'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, ignore_key, False, {'ignore_registry_key'}),
+    (key, subkey_1, fim.KEY_WOW64_32KEY, ignore_key, False, {'ignore_registry_key'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, "regex_ignored_key", False, {'ignore_registry_key'}),
+    (key, subkey_1, fim.KEY_WOW64_32KEY, "regex_ignored_key", False, {'ignore_registry_key'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, "some_key", True, {'ignore_registry_key'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, ignore_key, False, {'ignore_registry_key'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, "regex_ignored_key", False, {'ignore_registry_key'})
 ])
 def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, tags_to_apply,
                              get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start,
@@ -99,37 +96,37 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
     fim.registry_ignore_path = os.path.join(root_key, registry)
 
     # Create registry
-    create_registry(registry_parser[root_key], os.path.join(registry, subkey), arch)
+    fim.create_registry(fim.registry_parser[root_key], os.path.join(registry, subkey), arch)
     # Go ahead in time to let syscheck perform a new scan
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_key_event,
+                                        callback=fim.callback_key_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
         assert event['data']['type'] == 'added', 'Wrong event type.'
         assert event['data']['path'] == os.path.join(root_key, registry, subkey), 'Wrong key path.'
-        assert event['data']['arch'] == '[x32]' if arch == KEY_WOW64_32KEY else '[x64]', 'Wrong key arch.'
+        assert event['data']['arch'] == '[x32]' if arch == fim.KEY_WOW64_32KEY else '[x64]', 'Wrong key arch.'
 
     else:
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=callback_key_event,
+                                            callback=fim.callback_key_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
 
 
 @pytest.mark.parametrize('root_key, registry, arch, value, triggers_event, tags_to_apply', [
-    (key, subkey_1, KEY_WOW64_32KEY, "some_value", True, {'ignore_registry_value'}),
-    (key, subkey_1, KEY_WOW64_64KEY, "some_value", True, {'ignore_registry_value'}),
-    (key, subkey_1, KEY_WOW64_64KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
-    (key, subkey_1, KEY_WOW64_32KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
-    (key, subkey_2, KEY_WOW64_64KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
-    (key, subkey_2, KEY_WOW64_64KEY, "some_value", True, {'ignore_registry_value'}),
-    (key, subkey_1, KEY_WOW64_32KEY, ignore_value, False, {'ignore_registry_value'}),
-    (key, subkey_1, KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'}),
-    (key, subkey_2, KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'})
+    (key, subkey_1, fim.KEY_WOW64_32KEY, "some_value", True, {'ignore_registry_value'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, "some_value", True, {'ignore_registry_value'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
+    (key, subkey_1, fim.KEY_WOW64_32KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, "regex_ignored_value", False, {'ignore_registry_value'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, "some_value", True, {'ignore_registry_value'}),
+    (key, subkey_1, fim.KEY_WOW64_32KEY, ignore_value, False, {'ignore_registry_value'}),
+    (key, subkey_1, fim.KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'}),
+    (key, subkey_2, fim.KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'})
 ])
 def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, tags_to_apply,
                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
@@ -154,26 +151,26 @@ def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     # Open the key (this shouldn't create an alert)
-    key_h = create_registry(registry_parser[root_key], registry, arch)
+    key_h = fim.create_registry(fim.registry_parser[root_key], registry, arch)
     # Create values
-    modify_registry_value(key_h, value, REG_SZ, "test_value")
+    fim.modify_registry_value(key_h, value, fim.REG_SZ, "test_value")
     # Go ahead in time to let syscheck perform a new scan
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_value_event,
+                                        callback=fim.callback_value_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
 
         assert event['data']['type'] == 'added', 'Wrong event type.'
         assert event['data']['path'] == os.path.join(root_key, registry), 'Wrong value path.'
-        assert event['data']['arch'] == '[x32]' if arch == KEY_WOW64_32KEY else '[x64]', 'wrong key arch.'
+        assert event['data']['arch'] == '[x32]' if arch == fim.KEY_WOW64_32KEY else '[x64]', 'wrong key arch.'
         assert event['data']['value_name'] == value, 'Wrong value name'
 
     else:
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=callback_value_event,
+                                            callback=fim.callback_value_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()

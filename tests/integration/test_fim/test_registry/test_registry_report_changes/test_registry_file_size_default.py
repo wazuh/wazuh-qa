@@ -8,7 +8,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
     callback_diff_size_limit_value, create_registry, registry_parser, modify_registry_value, \
-    check_time_travel, validate_registry_value_event, callback_detect_event, REG_SZ
+    check_time_travel, validate_registry_value_event, callback_value_event, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -104,8 +104,7 @@ def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
 
     modify_registry_value(key_h, "some_value", REG_SZ, "some content")
     check_time_travel(True, monitor=wazuh_log_monitor)
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=2, error_message='Did not receive expected '
+    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_value_event,
+                                    error_message='Did not receive expected '
                                                                     '"Sending FIM event: ..." event').result()
-    for ev in events:
-        validate_registry_value_event(ev, mode=mode)
+    validate_registry_value_event(event, mode=mode)
