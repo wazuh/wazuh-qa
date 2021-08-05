@@ -26,7 +26,8 @@ setup(name='wazuh_testing',
                                       'data/sslmanager.cert',
                                       'tools/macos_log/log_generator.m',
                                       'qa_ctl/deployment/dockerfiles/*',
-                                      'qa_ctl/deployment/vagrantfile_template.txt'
+                                      'qa_ctl/deployment/vagrantfile_template.txt',
+                                      'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2'
                                       ]
                     },
       entry_points={
