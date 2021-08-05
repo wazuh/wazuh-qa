@@ -36,5 +36,6 @@ Output fields:
       - checks
     Optional:
       - expected_result
+      - test_cases
 
-Test cases field: "test_cases"
+Test cases field: test_cases
