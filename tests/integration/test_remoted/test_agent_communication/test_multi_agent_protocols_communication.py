@@ -100,7 +100,7 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
     # Create archives log monitor
     archives_monitor = rd.create_archives_log_monitor()
 
-    # Wait 10 seconds until socket monitor is fully initialized
+    # Wait 10 seconds until remoted is fully initialized
     sleep(10)
 
     # Start sender event threads
