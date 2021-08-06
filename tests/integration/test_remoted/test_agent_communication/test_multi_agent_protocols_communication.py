@@ -3,6 +3,7 @@ import pytest
 
 import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
+import wazuh_testing.tools.monitoring as mo
 
 from time import sleep
 from wazuh_testing import TCP, UDP, TCP_UDP
@@ -71,7 +72,7 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
 
 
     send_event_threads = []
-    agent_custom_messages = []
+    search_patterns = []
 
     # Create num_agents (parameter) agents
     agents = ag.create_agents(agents_number=num_agents, manager_address=agent_info['manager_address'],
@@ -85,11 +86,12 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
             protocol = TCP if idx % 2 == 0 else UDP
 
         # Generate custom events for each agent
-        agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: test message from agent {agent.id}"
+        search_pattern = f"test message from agent {agent.id}"
+        agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {search_pattern}"
         event = agent.create_event(agent_custom_message)
 
-        # Save the agent message to check it later
-        agent_custom_messages.append(agent_custom_message)
+        # Save the search pattern to check it later
+        search_patterns.append(search_pattern)
 
         # Create sender event threads
         send_event_threads.append(ThreadExecutor(send_event, {'event': event, 'protocol': protocol,
@@ -110,9 +112,9 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
         thread.join()
 
     # Monitor archives log to find the sent messages
-    for message in agent_custom_messages:
+    for search_pattern in search_patterns:
         rd.detect_archives_log_event(archives_monitor,
-                                     callback=rd.callback_detect_syslog_event(message),
+                                     callback=mo.make_callback(pattern=search_pattern, prefix=r".*"),
                                      update_position=False,
                                      timeout=30,
                                      error_message="Agent message wasn't received or took too much time.")
@@ -125,7 +127,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_remoted):
+def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_wazuh):
     """Validate agent-manager communication with several agents using different protocols and ports"""
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
