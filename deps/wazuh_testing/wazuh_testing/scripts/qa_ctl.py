@@ -22,6 +22,10 @@ def main():
     parser.add_argument('--config', '-c', type=str, action='store', required=True,
                         help='Path to the configuration file.')
 
+    parser.add_argument('--deploy_action', '-d', type=str, action='store', choices=['destroy', 'run', 'info', 'status'],
+                        help="Perform an action in the infraestructure module. If this option is used, the rest of the "
+                             "modules won't be executed")
+
     arguments = parser.parse_args()
 
     assert os.path.exists(arguments.config), f"{arguments.config} file doesn't exists"
@@ -32,8 +36,23 @@ def main():
         if DEPLOY_KEY in yaml_config:
             deploy_dict = yaml_config[DEPLOY_KEY]
             instance_handler = QAInfraestructure(deploy_dict)
-            instance_handler.run()
-            print(instance_handler.get_instances_info())
+
+            if arguments.deploy_action:
+                if arguments.deploy_action == 'destroy':
+                    instance_handler.destroy()
+                    exit(0)
+                elif arguments.deploy_action == 'status':
+                    instance_handler.status()
+                    exit(0)
+                elif arguments.deploy_action == 'info':
+                    instance_handler.get_instances_info()
+                    exit(0)
+                else:
+                    instance_handler.run()
+                    exit(0)
+            else:
+                instance_handler.run()
+                print(instance_handler.get_instances_info())
 
         if PROVISION_KEY in yaml_config:
             provision_dict = yaml_config[PROVISION_KEY]
