@@ -1,0 +1,204 @@
+# Wazuh QA DocGenerator
+Wazuh - Quality assurance automation self-contained documentation parsing tool.
+
+## Rational
+Wazuh QA documentation is designed to be self-contained into the source code of each test.
+
+DocGenerator is the tool in charge of parsing the documentation block from each source code and generate data capable
+to be indexed and displayed.
+
+## Design
+### Input
+DocGenerator parses the information from test files containing a specific comment format:
+
+Each test file has self-contained documentation comment blocks in **YAML** format.
+
+These blocks can contain **Mandatory**, **Optional**, and **Ignored** fields.
+In the [Configuration section](#configuration) it's explained how to configure these fields.
+- **Mandatory** fields must be present in the documentation block and will be added to the final
+documentation output files.
+- **Optional** fields, if present, will be parsed and added to the final documentation output files.
+- **Ignored** fields are the ones not listed in the configuration file. They can be added by the developer to explain
+a specific functionality without including this information to the final documentation output files.
+
+Each test file has a header docstring that details information related to the whole test file.
+And each test method inside the file will have a test documentation block with the specific information of
+this test.
+
+Additional group information is parsed from the README files found in the repository. Each README file represents
+a group, and every test file at the same or lower folder level is considered as belonging to it.
+
+Also, groups could be nested, so a README file found under the level of a group will generate a new group that belongs
+to the first one.
+
+The specific content of each block is defined in the [Documentation schema section](#documentation-schema)
+
+### Parsing
+Running DocGenerator as specified in the [Usage section](#usage) will scan every test and group file found into the
+include paths of the documentation, it will extract the module and tests blocks from each test file and discard any
+non-documentable field. Also, complementary test-cases information will be extracted from a dry-run of pytest if there
+isn´t a description for them.
+
+### Output
+The parsed and filtered documentation information will be added to the Output folder defined by configuration.
+
+Each test file will generate a JSON and a YAML file with the documentation information. Each of these files contains
+a structure with the module description and every test function in the module. Each test function
+contains its description and, if available, the test-cases information.
+
+These files are ordered in nested folders with the same tree structure as the source code files.
+
+### Sanity Check
+After the generation of the documentation output, a sanity check can be executed to identify coverage, tags and
+any missing mandatory field.
+
+### Indexing
+The JSON files output are intended to be indexed into elasticsearch to be displayed by the Search-UI App.
+So, DocGenerator treats each JSON file as a document that will be added to elasticsearch index.
+
+### Local Lunch
+Together with the Indexing functionality, the tool has the capability to locally lunch SearchUI to visualize the
+documentation content into the App UI.
+### Diagram
+![DocGenerator](DocGenerator_diagram.png)
+
+### Documentation schema
+| Version |
+| ---     |
+| 0.1     |
+
+**Module block** This block will be at the top of the python module:
+|**Name**|**Type**|**Requirement**|**Description**|
+|---|---|---|---|
+|brief|String|Mandatory|Module description|
+|metada|Block|Mandatory|Canister for below items|
+|component|List|Mandatory|The Wazuh component (Manager/Agent) aimed with the test|
+|modules|List|Mandatory|Modules tested|
+|daemons|List|Mandatory|Daemons running during the test|
+|operating_systems|List|Mandatory|OS where the tests should be run|
+|tiers|List|Optional|Useful tags for searching purposes|
+|tags|List|Optional|Useful tags for searching purposes|
+
+Here is an example of how this Documentation block should look like and the hierarchy of these fields.
+
+    '''
+    brief: Module description
+    metadata:
+        modules:
+            - Wazuh DB
+        daemons:
+            - wazuh_db
+        component:
+            - Manager
+        operating_systems:
+            - Windows
+            - Ubuntu
+        tiers:
+            - 0
+            - 1
+        tags:
+            - Enrollment
+    '''
+
+**Tests block** This block will be at the description comment of each function test:
+|**Name**|**Type**|**Requirement**|**Description**|
+|---|---|---|---|
+|test_logic|String|Mandatory|The main description of what the test does|
+|checks|List|Mandatory|A list of what the test checks|
+
+Here is an example of how this Documentation block should look like and the hierarchy of these fields.
+
+    """
+      test_logic:
+          "Check that Wazuh DB creates the agent database when a query with a new agent ID is sent.
+
+          Also..."
+      checks:
+          - The received output must match with...
+          - The received output with regex must match with...
+    """
+
+## Content
+    ├── README.md
+    ├── DocGenerator.py       | The main module and the entry point of the tool execution
+    ├── config.yaml           | The configuration file of the tool
+    ├── lib
+    │   ├── Config.py         | The module in charge of parsing the configuration file
+    │   ├── CodeParser.py     | The module in charge of parsing documentation blocks
+    │   ├── PytestWrap.py     | The module in charge of dry-running pytest to collect complementary information
+    │   ├── Sanity.py         | The module in charge of performing a sanity check
+    │   ├── Utils.py          | The module with utility functions
+    ├── logs
+    │   ├── DocGenerator.log  | Tool logging file
+    └── output                | The default path where the parse documentation is dumped
+
+## Configuration
+The configuration file of the tool is located at **./config.yaml**.
+
+### Configurable values
+- **Project path**: The path of the complete project from where the documentation will be extracted. This path will be
+used during a sanity check to count every existent test in the project and calculate the coverage of the documentation.
+
+- **Output path**: The path where all the parsed documentation blocks will be dumped.
+
+- **Include paths**: A list with all the paths from where the tool will look to extract and parse the documentation
+blocks.
+
+- **Include regex**: A list of regexes to identify which files must be considered a test file.
+
+- **Group files**: A list of regexes to identify which files must be considered a group file.
+
+- **Function regex**: A list of regexes to identify which methods inside a test file must be considered a test method.
+
+- **Ignore paths**: A list with the paths that should be bypassed during the parsing scan.
+
+- **Output fields**: Lists with the expected fields in the documentation. There is a list for the modules fields and
+another for test fields. In turn, each of them is divided into Mandatory and Optional fields.
+During a sanity check, it will be checked that every Mandatory field is present in the respective documentation block.
+During the parsing, every field not present in the Mandatory or the Optional fields will be ignored.
+
+- **Test cases field**: Key to identify the test cases of each test. If this field is missing in the documentation block
+of a test, the tool will execute a dry run of pytest to automatically find all the test cases of the test and append
+this information with the key specified. If this option is missing, or if the key is found in the test documentation
+block, this action is avoided.
+
+## Usage
+
+### Parsing
+    python3 DocGenerator.py
+
+Without using any flag, the tool will load the configuration file and run a complete parse of the paths in the
+configuration to dump the content into the output folder.
+
+### Sanity Check
+    python3 DocGenerator.py -s
+
+Using **-s**, the tool will run a sanity check of the content in the output folder.
+
+It will check the coverage of the already parsed files in the **Output path** comparing it with the tests found in
+**Project path**.
+Also, it will validate that the output files have every Mandatory field.
+It will also list and report every tag found.
+
+### Debug
+    python3 DocGenerator.py -d
+
+Using **-d**, the tool runs in DEBUG mode, logging extra information in the log file.
+
+### Version
+    python3 DocGenerator.py -v
+
+Using **-v**, the tool will print its current version.
+
+### Config Test
+    python3 DocGenerator.py -t
+Using **-t** option, the tool will load the config file to test the correct content.
+
+### Index output data
+    python3 DocGenerator.py -i <INDEX_NAME>
+Using **-i** option, the tool indexes the content of each file output as a document into ElasticSearch. The name of the index
+must be provided as a parameter.
+
+### Local launch output data
+    python3 DocGenerator.py -l <INDEX_NAME>
+Using **-l** option, the tool indexes the content of each file output as a document into ElasticSearch and launch the application. The name of the index must be provided as a parameter.
