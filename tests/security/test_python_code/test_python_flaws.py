@@ -217,7 +217,7 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
             flaws_found[directory_to_check] = f"Vulnerabilities found in files: {files_with_flaws}," \
                                               f" check them in {new_flaws_path}"
 
-    assert not any(flaws_found[directory] for directory in test_parameters['directories_to_check']), \
+    assert not any(flaws_found.get(directory, None) for directory in test_parameters['directories_to_check']), \
         f"\nThe following possible vulnerabilities were found: {json.dumps(flaws_found, indent=4, sort_keys=True)}"
 
     # Change again to the path where we first executed the test
