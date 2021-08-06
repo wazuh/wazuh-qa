@@ -1,5 +1,5 @@
 """
-brief: Wazuh DocGenerator config parser.
+brief: Wazuh DocGenerator data indexer.
 copyright: Copyright (C) 2015-2021, Wazuh Inc.
 date: August 04, 2021
 license: This program is free software; you can redistribute it
@@ -11,18 +11,18 @@ import os
 import re
 import json
 import requests
+import logging
 from elasticsearch import Elasticsearch, helpers
+
 
 class IndexData:
     """
     brief: Class that indexes the data from JSON files into ElasticSearch.
     """
     def __init__(self, index, config):
-        self.conf = config
-        self.path = self.conf.documentation_path
+        self.path = config.documentation_path
         self.index = index
-        self.regex = ".*json"
-        self.files = self.get_files()
+        self.regex = re.compile(".*json")
         self.es = Elasticsearch()
         self.output = []
 
@@ -35,47 +35,46 @@ class IndexData:
             if res.status_code == 200:
                 return True
         except Exception as e:
-            print(e)
+            logging.exception(f"Connection error:\n{e}")
             return False
 
     def get_files(self):
         """
-        brief: Recursively finds all the files that match with the regex provided.
+        brief: Finds all the files inside the documentation path that matches with doc_file_regex.
         """
         doc_files = []
-        r = re.compile(self.regex)
         for (root, *_, files) in os.walk(self.path):
             for file in files:
-                if r.match(file):
-                    doc_files.append(os.path.join(root,file))
+                if self.regex.match(file):
+                    doc_files.append(os.path.join(root, file))
         return doc_files
 
-    def read_files_content(self):
+    def read_files_content(self, files):
         """
-        brief: It Opens every file found in the path and appends the content into a list.
+        brief: Opens every file found in the path and appends the content into a list.
         """
-        for file in self.files:
+        for file in files:
             with open(os.path.join(self.path, file)) as f:
                 lines = json.load(f)
                 self.output.append(lines)
 
     def remove_index(self):
         """
-        brief: It Deletes an index.
+        brief: Deletes an index.
         """
-        delete=self.es.indices.delete(index=self.index, ignore=[400, 404])
-        print(f'Delete index {self.index}\n {delete}\n')
+        delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
+        logging.info(f'Delete index {self.index}\n {delete}\n')
 
     def run(self):
         """
-        brief: This calls all the methods of the Class. Finally, it uses the index name and the documents
-        to make a request to the BULK API.
+        brief: Collects all the documentation files and makes a request to the BULK API to index the new data.
         """
         self.test_connection()
-        self.read_files_content()
+        files = self.get_files()
+        self.read_files_content(files)
         if self.test_connection():
             self.remove_index()
-            print("Indexing data...\n")
+            logging.info("Indexing data...\n")
             helpers.bulk(self.es, self.output, index=self.index)
-            out=json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
-            print(out)
+            out = json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
+            logging.info(out)

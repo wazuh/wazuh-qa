@@ -23,6 +23,7 @@ import argparse
 VERSION = "0.1"
 CONFIG_PATH = "config.yaml"
 
+
 class DocGenerator:
     """
     brief: Main class of DocGenerator tool.
@@ -53,7 +54,8 @@ class DocGenerator:
 
     def is_valid_file(self, file):
         """
-        brief: Checks if a file name should be ignored because it's in the ignore list or doesn´t match with the regexes.
+        brief: Checks if a file name should be ignored because it's in the ignore list
+        or doesn´t match with the regexes.
         args:
             - "file (str): File name to be controlled"
         returns: "boolean: False if the file should be ignored. True otherwise."
@@ -84,7 +86,7 @@ class DocGenerator:
         returns: "string: The name of the documentation group file"
         """
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
-        doc_path = os.path.join(base_path,group['name']+".group")
+        doc_path = os.path.join(base_path, group['name']+".group")
         return doc_path
 
     def get_test_doc_path(self, path):
@@ -154,8 +156,6 @@ class DocGenerator:
             logging.warning(f"Content for {path} is empty, ignoring it")
             return None
 
-
-
     def parse_folder(self, path, group_id):
         """
         brief: Search in a specific folder to parse possible group files and each test file.
@@ -173,15 +173,15 @@ class DocGenerator:
         (root, folders, files) = next(os.walk(path))
         for file in files:
             if self.is_group_file(file):
-                new_group = self.create_group(os.path.join(root,file), group_id)
+                new_group = self.create_group(os.path.join(root, file), group_id)
                 if new_group:
                     group_id = new_group
                     break
         for file in files:
             if self.is_valid_file(file):
-                self.create_test(os.path.join(root,file), group_id)
+                self.create_test(os.path.join(root, file), group_id)
         for folder in folders:
-            self.parse_folder(os.path.join(root,folder), group_id)
+            self.parse_folder(os.path.join(root, folder), group_id)
 
     def run(self):
         """
@@ -194,8 +194,9 @@ class DocGenerator:
             logging.debug(f"Going to parse files on '{path}'")
             self.parse_folder(path, self.__id_counter)
 
+
 def start_logging(folder, debug_level=logging.INFO):
-    LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log" )
+    LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log")
     if not os.path.exists(folder):
         os.makedirs(folder)
     logging.basicConfig(filename=LOG_PATH, level=debug_level)
@@ -224,10 +225,10 @@ if __name__ == '__main__':
         sanity = Sanity(Config(CONFIG_PATH))
         sanity.run()
     elif args.index_name:
-        indexData=IndexData(args.index_name, Config(CONFIG_PATH))
+        indexData = IndexData(args.index_name, Config(CONFIG_PATH))
         indexData.run()
     elif args.launch_app:
-        indexData=IndexData(args.launch_app, Config(CONFIG_PATH))
+        indexData = IndexData(args.launch_app, Config(CONFIG_PATH))
         indexData.run()
         os.chdir("Search-UI")
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
