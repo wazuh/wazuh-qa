@@ -18,8 +18,6 @@ metadata:
     operating_system:
         - Windows
         - Ubuntu
-    wazuh_max_version: 4.0.0
-    wazuh_min_version: 4.1.5
     tiers:
         - 0
         - 1

@@ -117,7 +117,7 @@ class Sanity():
         for regex in self.conf.function_regex:
             function_regexes.append(re.compile(regex))
 
-        for (root, directories, files) in os.walk(self.conf.project_path, topdown=True):
+        for (root, *_, files) in os.walk(self.conf.project_path, topdown=True):
             for regex in file_regexes:
                 test_files = list(filter(regex.match, files))
                 for test_file in test_files:
@@ -168,10 +168,10 @@ class Sanity():
 
     def run(self):
         """
-        brief: Run a complete sanity check of each documentation file on the output folder.
+        brief: Runs a complete sanity check of each documentation file on the output folder.
         """
         logging.info("\nStarting documentation sanity check")
-        for (root, directories, files) in os.walk(self.conf.documentation_path, topdown=True):
+        for (root, *_, files) in os.walk(self.conf.documentation_path, topdown=True):
             files = list(filter(self.files_regex.match, files))
             for file in files:
                 full_path = os.path.join(root, file)
