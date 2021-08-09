@@ -115,6 +115,8 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="It require review and rework of agent simulator, sometimes no work successfully when "
+                         "send keepalives and it cause that agent never change to active status.")
 def test_protocols_communication(get_configuration, configure_environment, restart_remoted):
     """Validate agent status after sending the start-up and keep-alive events"""
     manager_port = get_configuration['metadata']['port']
