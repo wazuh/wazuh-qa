@@ -1,14 +1,14 @@
-import yaml
-import sys
-
 from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
-from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 
 
 class RunQATests():
 
     def __build_test(self, test_params):
         test_dict = {}
+
+        if 'hosts' in test_params:
+            test_dict['hosts'] = test_params['hosts']
+
         if 'path' in test_params:
             paths = test_params['path']
             test_dict['tests_path'] = paths['test_files_path']
@@ -32,13 +32,8 @@ class RunQATests():
     def __init__(self, tests_obj):
         self.tests = []
         try:
-            if 'tests' in tests_obj:
-                for key, value in tests_obj['tests'].items():
-                    self.tests.append(self.__build_test(value))
-            else:
-                print("Malformed document. No tests root key found.")
-                exit()
-
+            for key, value in tests_obj.items():
+                self.tests.append(self.__build_test(value))
         except KeyError as e:
-            print(f'Keyword error. Bad tag in document:  {e}')
+            print(f"Keyword error. Bad tag in document:  {e}")
             exit()

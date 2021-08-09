@@ -4,97 +4,85 @@ deployment:
             vagrant:
                 enabled: True
                 vagrantfile_path: '/tmp'
-                vagrant_box: 'bento/ubuntu-20.04'
-                vm_memory: 1024
-                vm_cpu: 1
-                vm_name: 'ubuntu'
+                vagrant_box: '/home/jamh/drawers/qactlubuntu20.box'
+                vm_memory: 2048
+                vm_cpu: 2
+                vm_name: 'testqactlubuntu1'
                 vm_system: 'Linux'
-                os: Ubuntu
+                os: Linux
                 label: 'Label'
-                vm_ip: '10.2.0.3'
+                vm_ip: '10.2.0.13'
                 quiet_out: False
     host2:
         provider:
             vagrant:
                 enabled: True
                 vagrantfile_path: '/tmp'
-                vagrant_box: 'bento/ubuntu-20.04'
-                vm_memory: 1024
-                vm_cpu: 1
-                vm_name: 'ubuntu2'
+                vagrant_box: '/home/jamh/drawers/qactlubuntu20.box'
+                vm_memory: 2048
+                vm_cpu: 2
+                vm_name: 'testqactlubuntu2'
                 vm_system: 'Linux'
                 os: Linux
                 label: 'Label'
-                vm_ip: '10.2.0.4'
+                vm_ip: '10.2.0.14'
                 quiet_out: False
-
-
-    host4:
-        provider:
-            docker:
-                enabled: False
-                dockerfile_path: '/tmp/prueba'
-                name: 'test'
-                remove: False
-                ports:
-                detach: True
-                stdout: True
-                stderr: True
 provision:
     hosts:
         host1:
             host_info:
                 connection_method: ssh
-                host: 10.2.0.3
+                host: 10.2.0.13
                 user: vagrant
                 password: vagrant
                 connection_port: 22
                 ansible_python_interpreter: /usr/bin/python3.8
+
             wazuh_deployment:
                 wazuh_installation:
                     type: sources
                     target: manager
                     wazuh_branch: 4.2
+                    install_path: /home/vagrant
+
             qa_framework:
                 wazuh_qa_branch: master
                 qa_workdir: /home/vagrant/wazuh-qa/
+
         host2:
             host_info:
                 connection_method: ssh
-                host: 10.2.0.4
+                host: 10.2.0.14
                 user: vagrant
                 password: vagrant
                 connection_port: 22
                 ansible_python_interpreter: /usr/bin/python3.8
+
             wazuh_deployment:
                 wazuh_installation:
                     type: sources
                     target: agent
-                    manager_ip: 10.2.0.3
                     wazuh_branch: 4.2
+                    install_path: /home/vagrant
+
             qa_framework:
                 wazuh_qa_branch: master
                 qa_workdir: /home/vagrant/wazuh-qa/
-    groups:
-        manager:
-            hosts:
-                10.2.0.4
-        agent:
-            hosts:
-                10.2.0.3
-
 tests:
-    - type: pytest
-      path:
-          test_files_path:
-          test_results_path:
-      parameters:
-          tier: str
-          stop_after_first_failure: boolean
-          keyword_expression: str
-          traceback: str
-          dry_run: boolean
-          custom_args: str
-          verbose_level: int
-          log_level: str
-          markers: list(str)
+    test1:
+        hosts: 10.2.0.13
+        type: pytest
+        path:
+            test_files_path: '/tmp/wazuh-qa/tests/integration/test_fim/test_files/test_basic_usage/'
+            run_tests_dir_path: '/home/vagrant/'
+            test_results_path: '/home/jamh/drawers/test_results/'
+        parameters:
+            tiers: [0,1]
+            stop_after_first_failure: False
+            keyword_expression: "test_basic_usage_change*"
+            traceback: long
+            dry_run: False
+            custom_args: ""
+            verbose_level: True
+            log_level: ""
+            markers: []

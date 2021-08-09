@@ -46,7 +46,7 @@ class TestLauncher:
         else:
             local_internal_path += self.wazuh_dir_paths['all']
 
-        local_internal_path += "etc/local_internal_options.conf"
+        local_internal_path += 'etc/local_internal_options.conf'
 
         set_local_internal_opts = {'lineinfile': {'path': local_internal_path,
                                    'line': local_internal_options}}
