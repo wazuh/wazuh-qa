@@ -40,19 +40,18 @@ def main():
             if arguments.deploy_action:
                 if arguments.deploy_action == 'destroy':
                     instance_handler.destroy()
-                    exit(0)
                 elif arguments.deploy_action == 'status':
                     instance_handler.status()
-                    exit(0)
                 elif arguments.deploy_action == 'info':
                     instance_handler.get_instances_info()
-                    exit(0)
                 else:
                     instance_handler.run()
-                    exit(0)
-            else:
-                instance_handler.run()
-                print(instance_handler.get_instances_info())
+
+                exit(0)
+
+            instance_handler.run()
+            ins_info = instance_handler.get_instances_info()
+
 
         if PROVISION_KEY in yaml_config:
             provision_dict = yaml_config[PROVISION_KEY]
