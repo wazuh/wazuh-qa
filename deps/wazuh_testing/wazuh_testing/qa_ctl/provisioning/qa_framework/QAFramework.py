@@ -30,7 +30,7 @@ class QAFramework():
             inventory_file_path (str): Path were save the ansible inventory.
         """
         dependencies_task = AnsibleTask({'name': 'Install python dependencies',
-                                         'shell': 'pip3 install -r requirements.txt --no-cache-dir --upgrade '\
+                                         'shell': 'pip3 install -r requirements.txt --no-cache-dir --upgrade '
                                                   '--only-binary=:cryptography,grpcio:',
                                          'args': {'chdir': self.workdir}})
         ansible_tasks = [dependencies_task]

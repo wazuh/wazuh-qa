@@ -1,5 +1,6 @@
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 import os
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
@@ -16,7 +17,6 @@ class WazuhDeployment(ABC):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
-        preloaded_vars_file (string): path where is located the preloaded-vars template.
 
     Attributes:
         installation_files_path (string): Path where is located the Wazuh instalation files.
@@ -26,11 +26,10 @@ class WazuhDeployment(ABC):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
-        preloaded_vars_file (string): path where is located the preloaded-vars template.
     """
     def __init__(self, installation_files_path, configuration=None, inventory_file_path='/tmp/inventory.yaml',
-                 install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None,
-                 preloaded_vars_file="wazuh_testing/qa_ctl/provisioning/wazuh_deployment/templates"):
+                 install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None):
+
         self.installation_files_path = installation_files_path
         self.configuration = configuration
         self.inventory_file_path = inventory_file_path
@@ -38,7 +37,6 @@ class WazuhDeployment(ABC):
         self.install_dir_path = install_dir_path
         self.hosts = hosts
         self.server_ip = server_ip
-        self.preloaded_vars_file = preloaded_vars_file
 
     @abstractmethod
     def install(self, install_type):
@@ -48,10 +46,11 @@ class WazuhDeployment(ABC):
             AnsibleOutput: Result of the ansible playbook run.
         """
         tasks_list = []
+        parent_path = Path(__file__).parent
         if self.install_mode == 'sources':
             tasks_list.append(AnsibleTask({
                 'name': 'Render the "preloaded-vars.conf" file',
-                'template': {'src': f'{os.getcwd()}/{self.preloaded_vars_file}/preloaded_vars.conf.j2',
+                'template': {'src': os.path.join(parent_path, 'templates', 'preloaded_vars.conf.j2'),
                              'dest': f'{self.installation_files_path}/etc/preloaded-vars.conf',
                              'owner': 'root',
                              'group': 'root',

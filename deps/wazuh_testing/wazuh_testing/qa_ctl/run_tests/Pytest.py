@@ -42,7 +42,7 @@ class Pytest(Test):
     """
     def __init__(self, tests_result_path=None, tests_path=None, tests_run_dir=None, tiers=None,
                  stop_after_first_failure=False, keyword_expression=None, traceback=None, dry_run=False,
-                 custom_args=None, verbose_level=False, log_level=None, markers=None):
+                 custom_args=None, verbose_level=False, log_level=None, markers=None, hosts="all"):
 
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure
@@ -53,7 +53,7 @@ class Pytest(Test):
         self.verbose_level = verbose_level
         self.log_level = log_level
         self.markers = markers
-
+        self.hosts = hosts
         super().__init__(tests_path, tests_run_dir, tests_result_path)
 
     def run(self, ansible_inventory_path, custom_report_file_path=None):
@@ -119,7 +119,7 @@ class Pytest(Test):
                          AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               '/tmp/playbook_file.yaml'}
+                               '/tmp/playbook_file.yaml', "hosts": self.hosts}
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
