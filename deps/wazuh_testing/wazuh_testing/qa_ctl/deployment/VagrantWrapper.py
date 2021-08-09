@@ -1,11 +1,11 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import wazuh_testing.qa_ctl.deployment.Vagrantfile as vfile
-import vagrant
 import os
+import vagrant
+from shutil import rmtree
 from wazuh_testing.qa_ctl.deployment.Instance import Instance
-
+import wazuh_testing.qa_ctl.deployment.Vagrantfile as vfile
 
 class VagrantWrapper(Instance):
     """Class to handle Vagrant operations. The class will use the Vagrantfile class to create a vagrantfile in
@@ -29,13 +29,13 @@ class VagrantWrapper(Instance):
     def __init__(self, vagrant_root_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory, vm_system, vm_ip,
                  quiet_out=True):
 
-        box_folder = os.path.join(vagrant_root_folder, vm_name)
-        os.makedirs(box_folder, exist_ok=True)
+        self.box_folder = os.path.join(vagrant_root_folder, vm_name)
+        os.makedirs(self.box_folder, exist_ok=True)
 
-        self.vagrantfile = vfile.Vagrantfile(box_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory,
+        self.vagrantfile = vfile.Vagrantfile(self.box_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory,
                                              vm_system, vm_ip)
 
-        self.vagrant = vagrant.Vagrant(root=box_folder, quiet_stdout=quiet_out, quiet_stderr=False)
+        self.vagrant = vagrant.Vagrant(root=self.box_folder, quiet_stdout=quiet_out, quiet_stderr=False)
         self.vagrantfile.write_vagrantfile()
 
     def run(self):
@@ -54,6 +54,7 @@ class VagrantWrapper(Instance):
         """Destroys the VM specified in the vagrantfile and remove the vagrantfile."""
         self.vagrant.destroy()
         self.vagrantfile.remove_vagrantfile()
+        rmtree(self.box_folder)
 
     def suspend(self):
         """Suspends the VM specified in the vagrantfile."""
