@@ -16,6 +16,7 @@ class QAProvisioning():
         self.group_list = {}
         self.host_list = []
         self.inventory_file_path = None
+        self.wazuh_installation_paths = {}
 
     def process_inventory_data(self):
         for root_key, root_value in self.infra_obj.items():
@@ -78,6 +79,7 @@ class QAProvisioning():
                                                             install_mode=install_type, hosts=current_host)
 
                 deployment_instance.install()
+                self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
             if 'qa_framework' in host_value:
                 qa_framework_info = host_value['qa_framework']

@@ -63,7 +63,9 @@ def main():
         if TEST_KEY in yaml_config:
             test_dict = yaml_config[TEST_KEY]
             qa_test = RunQATests(test_dict)
-            test_launcher = TestLauncher(tests=qa_test.tests)
+            test_launcher = TestLauncher(tests=qa_test.tests,
+                                         ansible_inventory_path=qa_provisioning.inventory_file_path,
+                                         install_dir_paths=qa_provisioning.wazuh_installation_paths)
             test_launcher.run()
 
 
