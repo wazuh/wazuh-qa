@@ -43,6 +43,7 @@ configuration_ids = [f"{x['PROTOCOL']}_{x['PORT']}" for x in parameters]
 
 manager_address = 'localhost'
 
+
 # fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -50,6 +51,8 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="It require review and rework of agent simulator, sometimes no work successfully when "
+                         "send keepalives and it cause that agent never change to active status.")
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
     """Test if `wazuh-remoted` sends active response commands to the agent.
 
