@@ -2,7 +2,6 @@ from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
 
 
 class RunQATests():
-
     def __build_test(self, test_params):
         test_dict = {}
 

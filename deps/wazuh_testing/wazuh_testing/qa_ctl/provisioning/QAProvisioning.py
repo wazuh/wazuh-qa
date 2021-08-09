@@ -54,16 +54,28 @@ class QAProvisioning():
 
                 install_target = None if 'target' not in deploy_info else deploy_info['target']
                 install_type = None if 'type' not in deploy_info else deploy_info['type']
-                install_path = None if 'install_path' not in deploy_info else deploy_info['install_path']
+                installation_files_path = None if 'installation_files_path' not in deploy_info \
+                                                  else deploy_info['installation_files_path']
+                wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
+                                             else deploy_info['wazuh_install_path']
                 wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
                 local_package_path = None if 'local_package_path' not in deploy_info \
                                              else deploy_info['local_package_path']
                 manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
 
+                installation_files_parameters = {'wazuh_target': install_target}
+
+                if installation_files_path:
+                    installation_files_parameters['installation_files_path'] = installation_files_path
+                if wazuh_install_path:
+                    installation_files_parameters['wazuh_install_path'] = wazuh_install_path
+
                 if install_type == "sources":
-                    installation_instance = WazuhSources(install_target, install_path, wazuh_branch)
+                    installation_files_parameters['wazuh_branch'] = wazuh_branch
+                    installation_instance = WazuhSources(**installation_files_parameters)
                 if install_type == "localpackage":
-                    installation_instance = LocalPackage(install_target, install_path, local_package_path)
+                    installation_files_parameters['local_package_path'] = local_package_path
+                    installation_instance = LocalPackage(**installation_files_parameters)
 
                 remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                       hosts=current_host)
