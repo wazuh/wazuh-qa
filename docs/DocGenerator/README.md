@@ -167,7 +167,7 @@ block, this action is avoided.
 
 ### Dependencies
 
-The `requirements.txt` file specifies the required Python modules that need to be installed before running the tool. \
+The `requirements.txt` file specifies the required Python modules that need to be installed before running the tool.
 Also before indexing is mandatory to have `ElasticSearch` up and running.
 
 ##### Installation on Linux:
