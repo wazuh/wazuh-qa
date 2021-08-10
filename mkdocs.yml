@@ -533,5 +533,9 @@ nav:
           - Test disconnected nodes: tests/system/test_jwt_invalidation/test_disconnected_nodes.md
           - Test revoke endpoint: tests/system/test_jwt_invalidation/test_revoke_endpoint.md
           - Test update password:  tests/system/test_jwt_invalidation/test_update_password.md
+      - System:
+        - tests/security/index.md
+        - Test Python code:
+            - Test Python flaws: tests/security/test_python_code/test_python_flaws.md
       - Legacy:
         - tests/legacy/index.md
