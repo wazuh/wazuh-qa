@@ -66,7 +66,7 @@ class Pytest(Test):
             test_output_dir_path (str, None): Path to the local directory that will hold the txt output from ansible
                                               command
         """
-
+        assets_folder = 'assets/'
         if self.tests_result_path is None:
             self.tests_result_path = os.path.join(tempfile.gettempdir(), '')
         else:
@@ -90,35 +90,57 @@ class Pytest(Test):
         if self.verbose_level:
             shell += '--verbose '
         if self.custom_args:
-            for key, value in self.custom_args:
-                shell += f"--metadata={key} {value} "
+            for custom_arg in self.custom_args:
+                shell += f"--metadata {custom_arg} "
         if self.log_level:
             shell += f"--log-level={self.log_level} "
-        if self.markers:
-            shell += f"markers {self.markers} "
         if self.traceback:
             shell += f"--tb={self.traceback} "
-
-        shell += f"--html='./{html_report_file_name}' --self-contained-html"
+        if self.markers:
+            shell += f"-m {' '.join(self.markers)} "
+        shell += f"--html='./{html_report_file_name}'"
 
         execute_test_task = {'shell': shell, 'vars':
                              {'chdir': self.tests_run_dir},
                              'register': 'test_output',
                              'ignore_errors': 'yes'}
 
-        create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir,
-                               plain_report_file_name), 'content': "{{test_output.stdout}}"}}
+        create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir, plain_report_file_name),
+                                        'content': "{{test_output.stdout}}"}}
 
         fetch_plain_report = {'fetch': {'src': os.path.join(self.tests_run_dir, plain_report_file_name),
-                              'dest': self.tests_result_path, 'flat': 'yes'}}
+                                        'dest': self.tests_result_path, 'flat': 'yes'}}
 
         fetch_html_report = {'fetch': {'src': os.path.join(self.tests_run_dir, html_report_file_name),
-                             'dest': self.tests_result_path, 'flat': 'yes'}}
+                                       'dest': self.tests_result_path, 'flat': 'yes'}}
 
         ansible_tasks = [AnsibleTask(execute_test_task), AnsibleTask(create_plain_report),
                          AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
+                               '/tmp/playbook_file.yaml', "hosts": self.hosts}
+
+        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
+
+        # copy assets directory to local machine
+
+        check_assets_directory_exists = {'local_action': f"stat \
+                                         path={os.path.join(self.tests_result_path, assets_folder)}",
+                                         'register': 'stat_assets_folder'}
+
+        create_assets_directory = {'local_action': f"ansible.builtin.command mkdir \
+                                                   {os.path.join(self.tests_result_path, assets_folder)}",
+                                   'when': 'stat_assets_folder.stat.exists == False'}
+
+        fetch_assets_files = {'ansible.posix.synchronize': {'src': os.path.join(self.tests_run_dir, assets_folder),
+                                                            'dest': os.path.join(self.tests_result_path, assets_folder),
+                                                            'mode': 'pull',
+                                                            'delete': 'yes'
+                                                            }}
+        ansible_tasks = [AnsibleTask(check_assets_directory_exists), AnsibleTask(create_assets_directory),
+                         AnsibleTask(fetch_assets_files)]
+
+        playbook_parameters = {'become': False, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                '/tmp/playbook_file.yaml', "hosts": self.hosts}
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
