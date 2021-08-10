@@ -51,8 +51,9 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.skip(reason="It require review and rework of agent simulator, sometimes no work successfully when "
-                         "send keepalives and it cause that agent never change to active status.")
+@pytest.mark.skip(reason="It requires review and a rework for the agent simulator."
+                         "Sometimes it doesn't work properly when it sends keepalives "
+                         "messages causing the agent to never being in active status.")
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
     """Test if `wazuh-remoted` sends active response commands to the agent.
 
