@@ -7,7 +7,7 @@ type: integration
 
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
        Specifically, this test will check that specified 'denied-ips' connection is denied and
-       syslog produces a 'not allowed' message. 
+       syslog produces a 'not allowed' message.
 
 tier: 0
 
@@ -92,9 +92,9 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
     description: Check that 'wazuh-remoted' denied connection to the specified 'denied-ips'.
                  For this purpose, it uses the configuration from test cases, check if the different errors are
                  logged correctly and check if the API retrieves the expected configuration.
-    
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -105,7 +105,7 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that remoted starts correctly.
         - Verify that the warning is logged correctly in ossec.log when receives a message from blocked ip.
@@ -113,24 +113,25 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
         - Verify that the critical error is logged correctly in ossec.log when receives a message from blocked ip.
         - Verify that the API query matches correctly with the configuration that ossec.conf contains.
         - Verify that the selected configuration is the same as the API response.
-    
+
     input_description: A configuration template (test_basic_configuration_allowed_denied_ips) is contained in an
                        external YAML file, (wazuh_basic_configuration.yaml). That template is combined with different
                        test cases defined in the module. Those include configuration settings for the 'wazuh-remoted'
                        daemon and agents info.
-    
+
     expected_output:
         - r'Started <pid>: .* Listening on port .*'
         - Wazuh remoted did not start as expected.
         - r'Remote syslog allowed from: .*'
         - The expected output for denied-ips has not been produced.
         - r'Message from .* not allowed. Cannot find the ID of the agent'
-        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the 
+        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the
           introduced configuration on ossec.conf.'
-    
+
     tags:
         - remoted
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
