@@ -73,7 +73,7 @@ class QAProvisioning():
                 if install_type == "sources":
                     installation_files_parameters['wazuh_branch'] = wazuh_branch
                     installation_instance = WazuhSources(**installation_files_parameters)
-                if install_type == "localpackage":
+                if install_type == "package":
                     installation_files_parameters['local_package_path'] = local_package_path
                     installation_instance = LocalPackage(**installation_files_parameters)
 
