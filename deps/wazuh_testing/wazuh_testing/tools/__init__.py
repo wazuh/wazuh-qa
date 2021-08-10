@@ -21,6 +21,8 @@ if sys.platform == 'win32':
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
     ANALYSIS_STATISTICS_FILE = None
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
+
 
 else:
 
@@ -47,6 +49,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 
     try:
         import grp
@@ -94,8 +97,8 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 
-ANALYSISD_ANALISIS_SOCKET_PATH= os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
-ANALYSISD_QUEUE_SOCKET_PATH= os.path.join(QUEUE_SOCKETS_PATH, 'queue')
+ANALYSISD_ANALISIS_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
+ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
