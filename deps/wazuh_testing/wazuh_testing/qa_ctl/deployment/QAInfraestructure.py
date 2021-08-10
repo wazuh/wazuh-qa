@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
 from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
+import ipaddress
+import docker
 
 
 class QAInfraestructure:
@@ -13,8 +15,12 @@ class QAInfraestructure:
         vm_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml template.
     """
     instances = []
+    DOCKER_NETWORK_NAME = 'wazuh_net'
 
     def __init__(self, vm_list):
+        self.docker_client = docker.from_env()
+        self.docker_network = None
+        self.network_address = None
         for host in vm_list:
             for provider in vm_list[host]['provider']:
                 data = vm_list[host]['provider'][provider]
@@ -33,9 +39,36 @@ class QAInfraestructure:
                     _detach = True if 'detach' not in data else data['detach']
                     _stdout = False if 'stdout' not in data else data['stdout']
                     _stderr = False if 'stderr' not in data else data['stderr']
+                    _remove = False if 'remove' not in data else data['remove']
+                    _ip = None if 'ip' not in data else data['ip']
 
-                    docker_instance = DockerWrapper(data['dockerfile_path'], data['name'], data['remove'],
-                                                    _ports, _detach, _stdout, _stderr)
+                    if _ip:
+                        network = ipaddress.ip_network(f'{_ip}/24', strict=False)
+
+                        if not self.network_address:
+                            self.network_address = network
+
+                        assert network == self.network_address, 'Two different networks where found for docker '\
+                                                                'containers when only one network is allowed: '\
+                                                                f'{network} != {self.network_address}'
+
+                        if not self.docker_network:
+                            # Try to get the DOCKER_NETWORK_NAME network, if it fails, try to create it.
+                            try:
+                                self.docker_network = self.docker_client.networks.get(self.DOCKER_NETWORK_NAME)
+                            except docker.errors.NotFound:
+                                ipam_pool = docker.types.IPAMPool(subnet=str(self.network_address),
+                                                                  gateway=str(self.network_address[-2]))
+
+                                ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
+                                self.docker_network = self.docker_client.networks.create(self.DOCKER_NETWORK_NAME,
+                                                                                         driver='bridge',
+                                                                                         ipam=ipam_config)
+
+                    docker_instance = DockerWrapper(self.docker_client, data['dockerfile_path'], data['name'], _remove,
+                                                    _ports, _detach, _stdout, _stderr, ip=_ip,
+                                                    network_name=self.DOCKER_NETWORK_NAME)
+
                     self.instances.append(docker_instance)
 
     def run(self):
@@ -57,6 +90,12 @@ class QAInfraestructure:
         """Executes the 'destroy' method on every configured instance."""
         for instance in self.instances:
             instance.destroy()
+
+        if self.docker_network:
+            try:
+                self.docker_network.remove()
+            except docker.errors.NotFound:
+                pass
 
     def status(self):
         """Executes the 'status' method on every configured instance.

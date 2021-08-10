@@ -1,4 +1,5 @@
 import docker
+import ipaddress
 from wazuh_testing.qa_ctl.deployment.Instance import Instance
 from json import dumps
 
@@ -27,8 +28,9 @@ class DockerWrapper(Instance):
         stdout (bool): Value to set stdout attribute.
         stderr (bool): Value to set stderr attribute.
     """
-    def __init__(self, dockerfile_path, name, remove, ports=None, detach=True, stdout=False, stderr=False):
-        self.docker_client = docker.from_env()
+    def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None, detach=True, stdout=False,
+                 stderr=False, ip=None, network_name=None):
+        self.docker_client = docker_client
         self.dockerfile_path = dockerfile_path
         self.name = name
         self.remove = remove
@@ -41,6 +43,9 @@ class DockerWrapper(Instance):
         else:
             self.stdout = True
             self.stderr = True
+
+        self.ip = ip
+        self.network_name = network_name
 
         self.image = self.docker_client.images.build(path=self.dockerfile_path)[0]
 
@@ -57,23 +62,31 @@ class DockerWrapper(Instance):
         return self.docker_client.containers.get(self.name)
 
     def run(self):
-        self.docker_client.containers.run(image=self.image, name=self.name, ports=self.ports,
-                                          remove=self.remove, detach=self.detach, stdout=self.stdout,
-                                          stderr=self.stderr)
+        container = self.docker_client.containers.run(image=self.image, name=self.name, ports=self.ports,
+                                                      remove=self.remove, detach=self.detach, stdout=self.stdout,
+                                                      stderr=self.stderr)
+        if self.ip and self.network_name:
+            self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
 
     def restart(self):
         """Restart the container.
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
-        self.get_container().restart()
+        try:
+            self.get_container().restart()
+        except docker.errors.NotFound:
+            pass
 
     def halt(self):
         """Stops the container.
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
-        self.get_container().stop()
+        try:
+            self.get_container().stop()
+        except docker.errors.NotFound:
+            pass
 
     def destroy(self, remove_image=False):
         """Removes the container
@@ -82,7 +95,16 @@ class DockerWrapper(Instance):
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
-        self.get_container().remove()
+        try:
+            self.halt()
+        except docker.errors.NotFound:
+            pass
+
+        try:
+            self.get_container().remove()
+        except docker.errors.NotFound:
+            pass
+
         if remove_image:
             self.docker_client.images.remove(image=self.image.id, force=True)
 

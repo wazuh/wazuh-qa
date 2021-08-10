@@ -9,13 +9,13 @@ class WazuhSources(WazuhInstallation):
                  wazuh_repository_url='https://github.com/wazuh/wazuh.git'):
         self.wazuh_branch = wazuh_branch
         self.wazuh_repository_url = wazuh_repository_url
-        super().__init__(wazuh_target=wazuh_target, installation_files_path=f"{installation_files_path}/wazuh")
+        super().__init__(wazuh_target=wazuh_target, installation_files_path=f"{installation_files_path}/" +
+                                                                            f"wazuh-{self.wazuh_branch}")
 
     def download_installation_files(self, inventory_file_path, hosts='all'):
-        download_wazuh_sources_task = AnsibleTask({'name': 'Clone wazuh repository',
-                                                   'git': {'repo': self.wazuh_repository_url,
-                                                           'dest': self.installation_files_path,
-                                                           'version': self.wazuh_branch}})
+        download_wazuh_sources_task = AnsibleTask({'name': 'Download Wazuh branch',
+                                                   'shell': 'curl -Ls https://github.com/wazuh/wazuh/archive/' +
+                                                            f'{self.wazuh_branch}.tar.gz | tar zx'})
         super().download_installation_files(inventory_file_path, [download_wazuh_sources_task], hosts)
 
         return self.installation_files_path
