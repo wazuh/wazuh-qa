@@ -9,32 +9,26 @@ class Instance(ABC):
     @abstractmethod
     def run(self):
         """Method to start the instance."""
-        pass
 
     @abstractmethod
     def restart(self):
         """Method to restart the instance."""
-        pass
 
     @abstractmethod
     def halt(self):
         """Method to stop the instance."""
-        pass
 
     @abstractmethod
     def destroy(self):
         """Method to destroy the instance."""
-        pass
 
     @abstractmethod
     def get_instance_info(self):
         """Method to get the instance information."""
-        pass
 
     @abstractmethod
     def get_name(self):
         """Method to get the instance name."""
-        pass
 
     @abstractmethod
     def status(self):

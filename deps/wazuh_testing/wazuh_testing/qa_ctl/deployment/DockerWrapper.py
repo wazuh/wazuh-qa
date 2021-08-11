@@ -1,5 +1,4 @@
 import docker
-import ipaddress
 from wazuh_testing.qa_ctl.deployment.Instance import Instance
 from json import dumps
 
@@ -9,6 +8,7 @@ class DockerWrapper(Instance):
        the image and container.
 
        Attributes:
+        docker client (Docker Client): Client to communicate with the docker daemon.
         dockerfile_path (str): Path where the Dockerfile is stored.
         name (str): Container's name.
         remove (bool): Remove the container after it has finished.
@@ -18,8 +18,12 @@ class DockerWrapper(Instance):
                       dictionary are the corresponding ports to open on the host.
         stdout (bool): Return stdout logs when detach is False.
         stderr (bool): Return stderr logs when detach is False.
+        ip (string): String with the IP address of the container. The docker network MUST exists. If None, no static IP
+                     will be assigned.
+        network_name (string): Name of the docker network.
 
        Args:
+        docker client (Docker Client): Client to communicate with the docker daemon.
         dockerfile_path (str): Value to set dockerfile_path attribute.
         name (str): Value to set name attribute.
         remove (bool): Value to set remove attribute.
@@ -27,6 +31,9 @@ class DockerWrapper(Instance):
         ports (dict): Value to set ports attribute.
         stdout (bool): Value to set stdout attribute.
         stderr (bool): Value to set stderr attribute.
+        ip (string): String with the IP address of the container. The docker network MUST exists. If None, no static IP
+                     will be assigned.
+        network_name (string): Name of the docker network.
     """
     def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None, detach=True, stdout=False,
                  stderr=False, ip=None, network_name=None):
@@ -36,11 +43,10 @@ class DockerWrapper(Instance):
         self.remove = remove
         self.detach = detach
         self.ports = ports
+        self.stdout = stdout
+        self.stderr = stderr
 
-        if self.detach:
-            self.stdout = stdout
-            self.stderr = stderr
-        else:
+        if not self.detach:
             self.stdout = True
             self.stderr = True
 
@@ -50,7 +56,7 @@ class DockerWrapper(Instance):
         self.image = self.docker_client.images.build(path=self.dockerfile_path)[0]
 
     def get_container(self):
-        """Function to get the container using the name attribute:
+        """Get the container using the name attribute:
 
         Returns:
             Container: Container object with the container info.
@@ -79,7 +85,7 @@ class DockerWrapper(Instance):
             pass
 
     def halt(self):
-        """Stops the container.
+        """Stop the container.
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
@@ -89,7 +95,7 @@ class DockerWrapper(Instance):
             pass
 
     def destroy(self, remove_image=False):
-        """Removes the container
+        """Remove the container
         Args:
             remove_image(bool): Remove the docker image too. Defaults to False.
         Raises:

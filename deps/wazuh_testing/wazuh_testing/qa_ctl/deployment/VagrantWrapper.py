@@ -7,9 +7,10 @@ from shutil import rmtree
 from wazuh_testing.qa_ctl.deployment.Instance import Instance
 import wazuh_testing.qa_ctl.deployment.Vagrantfile as vfile
 
+
 class VagrantWrapper(Instance):
     """Class to handle Vagrant operations. The class will use the Vagrantfile class to create a vagrantfile in
-       runtime. The vagrantfile will be dumped to disk only if the up method is executed.
+       runtime.
 
     Attributes:
         vagrantfile (Vagrantfile): Vagrantfile object containing the vagrantfile information.
