@@ -635,7 +635,7 @@ def check_push_shared_config(agent, sender, injector=None):
 
     # Run injector with only receive messages module enabled
     stop_injector = False
-
+    time.sleep(1)
     if injector is None:
         injector = ag.Injector(sender, agent)
         injector.run()

@@ -74,7 +74,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         agent = ag.Agent(**agent_info[agent_name])
 
         # Sleep to avoid ConnectionRefusedError
-        sleep(2)
+        sleep(1)
 
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
 
