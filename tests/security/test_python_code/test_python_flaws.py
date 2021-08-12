@@ -103,9 +103,11 @@ def clone_wazuh_repository(pytestconfig):
 
     try:
         # Clone into temporary dir
-        repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git", t)
-        # Checkout to given branch
-        repo.git.checkout(branch)
+        # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
+        Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
+                        t,
+                        depth=1,
+                        branch=branch)
         yield t
     except:
         yield None
