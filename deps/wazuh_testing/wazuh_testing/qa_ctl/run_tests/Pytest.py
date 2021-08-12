@@ -9,41 +9,48 @@ from wazuh_testing.qa_ctl.run_tests.Test import Test
 
 
 class Pytest(Test):
-    SHELL = 'python3 -m pytest '
-    """ The class encapsulates the execution options of a specified set of tests and allows running them on the
+    """The class encapsulates the execution options of a specified set of tests and allows running them on the
         remote host
 
     Attributes:
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
         tier (srt, None): List of tiers to be executed
-        stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first failure
+        stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first
+                                                  failure
         keyword_expression (str, None): Regular expression allowing to execute all the tests that match said expression
         traceback (str, None): Set the traceback mode (auto/long/short/line/native/no)
-        dry_run(boolean, False): If set to True the flag --collect-only is added so no test will be executed, only collected
+        dry_run(boolean, False): If set to True the flag --collect-only is added so no test will be executed, only
+                                collected
         custom_args(dict, None): set of key pair values to be added as extra args to the test execution command
         verbose_level(boolean, False): if set to true, verbose flag is added to test execution command
         log_level(str, None): Log level to be set
         markers(list(str), None): Set of markers to be added to the test execution command
+        hosts(list(), ['all']): List of hosts aliases where the tests will be runned
 
     Args:
+        tests_result_path(str): Path to the directory where the reports will be stored in the local machine
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
-        tiers (list(int), None): List of tiers to be executed
-        stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first failure
+        tiers (list(int), []): List of tiers to be executed
+        stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first
+                                                  failure
         keyword_expression (str, None): Regular expression allowing to execute all the tests that match said expression
-        traceback (str, None): Set the traceback mode (auto/long/short/line/native/no)
-        dry_run(boolean, False): If set to True the flag --collect-only is added so no test will be executed, only collected
-        custom_args(dict, None): set of key pair values to be added as extra args to the test execution command
+        traceback (str, 'auto): Set the traceback mode (auto/long/short/line/native/no)
+        dry_run(boolean, False): If set to True the flag --collect-only is added so no test will be executed, only
+                                collected
+        custom_args(list(str), []): set of key pair values to be added as extra args to the test execution command
         verbose_level(boolean, False): if set to true, verbose flag is added to test execution command
         log_level(str, None): Log level to be set
-        markers(list(str), None): Set of markers to be added to the test execution command
-
+        markers(list(str), []): Set of markers to be added to the test execution command
+        hosts(list(), ['all']): List of hosts aliases where the tests will be runned
     """
+
+    RUN_PYTEST = 'python3 -m pytest '
+
     def __init__(self, tests_result_path, tests_path, tests_run_dir, tiers=[], stop_after_first_failure=False,
                  keyword_expression=None, traceback='auto', dry_run=False, custom_args=[], verbose_level=False,
                  log_level=None, markers=[], hosts=['all']):
-
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure
         self.keyword_expression = keyword_expression
@@ -56,15 +63,12 @@ class Pytest(Test):
         self.hosts = hosts
         super().__init__(tests_path, tests_run_dir, tests_result_path)
 
-    def run(self, ansible_inventory_path, custom_report_file_path=None):
-        """ Executes the current test with the specified options defined in attributes and bring back the reports
+    def run(self, ansible_inventory_path):
+        """Executes the current test with the specified options defined in attributes and bring back the reports
             to the host machine.
 
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
-            report_html_dir_path (str, None): Path to the local directory that will hold the html report
-            test_output_dir_path (str, None): Path to the local directory that will hold the txt output from ansible
-                                              command
         """
         assets_folder = 'assets/'
         if self.tests_result_path is None:
@@ -75,7 +79,7 @@ class Pytest(Test):
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
 
-        shell = self.SHELL
+        shell = self.RUN_PYTEST
 
         if self.keyword_expression:
             shell += os.path.join(self.tests_path, self.keyword_expression) + " "

@@ -2,7 +2,28 @@ from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
 
 
 class RunQATests():
+    """The class encapsulates the build of the tests from the test parameters read from the configuration file
+
+        Attributes:
+            tests (list(Pytest)): list of Pytest instances to run at the specified remote machines
+        Args:
+            test_parameters (dict): a dictionary containing all the required data to build the tests
+    """
+
+    def __init__(self, tests_parameters):
+        self.tests = []
+        for key, value in tests_parameters.items():
+            self.tests.append(self.__build_test(value))
+
     def __build_test(self, test_params):
+        """Private method in charge of reading all the required fields to build one test of type Pytest
+
+            Args:
+                test_params (dict): all the data regarding one specific test
+
+            Returns:
+                Pytest: one instance of Pytest built from the parameters in test_params
+        """
         test_dict = {}
 
         test_dict['hosts'] = ['all'] if 'hosts' not in test_params else test_params['hosts']
@@ -29,8 +50,3 @@ class RunQATests():
                 test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
 
         return Pytest(**test_dict)
-
-    def __init__(self, tests_parameters):
-        self.tests = []
-        for key, value in tests_parameters.items():
-            self.tests.append(self.__build_test(value))
