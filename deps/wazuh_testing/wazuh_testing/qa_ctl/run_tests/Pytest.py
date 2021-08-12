@@ -70,7 +70,9 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
+
         assets_folder = 'assets/'
+        assets_zip = "assets.zip"
         playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
 
         if self.tests_result_path is None:
@@ -120,33 +122,29 @@ class Pytest(Test):
         fetch_html_report = {'fetch': {'src': os.path.join(self.tests_run_dir, html_report_file_name),
                                        'dest': self.tests_result_path, 'flat': 'yes'}}
 
+        create_assets_directory = {'local_action': {'module': 'ansible.builtin.file',
+                                                    'path': os.path.join(self.tests_result_path, assets_folder),
+                                                    'state': 'directory'},
+                                   'become': False}
+
+        compress_assets_folder = {'community.general.archive': {'path': os.path.join(self.tests_run_dir, assets_folder),
+                                                                'dest': os.path.join(self.tests_run_dir, assets_zip),
+                                                                'format': 'zip'}}
+
+        fetch_compressed_assets = {'fetch': {'src': os.path.join(self.tests_run_dir, assets_zip),
+                                             'dest': self.tests_result_path, 'flat': 'yes'}}
+
+        uncompress_assets = {'local_action': {'module': 'unarchive',
+                                              'src': os.path.join(self.tests_result_path, assets_zip),
+                                              'dest': os.path.join(self.tests_result_path, assets_folder)},
+                             'become': False}
+
         ansible_tasks = [AnsibleTask(execute_test_task), AnsibleTask(create_plain_report),
-                         AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report)]
+                         AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),
+                         AnsibleTask(create_assets_directory), AnsibleTask(compress_assets_folder),
+                         AnsibleTask(fetch_compressed_assets), AnsibleTask(uncompress_assets)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               playbook_file_path, "hosts": self.hosts}
-
-        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
-
-        # copy assets directory to local machine
-
-        check_assets_directory_exists = {'local_action': f"stat \
-                                         path={os.path.join(self.tests_result_path, assets_folder)}",
-                                         'register': 'stat_assets_folder'}
-
-        create_assets_directory = {'local_action': f"ansible.builtin.command mkdir \
-                                                   {os.path.join(self.tests_result_path, assets_folder)}",
-                                   'when': 'stat_assets_folder.stat.exists == False'}
-
-        fetch_assets_files = {'ansible.posix.synchronize': {'src': os.path.join(self.tests_run_dir, assets_folder),
-                                                            'dest': os.path.join(self.tests_result_path, assets_folder),
-                                                            'mode': 'pull',
-                                                            'delete': 'yes'
-                                                            }}
-        ansible_tasks = [AnsibleTask(check_assets_directory_exists), AnsibleTask(create_assets_directory),
-                         AnsibleTask(fetch_assets_files)]
-
-        playbook_parameters = {'become': False, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, "hosts": self.hosts}
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
