@@ -71,6 +71,8 @@ class Pytest(Test):
             ansible_inventory_path (str): Path to ansible inventory file
         """
         assets_folder = 'assets/'
+        playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
+
         if self.tests_result_path is None:
             self.tests_result_path = os.path.join(tempfile.gettempdir(), '')
         else:
@@ -122,7 +124,7 @@ class Pytest(Test):
                          AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               '/tmp/playbook_file.yaml', "hosts": self.hosts}
+                               playbook_file_path, "hosts": self.hosts}
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
@@ -145,7 +147,7 @@ class Pytest(Test):
                          AnsibleTask(fetch_assets_files)]
 
         playbook_parameters = {'become': False, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               '/tmp/playbook_file.yaml', "hosts": self.hosts}
+                               playbook_file_path, "hosts": self.hosts}
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
 

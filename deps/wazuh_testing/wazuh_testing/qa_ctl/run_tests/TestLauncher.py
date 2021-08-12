@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
@@ -27,9 +28,10 @@ class TestLauncher:
                      "wazuh_modules.debug=2", "wazuh_database.interval=1", "wazuh_db.commit_time=2",
                      "wazuh_db.commit_time_max=3", "remoted.debug=2"]
 
-    def __init__(self, tests, install_dir_paths, ansible_inventory_path='/tmp/inventory.yaml',
-                 qa_framework_path="/tmp/wazuh-qa/"):
-        self.qa_framework_path = qa_framework_path
+    def __init__(self, tests, install_dir_paths, ansible_inventory_path,
+                 qa_framework_path=None):
+        self.qa_framework_path = qa_framework_path if qa_framework_path is not None else \
+                                                     os.path.join(tempfile.gettempdir(), 'wazuh-qa/')
         self.ansible_inventory_path = ansible_inventory_path
         self.tests = tests
         self.wazuh_dir_paths = install_dir_paths
@@ -44,6 +46,7 @@ class TestLauncher:
         """
         local_internal_path = ""
         local_internal_options = "\n".join(self.DEBUG_OPTIONS)
+        playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
 
         if hosts in self.wazuh_dir_paths:
             local_internal_path += os.path.join(self.wazuh_dir_paths[hosts], '')
@@ -58,7 +61,7 @@ class TestLauncher:
         ansible_tasks = [AnsibleTask(set_local_internal_opts)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               '/tmp/playbook_file.yaml', 'hosts': hosts}
+                               playbook_file_path, 'hosts': hosts}
 
         AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
