@@ -12,9 +12,6 @@ class VagrantWrapper(Instance):
     """Class to handle Vagrant operations. The class will use the Vagrantfile class to create a vagrantfile in
        runtime.
 
-    Attributes:
-        vagrantfile (Vagrantfile): Vagrantfile object containing the vagrantfile information.
-        vagrant (Vagrant): Vagrant object to handle vagrant operations
     Args:
         vagrant_root_folder (str): Root folder where the vagrant environment will be created.
         vm_box (str): Name or link to the Vagrant box
@@ -25,6 +22,11 @@ class VagrantWrapper(Instance):
         vm_system (str): System of the VM (Linux, Windows, Solaris, etc)
         vm_ip (str): IP assigned to the VM.
         quiet_out (Boolean): Flag to ignore the vagrant output. Defaults to True.
+
+    Attributes:
+        vagrantfile (Vagrantfile): Vagrantfile object containing the vagrantfile information.
+        vagrant (Vagrant): Vagrant object to handle vagrant operations
+
     """
 
     def __init__(self, vagrant_root_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory, vm_system, vm_ip,
@@ -67,38 +69,43 @@ class VagrantWrapper(Instance):
 
     def get_vagrant_version(self):
         """Gets the vagrant version of the host.
+
         Returns:
-            String: Vagrant version
+            (str): Vagrant version.
         """
         return self.vagrant.version()
 
     def status(self):
         """Gets the status of the VM specified in the vagrantfile.
-        The vagrant module returns a list of namedtuples like the following
-        `[Status(name='ubuntu', state='not_created', provider='virtualbox')]`
-        but we are only interested in the `state` field.
+            The vagrant module returns a list of namedtuples like the following
+            `[Status(name='ubuntu', state='not_created', provider='virtualbox')]`
+            but we are only interested in the `state` field.
+
         Returns:
-            Dictionary: Status of the VM.
+            (dict): Status of the VM.
         """
         return self.vagrant.status()[0].state
 
     def get_ssh_config(self):
         """Gets the config of the VM specified in the vagrantfile.
+
         Returns:
-            Dictionary: Dictionary with the configuration of the VM.
+            (dict): Dictionary with the configuration of the VM.
         """
         return self.vagrant.conf()
 
     def get_instance_info(self):
         """Gets the instance info.
+
         Returns:
-            Dictionary: Dictionary with the parameters of the VM.
+            (dict): Dictionary with the parameters of the VM.
         """
         return str(self.vagrantfile)
 
     def get_name(self):
         """Gets the name of the VM.
+
         Returns:
-            String: Name of the VM.
+            (str): Name of the VM.
         """
         return self.vagrantfile.vm_name

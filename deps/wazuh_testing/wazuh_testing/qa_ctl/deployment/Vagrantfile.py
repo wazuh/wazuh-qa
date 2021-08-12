@@ -8,8 +8,19 @@ import json
 
 class Vagrantfile():
     """Class to handle Vagrantfile creation in runtime. This class will use a template (specified in TEMPLATE_FILE
-       constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
-       format.
+        constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
+        format.
+
+    Args:
+        file_path (str): Path where the vagrantfile will be stored.
+        box_image (str): URL for the box image or Vagrant Box.
+        vm_label (str): Label for the VM
+        vm_name (str): Name of the VM.
+        cpus (int): Number of CPU cores for the VM.
+        memory (int): Memory assigned to the VM (in MB).
+        system (str): Type of system (Linux, Windows, Solaris....).
+        private_ip (str): IP of the VM.
+
     Attributes:
         TEMPLATE_FILE (str): Path where the vagrantfile_template is stored.
         REPLACE_PATTERN(str): Pattern to replace inside the vagrantfile_template.
@@ -22,15 +33,6 @@ class Vagrantfile():
         cpus (int): Number of CPU cores for the VM.
         memory (int): Memory assigned to the VM (in MB).
         system (str): Type of system (Linux, Windows, Solaris....).
-    Args:
-        file_path (str): Path where the vagrantfile will be stored.
-        box_image (str): URL for the box image or Vagrant Box.
-        vm_label (str): Label for the VM
-        vm_name (str): Name of the VM.
-        cpus (int): Number of CPU cores for the VM.
-        memory (int): Memory assigned to the VM (in MB).
-        system (str): Type of system (Linux, Windows, Solaris....).
-        private_ip (str): IP of the VM.
     """
     TEMPLATE_FILE = os.path.join(
         Path(__file__).parent, 'vagrantfile_template.txt')
@@ -48,8 +50,9 @@ class Vagrantfile():
 
     def __str__(self):
         """Get the parameters in JSON format.
+
         Returns:
-            str: String in JSON format with the class parameters.
+            (str): String in JSON format with the class parameters.
         """
         parameters = {
             'box_image': self.box_image,
@@ -65,13 +68,13 @@ class Vagrantfile():
         """Read the vagrantfile template located in self.TEMPLATEFILE constant
 
         Returns:
-            List: List with the content of the template vagrant template."""
+            (list): List with the content of the template vagrant template."""
         with open(self.TEMPLATE_FILE, 'r') as template_fd:
             return template_fd.readlines()
 
     def write_vagrantfile(self):
         """Replace the self.REPLACE_PATTERN line with a string with the parameters in JSON format and write the new
-           contents in self.file_path file.
+            contents in self.file_path file.
         """
         read_lines = self.read_vagrantfile_template()
         replace_line = read_lines.index(self.REPLACE_PATTERN)

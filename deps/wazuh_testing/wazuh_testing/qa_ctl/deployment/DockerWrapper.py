@@ -5,24 +5,9 @@ from json import dumps
 
 class DockerWrapper(Instance):
     """Class to handle docker operations. This class uses the docker python SDK to read a dockerfile and create
-       the image and container.
+        the image and container.
 
-       Attributes:
-        docker client (Docker Client): Client to communicate with the docker daemon.
-        dockerfile_path (str): Path where the Dockerfile is stored.
-        name (str): Container's name.
-        remove (bool): Remove the container after it has finished.
-        detach (bool): Run container in background.
-        ports (dict): Ports to bind inside the container.
-                      The keys of the dictionary are the ports to bind inside the container and the values of the
-                      dictionary are the corresponding ports to open on the host.
-        stdout (bool): Return stdout logs when detach is False.
-        stderr (bool): Return stderr logs when detach is False.
-        ip (string): String with the IP address of the container. The docker network MUST exists. If None, no static IP
-                     will be assigned.
-        network_name (string): Name of the docker network.
-
-       Args:
+    Args:
         docker client (Docker Client): Client to communicate with the docker daemon.
         dockerfile_path (str): Value to set dockerfile_path attribute.
         name (str): Value to set name attribute.
@@ -31,8 +16,23 @@ class DockerWrapper(Instance):
         ports (dict): Value to set ports attribute.
         stdout (bool): Value to set stdout attribute.
         stderr (bool): Value to set stderr attribute.
-        ip (string): String with the IP address of the container. The docker network MUST exists. If None, no static IP
-                     will be assigned.
+        ip (string): String with the IP address of the container. The docker network MUST exists. If None, no
+                        static IP will be assigned.
+        network_name (string): Name of the docker network.
+
+    Attributes:
+        docker client (Docker Client): Client to communicate with the docker daemon.
+        dockerfile_path (str): Path where the Dockerfile is stored.
+        name (str): Container's name.
+        remove (bool): Remove the container after it has finished.
+        detach (bool): Run container in background.
+        ports (dict): Ports to bind inside the container.
+                        The keys of the dictionary are the ports to bind inside the container and the values of the
+                        dictionary are the corresponding ports to open on the host.
+        stdout (bool): Return stdout logs when detach is False.
+        stderr (bool): Return stderr logs when detach is False.
+        ip (string): String with the IP address of the container. The docker network MUST exists. If None,
+                        no static IP will be assigned.
         network_name (string): Name of the docker network.
     """
     def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None, detach=True, stdout=False,
@@ -76,6 +76,7 @@ class DockerWrapper(Instance):
 
     def restart(self):
         """Restart the container.
+
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
@@ -86,6 +87,7 @@ class DockerWrapper(Instance):
 
     def halt(self):
         """Stop the container.
+
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
@@ -96,8 +98,10 @@ class DockerWrapper(Instance):
 
     def destroy(self, remove_image=False):
         """Remove the container
+
         Args:
             remove_image(bool): Remove the docker image too. Defaults to False.
+
         Raises:
             docker.errors.APIError: If the server returns an error.
         """
@@ -116,6 +120,7 @@ class DockerWrapper(Instance):
 
     def get_instance_info(self):
         """Get the parameters information.
+
         Returns
             str: String in JSON format with the parameters of the class.
         """
@@ -131,6 +136,7 @@ class DockerWrapper(Instance):
 
     def get_name(self):
         """Get the name of the container.
+
         Returns
             str: String with the name of the container.
         """
@@ -138,6 +144,7 @@ class DockerWrapper(Instance):
 
     def status(self):
         """Get the status of the container.
+
         Returns:
             str: String with the status of the container (running, exited, not created, etc).
         """

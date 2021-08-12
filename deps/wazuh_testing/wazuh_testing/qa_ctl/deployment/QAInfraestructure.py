@@ -9,21 +9,26 @@ import docker
 
 class QAInfraestructure:
     """Class to handle multiples instances objects.
+
+    Args:
+        instance_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml
+        template.
+
     Class Attributes:
         DOCKER_NETWORK_NAME: Name of the docker network where the containers will be connected.
+
     Instance Attributes:
         instances (list): List with the instances to handle.
         docker_client (Docker Client): Client to communicate with the docker daemon.
         docker_network (Docker Network): Network object to handle container's static IP address.
         network_address (IPNetwork): Docker network address.
-    Args:
-        instance_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml template.
+
     """
     DOCKER_NETWORK_NAME = 'wazuh_net'
 
     def __init__(self, instance_list):
         self.instances = []
-        self.docker_client = docker.from_env()
+        self.docker_client = None
         self.docker_network = None
         self.network_address = None
 
@@ -41,6 +46,9 @@ class QAInfraestructure:
                     self.instances.append(vagrant_instance)
 
                 elif provider == 'docker':
+                    if not self.docker_client:
+                        self.docker_client = docker.from_env()
+
                     _ports = None if 'ports' not in data else data['ports']
                     _detach = True if 'detach' not in data else data['detach']
                     _stdout = False if 'stdout' not in data else data['stdout']
@@ -56,7 +64,7 @@ class QAInfraestructure:
 
                         if network != self.network_address:
                             raise ValueError('Two different networks where found for docker containers when only one '
-                                             f'network is allowed: {network} != {self.network_address}')
+                                             f"network is allowed: {network} != {self.network_address}")
 
                         if not self.docker_network:
                             # Try to get the DOCKER_NETWORK_NAME network, if it fails, try to create it.
@@ -107,7 +115,7 @@ class QAInfraestructure:
         """Execute the 'status' method on every configured instance.
 
         Returns:
-            Dictionary: Contains the status for each configured instance.
+            (dict): Contains the status for each configured instance.
         """
         status = {}
         for instance in self.instances:
@@ -117,8 +125,9 @@ class QAInfraestructure:
 
     def get_instances_info(self):
         """Get information about for all the configured instances.
-           Returns:
-            Dictionary: Dictionary with the information for each configured instance.
+
+        Returns:
+            (dict): Dictionary with the information for each configured instance.
         """
         info = {}
         for instance in self.instances:
