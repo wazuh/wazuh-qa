@@ -135,14 +135,6 @@
             "line_number": 55,
             "line_range": [
                 48,
-                49,
-                50,
-                51,
-                52,
-                53,
-                54,
-                55,
-                56,
                 57
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",

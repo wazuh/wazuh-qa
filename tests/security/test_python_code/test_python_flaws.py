@@ -175,10 +175,14 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
         # We save the results obtained in the report as the rest of information is redundant or not used
         results = bandit_output['results']
 
-        # Delete line numbers in code to make it persistent with updates
+        # Delete line numbers in code to make it persistent with updates and change range to interval
         for result in results:
             result['code'] = re.sub(r"^\d+", "", result['code'])  # Delete first line number
             result['code'] = re.sub(r"\n\d+", "\n", result['code'], re.M)  # Delete line numbers after newline
+            first_line = result['line_range'][0]
+            last_line = result['line_range'][-1]
+            result['line_range'] = \
+                [first_line, last_line] if first_line != last_line else [first_line]  # Change line_range to interval
 
         # Compare the flaws obtained in results with the known flaws
         if is_default_check_dir:
@@ -198,12 +202,12 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
         known_flaws = update_known_flaws(known_flaws, results)
         if is_default_check_dir:
             with open(f"{KNOWN_FLAWS_DIRECTORY}/known_flaws_{directory_to_check.replace('/', '')}.json", mode="w") as f:
-                f.write(json.dumps(known_flaws, indent=4, sort_keys=True))
+                f.write(f"{json.dumps(known_flaws, indent=4, sort_keys=True)}\n")
         else:
             # if the directory to check is not one of the default list, we will create a new known_flaws file outside
             # the directory known_flaws, to avoid overwriting
             with open(f"known_flaws_{directory_to_check.replace('/', '')}.json", mode="w") as f:
-                f.write(json.dumps(known_flaws, indent=4, sort_keys=True))
+                f.write(f"{json.dumps(known_flaws, indent=4, sort_keys=True)}\n")
 
         new_flaws = [flaw for flaw in results if
                      flaw not in known_flaws['to_fix'] and flaw not in known_flaws['false_positives']]
@@ -212,7 +216,7 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
             new_flaws_path = os.path.join(TEST_PYTHON_CODE_PATH,
                                           f"new_flaws_{directory_to_check.replace('/', '')}.json")
             with open(new_flaws_path, mode="w+") as f:
-                f.write(json.dumps({'new_flaws': new_flaws}, indent=4, sort_keys=True))
+                f.write(f"{json.dumps({'new_flaws': new_flaws}, indent=4, sort_keys=True)}\n")
             files_with_flaws = ', '.join(list(dict.fromkeys([res['filename'] for res in new_flaws])))
             flaws_found[directory_to_check] = f"Vulnerabilities found in files: {files_with_flaws}," \
                                               f" check them in {new_flaws_path}"
