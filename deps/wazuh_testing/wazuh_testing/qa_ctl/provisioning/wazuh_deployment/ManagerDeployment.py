@@ -65,6 +65,8 @@ class ManagerDeployment(WazuhDeployment):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
+        super().health_check()
+
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Extract service status',
                                        'command': f'{self.install_dir_path}/bin/wazuh-control status',
@@ -76,8 +78,4 @@ class ManagerDeployment(WazuhDeployment):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        output = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
-
-        if output.rc != 0:
-            with open(f'{output.stderr_file}', 'r') as file:
-                raise Exception(f"Failed: {file.read()}")
+        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)

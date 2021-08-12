@@ -1,4 +1,4 @@
-
+from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
@@ -116,6 +116,9 @@ class QAProvisioning():
                                                             install_mode=install_type, hosts=current_host)
 
                 deployment_instance.install()
+                sleep(60)
+                deployment_instance.health_check()
+
                 self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
             if 'qa_framework' in host_value:
