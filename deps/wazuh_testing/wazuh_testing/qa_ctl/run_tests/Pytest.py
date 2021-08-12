@@ -40,9 +40,9 @@ class Pytest(Test):
         markers(list(str), None): Set of markers to be added to the test execution command
 
     """
-    def __init__(self, tests_result_path=None, tests_path=None, tests_run_dir=None, tiers=None,
-                 stop_after_first_failure=False, keyword_expression=None, traceback=None, dry_run=False,
-                 custom_args=None, verbose_level=False, log_level=None, markers=None, hosts="all"):
+    def __init__(self, tests_result_path, tests_path, tests_run_dir, tiers=[], stop_after_first_failure=False,
+                 keyword_expression=None, traceback='auto', dry_run=False, custom_args=[], verbose_level=False,
+                 log_level=None, markers=[], hosts=['all']):
 
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure

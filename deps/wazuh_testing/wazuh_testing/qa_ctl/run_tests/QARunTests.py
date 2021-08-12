@@ -5,8 +5,7 @@ class RunQATests():
     def __build_test(self, test_params):
         test_dict = {}
 
-        if 'hosts' in test_params:
-            test_dict['hosts'] = test_params['hosts']
+        test_dict['hosts'] = ['all'] if 'hosts' not in test_params else test_params['hosts']
 
         if 'path' in test_params:
             paths = test_params['path']
@@ -16,23 +15,22 @@ class RunQATests():
 
         if 'parameters' in test_params:
             parameters = test_params['parameters']
-            test_dict['tiers'] = parameters['tiers']
-            test_dict['stop_after_first_failure'] = parameters['stop_after_first_failure']
-            test_dict['keyword_expression'] = parameters['keyword_expression']
-            test_dict['traceback'] = parameters['traceback']
-            test_dict['dry_run'] = parameters['dry_run']
-            test_dict['custom_args'] = parameters['custom_args']
-            test_dict['verbose_level'] = parameters['verbose_level']
-            test_dict['log_level'] = parameters['log_level']
-            test_dict['markers'] = parameters['markers']
+            if parameters is not None:
+                test_dict['tiers'] = [] if 'tiers' not in parameters else parameters['tiers']
+                test_dict['stop_after_first_failure'] = False if 'stop_after_first_failure' not in parameters \
+                                                                 else parameters['stop_after_first_failure']
+                test_dict['keyword_expression'] = None if 'keyword_expression' not in parameters else \
+                                                          parameters['keyword_expression']
+                test_dict['traceback'] = 'auto' if 'traceback' not in parameters else parameters['traceback']
+                test_dict['dry_run'] = False if 'dry_run' not in parameters else parameters['dry_run']
+                test_dict['custom_args'] = [] if 'custom_args' not in parameters else parameters['custom_args']
+                test_dict['verbose_level'] = False if 'verbose_level' not in parameters else parameters['verbose_level']
+                test_dict['log_level'] = None if 'log_level' not in parameters else parameters['log_level']
+                test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
 
         return Pytest(**test_dict)
 
-    def __init__(self, tests_obj):
+    def __init__(self, tests_parameters):
         self.tests = []
-        try:
-            for key, value in tests_obj.items():
-                self.tests.append(self.__build_test(value))
-        except KeyError as e:
-            print(f"Keyword error. Bad tag in document:  {e}")
-            exit()
+        for key, value in tests_parameters.items():
+            self.tests.append(self.__build_test(value))
