@@ -4,10 +4,12 @@ from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
 class RunQATests():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
 
-        Attributes:
-            tests (list(Pytest)): list of Pytest instances to run at the specified remote machines
         Args:
             test_parameters (dict): a dictionary containing all the required data to build the tests
+
+        Attributes:
+            tests (list(Pytest)): list of Pytest instances to run at the specified remote machines
+
     """
 
     def __init__(self, tests_parameters):

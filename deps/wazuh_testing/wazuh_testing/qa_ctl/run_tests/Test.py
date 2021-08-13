@@ -8,6 +8,7 @@ class Test(ABC):
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
         tests_result_path(str): Path to the directory where the reports will be stored in the local machine
+
     Args:
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
