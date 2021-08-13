@@ -18,6 +18,7 @@ class QAProvisioning():
         host_list (list): List with every host given in config file.
         inventory_file_path (string): Path of the inventory file generated.
         wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
+
     Args:
         provision_info (dict): Dict with all the info needed coming from config file.
         instances_list (list): List with every instance (each host) needed to build the ansible inventory.
@@ -39,6 +40,7 @@ class QAProvisioning():
 
         Attributes:
             host_info (dict): Dict with the host info needed coming from config file.
+
         Returns:
             instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
         """
@@ -116,6 +118,7 @@ class QAProvisioning():
                                                             install_mode=install_type, hosts=current_host)
 
                 deployment_instance.install()
+                # Wait for Wazuh initialization before health_check
                 sleep(60)
                 deployment_instance.health_check()
 

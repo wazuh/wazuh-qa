@@ -65,7 +65,7 @@ class WazuhDeployment(ABC):
 
             tasks_list.append(AnsibleTask({
                 'name': 'Executing "install.sh" script to build and install Wazuh',
-                'shell': f'./install.sh > {gettempdir()}/wazuh_install_log.txt',
+                'shell': f"./install.sh > {gettempdir()}/wazuh_install_log.txt",
                 'args': {'chdir': f'{self.installation_files_path}'},
                 'when': 'ansible_system == "Linux"'}))
 

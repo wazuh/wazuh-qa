@@ -101,7 +101,7 @@ class AgentDeployment(WazuhDeployment):
 
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Extract service status',
-                                       'command': f'{self.install_dir_path}/bin/wazuh-control status',
+                                       'command': f"{self.install_dir_path}/bin/wazuh-control status",
                                        'when': 'ansible_system != "Windows"',
                                        'register': 'status',
                                        'failed_when': ['"wazuh-agentd" not in status.stdout',
