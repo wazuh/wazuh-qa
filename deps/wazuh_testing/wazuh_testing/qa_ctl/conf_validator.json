@@ -1,0 +1,282 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "QACTL Config file schema",
+  "properties": {
+    "deployment": {
+      "$id": "#/properties/deployment",
+      "type": "object",
+      "patternProperties": {
+        "^host[0-9]*$": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "object",
+              "properties": {
+                "vagrant": {
+                  "type": "object",
+                  "required": [
+                    "enabled",
+                    "vagrantfile_path",
+                    "vagrant_box",
+                    "vm_memory",
+                    "vm_cpu",
+                    "vm_name",
+                    "vm_system",
+                    "os",
+                    "label",
+                    "vm_ip"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "vagrantfile": {
+                      "type": "string"
+                    },
+                    "vagrant_box": {
+                      "type": "string"
+                    },
+                    "vm_memory": {
+                      "type": "integer"
+                    },
+                    "vm_cpu": {
+                      "type": "integer"
+                    },
+                    "vm_name": {
+                      "type": "string"
+                    },
+                    "vm_system": {
+                      "type": "string"
+                    },
+                    "os": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "vm_ip": {
+                      "type": "string"
+                    },
+                    "quiet_out": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "docker": {
+                  "type": "object",
+                  "required": [
+                    "enabled",
+                    "dockerfile_path",
+                    "name"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "dockerfile_path": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "ip": {
+                      "type": "string"
+                    },
+                    "remove": {
+                      "type": "boolean"
+                    },
+                    "ports": {
+                      "type": "object"
+                    },
+                    "detach": {
+                      "type": "boolean"
+                    },
+                    "stdout": {
+                      "type": "boolean"
+                    },
+                    "stderr": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "provisioning": {
+      "type": "object",
+      "required": [
+        "hosts",
+        "groups"
+      ],
+      "properties": {
+        "hosts": {
+          "patternProperties": {
+            "^host[0-9]*$": {
+              "type": "object",
+              "required": [
+                "host_info",
+                "wazuh_deployment",
+                "qa_framework"
+              ],
+              "properties": {
+                "host_info": {
+                  "type": "object",
+                  "required": [
+                    "connection_method",
+                    "host",
+                    "user",
+                    "password",
+                    "connection_port",
+                    "ansible_python_interpreter"
+                  ],
+                  "properties": {
+                    "connection_method": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
+                    },
+                    "password": {
+                      "type": "string"
+                    },
+                    "connection_port": {
+                      "type": "integer"
+                    },
+                    "ansible_python_interpreter": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "wazuh_deployment": {
+                  "type": "object",
+                  "required": [
+                    "wazuh_installation"
+                  ],
+                  "properties": {
+                    "wazuh_installation": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "target",
+                        "installation_file_path"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "manager_ip": {
+                          "type": "string"
+                        },
+                        "wazuh_branch": {
+                          "type": "string"
+                        },
+                        "local_package_path": {
+                          "type": "string"
+                        },
+                        "installation_file_path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "qa_framework": {
+                  "type": "object",
+                  "required": [
+                    "wazuh_qa_branch",
+                    "qa_workdir"
+                  ],
+                  "properties": {
+                    "wazuh_qa_branch": {
+                      "type": "string"
+                    },
+                    "qa_workdir": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "hosts": {
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        },
+        "path": {
+          "type": "object",
+          "required": [
+            "test_files_path",
+            "run_tests_dir_path",
+            "tests_results_path"
+          ],
+          "properties": {
+            "test_files_path": {
+              "type": "string"
+            },
+            "run_test_dir_path": {
+              "type": "string"
+            },
+            "test_results_path": {
+              "type": "string"
+            }
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "tier": {
+              "type": "string"
+            },
+            "stop_after_first_failure": {
+              "type": "boolean"
+            },
+            "keyword_expression": {
+              "type": "string"
+            },
+            "traceback": {
+              "type": "string"
+            },
+            "dry_run": {
+              "type": "boolean"
+            },
+            "custom_args": {
+              "type": "array"
+            },
+            "verbose_level": {
+              "type": "boolean"
+            },
+            "log_level": {
+              "type": "string"
+            },
+            "markers": {
+              "type": "array"
+            }
+          }
+        }
+      }
+    }
+  }
+}
