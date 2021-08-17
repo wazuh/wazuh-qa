@@ -4,85 +4,12 @@ deployment:
             vagrant:
                 enabled: True
                 vagrantfile_path: '/tmp'
-                vagrant_box: '/home/vhalgarv/drawers/qactlubuntu20.box'
-                vm_memory: 2048
-                vm_cpu: 2
-                vm_name: 'testqactlubuntu1'
+                vagrant_box: 'qactl/centos_82'
+                vm_memory: 512
+                vm_cpu: 1
+                vm_name: 'testboxes'
                 vm_system: 'Linux'
                 os: Linux
                 label: 'Label'
                 vm_ip: '10.2.0.13'
                 quiet_out: False
-    host2:
-        provider:
-            vagrant:
-                enabled: True
-                vagrantfile_path: '/tmp'
-                vagrant_box: '/home/vhalgarv/drawers/qactlubuntu20.box'
-                vm_memory: 2048
-                vm_cpu: 2
-                vm_name: 'testqactlubuntu2'
-                vm_system: 'Linux'
-                os: Linux
-                label: 'Label'
-                vm_ip: '10.2.0.12'
-                quiet_out: False
-provision:
-    hosts:
-        host1:
-            host_info:
-                connection_method: ssh
-                host: 10.2.0.13
-                user: vagrant
-                password: vagrant
-                connection_port: 22
-                ansible_python_interpreter: /usr/bin/python3.8
-
-            wazuh_deployment:
-                wazuh_installation:
-                    type: package
-                    target: manager
-                    local_package_path: /home/vhalgarv/Descargas/wazuh-manager_4.2.0-1_amd64.deb
-                    installation_files_path: /home/vagrant
-
-            qa_framework:
-                wazuh_qa_branch: master
-                qa_workdir: /home/vagrant/wazuh-qa/
-        host2:
-            host_info:
-                connection_method: ssh
-                host: 10.2.0.12
-                user: vagrant
-                password: vagrant
-                connection_port: 22
-                ansible_python_interpreter: /usr/bin/python3.8
-
-            wazuh_deployment:
-                wazuh_installation:
-                    type: package
-                    target: agent
-                    manager_ip: 10.2.0.13
-                    local_package_path: /home/vhalgarv/Descargas/wazuh-agent_4.2.0-1_amd64.deb
-                    installation_files_path: /home/vagrant
-
-            qa_framework:
-                wazuh_qa_branch: master
-                qa_workdir: /home/vagrant/wazuh-qa/
-tests:
-    test1:
-        hosts: 10.2.0.12
-        type: pytest
-        path:
-            test_files_path: '/tmp/wazuh-qa/tests/integration/test_fim/test_files/'
-            run_tests_dir_path: '/home/vagrant/'
-            test_results_path: '/home/vhalgarv/drawers/test_results/'
-        parameters:
-            tiers: [0,1]
-            stop_after_first_failure: False
-            keyword_expression: "test_basic*"
-            traceback: long
-            dry_run: False
-            custom_args: ""
-            verbose_level: True
-            log_level: ""
-            markers: []
