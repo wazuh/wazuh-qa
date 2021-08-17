@@ -7,6 +7,8 @@ import pytest
 
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from urllib3.exceptions import InsecureRequestWarning
+import requests
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -50,6 +52,7 @@ def test_queue_size_valid(get_configuration, configure_environment, restart_remo
     Raises:
         AssertionError: if API answer is different of expected configuration.
     """
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     remote.compare_config_api_response(cfg)

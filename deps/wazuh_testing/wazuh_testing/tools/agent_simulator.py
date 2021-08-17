@@ -690,7 +690,7 @@ class Agent:
         """
         return self.get_agent_info('connection_status')
 
-    @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         """Wait until agent status is active in global.db.
 
@@ -1542,6 +1542,8 @@ class Injector:
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
+        if is_tcp(self.sender.protocol):
+            self.sender.socket.shutdown(socket.SHUT_RDWR)
         self.sender.socket.close()
 
 
