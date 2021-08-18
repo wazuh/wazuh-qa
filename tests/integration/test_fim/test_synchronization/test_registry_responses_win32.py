@@ -84,7 +84,7 @@ def find_path_in_event_list(path, event_list):
         The event that matches the specified path. None if no event was found.
     """
     for event in event_list:
-        if event['path'] == path:
+        if event['data']['path'] == path:
             return event
     return None
 
@@ -99,10 +99,10 @@ def find_value_in_event_list(key_path, value_name, event_list):
         The event that matches the specified path. None if no event was found.
     """
     for event in event_list:
-        if 'value_name' not in event.keys():
+        if 'value_name' not in event['data'].keys():
             continue
 
-        if event['path'] == key_path and event['value_name'] == value_name:
+        if event['data']['path'] == key_path and event['data']['value_name'] == value_name:
             return event
 
     return None
