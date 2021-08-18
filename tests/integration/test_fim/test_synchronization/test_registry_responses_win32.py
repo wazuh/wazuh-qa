@@ -135,6 +135,7 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
+    fim.create_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
     # Wait for subkey sync messages only when it's expected
     if key_name is not None:
         fim.create_registry(fim.registry_parser[key], os.path.join(subkey, key_name), fim.KEY_WOW64_64KEY)
@@ -175,6 +176,7 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         assert find_value_in_event_list(
                os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
 
+    fim.delete_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
 
 @pytest.mark.parametrize('tags_to_apply', [{'registry_sync_responses'}])
 @pytest.mark.parametrize('key_name, value_name', [(':subkey1:', 'value1'), (':subkey2', ':value2')])
