@@ -6,11 +6,12 @@ import os
 import json
 import logging
 
+
 class Vagrantfile():
     """Class to handle Vagrantfile creation in runtime. This class will use a template (specified in TEMPLATE_FILE
        constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
        format.
-       
+
     Attributes:
         TEMPLATE_FILE (str): Path where the vagrantfile_template is stored.
         REPLACE_PATTERN(str): Pattern to replace inside the vagrantfile_template.
@@ -67,7 +68,7 @@ class Vagrantfile():
         """To str method. It will print the dictionary in JSON format."""
         parameters = {
             'box_image': self.box_image,
-            'box_url' : self.box_url,
+            'box_url': self.box_url,
             'vm_label': self.vm_label,
             'cpus': self.cpus,
             'memory': self.memory,
