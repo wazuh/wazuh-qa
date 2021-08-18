@@ -40,7 +40,7 @@ def get_configuration(request):
     return request.param
 
 
-def get_sync_msgs(tout, new_data=True):
+def get_sync_msgs(tout, integrity=False):
     """Look for as many synchronization events as possible.
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
     Params:
@@ -50,23 +50,28 @@ def get_sync_msgs(tout, new_data=True):
         A list with all the events in json format.
     """
     events = []
-    if new_data:
-        wazuh_log_monitor.start(timeout=tout,
-                                callback=fim.callback_dbsync_no_data,
-                                error_message='Did not receive expected '
-                                              '"db sync no data" event')
+
     for _ in range(0, max_events):
-        try:
-            sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                 callback=fim.callback_detect_registry_integrity_event,
-                                                 accum_results=1,
-                                                 error_message='Did not receive expected '
-                                                               'Sending integrity control message"').result()
-        except TimeoutError:
-            break
+        if integrity:
+            try:
+                sync_event = wazuh_log_monitor.start(timeout=40,
+                                                     callback=fim.callback_detect_integrity_event,
+                                                     accum_results=1,
+                                                     error_message='Did not receive expected '
+                                                                   'Sending FIM event"').result()
+            except TimeoutError:
+                break
+        else:
+            try:
+                sync_event = wazuh_log_monitor.start(timeout=40,
+                                                     callback=fim.callback_detect_event,
+                                                     accum_results=1,
+                                                     error_message='Did not receive expected '
+                                                                   'Sending FIM event"').result()
+            except TimeoutError:
+                break
 
         events.append(sync_event)
-
     return events
 
 
