@@ -215,64 +215,67 @@
     },
     "tests": {
       "type": "object",
-      "required": [
-        "path"
-      ],
-      "properties": {
-        "hosts": {
-          "type": "array"
-        },
-        "type": {
-          "type": "string"
-        },
-        "path": {
+      "patternProperties": {
+        "^test[0-9]*$": {
           "type": "object",
-          "required": [
-            "test_files_path",
-            "run_tests_dir_path",
-            "tests_results_path"
-          ],
+          "required": ["path"],
           "properties": {
-            "test_files_path": {
+            "hosts": {
               "type": "string"
             },
-            "run_test_dir_path": {
+            "type": {
               "type": "string"
             },
-            "test_results_path": {
-              "type": "string"
-            }
-          }
-        },
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "tier": {
-              "type": "string"
+            "path": {
+              "type": "object",
+              "required": [
+                "test_files_path",
+                "run_tests_dir_path",
+                "test_results_path"
+              ],
+              "properties": {
+                "test_files_path": {
+                  "type": "string"
+                },
+                "run_tests_dir_path": {
+                  "type": "string"
+                },
+                "test_results_path": {
+                  "type": "string"
+                }
+              }
             },
-            "stop_after_first_failure": {
-              "type": "boolean"
-            },
-            "keyword_expression": {
-              "type": "string"
-            },
-            "traceback": {
-              "type": "string"
-            },
-            "dry_run": {
-              "type": "boolean"
-            },
-            "custom_args": {
-              "type": "array"
-            },
-            "verbose_level": {
-              "type": "boolean"
-            },
-            "log_level": {
-              "type": "string"
-            },
-            "markers": {
-              "type": "array"
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "tier": {
+                  "type": "string"
+                },
+                "stop_after_first_failure": {
+                  "type": "boolean"
+                },
+                "keyword_expression": {
+                  "type": "string"
+                },
+                "traceback": {
+                  "type": "string"
+                },
+                "dry_run": {
+                  "type": "boolean"
+                },
+                "custom_args": {
+                  "type": "string"
+                },
+                "verbose_level": {
+                  "type": "boolean"
+                },
+                "log_level": {
+                  "type": "string"
+                },
+                "markers": {
+                  "type": "array"
+                }
+              }
             }
           }
         }
