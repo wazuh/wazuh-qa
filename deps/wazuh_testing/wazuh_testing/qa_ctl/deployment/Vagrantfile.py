@@ -10,13 +10,15 @@ class Vagrantfile():
     """Class to handle Vagrantfile creation in runtime. This class will use a template (specified in TEMPLATE_FILE
        constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
        format.
+       
     Attributes:
         TEMPLATE_FILE (str): Path where the vagrantfile_template is stored.
         REPLACE_PATTERN(str): Pattern to replace inside the vagrantfile_template.
         file_path (str): Path where the vagrantfile will be stored.
         vm_name (str): Name of the VM.
         file_path (str): Path where the vagrantfile will be stored.
-        box_image (str): URL for the box image or Vagrant Box.
+        box_image (str): Box name.
+        box_url (str) : URL for the box image or Vagrant Box.
         vm_label (str): Label for the VM
         vm_name (str): Name of the VM.
         cpus (int): Number of CPU cores for the VM.
@@ -25,8 +27,8 @@ class Vagrantfile():
                         It MUST start with '/' to assign properly the group in VirtualBox.
     Args:
         file_path (str): Path where the vagrantfile will be stored.
-        box_image (str): URL for the box image or Vagrant Box.
-        vm_label (str): Label for the VM
+        box_image (str): Box name.
+        vm_label (str): Label for the VM.
         vm_name (str): Name of the VM.
         cpus (int): Number of CPU cores for the VM.
         memory (int): Memory assigned to the VM (in MB).
