@@ -15,25 +15,18 @@ from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
-
-
-_conf_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_ctl')
+_data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
 
 
 def validate_conf(configuration):
-    schema_file = 'conf_validator.json'
+    schema_file = 'qactl_conf_validator_schema.json'
 
-    with open(os.path.join(_conf_path, schema_file), 'r') as f:
+    with open(os.path.join(_data_path, schema_file), 'r') as f:
         schema = json.load(f)
 
-    try:
-        validate(instance=configuration, schema=schema)
-    except jsonschema.exceptions.ValidationError as err:
-        print(err)
-        return False
-
-    return True
+    validate(instance=configuration, schema=schema)
+   
 
 
 def main():
@@ -53,34 +46,32 @@ def main():
 
     with open(arguments.config) as config_file_fd:
         yaml_config = yaml.safe_load(config_file_fd)
-        print(yaml_config)
-        result = validate_conf(yaml_config)
-        print(result)
+        validate_conf(yaml_config)
 
-    if result is True:
-        try:
-            if DEPLOY_KEY in yaml_config:
-                deploy_dict = yaml_config[DEPLOY_KEY]
-                instance_handler = QAInfraestructure(deploy_dict)
-                instance_handler.run()
+    
+    try:
+        if DEPLOY_KEY in yaml_config:
+            deploy_dict = yaml_config[DEPLOY_KEY]
+            instance_handler = QAInfraestructure(deploy_dict)
+            instance_handler.run()
 
-            if PROVISION_KEY in yaml_config:
-                provision_dict = yaml_config[PROVISION_KEY]
-                qa_provisioning = QAProvisioning(provision_dict)
-                qa_provisioning.process_inventory_data()
-                qa_provisioning.process_deployment_data()
+        if PROVISION_KEY in yaml_config:
+            provision_dict = yaml_config[PROVISION_KEY]
+            qa_provisioning = QAProvisioning(provision_dict)
+            qa_provisioning.process_inventory_data()
+            qa_provisioning.process_deployment_data()
 
-            if TEST_KEY in yaml_config:
-                test_dict = yaml_config[TEST_KEY]
-                qa_test = RunQATests(test_dict)
-                test_launcher = TestLauncher(tests=qa_test.tests,
-                                             ansible_inventory_path=qa_provisioning.inventory_file_path,
-                                             install_dir_paths=qa_provisioning.wazuh_installation_paths)
-                test_launcher.run()
+        if TEST_KEY in yaml_config:
+            test_dict = yaml_config[TEST_KEY]
+            qa_test = RunQATests(test_dict)
+            test_launcher = TestLauncher(tests=qa_test.tests,
+                                         ansible_inventory_path=qa_provisioning.inventory_file_path,
+                                         install_dir_paths=qa_provisioning.wazuh_installation_paths)
+            test_launcher.run()
 
-        finally:
-            if arguments.destroy:
-                instance_handler.destroy()
+    finally:
+        if arguments.destroy:
+            instance_handler.destroy()
         
 
 if __name__ == '__main__':
