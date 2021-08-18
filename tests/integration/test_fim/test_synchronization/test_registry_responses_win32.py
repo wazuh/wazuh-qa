@@ -208,7 +208,7 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply,
     fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
     control_service('start')
 
-    events = get_sync_msgs(sync_interval + 15)
+    events = get_sync_msgs(sync_interval + 15, integrity=True)
 
     assert find_value_in_event_list(
                os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
