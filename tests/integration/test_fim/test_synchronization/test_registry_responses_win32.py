@@ -128,6 +128,8 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         TimeoutError: If an expected event couldn't be captured.
         ValueError: If a path or value are not in the sync event.
     """
+    wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
+
     if key_name is None and value_name is None:
         pytest.skip('key_name and value_name are None. Skipping')
 
@@ -140,6 +142,8 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=fim.callback_detect_end_scan,
                                 error_message='Did not receive expected "end_scan" event').result()
+
+        wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
         events = get_sync_msgs(sync_interval + 15)
         # Parent key sync event
