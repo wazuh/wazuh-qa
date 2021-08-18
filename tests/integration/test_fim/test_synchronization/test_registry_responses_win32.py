@@ -138,7 +138,6 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
     fim.create_registry(fim.registry_parser[key], subkey, fim.KEY_WOW64_64KEY)
     # Wait for subkey sync messages only when it's expected
     if key_name is not None:
-        fim.create_registry(fim.registry_parser[key], os.path.join(subkey, key_name), fim.KEY_WOW64_64KEY)
         fim.check_time_travel(True, monitor=wazuh_log_monitor)
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=fim.callback_detect_end_scan,
@@ -147,8 +146,6 @@ def test_registry_responses(key_name, value_name, tags_to_apply,
         wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
         events = get_sync_msgs(sync_interval + 15)
-        # Parent key sync event
-        assert find_path_in_event_list(test_regs[0], events) is not None, f"No sync event was found for {test_regs[0]}"
 
         # Subkey sync event
         subkey_path = os.path.join(test_regs[0], key_name)
