@@ -269,7 +269,7 @@ def set_section_wazuh_conf(sections, template=None):
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
-        """
+        r"""
         Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
         (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
         section but different attributes).
@@ -360,7 +360,7 @@ def expand_placeholders(mutable_obj, placeholders=None):
 
 def add_metadata(dikt, metadata=None):
     """
-    Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
+    Create a new key 'metadata' in dict if not already exists and updates it with metadata content.
 
     Args:
         dikt (dict):  Target dict to update metadata in.
@@ -393,7 +393,7 @@ def process_configuration(config, placeholders=None, metadata=None):
 
 
 def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
-    """
+    r"""
     Load different configurations of Wazuh from a YAML file.
 
     Args:
@@ -510,7 +510,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def generate_syscheck_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
     Every configuration is ready to be applied in the tag \<directories\>.
     """
@@ -527,7 +527,7 @@ def generate_syscheck_config():
 
 
 def generate_syscheck_registry_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
 
     Every configuration is ready to be applied in the tag \<directories\>.
     """
