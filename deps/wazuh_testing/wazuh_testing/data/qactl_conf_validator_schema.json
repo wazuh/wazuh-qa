@@ -89,10 +89,27 @@
                       "type": "boolean"
                     },
                     "ports": {
-                      "type": "object"
+                      "patternProperties":{
+                        "^port[0-9]*$":{
+                          "type": "object",
+                          "required": [
+                            "binded_port",
+                            "host_port"
+                          ],
+                          "properties": {
+                            "binded_port": {
+                              "type": "string"
+                            },
+                            "host_port":{
+                              "type":"integer"
+                            }
+                          }
+                        }
+                      }
                     },
                     "detach": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "default": "true"
                     },
                     "stdout": {
                       "type": "boolean"
@@ -108,11 +125,10 @@
         }
       }
     },
-    "provisioning": {
+    "provision": {
       "type": "object",
       "required": [
-        "hosts",
-        "groups"
+        "hosts"
       ],
       "properties": {
         "hosts": {
@@ -167,14 +183,16 @@
                       "required": [
                         "type",
                         "target",
-                        "installation_file_path"
+                        "installation_files_path"
                       ],
                       "properties": {
                         "type": {
-                          "type": "string"
+                          "type": "string",
+                          "enum": ["sources", "package"]
                         },
                         "target": {
-                          "type": "string"
+                          "type": "string",
+                          "enum": ["manager", "agent"]
                         },
                         "manager_ip": {
                           "type": "string"
@@ -185,10 +203,30 @@
                         "local_package_path": {
                           "type": "string"
                         },
-                        "installation_file_path": {
+                        "installation_files_path": {
                           "type": "string"
+                        },
+                        "wazuh_install_path": {
+                          "type": "string",
+                          "default": "/var/ossec"
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {"type": {"const": "sources"}}
+                          },
+                          "then": {"required": ["wazuh_branch"]},
+
+                          "else": {"required": ["local_package_path"]}
+                        },
+                        {
+                          "if": {
+                            "properties": {"target": {"const": "agent"}}
+                          },
+                          "then": {"required": ["manager_ip"]}       
+                        }        
+                      ]
                     }
                   }
                 },
