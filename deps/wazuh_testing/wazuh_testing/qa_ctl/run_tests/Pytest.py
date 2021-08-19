@@ -74,6 +74,7 @@ class Pytest(Test):
 
         assets_folder = 'assets/'
         assets_zip = "assets.zip"
+        html_report = "/home/vagrant/"
         playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
 
         if self.tests_result_path is None:
@@ -108,20 +109,20 @@ class Pytest(Test):
         if self.markers:
             pytest_command += f"-m {' '.join(self.markers)} "
 
-        pytest_command += f"--html='./{html_report_file_name}'"
-
+        pytest_command += f"--html='{html_report_file_name}'"
+        
         execute_test_task = {'shell': pytest_command, 'vars':
                              {'chdir': self.tests_run_dir},
                              'register': 'test_output',
                              'ignore_errors': 'yes'}
-
+        
         create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir, plain_report_file_name),
                                         'content': "{{test_output.stdout}}"}}
 
         fetch_plain_report = {'fetch': {'src': os.path.join(self.tests_run_dir, plain_report_file_name),
                                         'dest': self.tests_result_path, 'flat': 'yes'}}
 
-        fetch_html_report = {'fetch': {'src': os.path.join(self.tests_run_dir, html_report_file_name),
+        fetch_html_report = {'fetch': {'src': os.path.join(html_report, html_report_file_name),
                                        'dest': self.tests_result_path, 'flat': 'yes'}}
 
         create_assets_directory = {'local_action': {'module': 'ansible.builtin.file',
@@ -129,11 +130,11 @@ class Pytest(Test):
                                                     'state': 'directory'},
                                    'become': False}
 
-        compress_assets_folder = {'community.general.archive': {'path': os.path.join(self.tests_run_dir, assets_folder),
-                                                                'dest': os.path.join(self.tests_run_dir, assets_zip),
+        compress_assets_folder = {'community.general.archive': {'path': os.path.join(html_report, assets_folder),
+                                                                'dest': os.path.join(html_report, assets_zip),
                                                                 'format': 'zip'}}
-
-        fetch_compressed_assets = {'fetch': {'src': os.path.join(self.tests_run_dir, assets_zip),
+        
+        fetch_compressed_assets = {'fetch': {'src': os.path.join(html_report, assets_zip),
                                              'dest': self.tests_result_path, 'flat': 'yes'}}
 
         uncompress_assets = {'local_action': {'module': 'unarchive',
