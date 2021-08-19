@@ -66,7 +66,7 @@ def replace_regex(pattern, new_value, data, replace_group=False):
 
 
 def insert_xml_tag(pattern, tag, value, data):
-    """
+    r"""
     Function to insert a xml tag in a string data.
 
     Args:
