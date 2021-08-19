@@ -110,12 +110,12 @@ class Pytest(Test):
             pytest_command += f"-m {' '.join(self.markers)} "
 
         pytest_command += f"--html='{html_report_file_name}'"
-        
+
         execute_test_task = {'shell': pytest_command, 'vars':
                              {'chdir': self.tests_run_dir},
                              'register': 'test_output',
                              'ignore_errors': 'yes'}
-        
+
         create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir, plain_report_file_name),
                                         'content': "{{test_output.stdout}}"}}
 
@@ -133,7 +133,7 @@ class Pytest(Test):
         compress_assets_folder = {'community.general.archive': {'path': os.path.join(html_report, assets_folder),
                                                                 'dest': os.path.join(html_report, assets_zip),
                                                                 'format': 'zip'}}
-        
+
         fetch_compressed_assets = {'fetch': {'src': os.path.join(html_report, assets_zip),
                                              'dest': self.tests_result_path, 'flat': 'yes'}}
 
