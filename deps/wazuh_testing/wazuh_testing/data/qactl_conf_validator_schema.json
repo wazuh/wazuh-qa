@@ -254,64 +254,103 @@
     "tests": {
       "type": "object",
       "patternProperties": {
-        "^test[0-9]*$": {
+        "^host[0-9]*$": {
           "type": "object",
-          "required": ["path"],
+          "required": ["host_info", "test"],
           "properties": {
-            "hosts": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string"
-            },
-            "path": {
+            "host_info": {
               "type": "object",
               "required": [
-                "test_files_path",
-                "run_tests_dir_path",
-                "test_results_path"
+                "connection_method",
+                "host",
+                "user",
+                "connection_port",
+                "ansible_python_interpreter"
               ],
               "properties": {
-                "test_files_path": {
+                "connection_method": {
+                  "type" : "string"
+                },
+                "host": {
+                  "type" : "string"
+                },
+                "user": {
                   "type": "string"
                 },
-                "run_tests_dir_path": {
+                "password": {
                   "type": "string"
                 },
-                "test_results_path": {
+                "ssh_private_key_file_path":{
+                  "type": "string"
+                },
+                "connection_port": {
+                  "type": "integer"
+                },
+                "ansible_python_interpreter": {
                   "type": "string"
                 }
               }
             },
-            "parameters": {
+            "test": {
               "type": "object",
+              "required": ["path"],
               "properties": {
-                "tier": {
+                "hosts": {
                   "type": "string"
                 },
-                "stop_after_first_failure": {
-                  "type": "boolean"
-                },
-                "keyword_expression": {
+                "type": {
                   "type": "string"
                 },
-                "traceback": {
-                  "type": "string"
+                "path": {
+                  "type": "object",
+                  "required": [
+                    "test_files_path",
+                    "run_tests_dir_path",
+                    "test_results_path"
+                  ],
+                  "properties": {
+                    "test_files_path": {
+                      "type": "string"
+                    },
+                    "run_tests_dir_path": {
+                      "type": "string"
+                    },
+                    "test_results_path": {
+                      "type": "string"
+                    }
+                  }
                 },
-                "dry_run": {
-                  "type": "boolean"
-                },
-                "custom_args": {
-                  "type": "string"
-                },
-                "verbose_level": {
-                  "type": "boolean"
-                },
-                "log_level": {
-                  "type": "string"
-                },
-                "markers": {
-                  "type": "array"
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "tier": {
+                      "type": "string"
+                    },
+                    "stop_after_first_failure": {
+                      "type": "boolean"
+                    },
+                    "keyword_expression": {
+                      "type": "string"
+                    },
+                    "traceback": {
+                      "type": "string"
+                    },
+                    "dry_run": {
+                      "type": "boolean"
+                    },
+                    "custom_args": {
+                      "type": "string"
+                    },
+                    "verbose_level": {
+                      "type": "boolean"
+                    },
+                    "log_level": {
+                      "type": "string"
+                    },
+                    "markers": {
+                      "type": "array"
+                    }
+                  }
                 }
               }
             }
