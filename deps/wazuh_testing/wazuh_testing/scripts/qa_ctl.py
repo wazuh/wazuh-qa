@@ -18,7 +18,6 @@ TEST_KEY = 'tests'
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
 
-
 def validate_conf(configuration):
     schema_file = 'qactl_conf_validator_schema.json'
 
@@ -26,7 +25,6 @@ def validate_conf(configuration):
         schema = json.load(f)
 
     validate(instance=configuration, schema=schema)
-   
 
 
 def main():
@@ -48,7 +46,6 @@ def main():
         yaml_config = yaml.safe_load(config_file_fd)
         validate_conf(yaml_config)
 
-    
     try:
         if DEPLOY_KEY in yaml_config:
             deploy_dict = yaml_config[DEPLOY_KEY]
@@ -72,7 +69,7 @@ def main():
     finally:
         if arguments.destroy:
             instance_handler.destroy()
-        
+
 
 if __name__ == '__main__':
     main()
