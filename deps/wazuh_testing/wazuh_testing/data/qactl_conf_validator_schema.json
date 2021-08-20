@@ -291,10 +291,14 @@
                   "type": "string"
                 }
               },
-              "if": {
-                "properties": {"password": {"const": "empty"}}
-              },
-              "then": { "required": ["ssh_private_key_file_path"]}
+              "oneOf": [
+                {
+                  "required": ["password"]
+                },
+                {
+                  "required": ["ssh_private_key_file_path"]
+                }
+              ]
             },
             "test": {
               "type": "object",
