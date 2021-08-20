@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import hashlib
 import os
 import platform
@@ -22,17 +23,17 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing import global_parameters
 
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
-              pytest.mark.agent]
+pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.win32,
+              pytest.mark.tier(level=0), pytest.mark.agent]
 
 sys_platform = platform.system()
 
-folder = 'etc' if sys_platform == 'Linux' else 'upgrade'
+folder = 'etc' if sys_platform != "Windows" else 'upgrade'
 
-upgrade_result_folder = 'var/upgrade' if sys_platform == 'Linux' else 'upgrade'
+upgrade_result_folder = 'var/upgrade' if sys_platform != "Windows" else 'upgrade'
 
-DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if sys_platform == 'Linux' \
-                                      else 'upgrade.bat'
+DEFAULT_UPGRADE_SCRIPT = 'upgrade.sh' if sys_platform != "Windows" else 'upgrade.bat'
+
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
@@ -52,11 +53,11 @@ error_msg = ''
 ver_split = _agent_version.replace("v", "").split(".")
 if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
     error_msg = 'Could not chmod' \
-        if sys_platform == 'Linux' else \
+        if sys_platform != "Windows" else \
         'Error executing command'
 else:
     error_msg = 'err Could not chmod' \
-        if sys_platform == 'Linux' else \
+        if sys_platform != "Windows" else \
         'err Cannot execute installer'
 
 test_metadata = [
@@ -212,7 +213,7 @@ def start_agent(request, get_configuration):
     time.sleep(1)
 
     control_service('stop')
-    agent_auth_pat = 'bin' if sys_platform == 'Linux' else ''
+    agent_auth_pat = 'bin' if sys_platform != "Windows" else ''
     subprocess.call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m',
                     SERVER_ADDRESS])
     control_service('start')
@@ -246,6 +247,12 @@ def download_wpk(get_configuration):
                                                     current_plaform)
         wpk_url = protocol + wpk_repo + "windows/" + wpk_file
         wpk_file_path = os.path.join(WAZUH_PATH, 'tmp', wpk_file)
+    elif current_plaform == "darwin":
+        wpk_file = "wazuh_agent_{0}_macos_{1}.wpk"\
+                .format(agent_version, architecture)
+        wpk_url = protocol + wpk_repo \
+            + "macos/" + architecture + "/pkg/" + wpk_file
+        wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
     else:
         wpk_file = "wazuh_agent_{0}_linux_{1}.wpk"\
                 .format(agent_version, architecture)
@@ -281,7 +288,7 @@ def prepare_agent_version(get_configuration):
         os.remove(UPGRADE_RESULT_PATH)
 
     if get_version() != metadata["initial_version"]:
-        if sys_platform in ['Windows', 'win32']:
+        if sys_platform == 'Windows':
             try:
                 control_service('stop')
             except ValueError:
@@ -309,7 +316,7 @@ def prepare_agent_version(get_configuration):
 
     yield
 
-    if sys_platform in ['Windows', 'win32']:
+    if sys_platform == 'Windows':
         try:
             control_service('stop')
         except ValueError:
