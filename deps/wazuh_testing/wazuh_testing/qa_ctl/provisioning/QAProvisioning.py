@@ -1,4 +1,5 @@
 from time import sleep
+import logging
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
@@ -77,8 +78,9 @@ class QAProvisioning():
         for _, host_value in self.provision_info['hosts'].items():
             current_host = host_value['host_info']['host']
             if 'wazuh_deployment' in host_value:
-                deploy_info = host_value['wazuh_deployment']['wazuh_installation']
-
+                deploy_info = host_value['wazuh_deployment']
+                health_check = True if 'health_check' not in host_value['wazuh_deployment'] \
+                                       else host_value['wazuh_deployment']['health_check']
                 install_target = None if 'target' not in deploy_info else deploy_info['target']
                 install_type = None if 'type' not in deploy_info else deploy_info['type']
                 installation_files_path = None if 'installation_files_path' not in deploy_info \
@@ -118,9 +120,14 @@ class QAProvisioning():
                                                             install_mode=install_type, hosts=current_host)
 
                 deployment_instance.install()
-                # Wait for Wazuh initialization before health_check
-                sleep(60)
-                deployment_instance.health_check()
+
+                if health_check:
+                    logging.info('Waiting for Wazuh installation')
+                    sleep(60)
+                    logging.info('Performing health check')
+                    deployment_instance.health_check()
+                else:
+                    logging.warning('Health check not performed')
 
                 self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
