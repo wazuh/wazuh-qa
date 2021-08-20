@@ -278,7 +278,8 @@
                   "type": "string"
                 },
                 "password": {
-                  "type": "string"
+                  "type": "string",
+                  "default": "empty"
                 },
                 "ssh_private_key_file_path":{
                   "type": "string"
@@ -289,7 +290,11 @@
                 "ansible_python_interpreter": {
                   "type": "string"
                 }
-              }
+              },
+              "if": {
+                "properties": {"password": {"const": "empty"}}
+              },
+              "then": { "required": ["ssh_private_key_file_path"]}
             },
             "test": {
               "type": "object",
