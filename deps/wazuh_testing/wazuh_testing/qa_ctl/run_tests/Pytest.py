@@ -128,12 +128,12 @@ class Pytest(Test):
                                         'content': "{{test_output.stdout}}"}}
 
         fetch_plain_report = {'name': f"Move {plain_report_file_name} from "
-                              "{plain_report_file_path} to {tests_result_path}",
+                              f"{plain_report_file_path} to {self.tests_result_path}",
                               'fetch': {'src': plain_report_file_path,
                                         'dest': self.tests_result_path, 'flat': 'yes'}}
 
         fetch_html_report = {'name': f"Move {html_report_file_name} from {html_report_file_path}"
-                             " to {self.tests_result_path}",
+                             f" to {self.tests_result_path}",
                              'fetch': {'src': html_report_file_path,
                                        'dest': self.tests_result_path, 'flat': 'yes'}}
 
