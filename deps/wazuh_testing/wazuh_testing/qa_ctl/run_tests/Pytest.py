@@ -71,19 +71,23 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
-
+        # Paths used below
         assets_folder = 'assets/'
         assets_zip = "assets.zip"
-        html_report = "/home/vagrant/"
+        html_report_file_name = f"test_report-{datetime.now()}.html"
+        plain_report_file_name = f"plain_report-{datetime.now()}.txt"
         playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
+        plain_report_file_path = os.path.join(self.tests_run_dir, plain_report_file_name)
+        html_report_file_path = os.path.join(self.tests_run_dir, html_report_file_name)
+        assets_dest_directory = os.path.join(self.tests_result_path, assets_folder)
+        assets_src_directory = os.path.join(self.tests_run_dir, assets_folder)
+        zip_src_path = os.path.join(self.tests_run_dir, assets_zip)
+        zip_dest_path = os.path.join(self.tests_result_path, assets_zip)
 
         if self.tests_result_path is None:
             self.tests_result_path = os.path.join(tempfile.gettempdir(), '')
         else:
             self.tests_result_path = os.path.join(self.tests_result_path, '')
-
-        html_report_file_name = f"test_report-{datetime.now()}.html"
-        plain_report_file_name = f"plain_report-{datetime.now()}.txt"
 
         pytest_command = self.RUN_PYTEST
 
@@ -109,37 +113,47 @@ class Pytest(Test):
         if self.markers:
             pytest_command += f"-m {' '.join(self.markers)} "
 
-        pytest_command += f"--html='{html_report_file_name}'"
+        pytest_command += f"--html='{self.tests_run_dir}/{html_report_file_name}'"
 
-        execute_test_task = {'shell': pytest_command, 'vars':
+        execute_test_task = {'name': f"Launch pytest in {self.tests_run_dir}",
+                             'shell': pytest_command, 'vars':
                              {'chdir': self.tests_run_dir},
                              'register': 'test_output',
                              'ignore_errors': 'yes'}
 
-        create_plain_report = {'copy': {'dest': os.path.join(self.tests_run_dir, plain_report_file_name),
+        create_plain_report = {'name': f"Create plain report file in {plain_report_file_path}",
+                               'copy': {'dest': plain_report_file_path,
                                         'content': "{{test_output.stdout}}"}}
 
-        fetch_plain_report = {'fetch': {'src': os.path.join(self.tests_run_dir, plain_report_file_name),
+        fetch_plain_report = {'name': f"Move {plain_report_file_name} from "
+                              f"{plain_report_file_path} to {self.tests_result_path}",
+                              'fetch': {'src': plain_report_file_path,
                                         'dest': self.tests_result_path, 'flat': 'yes'}}
 
-        fetch_html_report = {'fetch': {'src': os.path.join(html_report, html_report_file_name),
+        fetch_html_report = {'name': f"Move {html_report_file_name} from {html_report_file_path}"
+                             f" to {self.tests_result_path}",
+                             'fetch': {'src': html_report_file_path,
                                        'dest': self.tests_result_path, 'flat': 'yes'}}
 
-        create_assets_directory = {'local_action': {'module': 'ansible.builtin.file',
-                                                    'path': os.path.join(self.tests_result_path, assets_folder),
+        create_assets_directory = {'name': f"Create {assets_dest_directory} directory",
+                                   'local_action': {'module': 'ansible.builtin.file',
+                                                    'path': assets_dest_directory,
                                                     'state': 'directory'},
                                    'become': False}
 
-        compress_assets_folder = {'community.general.archive': {'path': os.path.join(html_report, assets_folder),
-                                                                'dest': os.path.join(html_report, assets_zip),
+        compress_assets_folder = {'name': "Compress assets folder",
+                                  'community.general.archive': {'path': assets_src_directory,
+                                                                'dest': zip_src_path,
                                                                 'format': 'zip'}}
 
-        fetch_compressed_assets = {'fetch': {'src': os.path.join(html_report, assets_zip),
+        fetch_compressed_assets = {'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
+                                   'fetch': {'src': zip_src_path,
                                              'dest': self.tests_result_path, 'flat': 'yes'}}
 
-        uncompress_assets = {'local_action': {'module': 'unarchive',
-                                              'src': os.path.join(self.tests_result_path, assets_zip),
-                                              'dest': os.path.join(self.tests_result_path, assets_folder)},
+        uncompress_assets = {'name': f"Uncompress {assets_zip} in {assets_dest_directory}",
+                             'local_action': {'module': 'unarchive',
+                                              'src': zip_dest_path,
+                                              'dest': assets_dest_directory},
                              'become': False}
 
         ansible_tasks = [AnsibleTask(execute_test_task), AnsibleTask(create_plain_report),
