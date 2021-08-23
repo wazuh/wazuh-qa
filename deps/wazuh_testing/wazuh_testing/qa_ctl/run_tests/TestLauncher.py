@@ -10,11 +10,15 @@ class TestLauncher:
 
     Attributes:
         tests (list(Test)): List containing all the tests to be executed in the remote machine
+        wazuh_dir_paths (dict): dictionary containing a list of key-value pairs referring to host alias and wazuh
+                                 installation path
         ansible_inventory_path (str): path to the ansible inventory file
         qa_framework_path (str, None): remote directory path where the qa repository will be download to
 
     Args:
         tests (list(Test)): List containing all the tests to be executed in the remote machine
+        install_dir_paths (dict): dictionary containing a list of key-value pairs referring to host alias and wazuh
+                                 installation path
         ansible_inventory_path (str): path to the ansible inventory file
         qa_framework_path (str, None): remote directory path where the qa repository will be download to
 
@@ -24,12 +28,14 @@ class TestLauncher:
                      "wazuh_modules.debug=2", "wazuh_database.interval=1", "wazuh_db.commit_time=2",
                      "wazuh_db.commit_time_max=3", "remoted.debug=2"]
 
-    def __init__(self, tests, ansible_inventory_path, qa_framework_path=None):
+    def __init__(self, tests, install_dir_paths, ansible_inventory_path,
+                 qa_framework_path=None):
         self.qa_framework_path = qa_framework_path if qa_framework_path is not None else \
                                                      os.path.join(tempfile.gettempdir(), 'wazuh-qa/')
         self.ansible_inventory_path = ansible_inventory_path
         self.tests = tests
-
+        self.wazuh_dir_paths = install_dir_paths
+        self.wazuh_dir_paths.update({'all': '/var/ossec/'})
 
     def __set_local_internal_options(self, hosts):
         """Private method that set the local internal options in the hosts passed by parameter
@@ -38,10 +44,16 @@ class TestLauncher:
                 hosts (list(str)): list of hosts aliases to index the dict attribute wazuh_dir_paths and extract the
                                   wazuh installation path
         """
-        local_internal_options = '\n'.join(self.DEBUG_OPTIONS)
+        local_internal_path = ""
+        local_internal_options = "\n".join(self.DEBUG_OPTIONS)
         playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
 
-        local_internal_path = '/var/ossec/etc/local_internal_options.conf'
+        if hosts in self.wazuh_dir_paths:
+            local_internal_path += os.path.join(self.wazuh_dir_paths[hosts], '')
+        else:
+            local_internal_path += self.wazuh_dir_paths['all']
+
+        local_internal_path += 'etc/local_internal_options.conf'
 
         set_local_internal_opts = {'lineinfile': {'path': local_internal_path,
                                    'line': local_internal_options}}

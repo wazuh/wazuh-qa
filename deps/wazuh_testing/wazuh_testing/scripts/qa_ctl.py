@@ -3,14 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import argparse
 import os
-import yaml
-
-from time import sleep
 from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
 from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
-
+import yaml
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
@@ -41,8 +38,6 @@ def main():
                 instance_handler.run()
 
             if PROVISION_KEY in yaml_config:
-                if DEPLOY_KEY in yaml_config:
-                    sleep(5)  # If machines are deployed, wait 5 seconds before connecting
                 provision_dict = yaml_config[PROVISION_KEY]
                 qa_provisioning = QAProvisioning(provision_dict)
                 qa_provisioning.process_inventory_data()
@@ -50,8 +45,10 @@ def main():
 
             if TEST_KEY in yaml_config:
                 test_dict = yaml_config[TEST_KEY]
-                tests_runner = RunQATests(test_dict)
-                test_launcher = TestLauncher(tests_runner.tests, tests_runner.inventory_file_path)
+                qa_test = RunQATests(test_dict)
+                test_launcher = TestLauncher(tests=qa_test.tests,
+                                             ansible_inventory_path=qa_provisioning.inventory_file_path,
+                                             install_dir_paths=qa_provisioning.wazuh_installation_paths)
                 test_launcher.run()
 
         finally:
