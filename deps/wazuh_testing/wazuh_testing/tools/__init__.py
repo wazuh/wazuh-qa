@@ -10,6 +10,7 @@ import subprocess
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     PREFIX = os.path.join('c:', os.sep)
@@ -38,8 +39,10 @@ else:
         PREFIX = os.sep
 
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
+    LOCAL_INTERNAL_OPTIONS_RELATIVE = os.path.join('etc', 'local_internal_options.conf')
 
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
+    LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, LOCAL_INTERNAL_OPTIONS_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
