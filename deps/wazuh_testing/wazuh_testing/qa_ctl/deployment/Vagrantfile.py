@@ -4,22 +4,13 @@
 from pathlib import Path
 import os
 import json
+import logging
 
 
 class Vagrantfile():
     """Class to handle Vagrantfile creation in runtime. This class will use a template (specified in TEMPLATE_FILE
-        constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
-        format.
-
-    Args:
-        file_path (str): Path where the vagrantfile will be stored.
-        box_image (str): URL for the box image or Vagrant Box.
-        vm_label (str): Label for the VM
-        vm_name (str): Name of the VM.
-        cpus (int): Number of CPU cores for the VM.
-        memory (int): Memory assigned to the VM (in MB).
-        system (str): Type of system (Linux, Windows, Solaris....).
-        private_ip (str): IP of the VM.
+       constant) to fill the `json_box` variable. This variable will have all the needed vagrant parameters in a JSON
+       format.
 
     Attributes:
         TEMPLATE_FILE (str): Path where the vagrantfile_template is stored.
@@ -27,12 +18,24 @@ class Vagrantfile():
         file_path (str): Path where the vagrantfile will be stored.
         vm_name (str): Name of the VM.
         file_path (str): Path where the vagrantfile will be stored.
-        box_image (str): URL for the box image or Vagrant Box.
+        box_image (str): Box name.
+        box_url (str) : URL for the box image or Vagrant Box.
         vm_label (str): Label for the VM
         vm_name (str): Name of the VM.
         cpus (int): Number of CPU cores for the VM.
         memory (int): Memory assigned to the VM (in MB).
-        system (str): Type of system (Linux, Windows, Solaris....).
+        system (str): Type of system (/Linux, /Windows, /Solaris....).
+                        It MUST start with '/' to assign properly the group in VirtualBox.
+    Args:
+        file_path (str): Path where the vagrantfile will be stored.
+        box_image (str): Box name.
+        vm_label (str): Label for the VM.
+        vm_name (str): Name of the VM.
+        cpus (int): Number of CPU cores for the VM.
+        memory (int): Memory assigned to the VM (in MB).
+        system (str): Type of system (/Linux, /Windows, /Solaris....).
+                        It MUST start with '/' to assign properly the group in VirtualBox.
+        private_ip (str): IP of the VM.
     """
     TEMPLATE_FILE = os.path.join(
         Path(__file__).parent, 'vagrantfile_template.txt')
@@ -47,15 +50,25 @@ class Vagrantfile():
         self.memory = memory
         self.system = f'/{system}'
         self.private_ip = private_ip
+        self.box_url = self.__get_box_url()
+
+    def __get_box_url(self):
+        box_mapping = {
+            'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu20_04.box',
+            'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box'
+        }
+
+        try:
+            return box_mapping[self.box_image]
+        except KeyError:
+            logging.warning('Using a box not tested')
+            return None
 
     def __str__(self):
-        """Get the parameters in JSON format.
-
-        Returns:
-            (str): String in JSON format with the class parameters.
-        """
+        """To str method. It will print the dictionary in JSON format."""
         parameters = {
             'box_image': self.box_image,
+            'box_url': self.box_url,
             'vm_label': self.vm_label,
             'cpus': self.cpus,
             'memory': self.memory,
@@ -65,17 +78,16 @@ class Vagrantfile():
         return json.dumps({self.vm_name: parameters})
 
     def read_vagrantfile_template(self):
-        """Read the vagrantfile template located in self.TEMPLATEFILE constant
+        """Function that will read the vagrantfile template located in self.TEMPLATEFILE constant
 
         Returns:
-            (list): List with the content of the template vagrant template."""
+            List: List with the content of the template vagrant template."""
         with open(self.TEMPLATE_FILE, 'r') as template_fd:
             return template_fd.readlines()
 
     def write_vagrantfile(self):
         """Replace the self.REPLACE_PATTERN line with a string with the parameters in JSON format and write the new
-            contents in self.file_path file.
-        """
+           contents in self.file_path file."""
         read_lines = self.read_vagrantfile_template()
         replace_line = read_lines.index(self.REPLACE_PATTERN)
         read_lines[replace_line] = self.REPLACE_PATTERN.format(
