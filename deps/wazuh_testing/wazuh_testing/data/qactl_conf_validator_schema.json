@@ -175,60 +175,56 @@
                 "wazuh_deployment": {
                   "type": "object",
                   "required": [
-                    "wazuh_installation"
+                    "type",
+                    "target",
+                    "installation_files_path"
                   ],
                   "properties": {
-                    "wazuh_installation": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "target",
-                        "installation_files_path"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": ["sources", "package"]
-                        },
-                        "target": {
-                          "type": "string",
-                          "enum": ["manager", "agent"]
-                        },
-                        "manager_ip": {
-                          "type": "string"
-                        },
-                        "wazuh_branch": {
-                          "type": "string"
-                        },
-                        "local_package_path": {
-                          "type": "string"
-                        },
-                        "installation_files_path": {
-                          "type": "string"
-                        },
-                        "wazuh_install_path": {
-                          "type": "string",
-                          "default": "/var/ossec"
-                        }
-                      },
-                      "allOf": [
-                        {
-                          "if": {
-                            "properties": {"type": {"const": "sources"}}
-                          },
-                          "then": {"required": ["wazuh_branch"]},
+                    "type": {
+                      "type": "string",
+                      "enum": ["sources", "package"]
+                    },
+                    "target": {
+                      "type": "string",
+                      "enum": ["manager", "agent"]
+                    },
+                    "manager_ip": {
+                      "type": "string"
+                    },
+                    "wazuh_branch": {
+                      "type": "string"
+                    },
+                    "local_package_path": {
+                      "type": "string"
+                    },
+                    "installation_files_path": {
+                      "type": "string"
+                    },
+                    "wazuh_install_path": {
+                      "type": "string",
+                      "default": "/var/ossec"
+                    },
 
-                          "else": {"required": ["local_package_path"]}
-                        },
-                        {
-                          "if": {
-                            "properties": {"target": {"const": "agent"}}
-                          },
-                          "then": {"required": ["manager_ip"]}       
-                        }        
-                      ]
+                    "health_check": {
+                      "type": "boolean"
                     }
-                  }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {"type": {"const": "sources"}}
+                      },
+                      "then": {"required": ["wazuh_branch"]},
+
+                      "else": {"required": ["local_package_path"]}
+                    },
+                    {
+                      "if": {
+                        "properties": {"target": {"const": "agent"}}
+                      },
+                      "then": {"required": ["manager_ip"]}       
+                    }        
+                  ]
                 },
                 "qa_framework": {
                   "type": "object",
