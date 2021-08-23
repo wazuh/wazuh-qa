@@ -1,10 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
-from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
 import ipaddress
 import docker
+
+from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
+from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
+from wazuh_testing.tools.thread_executor import ThreadExecutor
 
 
 class QAInfraestructure:
@@ -87,23 +89,43 @@ class QAInfraestructure:
 
     def run(self):
         """Execute the run method on every configured instance."""
-        for instance in self.instances:
-            instance.run()
+        runner_threads = [ThreadExecutor(instance.run) for instance in self.instances]
+
+        for runner_thread in runner_threads:
+            runner_thread.start()
+
+        for runner_thread in runner_threads:
+            runner_thread.join()
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
-        for instance in self.instances:
-            instance.halt()
+        runner_threads = [ThreadExecutor(instance.halt) for instance in self.instances]
+
+        for runner_thread in runner_threads:
+            runner_thread.start()
+
+        for runner_thread in runner_threads:
+            runner_thread.join()
 
     def restart(self):
         """Execute the 'restart' method on every configured instance."""
-        for instance in self.instances:
-            instance.restart()
+        runner_threads = [ThreadExecutor(instance.restart) for instance in self.instances]
+
+        for runner_thread in runner_threads:
+            runner_thread.start()
+
+        for runner_thread in runner_threads:
+            runner_thread.join()
 
     def destroy(self):
         """Execute the 'destroy' method on every configured instance."""
-        for instance in self.instances:
-            instance.destroy()
+        runner_threads = [ThreadExecutor(instance.destroy) for instance in self.instances]
+
+        for runner_thread in runner_threads:
+            runner_thread.start()
+
+        for runner_thread in runner_threads:
+            runner_thread.join()
 
         if self.docker_network:
             try:
