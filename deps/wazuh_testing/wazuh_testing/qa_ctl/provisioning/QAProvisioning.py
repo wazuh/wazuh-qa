@@ -1,4 +1,4 @@
-
+from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
@@ -9,32 +9,41 @@ from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramewo
 
 
 class QAProvisioning():
+    """Class to control different options and instances to provisioning with Wazuh and QA Framework.
 
-    def __init__(self, infra_obj):
-        self.infra_obj = infra_obj
+    Attributes:
+        provision_info (dict): Dict with all the info needed coming from config file.
+        instances_list (list): List with every instance (each host) needed to build the ansible inventory.
+        group_dict (dict): Dict with groups and every host belonging to them.
+        host_list (list): List with every host given in config file.
+        inventory_file_path (string): Path of the inventory file generated.
+        wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
+
+    Args:
+        provision_info (dict): Dict with all the info needed coming from config file.
+        instances_list (list): List with every instance (each host) needed to build the ansible inventory.
+        group_dict (dict): Dict with groups and every host belonging to them.
+        host_list (list): List with every host given in config file.
+        inventory_file_path (string): Path of the inventory file generated.
+        wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
+    """
+    def __init__(self, provision_info):
+        self.provision_info = provision_info
         self.instances_list = []
-        self.group_list = {}
+        self.group_dict = {}
         self.host_list = []
         self.inventory_file_path = None
         self.wazuh_installation_paths = {}
 
-    def process_inventory_data(self):
-        for root_key, root_value in self.infra_obj.items():
-            if root_key == "hosts":
-                for _, host_value in root_value.items():
-                    for module_key, module_value in host_value.items():
-                        if module_key == "host_info":
-                            current_host = module_value['host']
-                            if current_host:
-                                self.instances_list.append(self.__read_ansible_instance(module_value))
-            elif root_key == "groups":
-                self.group_list.update(self.infra_obj[root_key])
-
-        inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
-                                              ansible_groups=self.group_list)
-        self.inventory_file_path = inventory_instance.inventory_file_path
-
     def __read_ansible_instance(self, host_info):
+        """Read every host info and generate the AnsibleInstance object.
+
+        Attributes:
+            host_info (dict): Dict with the host info needed coming from config file.
+
+        Returns:
+            instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
+        """
         extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
         private_key_path = None if 'local_private_key_file_path' not in host_info \
                                    else host_info['local_private_key_file_path']
@@ -46,8 +55,26 @@ class QAProvisioning():
                                    ansible_python_interpreter=host_info['ansible_python_interpreter'])
         return instance
 
+    def process_inventory_data(self):
+        """Process config file info to generate the ansible inventory file."""
+        for root_key, root_value in self.provision_info.items():
+            if root_key == "hosts":
+                for _, host_value in root_value.items():
+                    for module_key, module_value in host_value.items():
+                        if module_key == "host_info":
+                            current_host = module_value['host']
+                            if current_host:
+                                self.instances_list.append(self.__read_ansible_instance(module_value))
+            elif root_key == "groups":
+                self.group_dict.update(self.provision_info[root_key])
+
+        inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
+                                              ansible_groups=self.group_dict)
+        self.inventory_file_path = inventory_instance.inventory_file_path
+
     def process_deployment_data(self):
-        for _, host_value in self.infra_obj['hosts'].items():
+        """Process config file info to generate all the tasks needed for deploy Wazuh"""
+        for _, host_value in self.provision_info['hosts'].items():
             current_host = host_value['host_info']['host']
             if 'wazuh_deployment' in host_value:
                 deploy_info = host_value['wazuh_deployment']['wazuh_installation']
@@ -91,6 +118,10 @@ class QAProvisioning():
                                                             install_mode=install_type, hosts=current_host)
 
                 deployment_instance.install()
+                # Wait for Wazuh initialization before health_check
+                sleep(60)
+                deployment_instance.health_check()
+
                 self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
             if 'qa_framework' in host_value:

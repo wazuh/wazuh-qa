@@ -1,6 +1,3 @@
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-
 class TestResult:
     """ The class holds the reports resulting from the execution of one battery of tests.
 

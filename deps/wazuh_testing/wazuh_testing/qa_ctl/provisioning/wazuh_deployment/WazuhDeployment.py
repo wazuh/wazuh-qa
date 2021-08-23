@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 import os
+from tempfile import gettempdir
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 
@@ -27,7 +28,7 @@ class WazuhDeployment(ABC):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
     """
-    def __init__(self, installation_files_path, configuration=None, inventory_file_path='/tmp/inventory.yaml',
+    def __init__(self, installation_files_path, inventory_file_path, configuration=None,
                  install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None):
 
         self.installation_files_path = installation_files_path
@@ -64,7 +65,7 @@ class WazuhDeployment(ABC):
 
             tasks_list.append(AnsibleTask({
                 'name': 'Executing "install.sh" script to build and install Wazuh',
-                'shell': './install.sh > /tmp/wazuh_install_log.txt',
+                'shell': f"./install.sh > {gettempdir()}/wazuh_install_log.txt",
                 'args': {'chdir': f'{self.installation_files_path}'},
                 'when': 'ansible_system == "Linux"'}))
 
