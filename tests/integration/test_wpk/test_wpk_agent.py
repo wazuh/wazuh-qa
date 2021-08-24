@@ -346,6 +346,10 @@ def prepare_agent_version(get_configuration):
                             '-C', '/'])
 
 
+mark_skip_agentLinux = pytest.mark.skipif(
+    pytest.mark.linux and pytest.mark.agent, reason="It will be blocked by wazuh/wazuh#9763")
+
+
 @mark_skip_agentLinux
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
