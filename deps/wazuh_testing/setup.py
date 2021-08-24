@@ -27,7 +27,8 @@ setup(name='wazuh_testing',
                                       'tools/macos_log/log_generator.m',
                                       'qa_ctl/deployment/dockerfiles/*',
                                       'qa_ctl/deployment/vagrantfile_template.txt',
-                                      'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2'
+                                      'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
+                                      'data/qactl_conf_validator_schema.json'
                                       ]
                     },
       entry_points={

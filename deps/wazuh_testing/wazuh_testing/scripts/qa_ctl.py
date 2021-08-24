@@ -20,7 +20,8 @@ _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fil
 
 
 def validate_conf(configuration):
-    schema_file = 'qactl_conf_validator_schema.json'
+    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
+    schema_file = os.path.join(data_path, 'qactl_conf_validator_schema.json')
 
     with open(os.path.join(_data_path, schema_file), 'r') as f:
         schema = json.load(f)
