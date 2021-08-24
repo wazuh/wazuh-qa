@@ -88,24 +88,12 @@
                     "remove": {
                       "type": "boolean"
                     },
+
+                    "dockerfile": {
+                      "type": "string"
+                    },
                     "ports": {
-                      "patternProperties":{
-                        "^port[0-9]*$":{
-                          "type": "object",
-                          "required": [
-                            "binded_port",
-                            "host_port"
-                          ],
-                          "properties": {
-                            "binded_port": {
-                              "type": "string"
-                            },
-                            "host_port":{
-                              "type":"integer"
-                            }
-                          }
-                        }
-                      }
+                      "type": "object"
                     },
                     "detach": {
                       "type": "boolean",
