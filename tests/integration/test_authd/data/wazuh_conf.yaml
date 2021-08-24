@@ -3,6 +3,7 @@
       - all
       apply_to_modules:
       - test_authd
+      - test_authd_key_hash
       sections:
       - section: auth
         elements:
@@ -110,7 +111,7 @@
       - section: auth
         elements:
         - disabled:
-            value: 'no'        
+            value: 'no'
         - purge:
             value: 'no'
     # conf 3
