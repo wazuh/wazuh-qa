@@ -122,12 +122,9 @@ class QAProvisioning():
                 deployment_instance.install()
 
                 if health_check:
-                    logging.info('Waiting for Wazuh installation')
+                    # Wait for Wazuh initialization before health_check
                     sleep(60)
-                    logging.info('Performing health check')
                     deployment_instance.health_check()
-                else:
-                    logging.warning('Health check not performed')
 
                 self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
