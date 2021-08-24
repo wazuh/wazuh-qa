@@ -5,6 +5,8 @@ from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import Loca
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
 
 
@@ -38,7 +40,7 @@ class QAProvisioning():
     def __read_ansible_instance(self, host_info):
         """Read every host info and generate the AnsibleInstance object.
 
-        Attributes:
+        Args:
             host_info (dict): Dict with the host info needed coming from config file.
 
         Returns:
@@ -54,6 +56,19 @@ class QAProvisioning():
                                    ssh_private_key_file_path=private_key_path,
                                    ansible_python_interpreter=host_info['ansible_python_interpreter'])
         return instance
+
+    def check_hosts_connection(self, hosts='all'):
+        """Check that all hosts are reachable via SSH connection
+
+        Args:
+            hosts (str): Hosts to check.
+        """
+        wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+                                           'wait_for_connection': {'delay': 5, 'timeout': 60}})
+
+        playbook_parameters = {'hosts': hosts, 'tasks_list': [wait_for_connection]}
+
+        AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
 
     def process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
