@@ -44,7 +44,7 @@ def main():
                 qa_provisioning = QAProvisioning(provision_dict)
                 qa_provisioning.process_inventory_data()
                 qa_provisioning.check_hosts_connection()
-                qa_provisioning.process_deployment_data()
+                qa_provisioning.provision()
 
             if TEST_KEY in yaml_config:
                 test_dict = yaml_config[TEST_KEY]

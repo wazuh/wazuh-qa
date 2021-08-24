@@ -87,45 +87,33 @@ class QAInfraestructure:
 
                     self.instances.append(docker_instance)
 
-    def run(self):
-        """Execute the run method on every configured instance."""
-        runner_threads = [ThreadExecutor(instance.run) for instance in self.instances]
+    def __threads_runner(self, threads):
+        """Auxiliary function to start and wait for threads
 
-        for runner_thread in runner_threads:
+        Args:
+            threads (list(ThreadExecutor)): Thread executors
+        """
+        for runner_thread in threads:
             runner_thread.start()
 
-        for runner_thread in runner_threads:
+        for runner_thread in threads:
             runner_thread.join()
+
+    def run(self):
+        """Execute the run method on every configured instance."""
+        self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
-        runner_threads = [ThreadExecutor(instance.halt) for instance in self.instances]
-
-        for runner_thread in runner_threads:
-            runner_thread.start()
-
-        for runner_thread in runner_threads:
-            runner_thread.join()
+        self.__threads_runner([ThreadExecutor(instance.halt) for instance in self.instances])
 
     def restart(self):
         """Execute the 'restart' method on every configured instance."""
-        runner_threads = [ThreadExecutor(instance.restart) for instance in self.instances]
-
-        for runner_thread in runner_threads:
-            runner_thread.start()
-
-        for runner_thread in runner_threads:
-            runner_thread.join()
+        self.__threads_runner([ThreadExecutor(instance.restart) for instance in self.instances])
 
     def destroy(self):
         """Execute the 'destroy' method on every configured instance."""
-        runner_threads = [ThreadExecutor(instance.destroy) for instance in self.instances]
-
-        for runner_thread in runner_threads:
-            runner_thread.start()
-
-        for runner_thread in runner_threads:
-            runner_thread.join()
+        self.__threads_runner([ThreadExecutor(instance.destroy) for instance in self.instances])
 
         if self.docker_network:
             try:
