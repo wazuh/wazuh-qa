@@ -10,6 +10,8 @@ Vagrant.configure("2") do |config|
   box.each do |vm_name, vm_parameters|
     config.vm.define "#{vm_name}" do |node|
       node.vm.box = "#{vm_parameters['box_image']}"
+      config.ssh.insert_key = false
+      node.vm.synced_folder ".", "/vagrant", disabled: true
       config.vm.box_url = "#{vm_parameters['box_url']}"
       node.vm.network :private_network, ip: "#{vm_parameters['private_ip']}"
       node.vm.hostname = "#{vm_name}"
