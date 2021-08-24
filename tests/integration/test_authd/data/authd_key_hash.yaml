@@ -1,0 +1,72 @@
+# Tests with agent's key hash. Key generated
+-
+  name: 'Testing general parsing options with key hash 1'
+  description: 'Registering new agent with any hash'
+  test_case:
+  -
+    input: "OSSEC A:'NewUserWithKeyHash1' K:'123ABCD'"
+    output: "OSSEC K:'001 NewUserWithKeyHash1"
+-
+  name: 'Testing general parsing options with key hash 2'
+  description: 'Registering new agent with group, IP and any hash'
+  pre_existent_keys:
+    - '001 user1 any 48a99873149358e48b13273c4ad07c44ed402bcb71fc94869f3e76b2f27637db'
+  groups:
+    - 'GroupName'
+  test_case:
+  -
+    input: "OSSEC A:'NewUserWithKeyHash2' G:'GroupName' IP:'100.100.10.1' K:'123ABCD'"
+    output: "OSSEC K:'002 NewUserWithKeyHash2"
+-
+  name: 'Testing general parsing options with key hash 3'
+  description: 'Testing group parsing with key and enrollment of an existing agent with wrong key hash'
+  pre_existent_keys:
+    - '001 user1 any 48a99873149358e48b13273c4ad07c44ed402bcb71fc94869f3e76b2f27637db'
+  groups:
+    - 'GroupName'
+  test_case:
+  -
+    input: "OSSEC A:'user1' G:'GroupName' K:'123ABCD'"
+    output: "OSSEC K:'002 user1"
+-
+  name: 'Testing general parsing options with key hash 4'
+  description: 'Testing group/IP parsing with key and enrollment of an existing agent with wrong key hash'
+  pre_existent_keys:
+    - '001 user1 any 48a99873149358e48b13273c4ad07c44ed402bcb71fc94869f3e76b2f27637db'
+  groups:
+    - 'GroupName'
+  test_case:
+  -
+    input: "OSSEC A:'user1' G:'GroupName' IP:'10.10.10.11' K:'123ABCD'"
+    output: "OSSEC K:'002 user1"
+-
+  name: 'Testing general parsing options with key hash 5'
+  description: 'Testing group/IP parsing with key and enrollment of an existing IP with wrong key hash'
+  pre_existent_keys:
+    - '001 user1 10.10.10.11 48a99873149358e48b13273c4ad07c44ed402bcb71fc94869f3e76b2f27637db'
+  groups:
+    - 'GroupName'
+  test_case:
+  -
+    input: "OSSEC A:'NewNameExistentIP' G:'GroupName' IP:'10.10.10.11' K:'123ABCD'"
+    output: "OSSEC K:'002 NewNameExistentIP"
+
+# Testing with agent's key hash. Key denied
+-
+  name: 'Testing general parsing options with key hash 6'
+  description: 'Trying to enroll an existing agent with the right hash. Key denied'
+  pre_existent_keys:
+    - '002 user2 any ba91912059668f3229e852089cef1ced0368f9df4f25b71c6a00d2319eb8010c'
+  test_case:
+  -
+    input: "OSSEC A:'user2' K:'13cdb438b53c1f46ec3edebb7c790c87a54b3c0d'"
+    output: "ERROR: Duplicated agent name:"
+-
+  name: 'Testing general parsing options with key hash 7'
+  description: 'Trying to enroll an existing IP with right key hash. Key denied'
+  pre_existent_keys:
+    - '003 user3 192.168.0.100 fbc01326f0d13300d418085f826d986d06b6bd1e22257dca84d7477890ddc45c'
+  test_case:
+  -
+    input: "OSSEC A:'userx' IP:'192.168.0.100' K:'aa06c24575fe8c474cd0c5386577eb974928dce3'"
+    output: "ERROR: Duplicated IP:"
