@@ -119,6 +119,9 @@ class Pytest(Test):
 
         pytest_command += f"--html='{reports_directory}/{html_report_file_name}'"
 
+        create_path_task = {'name': f"Create {reports_directory} path",
+                                        'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'}}
+
         execute_test_task = {'name': f"Launch pytest in {self.tests_run_dir}",
                              'shell': pytest_command, 'vars':
                              {'chdir': self.tests_run_dir},
@@ -137,7 +140,8 @@ class Pytest(Test):
         fetch_html_report = {'name': f"Move {html_report_file_name} from {html_report_file_path}"
                              f" to {self.tests_result_path}",
                              'fetch': {'src': html_report_file_path,
-                                       'dest': f"{self.tests_result_path}/", 'flat': 'yes'}}
+                                       'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+                             'ignore_errors': 'yes'}
 
         create_assets_directory = {'name': f"Create {assets_dest_directory} directory",
                                    'local_action': {'module': 'ansible.builtin.file',
@@ -148,22 +152,26 @@ class Pytest(Test):
         compress_assets_folder = {'name': "Compress assets folder",
                                   'community.general.archive': {'path': assets_src_directory,
                                                                 'dest': zip_src_path,
-                                                                'format': 'zip'}}
+                                                                'format': 'zip'},
+                                  'ignore_errors': 'yes'}
 
         fetch_compressed_assets = {'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
                                    'fetch': {'src': zip_src_path,
-                                             'dest': f"{self.tests_result_path}/", 'flat': 'yes'}}
+                                             'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+                                   'ignore_errors': 'yes'}
 
         uncompress_assets = {'name': f"Uncompress {assets_zip} in {assets_dest_directory}",
                              'local_action': {'module': 'unarchive',
                                               'src': zip_dest_path,
                                               'dest': assets_dest_directory},
-                             'become': False}
+                             'become': False,
+                             'ignore_errors': 'yes'}
 
-        ansible_tasks = [AnsibleTask(execute_test_task), AnsibleTask(create_plain_report),
-                         AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),
-                         AnsibleTask(create_assets_directory), AnsibleTask(compress_assets_folder),
-                         AnsibleTask(fetch_compressed_assets), AnsibleTask(uncompress_assets)]
+        ansible_tasks = [AnsibleTask(create_path_task), AnsibleTask(execute_test_task),
+                         AnsibleTask(create_plain_report), AnsibleTask(fetch_plain_report),
+                         AnsibleTask(fetch_html_report), AnsibleTask(create_assets_directory),
+                         AnsibleTask(compress_assets_folder), AnsibleTask(fetch_compressed_assets),
+                         AnsibleTask(uncompress_assets)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, "hosts": self.hosts}
