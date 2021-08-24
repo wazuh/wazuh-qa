@@ -81,6 +81,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
+@pytest.mark.skip(reason="Test disabled by #1678 until #1593 and #8746 are fixed")
 def test_agentd_state_config(test_case, set_local_internal_options):
 
     control_service('stop', 'wazuh-agentd')
