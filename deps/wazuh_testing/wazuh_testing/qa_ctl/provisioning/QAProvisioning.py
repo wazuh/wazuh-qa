@@ -38,6 +38,8 @@ class QAProvisioning():
         self.inventory_file_path = None
         self.wazuh_installation_paths = {}
 
+        self.__process_inventory_data()
+
     def __read_ansible_instance(self, host_info):
         """Read every host info and generate the AnsibleInstance object.
 
@@ -57,6 +59,23 @@ class QAProvisioning():
                                    ssh_private_key_file_path=private_key_path,
                                    ansible_python_interpreter=host_info['ansible_python_interpreter'])
         return instance
+
+    def __process_inventory_data(self):
+        """Process config file info to generate the ansible inventory file."""
+        for root_key, root_value in self.provision_info.items():
+            if root_key == "hosts":
+                for _, host_value in root_value.items():
+                    for module_key, module_value in host_value.items():
+                        if module_key == "host_info":
+                            current_host = module_value['host']
+                            if current_host:
+                                self.instances_list.append(self.__read_ansible_instance(module_value))
+            elif root_key == "groups":
+                self.group_dict.update(self.provision_info[root_key])
+
+        inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
+                                              ansible_groups=self.group_dict)
+        self.inventory_file_path = inventory_instance.inventory_file_path
 
     def __process_config_data(self, host_provision_info):
         """Process config file info to generate all the tasks needed for deploy Wazuh
@@ -126,7 +145,7 @@ class QAProvisioning():
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
 
-    def check_hosts_connection(self, hosts='all'):
+    def __check_hosts_connection(self, hosts='all'):
         """Check that all hosts are reachable via SSH connection
 
         Args:
@@ -139,25 +158,10 @@ class QAProvisioning():
 
         AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
 
-    def process_inventory_data(self):
-        """Process config file info to generate the ansible inventory file."""
-        for root_key, root_value in self.provision_info.items():
-            if root_key == "hosts":
-                for _, host_value in root_value.items():
-                    for module_key, module_value in host_value.items():
-                        if module_key == "host_info":
-                            current_host = module_value['host']
-                            if current_host:
-                                self.instances_list.append(self.__read_ansible_instance(module_value))
-            elif root_key == "groups":
-                self.group_dict.update(self.provision_info[root_key])
-
-        inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
-                                              ansible_groups=self.group_dict)
-        self.inventory_file_path = inventory_instance.inventory_file_path
-
-    def provision(self):
+    def run(self):
         """Provision all hosts in a parallel way"""
+        self.__check_hosts_connection()
+
         provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
                                 for _, host_value in self.provision_info['hosts'].items()]
 

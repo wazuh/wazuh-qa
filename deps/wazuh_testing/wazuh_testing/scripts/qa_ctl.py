@@ -8,7 +8,6 @@ import yaml
 from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
-from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 
 
 DEPLOY_KEY = 'deployment'
@@ -42,15 +41,12 @@ def main():
             if PROVISION_KEY in yaml_config:
                 provision_dict = yaml_config[PROVISION_KEY]
                 qa_provisioning = QAProvisioning(provision_dict)
-                qa_provisioning.process_inventory_data()
-                qa_provisioning.check_hosts_connection()
-                qa_provisioning.provision()
+                qa_provisioning.run()
 
             if TEST_KEY in yaml_config:
                 test_dict = yaml_config[TEST_KEY]
                 tests_runner = RunQATests(test_dict)
-                test_launcher = TestLauncher(tests_runner.tests, tests_runner.inventory_file_path)
-                test_launcher.run()
+                tests_runner.run()
 
         finally:
             if arguments.destroy:
