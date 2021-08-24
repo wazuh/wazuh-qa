@@ -81,7 +81,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
+@pytest.mark.skipif(pytest.mark.win32, reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
 def test_agentd_state_config(test_case, set_local_internal_options):
 
     control_service('stop', 'wazuh-agentd')
