@@ -10,7 +10,6 @@ license: This program is free software; you can redistribute it
 import ast
 import os
 import re
-import json
 import yaml
 from lib.PytestWrap import PytestWrap
 from lib.Utils import remove_inexistent
@@ -34,7 +33,7 @@ class CodeParser:
 
     def is_documentable_function(self, function):
         """
-        brief: Checks if a specific method match with the regexes to be documented.
+        brief: Checks if a specific method matches with the regexes to be documented.
         args:
             -"function (_ast.FunctionDef): Function class with all the information of the method"
         returns: "boolean: True if the method should be documentd. False otherwise"
@@ -46,7 +45,7 @@ class CodeParser:
 
     def remove_ignored_fields(self, doc):
         """
-        brief: Removes the fields from a parsed test file to delete the fields that are not mandatories or optionals
+        brief: Removes the fields from a parsed test file to delete the fields that are not mandatory or optional.
         args:
             -"doc (dict): The parsed documentation block"
         """

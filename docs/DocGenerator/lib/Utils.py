@@ -54,7 +54,7 @@ def remove_inexistent(source, check_list, stop_list=None):
 
 def get_keys_dict(_dic):
     """
-        brief: Flat a dictionary into a list of its keys
+        brief: Flat a dictionary into a list of its keys.
         args:
             - "_dic (dict): The source dictionary to be flattened."
     """
@@ -77,7 +77,7 @@ def get_keys_dict(_dic):
 
 def get_keys_list(_list):
     """
-        brief: Flat a list of dictionaries into a list of its keys
+        brief: Flat a list of dictionaries into a list of its keys.
         args:
             - "_list (list): The source list to be flattened."
     """
@@ -99,7 +99,7 @@ def get_keys_list(_list):
 
 def find_item(search_item, check):
     """
-        brief: Search for a specific key into a list of dictionaries or values
+        brief: Search for a specific key into a list of dictionaries or values.
         args:
               - "search_item (string): The key to be found."
               - "check (list): A list of dictionaries or values where the key should be found."
@@ -150,7 +150,7 @@ def check_missing_field(source, check):
 
 def clean_folder(folder):
     """
-        brief: Completely cleans the content into a folder.
+        brief: Completely cleans the content of a folder.
         args:
             - "folder (string): The path of the folder to be cleaned."
     """

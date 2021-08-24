@@ -88,7 +88,7 @@ class Config():
 
     def _read_function_regex(self):
         """
-        brief: Reads from the config filefile the regexes used to identify a tes method.
+        brief: Reads from the config file the regexes used to identify a test method.
         """
         if not 'Function regex' in self._config_data:
             logging.error("Config function regex is empty")
