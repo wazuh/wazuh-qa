@@ -47,7 +47,7 @@ class AnsibleInventory():
                         'ansible_python_interpreter': instance.ansible_python_interpreter,
                         'ansible_ssh_private_key_file': instance.ssh_private_key_file_path,
                         'vars': instance.host_vars,
-                        'ansible_ssh_common_args': "-o StrictHostKeyChecking=no"
+                        'ansible_ssh_common_args': "-o UserKnownHostsFile=/dev/null"
                         }
 
             # Remove ansible vars with None value
