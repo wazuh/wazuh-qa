@@ -71,19 +71,19 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
-
         # Paths used below
         assets_folder = 'assets/'
+        reports_folder = 'reports/'
         assets_zip = "assets.zip"
-        html_report = "/home/vagrant/"
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
         playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
-        plain_report_file_path = os.path.join(self.tests_run_dir, plain_report_file_name)
-        html_report_file_path = os.path.join(html_report, html_report_file_name)
-        assets_dest_directory = os.path.join(self.tests_result_path, assets_folder)
-        assets_src_directory = os.path.join(html_report, assets_folder)
-        zip_src_path = os.path.join(html_report, assets_zip)
+        reports_directory = os.path.join(self.tests_run_dir, reports_folder)
+        plain_report_file_path = os.path.join(reports_directory, plain_report_file_name)
+        html_report_file_path = os.path.join(reports_directory, html_report_file_name)
+        assets_dest_directory = os.path.join(reports_directory, assets_folder)
+        assets_src_directory = os.path.join(reports_directory, assets_folder)
+        zip_src_path = os.path.join(reports_directory, assets_zip)
         zip_dest_path = os.path.join(self.tests_result_path, assets_zip)
 
         if self.tests_result_path is None:
@@ -115,7 +115,7 @@ class Pytest(Test):
         if self.markers:
             pytest_command += f"-m {' '.join(self.markers)} "
 
-        pytest_command += f"--html='{html_report_file_name}'"
+        pytest_command += f"--html='{reports_directory}/{html_report_file_name}'"
 
         execute_test_task = {'name': f"Launch pytest in {self.tests_run_dir}",
                              'shell': pytest_command, 'vars':
