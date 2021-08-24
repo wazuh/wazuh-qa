@@ -7,6 +7,8 @@ import pytest
 
 import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from urllib3.exceptions import InsecureRequestWarning
+import requests
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -49,6 +51,7 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     Raises:
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected error message.
     """
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
