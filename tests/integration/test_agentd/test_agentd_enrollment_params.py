@@ -178,7 +178,7 @@ def check_log_error_conf(msg):
 
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-@pytest.mark.skipif(pytest.mark.win32, reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
+@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     global remoted_server
     print(f'Test: {test_case["name"]}')
