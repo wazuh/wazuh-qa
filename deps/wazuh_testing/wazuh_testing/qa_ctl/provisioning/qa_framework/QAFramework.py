@@ -2,7 +2,8 @@ from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class QAFramework():
     """Encapsulates all the functionality regarding the preparation and installation of qa-framework
@@ -17,6 +18,7 @@ class QAFramework():
         qa_repository (str): Url to the QA repository.
         qa_branch (str): QA branch of the qa repository.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, workdir=gettempdir(), qa_repository='https://github.com/wazuh/wazuh-qa.git', qa_branch='master'):
         self.qa_repository = qa_repository
@@ -35,6 +37,8 @@ class QAFramework():
                                          'args': {'chdir': self.workdir}})
         ansible_tasks = [dependencies_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
+        QAFramework.LOGGER.debug(f"Installing python dependencies in {hosts} hosts.")
+
         AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
 
     def install_framework(self, inventory_file_path, hosts='all'):
@@ -48,6 +52,7 @@ class QAFramework():
                                               'args': {'chdir': f"{self.workdir}/deps/wazuh_testing"}})
         ansible_tasks = [install_framework_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks, 'become': True}
+        QAFramework.LOGGER.debug(f"Installing wazuh-qa framework in {hosts} hosts.")
 
         AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
 
@@ -65,5 +70,6 @@ class QAFramework():
                                                      'version': self.qa_branch}})
         ansible_tasks = [create_path_task, download_qa_repo_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
+        QAFramework.LOGGER.debug(f"Downloading qa-repository in {hosts} hosts")
 
         AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)

@@ -4,7 +4,8 @@ import yaml
 from tempfile import gettempdir
 
 from wazuh_testing.tools.time import get_current_timestamp
-
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class AnsiblePlaybook():
     """Class to create playbook file with a custom tasks list
@@ -29,6 +30,8 @@ class AnsiblePlaybook():
         playbook_vars (dict): Variables for playbook
         generate_file (bool): If True, write playbook in file.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, name='generic_playbook', tasks_list=None, playbook_file_path=None, hosts='all',
                  gather_facts=False, ignore_errors=False, become=False, playbook_vars=None, generate_file=True):
         self.name = name
@@ -70,4 +73,5 @@ class AnsiblePlaybook():
 
     def delete_playbook_file(self):
         if os.path.exists(self.playbook_file_path):
+            AnsiblePlaybook.LOGGER.debug(f"Removing {self.playbook_file_path} playbook")
             os.remove(self.playbook_file_path)

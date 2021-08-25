@@ -26,6 +26,7 @@ class AgentDeployment(WazuhDeployment):
         server_ip (string): Manager IP to connect.
     """
 
+
     def install(self):
         """Child method to install Wazuh in agent
 

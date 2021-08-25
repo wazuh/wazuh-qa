@@ -4,6 +4,8 @@ from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleOutput import AnsibleOutput
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class AnsibleRunner:
@@ -19,6 +21,8 @@ class AnsibleRunner:
         ansible_playbook_path (string): Path where is located the playbook file.
         private_data_dir (string): Path where the artifacts files (result files) will be stored.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=gettempdir()):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
@@ -30,6 +34,8 @@ class AnsibleRunner:
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
+        AnsibleRunner.LOGGER.debug(f"Running {self.ansible_playbook_path} ansible-playbook with "
+                                   f"{self.ansible_inventory_path} inventory")
         runner = ansible_runner.run(private_data_dir=self.private_data_dir, playbook=self.ansible_playbook_path,
                                     inventory=self.ansible_inventory_path)
         ansible_output = AnsibleOutput(runner)

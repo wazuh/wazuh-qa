@@ -1,4 +1,5 @@
 from time import sleep
+
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
@@ -9,6 +10,8 @@ from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunne
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
 from wazuh_testing.tools.thread_executor import ThreadExecutor
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class QAProvisioning():
@@ -30,6 +33,8 @@ class QAProvisioning():
         inventory_file_path (string): Path of the inventory file generated.
         wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, provision_info):
         self.provision_info = provision_info
         self.instances_list = []
@@ -62,6 +67,8 @@ class QAProvisioning():
 
     def __process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
+        QAProvisioning.LOGGER.debug('Processing inventory data from provisioning hosts info...')
+
         for root_key, root_value in self.provision_info.items():
             if root_key == "hosts":
                 for _, host_value in root_value.items():
@@ -83,6 +90,7 @@ class QAProvisioning():
         Args:
             host_provision_info (dict): Dicionary with host provisioning info
         """
+        QAProvisioning.LOGGER.debug('Processing provisioning data from hosts..')
         current_host = host_provision_info['host_info']['host']
 
         if 'wazuh_deployment' in host_provision_info:
@@ -151,6 +159,7 @@ class QAProvisioning():
         Args:
             hosts (str): Hosts to check.
         """
+        QAProvisioning.LOGGER.info('Checking hosts SSH connection...')
         wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
                                            'wait_for_connection': {'delay': 5, 'timeout': 60}})
 
@@ -161,9 +170,9 @@ class QAProvisioning():
     def run(self):
         """Provision all hosts in a parallel way"""
         self.__check_hosts_connection()
-
         provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
                                 for _, host_value in self.provision_info['hosts'].items()]
+        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances...")
 
         for runner_thread in provision_threads:
             runner_thread.start()

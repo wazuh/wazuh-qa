@@ -5,6 +5,8 @@ import os
 from tempfile import gettempdir
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class WazuhDeployment(ABC):
@@ -28,6 +30,8 @@ class WazuhDeployment(ABC):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, installation_files_path, inventory_file_path, configuration=None,
                  install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None):
 
@@ -46,6 +50,7 @@ class WazuhDeployment(ABC):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
+        WazuhDeployment.LOGGER.debug(f"Installing wazuh {install_type} via {self.install_mode} in {self.hosts} hosts..")
         tasks_list = []
         parent_path = Path(__file__).parent
         if self.install_mode == 'sources':
@@ -111,6 +116,7 @@ class WazuhDeployment(ABC):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
+        WazuhDeployment.LOGGER.debug(f"{command}ing wazuh service in {self.hosts} hosts")
         tasks_list = []
         service_name = install_type if install_type == 'agent' else 'manager'
         service_command = f'{command}ed' if command != 'stop' else 'stopped'
@@ -173,6 +179,7 @@ class WazuhDeployment(ABC):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
+        WazuhDeployment.LOGGER.debug(f"Doing wazuh deployment healthcheck in {self.hosts} hosts")
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors',
                                        'lineinfile': {'path': f'{self.install_dir_path}/logs/ossec.log',

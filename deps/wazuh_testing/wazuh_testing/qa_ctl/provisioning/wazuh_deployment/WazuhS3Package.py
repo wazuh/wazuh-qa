@@ -1,8 +1,10 @@
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhPackage import WazuhPackage
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class WazuhS3Package(WazuhPackage):
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, wazuh_target, installation_files_path, version, system, revision, repository, architecture):
         self.revision = revision
@@ -23,4 +25,5 @@ class WazuhS3Package(WazuhPackage):
                                                        'dest': self.installation_files_path},
                                            'register': 'download_state', 'retries': 6, 'delay': 10,
                                            'until': 'download_state is success'})
+        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
         super().download_installation_files(inventory_file_path, [download_s3_package], hosts)

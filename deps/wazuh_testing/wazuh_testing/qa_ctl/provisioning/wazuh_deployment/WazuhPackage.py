@@ -4,7 +4,6 @@ from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhInstallation import
 
 
 class WazuhPackage(WazuhInstallation, ABC):
-
     def __init__(self, version, system, wazuh_target, installation_files_path):
         self.version = version
         self.system = system
