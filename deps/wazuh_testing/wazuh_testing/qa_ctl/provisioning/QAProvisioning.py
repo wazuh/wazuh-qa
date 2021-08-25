@@ -2,6 +2,7 @@ from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhS3Package import WazuhS3Package
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
@@ -102,6 +103,8 @@ class QAProvisioning():
                 wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
                                              else deploy_info['wazuh_install_path']
                 wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
+                s3_package_url = None if 's3_package_url' not in deploy_info \
+                                            else deploy_info['s3_package_url']
                 local_package_path = None if 'local_package_path' not in deploy_info \
                                              else deploy_info['local_package_path']
                 manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
@@ -117,12 +120,18 @@ class QAProvisioning():
                     installation_files_parameters['wazuh_branch'] = wazuh_branch
                     installation_instance = WazuhSources(**installation_files_parameters)
                 if install_type == "package":
-                    installation_files_parameters['local_package_path'] = local_package_path
-                    installation_instance = LocalPackage(**installation_files_parameters)
-
-                remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                    if s3_package_url is None:
+                        installation_files_parameters['local_package_path'] = local_package_path
+                        installation_instance = LocalPackage(**installation_files_parameters)
+                        remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                            hosts=current_host)
+                    else:
+                        installation_files_parameters['s3_package_url'] = s3_package_url
+                        installation_instance = WazuhS3Package(**installation_files_parameters)
+                        remote_files_path = installation_instance.download_installation_files(s3_package_url, self.inventory_file_path,
                                                                                       hosts=current_host)
 
+     
                 if install_target == "agent":
                     deployment_instance = AgentDeployment(remote_files_path,
                                                           inventory_file_path=self.inventory_file_path,
