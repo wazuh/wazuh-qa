@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the enrollment daemon authd under different messages
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+metadata:
+    component:
+        - Manager
+    modules:
+        - Authd
+    daemons:
+        - authd
+    operating_system:
+        - Ubuntu
+        - CentOS
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Authd
+'''
 
 import os
 import subprocess
@@ -104,11 +124,18 @@ def set_up_groups_keys(request):
 def test_ossec_auth_messages_with_key_hash(set_up_groups_keys, get_configuration, configure_environment,
                                            configure_sockets_environment, connect_to_sockets_module,
                                            wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    """
+        test_logic:
+            "Check that every input message in authd port generates the adequate output"
 
-    Raises:
-        ConnectionResetError: if wazuh-authd does not send the response to the agent through the socket.
-        AssertionError: if the response does not match the expected message.
+        checks:
+            - The received output must match with expected
+            - The enrollment messages are parsed as expected
+            - The agent keys are denied if the hash is the same than the manager's
+
+        Raises:
+            - ConnectionResetError: if wazuh-authd does not send the response to the agent through the socket.
+            - AssertionError: if the response does not match the expected message.
     """
     test_case = set_up_groups_keys['test_case']
 
