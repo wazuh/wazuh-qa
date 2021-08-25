@@ -1,16 +1,18 @@
-from datetime import datetime
-import tempfile
 import os
+
+from datetime import datetime
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.run_tests.TestResult import TestResult
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.run_tests.Test import Test
+from wazuh_testing.tools.time import get_current_timestamp
 
 
 class Pytest(Test):
     """The class encapsulates the execution options of a specified set of tests and allows running them on the
-        remote host
+       remote host
 
     Args:
         tests_result_path(str): Path to the directory where the reports will be stored in the local machine
@@ -30,6 +32,7 @@ class Pytest(Test):
         hosts(list(), ['all']): List of hosts aliases where the tests will be runned
 
     Attributes:
+        tests_result_path(str): Path to the directory where the reports will be stored in the local machine
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
         tier (srt, None): List of tiers to be executed
@@ -44,7 +47,6 @@ class Pytest(Test):
         log_level(str, None): Log level to be set
         markers(list(str), None): Set of markers to be added to the test execution command
         hosts(list(), ['all']): List of hosts aliases where the tests will be runned
-
     """
 
     RUN_PYTEST = 'python3 -m pytest '
@@ -62,6 +64,11 @@ class Pytest(Test):
         self.log_level = log_level
         self.markers = markers
         self.hosts = hosts
+        self.tests_result_path = gettempdir() if tests_result_path is None else tests_result_path
+
+        if not os.path.exists(self.tests_result_path):
+            os.makedirs(self.tests_result_path)
+
         super().__init__(tests_path, tests_run_dir, tests_result_path)
 
     def run(self, ansible_inventory_path):
@@ -71,13 +78,13 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
-        # Paths used below
+
         assets_folder = 'assets/'
         reports_folder = 'reports/'
         assets_zip = "assets.zip"
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"
-        playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
+        playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
         reports_directory = os.path.join(self.tests_run_dir, reports_folder)
         plain_report_file_path = os.path.join(reports_directory, plain_report_file_name)
         html_report_file_path = os.path.join(reports_directory, html_report_file_name)
@@ -85,11 +92,6 @@ class Pytest(Test):
         assets_src_directory = os.path.join(reports_directory, assets_folder)
         zip_src_path = os.path.join(reports_directory, assets_zip)
         zip_dest_path = os.path.join(self.tests_result_path, assets_zip)
-
-        if self.tests_result_path is None:
-            self.tests_result_path = os.path.join(tempfile.gettempdir(), '')
-        else:
-            self.tests_result_path = os.path.join(self.tests_result_path, '')
 
         pytest_command = self.RUN_PYTEST
 
@@ -117,6 +119,9 @@ class Pytest(Test):
 
         pytest_command += f"--html='{reports_directory}/{html_report_file_name}'"
 
+        create_path_task = {'name': f"Create {reports_directory} path",
+                                        'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'}}
+
         execute_test_task = {'name': f"Launch pytest in {self.tests_run_dir}",
                              'shell': pytest_command, 'vars':
                              {'chdir': self.tests_run_dir},
@@ -130,12 +135,13 @@ class Pytest(Test):
         fetch_plain_report = {'name': f"Move {plain_report_file_name} from "
                               f"{plain_report_file_path} to {self.tests_result_path}",
                               'fetch': {'src': plain_report_file_path,
-                                        'dest': self.tests_result_path, 'flat': 'yes'}}
+                                        'dest': f"{self.tests_result_path}/", 'flat': 'yes'}}
 
         fetch_html_report = {'name': f"Move {html_report_file_name} from {html_report_file_path}"
                              f" to {self.tests_result_path}",
                              'fetch': {'src': html_report_file_path,
-                                       'dest': self.tests_result_path, 'flat': 'yes'}}
+                                       'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+                             'ignore_errors': 'yes'}
 
         create_assets_directory = {'name': f"Create {assets_dest_directory} directory",
                                    'local_action': {'module': 'ansible.builtin.file',
@@ -146,22 +152,26 @@ class Pytest(Test):
         compress_assets_folder = {'name': "Compress assets folder",
                                   'community.general.archive': {'path': assets_src_directory,
                                                                 'dest': zip_src_path,
-                                                                'format': 'zip'}}
+                                                                'format': 'zip'},
+                                  'ignore_errors': 'yes'}
 
         fetch_compressed_assets = {'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
                                    'fetch': {'src': zip_src_path,
-                                             'dest': self.tests_result_path, 'flat': 'yes'}}
+                                             'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+                                   'ignore_errors': 'yes'}
 
         uncompress_assets = {'name': f"Uncompress {assets_zip} in {assets_dest_directory}",
                              'local_action': {'module': 'unarchive',
                                               'src': zip_dest_path,
                                               'dest': assets_dest_directory},
-                             'become': False}
+                             'become': False,
+                             'ignore_errors': 'yes'}
 
-        ansible_tasks = [AnsibleTask(execute_test_task), AnsibleTask(create_plain_report),
-                         AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),
-                         AnsibleTask(create_assets_directory), AnsibleTask(compress_assets_folder),
-                         AnsibleTask(fetch_compressed_assets), AnsibleTask(uncompress_assets)]
+        ansible_tasks = [AnsibleTask(create_path_task), AnsibleTask(execute_test_task),
+                         AnsibleTask(create_plain_report), AnsibleTask(fetch_plain_report),
+                         AnsibleTask(fetch_html_report), AnsibleTask(create_assets_directory),
+                         AnsibleTask(compress_assets_folder), AnsibleTask(fetch_compressed_assets),
+                         AnsibleTask(uncompress_assets)]
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, "hosts": self.hosts}

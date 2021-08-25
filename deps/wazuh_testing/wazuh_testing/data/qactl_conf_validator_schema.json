@@ -25,7 +25,6 @@
                     "vm_cpu",
                     "vm_name",
                     "vm_system",
-                    "os",
                     "label",
                     "vm_ip"
                   ],
@@ -49,9 +48,6 @@
                       "type": "string"
                     },
                     "vm_system": {
-                      "type": "string"
-                    },
-                    "os": {
                       "type": "string"
                     },
                     "label": {
@@ -210,8 +206,8 @@
                       "if": {
                         "properties": {"target": {"const": "agent"}}
                       },
-                      "then": {"required": ["manager_ip"]}       
-                    }        
+                      "then": {"required": ["manager_ip"]}
+                    }
                   ]
                 },
                 "qa_framework": {
