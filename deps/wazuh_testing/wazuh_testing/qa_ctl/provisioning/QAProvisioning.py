@@ -5,7 +5,10 @@ from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import Loca
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
+from wazuh_testing.tools.thread_executor import ThreadExecutor
 
 
 class QAProvisioning():
@@ -35,10 +38,12 @@ class QAProvisioning():
         self.inventory_file_path = None
         self.wazuh_installation_paths = {}
 
+        self.__process_inventory_data()
+
     def __read_ansible_instance(self, host_info):
         """Read every host info and generate the AnsibleInstance object.
 
-        Attributes:
+        Args:
             host_info (dict): Dict with the host info needed coming from config file.
 
         Returns:
@@ -55,7 +60,7 @@ class QAProvisioning():
                                    ansible_python_interpreter=host_info['ansible_python_interpreter'])
         return instance
 
-    def process_inventory_data(self):
+    def __process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
         for root_key, root_value in self.provision_info.items():
             if root_key == "hosts":
@@ -72,64 +77,96 @@ class QAProvisioning():
                                               ansible_groups=self.group_dict)
         self.inventory_file_path = inventory_instance.inventory_file_path
 
-    def process_deployment_data(self):
-        """Process config file info to generate all the tasks needed for deploy Wazuh"""
-        for _, host_value in self.provision_info['hosts'].items():
-            current_host = host_value['host_info']['host']
-            if 'wazuh_deployment' in host_value:
-                deploy_info = host_value['wazuh_deployment']['wazuh_installation']
+    def __process_config_data(self, host_provision_info):
+        """Process config file info to generate all the tasks needed for deploy Wazuh
 
-                install_target = None if 'target' not in deploy_info else deploy_info['target']
-                install_type = None if 'type' not in deploy_info else deploy_info['type']
-                installation_files_path = None if 'installation_files_path' not in deploy_info \
-                                                  else deploy_info['installation_files_path']
-                wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
-                                             else deploy_info['wazuh_install_path']
-                wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
-                local_package_path = None if 'local_package_path' not in deploy_info \
-                                             else deploy_info['local_package_path']
-                manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
+        Args:
+            host_provision_info (dict): Dicionary with host provisioning info
+        """
+        current_host = host_provision_info['host_info']['host']
 
-                installation_files_parameters = {'wazuh_target': install_target}
+        if 'wazuh_deployment' in host_provision_info:
+            deploy_info = host_provision_info['wazuh_deployment']
+            health_check = True if 'health_check' not in host_provision_info['wazuh_deployment'] \
+                else host_provision_info['wazuh_deployment']['health_check']
+            install_target = None if 'target' not in deploy_info else deploy_info['target']
+            install_type = None if 'type' not in deploy_info else deploy_info['type']
+            installation_files_path = None if 'installation_files_path' not in deploy_info \
+                else deploy_info['installation_files_path']
+            wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
+                else deploy_info['wazuh_install_path']
+            wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
+            local_package_path = None if 'local_package_path' not in deploy_info \
+                else deploy_info['local_package_path']
+            manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
 
-                if installation_files_path:
-                    installation_files_parameters['installation_files_path'] = installation_files_path
-                if wazuh_install_path:
-                    installation_files_parameters['wazuh_install_path'] = wazuh_install_path
+            installation_files_parameters = {'wazuh_target': install_target}
 
-                if install_type == "sources":
-                    installation_files_parameters['wazuh_branch'] = wazuh_branch
-                    installation_instance = WazuhSources(**installation_files_parameters)
-                if install_type == "package":
-                    installation_files_parameters['local_package_path'] = local_package_path
-                    installation_instance = LocalPackage(**installation_files_parameters)
+            if installation_files_path:
+                installation_files_parameters['installation_files_path'] = installation_files_path
+            if wazuh_install_path:
+                installation_files_parameters['wazuh_install_path'] = wazuh_install_path
 
-                remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                      hosts=current_host)
+            if install_type == "sources":
+                installation_files_parameters['wazuh_branch'] = wazuh_branch
+                installation_instance = WazuhSources(**installation_files_parameters)
+            if install_type == "package":
+                installation_files_parameters['local_package_path'] = local_package_path
+                installation_instance = LocalPackage(**installation_files_parameters)
 
-                if install_target == "agent":
-                    deployment_instance = AgentDeployment(remote_files_path,
-                                                          inventory_file_path=self.inventory_file_path,
-                                                          install_mode=install_type, hosts=current_host,
-                                                          server_ip=manager_ip)
-                if install_target == "manager":
-                    deployment_instance = ManagerDeployment(remote_files_path,
-                                                            inventory_file_path=self.inventory_file_path,
-                                                            install_mode=install_type, hosts=current_host)
+            remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                  hosts=current_host)
 
-                deployment_instance.install()
+            if install_target == "agent":
+                deployment_instance = AgentDeployment(remote_files_path,
+                                                      inventory_file_path=self.inventory_file_path,
+                                                      install_mode=install_type, hosts=current_host,
+                                                      server_ip=manager_ip)
+            if install_target == "manager":
+                deployment_instance = ManagerDeployment(remote_files_path,
+                                                        inventory_file_path=self.inventory_file_path,
+                                                        install_mode=install_type, hosts=current_host)
+            deployment_instance.install()
+
+            if health_check:
                 # Wait for Wazuh initialization before health_check
                 sleep(60)
                 deployment_instance.health_check()
 
-                self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
+            self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
 
-            if 'qa_framework' in host_value:
-                qa_framework_info = host_value['qa_framework']
-                wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
-                                          else qa_framework_info['wazuh_qa_branch']
+        if 'qa_framework' in host_provision_info:
+            qa_framework_info = host_provision_info['qa_framework']
+            wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
+                else qa_framework_info['wazuh_qa_branch']
 
-                qa_instance = QAFramework(qa_branch=wazuh_qa_branch)
-                qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
-                qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
-                qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
+            qa_instance = QAFramework(qa_branch=wazuh_qa_branch)
+            qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
+            qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
+            qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
+
+    def __check_hosts_connection(self, hosts='all'):
+        """Check that all hosts are reachable via SSH connection
+
+        Args:
+            hosts (str): Hosts to check.
+        """
+        wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+                                           'wait_for_connection': {'delay': 5, 'timeout': 60}})
+
+        playbook_parameters = {'hosts': hosts, 'tasks_list': [wait_for_connection]}
+
+        AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+
+    def run(self):
+        """Provision all hosts in a parallel way"""
+        self.__check_hosts_connection()
+
+        provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
+                                for _, host_value in self.provision_info['hosts'].items()]
+
+        for runner_thread in provision_threads:
+            runner_thread.start()
+
+        for runner_thread in provision_threads:
+            runner_thread.join()

@@ -1,10 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
-from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
 import ipaddress
 import docker
+
+from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
+from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
+from wazuh_testing.tools.thread_executor import ThreadExecutor
 
 
 class QAInfraestructure:
@@ -85,25 +87,33 @@ class QAInfraestructure:
 
                     self.instances.append(docker_instance)
 
+    def __threads_runner(self, threads):
+        """Auxiliary function to start and wait for threads
+
+        Args:
+            threads (list(ThreadExecutor)): Thread executors
+        """
+        for runner_thread in threads:
+            runner_thread.start()
+
+        for runner_thread in threads:
+            runner_thread.join()
+
     def run(self):
         """Execute the run method on every configured instance."""
-        for instance in self.instances:
-            instance.run()
+        self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
-        for instance in self.instances:
-            instance.halt()
+        self.__threads_runner([ThreadExecutor(instance.halt) for instance in self.instances])
 
     def restart(self):
         """Execute the 'restart' method on every configured instance."""
-        for instance in self.instances:
-            instance.restart()
+        self.__threads_runner([ThreadExecutor(instance.restart) for instance in self.instances])
 
     def destroy(self):
         """Execute the 'destroy' method on every configured instance."""
-        for instance in self.instances:
-            instance.destroy()
+        self.__threads_runner([ThreadExecutor(instance.destroy) for instance in self.instances])
 
         if self.docker_network:
             try:
