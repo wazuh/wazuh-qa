@@ -38,22 +38,19 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
-ip_name_configuration_tests = load_tests(os.path.join(test_data_path, 'name_ip_pass_tests.yaml'))
+force_options_tests = load_tests(os.path.join(test_data_path, 'force_options.yaml'))
 
 DEFAULT_FORCE_INSERT = 'yes'
 DEFAULT_USE_USER_IP = 'no'
-DEFAULT_USE_PASSWORD = 'no'
-DEFAULT_TEST_PASSWORD = 'TopSecret'
 CLIENT_KEY_ENTRY_LEN = 4
 
-conf_params = {'USE_SOURCE_IP': [], 'FORCE_INSERT': [], 'USE_PASSWORD': []}
+conf_params = {'USE_SOURCE_IP': [], 'FORCE_INSERT': []}
 
-for case in ip_name_configuration_tests:
+for case in force_options_tests:
     conf_params['USE_SOURCE_IP'].append(case.get('USE_SOURCE_IP', DEFAULT_USE_USER_IP))
     conf_params['FORCE_INSERT'].append(case.get('FORCE_INSERT', DEFAULT_FORCE_INSERT))
-    conf_params['USE_PASSWORD'].append(case.get('USE_PASSWORD', DEFAULT_USE_PASSWORD))
 
-p, m = generate_params(extra_params=conf_params, modes=['scheduled'] * len(ip_name_configuration_tests))
+p, m = generate_params(extra_params=conf_params, modes=['scheduled'] * len(force_options_tests))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
@@ -88,46 +85,11 @@ def clean_client_keys_file():
         raise
 
 
-def read_random_pass():
-    osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-    passw = None
-    try:
-        with open(osseclog_path, 'r') as log_file:
-            lines = log_file.readlines()
-            for line in lines:
-                if "Random password" in line:
-                    passw = line.split()[-1]
-            log_file.close()
-    except IOError as exception:
-        raise
-    return passw
-
-
 def read_hostname():
     return socket.gethostname()
 
 
-def reset_password(set_password):
-    # in case of random pass, remove /etc/authd.pass
-    if set_password and set_password == 'random':
-        try:
-            os.remove(authd_default_password_path)
-        except FileNotFoundError:
-            pass
-        except IOError:
-            raise
-    # in case of defined pass, set predefined pass in  /etc/authd.pass
-    elif set_password and set_password == 'defined':
-        # Write authd.pass
-        try:
-            with open(authd_default_password_path, 'w') as pass_file:
-                pass_file.write(DEFAULT_TEST_PASSWORD)
-                pass_file.close()
-        except IOError as exception:
-            raise
-
-
-def override_wazuh_conf(configuration, set_password):
+def override_wazuh_conf(configuration):
     # Stop Wazuh
     control_service('stop', daemon='wazuh-authd')
     time.sleep(1)
@@ -141,8 +103,6 @@ def override_wazuh_conf(configuration, set_password):
 
     # reset_client_keys
     clean_client_keys_file()
-    # reset password
-    reset_password(set_password)
 
     time.sleep(1)
     # Start Wazuh
@@ -212,7 +172,7 @@ log_monitor.start(timeout=30, callback=callback_agentd_startup)
 
 
 # @pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
-def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_sockets_environment):
+def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
     Parameters
@@ -231,19 +191,9 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
               "yes" if is present add host name to input message
     """
     current_test = get_current_test()
+    test_case = force_options_tests[current_test]['test_case']
 
-    # setup the password enviroment to password test
-    set_password = None
-    test_case = ip_name_configuration_tests[current_test]['test_case']
-    try:
-        if ip_name_configuration_tests[current_test]['USE_PASSWORD'] == 'yes':
-            set_password = 'defined'
-            if ip_name_configuration_tests[current_test]['random_pass'] == 'yes':
-                set_password = 'random'
-    except KeyError:
-        pass
-
-    override_wazuh_conf(get_configuration, set_password)
+    override_wazuh_conf(get_configuration)
     for config in test_case:
 
         # insert previous agent to force repeated case
@@ -258,28 +208,17 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 expected = "OSSEC K:'"
                 assert response, \
                     'Failed connection previous insert for {}: {}'.format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
+                        (force_options_tests[current_test]['name'], config['input'])
                 assert response[:len(expected)] == expected, \
                     "Failed response previous '{}': Input: {}".format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
+                        (force_options_tests[current_test]['name'], config['input'])
                 if expected == "OSSEC K:'":
                     time.sleep(0.5)
                     assert check_client_keys_file(response) == True, \
                         "Failed test case '{}' checking previous client.keys : Input: {}".format \
-                            (ip_name_configuration_tests[current_test]['name'], config['input'])
+                            (force_options_tests[current_test]['name'], config['input'])
         except KeyError:
             pass
-
-        # in case of test random and correct password register, read the random pass generated by os_authd and insert in query
-        # in case of test random and wrong password keep the password of the original query
-        if set_password and set_password == 'random':
-            try:
-                if config['insert_random_pass_in_query'] == 'yes':
-                    config['input'] = config['input'].format(read_random_pass())
-            except KeyError:
-                pass
-            except IndexError:
-                raise
 
         try:
             if config['insert_hostname_in_query'] == 'yes':
@@ -294,13 +233,13 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
         expected = config['output']
         response = send_message(config['input'])
         assert response, "Failed connection stage '{}'': '{}'".format \
-            (ip_name_configuration_tests[current_test]['name'], config['input'])
+            (force_options_tests[current_test]['name'], config['input'])
         if response[:len(expected)] != expected:
             if config.get('expected_fail') == 'yes':
                 pytest.xfail("Test expected to fail by configuration")
             else:
                 raise AssertionError("Failed test case '{}': Input: {}".format \
-                                         (ip_name_configuration_tests[current_test]['name'], config['input']))
+                                         (force_options_tests[current_test]['name'], config['input']))
 
         # if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
@@ -309,5 +248,5 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 response = response.replace("/32", "")
             assert check_client_keys_file(response) == True, \
                 "Failed test case '{}' checking client.keys : Input: {}".format \
-                    (ip_name_configuration_tests[current_test]['name'], config['input'])
+                    (force_options_tests[current_test]['name'], config['input'])
     return
