@@ -4,9 +4,11 @@
 import os
 import vagrant
 from shutil import rmtree
+
 from wazuh_testing.qa_ctl.deployment.Instance import Instance
 import wazuh_testing.qa_ctl.deployment.Vagrantfile as vfile
-
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class VagrantWrapper(Instance):
     """Class to handle Vagrant operations. The class will use the Vagrantfile class to create a vagrantfile in
@@ -26,13 +28,14 @@ class VagrantWrapper(Instance):
     Attributes:
         vagrantfile (Vagrantfile): Vagrantfile object containing the vagrantfile information.
         vagrant (Vagrant): Vagrant object to handle vagrant operations
-
+        vm_name (String): Name that will be assigned to the VM
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, vagrant_root_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory, vm_system, vm_ip,
                  quiet_out=True):
-
         self.box_folder = os.path.join(vagrant_root_folder, vm_name)
+        self.vm_name = vm_name
         os.makedirs(self.box_folder, exist_ok=True)
 
         self.vagrantfile = vfile.Vagrantfile(self.box_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory,
@@ -42,33 +45,37 @@ class VagrantWrapper(Instance):
         self.vagrantfile.write_vagrantfile()
 
     def run(self):
-        """Writes the vagrantfile and starts the VM specified in the vagrantfile."""
+        """Write the vagrantfile and starts the VM specified in the vagrantfile."""
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up...")
         self.vagrant.up()
 
     def halt(self):
-        """Stops the VM specified in the vagrantfile."""
+        """Stop the VM specified in the vagrantfile."""
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant halt...")
         self.vagrant.halt()
 
     def restart(self):
-        """Restarts the VM specified in the vagrantfile."""
+        """Restart the VM specified in the vagrantfile."""
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant restrt...")
         self.vagrant.restart()
 
     def destroy(self):
-        """Destroys the VM specified in the vagrantfile and remove the vagrantfile."""
+        """Destroy the VM specified in the vagrantfile and remove the vagrantfile."""
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant destroy...")
         self.vagrant.destroy()
         self.vagrantfile.remove_vagrantfile()
         rmtree(self.box_folder)
 
     def suspend(self):
-        """Suspends the VM specified in the vagrantfile."""
+        """Suspend the VM specified in the vagrantfile."""
         self.vagrant.suspend()
 
     def resume(self):
-        """Resumes the VM specified in the vagrantfile."""
+        """Resume the VM specified in the vagrantfile."""
         self.vagrant.resume()
 
     def get_vagrant_version(self):
-        """Gets the vagrant version of the host.
+        """Get the vagrant version of the host.
 
         Returns:
             (str): Vagrant version.
@@ -76,7 +83,7 @@ class VagrantWrapper(Instance):
         return self.vagrant.version()
 
     def status(self):
-        """Gets the status of the VM specified in the vagrantfile.
+        """Get the status of the VM specified in the vagrantfile.
             The vagrant module returns a list of namedtuples like the following
             `[Status(name='ubuntu', state='not_created', provider='virtualbox')]`
             but we are only interested in the `state` field.
@@ -87,7 +94,7 @@ class VagrantWrapper(Instance):
         return self.vagrant.status()[0].state
 
     def get_ssh_config(self):
-        """Gets the config of the VM specified in the vagrantfile.
+        """Get the config of the VM specified in the vagrantfile.
 
         Returns:
             (dict): Dictionary with the configuration of the VM.
@@ -95,7 +102,7 @@ class VagrantWrapper(Instance):
         return self.vagrant.conf()
 
     def get_instance_info(self):
-        """Gets the instance info.
+        """Get the instance info.
 
         Returns:
             (dict): Dictionary with the parameters of the VM.
@@ -103,7 +110,7 @@ class VagrantWrapper(Instance):
         return str(self.vagrantfile)
 
     def get_name(self):
-        """Gets the name of the VM.
+        """Get the name of the VM.
 
         Returns:
             (str): Name of the VM.

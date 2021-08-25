@@ -1,6 +1,10 @@
 import docker
-from wazuh_testing.qa_ctl.deployment.Instance import Instance
+
 from json import dumps
+
+from wazuh_testing.qa_ctl.deployment.Instance import Instance
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class DockerWrapper(Instance):
@@ -35,6 +39,8 @@ class DockerWrapper(Instance):
                         no static IP will be assigned.
         network_name (string): Name of the docker network.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None, detach=True, stdout=False,
                  stderr=False, ip=None, network_name=None):
         self.docker_client = docker_client
@@ -68,6 +74,7 @@ class DockerWrapper(Instance):
         return self.docker_client.containers.get(self.name)
 
     def run(self):
+        DockerWrapper.LOGGER.debug(f"Running {self.name} cointainer...")
         container = self.docker_client.containers.run(image=self.image, name=self.name, ports=self.ports,
                                                       remove=self.remove, detach=self.detach, stdout=self.stdout,
                                                       stderr=self.stderr)
@@ -81,6 +88,7 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
+            DockerWrapper.LOGGER.debug(f"Restarting {self.name} cointainer...")
             self.get_container().restart()
         except docker.errors.NotFound:
             pass
@@ -92,6 +100,7 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
+            DockerWrapper.LOGGER.debug(f"Stopping {self.name} cointainer...")
             self.get_container().stop()
         except docker.errors.NotFound:
             pass
@@ -111,11 +120,13 @@ class DockerWrapper(Instance):
             pass
 
         try:
+            DockerWrapper.LOGGER.debug(f"Removing {self.name} cointainer...")
             self.get_container().remove()
         except docker.errors.NotFound:
             pass
 
         if remove_image:
+            DockerWrapper.LOGGER.debug(f"Removing {self.image.id} docker image...")
             self.docker_client.images.remove(image=self.image.id, force=True)
 
     def get_instance_info(self):

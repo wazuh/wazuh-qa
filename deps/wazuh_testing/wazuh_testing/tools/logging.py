@@ -82,9 +82,6 @@ class Logging:
             ValueError: If logger not exists
 
         """
-        if not Logging.__logger_exists(logger_name):
-            raise ValueError(f"Logger {logger_name} does not exist")
-
         return logging.getLogger(logger_name)
 
     def debug(self, message):

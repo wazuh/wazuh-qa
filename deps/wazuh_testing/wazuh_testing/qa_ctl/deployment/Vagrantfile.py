@@ -4,7 +4,9 @@
 from pathlib import Path
 import os
 import json
-import logging
+
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class Vagrantfile():
@@ -37,6 +39,7 @@ class Vagrantfile():
                         It MUST start with '/' to assign properly the group in VirtualBox.
         private_ip (str): IP of the VM.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
     TEMPLATE_FILE = os.path.join(
         Path(__file__).parent, 'vagrantfile_template.txt')
     REPLACE_PATTERN = 'json_box = {}\n'
@@ -61,7 +64,7 @@ class Vagrantfile():
         try:
             return box_mapping[self.box_image]
         except KeyError:
-            logging.warning('Using a box not tested')
+            Vagrantfile.LOGGER.warning('Using a non default box...')
             return None
 
     def __str__(self):
@@ -84,6 +87,7 @@ class Vagrantfile():
             List: List with the content of the template vagrant template."""
         with open(self.TEMPLATE_FILE, 'r') as template_fd:
             return template_fd.readlines()
+        Vagrantfile.LOGGER.debug(f"Read vagrantfile {self.TEMPLATE_FILE} template")
 
     def write_vagrantfile(self):
         """Replace the self.REPLACE_PATTERN line with a string with the parameters in JSON format and write the new
@@ -95,8 +99,11 @@ class Vagrantfile():
 
         with open(self.file_path, 'w') as vagrantfile_fd:
             vagrantfile_fd.writelines(read_lines)
+        Vagrantfile.LOGGER.debug(f"Vagranfile written in {self.file_path}")
+
 
     def remove_vagrantfile(self):
         """Removes the file self.file_path if it exists."""
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
+            Vagrantfile.LOGGER.debug(f"{self.file_path} Vagranfile was removed")
