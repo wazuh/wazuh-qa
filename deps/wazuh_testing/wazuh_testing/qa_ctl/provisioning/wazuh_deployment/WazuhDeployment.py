@@ -20,6 +20,7 @@ class WazuhDeployment(ABC):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
     Attributes:
         installation_files_path (string): Path where is located the Wazuh instalation files.
@@ -29,10 +30,11 @@ class WazuhDeployment(ABC):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, installation_files_path, inventory_file_path, configuration=None,
+    def __init__(self, installation_files_path, inventory_file_path, qa_ctl_configuration, configuration=None,
                  install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None):
 
         self.installation_files_path = installation_files_path
@@ -42,6 +44,7 @@ class WazuhDeployment(ABC):
         self.install_dir_path = install_dir_path
         self.hosts = hosts
         self.server_ip = server_ip
+        self.qa_ctl_configuration = qa_ctl_configuration
 
     @abstractmethod
     def install(self, install_type):
@@ -108,7 +111,8 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                 output=self.qa_ctl_configuration.ansible_output)
 
     def __control_service(self, command, install_type):
         """Private method to control the Wazuh service in different systems.
@@ -143,7 +147,8 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                 output=self.qa_ctl_configuration.ansible_output)
 
     @abstractmethod
     def start_service(self, install_type):
@@ -199,7 +204,8 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                 output=self.qa_ctl_configuration.ansible_output)
 
     def wazuh_is_already_installed(self):
         """Check if Wazuh is installed in the system
@@ -215,7 +221,8 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        output = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters, raise_on_error=False)
+        output = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters, raise_on_error=False,
+                                                   output=self.qa_ctl_configuration.ansible_output)
 
         if output.rc == 0:
             return False

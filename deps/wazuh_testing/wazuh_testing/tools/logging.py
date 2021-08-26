@@ -37,7 +37,7 @@ class Logging:
             'DEBUG': logging.DEBUG,
             'INFO': logging.INFO,
             'WARNING': logging.WARNING,
-            'ERORR': logging.ERROR,
+            'ERROR': logging.ERROR,
             'CRITICAL': logging.CRITICAL
         }
 
@@ -83,6 +83,14 @@ class Logging:
 
         """
         return logging.getLogger(logger_name)
+
+    def enable(self):
+        """Enable logger"""
+        self.logger.disabled = False
+
+    def disable(self):
+        """Disable logger"""
+        self.logger.disabled = True
 
     def debug(self, message):
         """Log DEBUG message"""

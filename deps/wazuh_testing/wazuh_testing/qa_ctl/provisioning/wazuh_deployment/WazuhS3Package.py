@@ -6,12 +6,13 @@ from wazuh_testing.tools.logging import Logging
 class WazuhS3Package(WazuhPackage):
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, wazuh_target, installation_files_path, version, system, revision, repository, architecture):
+    def __init__(self, wazuh_target, installation_files_path, version, system, revision, repository, architecture,
+                 qa_ctl_configuration):
         self.revision = revision
         self.repository = repository
         self.architecture = architecture
         super().__init__(wazuh_target=wazuh_target, installation_files_path=installation_files_path, version=version,
-                         system=system)
+                         system=system, qa_ctl_configuration=qa_ctl_configuration)
 
     def get_package_name(self):
         pass

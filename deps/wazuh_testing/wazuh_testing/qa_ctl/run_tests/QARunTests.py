@@ -12,16 +12,19 @@ class RunQATests():
 
         Args:
             test_parameters (dict): a dictionary containing all the required data to build the tests
+            qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
         Attributes:
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
+            qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, tests_parameters):
+    def __init__(self, tests_parameters, qa_ctl_configuration):
         self.inventory_file_path = None
         self.test_launchers = []
+        self.qa_ctl_configuration = qa_ctl_configuration
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
@@ -75,7 +78,7 @@ class RunQATests():
         RunQATests.LOGGER.debug('Processing testing data from hosts..')
 
         for _, host_value in instances_info.items():
-            test_launcher = TestLauncher([], self.inventory_file_path)
+            test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
             for module_key, module_value in host_value.items():
                 hosts = host_value['host_info']['host']
                 if module_key == 'test':
@@ -96,6 +99,7 @@ class RunQATests():
         if test_params['type'] == 'pytest':
             test_dict = {}
             test_dict['hosts'] = [host]
+            test_dict['qa_ctl_configuration'] = self.qa_ctl_configuration
 
             if 'path' in test_params:
                 paths = test_params['path']

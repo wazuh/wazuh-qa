@@ -5,9 +5,10 @@ from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 
 
 class WazuhInstallation(ABC):
-    def __init__(self, wazuh_target, installation_files_path):
+    def __init__(self, wazuh_target, installation_files_path, qa_ctl_configuration):
         self.wazuh_target = wazuh_target
         self.installation_files_path = installation_files_path
+        self.qa_ctl_configuration = qa_ctl_configuration
         super().__init__()
 
     @abstractmethod
@@ -18,4 +19,5 @@ class WazuhInstallation(ABC):
         ansible_tasks.insert(0, create_path_task)
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
 
-        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters,
+                                          output=self.qa_ctl_configuration.ansible_output)

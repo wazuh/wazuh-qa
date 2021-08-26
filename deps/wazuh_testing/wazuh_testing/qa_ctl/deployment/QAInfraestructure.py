@@ -11,18 +11,21 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
+
 class QAInfraestructure:
     """Class to handle multiples instances objects.
 
     Args:
         instance_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml
         template.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
     Class Attributes:
         DOCKER_NETWORK_NAME (str): Name of the docker network where the containers will be connected.
         LOGGER (Logging): Logger object.
 
     Instance Attributes:
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         instances (list): List with the instances to handle.
         docker_client (Docker Client): Client to communicate with the docker daemon.
         docker_network (Docker Network): Network object to handle container's static IP address.
@@ -31,7 +34,8 @@ class QAInfraestructure:
     DOCKER_NETWORK_NAME = 'wazuh_net'
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, instance_list):
+    def __init__(self, instance_list, qa_ctl_configuration):
+        self.qa_ctl_configuration = qa_ctl_configuration
         self.instances = []
         self.docker_client = None
         self.docker_network = None
@@ -46,7 +50,7 @@ class QAInfraestructure:
 
                 if provider == 'vagrant':
                     QAInfraestructure.LOGGER.debug(f"Setting {data['vm_name']} vagrant instance for deployment...")
-                    quiet_out = True if 'quiet_out' not in data else data['quiet_out']
+                    quiet_out = True if not self.qa_ctl_configuration.vagrant_output else False
                     vagrant_instance = VagrantWrapper(data['vagrantfile_path'], data['vagrant_box'], data['label'],
                                                       data['vm_name'], data['vm_cpu'], data['vm_memory'],
                                                       data['vm_system'], data['vm_ip'], quiet_out)

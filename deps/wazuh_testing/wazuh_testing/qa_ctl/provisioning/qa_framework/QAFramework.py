@@ -12,18 +12,22 @@ class QAFramework():
         workdir (str): Directory where the qa repository files are stored
         qa_repository (str): Url to the QA repository.
         qa_branch (str): QA branch of the qa repository.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
     Attributes:
         workdir (str): Directory where the qa repository files are stored
         qa_repository (str): Url to the QA repository.
         qa_branch (str): QA branch of the qa repository.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, workdir=gettempdir(), qa_repository='https://github.com/wazuh/wazuh-qa.git', qa_branch='master'):
+    def __init__(self, qa_ctl_configuration, workdir=gettempdir(), qa_branch='master',
+                 qa_repository='https://github.com/wazuh/wazuh-qa.git'):
         self.qa_repository = qa_repository
         self.qa_branch = qa_branch
         self.workdir = f"{workdir}/wazuh-qa"
+        self.qa_ctl_configuration = qa_ctl_configuration
 
     def install_dependencies(self, inventory_file_path, hosts='all'):
         """Install all the necessary dependencies to allow the execution of the tests.
@@ -39,7 +43,8 @@ class QAFramework():
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
         QAFramework.LOGGER.debug(f"Installing python dependencies in {hosts} hosts.")
 
-        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters,
+                                          output=self.qa_ctl_configuration.ansible_output)
 
     def install_framework(self, inventory_file_path, hosts='all'):
         """Install the wazuh_testing framework to allow the execution of the tests.
@@ -54,7 +59,8 @@ class QAFramework():
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks, 'become': True}
         QAFramework.LOGGER.debug(f"Installing wazuh-qa framework in {hosts} hosts.")
 
-        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters,
+                                          output=self.qa_ctl_configuration.ansible_output)
 
     def download_qa_repository(self, inventory_file_path, hosts='all'):
         """Download the qa-framework in the specified attribute workdir.
@@ -72,4 +78,5 @@ class QAFramework():
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
         QAFramework.LOGGER.debug(f"Downloading qa-repository in {hosts} hosts")
 
-        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters,
+                                          output=self.qa_ctl_configuration.ansible_output)
