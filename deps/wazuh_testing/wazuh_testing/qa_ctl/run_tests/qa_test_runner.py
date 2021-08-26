@@ -2,7 +2,9 @@ import os
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
+from wazuh_testing.tools.thread_executor import ThreadExecutor
 
 
 class QATestRunner():
@@ -12,18 +14,16 @@ class QATestRunner():
             test_parameters (dict): a dictionary containing all the required data to build the tests
 
         Attributes:
-            tests (list(Pytest)): list of Pytest instances to run at the specified remote machines
             inventory_file_path (string): Path of the inventory file generated.
+            test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
     """
 
     def __init__(self, tests_parameters):
-        self.tests = []
         self.inventory_file_path = None
-
+        self.test_launchers = []
         self.__process_inventory_data(tests_parameters)
+        self.__process_test_data(tests_parameters)
 
-        for _, host_value in tests_parameters.items():
-            self.tests.append(self.__build_test(host_value['test'], host_value['host_info']['host']))
 
     def __read_ansible_instance(self, host_info):
         """Read every host info and generate the AnsibleInstance object.
@@ -46,7 +46,11 @@ class QATestRunner():
         return instance
 
     def __process_inventory_data(self, instances_info):
-        """Process config file info to generate the ansible inventory file."""
+        """Process config file info to generate the ansible inventory file.
+
+         Args:
+            instances_info (dict): Dictionary with hosts configuration.
+        """
         instances_list = []
 
         for _, host_value in instances_info.items():
@@ -59,6 +63,22 @@ class QATestRunner():
         inventory_instance = AnsibleInventory(ansible_instances=instances_list)
         self.inventory_file_path = inventory_instance.inventory_file_path
 
+
+    def __process_test_data(self, instances_info):
+        """Process test data configuration and build the test launchers, setting the related class attribute.
+
+        Args:
+            instances_info (dict): Dictionary with hosts configuration.
+        """
+        for _, host_value in instances_info.items():
+            test_launcher = TestLauncher([], self.inventory_file_path)
+            for module_key, module_value in host_value.items():
+                hosts = host_value['host_info']['host']
+                if module_key == 'test':
+                    test_launcher.add(self.__build_test(module_value, hosts))
+            self.test_launchers.append(test_launcher)
+
+
     def __build_test(self, test_params, host=['all']):
         """Private method in charge of reading all the required fields to build one test of type Pytest
 
@@ -69,33 +89,45 @@ class QATestRunner():
             Returns:
                 Pytest: one instance of Pytest built from the parameters in test_params
         """
-        test_dict = {}
+        if test_params['type'] == 'pytest':
+            test_dict = {}
+            test_dict['hosts'] = [host]
 
-        test_dict['hosts'] = [host]
+            if 'path' in test_params:
+                paths = test_params['path']
+                test_dict['tests_path'] = paths['test_files_path']
+                test_dict['tests_result_path'] = paths['test_results_path']
+                test_dict['tests_run_dir'] = paths['run_tests_dir_path']
 
-        if 'path' in test_params:
-            paths = test_params['path']
-            test_dict['tests_path'] = paths['test_files_path']
-            test_dict['tests_result_path'] = paths['test_results_path']
-            test_dict['tests_run_dir'] = paths['run_tests_dir_path']
+            if 'parameters' in test_params:
+                parameters = test_params['parameters']
+                if parameters is not None:
+                    test_dict['tiers'] = [] if 'tiers' not in parameters else parameters['tiers']
+                    test_dict['stop_after_first_failure'] = False if 'stop_after_first_failure' not in parameters \
+                                                                    else parameters['stop_after_first_failure']
+                    test_dict['keyword_expression'] = None if 'keyword_expression' not in parameters else \
+                                                            parameters['keyword_expression']
+                    test_dict['traceback'] = 'auto' if 'traceback' not in parameters else parameters['traceback']
+                    test_dict['dry_run'] = False if 'dry_run' not in parameters else parameters['dry_run']
+                    test_dict['custom_args'] = [] if 'custom_args' not in parameters else parameters['custom_args']
+                    test_dict['verbose_level'] = False if 'verbose_level' not in parameters else parameters['verbose_level']
+                    test_dict['log_level'] = None if 'log_level' not in parameters else parameters['log_level']
+                    test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
 
-        if 'parameters' in test_params:
-            parameters = test_params['parameters']
-            if parameters is not None:
-                test_dict['tiers'] = [] if 'tiers' not in parameters else parameters['tiers']
-                test_dict['stop_after_first_failure'] = False if 'stop_after_first_failure' not in parameters \
-                                                                 else parameters['stop_after_first_failure']
-                test_dict['keyword_expression'] = None if 'keyword_expression' not in parameters else \
-                                                          parameters['keyword_expression']
-                test_dict['traceback'] = 'auto' if 'traceback' not in parameters else parameters['traceback']
-                test_dict['dry_run'] = False if 'dry_run' not in parameters else parameters['dry_run']
-                test_dict['custom_args'] = [] if 'custom_args' not in parameters else parameters['custom_args']
-                test_dict['verbose_level'] = False if 'verbose_level' not in parameters else parameters['verbose_level']
-                test_dict['log_level'] = None if 'log_level' not in parameters else parameters['log_level']
-                test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
+            return Pytest(**test_dict)
+        else:
+            raise ValueError(f"Test \'{test_params['type']}\' is not allowed. Allowed value: pytest")
 
-        return Pytest(**test_dict)
-    
+    def run(self):
+        """Run testing threads. One thread per TestLauncher object"""
+        runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
+
+        for runner_thread in runner_threads:
+            runner_thread.start()
+
+        for runner_thread in runner_threads:
+            runner_thread.join()
+            
     def destroy(self):
         if os.path.exists(self.inventory_file_path):
             os.remove(self.inventory_file_path)

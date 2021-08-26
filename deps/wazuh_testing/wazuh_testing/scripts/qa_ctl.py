@@ -10,7 +10,6 @@ from jsonschema import validate
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
-from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 
 
 DEPLOY_KEY = 'deployment'
@@ -20,7 +19,8 @@ _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fil
 
 
 def validate_conf(configuration):
-    schema_file = 'qactl_conf_validator_schema.json'
+    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
+    schema_file = os.path.join(data_path, 'qactl_conf_validator_schema.json')
 
     with open(os.path.join(_data_path, schema_file), 'r') as f:
         schema = json.load(f)
@@ -43,10 +43,12 @@ def main():
 
     assert os.path.exists(arguments.config), f"{arguments.config} file doesn't exists"
 
+    # Validate configuration schema
     with open(arguments.config) as config_file_fd:
         yaml_config = yaml.safe_load(config_file_fd)
         validate_conf(yaml_config)
-        
+
+    # Run QACTL modules
     try:
         if DEPLOY_KEY in yaml_config:
             deploy_dict = yaml_config[DEPLOY_KEY]
@@ -56,15 +58,12 @@ def main():
         if PROVISION_KEY in yaml_config:
             provision_dict = yaml_config[PROVISION_KEY]
             qa_provisioning = QAProvisioning(provision_dict)
-            qa_provisioning.process_inventory_data()
-            qa_provisioning.check_hosts_connection()
-            qa_provisioning.process_deployment_data()
+            qa_provisioning.run()
 
         if TEST_KEY in yaml_config:
             test_dict = yaml_config[TEST_KEY]
             tests_runner = QATestRunner(test_dict)
-            test_launcher = TestLauncher(tests_runner.tests, tests_runner.inventory_file_path)
-            test_launcher.run()
+            tests_runner.run()
 
     finally:
         if arguments.destroy:

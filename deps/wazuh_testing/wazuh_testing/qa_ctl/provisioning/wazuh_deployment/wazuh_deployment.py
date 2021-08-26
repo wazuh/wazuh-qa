@@ -75,7 +75,8 @@ class WazuhDeployment(ABC):
                                            'when': 'ansible_os_family|lower == "debian"'}))
 
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | yum',
-                                           'yum': {'name': f'{self.installation_files_path}'},
+                                           'yum': {'name': f'{self.installation_files_path}',
+                                                   'disable_gpg_check': 'yes'},
                                            'when': ['ansible_os_family|lower == "redhat"',
                                                     'not (ansible_distribution|lower == "centos" and ' +
                                                     'ansible_distribution_major_version >= "8")',
@@ -83,7 +84,8 @@ class WazuhDeployment(ABC):
                                                     'ansible_distribution_major_version >= "8")']}))
 
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | dnf',
-                                           'dnf': {'name': f'{self.installation_files_path}'},
+                                           'dnf': {'name': f'{self.installation_files_path}',
+                                                   'disable_gpg_check': 'yes'},
                                            'when': ['ansible_os_family|lower == "redhat"',
                                                     '(ansible_distribution|lower == "centos" and ' +
                                                     'ansible_distribution_major_version >= "8") or' +

@@ -1,9 +1,10 @@
 import os
-import tempfile
+
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
-
+from wazuh_testing.tools.time import get_current_timestamp
 
 class TestLauncher:
     """The class encapsulates the execution of a list of tests previously built and passed as a parameter.
@@ -26,7 +27,7 @@ class TestLauncher:
 
     def __init__(self, tests, ansible_inventory_path, qa_framework_path=None):
         self.qa_framework_path = qa_framework_path if qa_framework_path is not None else \
-                                                     os.path.join(tempfile.gettempdir(), 'wazuh-qa/')
+                                                     os.path.join(gettempdir(), 'wazuh-qa/')
         self.ansible_inventory_path = ansible_inventory_path
         self.tests = tests
 
@@ -39,7 +40,7 @@ class TestLauncher:
                                   wazuh installation path
         """
         local_internal_options = '\n'.join(self.DEBUG_OPTIONS)
-        playbook_file_path = os.path.join(tempfile.gettempdir(), 'playbook_file.yaml')
+        playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
 
         local_internal_path = '/var/ossec/etc/local_internal_options.conf'
 
@@ -53,8 +54,17 @@ class TestLauncher:
 
         AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
+    def add(self, test):
+        """Add new test to the TestLauncher instance.
+
+        Args:
+            test (Test): Test object.
+        """
+        if test:
+            self.tests.append(test)
+
     def run(self):
-        """ Function to iterate over a list of a set of ests and execute them one by one. """
+        """Function to iterate over a list of tests and run them one by one."""
         for test in self.tests:
             self.__set_local_internal_options(test.hosts)
             test.run(self.ansible_inventory_path)
