@@ -9,7 +9,7 @@ import yaml
 from jsonschema import validate
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
-from wazuh_testing.qa_ctl.run_tests.qa_run_tests import RunQATests
+from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 
 
@@ -62,13 +62,20 @@ def main():
 
         if TEST_KEY in yaml_config:
             test_dict = yaml_config[TEST_KEY]
-            tests_runner = RunQATests(test_dict)
+            tests_runner = QATestRunner(test_dict)
             test_launcher = TestLauncher(tests_runner.tests, tests_runner.inventory_file_path)
             test_launcher.run()
 
     finally:
         if arguments.destroy:
-            instance_handler.destroy()
+            if DEPLOY_KEY in yaml_config:
+                instance_handler.destroy()
+            
+            if PROVISION_KEY in yaml_config:
+                qa_provisioning.destroy()
+
+            if TEST_KEY in yaml_config:
+                tests_runner.destroy()
 
 
 if __name__ == '__main__':

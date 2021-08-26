@@ -1,7 +1,9 @@
+import os
+
 from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import LocalPackage
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import WazuhLocalPackage
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_sources import WazuhSources
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.agent_deployment import AgentDeployment
@@ -122,7 +124,7 @@ class QAProvisioning():
                 if install_type == "package":
                     if s3_package_url is None:
                         installation_files_parameters['local_package_path'] = local_package_path
-                        installation_instance = LocalPackage(**installation_files_parameters)
+                        installation_instance = WazuhLocalPackage(**installation_files_parameters)
                         remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                             hosts=current_host)
                     else:
@@ -160,3 +162,7 @@ class QAProvisioning():
                 qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
                 qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
                 qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
+    
+    def destroy(self):
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)

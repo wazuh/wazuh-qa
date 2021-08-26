@@ -1,9 +1,11 @@
+import os
+
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 
 
-class RunQATests():
+class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
 
         Args:
@@ -93,3 +95,7 @@ class RunQATests():
                 test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
 
         return Pytest(**test_dict)
+    
+    def destroy(self):
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)
