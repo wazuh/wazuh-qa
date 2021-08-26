@@ -3,6 +3,8 @@ from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleIn
 from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
 from wazuh_testing.tools.thread_executor import ThreadExecutor
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class RunQATests():
@@ -15,6 +17,7 @@ class RunQATests():
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, tests_parameters):
         self.inventory_file_path = None
@@ -49,6 +52,7 @@ class RunQATests():
          Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
+        RunQATests.LOGGER.debug('Processing inventory data from testing hosts info...')
         instances_list = []
 
         for _, host_value in instances_info.items():
@@ -68,6 +72,8 @@ class RunQATests():
         Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
+        RunQATests.LOGGER.debug('Processing testing data from hosts..')
+
         for _, host_value in instances_info.items():
             test_launcher = TestLauncher([], self.inventory_file_path)
             for module_key, module_value in host_value.items():
@@ -120,8 +126,14 @@ class RunQATests():
         """Run testing threads. One thread per TestLauncher object"""
         runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
+        RunQATests.LOGGER.info(f"Launching {len(runner_threads)} tests...")
+
         for runner_thread in runner_threads:
             runner_thread.start()
 
+        RunQATests.LOGGER.info(f'Waiting until tests finish...')
+
         for runner_thread in runner_threads:
             runner_thread.join()
+
+        RunQATests.LOGGER.info(f'Tests have been finished...')

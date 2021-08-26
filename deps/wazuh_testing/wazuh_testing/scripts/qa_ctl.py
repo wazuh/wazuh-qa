@@ -11,11 +11,14 @@ from jsonschema import validate
 from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
+LOGGER = Logging(QACTL_LOGGER, level='INFO', log_file='/home/jmv74211/test.log')
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
 
@@ -47,7 +50,9 @@ def main():
     # Validate configuration schema
     with open(arguments.config) as config_file_fd:
         yaml_config = yaml.safe_load(config_file_fd)
+        LOGGER.debug('User configuration template has been read')
         validate_conf(yaml_config)
+        LOGGER.debug('User configuration template has been validated')
 
     # Run QACTL modules
     try:

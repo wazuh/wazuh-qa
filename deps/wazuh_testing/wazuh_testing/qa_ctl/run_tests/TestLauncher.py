@@ -5,6 +5,8 @@ from tempfile import gettempdir
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
 from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class TestLauncher:
@@ -21,7 +23,7 @@ class TestLauncher:
         qa_framework_path (str, None): remote directory path where the qa repository will be download to
 
     """
-
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
     DEBUG_OPTIONS = ["syscheck.debug=2", "agent.debug=2", "monitord.rotate_log=0", "analysisd.debug=2",
                      "wazuh_modules.debug=2", "wazuh_database.interval=1", "wazuh_db.commit_time=2",
                      "wazuh_db.commit_time_max=3", "remoted.debug=2"]
@@ -52,6 +54,8 @@ class TestLauncher:
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, 'hosts': hosts}
+
+        TestLauncher.LOGGER.debug(f"Setting local_internal_options configuration in {hosts} hosts")
 
         AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False)
 
