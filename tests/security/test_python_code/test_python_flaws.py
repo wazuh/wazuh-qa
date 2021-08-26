@@ -16,8 +16,7 @@ DEFAULT_DIRECTORIES_TO_CHECK = 'framework/,api/,wodles/'
 DEFAULT_REPOSITORY = 'wazuh'
 
 
-def run_bandit_scan(directory_to_check: str, directories_to_exclude: str,
-                    severity_level: str, confidence_level: str):
+def run_bandit_scan(directory_to_check, directories_to_exclude, severity_level, confidence_level):
     """Run Bandit scan in a specified directory. The directories to exclude, minimum severity and confidence level can
     also be specified.
 
@@ -32,21 +31,21 @@ def run_bandit_scan(directory_to_check: str, directories_to_exclude: str,
         dict: Dictionary with the Bandit scan output.
     """
     # Run Bandit to check possible security flaws
-    b_mgr = b_manager.BanditManager(b_config.BanditConfig(),  # default config options object
-                                    None)  # aggregation type
-    b_mgr.discover_files([directory_to_check],  # list of targets
-                         True,  # recursive
-                         directories_to_exclude)  # excluded paths
-    b_mgr.run_tests()
+    bandit_manager = b_manager.BanditManager(b_config.BanditConfig(),  # default config options object
+                                             None)  # aggregation type
+    bandit_manager.discover_files([directory_to_check],  # list of targets
+                                  True,  # recursive
+                                  directories_to_exclude)  # excluded paths
+    bandit_manager.run_tests()
 
     # Trigger output of results by Bandit Manager
     _, filename = tempfile.mkstemp(suffix='.json')
-    b_mgr.output_results(None,  # context lines
-                         severity_level,  # minimum severity level
-                         confidence_level,  # minimum confidence level
-                         open(filename, mode='w'),  # output file object
-                         'json',  # output format
-                         None)  # msg template
+    bandit_manager.output_results(None,  # context lines
+                                  severity_level,  # minimum severity level
+                                  confidence_level,  # minimum confidence level
+                                  open(filename, mode='w'),  # output file object
+                                  'json',  # output format
+                                  None)  # msg template
 
     # Read the temporary file with the Bandit result and remove it
     with open(filename, mode="r") as f:
@@ -56,7 +55,7 @@ def run_bandit_scan(directory_to_check: str, directories_to_exclude: str,
     return bandit_output
 
 
-def update_known_flaws(known_flaws: dict, results: list) -> dict:
+def update_known_flaws(known_flaws, results):
     """Compare the Bandit results of the run with the already known flaws. Update the known flaws with the new line
     numbers and remove the known flaws that don't appear in the run results (were fixed).
 
@@ -99,25 +98,25 @@ def clone_wazuh_repository(pytestconfig):
     branch = pytestconfig.getoption('branch')
 
     # Create temporary dir
-    t = tempfile.mkdtemp()
+    repository_path = tempfile.mkdtemp()
 
     try:
         # Clone into temporary dir
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
         Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
-                        t,
+                        repository_path,
                         depth=1,
                         branch=branch)
-        yield t
+        yield repository_path
     except:
         yield None
 
     # Remove the temporary directory when the test ends
-    shutil.rmtree(t)
+    shutil.rmtree(repository_path)
 
 
 @pytest.fixture(scope='session', autouse=True)
-def test_parameters(pytestconfig):
+def get_test_parameters(pytestconfig):
     """Fixture returning the parameters passed for the test.
 
     Args:
@@ -138,7 +137,7 @@ def test_parameters(pytestconfig):
             'repository': repository}
 
 
-def test_check_security_flaws(clone_wazuh_repository, test_parameters):
+def test_check_security_flaws(clone_wazuh_repository, get_test_parameters):
     """Test whether the directory to check has python files with possible vulnerabilities or not.
 
     The test passes if there are no new vulnerabilities. The test fails in other case and generates a report.
@@ -150,7 +149,7 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
     Args:
         clone_wazuh_repository (fixture): Pytest fixture returning the path of the temporary directory path the
             repository cloned. This directory is removed at the end of the pytest session.
-        test_parameters (fixture): Pytest fixture returning the a dictionary with all the test parameters.
+        get_test_parameters (fixture): Pytest fixture returning the a dictionary with all the test parameters.
             These parameters are the directories to check, directories to exclude, the minimum confidence level, the
             minimum severity level and the repository name.
     """
@@ -161,15 +160,15 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
     os.chdir(clone_wazuh_repository)
 
     flaws_found = {}
-    for directory_to_check in test_parameters['directories_to_check']:
+    for directory_to_check in get_test_parameters['directories_to_check']:
         is_default_check_dir = directory_to_check.replace('/', '') in \
-                               DEFAULT_DIRECTORIES_TO_CHECK.replace('/', '').split(',') and test_parameters[
+                               DEFAULT_DIRECTORIES_TO_CHECK.replace('/', '').split(',') and get_test_parameters[
                                    'repository'] == DEFAULT_REPOSITORY
         # Run Bandit scan
         bandit_output = run_bandit_scan(directory_to_check,
-                                        test_parameters['directories_to_exclude'],
-                                        test_parameters['min_severity_level'],
-                                        test_parameters['min_confidence_level'])
+                                        get_test_parameters['directories_to_exclude'],
+                                        get_test_parameters['min_severity_level'],
+                                        get_test_parameters['min_confidence_level'])
         assert not bandit_output['errors'], \
             f"\nBandit returned errors when trying to get possible vulnerabilities in the directory " \
             f"{directory_to_check}:\n{bandit_output['errors']}"
@@ -223,7 +222,7 @@ def test_check_security_flaws(clone_wazuh_repository, test_parameters):
             flaws_found[directory_to_check] = f"Vulnerabilities found in files: {files_with_flaws}," \
                                               f" check them in {new_flaws_path}"
 
-    assert not any(flaws_found.get(directory, None) for directory in test_parameters['directories_to_check']), \
+    assert not any(flaws_found.get(directory, None) for directory in get_test_parameters['directories_to_check']), \
         f"\nThe following possible vulnerabilities were found: {json.dumps(flaws_found, indent=4, sort_keys=True)}"
 
     # Change again to the path where we first executed the test

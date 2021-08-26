@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Chmod setting a permissive mask 0o770 on file (group_path).",
-            "line_number": 579,
+            "line_number": 582,
             "line_range": [
-                579
+                582
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b103_set_bad_file_permissions.html",
             "test_id": "B103",
@@ -318,9 +318,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 1746,
+            "line_number": 1755,
             "line_range": [
-                1746
+                1755
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
             "test_id": "B108",
@@ -332,9 +332,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 92,
+            "line_number": 93,
             "line_range": [
-                92
+                93
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
             "test_id": "B608",
@@ -346,9 +346,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 94,
+            "line_number": 95,
             "line_range": [
-                94
+                95
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
             "test_id": "B608",
@@ -360,9 +360,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 96,
+            "line_number": 97,
             "line_range": [
-                96
+                97
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
             "test_id": "B608",
