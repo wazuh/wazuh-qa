@@ -5,13 +5,12 @@ import json
 import argparse
 import os
 import yaml
-import jsonschema
 
 from jsonschema import validate
-from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
-from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
-from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
-from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
+from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
+from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
+from wazuh_testing.qa_ctl.run_tests.qa_run_tests import RunQATests
+from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 
 
 DEPLOY_KEY = 'deployment'

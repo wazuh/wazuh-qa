@@ -1,5 +1,5 @@
 import docker
-from wazuh_testing.qa_ctl.deployment.Instance import Instance
+from wazuh_testing.qa_ctl.deployment.instance import Instance
 from json import dumps
 
 

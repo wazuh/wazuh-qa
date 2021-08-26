@@ -2,10 +2,10 @@ from datetime import datetime
 import tempfile
 import os
 
-from wazuh_testing.qa_ctl.run_tests.TestResult import TestResult
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.qa_ctl.run_tests.Test import Test
+from wazuh_testing.qa_ctl.run_tests.test_result import TestResult
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
+from wazuh_testing.qa_ctl.run_tests.test import Test
 
 
 class Pytest(Test):

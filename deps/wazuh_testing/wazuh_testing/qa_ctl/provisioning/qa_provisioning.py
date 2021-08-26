@@ -1,14 +1,14 @@
 from time import sleep
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhS3Package import WazuhS3Package
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import LocalPackage
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_sources import WazuhSources
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.agent_deployment import AgentDeployment
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.manager_deployment import ManagerDeployment
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.qa_framework.qa_framework import QAFramework
 
 
 class QAProvisioning():

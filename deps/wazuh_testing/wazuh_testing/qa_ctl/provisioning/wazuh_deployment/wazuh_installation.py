@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 
 
 class WazuhInstallation(ABC):

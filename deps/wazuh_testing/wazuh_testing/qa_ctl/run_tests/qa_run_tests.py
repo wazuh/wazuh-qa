@@ -1,6 +1,6 @@
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
-from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 
 
 class RunQATests():
