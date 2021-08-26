@@ -4,8 +4,8 @@
 import ipaddress
 import docker
 
-from wazuh_testing.qa_ctl.deployment.DockerWrapper import DockerWrapper
-from wazuh_testing.qa_ctl.deployment.VagrantWrapper import VagrantWrapper
+from wazuh_testing.qa_ctl.deployment.docker_wrapper import DockerWrapper
+from wazuh_testing.qa_ctl.deployment.vagrant_wrapper import VagrantWrapper
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 
 

@@ -1,10 +1,10 @@
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhPackage import WazuhPackage
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_package import WazuhPackage
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from pathlib import Path
 import os
 
 
-class LocalPackage(WazuhPackage):
+class WazuhLocalPackage(WazuhPackage):
 
     def __init__(self, wazuh_target, installation_files_path, local_package_path, version=None, system=None):
         self.local_package_path = local_package_path

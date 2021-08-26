@@ -1,6 +1,5 @@
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhInstallation import WazuhInstallation
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-import os
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_installation import WazuhInstallation
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 
 
 class WazuhSources(WazuhInstallation):

@@ -5,12 +5,11 @@ import json
 import argparse
 import os
 import yaml
-import jsonschema
 
 from jsonschema import validate
-from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
-from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
-from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
+from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
+from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
+from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
 
 
 DEPLOY_KEY = 'deployment'
@@ -63,12 +62,19 @@ def main():
 
         if TEST_KEY in yaml_config:
             test_dict = yaml_config[TEST_KEY]
-            tests_runner = RunQATests(test_dict)
+            tests_runner = QATestRunner(test_dict)
             tests_runner.run()
 
     finally:
         if arguments.destroy:
-            instance_handler.destroy()
+            if DEPLOY_KEY in yaml_config:
+                instance_handler.destroy()
+            
+            if PROVISION_KEY in yaml_config:
+                qa_provisioning.destroy()
+
+            if TEST_KEY in yaml_config:
+                tests_runner.destroy()
 
 
 if __name__ == '__main__':
