@@ -1,9 +1,9 @@
 import ansible_runner
-
+import shutil
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleOutput import AnsibleOutput
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsiblePlaybook import AnsiblePlaybook
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_output import AnsibleOutput
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePlaybook
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
@@ -40,6 +40,7 @@ class AnsibleRunner:
         quiet = not self.output
         AnsibleRunner.LOGGER.debug(f"Running {self.ansible_playbook_path} ansible-playbook with "
                                    f"{self.ansible_inventory_path} inventory")
+
         runner = ansible_runner.run(private_data_dir=self.private_data_dir, playbook=self.ansible_playbook_path,
                                     inventory=self.ansible_inventory_path, quiet=quiet)
         ansible_output = AnsibleOutput(runner)
@@ -66,3 +67,4 @@ class AnsibleRunner:
 
         finally:
             ansible_playbook.delete_playbook_file()
+            shutil.rmtree(runner.config.private_data_dir)

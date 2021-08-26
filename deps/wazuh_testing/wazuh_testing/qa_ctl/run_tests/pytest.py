@@ -2,11 +2,10 @@ import os
 
 from datetime import datetime
 from tempfile import gettempdir
-
-from wazuh_testing.qa_ctl.run_tests.TestResult import TestResult
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.qa_ctl.run_tests.Test import Test
+from wazuh_testing.qa_ctl.run_tests.test_result import TestResult
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
+from wazuh_testing.qa_ctl.run_tests.test import Test
 from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging

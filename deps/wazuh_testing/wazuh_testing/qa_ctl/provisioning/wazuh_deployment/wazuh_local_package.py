@@ -2,13 +2,13 @@ import os
 
 from pathlib import Path
 
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhPackage import WazuhPackage
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_package import WazuhPackage
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
 
-class LocalPackage(WazuhPackage):
+class WazuhLocalPackage(WazuhPackage):
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, wazuh_target, installation_files_path, local_package_path, qa_ctl_configuration, version=None,
@@ -23,8 +23,8 @@ class LocalPackage(WazuhPackage):
                                                    {self.installation_files_path}",
                                                  'copy': {'src': self.local_package_path,
                                                           'dest': self.installation_files_path}})
-        LocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to {self.installation_files_path}"
-                                  f" in {hosts} hosts")
+        WazuhLocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to "
+                                       f"{self.installation_files_path} in {hosts} hosts")
         super().download_installation_files(inventory_file_path, [copy_ansible_task], hosts)
 
         return os.path.join(self.installation_files_path, self.package_name)

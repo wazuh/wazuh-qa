@@ -188,9 +188,11 @@
                       "type": "string",
                       "default": "/var/ossec"
                     },
-
                     "health_check": {
                       "type": "boolean"
+                    },
+                    "s3_package_url": {
+                      "type" : "string"
                     }
                   },
                   "allOf": [
@@ -199,8 +201,12 @@
                         "properties": {"type": {"const": "sources"}}
                       },
                       "then": {"required": ["wazuh_branch"]},
-
-                      "else": {"required": ["local_package_path"]}
+                      "else": {
+                        "oneOf": [
+                          {"required": ["local_package_path"]},
+                          {"required": ["s3_package_url"]}
+                        ]
+                      }
                     },
                     {
                       "if": {

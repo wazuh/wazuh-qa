@@ -1,8 +1,7 @@
 import docker
-
 from json import dumps
 
-from wazuh_testing.qa_ctl.deployment.Instance import Instance
+from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 

@@ -1,18 +1,19 @@
-from time import sleep
+import os
 
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.LocalPackage import LocalPackage
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.WazuhSources import WazuhSources
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.AgentDeployment import AgentDeployment
-from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.ManagerDeployment import ManagerDeployment
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleRunner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleTask import AnsibleTask
-from wazuh_testing.qa_ctl.provisioning.qa_framework.QAFramework import QAFramework
+from time import sleep
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import WazuhLocalPackage
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_sources import WazuhSources
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.agent_deployment import AgentDeployment
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.manager_deployment import ManagerDeployment
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.qa_framework.qa_framework import QAFramework
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
-
 
 class QAProvisioning():
     """Class to control different options and instances to provisioning with Wazuh and QA Framework.
@@ -82,6 +83,7 @@ class QAProvisioning():
                                               ansible_groups=self.group_dict)
         self.inventory_file_path = inventory_instance.inventory_file_path
 
+
     def __process_config_data(self, host_provision_info):
         """Process config file info to generate all the tasks needed for deploy Wazuh
 
@@ -102,6 +104,8 @@ class QAProvisioning():
             wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
                 else deploy_info['wazuh_install_path']
             wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
+            s3_package_url = None if 's3_package_url' not in deploy_info \
+                                        else deploy_info['s3_package_url']
             local_package_path = None if 'local_package_path' not in deploy_info \
                 else deploy_info['local_package_path']
             manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
@@ -119,11 +123,16 @@ class QAProvisioning():
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
                 installation_instance = WazuhSources(**installation_files_parameters)
             if install_type == "package":
-                installation_files_parameters['local_package_path'] = local_package_path
-                installation_instance = LocalPackage(**installation_files_parameters)
-
-            remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                  hosts=current_host)
+                    if s3_package_url is None:
+                        installation_files_parameters['local_package_path'] = local_package_path
+                        installation_instance = WazuhLocalPackage(**installation_files_parameters)
+                        remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                            hosts=current_host)
+                    else:
+                        installation_files_parameters['s3_package_url'] = s3_package_url
+                        installation_instance = WazuhS3Package(**installation_files_parameters)
+                        remote_files_path = installation_instance.download_installation_files(s3_package_url, self.inventory_file_path,
+                                                                                      hosts=current_host)
 
             if install_target == "agent":
                 deployment_instance = AgentDeployment(remote_files_path,
@@ -182,3 +191,7 @@ class QAProvisioning():
 
         for runner_thread in provision_threads:
             runner_thread.join()
+
+    def destroy(self):
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)

@@ -1,13 +1,15 @@
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInstance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.AnsibleInventory import AnsibleInventory
-from wazuh_testing.qa_ctl.run_tests.TestLauncher import TestLauncher
-from wazuh_testing.qa_ctl.run_tests.Pytest import Pytest
+import os
+
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
+from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
 
-class RunQATests():
+class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
 
         Args:
@@ -55,7 +57,7 @@ class RunQATests():
          Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
-        RunQATests.LOGGER.debug('Processing inventory data from testing hosts info...')
+        QATestRunner.LOGGER.debug('Processing inventory data from testing hosts info...')
         instances_list = []
 
         for _, host_value in instances_info.items():
@@ -75,7 +77,7 @@ class RunQATests():
         Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
-        RunQATests.LOGGER.debug('Processing testing data from hosts..')
+        QATestRunner.LOGGER.debug('Processing testing data from hosts..')
 
         for _, host_value in instances_info.items():
             test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
@@ -130,14 +132,18 @@ class RunQATests():
         """Run testing threads. One thread per TestLauncher object"""
         runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
-        RunQATests.LOGGER.info(f"Launching {len(runner_threads)} tests...")
+        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests...")
 
         for runner_thread in runner_threads:
             runner_thread.start()
 
-        RunQATests.LOGGER.info(f'Waiting until tests finish...')
+        QATestRunner.LOGGER.info(f'Waiting until tests finish...')
 
         for runner_thread in runner_threads:
             runner_thread.join()
 
-        RunQATests.LOGGER.info(f'Tests have been finished...')
+        QATestRunner.LOGGER.info(f'Tests have been finished...')
+
+    def destroy(self):
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)

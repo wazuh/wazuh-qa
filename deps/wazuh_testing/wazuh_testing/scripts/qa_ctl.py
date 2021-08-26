@@ -7,9 +7,10 @@ import os
 import yaml
 
 from jsonschema import validate
-from wazuh_testing.qa_ctl.deployment.QAInfraestructure import QAInfraestructure
-from wazuh_testing.qa_ctl.provisioning.QAProvisioning import QAProvisioning
-from wazuh_testing.qa_ctl.run_tests.QARunTests import RunQATests
+
+from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
+from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
+from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
 from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfiguration
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -90,12 +91,19 @@ def main():
 
         if TEST_KEY in configuration_data:
             test_dict = configuration_data[TEST_KEY]
-            tests_runner = RunQATests(test_dict, qactl_configuration)
+            tests_runner = QATestRunner(test_dict, qactl_configuration)
             tests_runner.run()
 
     finally:
         if arguments.destroy:
-            instance_handler.destroy()
+            if DEPLOY_KEY in configuration_data:
+                instance_handler.destroy()
+
+            if PROVISION_KEY in configuration_data:
+                qa_provisioning.destroy()
+
+            if TEST_KEY in configuration_data:
+                tests_runner.destroy()
 
 
 if __name__ == '__main__':
