@@ -2,9 +2,9 @@
 
 ## Description
 PVS is a tool used to scan for vulnerabilities in a requirements.txt file.\
-It can generate reports via console output or json file and can be ran with `pytest` or as a python script.\
-If you use it as script, requirements file must be specified locally. Other way to scan for vulnerabilities is checking on `pip freeze` to get packages currently installed on the system (more information below, under `how to use` section).\
-Using with pytest, it manage to handle remote files under github repositories. Requirements file can be specified with `repo`, `branch` and `path` parameters giving flexibility on file location.
+It can generate reports via console output or json file and can be run with `pytest` or as a python script.\
+If you use it as a script, the requirements file must be specified locally. Another way to scan for vulnerabilities is checking on `pip freeze` to get packages currently installed on the system (more information below, under `how to use` section).\
+Using along with pytest, it manage to handle remote files under github repositories. Requirements file can be specified with `repo`, `branch` and `path` parameters giving flexibility on file location.
 
 ## How to use
 ### A - Script
@@ -43,42 +43,46 @@ optional arguments:
 Parameters:
 	--repo: repository name. Default: 'wazuh'.
 	--branch: branch name of specified repository. Default: 'master'.
-	--path: requirements file path. Default: 'framework/requirements.txt'.
+	--requirements-path: requirements file path. Default: 'framework/requirements.txt'.
+    --report-path: output file path. Default: 'test_package_vuln_scan/report_file.json'
 ```
 #### scanning wazuh-qa requirements file:
 ```
-⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ python3 -m pytest test_package_vuln_scan/ --repo wazuh-qa --branch master --path requirements.txt
+⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ python3 -m pytest test_package_vuln_scan/ --repo wazuh-qa --branch master --requirements-path requirements.txt --report-path ~/Desktop/report_file.json
 ==================================================================================== test session starts =====================================================================================
-platform linux -- Python 3.9.5, pytest-5.0.0, py-1.10.0, pluggy-0.13.1
+platform linux -- Python 3.9.5, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
 rootdir: /home/kondent/git/wazuh-qa/tests/security
-plugins: html-3.1.1, metadata-1.11.0, tavern-1.2.2
-collected 1 item
+plugins: html-3.1.1, metadata-1.11.0, testinfra-5.0.0
+collected 1 item                                                                                                                                                                             
 
 test_package_vuln_scan/test_package_vuln_scan.py F                                                                                                                                     [100%]
 
 ========================================================================================== FAILURES ==========================================================================================
 ___________________________________________________________________________________ test_package_vuln_scan ___________________________________________________________________________________
 
-pytestconfig = <_pytest.config.Config object at 0x7fad7da94a60>
+pytestconfig = <_pytest.config.Config object at 0x7fef88d27e80>
 
     def test_package_vuln_scan(pytestconfig):
-        branch = pytestconfig.getoption('branch')
-        repo = pytestconfig.getoption('repo')
-        path = pytestconfig.getoption('path')
-        requirements_url = f'https://raw.githubusercontent.com/wazuh/{repo}/{branch}/{path}'
+        branch = pytestconfig.getoption('--branch')
+        repo = pytestconfig.getoption('--repo')
+        requirements_path = pytestconfig.getoption('--requirements-path')
+        report_path = pytestconfig.getoption('--report-path')
+        requirements_url = f'https://raw.githubusercontent.com/wazuh/{repo}/{branch}/{requirements_path}'
         urlretrieve(requirements_url, REQUIREMENTS_TEMP_FILE.name)
         result = report_for_pytest(REQUIREMENTS_TEMP_FILE.name)
         REQUIREMENTS_TEMP_FILE.close()
-        export_report(result, REPORT_FILE)
+        export_report(result, report_path)
 >       assert loads(result)['vulnerabilities_found'] == 0, f'Vulnerables packages were found, full report at: ' \
-                                                            f'{REPORT_FILE}'
-E       AssertionError: Vulnerables packages were found, full report at: test_package_vuln_scan/report_file.json
+                                                            f'{report_path}'
+E       AssertionError: Vulnerables packages were found, full report at: /home/kondent/Desktop/report_file.json
 E       assert 28 == 0
 
 test_package_vuln_scan/test_package_vuln_scan.py:20: AssertionError
-================================================================================== 1 failed in 1.64 seconds ==================================================================================
+================================================================================== short test summary info ===================================================================================
+FAILED test_package_vuln_scan/test_package_vuln_scan.py::test_package_vuln_scan - AssertionError: Vulnerables packages were found, full report at: /home/kondent/Desktop/report_file.json
+===================================================================================== 1 failed in 1.84s ======================================================================================
 
-⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ cat test_package_vuln_scan/report_file.json 
+⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ cat ~/Desktop/report_file.json
 {
     "report_date": "2021-08-09T12:22:45.859541",
     "vulnerabilities_found": 28,
