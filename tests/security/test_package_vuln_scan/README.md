@@ -44,7 +44,7 @@ Parameters:
 	--repo: repository name. Default: 'wazuh'.
 	--branch: branch name of specified repository. Default: 'master'.
 	--requirements-path: requirements file path. Default: 'framework/requirements.txt'.
-    --report-path: output file path. Default: 'test_package_vuln_scan/report_file.json'
+        --report-path: output file path. Default: 'test_package_vuln_scan/report_file.json'.
 ```
 #### scanning wazuh-qa requirements file:
 ```
