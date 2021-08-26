@@ -4,6 +4,7 @@ from json import dumps
 from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class DockerWrapper(Instance):
@@ -78,7 +79,14 @@ class DockerWrapper(Instance):
                                                       remove=self.remove, detach=self.detach, stdout=self.stdout,
                                                       stderr=self.stderr)
         if self.ip and self.network_name:
-            self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
+            try:
+                self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
+            except docker.errors.APIError: #requests.exceptions.HTTPError:
+                exception_message = f"Invalid address {self.ip} It does not belong to any of this network's " \
+                                     'subnets. Please check if you have already set this docker network ' \
+                                     '(run `docker network ls`) and then remove it if it is created with ' \
+                                     'docker network rm `<network_id>`'
+                raise QAValueError(exception_message, DockerWrapper.LOGGER.critical)
 
     def restart(self):
         """Restart the container.
