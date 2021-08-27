@@ -185,6 +185,13 @@ class Pytest(Test):
                                           output=self.qa_ctl_configuration.ansible_output)
 
         self.result = TestResult(html_report_file_path=os.path.join(self.tests_result_path, html_report_file_name),
-                                 plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name))
+                                 plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name),
+                                 test_name=self.tests_path)
 
         Pytest.LOGGER.debug(f"{self.tests_path} tests of {self.hosts} hosts were saved in {self.tests_result_path}")
+
+        # Print test result in stdout
+        if self.qa_ctl_configuration.logging_enable:
+            Pytest.LOGGER.info(self.result)
+        else:
+            print(self.result)
