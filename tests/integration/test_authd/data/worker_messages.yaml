@@ -61,3 +61,22 @@
     cluster_input: '{"daemon_name":"authd","message":{"arguments":{"name":"user_","ip":"192.0.0.0","force":0},"function":"add"}}'
     cluster_output: '{"error":9007,"message":"Duplicate IP"}'
     port_output: "ERROR: Duplicate IP"
+
+- # Testing messages with agent's key hash
+  name: "Agent's key hash 1"
+  description: "Simple request with key hash"
+  test_case:
+  -
+    port_input: "OSSEC A:'user1' K:'123ABC'"
+    cluster_input: '{"daemon_name":"authd","message":{"arguments":{"name":"user1","ip":"any","key_hash":"123ABC","force":0},"function":"add"}}'
+    cluster_output: '{"error":0,"data":{"id":"001","name":"user1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
+    port_output: "OSSEC K:'"
+-
+  name: "Agent's key hash 2"
+  description: "Complete request with key hash"
+  test_case:
+  -
+    port_input: "OSSEC A:'user1' G:'Group1' IP:'10.10.10.10' K:'123ABC'"
+    cluster_input: '{"daemon_name":"authd","message":{"arguments":{"name":"user1","ip":"10.10.10.10","groups":"Group1","key_hash":"123ABC","force":0},"function":"add"}}'
+    cluster_output: '{"error":0,"data":{"id":"001","name":"user1","ip":"10.10.10.10","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
+    port_output: "OSSEC K:'"
