@@ -353,5 +353,32 @@
         }
       }
     }
+  },
+  "config": {
+    "$id": "#/properties/config",
+    "type": "object",
+    "patternProperties": {
+      "vagrant_output": {
+        "type": "boolean"
+      },
+      "ansible_output": {
+        "type": "boolean"
+      },
+      "logging":{
+        "type": "object",
+        "properties": {
+          "enable": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+          },
+          "file": {
+            "type": "string"
+          }
+        }
+      }
+    }
   }
 }

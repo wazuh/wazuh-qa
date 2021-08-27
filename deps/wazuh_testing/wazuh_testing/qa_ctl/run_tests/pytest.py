@@ -7,6 +7,8 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunn
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl.run_tests.test import Test
 from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class Pytest(Test):
@@ -17,6 +19,7 @@ class Pytest(Test):
         tests_result_path(str): Path to the directory where the reports will be stored in the local machine
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         tiers (list(int), []): List of tiers to be executed
         stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first
                                                   failure
@@ -34,6 +37,7 @@ class Pytest(Test):
         tests_result_path(str): Path to the directory where the reports will be stored in the local machine
         tests_path (str): Path to the set of tests to be executed
         tests_run_dir (str): Path to the directory from where the tests are going to be executed
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         tier (srt, None): List of tiers to be executed
         stop_after_first_failure (boolean, False): If set to true then the tests' execution will stop after the first
                                                   failure
@@ -47,12 +51,13 @@ class Pytest(Test):
         markers(list(str), None): Set of markers to be added to the test execution command
         hosts(list(), ['all']): List of hosts aliases where the tests will be runned
     """
-
     RUN_PYTEST = 'python3 -m pytest '
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, tests_result_path, tests_path, tests_run_dir, tiers=[], stop_after_first_failure=False,
-                 keyword_expression=None, traceback='auto', dry_run=False, custom_args=[], verbose_level=False,
-                 log_level=None, markers=[], hosts=['all']):
+    def __init__(self, tests_result_path, tests_path, tests_run_dir, qa_ctl_configuration,
+                 tiers=[], stop_after_first_failure=False, keyword_expression=None, traceback='auto', dry_run=False,
+                 custom_args=[], verbose_level=False, log_level=None, markers=[], hosts=['all']):
+        self.qa_ctl_configuration = qa_ctl_configuration
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure
         self.keyword_expression = keyword_expression
@@ -77,7 +82,6 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
-
         assets_folder = 'assets/'
         reports_folder = 'reports/'
         assets_zip = "assets.zip"
@@ -174,8 +178,13 @@ class Pytest(Test):
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, "hosts": self.hosts}
+        Pytest.LOGGER.debug(f"Running {pytest_command} on {self.hosts} hosts...")
+        Pytest.LOGGER.info(f"Running {self.tests_path} test on {self.hosts} hosts...")
 
-        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False)
+        AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False,
+                                          output=self.qa_ctl_configuration.ansible_output)
+
+        Pytest.LOGGER.debug(f"Saving {self.tests_path} test resulsts of {self.hosts} hosts in {self.tests_result_path}")
 
         self.result = TestResult(html_report_file_path=os.path.join(self.tests_result_path, html_report_file_name),
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name))

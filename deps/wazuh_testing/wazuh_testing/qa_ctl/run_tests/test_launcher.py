@@ -5,6 +5,8 @@ from tempfile import gettempdir
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class TestLauncher:
     """The class encapsulates the execution of a list of tests previously built and passed as a parameter.
@@ -12,23 +14,26 @@ class TestLauncher:
     Attributes:
         tests (list(Test)): List containing all the tests to be executed in the remote machine
         ansible_inventory_path (str): path to the ansible inventory file
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         qa_framework_path (str, None): remote directory path where the qa repository will be download to
 
     Args:
         tests (list(Test)): List containing all the tests to be executed in the remote machine
         ansible_inventory_path (str): path to the ansible inventory file
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         qa_framework_path (str, None): remote directory path where the qa repository will be download to
 
     """
-
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
     DEBUG_OPTIONS = ["syscheck.debug=2", "agent.debug=2", "monitord.rotate_log=0", "analysisd.debug=2",
                      "wazuh_modules.debug=2", "wazuh_database.interval=1", "wazuh_db.commit_time=2",
                      "wazuh_db.commit_time_max=3", "remoted.debug=2"]
 
-    def __init__(self, tests, ansible_inventory_path, qa_framework_path=None):
+    def __init__(self, tests, ansible_inventory_path, qa_ctl_configuration, qa_framework_path=None):
         self.qa_framework_path = qa_framework_path if qa_framework_path is not None else \
                                                      os.path.join(gettempdir(), 'wazuh-qa/')
         self.ansible_inventory_path = ansible_inventory_path
+        self.qa_ctl_configuration = qa_ctl_configuration
         self.tests = tests
 
 
@@ -52,7 +57,10 @@ class TestLauncher:
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, 'hosts': hosts}
 
-        AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False)
+        TestLauncher.LOGGER.debug(f"Setting local_internal_options configuration in {hosts} hosts")
+
+        AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False,
+                                          output=self.qa_ctl_configuration.ansible_output)
 
     def add(self, test):
         """Add new test to the TestLauncher instance.

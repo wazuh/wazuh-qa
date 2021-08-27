@@ -12,9 +12,15 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunn
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.qa_framework.qa_framework import QAFramework
 from wazuh_testing.tools.thread_executor import ThreadExecutor
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 class QAProvisioning():
     """Class to control different options and instances to provisioning with Wazuh and QA Framework.
+
+    Args:
+        provision_info (dict): Dict with all the info needed coming from config file.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
     Attributes:
         provision_info (dict): Dict with all the info needed coming from config file.
@@ -23,22 +29,18 @@ class QAProvisioning():
         host_list (list): List with every host given in config file.
         inventory_file_path (string): Path of the inventory file generated.
         wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
-
-    Args:
-        provision_info (dict): Dict with all the info needed coming from config file.
-        instances_list (list): List with every instance (each host) needed to build the ansible inventory.
-        group_dict (dict): Dict with groups and every host belonging to them.
-        host_list (list): List with every host given in config file.
-        inventory_file_path (string): Path of the inventory file generated.
-        wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
-    def __init__(self, provision_info):
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
+    def __init__(self, provision_info, qa_ctl_configuration):
         self.provision_info = provision_info
         self.instances_list = []
         self.group_dict = {}
         self.host_list = []
         self.inventory_file_path = None
         self.wazuh_installation_paths = {}
+        self.qa_ctl_configuration = qa_ctl_configuration
 
         self.__process_inventory_data()
 
@@ -64,6 +66,8 @@ class QAProvisioning():
 
     def __process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
+        QAProvisioning.LOGGER.debug('Processing inventory data from provisioning hosts info...')
+
         for root_key, root_value in self.provision_info.items():
             if root_key == "hosts":
                 for _, host_value in root_value.items():
@@ -78,7 +82,7 @@ class QAProvisioning():
         inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
                                               ansible_groups=self.group_dict)
         self.inventory_file_path = inventory_instance.inventory_file_path
-    
+
 
     def __process_config_data(self, host_provision_info):
         """Process config file info to generate all the tasks needed for deploy Wazuh
@@ -86,6 +90,7 @@ class QAProvisioning():
         Args:
             host_provision_info (dict): Dicionary with host provisioning info
         """
+        QAProvisioning.LOGGER.debug('Processing provisioning data from hosts..')
         current_host = host_provision_info['host_info']['host']
 
         if 'wazuh_deployment' in host_provision_info:
@@ -112,6 +117,8 @@ class QAProvisioning():
             if wazuh_install_path:
                 installation_files_parameters['wazuh_install_path'] = wazuh_install_path
 
+            installation_files_parameters['qa_ctl_configuration'] = self.qa_ctl_configuration
+
             if install_type == "sources":
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
                 installation_instance = WazuhSources(**installation_files_parameters)
@@ -131,11 +138,13 @@ class QAProvisioning():
                 deployment_instance = AgentDeployment(remote_files_path,
                                                       inventory_file_path=self.inventory_file_path,
                                                       install_mode=install_type, hosts=current_host,
-                                                      server_ip=manager_ip)
+                                                      server_ip=manager_ip,
+                                                      qa_ctl_configuration=self.qa_ctl_configuration)
             if install_target == "manager":
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
-                                                        install_mode=install_type, hosts=current_host)
+                                                        install_mode=install_type, hosts=current_host,
+                                                        qa_ctl_configuration=self.qa_ctl_configuration)
             deployment_instance.install()
 
             if health_check:
@@ -150,7 +159,7 @@ class QAProvisioning():
             wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
                 else qa_framework_info['wazuh_qa_branch']
 
-            qa_instance = QAFramework(qa_branch=wazuh_qa_branch)
+            qa_instance = QAFramework(qa_branch=wazuh_qa_branch, qa_ctl_configuration=self.qa_ctl_configuration)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
@@ -161,19 +170,21 @@ class QAProvisioning():
         Args:
             hosts (str): Hosts to check.
         """
+        QAProvisioning.LOGGER.info('Checking hosts SSH connection...')
         wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
                                            'wait_for_connection': {'delay': 5, 'timeout': 60}})
 
         playbook_parameters = {'hosts': hosts, 'tasks_list': [wait_for_connection]}
 
-        AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+        AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                          output=self.qa_ctl_configuration.ansible_output)
 
     def run(self):
         """Provision all hosts in a parallel way"""
         self.__check_hosts_connection()
-
         provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
                                 for _, host_value in self.provision_info['hosts'].items()]
+        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances...")
 
         for runner_thread in provision_threads:
             runner_thread.start()

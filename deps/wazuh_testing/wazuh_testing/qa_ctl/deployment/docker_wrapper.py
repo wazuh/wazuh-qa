@@ -1,6 +1,10 @@
 import docker
-from wazuh_testing.qa_ctl.deployment.instance import Instance
 from json import dumps
+
+from wazuh_testing.qa_ctl.deployment.instance import Instance
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class DockerWrapper(Instance):
@@ -35,6 +39,8 @@ class DockerWrapper(Instance):
                         no static IP will be assigned.
         network_name (string): Name of the docker network.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
     def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None, detach=True, stdout=False,
                  stderr=False, ip=None, network_name=None):
         self.docker_client = docker_client
@@ -68,11 +74,19 @@ class DockerWrapper(Instance):
         return self.docker_client.containers.get(self.name)
 
     def run(self):
+        DockerWrapper.LOGGER.debug(f"Running {self.name} cointainer...")
         container = self.docker_client.containers.run(image=self.image, name=self.name, ports=self.ports,
                                                       remove=self.remove, detach=self.detach, stdout=self.stdout,
                                                       stderr=self.stderr)
         if self.ip and self.network_name:
-            self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
+            try:
+                self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
+            except docker.errors.APIError: #requests.exceptions.HTTPError:
+                exception_message = f"Invalid address {self.ip} It does not belong to any of this network's " \
+                                     'subnets. Please check if you have already set this docker network ' \
+                                     '(run `docker network ls`) and then remove it if it is created with ' \
+                                     'docker network rm `<network_id>`'
+                raise QAValueError(exception_message, DockerWrapper.LOGGER.critical)
 
     def restart(self):
         """Restart the container.
@@ -81,6 +95,7 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
+            DockerWrapper.LOGGER.debug(f"Restarting {self.name} cointainer...")
             self.get_container().restart()
         except docker.errors.NotFound:
             pass
@@ -92,6 +107,7 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
+            DockerWrapper.LOGGER.debug(f"Stopping {self.name} cointainer...")
             self.get_container().stop()
         except docker.errors.NotFound:
             pass
@@ -111,11 +127,13 @@ class DockerWrapper(Instance):
             pass
 
         try:
+            DockerWrapper.LOGGER.debug(f"Removing {self.name} cointainer...")
             self.get_container().remove()
         except docker.errors.NotFound:
             pass
 
         if remove_image:
+            DockerWrapper.LOGGER.debug(f"Removing {self.image.id} docker image...")
             self.docker_client.images.remove(image=self.image.id, force=True)
 
     def get_instance_info(self):

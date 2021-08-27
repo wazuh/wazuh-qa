@@ -5,6 +5,8 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleI
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 from wazuh_testing.tools.thread_executor import ThreadExecutor
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class QATestRunner():
@@ -12,15 +14,19 @@ class QATestRunner():
 
         Args:
             test_parameters (dict): a dictionary containing all the required data to build the tests
+            qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
         Attributes:
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
+            qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, tests_parameters):
+    def __init__(self, tests_parameters, qa_ctl_configuration):
         self.inventory_file_path = None
         self.test_launchers = []
+        self.qa_ctl_configuration = qa_ctl_configuration
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
@@ -51,6 +57,7 @@ class QATestRunner():
          Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
+        QATestRunner.LOGGER.debug('Processing inventory data from testing hosts info...')
         instances_list = []
 
         for _, host_value in instances_info.items():
@@ -70,8 +77,10 @@ class QATestRunner():
         Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
+        QATestRunner.LOGGER.debug('Processing testing data from hosts..')
+
         for _, host_value in instances_info.items():
-            test_launcher = TestLauncher([], self.inventory_file_path)
+            test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
             for module_key, module_value in host_value.items():
                 hosts = host_value['host_info']['host']
                 if module_key == 'test':
@@ -92,6 +101,7 @@ class QATestRunner():
         if test_params['type'] == 'pytest':
             test_dict = {}
             test_dict['hosts'] = [host]
+            test_dict['qa_ctl_configuration'] = self.qa_ctl_configuration
 
             if 'path' in test_params:
                 paths = test_params['path']
@@ -122,12 +132,18 @@ class QATestRunner():
         """Run testing threads. One thread per TestLauncher object"""
         runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
+        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests...")
+
         for runner_thread in runner_threads:
             runner_thread.start()
 
+        QATestRunner.LOGGER.info(f'Waiting until tests finish...')
+
         for runner_thread in runner_threads:
             runner_thread.join()
-            
+
+        QATestRunner.LOGGER.info(f'Tests have been finished...')
+
     def destroy(self):
         if os.path.exists(self.inventory_file_path):
             os.remove(self.inventory_file_path)

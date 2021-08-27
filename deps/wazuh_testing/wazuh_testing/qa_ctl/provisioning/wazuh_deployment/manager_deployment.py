@@ -15,6 +15,7 @@ class ManagerDeployment(WazuhDeployment):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
     Attributes:
         installation_files (string): Path where is located the Wazuh instalation files.
@@ -24,6 +25,7 @@ class ManagerDeployment(WazuhDeployment):
         install_dir_path (string): Path where the Wazuh installation will be stored.
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
 
     def install(self):
@@ -78,4 +80,5 @@ class ManagerDeployment(WazuhDeployment):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters)
+        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                 output=self.qa_ctl_configuration.ansible_output)
