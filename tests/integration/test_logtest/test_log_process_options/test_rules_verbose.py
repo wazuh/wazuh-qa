@@ -9,7 +9,7 @@ import re
 
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOGTEST_SOCKET_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP, LOCAL_RULES_PATH
 
 
 # Marks
@@ -22,8 +22,11 @@ with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
-logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
-receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
+receiver_sockets_params = [(LOGTEST_SOCKET_PATH, 'AF_UNIX', 'TCP')]
+
+local_rules_debug_messages = ['Trying rule: 880000 - Parent rules verbose', '*Rule 880000 matched',
+                              '*Trying child rules', 'Trying rule: 880001 - test last_match', '*Rule 880001 matched',
+                              '*Trying child rules', 'Trying rule: 880002 - test_child test_child']
 
 
 # Fixtures
@@ -35,18 +38,18 @@ def configure_rules_list(get_configuration, request):
     """
 
     # save current rules
-    shutil.copy('/var/ossec/etc/rules/local_rules.xml', '/var/ossec/etc/rules/local_rules.xml.cpy')
+    shutil.copy(LOCAL_RULES_PATH, LOCAL_RULES_PATH+'.cpy')
 
     file_test = get_configuration['rule_file']
     # copy test rules
-    shutil.copy(test_data_path + file_test, '/var/ossec/etc/rules/local_rules.xml')
-    shutil.chown('/var/ossec/etc/rules/local_rules.xml', "wazuh", "wazuh")
+    shutil.copy(test_data_path + file_test, LOCAL_RULES_PATH)
+    shutil.chown(LOCAL_RULES_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
 
     yield
 
     # restore previous configuration
-    shutil.move('/var/ossec/etc/rules/local_rules.xml.cpy', '/var/ossec/etc/rules/local_rules.xml')
-    shutil.chown('/var/ossec/etc/rules/local_rules.xml', "wazuh", "wazuh")
+    shutil.move(LOCAL_RULES_PATH+'.cpy', LOCAL_RULES_PATH)
+    shutil.chown(LOCAL_RULES_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
 
 
 @pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])
@@ -57,11 +60,11 @@ def get_configuration(request):
 
 # Tests
 def test_rules_verbose(get_configuration, configure_rules_list, connect_to_sockets_function):
-    """
-    Check that every input message in logtest socket generates the adequate output
+    """Check the correct behaviour of logtest `rules_debug` field.
 
-    This tests is designed to verify the correct logtest behaviour related to the 'rules_debug' request field
+    This test writes different inputs at the logtest socket and checks the responses to be the expected.
     """
+
     # send the logtest request
     receiver_sockets[0].send(get_configuration['input'], size=True)
 
@@ -72,15 +75,9 @@ def test_rules_verbose(get_configuration, configure_rules_list, connect_to_socke
     assert result['error'] == 0
     assert result['data']['output']['rule']['id'] == get_configuration['rule_id']
 
-    if 'verbose_mode' in get_configuration and get_configuration['verbose_mode'] is True:
+    if 'verbose_mode' in get_configuration and get_configuration['verbose_mode']:
         if 'rules_debug' in result['data']:
-            assert result['data']['rules_debug'][-7] == 'Trying rule: 880000 - Parent rules verbose'
-            assert result['data']['rules_debug'][-6] == '*Rule 880000 matched'
-            assert result['data']['rules_debug'][-5] == '*Trying child rules'
-            assert result['data']['rules_debug'][-4] == 'Trying rule: 880001 - test last_match'
-            assert result['data']['rules_debug'][-3] == '*Rule 880001 matched'
-            assert result['data']['rules_debug'][-2] == '*Trying child rules'
-            assert result['data']['rules_debug'][-1] == 'Trying rule: 880002 - test_child test_child'
+            assert result['data']['rules_debug'][-len(local_rules_debug_messages):] == local_rules_debug_messages
         else:
             assert False, 'The rules_debug field was not found in the response data'
 
