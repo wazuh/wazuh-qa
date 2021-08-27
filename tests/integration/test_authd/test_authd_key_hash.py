@@ -144,7 +144,7 @@ def test_ossec_auth_messages_with_key_hash(set_up_groups_keys, get_configuration
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=False)
+        receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':
