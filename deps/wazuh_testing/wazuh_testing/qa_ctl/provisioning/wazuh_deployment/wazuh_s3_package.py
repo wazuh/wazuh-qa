@@ -29,12 +29,15 @@ class WazuhS3Package(WazuhPackage):
         pass
 
     def download_installation_files(self, s3_package_url, inventory_file_path, hosts='all'):
+        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
+
         download_s3_package = AnsibleTask({'name': 'Download S3 package',
                                            'get_url': {'url': s3_package_url,
                                                        'dest': self.installation_files_path},
                                            'register': 'download_state', 'retries': 6, 'delay': 10,
                                            'until': 'download_state is success'})
-        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
+        WazuhS3Package.LOGGER.debug(f"Wazuh S3 package was successfully downloaded in {hosts} hosts")
+
         super().download_installation_files(inventory_file_path, [download_s3_package], hosts)
 
         return os.path.join(self.installation_files_path, self.package_name)

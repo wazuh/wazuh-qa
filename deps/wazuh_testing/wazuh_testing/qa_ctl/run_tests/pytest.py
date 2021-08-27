@@ -178,13 +178,13 @@ class Pytest(Test):
 
         playbook_parameters = {'become': True, 'tasks_list': ansible_tasks, 'playbook_file_path':
                                playbook_file_path, "hosts": self.hosts}
-        Pytest.LOGGER.debug(f"Running {pytest_command} on {self.hosts} hosts...")
-        Pytest.LOGGER.info(f"Running {self.tests_path} test on {self.hosts} hosts...")
+        Pytest.LOGGER.info(f"Running {self.tests_path} test on {self.hosts} hosts")
+        Pytest.LOGGER.debug(f"Running {pytest_command} on {self.hosts} hosts")
 
         AnsibleRunner.run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=False,
                                           output=self.qa_ctl_configuration.ansible_output)
 
-        Pytest.LOGGER.debug(f"Saving {self.tests_path} test resulsts of {self.hosts} hosts in {self.tests_result_path}")
-
         self.result = TestResult(html_report_file_path=os.path.join(self.tests_result_path, html_report_file_name),
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name))
+
+        Pytest.LOGGER.debug(f"{self.tests_path} tests of {self.hosts} hosts were saved in {self.tests_result_path}")

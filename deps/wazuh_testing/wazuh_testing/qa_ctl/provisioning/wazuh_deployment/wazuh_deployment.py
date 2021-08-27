@@ -55,7 +55,7 @@ class WazuhDeployment(ABC):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
-        WazuhDeployment.LOGGER.debug(f"Installing wazuh {install_type} via {self.install_mode} in {self.hosts} hosts..")
+        WazuhDeployment.LOGGER.debug(f"Installing wazuh {install_type} via {self.install_mode} in {self.hosts} hosts")
         tasks_list = []
         parent_path = Path(__file__).parent
         if self.install_mode == 'sources':
@@ -113,8 +113,11 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
-                                                 output=self.qa_ctl_configuration.ansible_output)
+        tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                         output=self.qa_ctl_configuration.ansible_output)
+        WazuhDeployment.LOGGER.debug(f"Wazuh installation has been successfully done in {self.hosts} hosts")
+
+        return tasks_result
 
     def __control_service(self, command, install_type):
         """Private method to control the Wazuh service in different systems.
@@ -149,8 +152,11 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
-                                                 output=self.qa_ctl_configuration.ansible_output)
+        tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+                                                         output=self.qa_ctl_configuration.ansible_output)
+        WazuhDeployment.LOGGER.debug(f"Wazuh service was {command}ed in {self.hosts} hosts")
+
+        return tasks_result
 
     @abstractmethod
     def start_service(self, install_type):
@@ -186,7 +192,7 @@ class WazuhDeployment(ABC):
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
         """
-        WazuhDeployment.LOGGER.debug(f"Doing wazuh deployment healthcheck in {self.hosts} hosts")
+        WazuhDeployment.LOGGER.debug(f"Starting wazuh deployment healthcheck in {self.hosts} hosts")
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors',
                                        'lineinfile': {'path': f'{self.install_dir_path}/logs/ossec.log',
@@ -206,8 +212,11 @@ class WazuhDeployment(ABC):
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
-        return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
+        tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                                  output=self.qa_ctl_configuration.ansible_output)
+        WazuhDeployment.LOGGER.debug(f"Wazuh deployment healthcheck OK in {self.hosts} hosts")
+
+        return tasks_result
 
     def wazuh_is_already_installed(self):
         """Check if Wazuh is installed in the system

@@ -19,12 +19,15 @@ class WazuhLocalPackage(WazuhPackage):
                          system=system, qa_ctl_configuration=qa_ctl_configuration)
 
     def download_installation_files(self, inventory_file_path, hosts='all'):
+        WazuhLocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to "
+                                       f"{self.installation_files_path} in {hosts} hosts")
+
         copy_ansible_task = AnsibleTask({'name': f"Copy {self.local_package_path} package to \
                                                    {self.installation_files_path}",
                                                  'copy': {'src': self.local_package_path,
                                                           'dest': self.installation_files_path}})
-        WazuhLocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to "
-                                       f"{self.installation_files_path} in {hosts} hosts")
+        WazuhLocalPackage.LOGGER.debug(f"{self.local_package_path} has been successfully copied in {hosts} hosts")
+
         super().download_installation_files(inventory_file_path, [copy_ansible_task], hosts)
 
         return os.path.join(self.installation_files_path, self.package_name)
