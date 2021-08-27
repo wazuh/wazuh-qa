@@ -10,6 +10,7 @@ metadata:
         - Manager
     modules:
         - Authd
+        - Cluster
     daemons:
         - authd
     operating_system:
@@ -20,7 +21,6 @@ metadata:
     tags:
         - Enrollment
         - Authd
-        - Cluster
         - Master
 '''
 
@@ -109,7 +109,6 @@ def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_en
             - The received output must match with expected
             - The enrollment messages are parsed as expected
             - The agent keys are denied if the hash is the same than the manager's
-
     """
     test_case = set_up_groups_keys['test_case']
     for stage in test_case:

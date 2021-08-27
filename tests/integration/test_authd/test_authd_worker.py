@@ -1,6 +1,28 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the enrollment daemon authd under different messages in a Cluster scenario (for Cluster)
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+metadata:
+    component:
+        - Manager
+    modules:
+        - Authd
+        - Cluster
+    daemons:
+        - authd
+    operating_system:
+        - Ubuntu
+        - CentOS
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Authd
+        - Worker
+'''
 
 import os
 import subprocess
@@ -91,18 +113,20 @@ def get_configuration(request):
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    """
+        test_logic:
+            "Check that every message from the agent is correctly formatted for master, and every master
+            response is correctly parsed for agent"
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
+        checks:
+            - The 'port_input' from agent is formatted to 'cluster_input' for master
+            - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
     """
     test_case = set_up_groups['test_case']
     for stage in test_case:
         # Push expected info to mitm queue
         mitm_master.set_cluster_messages(stage['cluster_input'], stage['cluster_output'])
-        # Reopen socket (socket is closed by maanger after sending message with client key)
+        # Reopen socket (socket is closed by manager after sending message with client key)
         mitm_master.restart()
         receiver_sockets[0].open()
         expected = stage['port_output']
