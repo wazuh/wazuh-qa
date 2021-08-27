@@ -1,5 +1,5 @@
 '''
-brief: This module verifies the correct behavior of the enrollment daemon authd under different messages in a Cluster scenario (for Master)
+brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Master)
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
@@ -79,7 +79,7 @@ def set_up_groups_keys(request):
         # The client.keys file is cleaned always
         # but the keys are added only if pre_existent_keys has values
         with open(client_keys_path, "w") as keys_file:
-            if(keys != None):
+            if(keys is not None):
                 for key in keys:
                     keys_file.write(key + '\n')
             keys_file.close()
@@ -100,7 +100,8 @@ def set_up_groups_keys(request):
 
 
 def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_environment,
-                             configure_sockets_environment_function, connect_to_sockets_function, wait_for_agentd_startup):
+                             configure_sockets_environment_function, connect_to_sockets_function,
+                             wait_for_agentd_startup):
     """
         test_logic:
             "Check that every input message in trough local authd port generates the adequate response to worker"
@@ -119,5 +120,5 @@ def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_en
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         assert response[:len(expected)] == expected, \
-            'Failed test case "{}". Response was: {} instead of: {}'.format \
-            (set_up_groups_keys['name'], response, expected)
+            'Failed test case "{}". Response was: {} instead of: {}' \
+            .format(set_up_groups_keys['name'], response, expected)
