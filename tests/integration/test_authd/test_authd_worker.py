@@ -1,5 +1,5 @@
 '''
-brief: This module verifies the correct behavior of the enrollment daemon authd under different messages in a Cluster scenario (for Cluster)
+brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Worker)
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
