@@ -1,6 +1,6 @@
-# Test duplicated regitry entries
+# Test duplicated registry entries
 
-This test will check that for two monitored registries with the same name value but with different capitalization only triggers one added event when the registry is created.
+This test will check that two monitored registries with the same name value but with different capitalization only triggers one added event when the registry is created.
 
 ## General info
 
