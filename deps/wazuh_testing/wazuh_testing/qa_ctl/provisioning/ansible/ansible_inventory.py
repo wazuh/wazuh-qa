@@ -80,6 +80,7 @@ class AnsibleInventory():
             inventory.write(self.__str__())
 
     def delete_playbook_file(self):
+        """Delete all created playbook files"""
         # if os.path.exists(self.inventory_file_path):
         #     os.remove(self.inventory_file_path)
         pass

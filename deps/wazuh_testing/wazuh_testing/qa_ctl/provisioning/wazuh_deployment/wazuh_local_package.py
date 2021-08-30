@@ -9,6 +9,23 @@ from wazuh_testing.tools.logging import Logging
 
 
 class WazuhLocalPackage(WazuhPackage):
+    """Install Wazuh from a local existent package
+
+    Args:
+        wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
+        installation_files_path (string): Path where is located the Wazuh instalation files.
+        local_package_path (string): Path where the local package is located.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        version (string): The version of Wazuh. Parameter set by default to 'None'.
+        system (string): System of the Wazuh installation files. Parameter set by default to 'None'.
+
+    Attributes:
+        local_package_path (string): Path where the local package is located.
+        package_name (string): name of the Wazuh package.
+        installation_files_path (string): Path where the Wazuh installation files are located.
+        local_package_path (string): Path where the local package is located.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+    """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, wazuh_target, installation_files_path, local_package_path, qa_ctl_configuration, version=None,
@@ -19,6 +36,15 @@ class WazuhLocalPackage(WazuhPackage):
                          system=system, qa_ctl_configuration=qa_ctl_configuration)
 
     def download_installation_files(self, inventory_file_path, hosts='all'):
+        """Download the installation files of Wazuh in the given inventory file path
+
+        Args:
+            inventory_file_path (string): path where the instalation files are going to be stored.
+            hosts (string): Parameter set to `all` by default.
+        
+        Returns:
+            str: String with the complete path of the installation package
+        """
         WazuhLocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to "
                                        f"{self.installation_files_path} in {hosts} hosts")
 
