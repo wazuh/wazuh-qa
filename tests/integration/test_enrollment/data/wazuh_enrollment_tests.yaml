@@ -253,7 +253,6 @@
 -
   name: "Default Name with key hash"
   description: "Check the default message when having a key hash"
-  debug: "yes"
   pre_existent_keys:
     - "001 test_name any TopSecret"
   message:

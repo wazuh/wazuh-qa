@@ -1,14 +1,20 @@
 import os
 import platform
 import socket
-import ssl
+import yaml
 
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+import subprocess
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
+
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 DEFAULT_VALUES = {
     'enabled': 'yes',
-    'manager_address': None,
+    'manager_address': '127.0.0.1',
     'port': 1515,
     'host_name': socket.gethostname(),
     'groups': None,
@@ -41,45 +47,16 @@ CONFIG_PATHS = {
     'AGENT_PEM_PATH': AGENT_PEM_PATH,
     'AGENT_KEY_PATH': AGENT_KEY_PATH,
     'PASSWORD_PATH': AUTHDPASS_PATH
-
 }
 
-
-def clean_client_keys_file():
-    try:
-        client_file = open(CLIENT_KEYS_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
-
-
-def check_client_keys_file():
-    """Wait until client key has been written"""
-
-    def wait_key_changes(line):
-        if 'Valid key received' in line:
-            return line
-        return None
-
-    log_monitor = FileMonitor(LOG_FILE_PATH)
-    try:
-        log_monitor.start(timeout=6, callback=wait_key_changes)
-    except:
-        pass
-    try:
-        with open(CLIENT_KEYS_PATH) as client_file:
-            client_line = client_file.readline()
-            # check format key 4 items (id name ip key)
-            if len(client_line.split(" ")) != 4:
-                client_file.close()
-                return False
-            client_file.close()
-            return f"OSSEC K:'{client_line[:-1]}'\n"
-    except IOError:
-        raise
-    client_file.close()
-    return False
-
+def load_tests(path):
+    """ Loads a yaml file from a path
+    Returns
+    ----------
+    yaml structure
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
 
 def clean_password_file():
     try:
@@ -88,15 +65,11 @@ def clean_password_file():
     except IOError as exception:
         raise
 
-
 def parse_configuration_string(configuration):
     for key, value in configuration.items():
         if isinstance(value, str):
             configuration[key] = value.format(**CONFIG_PATHS)
-
-
 class AgentAuthParser:
-
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
         self._command = []
         if sudo:
@@ -139,6 +112,35 @@ class AgentAuthParser:
     def add_groups(self, group_string):
         self._command += ['-G', group_string]
 
+def launch_agent_auth(configuration):
+    parse_configuration_string(configuration)
+    parser = AgentAuthParser(server_address=DEFAULT_VALUES['manager_address'], BINARY_PATH=AGENT_AUTH_BINARY_PATH,
+                             sudo=True if platform.system() == 'Linux' else False)
+    if configuration.get('agent_name'):
+        parser.add_agent_name(configuration.get("agent_name"))
+    if configuration.get('agent_address'):
+        parser.add_agent_adress(configuration.get("agent_address"))
+    if configuration.get('auto_method') == 'yes':
+        parser.add_auto_negotiation()
+    if configuration.get('ssl_cipher'):
+        parser.add_ciphers(configuration.get('ssl_cipher'))
+    if configuration.get('server_ca_path'):
+        parser.add_manager_ca(configuration.get('server_ca_path'))
+    if configuration.get('agent_key_path'):
+        parser.add_agent_certificates(configuration.get('agent_key_path'), configuration.get('agent_certificate_path'))
+    if configuration.get('use_source_ip'):
+        parser.use_source_ip()
+    if configuration.get('password'):
+        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'),
+                            path=AUTHDPASS_PATH)
+    else:
+        parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
+    if configuration.get('groups'):
+        parser.add_groups(configuration.get('groups'))
+
+    out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out.communicate()
+
 def wait_until(x, log_str):
     """Callback function to wait for a message in a log file.
 
@@ -147,3 +149,66 @@ def wait_until(x, log_str):
         log_str (str): Log file string.
     """
     return x if log_str in x else None
+
+LAST_MESSAGE = None
+CURRENT_TEST_CASE = {}
+
+def receiver_callback(received):
+    if len(received) == 0:
+        return b""
+
+    global LAST_MESSAGE
+    LAST_MESSAGE = received.decode()
+    response = CURRENT_TEST_CASE['message']['response'].format(**DEFAULT_VALUES).encode()
+    return response
+
+def get_last_message():
+    global LAST_MESSAGE
+    import time
+    timeout = time.time() + 20 # 20 seconds timeout
+    while not LAST_MESSAGE and time.time() <= timeout:
+        pass
+    return LAST_MESSAGE
+
+def clear_last_message():
+    global LAST_MESSAGE
+    LAST_MESSAGE = None
+
+def clean_log_file():
+    try:
+        client_file = open(LOG_FILE_PATH, 'w')
+        client_file.close()
+    except IOError as exception:
+        raise
+
+def get_temp_yaml(param):
+    temp = os.path.join(test_data_path, 'temp.yaml')
+    with open(configurations_path, 'r') as conf_file:
+        enroll_conf = {'enrollment': {'elements': []}}
+        for elem in param:
+            if elem == 'password':
+                continue
+            enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
+        print(enroll_conf)
+        temp_conf_file = yaml.safe_load(conf_file)
+        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+
+def override_wazuh_conf(configuration, test):
+    parse_configuration_string(configuration)
+    # Configuration for testing
+    temp = get_temp_yaml(configuration)
+    conf = load_wazuh_configurations(temp, test, )
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+    # Set new configuration
+    write_wazuh_conf(test_config)
+
+    clean_password_file()
+    if configuration.get('password'):
+        parser = AgentAuthParser()
+        parser.add_password(password=configuration['password']['value'], isFile=True,
+                            path=configuration.get('authorization_pass_path'))
