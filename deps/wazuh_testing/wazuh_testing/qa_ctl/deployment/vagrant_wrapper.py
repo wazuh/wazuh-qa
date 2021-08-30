@@ -48,23 +48,27 @@ class VagrantWrapper(Instance):
 
     def run(self):
         """Write the vagrantfile and starts the VM specified in the vagrantfile."""
-        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up...")
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up")
         self.vagrant.up()
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been created sucessfully")
 
     def halt(self):
         """Stop the VM specified in the vagrantfile."""
-        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant halt...")
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant halt")
         self.vagrant.halt()
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been off sucessfully")
 
     def restart(self):
         """Restart the VM specified in the vagrantfile."""
-        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant restrt...")
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant restart")
         self.vagrant.restart()
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been restarted sucessfully")
 
     def destroy(self):
         """Destroy the VM specified in the vagrantfile and remove the vagrantfile."""
-        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant destroy...")
+        VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant destroy")
         self.vagrant.destroy()
+        VagrantWrapper.LOGGER.debug(f"{self.vm_name} instance has been destroyed sucessfully")
         self.vagrantfile.remove_vagrantfile()
         rmtree(self.box_folder)
 

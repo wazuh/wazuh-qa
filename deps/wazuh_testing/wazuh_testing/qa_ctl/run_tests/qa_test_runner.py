@@ -57,7 +57,7 @@ class QATestRunner():
          Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
-        QATestRunner.LOGGER.debug('Processing inventory data from testing hosts info...')
+        QATestRunner.LOGGER.debug('Processing inventory data from testing hosts info')
         instances_list = []
 
         for _, host_value in instances_info.items():
@@ -69,6 +69,7 @@ class QATestRunner():
 
         inventory_instance = AnsibleInventory(ansible_instances=instances_list)
         self.inventory_file_path = inventory_instance.inventory_file_path
+        QATestRunner.LOGGER.debug('Inventory data from testing hosts info was processed successfully')
 
 
     def __process_test_data(self, instances_info):
@@ -77,7 +78,7 @@ class QATestRunner():
         Args:
             instances_info (dict): Dictionary with hosts configuration.
         """
-        QATestRunner.LOGGER.debug('Processing testing data from hosts..')
+        QATestRunner.LOGGER.debug('Processing testing data from hosts')
 
         for _, host_value in instances_info.items():
             test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
@@ -86,7 +87,7 @@ class QATestRunner():
                 if module_key == 'test':
                     test_launcher.add(self.__build_test(module_value, hosts))
             self.test_launchers.append(test_launcher)
-
+        QATestRunner.LOGGER.debug('Testing data from hosts info was processed successfully')
 
     def __build_test(self, test_params, host=['all']):
         """Private method in charge of reading all the required fields to build one test of type Pytest
@@ -132,17 +133,17 @@ class QATestRunner():
         """Run testing threads. One thread per TestLauncher object"""
         runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
-        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests...")
+        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests")
 
         for runner_thread in runner_threads:
             runner_thread.start()
 
-        QATestRunner.LOGGER.info(f'Waiting until tests finish...')
+        QATestRunner.LOGGER.info('Waiting for tests to finish')
 
         for runner_thread in runner_threads:
             runner_thread.join()
 
-        QATestRunner.LOGGER.info(f'Tests have been finished...')
+        QATestRunner.LOGGER.info('The test run is finished')
 
     def destroy(self):
         """"Destroy all the temporary files created during a running QAtestRunner instance"""

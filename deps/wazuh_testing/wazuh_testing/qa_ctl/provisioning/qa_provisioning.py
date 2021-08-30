@@ -66,7 +66,7 @@ class QAProvisioning():
 
     def __process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
-        QAProvisioning.LOGGER.debug('Processing inventory data from provisioning hosts info...')
+        QAProvisioning.LOGGER.debug('Processing inventory data from provisioning hosts info')
 
         for root_key, root_value in self.provision_info.items():
             if root_key == "hosts":
@@ -82,7 +82,7 @@ class QAProvisioning():
         inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,
                                               ansible_groups=self.group_dict)
         self.inventory_file_path = inventory_instance.inventory_file_path
-
+        QAProvisioning.LOGGER.debug('The inventory data from provisioning hosts info has been processed successfully')
 
     def __process_config_data(self, host_provision_info):
         """Process config file info to generate all the tasks needed for deploy Wazuh
@@ -90,7 +90,6 @@ class QAProvisioning():
         Args:
             host_provision_info (dict): Dicionary with host provisioning info
         """
-        QAProvisioning.LOGGER.debug('Processing provisioning data from hosts..')
         current_host = host_provision_info['host_info']['host']
 
         if 'wazuh_deployment' in host_provision_info:
@@ -119,28 +118,29 @@ class QAProvisioning():
 
             installation_files_parameters['qa_ctl_configuration'] = self.qa_ctl_configuration
 
-            if install_type == "sources":
+            if install_type == 'sources':
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
                 installation_instance = WazuhSources(**installation_files_parameters)
-            if install_type == "package":
+            if install_type == 'package':
                     if s3_package_url is None:
                         installation_files_parameters['local_package_path'] = local_package_path
                         installation_instance = WazuhLocalPackage(**installation_files_parameters)
                         remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                            hosts=current_host)
+                                                                                              hosts=current_host)
                     else:
                         installation_files_parameters['s3_package_url'] = s3_package_url
                         installation_instance = WazuhS3Package(**installation_files_parameters)
-                        remote_files_path = installation_instance.download_installation_files(s3_package_url, self.inventory_file_path,
-                                                                                      hosts=current_host)
+                        remote_files_path = installation_instance.download_installation_files(s3_package_url,
+                                                                                              self.inventory_file_path,
+                                                                                              hosts=current_host)
 
-            if install_target == "agent":
+            if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
                                                       inventory_file_path=self.inventory_file_path,
                                                       install_mode=install_type, hosts=current_host,
                                                       server_ip=manager_ip,
                                                       qa_ctl_configuration=self.qa_ctl_configuration)
-            if install_target == "manager":
+            if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
                                                         install_mode=install_type, hosts=current_host,
@@ -149,7 +149,10 @@ class QAProvisioning():
 
             if health_check:
                 # Wait for Wazuh initialization before health_check
-                sleep(60)
+                health_check_sleep_time = 60
+                QAProvisioning.LOGGER.info(f"Waiting {health_check_sleep_time} seconds before performing the "
+                                           f"healthcheck in {current_host} host")
+                sleep(health_check_sleep_time)
                 deployment_instance.health_check()
 
             self.wazuh_installation_paths[deployment_instance.hosts] = deployment_instance.install_dir_path
@@ -170,7 +173,7 @@ class QAProvisioning():
         Args:
             hosts (str): Hosts to check.
         """
-        QAProvisioning.LOGGER.info('Checking hosts SSH connection...')
+        QAProvisioning.LOGGER.info('Checking hosts SSH connection')
         wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
                                            'wait_for_connection': {'delay': 5, 'timeout': 60}})
 
@@ -178,19 +181,22 @@ class QAProvisioning():
 
         AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                           output=self.qa_ctl_configuration.ansible_output)
+        QAProvisioning.LOGGER.info('Hosts connection OK. The instances are accessible via ssh')
 
     def run(self):
         """Provision all hosts in a parallel way"""
         self.__check_hosts_connection()
         provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
                                 for _, host_value in self.provision_info['hosts'].items()]
-        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances...")
+        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
         for runner_thread in provision_threads:
             runner_thread.start()
 
         for runner_thread in provision_threads:
             runner_thread.join()
+
+        QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object

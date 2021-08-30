@@ -45,7 +45,10 @@ class Logging:
 
     def __default_config(self):
         """Set default handler configuration"""
-        formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+        if self.level == logging.DEBUG:
+            formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+        else:
+            formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
         self.logger.setLevel(self.level)
 
         if self.stdout:
