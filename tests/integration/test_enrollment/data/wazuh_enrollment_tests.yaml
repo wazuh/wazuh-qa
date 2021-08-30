@@ -41,6 +41,8 @@
   description: "Check a invalid agent_address in auto enrollment configuration"
   configuration:
     agent_address: "192.168.0.1000"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
   #Known Issue: Invalid adress is not checked. Skiped
   skips:
@@ -85,6 +87,8 @@
     - agent-auth
   configuration:
     enabled: "nn"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: Invalid content for tag 'enabled'."
 -
   name: "Valid agent name config"
@@ -111,18 +115,24 @@
   description: "Check a invalid agent_name configurations"
   configuration:
     agent_name: "test_agent/+bad"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: Invalid agent name"
 -
   name: "Invalid agent name config - too short"
   description: "Check a invalid agent_name configurations too short"
   configuration:
     agent_name: "n"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: Invalid agent name"
 -
   name: "Invalid agent name config - too long"
   description: "Check a invalid agent_name configurations too long"
   configuration:
     agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: Invalid agent name"
 -
   name: "Use source IP"
@@ -137,10 +147,25 @@
 -
   name: "Incompatible - Use source IP"
   description: "Use source IP option while trying to set an IP"
+  skips:
+    - wazuh-agentd
   configuration:
     use_source_ip: "yes"
     agent_address: "127.0.0.1"
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: Options '-I' and '-i' are uncompatible."
+-
+  name: "Incompatible - Use source IP"
+  description: "Use source IP option while trying to set an IP"
+  skips:
+    - agent-auth
+  configuration:
+    use_source_ip: "yes"
+    agent_address: "127.0.0.1"
+  pre_existent_keys:
+    - ""
+  expected_error: "ERROR: Incompatible sender_ip options: Forcing IP while using use_source_ip flag."
 -
   name: "Password from string - Agent-Auth"
   description: "Check that configured password is sent on string"
@@ -193,7 +218,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: " OSSEC A:'{host_name}'\n"
+    expected: "OSSEC A:'{host_name}'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Invalid port 65536"
@@ -202,6 +227,8 @@
     - agent-auth
   configuration:
     port: 65536
+  pre_existent_keys:
+    - ""
   expected_error: "(1205): Invalid port number: '65536'"
 -
   name: "Invalid port 0"
@@ -210,6 +237,8 @@
     - agent-auth
   configuration:
     port: 0
+  pre_existent_keys:
+    - ""
   expected_error: "(1205): Invalid port number: '0'"
 -
   name: "Invalid port -1515"
@@ -218,10 +247,13 @@
     - agent-auth
   configuration:
     port: -1515
+  pre_existent_keys:
+    - ""
   expected_error: "ERROR: (1235): Invalid value for element 'port': -1515."
 -
   name: "Default Name with key hash"
   description: "Check the default message when having a key hash"
+  debug: "yes"
   pre_existent_keys:
     - "001 test_name any TopSecret"
   message:
