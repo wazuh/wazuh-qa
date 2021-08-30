@@ -11,7 +11,6 @@ from wazuh_testing.tools.logging import Logging
 class WazuhS3Package(WazuhPackage):
     """Install Wazuh from a S3 URL package
 
-
     Args:
         wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
         s3_package_url (string): URL of the S3 Wazuh package.
@@ -22,7 +21,6 @@ class WazuhS3Package(WazuhPackage):
         revision (string): Revision of the wazuh package. Parameter set by default to 'None'.
         repository (string): Repository of the wazuh package. Parameter set by default to 'None'.
         architecture (string): Architecture of the Wazuh package. Parameter set by default to 'None'.
-
 
     Attributes:
         wazuh_target (string): Type of the Wazuh instance desired (agent or manager).

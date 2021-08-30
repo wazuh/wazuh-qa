@@ -12,7 +12,7 @@ class WazuhInstallation(ABC):
         installation_files_path (string): Path where the Wazuh instalation files are located.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     
-    Aributes:
+    Attributes:
         wazuh_target (string): Type of the wazuh installation desired (manager or agent).
         installation_files_path (string): Path where the wazuh installation files are located.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.       
@@ -25,7 +25,7 @@ class WazuhInstallation(ABC):
 
     @abstractmethod
     def download_installation_files(self, inventory_file_path, ansible_tasks, hosts='all'):
-        """Downloads the installation files of Wazuh  by creating an ansible playbook and launching it
+        """Download the installation files of Wazuh  by creating an ansible playbook and launching it
 
         Args:
             inventory_file_path (string): path where the instalation files are going to be stored

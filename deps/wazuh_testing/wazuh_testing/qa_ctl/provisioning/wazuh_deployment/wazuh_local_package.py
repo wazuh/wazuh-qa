@@ -25,7 +25,6 @@ class WazuhLocalPackage(WazuhPackage):
         installation_files_path (string): Path where the Wazuh installation files are located.
         local_package_path (string): Path where the local package is located.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
-
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 

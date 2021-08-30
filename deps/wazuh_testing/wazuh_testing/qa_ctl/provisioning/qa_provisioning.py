@@ -199,7 +199,6 @@ class QAProvisioning():
         QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
 
     def destroy(self):
-        """Destroy all the temporary files created by an instance of this object
-        """
+        """Destroy all the temporary files created by an instance of this object"""
         if os.path.exists(self.inventory_file_path):
             os.remove(self.inventory_file_path)

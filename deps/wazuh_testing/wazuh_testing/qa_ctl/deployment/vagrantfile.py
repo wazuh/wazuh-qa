@@ -56,7 +56,7 @@ class Vagrantfile():
         self.box_url = self.__get_box_url()
 
     def __get_box_url(self):
-        """Gets the box URL of the specified box_image parameter
+        """Get the box URL of the specified box_image parameter
         
         Returns:
             str: String with the URL of the specified box (if exists). In case the box is not found in the map,
