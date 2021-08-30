@@ -38,17 +38,8 @@ params = [{'SERVER_ADDRESS': SERVER_ADDRESS, }]
 metadata = [{}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 LAST_MESSAGE = None
 CURRENT_TEST_CASE = {}
-
-def check_log_error_conf(msg):
-    with open(LOG_FILE_PATH, 'r') as log_file:
-        lines = log_file.readlines()
-        for line in lines:
-            if msg in line:
-                return line
-    return None
 
 def receiver_callback(received):
     if len(received) == 0:
@@ -159,7 +150,7 @@ def set_test_case(test_case):
     CURRENT_TEST_CASE = test_case
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys):
+def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys):
     if 'wazuh-agentd' in CURRENT_TEST_CASE.get("skips", []):
         pytest.skip("This test does not apply to agentd")
     if 'yes' in CURRENT_TEST_CASE.get("debug", []):
@@ -176,15 +167,12 @@ def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configu
             control_service('start', daemon='wazuh-agentd')
         except:
             pass
-        def wait_key_changes(line):
-            if CURRENT_TEST_CASE.get('expected_error') in line:
-                return line
-            return None
         try:
             log_monitor = FileMonitor(LOG_FILE_PATH)
-            log_monitor.start(timeout=120, callback=wait_key_changes)
+            log_monitor.start(timeout=120, callback=lambda x: wait_until(x, CURRENT_TEST_CASE.get('expected_error')))
         except TimeoutError as err:
             assert False, f'Expected error log doesn´t occurred'
+
     else:
         control_service('start', daemon='wazuh-agentd')
         result = get_last_message()
