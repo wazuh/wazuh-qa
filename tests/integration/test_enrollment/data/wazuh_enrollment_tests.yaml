@@ -91,7 +91,7 @@
   description: "Check a valid agent_name configurations"
   configuration:
     agent_name: "test_agent"
-    pre_existent_keys:
+  pre_existent_keys:
     - ""
   message:
     expected: "OSSEC A:'test_agent'\n"
@@ -227,7 +227,6 @@
   message:
     expected: "OSSEC A:'{host_name}' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
-  debug: 'yes'
 
 -
   name: "Valid agent address with key hash"
