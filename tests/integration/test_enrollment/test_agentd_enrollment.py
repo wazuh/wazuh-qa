@@ -4,39 +4,16 @@
 
 import pytest
 import ssl
-import subprocess
 import yaml
-import time
-
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
-from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
 from conftest import *
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
-SERVER_ADDRESS = '127.0.0.1'
-
-def load_tests(path):
-    """ Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
-params = [{'SERVER_ADDRESS': SERVER_ADDRESS, }]
-metadata = [{}]
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__)
 
 LAST_MESSAGE = None
 CURRENT_TEST_CASE = {}
@@ -63,47 +40,7 @@ def clear_last_message():
     global LAST_MESSAGE
     LAST_MESSAGE = None
 
-def get_temp_yaml(param):
-    temp = os.path.join(test_data_path, 'temp.yaml')
-    with open(configurations_path, 'r') as conf_file:
-        enroll_conf = {'enrollment': {'elements': []}}
-        for elem in param:
-            if elem == 'password':
-                continue
-            enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
-        print(enroll_conf)
-        temp_conf_file = yaml.safe_load(conf_file)
-        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
-    with open(temp, 'w') as temp_file:
-        yaml.safe_dump(temp_conf_file, temp_file)
-    return temp
-
-def clean_log_file():
-    try:
-        client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
-
-def override_wazuh_conf(configuration):
-    # Configuration for testing
-    temp = get_temp_yaml(configuration)
-    conf = load_wazuh_configurations(temp, __name__, )
-    os.remove(temp)
-
-    test_config = set_section_wazuh_conf(conf[0]['sections'])
-    # Set new configuration
-    write_wazuh_conf(test_config)
-
-    clean_log_file()
-    clean_password_file()
-    if configuration.get('password'):
-        parser = AgentAuthParser()
-        parser.add_password(password=configuration['password']['value'], isFile=True,
-                            path=configuration.get('authorization_pass_path'))
-
-
-socket_listener = ManInTheMiddle(address=(SERVER_ADDRESS, 1515), family='AF_INET',
+socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']), family='AF_INET',
                                               connection_protocol='SSL', func=receiver_callback)
 
 # fixtures
@@ -153,16 +90,12 @@ def set_test_case(test_case):
 def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys):
     if 'wazuh-agentd' in CURRENT_TEST_CASE.get("skips", []):
         pytest.skip("This test does not apply to agentd")
-    if 'yes' in CURRENT_TEST_CASE.get("debug", []):
-        print("DEBUG")
 
     control_service('stop', daemon='wazuh-agentd')
-    clear_last_message()
-    configuration = CURRENT_TEST_CASE.get('configuration', {})
-    parse_configuration_string(configuration)
-    override_wazuh_conf(configuration)
+    override_wazuh_conf(CURRENT_TEST_CASE.get('configuration', {}), __name__)
 
     if 'expected_error' in CURRENT_TEST_CASE:
+        clean_log_file()
         try:
             control_service('start', daemon='wazuh-agentd')
         except:
@@ -174,6 +107,7 @@ def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_e
             assert False, f'Expected error log doesn´t occurred'
 
     else:
+        clear_last_message()
         control_service('start', daemon='wazuh-agentd')
         result = get_last_message()
         assert result != None, "Enrollment request message never arraived"
