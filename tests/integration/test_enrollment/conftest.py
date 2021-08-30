@@ -138,3 +138,12 @@ class AgentAuthParser:
 
     def add_groups(self, group_string):
         self._command += ['-G', group_string]
+
+def wait_until(x, log_str):
+    """Callback function to wait for a message in a log file.
+
+    Args:
+        x (str): String containing message.
+        log_str (str): Log file string.
+    """
+    return x if log_str in x else None

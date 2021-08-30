@@ -19,8 +19,6 @@ from conftest import *
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
-REMOTED_PORT = 1514
-
 
 def load_tests(path):
     """ Loads a yaml file from a path
@@ -39,17 +37,8 @@ params = [{'SERVER_ADDRESS': SERVER_ADDRESS, }]
 metadata = [{}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 LAST_MESSAGE = None
 CURRENT_TEST_CASE = {}
-
-def check_log_error_conf(msg):
-    with open(LOG_FILE_PATH, 'r') as log_file:
-        lines = log_file.readlines()
-        for line in lines:
-            if msg in line:
-                return line
-    return None
 
 def receiver_callback(received):
     if len(received) == 0:
@@ -159,11 +148,14 @@ def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configu
     launch_agent_auth(CURRENT_TEST_CASE.get('configuration', {}))
 
     if 'expected_error' in CURRENT_TEST_CASE:
-        assert check_log_error_conf(CURRENT_TEST_CASE.get('expected_error')) != None, \
-            'Expected error log doesn´t occurred'
+        try:
+            log_monitor = FileMonitor(LOG_FILE_PATH)
+            log_monitor.start(timeout=120, callback=lambda x: wait_until(x, CURRENT_TEST_CASE.get('expected_error')))
+        except TimeoutError as err:
+            assert False, f'Expected error log doesn´t occurred'
     else:
         result = get_last_message()
-        assert result != None, "Enrollment request message never arraived"
+        assert result != None, "Enrollment request message never arrived"
         assert result == CURRENT_TEST_CASE['message']['expected'].format(**DEFAULT_VALUES),  \
                'Expected enrollment request message does not match'
 
