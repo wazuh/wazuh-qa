@@ -74,14 +74,15 @@ class DockerWrapper(Instance):
         return self.docker_client.containers.get(self.name)
 
     def run(self):
-        DockerWrapper.LOGGER.debug(f"Running {self.name} cointainer...")
+        DockerWrapper.LOGGER.debug(f"Starting {self.name} cointainer")
         container = self.docker_client.containers.run(image=self.image, name=self.name, ports=self.ports,
                                                       remove=self.remove, detach=self.detach, stdout=self.stdout,
                                                       stderr=self.stderr)
+        DockerWrapper.LOGGER.debug(f"The container {self.name} is running")
         if self.ip and self.network_name:
             try:
                 self.docker_client.networks.get(self.network_name).connect(container, ipv4_address=self.ip)
-            except docker.errors.APIError: #requests.exceptions.HTTPError:
+            except docker.errors.APIError:
                 exception_message = f"Invalid address {self.ip} It does not belong to any of this network's " \
                                      'subnets. Please check if you have already set this docker network ' \
                                      '(run `docker network ls`) and then remove it if it is created with ' \
@@ -95,8 +96,9 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
-            DockerWrapper.LOGGER.debug(f"Restarting {self.name} cointainer...")
+            DockerWrapper.LOGGER.debug(f"Restarting {self.name} cointainer")
             self.get_container().restart()
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been restarted sucessfully")
         except docker.errors.NotFound:
             pass
 
@@ -107,8 +109,9 @@ class DockerWrapper(Instance):
             docker.errors.APIError: If the server returns an error.
         """
         try:
-            DockerWrapper.LOGGER.debug(f"Stopping {self.name} cointainer...")
+            DockerWrapper.LOGGER.debug(f"Stopping {self.name} cointainer")
             self.get_container().stop()
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been stopped sucessfully")
         except docker.errors.NotFound:
             pass
 
@@ -127,14 +130,16 @@ class DockerWrapper(Instance):
             pass
 
         try:
-            DockerWrapper.LOGGER.debug(f"Removing {self.name} cointainer...")
+            DockerWrapper.LOGGER.debug(f"Removing {self.name} cointainer")
             self.get_container().remove()
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been removed sucessfully")
         except docker.errors.NotFound:
             pass
 
         if remove_image:
-            DockerWrapper.LOGGER.debug(f"Removing {self.image.id} docker image...")
+            DockerWrapper.LOGGER.debug(f"Removing {self.image.id} docker image")
             self.docker_client.images.remove(image=self.image.id, force=True)
+            DockerWrapper.LOGGER.debug(f"The {self.image.id} image has been removed sucessfully")
 
     def get_instance_info(self):
         """Get the parameters information.

@@ -64,7 +64,7 @@ class Vagrantfile():
         try:
             return box_mapping[self.box_image]
         except KeyError:
-            Vagrantfile.LOGGER.warning('Using a non default box...')
+            Vagrantfile.LOGGER.warning('Using a non default box')
             return None
 
     def __str__(self):

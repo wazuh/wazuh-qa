@@ -41,7 +41,7 @@ class QAInfraestructure:
         self.docker_network = None
         self.network_address = None
 
-        QAInfraestructure.LOGGER.debug('Processing deployment configuration...')
+        QAInfraestructure.LOGGER.debug('Processing deployment configuration')
         for host in instance_list:
             for provider in instance_list[host]['provider']:
                 data = instance_list[host]['provider'][provider]
@@ -49,15 +49,16 @@ class QAInfraestructure:
                     continue
 
                 if provider == 'vagrant':
-                    QAInfraestructure.LOGGER.debug(f"Setting {data['vm_name']} vagrant instance for deployment...")
+                    QAInfraestructure.LOGGER.debug(f"Setting {data['vm_name']} vagrant instance for deployment")
                     quiet_out = True if not self.qa_ctl_configuration.vagrant_output else False
                     vagrant_instance = VagrantWrapper(data['vagrantfile_path'], data['vagrant_box'], data['label'],
                                                       data['vm_name'], data['vm_cpu'], data['vm_memory'],
                                                       data['vm_system'], data['vm_ip'], quiet_out)
                     self.instances.append(vagrant_instance)
+                    QAInfraestructure.LOGGER.debug(f"{data['vm_name']} vagrant instance has been set successfully")
 
                 elif provider == 'docker':
-                    QAInfraestructure.LOGGER.debug(f"Setting {data['name']} docker instance for deployment...")
+                    QAInfraestructure.LOGGER.debug(f"Setting {data['name']} docker instance for deployment")
                     if not self.docker_client:
                         self.docker_client = docker.from_env()
 
@@ -85,7 +86,7 @@ class QAInfraestructure:
                                 self.docker_network = self.docker_client.networks.get(self.DOCKER_NETWORK_NAME)
                             except docker.errors.NotFound:
                                 QAInfraestructure.LOGGER.debug(f"Docker network {self.network_address} not found."
-                                                               'Creating it...')
+                                                               'Creating it')
                                 ipam_pool = docker.types.IPAMPool(subnet=str(self.network_address),
                                                                   gateway=str(self.network_address[-2]))
 
@@ -93,11 +94,15 @@ class QAInfraestructure:
                                 self.docker_network = self.docker_client.networks.create(self.DOCKER_NETWORK_NAME,
                                                                                          driver='bridge',
                                                                                          ipam=ipam_config)
-
+                                QAInfraestructure.LOGGER.debug(f"Docker network {self.network_address} has been "
+                                                               'created successfully')
                     docker_instance = DockerWrapper(self.docker_client, data['dockerfile_path'], data['name'], _remove,
                                                     _ports, _detach, _stdout, _stderr, ip=_ip,
                                                     network_name=self.DOCKER_NETWORK_NAME)
                     self.instances.append(docker_instance)
+                    QAInfraestructure.LOGGER.debug(f"{data['vm_name']} docker container has been set successfully")
+
+            QAInfraestructure.LOGGER.debug('Deployment configuration processing has been finished successfully')
 
     def __threads_runner(self, threads):
         """Auxiliary function to start and wait for threads
@@ -113,28 +118,32 @@ class QAInfraestructure:
 
     def run(self):
         """Execute the run method on every configured instance."""
-        QAInfraestructure.LOGGER.info(f"Running {len(self.instances)} instances deployment...")
+        QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
+        QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
-        QAInfraestructure.LOGGER.info(f"Stopping {len(self.instances)} instances...")
+        QAInfraestructure.LOGGER.info(f"Stopping {len(self.instances)} instances")
         self.__threads_runner([ThreadExecutor(instance.halt) for instance in self.instances])
+        QAInfraestructure.LOGGER.info('The instances have been stopped sucessfully')
 
     def restart(self):
         """Execute the 'restart' method on every configured instance."""
-        QAInfraestructure.LOGGER.info(f"Restarting {len(self.instances)} instances...")
+        QAInfraestructure.LOGGER.info(f"Restarting {len(self.instances)} instances")
         self.__threads_runner([ThreadExecutor(instance.restart) for instance in self.instances])
 
     def destroy(self):
         """Execute the 'destroy' method on every configured instance."""
-        QAInfraestructure.LOGGER.info(f"Destroying {len(self.instances)} instances...")
+        QAInfraestructure.LOGGER.info(f"Destroying {len(self.instances)} instances")
         self.__threads_runner([ThreadExecutor(instance.destroy) for instance in self.instances])
+        QAInfraestructure.LOGGER.info(f"The instances have been destroyed sucessfully")
 
         if self.docker_network:
-            QAInfraestructure.LOGGER.debug('Removing docker network...')
+            QAInfraestructure.LOGGER.info('Removing docker network')
             try:
                 self.docker_network.remove()
+                QAInfraestructure.LOGGER.info('Docker network has been removed sucessfully')
             except docker.errors.NotFound:
                 QAInfraestructure.LOGGER.error('Could not remove docker network')
                 pass
@@ -146,9 +155,10 @@ class QAInfraestructure:
             (dict): Contains the status for each configured instance.
         """
         status = {}
-        QAInfraestructure.LOGGER.debug('Getting instances status...')
+        QAInfraestructure.LOGGER.debug('Getting instances status')
         for instance in self.instances:
             status[instance.get_name()] = instance.status()
+        QAInfraestructure.LOGGER.debug('Instances status info was obtained sucessfully')
 
         return status
 
@@ -159,8 +169,9 @@ class QAInfraestructure:
             (dict): Dictionary with the information for each configured instance.
         """
         info = {}
-        QAInfraestructure.LOGGER.debug('Getting instances info...')
+        QAInfraestructure.LOGGER.debug('Getting instances info')
         for instance in self.instances:
             info[instance.get_name()] = instance.get_instance_info()
+        QAInfraestructure.LOGGER.debug('Instances info was obtained sucessfully')
 
         return info
