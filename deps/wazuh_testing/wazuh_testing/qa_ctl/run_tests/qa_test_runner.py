@@ -145,5 +145,6 @@ class QATestRunner():
         QATestRunner.LOGGER.info(f'Tests have been finished...')
 
     def destroy(self):
+        """"Destroy all the temporary files created during a running QAtestRunner instance"""
         if os.path.exists(self.inventory_file_path):
             os.remove(self.inventory_file_path)

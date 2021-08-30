@@ -56,6 +56,12 @@ class Vagrantfile():
         self.box_url = self.__get_box_url()
 
     def __get_box_url(self):
+        """Gets the box URL of the specified box_image parameter
+        
+        Returns:
+            str: String with the URL of the specified box (if exists). In case the box is not found in the map,
+            it will return a 'None' value.
+        """
         box_mapping = {
             'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu20_04.box',
             'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box'

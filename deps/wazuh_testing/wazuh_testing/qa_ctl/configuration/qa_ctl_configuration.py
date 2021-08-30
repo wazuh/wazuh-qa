@@ -1,5 +1,22 @@
 
 class QACTLConfiguration:
+    """Class implemented to control the different options for the output config module.
+
+    Args:
+        configuration_data (dict) : Dict with all the info needed for this module coming from config file.
+    
+    Attributes:
+        configuration_data (dict) : Dict with all the info needed for this module coming from config file.
+        vagrant_output (boolean): Defines if the vagrant's outputs are going to be replaced by customized
+        outputs or if they remain with the default outputs. This parameter is set to 'False' by default.
+        ansible_output (boolean): Defines if the ansible's outputs are going to be replaced by customized 
+        outputs or if they remain with the default outputs. This parameter is set to 'False' by default.
+        logging_enable (boolean): This field is used for enabling or disabling the logging outputs option.
+        Its default value is set to 'True'.
+        logging_level (string): Defines the logging level for the outputs. 
+        Four options are available: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+        logging_file (string): This field defines a path for a file where the outputs will be logged as well
+    """
 
     def __init__(self, configuration_data):
         self.configuration_data = configuration_data
@@ -12,6 +29,9 @@ class QACTLConfiguration:
         self.__read_configuration_data()
 
     def __read_configuration_data(self):
+        """Read the given configuration data of the object and sets the values of the
+            parameters of the class.
+        """
         if 'config' in self.configuration_data:
             if 'vagrant_output' in self.configuration_data['config']:
                 self.vagrant_output = self.configuration_data['config']['vagrant_output']
@@ -27,6 +47,7 @@ class QACTLConfiguration:
 
 
     def __str__(self):
+        """Define how the class object is to be displayed."""
         return f"vagrant_output: {self.vagrant_output}\nansible_output: {self.ansible_output}\n" \
                f"logging_enable: {self.logging_enable}\nloggin_level: {self.logging_level}\n"\
                f"logging_file: {self.logging_file}\n"

@@ -9,6 +9,34 @@ from wazuh_testing.tools.logging import Logging
 
 
 class WazuhS3Package(WazuhPackage):
+    """Install Wazuh from a S3 URL package
+
+
+    Args:
+        wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
+        s3_package_url (string): URL of the S3 Wazuh package.
+        installation_files_path (string): Path where is located the Wazuh instalation files.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        version (string): The version of Wazuh. Parameter set by default to 'None'.
+        system (string): System of the Wazuh installation files. Parameter set by default to 'None'.
+        revision (string): Revision of the wazuh package. Parameter set by default to 'None'.
+        repository (string): Repository of the wazuh package. Parameter set by default to 'None'.
+        architecture (string): Architecture of the Wazuh package. Parameter set by default to 'None'.
+
+
+    Attributes:
+        wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
+        s3_package_url (string): URL of the S3 Wazuh package.
+        package_name (string): Name of the S3 package.
+        installation_files_path (string): Path where is located the Wazuh instalation files.
+        qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        version (string): The version of Wazuh. Parameter set by default to 'None'.
+        system (string): System of the Wazuh installation files. Parameter set by default to 'None'.
+        revision (string): Revision of the wazuh package. Parameter set by default to 'None'.
+        repository (string): Repository of the wazuh package. Parameter set by default to 'None'.
+        architecture (string): Architecture of the Wazuh package. Parameter set by default to 'None'.
+    """
+
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, wazuh_target, s3_package_url, installation_files_path, qa_ctl_configuration, version=None,
@@ -29,6 +57,16 @@ class WazuhS3Package(WazuhPackage):
         pass
 
     def download_installation_files(self, s3_package_url, inventory_file_path, hosts='all'):
+        """Download the installation files of Wazuh in the given inventory file path
+
+        Args:
+            s3_package_url (string): URL of the S3 Wazuh package.
+            inventory_file_path (string): path where the instalation files are going to be stored.
+            hosts (string): Parameter set to `all` by default.
+        
+        Returns:
+            str: String with the complete path of the downloaded installation package
+        """    
         download_s3_package = AnsibleTask({'name': 'Download S3 package',
                                            'get_url': {'url': s3_package_url,
                                                        'dest': self.installation_files_path},

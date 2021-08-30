@@ -52,6 +52,18 @@ class AnsibleRunner:
 
     @staticmethod
     def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=True, output=False):
+        """Run the ansible tasks given from playbook parameters
+
+        Args:
+            ansible_inventory_path (string): Path were the ansible directory is placed.
+            playbook_parameters : parameters for the ansible playbook.
+            raise_on_error (boolean): Sets if errors or unexpected behaviour are goint to raise errors, Set to 'True' by default.
+            output (boolena): sets if there are going to be outputs. Set to 'False' by default.
+        
+        Returns:
+            AnsibleOutput: Result of the ansible playbook run.
+
+        """
         ansible_playbook = AnsiblePlaybook(**playbook_parameters)
         quiet = not output
 

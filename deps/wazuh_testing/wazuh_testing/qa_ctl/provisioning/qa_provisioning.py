@@ -193,5 +193,7 @@ class QAProvisioning():
             runner_thread.join()
 
     def destroy(self):
+        """Destroy all the temporary files created by an instance of this object
+        """
         if os.path.exists(self.inventory_file_path):
             os.remove(self.inventory_file_path)

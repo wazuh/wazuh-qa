@@ -72,6 +72,7 @@ class AnsiblePlaybook():
             file.write(self.__str__())
 
     def delete_playbook_file(self):
+        """Delete the existing playbook file"""
         if os.path.exists(self.playbook_file_path):
             AnsiblePlaybook.LOGGER.debug(f"Removing {self.playbook_file_path} playbook")
             os.remove(self.playbook_file_path)
