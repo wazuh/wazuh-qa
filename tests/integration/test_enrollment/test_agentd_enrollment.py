@@ -9,9 +9,10 @@ import yaml
 import time
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.monitoring import QueueMonitor
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
 from conftest import *
 
 # Marks
@@ -19,8 +20,6 @@ from conftest import *
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 SERVER_ADDRESS = '127.0.0.1'
-REMOTED_PORT = 1514
-
 
 def load_tests(path):
     """ Loads a yaml file from a path
@@ -73,34 +72,45 @@ def clear_last_message():
     global LAST_MESSAGE
     LAST_MESSAGE = None
 
-def launch_agent_auth(configuration):
-    parse_configuration_string(configuration)
-    parser = AgentAuthParser(server_address=SERVER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH,
-                             sudo=True if platform.system() == 'Linux' else False)
-    if configuration.get('agent_name'):
-        parser.add_agent_name(configuration.get("agent_name"))
-    if configuration.get('agent_address'):
-        parser.add_agent_adress(configuration.get("agent_address"))
-    if configuration.get('auto_method') == 'yes':
-        parser.add_auto_negotiation()
-    if configuration.get('ssl_cipher'):
-        parser.add_ciphers(configuration.get('ssl_cipher'))
-    if configuration.get('server_ca_path'):
-        parser.add_manager_ca(configuration.get('server_ca_path'))
-    if configuration.get('agent_key_path'):
-        parser.add_agent_certificates(configuration.get('agent_key_path'), configuration.get('agent_certificate_path'))
-    if configuration.get('use_source_ip'):
-        parser.use_source_ip()
-    if configuration.get('password'):
-        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'),
-                            path=AUTHDPASS_PATH)
-    else:
-        parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
-    if configuration.get('groups'):
-        parser.add_groups(configuration.get('groups'))
+def get_temp_yaml(param):
+    temp = os.path.join(test_data_path, 'temp.yaml')
+    with open(configurations_path, 'r') as conf_file:
+        enroll_conf = {'enrollment': {'elements': []}}
+        for elem in param:
+            if elem == 'password':
+                continue
+            enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
+        print(enroll_conf)
+        temp_conf_file = yaml.safe_load(conf_file)
+        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
 
-    out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out.communicate()
+def clean_log_file():
+    try:
+        client_file = open(LOG_FILE_PATH, 'w')
+        client_file.close()
+    except IOError as exception:
+        raise
+
+def override_wazuh_conf(configuration):
+    # Configuration for testing
+    temp = get_temp_yaml(configuration)
+    conf = load_wazuh_configurations(temp, __name__, )
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+    # Set new configuration
+    write_wazuh_conf(test_config)
+
+    clean_log_file()
+    clean_password_file()
+    if configuration.get('password'):
+        parser = AgentAuthParser()
+        parser.add_password(password=configuration['password']['value'], isFile=True,
+                            path=configuration.get('authorization_pass_path'))
+
 
 socket_listener = ManInTheMiddle(address=(SERVER_ADDRESS, 1515), family='AF_INET',
                                               connection_protocol='SSL', func=receiver_callback)
@@ -150,18 +160,33 @@ def set_test_case(test_case):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys):
-
-    if 'agent-auth' in CURRENT_TEST_CASE.get("skips", []):
-        pytest.skip("This test does not apply to agent-auth")
+    if 'wazuh-agentd' in CURRENT_TEST_CASE.get("skips", []):
+        pytest.skip("This test does not apply to agentd")
+    if 'yes' in CURRENT_TEST_CASE.get("debug", []):
+        print("DEBUG")
 
     control_service('stop', daemon='wazuh-agentd')
     clear_last_message()
-    launch_agent_auth(CURRENT_TEST_CASE.get('configuration', {}))
+    configuration = CURRENT_TEST_CASE.get('configuration', {})
+    parse_configuration_string(configuration)
+    override_wazuh_conf(configuration)
 
     if 'expected_error' in CURRENT_TEST_CASE:
-        assert check_log_error_conf(CURRENT_TEST_CASE.get('expected_error')) != None, \
-            'Expected error log doesn´t occurred'
+        try:
+            control_service('start', daemon='wazuh-agentd')
+        except:
+            pass
+        def wait_key_changes(line):
+            if CURRENT_TEST_CASE.get('expected_error') in line:
+                return line
+            return None
+        try:
+            log_monitor = FileMonitor(LOG_FILE_PATH)
+            log_monitor.start(timeout=120, callback=wait_key_changes)
+        except TimeoutError as err:
+            assert False, f'Expected error log doesn´t occurred'
     else:
+        control_service('start', daemon='wazuh-agentd')
         result = get_last_message()
         assert result != None, "Enrollment request message never arraived"
         assert result == CURRENT_TEST_CASE['message']['expected'].format(**DEFAULT_VALUES),  \

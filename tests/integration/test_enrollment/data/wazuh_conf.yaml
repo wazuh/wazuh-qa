@@ -2,14 +2,14 @@
     - tags:
       - all
       apply_to_modules:
-      - test_agentd_enrollment_params
+      - test_agentd_enrollment
       - test_agent_auth_enrollment
       sections:
       - section: client
         elements:
-            - notify_time: 
+            - notify_time:
                 value: 10
-            - time-reconnect: 
+            - time-reconnect:
                 value: 60
             - auto_restart:
                 value: 'yes'
@@ -17,10 +17,14 @@
                 value: 'aes'
             - server:
                 elements:
-                - address: 
+                - address:
                     value: 127.0.0.1
                 - protocol:
                     value: 'tcp'
+                - max_retries:
+                    value: 1
+                - retry_interval:
+                    value: 1
     - tags:
       - all
       apply_to_modules:
@@ -28,9 +32,9 @@
       sections:
       - section: client
         elements:
-            - notify_time: 
+            - notify_time:
                 value: 10
-            - time-reconnect: 
+            - time-reconnect:
                 value: 60
             - auto_restart:
                 value: 'yes'
@@ -38,7 +42,7 @@
                 value: 'aes'
             - server:
                 elements:
-                - address: 
+                - address:
                     value: SERVER_ADDRESS
                 - port:
                     value: REMOTED_PORT
@@ -63,9 +67,9 @@
       sections:
       - section: client
         elements:
-            - notify_time: 
+            - notify_time:
                 value: 10
-            - time-reconnect: 
+            - time-reconnect:
                 value: 60
             - auto_restart:
                 value: 'yes'
@@ -73,37 +77,37 @@
                 value: 'aes'
             - server:
                 elements:
-                - address: 
+                - address:
                     value: SERVER_ADDRESS_1
                 - port:
                     value: REMOTED_PORT_1
                 - protocol:
                     value: PROTOCOL
-                - max_retries: 
+                - max_retries:
                     value: 3
                 - retry_interval:
                     value: 3
             - server:
                 elements:
-                - address: 
+                - address:
                     value: SERVER_ADDRESS_2
                 - port:
                     value: REMOTED_PORT_2
                 - protocol:
                     value: PROTOCOL
-                - max_retries: 
+                - max_retries:
                     value: 3
                 - retry_interval:
                     value: 3
             - server:
                 elements:
-                - address: 
+                - address:
                     value: SERVER_ADDRESS_3
                 - port:
                     value: REMOTED_PORT_3
                 - protocol:
                     value: PROTOCOL
-                - max_retries: 
+                - max_retries:
                     value: 3
                 - retry_interval:
                     value: 3
@@ -114,9 +118,9 @@
       sections:
       - section: client
         elements:
-            - notify_time: 
+            - notify_time:
                 value: 10
-            - time-reconnect: 
+            - time-reconnect:
                 value: 60
             - auto_restart:
                 value: 'yes'
@@ -128,13 +132,13 @@
                     value: 'ENROLL'
             - server:
                 elements:
-                - address: 
+                - address:
                     value: '127.0.0.1'
                 - port:
                     value: '1514'
                 - protocol:
                     value: PROTOCOL
-                - max_retries: 
+                - max_retries:
                     value: MAX_RETRIES
                 - retry_interval:
                     value: RETRY_INTERVAL
@@ -148,10 +152,9 @@
         elements:
             - server:
                 elements:
-                - address: 
+                - address:
                     value: '127.0.0.1'
                 - port:
                     value: '1514'
                 - protocol:
                     value: 'tcp'
-        
