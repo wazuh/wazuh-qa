@@ -124,6 +124,16 @@ def write_json_file(file_path, data, ensure_ascii=False):
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
 
 
+def delete_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
+def delete_path_recursively(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 def download_file(source_url, dest_path):
     request = requests.get(source_url, allow_redirects=True)
     with open(dest_path, 'wb') as dest_file:

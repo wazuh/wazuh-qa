@@ -14,6 +14,7 @@ from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
 from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfiguration
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
 
 
 DEPLOY_KEY = 'deployment'
@@ -22,6 +23,11 @@ TEST_KEY = 'tests'
 
 qactl_logger = None
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
+launched = {
+    'instance_handler': False,
+    'qa_provisioning': False,
+    'test_runner': False
+}
 
 
 def read_configuration_data(configuration_file_path):
@@ -54,56 +60,76 @@ def main():
     configuration_data = {}
     instance_handler = None
 
-    parser.add_argument('--config', '-c', type=str, action='store', required=True,
+    parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
 
-    parser.add_argument('--destroy', '-d', action='store_true',
-                        help='Destroy the instances once the tool has finished.')
+    parser.add_argument('-p', '--persistent', action='store_true',
+                        help='Persistent instance mode. Do not destroy the instances once the process has finished.')
+
+    parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
+                        help='Independent run method. Specify a test or a list of tests to be run')
+
+    parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
+                        help='Wazuh installation and tests version')
 
     arguments = parser.parse_args()
 
+    if arguments.run_test:
+        config_generator = QACTLConfigGenerator(arguments.run_test)
+        config_generator.run()
+
+
     # Check configuration file path exists
-    assert os.path.exists(arguments.config), f"{arguments.config} file doesn't exists"
+    # assert os.path.exists(arguments.config), f"{arguments.config} file doesn't exists"
 
     # Read configuration data
-    configuration_data = read_configuration_data(arguments.config)
+    # configuration_data = read_configuration_data(arguments.config)
 
-    # Validate configuration schema
-    validate_configuration_data(configuration_data)
+    # # Validate configuration schema
+    # validate_configuration_data(configuration_data)
 
-    # Set QACTL configuration
-    qactl_configuration = QACTLConfiguration(configuration_data)
+    # # Set QACTL configuration
+    # qactl_configuration = QACTLConfiguration(configuration_data)
 
-    # Set QACTL logging
-    set_qactl_logging(qactl_configuration)
+    # # Set QACTL logging
+    # set_qactl_logging(qactl_configuration)
 
     # Run QACTL modules
-    try:
-        if DEPLOY_KEY in configuration_data:
-            deploy_dict = configuration_data[DEPLOY_KEY]
-            instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
-            instance_handler.run()
+    # try:
 
-        if PROVISION_KEY in configuration_data:
-            provision_dict = configuration_data[PROVISION_KEY]
-            qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
-            qa_provisioning.run()
 
-        if TEST_KEY in configuration_data:
-            test_dict = configuration_data[TEST_KEY]
-            tests_runner = QATestRunner(test_dict, qactl_configuration)
-            tests_runner.run()
+    #     if arguments.version:
+    #         print(f"VERSION -> {arguments.version}")
 
-    finally:
-        if arguments.destroy:
-            if DEPLOY_KEY in configuration_data:
-                instance_handler.destroy()
+    #     if DEPLOY_KEY in configuration_data:
+    #         deploy_dict = configuration_data[DEPLOY_KEY]
+    #         instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
+    #         instance_handler.run()
+    #         launched['instance_handler'] = True
 
-            if PROVISION_KEY in configuration_data:
-                qa_provisioning.destroy()
+    #     if PROVISION_KEY in configuration_data:
+    #         provision_dict = configuration_data[PROVISION_KEY]
+    #         qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
+    #         qa_provisioning.run()
+    #         launched['qa_provisioning'] = True
 
-            if TEST_KEY in configuration_data:
-                tests_runner.destroy()
+    #     if TEST_KEY in configuration_data:
+    #         test_dict = configuration_data[TEST_KEY]
+    #         tests_runner = QATestRunner(test_dict, qactl_configuration)
+    #         tests_runner.run()
+    #         launched['test_runner'] = True
+
+    # finally:
+    #     if not arguments.persistent:
+    #         print("DESTROY")
+    #         if DEPLOY_KEY in configuration_data and launched['instance_handler']:
+    #             instance_handler.destroy()
+
+    #         if PROVISION_KEY in configuration_data and launched['qa_provisioning']:
+    #             qa_provisioning.destroy()
+
+    #         if TEST_KEY in configuration_data and launched['test_runner']:
+    #             tests_runner.destroy()
 
 
 if __name__ == '__main__':
