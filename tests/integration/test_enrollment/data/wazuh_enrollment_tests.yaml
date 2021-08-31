@@ -172,9 +172,7 @@
   skips:
     - wazuh-agentd
   configuration:
-    password:
-      type: "string"
-      value: "pass123"
+    password: "pass123"
   pre_existent_keys:
     - ""
   message:
@@ -183,16 +181,11 @@
 -
   name: "Password from file - Agent-Auth"
   description: "Check that password file is open and read successfully"
-  skips:
-    - wazuh-agentd
-  configuration:
-    password:
-      type: "file"
-      value: "pass123"
+  password_file_content: "pass_from_file"
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC PASS: pass123 OSSEC A:'{host_name}'\n"
+    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Password from file - Agentd"
@@ -201,12 +194,11 @@
     - agent-auth
   configuration:
     authorization_pass_path: "{PASSWORD_PATH}"
-    password:
-      value: "pass123"
+  password_file_content: "pass_from_file"
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC PASS: pass123 OSSEC A:'{host_name}'\n"
+    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Valid port"
