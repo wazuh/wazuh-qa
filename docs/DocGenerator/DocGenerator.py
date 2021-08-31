@@ -22,6 +22,9 @@ import argparse
 
 VERSION = "0.1"
 CONFIG_PATH = "config.yaml"
+FIRST_PROPOSAL = "first_cfg.yaml"
+SECOND_PROPOSAL = "second_cfg.yaml"
+THIRD_PROPOSAL = "third_cfg.yaml"
 
 
 class DocGenerator:
@@ -220,18 +223,18 @@ if __name__ == '__main__':
     if args.version:
         print(f"DocGenerator v{VERSION}")
     elif args.test_config:
-        Config(CONFIG_PATH)
+        Config(FIRST_PROPOSAL)
     elif args.sanity:
-        sanity = Sanity(Config(CONFIG_PATH))
+        sanity = Sanity(Config(FIRST_PROPOSAL))
         sanity.run()
     elif args.index_name:
-        indexData = IndexData(args.index_name, Config(CONFIG_PATH))
+        indexData = IndexData(args.index_name, Config(FIRST_PROPOSAL))
         indexData.run()
     elif args.launch_app:
-        indexData = IndexData(args.launch_app, Config(CONFIG_PATH))
+        indexData = IndexData(args.launch_app, Config(FIRST_PROPOSAL))
         indexData.run()
         os.chdir("Search-UI")
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:
-        docs = DocGenerator(Config(CONFIG_PATH))
+        docs = DocGenerator(Config(FIRST_PROPOSAL))
         docs.run()
