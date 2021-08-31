@@ -8,7 +8,7 @@ import pytest
 from wazuh_testing import global_parameters
 import wazuh_testing.fim as fim
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
 
 
 # Helper functions
@@ -64,11 +64,18 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope='module', params=configurations)
+def stop_syscheckd_module(request):
+    """Stop syscheckd module after test execution."""
+    yield
+    control_service('stop', daemon='wazuh-syscheckd')
+
+
 # Test
 
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_fim_start):
+                                   restart_syscheckd, wait_for_fim_start, stop_syscheckd_module):
     """Two registries with capital differences must trigger just one modify the event.
 
     Test to check that two registries monitored with the same name but
