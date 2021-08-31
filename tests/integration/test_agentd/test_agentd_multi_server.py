@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will check the agent's enrollment and connection to a manager in a multi-server environment.
+    The objective is to check how the agent manages the connections to the servers depending on their status.
+
+tiers:
+    - 0
+
+component:
+    agent
+
+path:
+    tests/integration/test_agentd/
+
+daemons:
+    - agentd
+    - authd
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+    - windows, 7
+    - windows, 8
+    - windows, 10
+    - windows, server 2003
+    - windows, server 2012
+    - windows, server 2016
+
+coverage:
+
+pytest_args:
+
+tags:
+    - enrollment
+'''
 import os
 import pytest
 from time import sleep
@@ -341,19 +393,71 @@ def wait_until(x, log_str):
 # @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
-    """Check the agent's enrollment and connection to a manager in a multi-server environment.
+    '''
+    description:
+        Check the agent's enrollment and connection to a manager in a multi-server environment.
+        Initialize an environment with multiple simulated servers in which the agent is forced to enroll
+        under different test conditions, verifying the agent's behavior through its log files.
 
-    Initialize an environment with multiple simulated servers in which the agent is forced to enroll
-    under different test conditions, verifying the agent's behavior through its log files.
+    wazuh_min_version:
+        4.1
 
-    Args:
-        add_hostnames (fixture): Adds to the OS hosts file the names and IP's of the test servers.
-        configure_authd_server (fixture): Initializes multiple simulated remoted connections.
-        set_authd_id (fixture): Sets the agent id to 101 in authd simulated connection.
-        clean_keys (fixture): Clears the client.key file used by the simulated remote connections.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
-    """
+    parameters:
+        - add_hostnames (fixture):
+            Adds to the OS hosts file the names and IP's of the test servers.
+
+        - configure_authd_server (fixture):
+            Initializes a simulated authd connection.
+
+        - set_authd_id (fixture):
+            Sets the agent id to 101 in authd simulated connection.
+
+        - clean_keys (fixture):
+            Clears the client.key file used by the simulated remote connections.
+
+        - configure_environment (fixture):
+            Configure a custom environment for testing.
+
+        - get_configuration (fixture):
+            Get configurations from the module.
+
+    assertions:
+        - Agent without keys. All servers will refuse the connection to remoted but will accept enrollment.
+          The agent should try to connect and enroll to each of them.
+
+        - Agent without keys. The first server only has enrollment available, and the third server only
+          has remoted available. The agent should enroll in the first server and connect to the third one.
+
+        - Agent without keys. The agent should enroll and connect to the first server, and then the first server
+          will disconnect, agent should connect to the second server with the same key.
+
+        - Agent without keys. The agent should enroll and connect to the first server, and then the first server
+          will disconnect, agent should try to enroll to the first server again,
+          and then after failure, move to the second server and connect.
+
+        - Agent with keys. The agent should enroll and connect to the last server.
+
+        - Agent with keys. The first server is available, but it disconnects, the second and third servers
+          are not responding. The agent on disconnection, should try the second and
+          third servers and go back finally to the first server.**
+
+    test_input:
+        Several settings are used for the servers and the requests to be made along with the expected responses.
+
+    logging:
+        - ossec.log:
+            - r"Requesting a key from server"
+            - r"Valid key received"
+            - r"Trying to connect to server"
+            - r"Connected to the server"
+            - r"Received message: '#!-agent ack '"
+            - r"Server responded. Releasing lock."
+            - r"Unable to connect to"
+
+    tags:
+        - enrollment
+        - simulator
+    '''
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):

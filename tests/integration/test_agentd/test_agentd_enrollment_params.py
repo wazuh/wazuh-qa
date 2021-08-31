@@ -1,7 +1,60 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will verify different situations that may occur at `wazuh-agentd` during enrollment.
+    The objective is to check the enrollment of the agent using certain settings
+    in the configuration file produces the expected responses from the server.
+
+tiers:
+    - 0
+
+component:
+    agent
+
+path:
+    tests/integration/test_agentd/
+
+daemons:
+    - agentd
+    - authd
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+    - windows, 7
+    - windows, 8
+    - windows, 10
+    - windows, server 2003
+    - windows, server 2012
+    - windows, server 2016
+
+coverage:
+
+pytest_args:
+
+tags:
+    - enrollment
+'''
 import datetime
 import os
 import pytest
@@ -211,13 +264,39 @@ def check_log_error_conf(msg):
 
 @pytest.mark.parametrize('test_case', tests, ids=[case['description'] for case in tests])
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
-    """Test different situations that can occur on the wazuh-agentd daemon during agent enrollment.
+    '''
+    description:
+        Test different situations that can occur on the `wazuh-agentd` daemon during agent enrollment.
 
-    Args:
-        configure_authd_server (fixture): Initializes a simulated authd connection.
-        configure_environment (fixture): Configure a custom environment for testing.
-        test_case (list): List of tests to be performed.
-    """
+    wazuh_min_version:
+        4.1
+
+    parameters:
+        - configure_authd_server (fixture):
+            Initializes a simulated authd connection.
+
+        - configure_environment (fixture):
+            Configure a custom environment for testing.
+
+        - test_case (list):
+            List of tests to be performed.
+
+    assertions:
+        - Check that the responses received are consistent with the parameters sent.
+
+    test_input:
+        The tests are based on using specific configurations for the agent, initiate the agent enrollment
+        with the manager, and finally, verify that the response received matches the expected one.
+        Both configurations and responses are found in a YAML file.
+
+    logging:
+        - ossec.log:
+            - r"Multiple values located in the wazuh_enrollment_tests.yaml file."
+
+    tags:
+        - enrollment
+        - simulator
+    '''
     global remoted_server
     print(f'Test: {test_case["name"]}')
     if 'wazuh-agentd' in test_case.get("skips", []):

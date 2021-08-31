@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will check that the connection is finally made when
+    there are delays between connection attempts to the server.
+    The objective is to check how `wazuh-agentd` behaves when there are delays between connection attempts
+    to `wazuh-remoted` using `TCP` and `UDP` protocols.
+
+tiers:
+    - 0
+
+component:
+    agent
+
+path:
+    tests/integration/test_agentd/
+
+daemons:
+    - agentd
+    - remoted
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+    - windows, 7
+    - windows, 8
+    - windows, 10
+    - windows, server 2003
+    - windows, server 2012
+    - windows, server 2016
+
+coverage:
+
+pytest_args:
+
+tags:
+    - enrollment
+'''
 from datetime import datetime, timedelta
 import os
 import platform
@@ -256,18 +310,51 @@ This test covers different options of delays between server connection attempts:
 
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration):
-    """Check how the agent behaves when there are delays between connection attempts to the server.
+    '''
+    description:
+        Check how the agent behaves when there are delays between connection attempts to the server.
+        For this purpose, different values for `max_retries` and `retry_interval` parameters are tested.
 
-    For this purpose, different values for max_retries and retry_interval parameters are tested.
+    wazuh_min_version:
+        4.1
 
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        start_authd (fixture): Enable authd to accept connections and perform enrollments.
-        stop_agent (fixture): Stop Wazuh's agent.
-        set_keys (fixture): Write to client.keys file the agent's enrollment details.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
-    """
+    parameters:
+        - configure_authd_server (fixture):
+            Initializes a simulated authd connection.
+
+        - start_authd (fixture):
+            Enable authd to accept connections and perform enrollments.
+
+        - stop_agent (fixture):
+            Stop Wazuh's agent.
+
+        - set_keys (fixture):
+            Write to client.keys file the agent's enrollment details.
+
+        - configure_environment (fixture):
+            Configure a custom environment for testing.
+
+        - get_configuration (fixture):
+            Get configurations from the module.
+
+    assertions:
+        - Check for unsuccessful connection retries in agentd initialization.
+        - If auto enrollment is enabled, verify successfully enrollment.
+        - Check the server rollback feature.
+
+    test_input:
+        Different parameters are used for the server using the `TCP` and `UDP` protocols.
+
+    logging:
+        - ossec.log:
+            - r"Valid key received"
+            - r"Trying to connect to server"
+            - r"Unable to connect to any server"
+
+    tags:
+        - enrollment
+        - simulator
+    '''
     DELTA = 1
     RECV_TIMEOUT = 5
     ENROLLMENT_SLEEP = 20
