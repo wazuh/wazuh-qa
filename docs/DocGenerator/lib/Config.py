@@ -17,7 +17,7 @@ class Config():
     """
     def __init__(self, config_file):
         self.project_path = "../.."
-        self.documentation_path = ".."
+        self.documentation_path = "../output"
         self.include_paths = []
         self.include_regex = []
         self.group_files = ""
