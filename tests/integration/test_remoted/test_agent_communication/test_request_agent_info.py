@@ -1,6 +1,46 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief:
+    Check that manager-agent communication through remoted socket works as expected.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+modules:
+    - remoted
+daemons:
+    - wazuh-remoted
+os_platform:
+    - linux
+os_vendor:
+    - redhat
+    - debian
+    - ubuntu
+    - alas
+    - arch-linux
+os_version:
+    - rhel5
+    - rhel6
+    - rhel7
+    - rhel8
+    - buster
+    - stretch
+    - wheezy
+    - bionic
+    - xenial
+    - trusty
+    - amazon-linux-1
+    - amazon-linux-2
+tiers:
+    - 0
+tags:
+    - tcp
+    - udp
+    - authd
+component:
+    - manager
+'''
 import os
 import time
 
@@ -60,9 +100,31 @@ def get_configuration(request):
 def test_request(get_configuration, configure_environment, remove_shared_files,
                  restart_remoted, command_request, expected_answer):
     """
-    Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
-    collects the response, and writes it in the socket or returns an error message if the queried
-    agent is disconnected.
+    description:
+        Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
+        collects the response, and writes it in the socket or returns an error message if the queried
+        agent is disconnected.
+    parameters:
+        - remove_shared_files:
+            type: fixture
+            brief: Temporary removes txt files from default agent group shared files
+        - restart_remoted:
+            type: fixture
+            brief: Reset ossec.log and start a new monitor
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.2
+    behaviour:
+        - Test getconfig request
+        - Test getstate request
+        - Test getconfig request for a disconnected agent
+    expected_behaviour:
+        - "Remoted unexpected answer"
     """
     cfg = get_configuration['metadata']
     protocols = cfg['PROTOCOL'].split(',')

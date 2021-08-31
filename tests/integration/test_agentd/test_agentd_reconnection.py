@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: These tests will check if, during enrollment, the agent re-establishes communication with the manager
+       under different situations that interrupt it.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+modules:
+    - agentd
+daemons:
+    - wazuh-agentd
+os_platform:
+    - linux
+    - windows
+    - mac
+os_vendor:
+    - redhat
+    - debian
+    - ubuntu
+    - alas
+    - macos
+    - arch-linux
+os_version:
+    - rhel5
+    - rhel6
+    - rhel7
+    - rhel8
+    - buster
+    - stretch
+    - jessie
+    - wheezy
+    - bionic
+    - xenial
+    - trusty
+    - windows-10
+    - windows-8
+    - windows-7
+    - windows-server-2003
+    - windows-server-2012
+    - windows-server-2016
+    - macos-catalina
+    - macos-server
+    - amazon-linux-1
+    - amazon-linux-2
+tiers:
+    - 0
+tags:
+    - tcp
+    - udp
+    - authd
+component:
+    - agent
+'''
 import os
 import platform
 from time import sleep
@@ -181,17 +232,42 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 
 
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
-    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-
-    In this case, the agent starts with keys.
-
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        start_authd (fixture): Enable authd to accept connections and perform enrollments.
-        set_authd_id (fixture): Set agent id to 101 in the authd simulated connection.
-        set_keys (fixture): Write to client.keys file the agent's enrollment details.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
+    """
+    description:
+        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+        In this case, the agent starts with keys.
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initialize a simulated authd connection.
+        - start_authd:
+            type: fixture
+            brief: Enable authd to accept connections and perform enrollments.
+        - set_authd_id:
+            type: fixture
+            brief: Set agent id to 101 in the authd simulated connection.
+        - set_keys:
+            type: fixture
+            brief: Write to client.keys file the agent's enrollment details.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.1
+    behaviour:
+        - Verify that `wazuh-agentd` is communicating with `wazuh-remoted`(if the agent is already enrolled)
+        - Configure `wazuh-remoted` to reject this connection
+        - Verify that the agent is enrolled again.
+    expected_behaviour:
+        - "Sending keep alive"
+        - "Valid key received"
+        - "Notify message from agent was never sent!"
+        - "Agent never enrolled after rejecting connection!"
+        - "Notify message from agent was never sent!"
+        - "Incorrect Secure Message"
     """
     global remoted_server
 
@@ -242,17 +318,42 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 
 def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
-    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-
-    In this case, the agent doesn't have client.keys file.
-
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        start_authd (fixture): Enable authd to accept connections and perform enrollments.
-        set_authd_id (fixture): Set agent id to 101 in the authd simulated connection.
-        delete_keys (fixture): Remove the agent's client.keys file.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
+    """
+    description:
+        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+        In this case, the agent doesn't have client.keys file.
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initialize a simulated authd connection.
+        - start_authd:
+            type: fixture
+            brief: Enable authd to accept connections and perform enrollments.
+        - set_authd_id:
+            type: fixture
+            brief: Set agent id to 101 in the authd simulated connection.
+        - delete_keys:
+            type: fixture
+            brief: Remove the agent's client.keys file.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.1
+    behaviour:
+        - Verify that `wazuh-agentd` is communicating with `wazuh-remoted`(if the agent is already enrolled)
+        - Configure `wazuh-remoted` to reject this connection
+        - Verify that the agent is enrolled again.
+    expected_behaviour:
+        - "Sending keep alive"
+        - "Valid key received"
+        - "Agent never enrolled for the first time."
+        - "Agent never enrolled after rejecting connection!"
+        - "Notify message from agent was never sent!"
+        - "Incorrect Secure Message"
     """
     global remoted_server
 
@@ -305,17 +406,42 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 
 def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
-    """Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-
-    In this case, the agent has its client.keys file empty.
-
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        start_authd (fixture): Enable authd to accept connections and perform enrollments.
-        set_authd_id (fixture): Set agent id to 101 in the authd simulated connection.
-        clean_keys (fixture): Clear the agent's client.keys file.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
+    """
+    description:
+        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
+        In this case, the agent has its client.keys file empty.
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initialize a simulated authd connection.
+        - start_authd:
+            type: fixture
+            brief: Enable authd to accept connections and perform enrollments.
+        - set_authd_id:
+            type: fixture
+            brief: Set agent id to 101 in the authd simulated connection.
+        - clean_keys:
+            type: fixture
+            brief: Clear the agent's client.keys file.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.1
+    behaviour:
+        - Verify that `wazuh-agentd` is communicating with `wazuh-remoted`(if the agent is already enrolled)
+        - Configure `wazuh-remoted` to reject this connection
+        - Verify that the agent is enrolled again.
+    expected_output:
+        - "Sending keep alive"
+        - "Valid key received"
+        - "Agent never enrolled for the first time."
+        - "Agent never enrolled after rejecting connection!"
+        - "Notify message from agent was never sent!"
+        - "Incorrect Secure Message"
     """
     global remoted_server
 
@@ -369,18 +495,45 @@ and multiple retries are required until the new key is obtained to start communi
 
 
 def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
-    """Check how the agent behaves when it makes multiple enrollment attempts before getting its key.
-
-    For this, the agent starts without keys and perform multiple enrollment requests
-    to authd before getting the new key to communicate with remoted.
-
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        stop_authd (fixture): Disable authd to accept connections and perform enrollments.
-        set_authd_id (fixture): Set agent id to 101 in the authd simulated connection.
-        clean_keys (fixture): Clear the agent's client.keys file.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
+    """
+    description:
+        Check how the agent behaves when it makes multiple enrollment attempts before getting its key.
+        For this, the agent starts without keys and perform multiple enrollment requests
+        to authd before getting the new key to communicate with remoted.
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initialize a simulated authd connection.
+        - stop_authd:
+            type: fixture
+            brief: Disable authd to accept connections and perform enrollments.
+        - set_authd_id:
+            type: fixture
+            brief: Set agent id to 101 in the authd simulated connection.
+        - clean_keys:
+            type: fixture
+            brief: Clear the agent's client.keys file.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.1
+    behaviour:
+        - Verify that `wazuh-agentd` is communicating with `wazuh-remoted`(if the agent is already enrolled)
+        - Configure `wazuh-remoted` to reject this connection
+        - Verify that the agent is enrolled again.
+    expected_behaviour:
+        - "Requesting a key"
+        - "Sending keep alive"
+        - "Valid key received"
+        - "Enrollment retry was not sent!"
+        - "Retries too quick"
+        - "No succesful enrollment after reties!"
+        - "Notify message from agent was never sent!"
+        - "A Wazuh module stopped because of Agentd initialization!"
     """
     global remoted_server
 
@@ -437,17 +590,36 @@ and multiple connection retries are required prior to requesting a new enrollmen
 
 
 def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration):
-    """Check how the agent behaves when Remoted is not available and performs multiple connection attempts to it.
-
-    For this, the agent starts with keys but Remoted is not available for several seconds,
-    then the agent performs multiple connection retries before requesting a new enrollment.
-
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        stop_authd (fixture): Disable authd to accept connections and perform enrollments.
-        set_keys (fixture): Write to client.keys file the agent's enrollment details.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
+    """
+    description:
+        Check how the agent behaves when Remoted is not available and performs multiple connection attempts to it.
+        For this, the agent starts with keys but Remoted is not available for several seconds,
+        then the agent performs multiple connection retries before requesting a new enrollment.
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initialize a simulated authd connection.
+        - stop_authd:
+            type: fixture
+            brief: Disable authd to accept connections and perform enrollments.
+        - set_keys:
+            type: fixture
+            brief: Write to client.keys file the agent's enrollment details.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+    wazuh_min_version:
+        4.1
+    behaviour:
+        - Verify that `wazuh-agentd` is communicating with `wazuh-remoted`(if the agent is already enrolled)
+        - Configure `wazuh-remoted` to reject this connection
+        - Verify that the agent is enrolled again.
+    expected_behaviour:
+        - "Sending keep alive"
+        - "Notify message from agent was never sent!"
     """
     global remoted_server
     REMOTED_KEYS_SYNC_TIME = 10
