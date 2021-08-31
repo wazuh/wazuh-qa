@@ -77,7 +77,6 @@ def set_keys(test_case):
         with open(CLIENT_KEYS_PATH, "w") as keys_file:
             for key in keys:
                 keys_file.writelines(key)
-            keys_file.close()
     except IOError:
         raise
 
@@ -88,7 +87,18 @@ def set_test_case(test_case):
     CURRENT_TEST_CASE = test_case
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys):
+@pytest.fixture(scope="function")
+def set_pass(test_case):
+    # Write password file
+    try:
+        with open(AUTHDPASS_PATH, "w") as f:
+            if 'password_file_content' in test_case:
+                f.write(test_case['password_file_content'])
+    except IOError:
+        raise
+
+@pytest.mark.parametrize('test_case', [case for case in tests])
+def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys, set_pass):
 
     if 'agent-auth' in CURRENT_TEST_CASE.get("skips", []):
         pytest.skip("This test does not apply to agent-auth")

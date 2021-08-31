@@ -58,12 +58,6 @@ def load_tests(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
-def clean_password_file():
-    try:
-        client_file = open(AUTHDPASS_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
 
 def parse_configuration_string(configuration):
     for key, value in configuration.items():
@@ -102,12 +96,8 @@ class AgentAuthParser:
     def use_source_ip(self):
         self._command += ['-i']
 
-    def add_password(self, password=None, isFile=False, path=None):
-        with open(path, 'w') as f:
-            if isFile and password:
-                f.write(password)
-            elif password:
-                self._command += ['-P', password]
+    def add_password(self, password):
+        self._command += ['-P', password]
 
     def add_groups(self, group_string):
         self._command += ['-G', group_string]
@@ -131,10 +121,7 @@ def launch_agent_auth(configuration):
     if configuration.get('use_source_ip'):
         parser.use_source_ip()
     if configuration.get('password'):
-        parser.add_password(configuration['password']['value'], isFile=(configuration['password']['type'] == 'file'),
-                            path=AUTHDPASS_PATH)
-    else:
-        parser.add_password(None, isFile=True, path=AUTHDPASS_PATH)
+        parser.add_password(configuration.get('password'))
     if configuration.get('groups'):
         parser.add_groups(configuration.get('groups'))
 
@@ -206,9 +193,3 @@ def override_wazuh_conf(configuration, test):
     test_config = set_section_wazuh_conf(conf[0]['sections'])
     # Set new configuration
     write_wazuh_conf(test_config)
-
-    clean_password_file()
-    if configuration.get('password'):
-        parser = AgentAuthParser()
-        parser.add_password(password=configuration['password']['value'], isFile=True,
-                            path=configuration.get('authorization_pass_path'))
