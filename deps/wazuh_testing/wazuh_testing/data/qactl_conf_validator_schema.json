@@ -184,6 +184,21 @@
                     "installation_files_path": {
                       "type": "string"
                     },
+                    "version":{
+                      "type": "string"
+                    },
+                    "system":{
+                      "type": "string"
+                    },
+                    "revision":{
+                      "type": "string"
+                    },
+                    "repository":{
+                      "type": "string"
+                    },
+                    "architecture":{
+                      "type": "string"
+                    },
                     "wazuh_install_path": {
                       "type": "string",
                       "default": "/var/ossec"
@@ -204,7 +219,13 @@
                       "else": {
                         "oneOf": [
                           {"required": ["local_package_path"]},
-                          {"required": ["s3_package_url"]}
+                          {"required": ["s3_package_url"]},
+                          {"required": [
+                            "version", 
+                            "system", 
+                            "revision", 
+                            "repository",
+                            "architecture"]}
                         ]
                       }
                     },
