@@ -5,24 +5,3 @@
   - test_max_upload_size
   configuration:
     max_upload_size: MAX_UPLOAD_SIZE
-
-  #    max_upload_size: 0
-#  sections:
-#  - section: remote
-#    elements:
-#    - connection:
-#        value: secure
-#    - port:
-#        value: PORT
-#    - protocol:
-#        value: PROTOCOL
-
-#---
-#- tags:
-#  - limitless_upload_size
-#  configuration:
-#    max_upload_size: 0
-#- tags:
-#  - low_upload_size
-#  configuration:
-#    max_upload_size: 5
