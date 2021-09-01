@@ -2087,10 +2087,33 @@ if sys.platform == 'win32':
                                   error_message=f'End of scheduled scan not detected after '
                                   f"{global_parameters.default_timeout} seconds")
 
+                                  
+def run_audit_command(directory, params, cmd_type):
+    """Function to run auditctl commands.
+
+    Args:
+        directory (str): An audit rule will be added or deleted for this directory.
+        params (str): Parameters for auditctl.
+        cmd_type (str): type of command that will be used.
+                        - add to create a new audit rule.
+                        - delete to remove an audit rule.
+    Raises:
+        ValueError: If cmd_type is not add or delete.
+    """
+
+    if cmd_type == 'add':
+        audit_flag = '-w'
+    elif cmd_type == 'delete':
+        audit_flag = '-W'
+    else:
+        raise ValueError("Only add and delete values are allowed")
+
+    command = f"auditctl {audit_flag} {directory} -p wa {params}"
+    subprocess.run(command.split())
+
 
 class CustomValidator:
     """Enable using user-defined validators over the events when validating them with EventChecker"""
-
     def __init__(self, validators_after_create=None, validators_after_update=None,
                  validators_after_delete=None, validators_after_cud=None):
         self.validators_create = validators_after_create

@@ -10,8 +10,8 @@ if the directory is monitored, events are triggered.
 ## Test logic
 
 - The test creates audit rules with multiple keys for monitored and non monitored directories
-- Then it waits until FIM reloads the audit rules. This is to avoid false positives when `whodata healthcheck` events remains in the audit socket.
-- It creates files inside the specified folder and check if FIM decodes the key of the audit event.
+- Then it waits until FIM reloads the audit rules. This is to avoid false positives when `whodata healthcheck` events remain in the audit socket.
+- It creates files inside the specified folder and checks if FIM decodes the key of the audit event.
 - If the action was performed in a monitored directory, check that the event is triggered.
 
 ## Checks
