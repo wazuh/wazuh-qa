@@ -36,6 +36,7 @@ class IndexData:
                 return True
         except Exception as e:
             logging.exception(f"Connection error:\n{e}")
+            print("Connection error")
             return False
 
     def get_files(self):
