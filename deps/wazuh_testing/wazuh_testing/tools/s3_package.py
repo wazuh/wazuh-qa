@@ -263,7 +263,7 @@ def get_s3_package_url(repository, target, version, revision, system, architectu
         else:
             print("get_s3_package_url error")              
         
-        package_name = get_package_name(target, version, system, revision, repository, architecture, short_url)
+        package_name = get_package_name(target, version, system, revision, repository, architecture)
         result_tmp = generate_repository_url(s3_path, package_name, s3_bucket)
         print(result_tmp)
         return result_tmp
