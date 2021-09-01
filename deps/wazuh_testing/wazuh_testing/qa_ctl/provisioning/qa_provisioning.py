@@ -146,7 +146,7 @@ class QAProvisioning():
                         installation_instance = WazuhS3Package(**installation_files_parameters)
                         remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                               hosts=current_host)
-                    if s3_package_url is None and version is None:
+                    elif s3_package_url is None and version is None:
                         installation_files_parameters['local_package_path'] = local_package_path
                         installation_instance = WazuhLocalPackage(**installation_files_parameters)
                         remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
