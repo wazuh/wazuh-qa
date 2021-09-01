@@ -4,8 +4,6 @@ Output path: "../output"
 
 Include paths:
   - "../../tests/integration/test_agentd"
-  - "../../tests/integration/test_wazuh_db"
-  - "../../tests/integration/test_vulnerability_detector"
 
 Include regex:
   - "^test_.*py$"
@@ -18,7 +16,6 @@ Function regex:
 
 Ignore paths:
   - "../../tests/integration/test_agentd/data"
-  - "../../tests/integration/test_wazuh_db/data"
 
 Output fields:
   Module:
