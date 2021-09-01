@@ -34,4 +34,6 @@ RUN npm install --save-dev typescript
 WORKDIR ../
 
 # index jsons and launch SearchUI
-CMD service elasticsearch start && python3 DocGenerator.py -l qa-docs
+CMD service elasticsearch start && \
+    sleep 10 && \
+    python3 DocGenerator.py -l qa-docs
