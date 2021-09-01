@@ -16,8 +16,8 @@ Verify that a 413 status code (Request Entity Too Large) is returned if the body
 
 ## Expected behavior
 
-- Fail if 200 code is returned when body is bigger than `max_upload_size`.
-- Fail if 413 code is returned when body is smaller than `max_upload_size`.
+- Fail if 200 code is returned when the body is bigger than `max_upload_size`.
+- Fail if 413 code is returned when the body is smaller than `max_upload_size`.
 
 ## Code documentation
 
