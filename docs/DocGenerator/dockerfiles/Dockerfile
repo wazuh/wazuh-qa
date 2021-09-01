@@ -21,8 +21,7 @@ RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
     apt update && \
     apt install -y default-jre && \
     apt install -y default-jdk && \
-    apt install -y elasticsearch && \
-    service elasticsearch start
+    apt install -y elasticsearch
 
 # get test doc output
 WORKDIR wazuh-qa/docs/DocGenerator/
@@ -35,4 +34,5 @@ RUN npm install --save-dev typescript
 WORKDIR ../
 
 # index jsons and launch SearchUI
-RUN python3 DocGenerator.py -l qa-doc
+CMD service elasticsearch start && python3 DocGenerator.py -l qa-doc
+#RUN python3 DocGenerator.py -l qa-doc
