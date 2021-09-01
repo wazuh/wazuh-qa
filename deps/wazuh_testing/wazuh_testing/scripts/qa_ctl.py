@@ -59,6 +59,7 @@ def main():
     parser = argparse.ArgumentParser()
     configuration_data = {}
     instance_handler = None
+    configuration_file = None
 
     parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
@@ -75,28 +76,30 @@ def main():
     arguments = parser.parse_args()
 
     if arguments.run_test:
-        config_generator = QACTLConfigGenerator(arguments.run_test)
+        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
         config_generator.run()
-
+        configuration_file = config_generator.config_file_path
+    else:
+        configuration_file = arguments.config
 
     # Check configuration file path exists
-    # assert os.path.exists(arguments.config), f"{arguments.config} file doesn't exists"
+    assert os.path.exists(configuration_file), f"{configuration_file} file doesn't exists or could not be "\
+                                                'generated correctly'
 
     # Read configuration data
-    # configuration_data = read_configuration_data(arguments.config)
+    configuration_data = read_configuration_data(configuration_file)
 
-    # # Validate configuration schema
-    # validate_configuration_data(configuration_data)
+    # Validate configuration schema
+    validate_configuration_data(configuration_data)
 
-    # # Set QACTL configuration
-    # qactl_configuration = QACTLConfiguration(configuration_data)
+    # Set QACTL configuration
+    qactl_configuration = QACTLConfiguration(configuration_data)
 
-    # # Set QACTL logging
-    # set_qactl_logging(qactl_configuration)
+    # Set QACTL logging
+    set_qactl_logging(qactl_configuration)
 
     # Run QACTL modules
     # try:
-
 
     #     if arguments.version:
     #         print(f"VERSION -> {arguments.version}")
@@ -106,7 +109,8 @@ def main():
     #         instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
     #         instance_handler.run()
     #         launched['instance_handler'] = True
-
+    # finally:
+    #     pass
     #     if PROVISION_KEY in configuration_data:
     #         provision_dict = configuration_data[PROVISION_KEY]
     #         qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)

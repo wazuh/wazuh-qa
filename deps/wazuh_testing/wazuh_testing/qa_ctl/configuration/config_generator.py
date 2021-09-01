@@ -5,6 +5,7 @@ from tempfile import gettempdir
 
 from wazuh_testing.tools import file
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.tools.time import get_current_timestamp
 
 
 class QACTLConfigGenerator:
@@ -20,20 +21,24 @@ class QACTLConfigGenerator:
             'user': 'vagrant',
             'password': 'vagrant',
             'connection_port': 22,
-            'ansible_python_interpreter': '/usr/bin/python3'
+            'ansible_python_interpreter': '/usr/bin/python3',
+            'system': 'deb'
         },
         'qactl/centos_8': {
             'connection_method': 'ssh',
             'user': 'vagrant',
             'password': 'vagrant',
             'connection_port': 22,
-            'ansible_python_interpreter': '/usr/bin/python3'
+            'ansible_python_interpreter': '/usr/bin/python3',
+            'system': 'rpm'
         }
     }
 
-    def __init__(self, tests):
+    def __init__(self, tests, wazuh_version='4.2.0'):
         self.tests = tests
+        self.wazuh_version = wazuh_version
         self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
+        self.config_file_path = f"{gettempdir()}/config_{get_current_timestamp()}.yaml"
         self.config = {}
         self.hosts = []
 
@@ -148,6 +153,17 @@ class QACTLConfigGenerator:
 
         return instance
 
+    def __get_package_url(self, instance):
+        # target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
+        #     else 'agent'
+        # vagrant_box = self.config['deployment'][instance]['provider']['vagrant']['vagrant_box']
+        # system = QACTLConfigGenerator.BOX_INFO[vagrant_box]['system']
+        # architecture = 'x86_64'  # Get architecture from system
+
+        # package_url = get_package_url('live', target, self.wazuh_version, '1', system, architecture)
+        pass
+
+
     def __process_deployment_data(self, tests_info):
         self.config['deployment'] = {}
 
@@ -185,9 +201,9 @@ class QACTLConfigGenerator:
             self.config['provision']['hosts'][instance]['host_info']['host'] = vm_ip
 
             # Wazuh deployment
-            s3_package_url = 'mocked_url'
             target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
                 else 'agent'
+            s3_package_url = 'mocked_url' ## self.__get_package_url(instance)
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
                 'target': target,
@@ -214,12 +230,13 @@ class QACTLConfigGenerator:
         for test in tests_info:
             instance = f"host_{test_host_number}"
             self.config['tests'][instance] = {'host_info': {}, 'test': {}}
-            self.config['tests'][instance]['host_info'] = self.config['provision']['hosts'][instance]['host_info']
+            self.config['tests'][instance]['host_info'] = dict(self.config['provision']['hosts'][instance]['host_info'])
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
                     'test_files_path': f"{gettempdir()}/wazuh_qa/{test['test_path']}",
-                    'run_tests_dir_path': f"{gettempdir()}/wazuh_qa/test/integration"
+                    'run_tests_dir_path': f"{gettempdir()}/wazuh_qa/test/integration",
+                    'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
                 }
             }
             test_host_number += 1
@@ -233,13 +250,14 @@ class QACTLConfigGenerator:
         self.__process_provision_data()
         self.__process_test_data(tests_info)
 
-        import json
-        print(json.dumps(self.config, indent=4))
-
     def run(self):
         info = self.__get_all_tests_info()
         self.__process_test_info(info)
+        file.write_yaml_file(self.config_file_path, self.config)
 
     def destroy(self):
         for host_ip in self.hosts:
             self.__delete_ip_entry(host_ip)
+
+        if os.path.exists(self.config_file_path):
+            os.remove(self.config_file_path)
