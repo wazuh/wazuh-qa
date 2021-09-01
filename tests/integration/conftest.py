@@ -602,3 +602,66 @@ def create_file_structure_function(get_files_list):
     yield
 
     delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope='module')
+def use_wazuh_daemons(get_configuration, request):
+    """Wazuh daemons handler.
+
+    It uses `wazuh_daemons_configuration` of each module in order to configure the behavior of the fixture. 
+    In case this variable is not defined all wazuh modules will be restarted.
+    The  `wazuh_daemons_configuration` should be a dictionary with the following keys:
+
+        wazuh_daemons (list, optional): List with every daemon to be used by the module. In case of empty array, all Wazuh will be restarted. Default value empty.
+        truncate_log (boolean): Configure if ossec.log truncation. Default `True`
+        ignore_errors (boolean): Configure if errors in daemon handling should be ignore. Default `False`
+
+    Args:
+        get_configuration (fixture): Gets the current configuration of the test.
+        request (fixture): Provide information on the executing test function.
+    """
+    wazuh_daemons = []
+    truncate_log = True
+    ignore_errors = False
+
+    try:
+        wazuh_daemons_configuration = getattr(request.module, 'wazuh_daemons_configuration')
+        if 'wazuh_daemons' in wazuh_daemons_configuration:
+            wazuh_daemons = wazuh_daemons_configuration['wazuh_daemons']
+
+        if 'truncate_log' in wazuh_daemons_configuration:
+            truncate_log= wazuh_daemons_configuration['truncate_log']
+
+        if 'ignore_errors' in wazuh_daemons_configuration:
+            ignore_errors = wazuh_daemons_configuration['ignore_errors']
+
+    except AttributeError:
+       pass
+
+    if truncate_log:
+       truncate_file(LOG_FILE_PATH)
+
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+    try:
+        if wazuh_daemons:
+            for daemon in wazuh_daemons:
+                control_service('restart', daemon=daemon)
+        else:
+             control_service('restart')
+    except ValueError as value_error:
+        if not ignore_errors:
+            raise value_error
+    except subprocess.CalledProcessError as called_process_error:
+        if not ignore_errors:
+            raise called_process_error
+
+    yield
+
+    if wazuh_daemons:
+        for daemon in wazuh_daemons:
+            control_service('stop', daemon=daemon)
+    else:
+        control_service('stop')
