@@ -605,14 +605,13 @@ def create_file_structure_function(get_files_list):
 
 
 @pytest.fixture(scope='module')
-def use_wazuh_daemons(get_configuration, request):
-    """Wazuh daemons handler.
+def use_daemons(get_configuration, request):
+    """Daemons handler.
 
-    It uses `wazuh_daemons_configuration` of each module in order to configure the behavior of the fixture. 
-    In case this variable is not defined all wazuh modules will be restarted.
-    The  `wazuh_daemons_configuration` should be a dictionary with the following keys:
-
-        wazuh_daemons (list, optional): List with every daemon to be used by the module. In case of empty array, all Wazuh will be restarted. Default value empty.
+    It uses `daemons_configuration` of each module in order to configure the behavior of the fixture. 
+    The  `daemons_configuration` should be a dictionary with the following keys:
+        daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
+            will be raised
         truncate_log (boolean): Configure if ossec.log truncation. Default `True`
         ignore_errors (boolean): Configure if errors in daemon handling should be ignore. Default `False`
 
@@ -620,23 +619,23 @@ def use_wazuh_daemons(get_configuration, request):
         get_configuration (fixture): Gets the current configuration of the test.
         request (fixture): Provide information on the executing test function.
     """
-    wazuh_daemons = []
+    daemons = []
     truncate_log = True
     ignore_errors = False
 
     try:
-        wazuh_daemons_configuration = getattr(request.module, 'wazuh_daemons_configuration')
-        if 'wazuh_daemons' in wazuh_daemons_configuration:
-            wazuh_daemons = wazuh_daemons_configuration['wazuh_daemons']
+        daemons_configuration = getattr(request.module, 'daemons_configuration')
+        if 'daemons' in daemons_configuration:
+            daemons = daemons_configuration['daemons']
 
-        if 'truncate_log' in wazuh_daemons_configuration:
-            truncate_log= wazuh_daemons_configuration['truncate_log']
+        if 'truncate_log' in daemons_configuration:
+            truncate_log = daemons_configuration['truncate_log']
 
-        if 'ignore_errors' in wazuh_daemons_configuration:
-            ignore_errors = wazuh_daemons_configuration['ignore_errors']
+        if 'ignore_errors' in daemons_configuration:
+            ignore_errors = daemons_configuration['ignore_errors']
 
-    except AttributeError:
-       pass
+    except AttributeError as daemon_configuration_not_set:
+       raise daemon_configuration_not_set
 
     if truncate_log:
        truncate_file(LOG_FILE_PATH)
@@ -646,8 +645,8 @@ def use_wazuh_daemons(get_configuration, request):
 
 
     try:
-        if wazuh_daemons:
-            for daemon in wazuh_daemons:
+        if daemons:
+            for daemon in daemons:
                 control_service('restart', daemon=daemon)
         else:
              control_service('restart')
@@ -660,8 +659,8 @@ def use_wazuh_daemons(get_configuration, request):
 
     yield
 
-    if wazuh_daemons:
-        for daemon in wazuh_daemons:
+    if daemons:
+        for daemon in daemons:
             control_service('stop', daemon=daemon)
     else:
         control_service('stop')
