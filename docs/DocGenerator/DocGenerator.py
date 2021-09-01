@@ -212,7 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
     parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
     parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
-    parser.add_argument('-l', help="Indexes the data and launch the application.", dest='index_name')
+    parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launching_index_name')
     args = parser.parse_args()
 
     if args.debug_level:
@@ -230,8 +230,8 @@ if __name__ == '__main__':
     elif args.index_name:
         indexData = IndexData(args.index_name, Config(FIRST_PROPOSAL))
         indexData.run()
-    elif args.launch_app:
-        indexData = IndexData(args.index_name, Config(FIRST_PROPOSAL))
+    elif args.launching_index_name:
+        indexData = IndexData(args.launching_index_name, Config(FIRST_PROPOSAL))
         indexData.run()
         os.chdir("Search-UI")
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
