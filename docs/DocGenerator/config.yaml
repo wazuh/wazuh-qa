@@ -3,8 +3,7 @@ Project path: "../../tests/integration"
 Output path: "../output"
 
 Include paths:
-  - "../../tests/integration/test_wazuh_db"
-  - "../../tests/integration/test_vulnerability_detector"
+  - "../../tests/integration/test_agentd"
 
 Include regex:
   - "^test_.*py$"
@@ -16,26 +15,32 @@ Function regex:
   - "^test_"
 
 Ignore paths:
-  - "../../tests/integration/test_wazuh_db/data"
+  - "../../tests/integration/test_agentd/data"
 
 Output fields:
   Module:
     Mandatory:
-      - brief
-      - metadata:
-        - modules
-        - daemons
-        - component
-        - operating_system
-        - tiers
+      - copyright
+      - type
+      - description
+      - tiers
+      - component
+      - path
+      - daemons
+      - os_support
     Optional:
+      - coverage
+      - pytest_args
       - tags
   Test:
     Mandatory:
-      - test_logic
-      - checks
+      - description
+      - wazuh_min_version
+      - assertions
+      - test_input
+      - logging
     Optional:
-      - expected_result
-      - test_cases
+      - parameters
+      - tags
 
 Test cases field: test_cases
