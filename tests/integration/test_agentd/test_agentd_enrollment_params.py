@@ -272,14 +272,17 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - test_case (list):
-            List of tests to be performed.
+        - test_case:
+            type: list
+            brief: List of tests to be performed.
 
     assertions:
         - Check that the responses received are consistent with the parameters sent.

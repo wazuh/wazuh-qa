@@ -403,23 +403,29 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
         4.1
 
     parameters:
-        - add_hostnames (fixture):
-            Adds to the OS hosts file the names and IP's of the test servers.
+        - add_hostnames:
+            type: fixture
+            brief: Adds to the OS hosts file the names and IP's of the test servers.
 
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - set_authd_id (fixture):
-            Sets the agent id to 101 in authd simulated connection.
+        - set_authd_id:
+            type: fixture
+            brief: Sets the agent id to 101 in authd simulated connection.
 
-        - clean_keys (fixture):
-            Clears the client.key file used by the simulated remote connections.
+        - clean_keys:
+            type: fixture
+            brief: Clears the client.key file used by the simulated remote connections.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Agent without keys. All servers will refuse the connection to remoted but will accept enrollment.
@@ -439,7 +445,7 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         - Agent with keys. The first server is available, but it disconnects, the second and third servers
           are not responding. The agent on disconnection, should try the second and
-          third servers and go back finally to the first server.**
+          third servers and go back finally to the first server.
 
     test_input:
         Several settings are used for the servers and the requests to be made along with the expected responses.
@@ -450,7 +456,7 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
             - r"Valid key received"
             - r"Trying to connect to server"
             - r"Connected to the server"
-            - r"Received message: '#!-agent ack '"
+            - r"Received message"
             - r"Server responded. Releasing lock."
             - r"Unable to connect to"
 

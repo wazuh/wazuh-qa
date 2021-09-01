@@ -319,23 +319,29 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - start_authd (fixture):
-            Enable authd to accept connections and perform enrollments.
+        - start_authd:
+            type: fixture
+            brief: Enable authd to accept connections and perform enrollments.
 
-        - stop_agent (fixture):
-            Stop Wazuh's agent.
+        - stop_agent:
+            type: fixture
+            brief: Stop Wazuh's agent.
 
-        - set_keys (fixture):
-            Write to client.keys file the agent's enrollment details.
+        - set_keys:
+            type: fixture
+            brief: Write to client.keys file the agent's enrollment details.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Check for unsuccessful connection retries in agentd initialization.

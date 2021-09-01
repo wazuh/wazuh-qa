@@ -140,11 +140,13 @@ def test_agentd_state(configure_environment, test_case: list):
         4.2
 
     parameters:
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - test_case (list):
-            List of tests to be performed.
+        - test_case:
+            type: list
+            brief: List of tests to be performed.
 
     assertions:
         - Verify the creation of the statistics file.

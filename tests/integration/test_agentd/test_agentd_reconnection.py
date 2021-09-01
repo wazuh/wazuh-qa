@@ -244,14 +244,17 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -325,14 +328,17 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -409,14 +415,17 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -495,14 +504,17 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -586,14 +598,17 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
         4.1
 
     parameters:
-        - configure_authd_server (fixture):
-            Initializes a simulated authd connection.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated authd connection.
 
-        - configure_environment (fixture):
-            Configure a custom environment for testing.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
-        - get_configuration (fixture):
-            Get configurations from the module.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
 
     assertions:
         - Verify that the agent enrollment is successful.
