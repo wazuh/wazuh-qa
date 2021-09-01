@@ -1,6 +1,10 @@
+import random
+import os
+
 from tempfile import gettempdir
 
-from wazuh_testing.tools.file import write_json_file, read_json_file, delete_file
+from wazuh_testing.tools import file
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class QACTLConfigGenerator:
@@ -29,10 +33,12 @@ class QACTLConfigGenerator:
 
     def __init__(self, tests):
         self.tests = tests
+        self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
         self.config = {}
+        self.hosts = []
 
     def __qa_docs_mocking(self, test_name):
-        file = f"{gettempdir()}/mocked_data.json"
+        mocked_file = f"{gettempdir()}/mocked_data.json"
         mocking_data = {
             'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
             'test_wazuh_min_version': '4.2.0',
@@ -42,13 +48,13 @@ class QACTLConfigGenerator:
             'test_target': 'manager'
         }
 
-        write_json_file(file, mocking_data)
+        file.write_json_file(mocked_file, mocking_data)
 
     def __get_test_info(self, test_name):
         self.__qa_docs_mocking(test_name)
-        info = read_json_file(f"{gettempdir()}/mocked_data.json")
+        info = file.read_json_file(f"{gettempdir()}/mocked_data.json")
         info['test_name'] = test_name
-        delete_file(f"{gettempdir()}/mocked_data.json")
+        file.delete_file(f"{gettempdir()}/mocked_data.json")
         return info
 
     def __get_all_tests_info(self):
@@ -88,9 +94,45 @@ class QACTLConfigGenerator:
     def __validate_test_info(self, test_info):
         pass
 
+    def __get_host_IP(self):
+        HOST_NETWORK = '10.150.50.x'
+
+        def ip_is_already_used(ip, qactl_host_used_ips):
+            with open(qactl_host_used_ips) as used_ips_file:
+                lines = used_ips_file.readlines()
+
+                for line in lines:
+                    if ip in line:
+                        return True
+
+            return False
+
+        if not os.path.exists(self.qactl_used_ips_file):
+            open(self.qactl_used_ips_file, 'a').close()
+
+        # Get a free IP in HOST_NETWORK range
+        for _ip in range(1, 256):
+            host_ip = HOST_NETWORK.replace('x', str(_ip))
+            if not ip_is_already_used(host_ip, self.qactl_used_ips_file):
+                break
+            if _ip == 255:
+                raise QAValueError(f"Could not find an IP available in {HOST_NETWORK}")
+
+        # Write new used IP in used IPs file
+        with open(self.qactl_used_ips_file, 'a') as used_ips_file:
+            used_ips_file.write(f"{host_ip}\n")
+
+        return host_ip
+
+    def __delete_ip_entry(self, host_ip):
+        data = file.read_file(self.qactl_used_ips_file)
+
+        data = data.replace(f"{host_ip}\n", '')
+
+        file.write_file(self.qactl_used_ips_file, data)
 
     def __add_instance(self, test_vendor, test_name, test_target, test_system, vm_cpu=1, vm_memory=1024):
-        import random
+        instance_ip = self.__get_host_IP()
         instance = {
             'enabled': True,
             'vagrantfile_path': gettempdir(),
@@ -100,8 +142,9 @@ class QACTLConfigGenerator:
             'vm_name': f"{test_target}_{test_name}",
             'vm_system': test_system,
             'label': f"{test_target}_{test_name}",
-            'vm_ip': f"172.16.1.7{random.randint(0,9)}"
+            'vm_ip': instance_ip
         }
+        self.hosts.append(instance_ip)
 
         return instance
 
@@ -193,7 +236,10 @@ class QACTLConfigGenerator:
         import json
         print(json.dumps(self.config, indent=4))
 
-
     def run(self):
         info = self.__get_all_tests_info()
         self.__process_test_info(info)
+
+    def destroy(self):
+        for host_ip in self.hosts:
+            self.__delete_ip_entry(host_ip)
