@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the enrollment tool agent-auth under different configurations.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+metadata:
+    component:
+        - Agent
+    modules:
+        - agent-auth
+    daemons:
+        - agent-auth
+    operating_system:
+        - Ubuntu
+        - CentOS
+        - Windows
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Agent-auth
+'''
 
 import pytest
 
@@ -21,6 +41,16 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys, set_pass, test_case: list):
+    """
+        test_logic:
+            "Check that different configuration generates the adequate enrollment message or the corresponding
+            error log. Agent-auth will be executed using the different parameters and with different keys and password
+            files scenarios as described in the test cases."
+        checks:
+            - The enrollment messages is sent when the configuration is valid
+            - The enrollment message is generated as expected when the configuration is valid.
+            - The error log is generated as expected when the configuration is invalid.
+    """
 
     if 'agent-auth' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agent-auth")

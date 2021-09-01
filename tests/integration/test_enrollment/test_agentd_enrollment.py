@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of Wazuh Agentd during the enrollment under different configurations.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+metadata:
+    component:
+        - Agent
+    modules:
+        - Agentd
+    daemons:
+        - Agentd
+    operating_system:
+        - Ubuntu
+        - CentOS
+        - Windows
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Agentd
+'''
 
 import pytest
 import ssl
@@ -23,6 +43,17 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_environment, set_keys, set_pass, test_case: list):
+    """
+        test_logic:
+            "Check that different configuration generates the adequate enrollment message or the corresponding
+            error log. The configuration, keys and password files will be written with the different scenarios described
+            in the test cases. After this, Agentd is started to wait for the expected result."
+        checks:
+            - The enrollment messages is sent when the configuration is valid
+            - The enrollment message is generated as expected when the configuration is valid.
+            - The error log is generated as expected when the configuration is invalid.
+    """
+
     if 'wazuh-agentd' in test_case.get("skips", []):
         pytest.skip("This test does not apply to agentd")
 

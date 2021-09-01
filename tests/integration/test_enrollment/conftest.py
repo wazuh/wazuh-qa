@@ -15,6 +15,8 @@ from wazuh_testing.tools.monitoring import ManInTheMiddle
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
+# Default data
+
 DEFAULT_VALUES = {
     'enabled': 'yes',
     'manager_address': '127.0.0.1',
@@ -31,7 +33,6 @@ DEFAULT_VALUES = {
 }
 
 folder = 'etc' if platform.system() == 'Linux' else ''
-
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')  # for unix add 'etc'
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
@@ -52,21 +53,44 @@ CONFIG_PATHS = {
     'PASSWORD_PATH': AUTHDPASS_PATH
 }
 
+def parse_configuration_string(configuration):
+    """Formats a configuration dictionary with the default CONFIG_PATHS.
+    Args:
+        Configuration (dict): Configuration dictionary to be extended with CONFIG_PATHS.
+    """
+    for key, value in configuration.items():
+        if isinstance(value, str):
+            configuration[key] = value.format(**CONFIG_PATHS)
+
+# Test cases
+
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
+    """ Loads a yaml file from a path.
+    Args:
+        path (str): Location of the test to be loaded.
+    Returns:
+        yaml structure: Loaded test.
     """
     with open(path) as f:
         return yaml.safe_load(f)
 
+tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 
-def parse_configuration_string(configuration):
-    for key, value in configuration.items():
-        if isinstance(value, str):
-            configuration[key] = value.format(**CONFIG_PATHS)
+CURRENT_TEST_CASE = {}
+
+@pytest.mark.parametrize('test_case', [case for case in tests])
+@pytest.fixture(scope="function")
+def set_test_case(test_case):
+    """Sets the current test case as a global variable accesible for different fixtures and callbacks.
+
+    Args: test_case (dict): The current test case.
+    """
+    global CURRENT_TEST_CASE
+    CURRENT_TEST_CASE = test_case
+
+# Agent auth launcher
 class AgentAuthParser:
+    """Creates the right invoke command to call agent-auth with all the different configurations"""
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
         self._command = []
         if sudo:
@@ -106,6 +130,11 @@ class AgentAuthParser:
         self._command += ['-G', group_string]
 
 def launch_agent_auth(configuration):
+    """Launchs agent-auth based on a specific configuation dictioanry
+
+    Args:
+        configuration (dict): Dictionary with the agent-auth configuration.
+    """
     parse_configuration_string(configuration)
     parser = AgentAuthParser(server_address=DEFAULT_VALUES['manager_address'], BINARY_PATH=AGENT_AUTH_BINARY_PATH,
                              sudo=True if platform.system() == 'Linux' else False)
@@ -131,6 +160,8 @@ def launch_agent_auth(configuration):
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out.communicate()
 
+#Utils
+
 def wait_until(x, log_str):
     """Callback function to wait for a message in a log file.
 
@@ -140,10 +171,25 @@ def wait_until(x, log_str):
     """
     return x if log_str in x else None
 
+def clean_log_file():
+    """Completely clean the Wazuh log file"""
+    try:
+        client_file = open(LOG_FILE_PATH, 'w')
+        client_file.close()
+    except IOError as exception:
+        raise
+
+# Socket listener
+
 LAST_MESSAGE = None
-CURRENT_TEST_CASE = {}
 
 def receiver_callback(received):
+    """Callback function to handle a message received by the socket listener.
+    Args:
+        received (bytes): Raw data received in the socket.
+    Returns:
+        response (bytes): Raw data to be responded to in the socket.
+    """
     if len(received) == 0:
         return b""
 
@@ -153,6 +199,11 @@ def receiver_callback(received):
     return response
 
 def get_last_message():
+    """Returns the last received message in the listener socket. Waits 20 seconds of timeout.
+    Returns:
+        LAST_MESSAGE (str): Decoded data received in the socket.
+        None if the response never arrived.
+    """
     global LAST_MESSAGE
     import time
     timeout = time.time() + 20 # 20 seconds timeout
@@ -161,17 +212,34 @@ def get_last_message():
     return LAST_MESSAGE
 
 def clear_last_message():
+    """Clears the last received message in the listener socket to wait for a new message."""
     global LAST_MESSAGE
     LAST_MESSAGE = None
 
-def clean_log_file():
-    try:
-        client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
+socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']), family='AF_INET',
+                                              connection_protocol='SSL', func=receiver_callback)
+
+@pytest.fixture(scope="function")
+def configure_socket_listener():
+    """Configures the socket listener to start listening on the socket."""
+    socket_listener.start()
+    socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
+                                                   certificate='/var/ossec/etc/manager.cert',
+                                                   keyfile='/var/ossec/etc/manager.key',
+                                                   options=None,
+                                                   cert_reqs=ssl.CERT_OPTIONAL)
+
+    while not socket_listener.queue.empty():
+        socket_listener.queue.get_nowait()
+    socket_listener.event.clear()
+
+    yield
+    socket_listener.shutdown()
+
+# Wazuh conf
 
 def get_temp_yaml(param):
+    """Creates a temporal config file."""
     temp = os.path.join(test_data_path, 'temp.yaml')
     with open(configurations_path, 'r') as conf_file:
         enroll_conf = {'enrollment': {'elements': []}}
@@ -187,6 +255,11 @@ def get_temp_yaml(param):
     return temp
 
 def override_wazuh_conf(configuration, test):
+    """Re-writes Wazuh configuration file with new configurations from the test case.
+    Args:
+        configuration (dict): Dictionary with the configuration to overwrite.
+        test (str): Name of the current test.
+    """
     parse_configuration_string(configuration)
     # Configuration for testing
     temp = get_temp_yaml(configuration)
@@ -197,56 +270,15 @@ def override_wazuh_conf(configuration, test):
     # Set new configuration
     write_wazuh_conf(test_config)
 
-tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
-
-LAST_MESSAGE = None
-CURRENT_TEST_CASE = {}
-
-def receiver_callback(received):
-    if len(received) == 0:
-        return b""
-
-    global LAST_MESSAGE
-    global CURRENT_TEST_CASE
-    LAST_MESSAGE = received.decode()
-    socket_listener.event.set()
-    response = CURRENT_TEST_CASE['message']['response'].format(**DEFAULT_VALUES).encode()
-    return response
-
-def get_last_message():
-    global LAST_MESSAGE
-    import time
-    timeout = time.time() + 20 # 20 seconds timeout
-    while not LAST_MESSAGE and time.time() <= timeout:
-        pass
-    return LAST_MESSAGE
-
-def clear_last_message():
-    global LAST_MESSAGE
-    LAST_MESSAGE = None
-
-socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']), family='AF_INET',
-                                              connection_protocol='SSL', func=receiver_callback)
-
-@pytest.fixture(scope="function")
-def configure_socket_listener():
-    socket_listener.start()
-    socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
-                                                   certificate='/var/ossec/etc/manager.cert',
-                                                   keyfile='/var/ossec/etc/manager.key',
-                                                   options=None,
-                                                   cert_reqs=ssl.CERT_OPTIONAL)
-
-    while not socket_listener.queue.empty():
-        socket_listener.queue.get_nowait()
-    socket_listener.event.clear()
-
-    yield
-    socket_listener.shutdown()
+# Keys file
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 @pytest.fixture(scope="function")
 def set_keys(test_case):
+    """Writes the keys file with the content defined in the configuration.
+    Args:
+        test_case (dict): Current test case.
+    """
     keys = test_case.get('pre_existent_keys', [])
     if not keys:
         return
@@ -258,16 +290,15 @@ def set_keys(test_case):
     except IOError:
         raise
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
-@pytest.fixture(scope="function")
-def set_test_case(test_case):
-    global CURRENT_TEST_CASE
-    CURRENT_TEST_CASE = test_case
+#Password file
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
 @pytest.fixture(scope="function")
 def set_pass(test_case):
-    # Write password file
+    """Writes the password file with the content defined in the configuration.
+    Args:
+        test_case (dict): Current test case.
+    """
     try:
         with open(AUTHDPASS_PATH, "w") as f:
             if 'password_file_content' in test_case:
