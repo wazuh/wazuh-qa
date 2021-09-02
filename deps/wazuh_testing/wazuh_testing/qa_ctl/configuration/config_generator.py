@@ -2,10 +2,14 @@ import random
 import os
 
 from tempfile import gettempdir
+from sys import exit
+from packaging.version import parse
 
 from wazuh_testing.tools import file
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 
 class QACTLConfigGenerator:
@@ -34,13 +38,27 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version='4.2.0'):
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+
+    def __init__(self, tests, wazuh_version):
         self.tests = tests
-        self.wazuh_version = wazuh_version
+        self.wazuh_version = self.__get_last_wazuh_version() if wazuh_version is None else wazuh_version
         self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
         self.config_file_path = f"{gettempdir()}/config_{get_current_timestamp()}.yaml"
         self.config = {}
         self.hosts = []
+
+    def __get_last_wazuh_version(self):
+        return '4.2.0'
+
+    def __get_qa_branch(self):
+        short_version = f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}"
+
+        # Check if exist QA BRANCH OF short version
+
+        # Else check if master branch version is equal to target version (example 4.3.0 == master)
+
+        # Else raise version error. QA branch not found
 
     def __qa_docs_mocking(self, test_name):
         mocked_file = f"{gettempdir()}/mocked_data.json"
@@ -67,7 +85,7 @@ class QACTLConfigGenerator:
         tests_info = [
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.2.0',
+                'test_wazuh_min_version': '4.2.1',
                 'test_system': 'linux',
                 'test_vendor': 'ubuntu',
                 'test_os_version': '20.04',
@@ -77,7 +95,7 @@ class QACTLConfigGenerator:
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
                 'test_wazuh_min_version': '4.2.0',
-                'test_system': 'linux',
+                'test_system': 'windows',
                 'test_vendor': 'centos',
                 'test_os_version': '8',
                 'test_target': 'agent',
@@ -96,8 +114,57 @@ class QACTLConfigGenerator:
         return tests_info
 
 
-    def __validate_test_info(self, test_info):
-        pass
+    def __validate_test_info(self, test_info, user_input=True, log_error=True):
+        def _ask_user_input():
+                user_continue = input('Do you want to continue with qa-ctl running? [y/n]: ')
+                if user_continue.lower() != 'y':
+                    QACTLConfigGenerator.LOGGER.debug('The user has decided to stop execution due to incompatibility '
+                                                      'between test and qa-ctl')
+                    exit(0)
+
+        def _validation_error(log_error=True, error_message=None, user_input=True):
+            if log_error:
+                QACTLConfigGenerator.LOGGER.error(error_message)
+            if user_input:
+                _ask_user_input()
+
+        def _check_validate(check, allowed_values, user_input, log_error, test_name, system):
+            if check not in allowed_values:
+                error_message = f"{test_name} cannot be launched. Reason: Currently we do not "\
+                                f"support {system}. Allowed values: {allowed_values}"
+                _validation_error(log_error, error_message, user_input)
+
+                return False
+
+            return True
+
+        allowed_info = {
+            'systems': ['linux'],
+            'vendors': ['centos', 'ubuntu']
+        }
+
+        checks = {
+            test_info['test_system']: allowed_info['systems'],
+            test_info['test_vendor']: allowed_info['vendors']
+        }
+        validation_ok = True
+
+        # Validate checks
+        for check, allowed_values in checks.items():
+            validation_ok = _check_validate(check, allowed_values, user_input, log_error, test_info['test_name'],
+                                            test_info['test_system'])
+            if not validation_ok:
+                return False
+
+        # Validate version requirements
+        if parse(str(test_info['test_wazuh_min_version'])) > parse(str(self.wazuh_version)):
+            error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
+                            f"{test_info['test_wazuh_min_version']} and you are using {self.wazuh_version}"
+            _validation_error(log_error, error_message, user_input)
+
+            return False
+
+        return True
 
     def __get_host_IP(self):
         HOST_NETWORK = '10.150.50.x'
@@ -168,24 +235,23 @@ class QACTLConfigGenerator:
         self.config['deployment'] = {}
 
         for test in tests_info:
-            self.__validate_test_info(test)
-
-            # Process deployment data
-            host_number = len(self.config['deployment'].keys()) + 1
-            self.config['deployment'][f"host_{host_number}"] = {
-                'provider': {
-                   'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], test['test_target'],
-                                                  test['test_system'])
-                }
-            }
-            # Add manager if the target is an agent
-            if test['test_target'] == 'agent':
-                host_number += 1
+            if self.__validate_test_info(test):
+                # Process deployment data
+                host_number = len(self.config['deployment'].keys()) + 1
                 self.config['deployment'][f"host_{host_number}"] = {
                     'provider': {
-                        'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], 'manager',
-                                                       test['test_system'])
+                    'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], test['test_target'],
+                                                    test['test_system'])
                     }
+                }
+                # Add manager if the target is an agent
+                if test['test_target'] == 'agent':
+                    host_number += 1
+                    self.config['deployment'][f"host_{host_number}"] = {
+                        'provider': {
+                            'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], 'manager',
+                                                        test['test_system'])
+                        }
                 }
 
     def __process_provision_data(self):
@@ -228,22 +294,24 @@ class QACTLConfigGenerator:
         test_host_number = len(self.config['tests'].keys()) + 1
 
         for test in tests_info:
-            instance = f"host_{test_host_number}"
-            self.config['tests'][instance] = {'host_info': {}, 'test': {}}
-            self.config['tests'][instance]['host_info'] = dict(self.config['provision']['hosts'][instance]['host_info'])
-            self.config['tests'][instance]['test'] = {
-                'type': 'pytest',
-                'path': {
-                    'test_files_path': f"{gettempdir()}/wazuh_qa/{test['test_path']}",
-                    'run_tests_dir_path': f"{gettempdir()}/wazuh_qa/test/integration",
-                    'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
+            if self.__validate_test_info(test, False, False):
+                instance = f"host_{test_host_number}"
+                self.config['tests'][instance] = {'host_info': {}, 'test': {}}
+                self.config['tests'][instance]['host_info'] = \
+                    dict(self.config['provision']['hosts'][instance]['host_info'])
+                self.config['tests'][instance]['test'] = {
+                    'type': 'pytest',
+                    'path': {
+                        'test_files_path': f"{gettempdir()}/wazuh_qa/{test['test_path']}",
+                        'run_tests_dir_path': f"{gettempdir()}/wazuh_qa/test/integration",
+                        'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
+                    }
                 }
-            }
-            test_host_number += 1
-            # If it is an agent test then we skip the next manager instance since no test will be launched in that
-            # instance
-            if test['test_target'] == 'agent':
                 test_host_number += 1
+                # If it is an agent test then we skip the next manager instance since no test will be launched in that
+                # instance
+                if test['test_target'] == 'agent':
+                    test_host_number += 1
 
     def __process_test_info(self, tests_info):
         self.__process_deployment_data(tests_info)
