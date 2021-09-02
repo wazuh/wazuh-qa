@@ -44,6 +44,7 @@ parameters, metadata = generate_params(extra_params=conf_params, modes=['schedul
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Variables
+
 log_monitor_paths = []
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
@@ -54,6 +55,7 @@ hostname = socket.gethostname()
 
 test_index = 0
 
+# Functions
 
 def get_current_test():
     global test_index
@@ -122,6 +124,14 @@ def send_message(message):
     return response
 
 
+# Fixtures
+
+@pytest.fixture(scope="module", params=configurations)
+def get_configuration(request):
+    """Get configurations from the module"""
+    return request.param
+
+
 # Initial clean client_keys file
 # Stop Wazuh
 control_service('stop')
@@ -132,7 +142,7 @@ truncate_file(client_keys_path)
 # Start Wazuh
 control_service('start')
 
-"""Wait until authd has begun"""
+# Wait until authd has begun
 
 log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor.start(timeout=30, callback=callback_authd_startup)
