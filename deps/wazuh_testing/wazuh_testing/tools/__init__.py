@@ -121,6 +121,9 @@ ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH,'ar')
 
 WAZUH_SOCKETS = {
     'wazuh-agentd': [],
+    'wazuh-apid': [],
+    'wazuh-agentlessd': [],
+    'wazuh-csyslogd': [],
     'wazuh-analysisd': [
                         ANALYSISD_ANALISIS_SOCKET_PATH,
                         ANALYSISD_QUEUE_SOCKET_PATH
@@ -130,6 +133,7 @@ WAZUH_SOCKETS = {
     'wazuh-logcollector': [LOGCOLLECTOR_SOCKET_PATH],
     'wazuh-monitord': [MONITORD_SOCKET_PATH],
     'wazuh-remoted': [REMOTED_SOCKET_PATH],
+    'wazuh-maild': [],
     'wazuh-syscheckd': [SYSCHECKD_SOCKET_PATH],
     'wazuh-db': [WAZUH_DB_SOCKET_PATH],
     'wazuh-modulesd': [
@@ -146,3 +150,27 @@ WAZUH_OPTIONAL_SOCKETS = [
     MODULESD_KREQUEST_SOCKET_PATH,
     AUTHD_SOCKET_PATH
 ]
+
+# Wazuh daemons
+LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
+AGENTLESS_DAEMON = 'wazuh-agentlessd'
+CSYSLOG_DAEMON = 'wazuh-csyslogd'
+REMOTE_DAEMON = 'wazuh-remoted'
+ANALYSISD_DAEMON = 'wazuh-analysisd'
+API_DAEMON = 'wazuh-apid'
+MAIL_DAEMON = 'wazuh-maild'
+SYSCHECK_DAEMON = 'wazuh-syscheckd'
+EXEC_DAEMON = 'wazuh-execd'
+MODULES_DAEMON = 'wazuh-modulesd'
+CLUSTER_DAEMON = 'wazuh-clusterd'
+INTEGRATOR_DAEMON = 'wazuh-integratord'
+MONITOR_DAEMON = 'wazuh-monitord'
+DB_DAEMON = 'wazuh-db'
+AGENT_DAEMON = 'wazuh-agentd'
+
+
+ALL_MANAGER_DAEMONS = [LOGCOLLECTOR_DAEMON, AGENTLESS_DAEMON, CSYSLOG_DAEMON, REMOTE_DAEMON, ANALYSISD_DAEMON,
+ API_DAEMON, MAIL_DAEMON, SYSCHECK_DAEMON, EXEC_DAEMON, MODULES_DAEMON, CLUSTER_DAEMON, INTEGRATOR_DAEMON, MONITOR_DAEMON,
+ DB_DAEMON ]
+ALL_AGENT_DAEMONS = [AGENT_DAEMON, EXEC_DAEMON, LOGCOLLECTOR_DAEMON, SYSCHECK_DAEMON, MODULES_DAEMON]
+API_DAEMON_REQUIREMENTS = [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_DAEMON, DB_DAEMON, REMOTE_DAEMON]
