@@ -612,24 +612,22 @@ def use_daemons(get_configuration, request):
     The  `daemons_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
             will be raised
-        truncate_log (boolean): Configure if ossec.log truncation. Default `True`
-        ignore_errors (boolean): Configure if errors in daemon handling should be ignore. Default `False`
+        ignore_errors (boolean): Configure if errors in daemon handling should be ignore. This option is available
+        in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
         get_configuration (fixture): Gets the current configuration of the test.
         request (fixture): Provide information on the executing test function.
     """
     daemons = []
-    truncate_log = True
     ignore_errors = False
 
     try:
         daemons_configuration = getattr(request.module, 'daemons_configuration')
         if 'daemons' in daemons_configuration:
             daemons = daemons_configuration['daemons']
-
-        if 'truncate_log' in daemons_configuration:
-            truncate_log = daemons_configuration['truncate_log']
+            if not daemons:
+                raise ValueError
 
         if 'ignore_errors' in daemons_configuration:
             ignore_errors = daemons_configuration['ignore_errors']
@@ -637,19 +635,10 @@ def use_daemons(get_configuration, request):
     except AttributeError as daemon_configuration_not_set:
        raise daemon_configuration_not_set
 
-    if truncate_log:
-       truncate_file(LOG_FILE_PATH)
-
-    file_monitor = FileMonitor(LOG_FILE_PATH)
-    setattr(request.module, 'wazuh_log_monitor', file_monitor)
-
-
     try:
-        if daemons:
-            for daemon in daemons:
-                control_service('restart', daemon=daemon)
-        else:
-             control_service('restart')
+        for daemon in daemons:
+            control_service('restart', daemon=daemon)
+
     except ValueError as value_error:
         if not ignore_errors:
             raise value_error
@@ -659,8 +648,5 @@ def use_daemons(get_configuration, request):
 
     yield
 
-    if daemons:
-        for daemon in daemons:
-            control_service('stop', daemon=daemon)
-    else:
-        control_service('stop')
+    for daemon in daemons:
+        control_service('stop', daemon=daemon)
