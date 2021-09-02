@@ -104,7 +104,7 @@ def get_repository_url(target, version, system, revision, repository, architectu
     s3_bucket = DEV_BUCKET
 
     system_path = {
-       SYSTEMS['rpm']: 'yum',
+       SYSTEMS['rpm']: '/yum',
        SYSTEMS['deb']: f"/apt/pool/main/w/wazuh-{target}",
        SYSTEMS['windows']: '/windows',
        SYSTEMS['macos']: '/macos',
@@ -248,10 +248,10 @@ def get_package_name(target, version, system, revision, repository, architecture
     elif system == SYSTEMS['rpm5']:
         package_name += f"-{version}-{revision}.el5.{rpm_architecture}.rpm"
     elif system == SYSTEMS['wpk-linux']:
-        revision_section = f"-{revision}" if revision != 1 else ''
+        revision_section = f"-{revision}" if revision != '1' else ''
         package_name = f"wazuh_agent_v{version}{revision_section}_linux_x86_64.wpk"
     elif system == SYSTEMS['wpk-windows']:
-        revision_section = f"-{revision}" if revision != 1 else ''
+        revision_section = f"-{revision}" if revision != '1' else ''
         package_name = f"wazuh_agent_v{version}{revision_section}_windows.wpk"
     else:
         raise QAValueError(f"{system} is not a valid system")
