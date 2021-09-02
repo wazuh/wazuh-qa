@@ -1,7 +1,54 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will verify if the `wazuh-db` and `analysisd` daemons
+    correctly handle `syscheck` events considered rare.
+
+tiers:
+    - 2
+
+component:
+    manager
+
+path:
+    tests/integration/test_analysisd/test_all_syscheckd_configurations/
+
+daemons:
+    - analysisd
+    - syscheckd
+    - wazuh-db
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+
+coverage:
+
+pytest_args:
+
+tags:
+
+'''
 import os
 
 import pytest
@@ -51,16 +98,48 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
                          ids=[test_case['name'] for test_case in test_cases])
 def test_validate_rare_socket_responses(configure_sockets_environment, connect_to_sockets_module,
                                         wait_for_analysisd_startup, test_case: list):
-    """Validate every response from the analysisd socket to the wazuh-db socket using rare cases with encoded characters.
+    '''
+    description:
+        Validate every response from the `analysisd` socket to the `wazuh-db` socket
+        using rare `syscheck` events with encoded characters.
 
-    This test will catch every response from analysisd to wazuh-db in real-time using the yaml
-    `/data/syscheck_events.yaml`.
+    wazuh_min_version:
+        3.12
 
-    Parameters
-    ----------
-    test_case : dict
-        Dict with the input to inject to the analysisd socket and output to expect to be sent to the wazuh-db socket.
-    """
+    parameters:
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of `connect_to_sockets` fixture.
+
+        - wait_for_analysisd_startup:
+            type: fixture
+            brief: Wait until analysisd has begun and alerts.json is created.
+
+        - test_case:
+            type: list
+            brief: List of tests to be performed.
+
+    assertions:
+        - Check that the output logs are consistent with the syscheck events received.
+
+    test_input:
+        Different test cases that are contained in an external `YAML` file (syscheck_rare_events.yaml)
+        that includes `syscheck` events data and the expected output.
+
+    logging:
+        - ossec.log:
+            - "Multiple values located in the `syscheck_rare_events.yaml` file."
+
+        - alerts.json:
+            -"Multiple values located in the `syscheck_rare_events.yaml` file."
+
+    tags:
+
+    '''
     # There is only one stage per test_case
     stage = test_case[0]
     expected = callback_analysisd_message(stage['output'])
