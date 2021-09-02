@@ -15,6 +15,7 @@ from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
+
 class QAProvisioning():
     """Class to control different options and instances to provisioning with Wazuh and QA Framework.
 
@@ -31,6 +32,7 @@ class QAProvisioning():
         wazuh_installation_paths (dict): Dict indicating the Wazuh installation paths for every host.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
+
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, provision_info, qa_ctl_configuration):
@@ -104,21 +106,15 @@ class QAProvisioning():
                 else deploy_info['wazuh_install_path']
             wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
             s3_package_url = None if 's3_package_url' not in deploy_info \
-                                        else deploy_info['s3_package_url']
-
+                else deploy_info['s3_package_url']
+            system = None if 'version' not in deploy_info \
+                else deploy_info['system']
             version = None if 'version' not in deploy_info \
-                                else deploy_info['version']
+                else deploy_info['version']
             repository = None if 'repository' not in deploy_info \
-                                else deploy_info['repository']
-
+                else deploy_info['repository']
             revision = None if 'revision' not in deploy_info \
-                                else deploy_info['revision']
-
-            system = None if 'system' not in deploy_info \
-                                else deploy_info['system']
-            architecture = None if 'architecture' not in deploy_info \
-                                else deploy_info['architecture']
-
+                else deploy_info['revision']
             local_package_path = None if 'local_package_path' not in deploy_info \
                 else deploy_info['local_package_path']
             manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
@@ -137,27 +133,26 @@ class QAProvisioning():
                 installation_instance = WazuhSources(**installation_files_parameters)
             if install_type == 'package':
 
-                    if s3_package_url is None and local_package_path is None:
-                        installation_files_parameters['version'] = version
-                        installation_files_parameters['system'] = system
-                        installation_files_parameters['revision'] = revision
-                        installation_files_parameters['repository'] = repository
-                        installation_files_parameters['architecture'] = architecture
-                        installation_instance = WazuhS3Package(**installation_files_parameters)
-                        remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                              hosts=current_host)
-                    elif s3_package_url is None and version is None:
-                        installation_files_parameters['local_package_path'] = local_package_path
-                        installation_instance = WazuhLocalPackage(**installation_files_parameters)
-                        remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                              hosts=current_host)
-                    
-                    else:
-                        installation_files_parameters['s3_package_url'] = s3_package_url
-                        installation_instance = WazuhS3Package(**installation_files_parameters)
-                        remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                              s3_package_url,
-                                                                                              hosts=current_host)
+                if s3_package_url is None and local_package_path is None:
+                    installation_files_parameters['system'] = system
+                    installation_files_parameters['version'] = version
+                    installation_files_parameters['revision'] = revision
+                    installation_files_parameters['repository'] = repository
+                    installation_instance = WazuhS3Package(**installation_files_parameters)
+                    remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                          hosts=current_host)
+                elif s3_package_url is None and local_package_path is not None:
+                    installation_files_parameters['local_package_path'] = local_package_path
+                    installation_instance = WazuhLocalPackage(**installation_files_parameters)
+                    remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                          hosts=current_host)
+
+                else:
+                    installation_files_parameters['s3_package_url'] = s3_package_url
+                    installation_instance = WazuhS3Package(**installation_files_parameters)
+                    remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
+                                                                                          s3_package_url,
+                                                                                          hosts=current_host)
 
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
@@ -212,7 +207,7 @@ class QAProvisioning():
         """Provision all hosts in a parallel way"""
         self.__check_hosts_connection()
         provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
-                                for _, host_value in self.provision_info['hosts'].items()]
+                             for _, host_value in self.provision_info['hosts'].items()]
         QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
         for runner_thread in provision_threads:
