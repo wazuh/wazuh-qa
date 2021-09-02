@@ -633,7 +633,7 @@ def daemons_handler(get_configuration, request):
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
             will be raised
         wazuh_control (boolean): Configure to restart all wazuh services. Default `False`.
-        ignore_errors (boolean): Configure if errors in daemon handling should be ignore. This option is available
+        ignore_errors (boolean): Configure if errors in daemon handling should be ignored. This option is available
         in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
@@ -648,7 +648,7 @@ def daemons_handler(get_configuration, request):
         daemons_handler_configuration = getattr(request.module, 'daemons_handler_configuration')
         if 'daemons' in daemons_handler_configuration and not wazuh_control:
             daemons = daemons_handler_configuration['daemons']
-            if not daemons:
+            if not daemons or (type(daemons) == list and len(daemons) == 0):
                 logger.error('Daemons Handler: Daemons list is not set')
                 raise ValueError
 
