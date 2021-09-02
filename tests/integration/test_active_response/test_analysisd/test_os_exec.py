@@ -16,7 +16,7 @@ tiers:
     - 0
 
 component:
-    server
+    manager
 
 path:
     tests/integration/test_active_response/test_analysisd/
