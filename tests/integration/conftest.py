@@ -698,7 +698,7 @@ def daemons_handler(get_configuration, request):
 @pytest.fixture(scope='function')
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
-    
+
     It uses de variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
 
     Args:
@@ -708,12 +708,12 @@ def file_monitoring(request):
         file_to_monitor = getattr(request.module, 'file_to_monitor')
     else:
         file_to_monitor = LOG_FILE_PATH
-    
+
     logger.debug(f"File monitoring - DEBUG - Initializing file to monitor to {file_to_monitor}")
 
     file_monitor = FileMonitor(file_to_monitor)
     setattr(request.module, 'log_monitor', file_monitor)
-    
+
     yield
 
     truncate_file(file_to_monitor)
