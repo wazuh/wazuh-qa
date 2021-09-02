@@ -39,9 +39,9 @@ for case in force_options_tests:
     conf_params['USE_SOURCE_IP'].append(case.get('USE_SOURCE_IP', DEFAULT_USE_USER_IP))
     conf_params['FORCE_INSERT'].append(case.get('FORCE_INSERT', DEFAULT_FORCE_INSERT))
 
-p, m = generate_params(extra_params=conf_params, modes=['scheduled'] * len(force_options_tests))
+parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'] * len(force_options_tests))
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Variables
 log_monitor_paths = []
