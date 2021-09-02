@@ -119,7 +119,7 @@ def pytest_addoption(parser):
         metavar="minimum_level",
         default=-1,
         type=int,
-        help="only run tests with a tier level less or equal than 'minimum_level'"
+        help="only run tests with a tier level greater or equal than 'minimum_level'"
     )
     parser.addoption(
         "--tier-maximum",
@@ -195,7 +195,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--add-file",
         action="append",
-        metavar="add-file",
+        metavar="file",
         default=[],
         type=str,
         help="add file to the HTML report"
@@ -336,9 +336,10 @@ def pytest_runtest_makereport(item, call):
         # Extra files to be added in 'Links' section
         files = get_report_files()
         for filepath in files:
-            with open(filepath, mode='r', errors='replace') as f:
-                content = f.read()
-                extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
+            if os.path.isfile(filepath):
+                with open(filepath, mode='r', errors='replace') as f:
+                    content = f.read()
+                    extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
         if not report.passed and not report.skipped:
             report.extra = extra
