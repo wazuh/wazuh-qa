@@ -1,7 +1,52 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will check if the `analysisd` daemon processes `Active Response` messages correctly.
+
+tiers:
+    - 0
+
+component:
+    manager
+
+path:
+    tests/integration/test_active_response/test_analysisd/
+
+daemons:
+    - analysisd
+    - execd
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+
+coverage:
+
+pytest_args:
+
+tags:
+    - active_response
+'''
 import json
 import os
 import pytest
@@ -350,7 +395,48 @@ def validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, a
 
 # TESTS
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
-    """Check if Active Response message is sent in correct format depending on agent version"""
+    '''
+    description:
+        Check if `Active Response` message is sent in correct format depending on agent version.
+
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Set execd daemon in debug mode.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+
+        - restart_service:
+            type: fixture
+            brief: Restart Wazuh manager service and clean the ossec.log file.
+
+        - configure_agents:
+            type: fixture
+            brief: Create simulated agents for testing.
+
+    assertions:
+        - Validate Active Response messages in old string format.
+        - Validate Active Response messages in new `JSON` format.
+
+    test_input:
+        Different `Active Response` messages sent to Debian and Ubuntu simulated agents.
+
+    logging:
+        - ossec.log:
+            - r"Active response request received "
+
+    tags:
+        - simulator
+    '''
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     extra_args = metadata['extra_args']
