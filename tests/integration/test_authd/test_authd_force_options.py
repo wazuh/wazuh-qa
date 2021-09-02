@@ -62,7 +62,7 @@ def get_current_test():
     return current
 
 
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
