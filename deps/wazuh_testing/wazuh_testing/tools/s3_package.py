@@ -7,8 +7,7 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 PROD_BUCKET = 'packages.wazuh.com'
 DEV_BUCKET = 'packages-dev.wazuh.com'
-S3_SERVER = 's3-us-west-1'
-INSTALL_DIR = 'var'
+S3_REGION_URL = 's3-us-west-1'
 
 SYSTEMS = {
     'rpm': 'rpm',
@@ -32,54 +31,26 @@ ARCHITECTURES = {
 }
 
 
-def get_s3_package_url(repository, target, version, revision, system, architecture, short_url=True):
+def get_s3_package_url(repository, target, version, revision, system, architecture, install_dir='/var', short_url=True):
     """Generate the url for a package of the s3 servers
     Args:
+        repository (string): non-repository directory where the package is located
         target (string): Type of the wazuh installation package.
         version (string): Version of the installation package
-        system (string): System desired for the installation version
         revision (string): Revisision of the package version
-        repository (string): non-repository directory where the package is located
+        system (string): System desired for the installation version
         architecture (string): Architecture of the package
-        s3_bucket (string): String with the s3 bucket type
+        install_dir (string): Wazuh installation directory
         short_url (boolean): Defines wether if the url is going to be a short type or not.
-        This parameter is set to False by default.
 
     Returns:
         str: The url of the desired package
     """
-    s3_bucket = DEV_BUCKET
-    system_path = {
-       SYSTEMS['rpm']: 'yum',
-       SYSTEMS['deb']: f"/apt/pool/main/w/wazuh-{target}",
-       SYSTEMS['windows']: '/windows',
-       SYSTEMS['macos']: '/macos',
-       SYSTEMS['solaris10']: f"/solaris/{architecture}/10",
-       SYSTEMS['solaris11']: f"/solaris/{architecture}/11",
-       SYSTEMS['rpm5']: f"/yum5/{architecture}",
-       SYSTEMS['wpk-linux']: f"/wpk/linux/{architecture}",
-       SYSTEMS['wpk-windows']: f"/wpk/windows"
-    }
-
     if is_repository(repository):
-
-        if repository == 'live':
-            s3_bucket = PROD_BUCKET
-            tokens = version.split('.')
-            s3_path = f"{tokens[0]}.x"
-        else:
-            s3_path = f"{repository}"
-
-        try:
-            s3_path += system_path[system]
-        except KeyError:
-            raise f"System {system} is not a valid system"
-
-        package_name = get_package_name(target, version, system, revision, repository, architecture)
-        return get_repository_url(s3_path, package_name, s3_bucket)
+        return get_repository_url(target, version, system, revision, repository, architecture, short_url)
     else:
-        return get_non_repository_url(target, version, system, revision, repository,
-                                      architecture, s3_bucket)
+        return get_non_repository_url(target, version, system, revision, repository, architecture, DEV_BUCKET,
+                                      install_dir, short_url)
 
 
 def get_short_version(version):
@@ -92,8 +63,8 @@ def get_short_version(version):
         str: String with the version in a usable format for the tool
     """
     tokens = version.split('.')
-    def_version = f"{tokens[0]}.{tokens[1]}"
-    return def_version
+    short_version = f"{tokens[0]}.{tokens[1]}"
+    return short_version
 
 
 def is_repository(folder_path):
@@ -107,7 +78,6 @@ def is_repository(folder_path):
     """
     repository_list = ['pre-release', 'futures', 'debug', 'trash', 'staging', 'live']
     non_repository_list = ['warehouse-branches', 'warehouse-pullrequests', 'warehouse-test']
-    is_repo = False
 
     if folder_path in repository_list:
         return True
@@ -117,28 +87,58 @@ def is_repository(folder_path):
         raise QAValueError(f"{folder_path} is unknown. It was not found in {repository_list} or {non_repository_list}")
 
 
-def get_repository_url(s3_path, package_name, s3_bucket, short_url=True):
+def get_repository_url(target, version, system, revision, repository, architecture, short_url=True):
     """Generate the url for a package of a repository type directory
 
     Args:
-        s3_path (string): Path with the s3_path where the package is locate
-        package_name (string): String with the name of the package
-        s3_bucket (string): String with the s3 bucket type
+        target (string): Type of the wazuh installation package.
+        version (string): Version of the installation package
+        revision (string): Revisision of the package version
+        system (string): System desired for the installation version
+        architecture (string): Architecture of the package
         short_url (boolean): Defines wether if the url is going to be a short type or not.
-                            This parameter is set to False by default.
 
     Returns:
         str: The url of the given package
     """
+    s3_bucket = DEV_BUCKET
+
+    system_path = {
+       SYSTEMS['rpm']: 'yum',
+       SYSTEMS['deb']: f"/apt/pool/main/w/wazuh-{target}",
+       SYSTEMS['windows']: '/windows',
+       SYSTEMS['macos']: '/macos',
+       SYSTEMS['solaris10']: f"/solaris/{architecture}/10",
+       SYSTEMS['solaris11']: f"/solaris/{architecture}/11",
+       SYSTEMS['rpm5']: f"/yum5/{architecture}",
+       SYSTEMS['wpk-linux']: f"/wpk/linux/{architecture}",
+       SYSTEMS['wpk-windows']: f"/wpk/windows"
+    }
+
+    if repository == 'live':
+        s3_bucket = PROD_BUCKET
+        tokens = version.split('.')
+        s3_path = f"{tokens[0]}.x"
+    else:
+        s3_path = f"{repository}"
+
+    try:
+        s3_path += system_path[system]
+    except KeyError:
+        raise f"{system} is not a valid system. Allowed systems: {SYSTEMS.keys()}"
+
+    package_name = get_package_name(target, version, system, revision, repository, architecture)
+
     if short_url:
         url = f"https://{s3_bucket}/{s3_path}/{package_name}"
     else:
-        url = f"https://{S3_SERVER}/{s3_bucket}/{s3_path}/{package_name}"
+        url = f"https://{S3_REGION_URL}/{s3_bucket}/{s3_path}/{package_name}"
 
     return url
 
 
-def get_non_repository_url(target, version, system, revision, repository, architecture, s3_bucket, short_url=True):
+def get_non_repository_url(target, version, system, revision, repository, architecture, s3_bucket, install_dir='/var',
+                           short_url=True):
     """Generate the url for a package of a non-repository type directory
 
     Args:
@@ -149,6 +149,7 @@ def get_non_repository_url(target, version, system, revision, repository, archit
         repository (string): non-repository directory where the package is located
         architecture (string): Architecture of the package
         s3_bucket (string): String with the s3 bucket type
+        install_dir (string): Wazuh installation directory
         short_url (boolean): Defines wether if the url is going to be a short type or not.
                             This parameter is set to False by default.
 
@@ -158,7 +159,7 @@ def get_non_repository_url(target, version, system, revision, repository, archit
     if short_url:
         non_repository_url = f"https://{s3_bucket}"
     else:
-        non_repository_url = f"https://{S3_SERVER}/{s3_bucket}"
+        non_repository_url = f"https://{S3_REGION_URL}/{s3_bucket}"
 
     short_version = get_short_version(version)
 
@@ -172,11 +173,7 @@ def get_non_repository_url(target, version, system, revision, repository, archit
         raise QAValueError(f"The repository named {repository} is unknown.")
 
     if system == SYSTEMS['rpm'] or system == SYSTEMS['rpm5'] or system == SYSTEMS['deb']:
-        non_repository_url += f"/{system}"
-        if repository == 'warehouse-test' and short_version == '4.1':
-            non_repository_url += f"/opt"
-        else:
-            non_repository_url += f"/{INSTALL_DIR}"
+        non_repository_url += f"/{system}{install_dir}"
     elif system == SYSTEMS['solaris10']:
         non_repository_url += f"/solaris/{architecture}/10"
     elif system == SYSTEMS['solaris11']:
@@ -190,6 +187,7 @@ def get_non_repository_url(target, version, system, revision, repository, archit
 
     package_name = get_package_name(target, version, system, revision, repository, architecture)
     non_repository_url += f"/{package_name}"
+
     return non_repository_url
 
 
@@ -244,7 +242,8 @@ def get_package_name(target, version, system, revision, repository, architecture
         package_name += f"_v{version}"
         if repository != 'live' and repository != 'pre-release':
             package_name += f"-{revision}"
-        architecture_section = f"-sol10-{architecture}.pkg" if system == SYSTEMS['solaris10'] else f"-sol11-{architecture}.p5p"
+        architecture_section = f"-sol10-{architecture}.pkg" if system == SYSTEMS['solaris10'] \
+            else f"-sol11-{architecture}.p5p"
         package_name += architecture_section
     elif system == SYSTEMS['rpm5']:
         package_name += f"-{version}-{revision}.el5.{rpm_architecture}.rpm"
