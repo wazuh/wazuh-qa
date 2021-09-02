@@ -60,7 +60,7 @@
   test_case:
   -
     input: "OSSEC A:'user2' K:'13cdb438b53c1f46ec3edebb7c790c87a54b3c0d'"
-    output: "ERROR: Duplicated agent name:"
+    output: 'ERROR: Duplicated agent name:'
 -
   name: 'Testing general parsing options with key hash 7'
   description: 'Trying to enroll an existing IP with right key hash. Key denied'
@@ -69,4 +69,4 @@
   test_case:
   -
     input: "OSSEC A:'userx' IP:'192.168.0.100' K:'aa06c24575fe8c474cd0c5386577eb974928dce3'"
-    output: "ERROR: Duplicated IP:"
+    output: 'ERROR: Duplicated IP:'
