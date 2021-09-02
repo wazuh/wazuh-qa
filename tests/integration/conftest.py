@@ -16,7 +16,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -623,30 +623,37 @@ def daemons_handler(get_configuration, request):
     ignore_errors = False
 
     try:
-        daemons_configuration = getattr(request.module, 'daemons_configuration')
-        if 'daemons' in daemons_configuration:
-            daemons = daemons_configuration['daemons']
+        daemons_handler_configuration = getattr(request.module, 'daemons_handler_configuration')
+        if 'daemons' in daemons_handler_configuration:
+            daemons = daemons_handler_configuration['daemons']
             if not daemons:
+                logger.error('Daemons Handler: Daemons list is not set')
                 raise ValueError
 
-        if 'ignore_errors' in daemons_configuration:
-            ignore_errors = daemons_configuration['ignore_errors']
+        if 'ignore_errors' in daemons_handler_configuration:
+            logger.debug(f"Daemons Handler: Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+            ignore_errors = daemons_handler_configuration['ignore_errors']
 
     except AttributeError as daemon_configuration_not_set:
-       raise daemon_configuration_not_set
+        logger.error('Daemons Handler: Error - daemons_handler_configuration is not set')
+        raise daemon_configuration_not_set
 
     try:
         for daemon in daemons:
+            logger.debug(f"Daemons Handler: Restarting {daemon}")
             control_service('restart', daemon=daemon)
 
     except ValueError as value_error:
+        logger.error(f"Daemons Handler: Error - {str(value_error)}")
         if not ignore_errors:
             raise value_error
     except subprocess.CalledProcessError as called_process_error:
+        logger.error(f"Daemons Handler: Error - {str(called_process_error)}")
         if not ignore_errors:
             raise called_process_error
 
     yield
 
     for daemon in daemons:
+        logger.debug(f"Daemons Handler: Stopping {daemon}")
         control_service('stop', daemon=daemon)
