@@ -1,5 +1,5 @@
 '''
-brief: This module verifies the correct behavior of the enrollment tool agent-auth under different configurations.
+brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
@@ -66,7 +66,7 @@ def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configu
             log_monitor = FileMonitor(LOG_FILE_PATH)
             log_monitor.start(timeout=120, callback=lambda x: wait_until(x, test_case.get('expected_error')))
         except TimeoutError as err:
-            assert False, f'Expected error log doesn´t occurred'
+            assert False, f'Expected error log does not occured'
     else:
         result = get_last_message()
         assert result is not None, "Enrollment request message never arrived"
