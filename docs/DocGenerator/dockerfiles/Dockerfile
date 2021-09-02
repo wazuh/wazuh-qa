@@ -25,8 +25,7 @@ RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 
 # get test doc output
 WORKDIR wazuh-qa/docs/DocGenerator/
-RUN git checkout 1797-docker-deployment && \
-    pip install -r requirements.txt && \
+RUN pip install -r requirements.txt && \
     python3 DocGenerator.py
 
 WORKDIR Search-UI/
