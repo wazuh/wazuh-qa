@@ -39,8 +39,10 @@ def get_configuration(request):
     """Get configurations from the module"""
     return request.param
 
+
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, create_certificates, set_keys, set_pass, test_case: list):
+def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configure_environment, create_certificates,
+                               set_keys, set_pass, test_case: list):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -67,8 +69,8 @@ def test_agent_auth_enrollment(set_test_case, configure_socket_listener, configu
             assert False, f'Expected error log doesn´t occurred'
     else:
         result = get_last_message()
-        assert result != None, "Enrollment request message never arrived"
-        assert result == test_case['message']['expected'].format(**DEFAULT_VALUES),  \
-               'Expected enrollment request message does not match'
+        assert result is not None, "Enrollment request message never arrived"
+        assert result == test_case['message']['expected'].format(**DEFAULT_VALUES), \
+            'Expected enrollment request message does not match'
 
     return

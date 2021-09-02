@@ -42,7 +42,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_environment, create_certificates, set_keys, set_pass, test_case: list):
+def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_environment, create_certificates,
+                           set_keys, set_pass, test_case: list):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -64,7 +65,7 @@ def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_e
         clean_log_file()
         try:
             control_service('start', daemon='wazuh-agentd')
-        except:
+        except Exception:
             pass
         try:
             log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -76,8 +77,8 @@ def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_e
         clear_last_message()
         control_service('start', daemon='wazuh-agentd')
         result = get_last_message()
-        assert result != None, "Enrollment request message never arraived"
+        assert result is not None, "Enrollment request message never arraived"
         assert result == test_case['message']['expected'].format(**DEFAULT_VALUES),  \
-               'Expected enrollment request message does not match'
+            'Expected enrollment request message does not match'
 
     return
