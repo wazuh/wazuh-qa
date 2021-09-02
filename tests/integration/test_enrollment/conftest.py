@@ -11,6 +11,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.monitoring import ManInTheMiddle
+from wazuh_testing.tools.security import CertificateController
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -180,7 +181,8 @@ def clean_log_file():
         raise
 
 # Socket listener
-
+KEY_PATH = '/etc/manager.key'
+CERT_PATH = '/etc/manager.cert'
 LAST_MESSAGE = None
 
 def receiver_callback(received):
@@ -219,13 +221,21 @@ def clear_last_message():
 socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']), family='AF_INET',
                                               connection_protocol='SSL', func=receiver_callback)
 
+@pytest.fixture(scope="module")
+def create_certificates():
+    cert_controller = CertificateController()
+    cert_controller.get_root_ca_cert().sign(cert_controller.get_root_key(), cert_controller.digest)
+    cert_controller.store_private_key(cert_controller.get_root_key(), KEY_PATH)
+    cert_controller.store_ca_certificate(cert_controller.get_root_ca_cert(), CERT_PATH)
+
+
 @pytest.fixture(scope="function")
 def configure_socket_listener():
     """Configures the socket listener to start listening on the socket."""
     socket_listener.start()
     socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
-                                                   certificate='/var/ossec/etc/manager.cert',
-                                                   keyfile='/var/ossec/etc/manager.key',
+                                                   certificate=CERT_PATH,
+                                                   keyfile=KEY_PATH,
                                                    options=None,
                                                    cert_reqs=ssl.CERT_OPTIONAL)
 
