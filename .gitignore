@@ -57,5 +57,8 @@ deps/wazuh_testing/wazuh_testing.egg-info/
 docs/output/
 # DocGenerator logs path
 docs/DocGenerator/logs
+# DocGenerator SearchUI
+docs/DocGenerator/Search-UI/package-lock.json
 
 .idea/
+
