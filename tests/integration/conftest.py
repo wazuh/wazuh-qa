@@ -16,7 +16,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -602,3 +602,28 @@ def create_file_structure_function(get_files_list):
     yield
 
     delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope='function')
+def file_monitoring(request):
+    """Fixture to handle the monitoring of a specified file.
+    
+    It uses de variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    if hasattr(request.module, 'file_to_monitor'):
+        file_to_monitor = getattr(request.module, 'file_to_monitor')
+    else:
+        file_to_monitor = LOG_FILE_PATH
+    
+    logger.debug(f"File monitoring - DEBUG - Initializing file to monitor to {file_to_monitor}")
+
+    file_monitor = FileMonitor(file_to_monitor)
+    setattr(request.module, 'log_monitor', file_monitor)
+    
+    yield
+
+    truncate_file(file_to_monitor)
+    logger.debug(f"File monitoring - DEBUG - Trucanted {file_to_monitor}")
