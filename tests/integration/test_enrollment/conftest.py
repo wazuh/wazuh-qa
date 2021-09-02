@@ -137,7 +137,7 @@ class AgentAuthParser:
 
 
 def launch_agent_auth(configuration):
-    """Launchs agent-auth based on a specific configuation dictioanry
+    """Launches agent-auth based on a specific dictionary configuration
 
     Args:
         configuration (dict): Dictionary with the agent-auth configuration.

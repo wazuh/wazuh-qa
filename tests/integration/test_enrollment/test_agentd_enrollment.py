@@ -77,7 +77,7 @@ def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_e
         clear_last_message()
         control_service('start', daemon='wazuh-agentd')
         result = get_last_message()
-        assert result is not None, "Enrollment request message never arraived"
+        assert result is not None, "Enrollment request message never arrived"
         assert result == test_case['message']['expected'].format(**DEFAULT_VALUES),  \
             'Expected enrollment request message does not match'
 
