@@ -9,8 +9,8 @@ Using along with pytest, it manage to handle remote files under github repositor
 ## How to use
 ### A - Script
 ```
-⬦⬦⬦ ~/git/wazuh-qa/tests/security/test_package_vuln_scan ⨘ python3 package_vuln_scan.py -h
-usage: package_vuln_scan.py [-h] (-r INPUT | -p) [-o OUTPUT]
+↪ ~/git/wazuh-qa/tests/security/test_python_packages_vuln_scan ⊶ feature/1612-package-vuln-scanner ⨘ python3 python_packages_vuln_scan.py -h
+usage: python_packages_vuln_scan.py [-h] (-r INPUT | -p) [-o OUTPUT]
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -20,19 +20,19 @@ optional arguments:
 ```
 #### pip scan mode with console output:
 ```
-⬦⬦⬦ ~/git/wazuh-qa/tests/security/test_package_vuln_scan ⨘ python3 package_vuln_scan.py -p
+↪ ~/git/wazuh-qa/tests/security/test_python_packages_vuln_scan ⊶ feature/1612-package-vuln-scanner ⨘ python3 python_packages_vuln_scan.py -p
 {
-    "report_date": "2021-08-09T12:17:26.615321",
+    "report_date": "2021-09-02T09:22:40.224599",
     "vulnerabilities_found": 0,
     "packages": []
 }
 ```
 #### requirements file with json output file:
 ```
-⬦⬦⬦ ~/git/wazuh-qa/tests/security/test_package_vuln_scan ⨘ python3 package_vuln_scan.py -r ~/git/wazuh/framework/requirements.txt -o json_output.json
-⬦⬦⬦ ~/git/wazuh-qa/tests/security/test_package_vuln_scan ⨘ cat json_output.json
+↪ ~/git/wazuh-qa/tests/security/test_python_packages_vuln_scan ⊶ feature/1612-package-vuln-scanner ⨘ python3 python_packages_vuln_scan.py -r ~/git/wazuh/framework/requirements.txt -o json_output.json
+↪ ~/git/wazuh-qa/tests/security/test_python_packages_vuln_scan ⊶ feature/1612-package-vuln-scanner ⨘ cat json_output.json 
 {
-    "report_date": "2021-08-09T12:19:07.675120",
+    "report_date": "2021-09-02T09:23:09.390008",
     "vulnerabilities_found": 0,
     "packages": []
 }
@@ -41,28 +41,28 @@ optional arguments:
 ### B - Pytest
 ```
 Parameters:
-	--repo: repository name. Default: 'wazuh'.
-	--branch: branch name of specified repository. Default: 'master'.
-	--requirements-path: requirements file path. Default: 'framework/requirements.txt'.
-        --report-path: output file path. Default: 'test_package_vuln_scan/report_file.json'.
+    --repo: repository name. Default: 'wazuh'.
+    --branch: branch name of specified repository. Default: 'master'.
+    --requirements-path: requirements file path. Default: 'framework/requirements.txt'.
+    --report-path: output file path. Default: 'test_python_packages_vuln_scan/report_file.json'.
 ```
 #### scanning wazuh-qa requirements file:
 ```
-⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ python3 -m pytest test_package_vuln_scan/ --repo wazuh-qa --branch master --requirements-path requirements.txt --report-path ~/Desktop/report_file.json
+↪ ~/git/wazuh-qa/tests/security ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest test_python_packages_vuln_scan/ --repo wazuh-qa --branch master --requirements-path requirements.txt --report-path ~/Desktop/report_file.json
 ==================================================================================== test session starts =====================================================================================
 platform linux -- Python 3.9.5, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
 rootdir: /home/kondent/git/wazuh-qa/tests/security
 plugins: html-3.1.1, metadata-1.11.0, testinfra-5.0.0
 collected 1 item                                                                                                                                                                             
 
-test_package_vuln_scan/test_package_vuln_scan.py F                                                                                                                                     [100%]
+test_python_packages_vuln_scan/test_python_packages_vuln_scan.py F                                                                                                                     [100%]
 
 ========================================================================================== FAILURES ==========================================================================================
-___________________________________________________________________________________ test_package_vuln_scan ___________________________________________________________________________________
+_______________________________________________________________________________ test_python_packages_vuln_scan _______________________________________________________________________________
 
-pytestconfig = <_pytest.config.Config object at 0x7fef88d27e80>
+pytestconfig = <_pytest.config.Config object at 0x7f11d3b87e20>
 
-    def test_package_vuln_scan(pytestconfig):
+    def test_python_packages_vuln_scan(pytestconfig):
         branch = pytestconfig.getoption('--branch')
         repo = pytestconfig.getoption('--repo')
         requirements_path = pytestconfig.getoption('--requirements-path')
@@ -77,14 +77,20 @@ pytestconfig = <_pytest.config.Config object at 0x7fef88d27e80>
 E       AssertionError: Vulnerables packages were found, full report at: /home/kondent/Desktop/report_file.json
 E       assert 28 == 0
 
-test_package_vuln_scan/test_package_vuln_scan.py:20: AssertionError
-================================================================================== short test summary info ===================================================================================
-FAILED test_package_vuln_scan/test_package_vuln_scan.py::test_package_vuln_scan - AssertionError: Vulnerables packages were found, full report at: /home/kondent/Desktop/report_file.json
-===================================================================================== 1 failed in 1.84s ======================================================================================
+test_python_packages_vuln_scan/test_python_packages_vuln_scan.py:23: AssertionError
+====================================================================================== warnings summary ======================================================================================
+test_python_packages_vuln_scan/python_packages_vuln_scan.py:82
+  /home/kondent/git/wazuh-qa/tests/security/test_python_packages_vuln_scan/python_packages_vuln_scan.py:82: DeprecationWarning: invalid escape sequence \d
+    package_version = max(re.findall('\d+\.+\d*\.*\d', line))
 
-⬦⬦⬦ ~/git/wazuh-qa/tests/security ⨘ cat ~/Desktop/report_file.json
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+================================================================================== short test summary info ===================================================================================
+FAILED test_python_packages_vuln_scan/test_python_packages_vuln_scan.py::test_python_packages_vuln_scan - AssertionError: Vulnerables packages were found, full report at: /home/kondent/De...
+================================================================================ 1 failed, 1 warning in 1.44s ================================================================================
+
+↪ ~/git/wazuh-qa/tests/security ⊶ feature/1612-package-vuln-scanner ⨘ cat ~/Desktop/report_file.json 
 {
-    "report_date": "2021-08-09T12:22:45.859541",
+    "report_date": "2021-09-02T09:24:54.168627",
     "vulnerabilities_found": 28,
     "packages": [
         {
@@ -94,9 +100,9 @@ FAILED test_package_vuln_scan/test_package_vuln_scan.py::test_package_vuln_scan 
             "vuln_description": "libImaging/TiffDecode.c in Pillow before 6.2.2 has a TIFF decoding integer overflow, related to realloc. See: CVE-2020-5310.",
             "safety_id": "37779"
         },
-...
-...
-...
+        ...
+        ...
+        ...
         {
             "package_name": "pillow",
             "package_version": "6.2.0",
