@@ -605,8 +605,8 @@ def create_file_structure_function(get_files_list):
 
 
 @pytest.fixture(scope='module')
-def use_daemons(get_configuration, request):
-    """Daemons handler.
+def daemons_handler(get_configuration, request):
+    """Handler of Wazuh daemons.
 
     It uses `daemons_configuration` of each module in order to configure the behavior of the fixture. 
     The  `daemons_configuration` should be a dictionary with the following keys:
