@@ -33,7 +33,7 @@ WORKDIR Search-UI/
 RUN npm install --save-dev typescript
 WORKDIR ../
 
-# index jsons and launch SearchUI
+# index jsons and launch SearchUI and wait that ES is up
 CMD service elasticsearch start && \
-    sleep 10 && \
-    python3 DocGenerator.py -l qa-docs
+    sleep 8 && \
+    python3 DocGenerator.py -l qa-doc
