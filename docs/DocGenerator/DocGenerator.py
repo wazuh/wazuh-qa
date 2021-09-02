@@ -183,16 +183,43 @@ class DocGenerator:
         for folder in folders:
             self.parse_folder(os.path.join(root, folder), group_id)
 
+    def locate_test(self):
+        return
+
+    def parse_test(self):
+        return
+
+    def print_test_info(self, output_path):
+        '''
+        brief: Print the test info to standard output. If an output path is specified,
+               the output is redirected to `output_path/test_info.json`.
+        '''
+        # If an output path is specified
+        if output_path != None:
+            pass
+        pass
+
     def run(self):
         """
         brief: Run a complete scan of each include path to parse every test and group found.
+               Normal mode: expected behaviour, Single test mode: found the test required and par it
         """
-        logging.info("\nStarting documentation parsing")
-        clean_folder(self.conf.documentation_path)
-        for path in self.conf.include_paths:
-            self.scan_path = path
-            logging.debug(f"Going to parse files on '{path}'")
-            self.parse_folder(path, self.__id_counter)
+        if self.conf.mode == "Normal":
+            logging.info("\nStarting documentation parsing")
+            clean_folder(self.conf.documentation_path)
+            for path in self.conf.include_paths:
+                self.scan_path = path
+                logging.debug(f"Going to parse files on '{path}'")
+                self.parse_folder(path, self.__id_counter)
+        elif self.conf.mode == "Single test":
+            logging.info("\nStarting test documentation parsing")
+            test = self.locate_test()
+            if test:
+                logging.debug(f"Going to parse '{self.conf.test_name}'")
+                self.parse_test(test)
+            else:
+                logging.error(f"'{self.conf.test_name}' could not be found")
+            self.print_test_info(self.conf.output_path)
 
 
 def start_logging(folder, debug_level=logging.INFO):
@@ -210,6 +237,8 @@ if __name__ == '__main__':
     parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
     parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
     parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launch_app')
+    parser.add_argument('-T', help="Test name or path to parse.", dest='test_input')
+    parser.add_argument('-o', help="Output directory path.", dest='output_path')
     args = parser.parse_args()
 
     if args.debug_level:
@@ -234,4 +263,6 @@ if __name__ == '__main__':
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:
         docs = DocGenerator(Config(CONFIG_PATH))
+        if args.test_input:
+            docs = DocGenerator(Config(args.test_input, args.output_path))
         docs.run()

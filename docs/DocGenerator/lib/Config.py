@@ -15,7 +15,21 @@ class Config():
     """
     brief: Class that parses the configuration file and exposes the available configurations.
     """
-    def __init__(self, config_file):
+    def __init__(self, *args):
+        # If it is called using the config file
+        self.mode = "Normal"
+        if len(args) == 1:
+            self._initialize_config(args[0])
+        else:
+            # It is called with a single test to parse
+            self.mode = "Single test"
+            # Search it within the whole directory
+            self.include_paths = "../../tests/"
+            self.test_name = args[0]
+            self.output_path = args[1]
+
+
+    def _initialize_config(self, config_file):
         self.project_path = "../.."
         self.documentation_path = ".."
         self.include_paths = []
