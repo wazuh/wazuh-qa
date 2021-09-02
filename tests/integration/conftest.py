@@ -628,8 +628,8 @@ def configure_local_internal_options_module(request):
 def daemons_handler(get_configuration, request):
     """Handler of Wazuh daemons.
 
-    It uses `daemons_configuration` of each module in order to configure the behavior of the fixture. 
-    The  `daemons_configuration` should be a dictionary with the following keys:
+    It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture. 
+    The  `daemons_handler_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
             will be raised
         ignore_errors (boolean): Configure if errors in daemon handling should be ignore. This option is available
