@@ -5,6 +5,7 @@ from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_package import Waz
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.tools.s3_package import get_s3_package_url
 
 
@@ -46,7 +47,7 @@ class WazuhS3Package(WazuhPackage):
         super().__init__(wazuh_target=wazuh_target, installation_files_path=installation_files_path,
                          system=system, version=version, qa_ctl_configuration=qa_ctl_configuration)
 
-    def get_architecture(self, system):
+    def __get_architecture(self, system):
         """Get the needed architecture for the wazuh package
 
         Args:
@@ -56,14 +57,15 @@ class WazuhS3Package(WazuhPackage):
             str: String with the default architecture for the system
         """
         default_architectures = {
-            'deb': 'x86_64',
+            'deb': 'amd64',
             'rpm': 'x86_64',
-            'windows': 'amd64',
+            'rpm5': 'x86_64',
+            'windows': 'i386',
             'macos': 'amd64',
             'solaris10': 'i386',
             'solaris11': 'i386',
             'wpk-linux': 'x86_64',
-            'wpk-windows': 'amd64',
+            'wpk-windows': 'i386',
         }
         return default_architectures[system]
 
@@ -83,14 +85,18 @@ class WazuhS3Package(WazuhPackage):
         Returns:
             str: String with the complete path of the downloaded installation package
         """
-        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
-
-        if s3_package_url is None and self.version is not None and self.repository is not None and self.version is not None and self.revision is not None:
-            architecture = self.get_architecture(self.system)
+        if s3_package_url is None and self.version is not None and self.repository is not None and \
+                self.system is not None and self.revision is not None:
+            architecture = self.__get_architecture(self.system)
             s3_package_url = get_s3_package_url(self.repository, self.wazuh_target, self.version,
                                                 self.revision, self.system, architecture)
+        else:
+            raise QAValueError(f"Could not get Wazuh Package S3 URL from {hosts} host. s3_package_url or "
+                               '(version, repository, sistem, revision) has None value')
 
         package_name = Path(s3_package_url).name
+        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
+
         download_s3_package = AnsibleTask({'name': 'Download S3 package',
                                            'get_url': {'url': s3_package_url,
                                                        'dest': self.installation_files_path},
