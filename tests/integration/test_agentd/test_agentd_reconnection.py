@@ -232,7 +232,7 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 
 
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
-    """
+    '''
     description:
         Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
         In this case, the agent starts with keys.
@@ -268,7 +268,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
         - "Agent never enrolled after rejecting connection!"
         - "Notify message from agent was never sent!"
         - "Incorrect Secure Message"
-    """
+    '''
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -318,7 +318,7 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 
 def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
-    """
+    '''
     description:
         Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
         In this case, the agent doesn't have client.keys file.
@@ -354,7 +354,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
         - "Agent never enrolled after rejecting connection!"
         - "Notify message from agent was never sent!"
         - "Incorrect Secure Message"
-    """
+    '''
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -406,7 +406,7 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 
 def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
-    """
+    '''
     description:
         Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
         In this case, the agent has its client.keys file empty.
@@ -442,7 +442,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
         - "Agent never enrolled after rejecting connection!"
         - "Notify message from agent was never sent!"
         - "Incorrect Secure Message"
-    """
+    '''
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -495,7 +495,7 @@ and multiple retries are required until the new key is obtained to start communi
 
 
 def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
-    """
+    '''
     description:
         Check how the agent behaves when it makes multiple enrollment attempts before getting its key.
         For this, the agent starts without keys and perform multiple enrollment requests
@@ -534,7 +534,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
         - "No succesful enrollment after reties!"
         - "Notify message from agent was never sent!"
         - "A Wazuh module stopped because of Agentd initialization!"
-    """
+    '''
     global remoted_server
 
     remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
@@ -590,7 +590,7 @@ and multiple connection retries are required prior to requesting a new enrollmen
 
 
 def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration):
-    """
+    '''
     description:
         Check how the agent behaves when Remoted is not available and performs multiple connection attempts to it.
         For this, the agent starts with keys but Remoted is not available for several seconds,
@@ -620,7 +620,7 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
     expected_behaviour:
         - "Sending keep alive"
         - "Notify message from agent was never sent!"
-    """
+    '''
     global remoted_server
     REMOTED_KEYS_SYNC_TIME = 10
 

@@ -99,7 +99,7 @@ def get_configuration(request):
 @pytest.mark.parametrize("command_request,expected_answer", test_case.values(), ids=list(test_case.keys()))
 def test_request(get_configuration, configure_environment, remove_shared_files,
                  restart_remoted, command_request, expected_answer):
-    """
+    '''
     description:
         Writes (config/state) requests in $DIR/queue/ossec/request and check if remoted forwards it to the agent,
         collects the response, and writes it in the socket or returns an error message if the queried
@@ -125,7 +125,7 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
         - Test getconfig request for a disconnected agent
     expected_behaviour:
         - "Remoted unexpected answer"
-    """
+    '''
     cfg = get_configuration['metadata']
     protocols = cfg['PROTOCOL'].split(',')
 
