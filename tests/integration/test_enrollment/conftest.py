@@ -190,8 +190,6 @@ def clean_log_file():
 
 
 # Socket listener
-KEY_PATH = '/etc/manager.key'
-CERT_PATH = '/etc/manager.cert'
 LAST_MESSAGE = None
 
 
@@ -239,8 +237,8 @@ socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEF
 def create_certificates():
     cert_controller = CertificateController()
     cert_controller.get_root_ca_cert().sign(cert_controller.get_root_key(), cert_controller.digest)
-    cert_controller.store_private_key(cert_controller.get_root_key(), KEY_PATH)
-    cert_controller.store_ca_certificate(cert_controller.get_root_ca_cert(), CERT_PATH)
+    cert_controller.store_private_key(cert_controller.get_root_key(), AGENT_KEY_PATH)
+    cert_controller.store_ca_certificate(cert_controller.get_root_ca_cert(), AGENT_CERT_PATH)
 
 
 @pytest.fixture(scope="function")
@@ -248,8 +246,8 @@ def configure_socket_listener():
     """Configures the socket listener to start listening on the socket."""
     socket_listener.start()
     socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
-                                                   certificate=CERT_PATH,
-                                                   keyfile=KEY_PATH,
+                                                   certificate=AGENT_CERT_PATH,
+                                                   keyfile=AGENT_KEY_PATH,
                                                    options=None,
                                                    cert_reqs=ssl.CERT_OPTIONAL)
 
