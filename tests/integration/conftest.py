@@ -608,7 +608,7 @@ def create_file_structure_function(get_files_list):
 def daemons_handler(get_configuration, request):
     """Handler of Wazuh daemons.
 
-    It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture. 
+    It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
     The  `daemons_handler_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
             will be raised
@@ -643,7 +643,6 @@ def daemons_handler(get_configuration, request):
     except AttributeError as daemon_configuration_not_set:
         logger.error('Daemons Handler: Error - daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
-
 
     try:
         if wazuh_control:
