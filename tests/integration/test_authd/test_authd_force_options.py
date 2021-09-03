@@ -26,7 +26,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
-force_options_tests = load_tests(os.path.join(test_data_path, 'force_options.yaml'))
+force_options_tests = load_tests(os.path.join(test_data_path, 'test_authd_force_options.yaml'))
 
 DEFAULT_FORCE_INSERT = 'yes'
 DEFAULT_USE_USER_IP = 'no'
