@@ -1,5 +1,4 @@
 ---
-  #PASSWORD test
   -
     name: "Default USE_PASSWORD request with password use_password enabled"
     description: "Try register an agent with password and use_password enabled: register"
