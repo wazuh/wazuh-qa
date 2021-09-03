@@ -203,7 +203,7 @@ class HostManager:
             token (str, optional):  Request token. Default `None`
             check ( bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
 
-        Returns: 
+        Returns:
             API response (dict) : Return the response in JSON format.
         """
         request_body = 'body="{}"'.format(
@@ -243,4 +243,4 @@ class HostManager:
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible("shell", cmd, check=check)["stdout"]
+        return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
