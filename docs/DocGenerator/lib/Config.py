@@ -9,20 +9,22 @@ license: This program is free software; you can redistribute it
 
 import yaml
 import logging
+from enum import Enum
 
 
 class Config():
     """
     brief: Class that parses the configuration file and exposes the available configurations.
+           It exists two modes of execution: Normal and Single test.
     """
     def __init__(self, *args):
         # If it is called using the config file
-        self.mode = "Normal"
+        self.mode = mode.DEFAULT
         if len(args) == 1:
             self._initialize_config(args[0])
         else:
             # It is called with a single test to parse
-            self.mode = "Single test"
+            self.mode = mode.SINGLE_TEST
             # Search it within the whole directory
             self.include_paths = "../../tests/"
             self.test_name = args[0]
@@ -172,3 +174,10 @@ class _fields:
     def __init__(self):
         self.mandatory = []
         self.optional = []
+
+class mode(Enum):
+    '''
+    brief: Enumeration for classificate differents behaviours for DocGenerator
+    '''
+    DEFAULT = 1
+    SINGLE_TEST = 2

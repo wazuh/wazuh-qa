@@ -11,7 +11,7 @@ import os
 import re
 import json
 import yaml
-from lib.Config import Config
+from lib.Config import Config, mode
 from lib.CodeParser import CodeParser
 from lib.Sanity import Sanity
 from lib.Utils import clean_folder
@@ -204,14 +204,14 @@ class DocGenerator:
         brief: Run a complete scan of each include path to parse every test and group found.
                Normal mode: expected behaviour, Single test mode: found the test required and par it
         """
-        if self.conf.mode == "Normal":
+        if self.conf.mode == mode.DEFAULT:
             logging.info("\nStarting documentation parsing")
             clean_folder(self.conf.documentation_path)
             for path in self.conf.include_paths:
                 self.scan_path = path
                 logging.debug(f"Going to parse files on '{path}'")
                 self.parse_folder(path, self.__id_counter)
-        elif self.conf.mode == "Single test":
+        elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
             test = self.locate_test()
             if test:
