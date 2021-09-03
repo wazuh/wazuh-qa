@@ -12,7 +12,7 @@ from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file, load_tests
-from wazuh_testing.tools.monitoring import SocketController, FileMonitor
+from wazuh_testing.tools.monitoring import SocketController, FileMonitor, callback_authd_startup
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
 # Marks
@@ -86,15 +86,10 @@ def override_wazuh_conf(configuration):
     # Start Wazuh
     control_service('start', daemon='wazuh-authd')
 
-    """Wait until agentd has begun"""
-
-    def callback_agentd_startup(line):
-        if 'Accepting connections on port 1515' in line:
-            return line
-        return None
+    """Wait until authd has begun"""
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
-    log_monitor.start(timeout=30, callback=callback_agentd_startup)
+    log_monitor.start(timeout=30, callback=callback_authd_startup)
     time.sleep(1)
 
 
@@ -136,17 +131,10 @@ truncate_file(client_keys_path)
 # Start Wazuh
 control_service('start')
 
-"""Wait until agentd has begun"""
-
-
-def callback_agentd_startup(line):
-    if 'Accepting connections on port 1515' in line:
-        return line
-    return None
-
+"""Wait until authd has begun"""
 
 log_monitor = FileMonitor(LOG_FILE_PATH)
-log_monitor.start(timeout=30, callback=callback_agentd_startup)
+log_monitor.start(timeout=30, callback=callback_authd_startup)
 
 
 # @pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
