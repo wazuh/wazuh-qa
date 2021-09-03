@@ -1,7 +1,54 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will check if the cache feature of the API handled by the `apid` daemon is working properly.
+
+tiers:
+    - 0
+
+component:
+    manager
+
+path:
+    tests/integration/test_api/test_config/test_cache/
+
+daemons:
+    - apid
+    - analysisd
+    - syscheckd
+    - wazuh-db
+
+os_support:
+    - linux, rhel5
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+
+coverage:
+
+pytest_args:
+
+tags:
+    - api
+'''
 import os
 import time
 
@@ -53,18 +100,55 @@ def extra_configuration_after_yield():
 ])
 def test_cache(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                wait_for_start, get_api_details):
-    """Verify that the stored response is returned when cache is enabled.
+    '''
+    description:
+        Verify that the stored response is returned when the cache is enabled.
+        Calls to rules endpoints can be cached. This test verifies if the result
+        of the first call to a rule endpoint is equal to the second within a period
+        established in the configuration, even though a new file has been created during the process.
 
-    Calls to rules endpoints can be cached. This test verifies that the result
-    of the first call to a rule endpoint is equal to the second within a period
-    established in the configuration, even though a new file has been created
-    during the process.
+    wazuh_min_version:
+        3.13
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Check if the stored response is returned when the cache is enabled.
+
+    test_input:
+        Different test cases are contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    logging:
+        - api.log:
+            - Requests made to the API should be logged.
+
+    tags:
+
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     cache = get_configuration['configuration']['cache']['enabled']
     api_details = get_api_details()
