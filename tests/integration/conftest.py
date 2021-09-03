@@ -14,7 +14,10 @@ from datetime import datetime
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-from wazuh_testing import global_parameters
+
+import wazuh_testing.tools.configuration as conf
+from wazuh_testing import global_parameters, logger
+from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
@@ -574,3 +577,52 @@ def put_env_variables(get_configuration, request):
         for env in environment_variables:
             if sys.platform != 'win32':
                 os.unsetenv(env[0])
+
+
+@pytest.fixture(scope="module")
+def create_file_structure_module(get_files_list):
+    """Module scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope="function")
+def create_file_structure_function(get_files_list):
+    """Function scope version of create_file_structure."""
+    create_file_structure(get_files_list)
+
+    yield
+
+    delete_file_structure(get_files_list)
+
+
+@pytest.fixture(scope="module")
+def configure_local_internal_options_module(request):
+    """Fixture to configure the local internal options file.
+
+    It uses the test variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = ['monitord.rotate_log': '0', 'syscheck.debug': '0' ]
+    """
+    try:
+        local_internal_options = getattr(request.module, 'local_internal_options', [])
+    except AttributeError as local_internal_configuration_not_set:
+        logger.error('Configure Local Internal Options: Error - local_internal_options is not set')
+        raise local_internal_configuration_not_set
+
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    logger.error('Configure Local Internal Options: DEBUG - Set local_internal_option to '  +
+                    f"{str(local_internal_options)}")
+    conf.set_local_internal_options_dict(local_internal_options)
+
+    yield
+
+
+    logger.error('Configure Local Internal Options: DEBUG - Restore local_internal_option to '  +
+                    f"{str(backup_local_internal_options)}")
+    conf.set_local_internal_options_dict(backup_local_internal_options)
