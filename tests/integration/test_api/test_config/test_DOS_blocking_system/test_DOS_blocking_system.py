@@ -132,7 +132,7 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
             - Requests made to the API should be logged.
 
     tags:
-
+        - dos_attack
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     max_request_per_minute = get_configuration['configuration']['access']['max_request_per_minute']
