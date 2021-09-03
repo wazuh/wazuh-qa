@@ -62,7 +62,7 @@ class WorkerMID(ManInTheMiddle):
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'worker_messages.yaml'))
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 params = [{'FERNET_KEY': FERNET_KEY}]
 metadata = [{'fernet_key': FERNET_KEY}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)

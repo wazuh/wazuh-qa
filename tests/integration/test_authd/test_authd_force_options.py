@@ -6,13 +6,11 @@ import os
 import socket
 import ssl
 import time
-
 import pytest
 import yaml
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
+from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
@@ -38,7 +36,7 @@ def load_tests(path):
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 force_options_tests = load_tests(os.path.join(test_data_path, 'force_options.yaml'))

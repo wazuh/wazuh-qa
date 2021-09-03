@@ -35,7 +35,7 @@ def load_tests(path):
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 pass_tests = load_tests(os.path.join(test_data_path, 'pass_tests.yaml'))
