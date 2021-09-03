@@ -20,18 +20,47 @@ class Config():
     def __init__(self, *args):
         # If it is called using the config file
         self.mode = mode.DEFAULT
+        self.project_path = "../.."
+        self.documentation_path = ".."
+        self.include_paths = []
+        self.include_regex = []
+        self.group_files = ""
+        self.function_regex = []
+        self.ignore_paths = []
+        self.valid_tags = []
+        self.module_fields = _fields()
+        self.test_fields = _fields()
+        self.test_cases_field = None
+
+        try:
+            with open(args[0]) as fd:
+                self._config_data = yaml.safe_load(fd)
+        except:
+            logging.error("Cannot load config file")
+            raise Exception("Cannot load config file")
+
+        self._read_function_regex()
+        self._read_output_fields()
+        self._read_test_cases_field()
+
         if len(args) == 1:
-            self._initialize_config(args[0])
+            self._read_project_path()
+            self._read_documentation_path()
+            self._read_include_paths()
+            self._read_include_regex()
+            self._read_group_files()
+            self._read_ignore_paths()
+            
         else:
             # It is called with a single test to parse
             self.mode = mode.SINGLE_TEST
             # Search it within the whole directory
             self.include_paths = "../../tests/"
-            self.test_name = args[0]
-            self.output_path = args[1]
+            self.test_name = args[1]
+            self.output_path = args[2]
+            
 
-
-    def _initialize_config(self, config_file):
+    def _initialize_config(self):
         self.project_path = "../.."
         self.documentation_path = ".."
         self.include_paths = []

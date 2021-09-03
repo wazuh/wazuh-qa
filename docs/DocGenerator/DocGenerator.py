@@ -10,6 +10,7 @@ license: This program is free software; you can redistribute it
 import os
 import re
 import json
+from types import SimpleNamespace
 import yaml
 from lib.Config import Config, mode
 from lib.CodeParser import CodeParser
@@ -37,8 +38,9 @@ class DocGenerator:
         for ignore_regex in self.conf.ignore_paths:
             self.ignore_regex.append(re.compile(ignore_regex))
         self.include_regex = []
-        for include_regex in self.conf.include_regex:
-            self.include_regex.append(re.compile(include_regex))
+        if self.conf.mode == mode.DEFAULT:
+            for include_regex in self.conf.include_regex:
+                self.include_regex.append(re.compile(include_regex))
 
     def is_valid_folder(self, path):
         """
@@ -147,7 +149,12 @@ class DocGenerator:
         self.__id_counter = self.__id_counter + 1
         test = self.parser.parse_test(path, self.__id_counter, group_id)
         if test:
-            doc_path = self.get_test_doc_path(path)
+            if self.conf.mode == mode.DEFAULT:
+                doc_path = self.get_test_doc_path(path)
+            elif self.conf.mode == mode.SINGLE_TEST:
+                doc_path = self.conf.output_path
+                if self.print_test_info(test) == None:
+                    return
             self.dump_output(test, doc_path)
             logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
             return self.__id_counter
@@ -184,20 +191,30 @@ class DocGenerator:
             self.parse_folder(os.path.join(root, folder), group_id)
 
     def locate_test(self):
-        return
+        '''
+        brief: try to get the test path
+        '''
+        base_path = "../../tests"
+        complete_test_name = self.conf.test_name + ".py"
+        logging.info(f"Looking for {complete_test_name}")
+        for root, dirnames, filenames in os.walk(base_path, topdown=True):
+            for filename in filenames:
+                if filename == complete_test_name:
+                    return os.path.join(root, complete_test_name)
+        return None
 
-    def parse_test(self):
-        return
-
-    def print_test_info(self, output_path):
+    def print_test_info(self, test):
         '''
         brief: Print the test info to standard output. If an output path is specified,
                the output is redirected to `output_path/test_info.json`.
         '''
-        # If an output path is specified
-        if output_path != None:
-            pass
-        pass
+        # Use the key that QACTL needs
+        print(test)
+        # dump into file
+        if self.conf.output_path:
+            return
+        else:
+            return None
 
     def run(self):
         """
@@ -213,13 +230,12 @@ class DocGenerator:
                 self.parse_folder(path, self.__id_counter)
         elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
-            test = self.locate_test()
-            if test:
-                logging.debug(f"Going to parse '{self.conf.test_name}'")
-                self.parse_test(test)
+            test_path = self.locate_test()
+            if test_path:
+                logging.debug(f"Parsing '{self.conf.test_name}'")
+                self.create_test(test_path, 0)
             else:
                 logging.error(f"'{self.conf.test_name}' could not be found")
-            self.print_test_info(self.conf.output_path)
 
 
 def start_logging(folder, debug_level=logging.INFO):
@@ -264,5 +280,5 @@ if __name__ == '__main__':
     else:
         docs = DocGenerator(Config(CONFIG_PATH))
         if args.test_input:
-            docs = DocGenerator(Config(args.test_input, args.output_path))
+            docs = DocGenerator(Config(CONFIG_PATH, args.test_input, args.output_path))
         docs.run()
