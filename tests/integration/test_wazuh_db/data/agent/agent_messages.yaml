@@ -76,10 +76,10 @@
     output: 'ok []'
     stage: "agent vuln_cve checking empty table again"
 -
-  name: "Not existing agent"
-  description: "Check messages from not registered agents."
+  name: 'Not existing agent'
+  description: 'Check messages from not registered agents.'
   test_case:
   -
-    input: "agent 003 syscheck delete"
-    output: "err Agent not found"
-    stage: "Syscheck query to a non existing agent"
+    input: 'agent 003 syscheck delete'
+    output: 'err Agent not found'
+    stage: 'Syscheck query to a non-existing agent'

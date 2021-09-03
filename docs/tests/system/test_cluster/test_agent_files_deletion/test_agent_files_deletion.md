@@ -8,14 +8,14 @@ This test checks that, when an agent is removed/unregistered, the files related 
 - `{wazuh_path}/var/db/agents/{name}-{id}.db`
 - `{wazuh_path}/queue/db/{id}.db`
 
-It is also verified that the information related to the unregistered agent is deleted from the following tables (inside `global.db`): 
+It is also verified that the information related to the unregistered agent is deleted from the following tables (inside `global.db`):
 
 - agent
 - belongs
 
 ## Objective
 
-To confirm that no remaining files are left in the managers after deleting registered agents. 
+To confirm that no remaining files are left in the managers after deleting registered agents.
 
 ## General info
 
@@ -26,8 +26,8 @@ To confirm that no remaining files are left in the managers after deleting regis
 ## Expected behavior
 
 - Fail if any of the agent files cannot be found when it has not been unregistered yet.
-- Fail if there are no information of the agent in `global.db` when it has not been unregistered yet.
-- Fail if after unregistering the agent, any of the expected files are not removed. 
+- Fail if there is no information of the agent in `global.db` when it has not been unregistered yet.
+- Fail if after unregistering the agent, any of the expected files are not removed.
 - Fail if after unregistering the agent, any of the expected information in `global.db` can be queried.
 
 ## Code documentation
