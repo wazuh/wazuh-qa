@@ -5,7 +5,10 @@ Output path: "../output"
 Include paths:
   - "../../tests/integration/test_active_response"
   - "../../tests/integration/test_agentd"
+<<<<<<< HEAD
   - "../../tests/integration/test_analysisd"
+=======
+>>>>>>> a4d4283bf22b711bf3f0a8db0a9b5beb6a3672a2
   - "../../tests/integration/test_api"
 
 Include regex:
