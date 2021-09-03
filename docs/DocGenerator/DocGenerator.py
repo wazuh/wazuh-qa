@@ -207,18 +207,27 @@ class DocGenerator:
         brief: Print the test info to standard output. If an output path is specified,
                the output is redirected to `output_path/test_info.json`.
         '''
-        print("test_path: "+self.test_path[6:])
-        # Use the key that QACTL needs
-        for field in self.conf.module_info:
-            for k, v in field.items():
-                print(str(k)+": "+str(test[v]))
-        for field in self.conf.test_info:
-            for k, v in field.items():
-                print(str(k)+": "+str(test['tests'][0][v]))
         # dump into file
         if self.conf.output_path:
-            return
+            test_info = {}
+            test_info['test_path'] = self.test_path[6:]
+            for field in self.conf.module_info:
+                for k, v in field.items():
+                    test_info[k] = test[v]
+            for field in self.conf.test_info:
+                for k, v in field.items():
+                    test_info[k] = test['tests'][0][v]
+            with open(os.path.join(self.conf.output_path, 'test_info.json'), 'w') as fp:
+                json.dump(test_info, fp)
         else:
+            print("test_path: "+self.test_path[6:])
+            # Use the key that QACTL needs
+            for field in self.conf.module_info:
+                for k, v in field.items():
+                    print(str(k)+": "+str(test[v]))
+            for field in self.conf.test_info:
+                for k, v in field.items():
+                    print(str(k)+": "+str(test['tests'][0][v]))
             return None
 
     def run(self):
