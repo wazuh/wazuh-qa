@@ -47,7 +47,8 @@ class WazuhS3Package(WazuhPackage):
         super().__init__(wazuh_target=wazuh_target, installation_files_path=installation_files_path,
                          system=system, version=version, qa_ctl_configuration=qa_ctl_configuration)
 
-    def __get_architecture(self, system):
+    @staticmethod
+    def get_architecture(system):
         """Get the needed architecture for the wazuh package
 
         Args:
@@ -87,7 +88,7 @@ class WazuhS3Package(WazuhPackage):
         """
         if s3_package_url is None and self.version is not None and self.repository is not None and \
                 self.system is not None and self.revision is not None:
-            architecture = self.__get_architecture(self.system)
+            architecture = WazuhS3Package.get_architecture(self.system)
             s3_package_url = get_s3_package_url(self.repository, self.wazuh_target, self.version,
                                                 self.revision, self.system, architecture)
         else:

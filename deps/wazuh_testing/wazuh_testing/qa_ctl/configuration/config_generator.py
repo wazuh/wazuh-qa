@@ -10,6 +10,8 @@ from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.s3_package import get_s3_package_url
+from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 
 
 class QACTLConfigGenerator:
@@ -85,7 +87,7 @@ class QACTLConfigGenerator:
         tests_info = [
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.2.1',
+                'test_wazuh_min_version': '4.2.0',
                 'test_system': 'linux',
                 'test_vendor': 'ubuntu',
                 'test_os_version': '20.04',
@@ -95,7 +97,7 @@ class QACTLConfigGenerator:
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
                 'test_wazuh_min_version': '4.2.0',
-                'test_system': 'windows',
+                'test_system': 'linux',
                 'test_vendor': 'centos',
                 'test_os_version': '8',
                 'test_target': 'agent',
@@ -221,15 +223,15 @@ class QACTLConfigGenerator:
         return instance
 
     def __get_package_url(self, instance):
-        # target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
-        #     else 'agent'
-        # vagrant_box = self.config['deployment'][instance]['provider']['vagrant']['vagrant_box']
-        # system = QACTLConfigGenerator.BOX_INFO[vagrant_box]['system']
-        # architecture = 'x86_64'  # Get architecture from system
+        target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
+            else 'agent'
+        vagrant_box = self.config['deployment'][instance]['provider']['vagrant']['vagrant_box']
+        system = QACTLConfigGenerator.BOX_INFO[vagrant_box]['system']
+        architecture = WazuhS3Package.get_architecture(system)
 
-        # package_url = get_package_url('live', target, self.wazuh_version, '1', system, architecture)
-        pass
+        package_url = get_s3_package_url('live', target, self.wazuh_version, '1', system, architecture)
 
+        return package_url
 
     def __process_deployment_data(self, tests_info):
         self.config['deployment'] = {}
@@ -269,7 +271,7 @@ class QACTLConfigGenerator:
             # Wazuh deployment
             target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
                 else 'agent'
-            s3_package_url = 'mocked_url' ## self.__get_package_url(instance)
+            s3_package_url = self.__get_package_url(instance)
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
                 'target': target,

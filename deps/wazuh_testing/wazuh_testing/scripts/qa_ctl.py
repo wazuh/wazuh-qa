@@ -75,6 +75,7 @@ def main():
 
     arguments = parser.parse_args()
 
+    # Generate or get the qactl configuration file
     if arguments.run_test:
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
         config_generator.run()
