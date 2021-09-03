@@ -23,15 +23,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """ Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')

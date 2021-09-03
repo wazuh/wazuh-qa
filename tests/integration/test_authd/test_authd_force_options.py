@@ -11,7 +11,7 @@ import yaml
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, load_tests
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
@@ -21,19 +21,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 
 # Configurations
-
-def load_tests(path):
-    """Loads a yaml file from a path.
-    
-    Args:
-        path (string): Yaml full path.
-        
-    Returns:
-       dict: Yaml structure.
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
