@@ -29,7 +29,9 @@ daemons:
     - wazuh-db
 
 os_support:
-    - linux, rhel5
+    - linux, centos 6
+    - linux, centos 7
+    - linux, centos 8
     - linux, rhel6
     - linux, rhel7
     - linux, rhel8
