@@ -47,6 +47,8 @@ log_monitor_paths = []
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+hostname = socket.gethostname()
+
 # fixtures
 
 test_index = 0
@@ -63,10 +65,6 @@ def get_current_test():
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
-
-
-def read_hostname():
-    return socket.gethostname()
 
 
 def override_wazuh_conf(configuration):
@@ -202,8 +200,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
         try:
             if config['insert_hostname_in_query'] == 'yes':
-                config['input'] = config['input'].format(read_hostname())
-                config['output'] = config['output'].format(read_hostname())
+                config['input'] = config['input'].format(hostname)
+                config['output'] = config['output'].format(hostname)
         except KeyError:
             pass
         except IndexError:
