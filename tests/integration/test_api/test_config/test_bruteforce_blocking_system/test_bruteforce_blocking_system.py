@@ -129,7 +129,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
             - Requests made to the API should be logged.
 
     tags:
-
+        - brute_force_attack
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     block_time = get_configuration['configuration']['access']['block_time']
