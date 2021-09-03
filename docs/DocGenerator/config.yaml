@@ -5,6 +5,8 @@ Output path: "../output"
 Include paths:
   - "../../tests/integration/test_wazuh_db"
   - "../../tests/integration/test_vulnerability_detector"
+  - "../../tests/integration/test_remoted"
+  - "../../tests/integration/test_agentd"
 
 Include regex:
   - "^test_.*py$"
@@ -22,20 +24,33 @@ Output fields:
   Module:
     Mandatory:
       - brief
-      - metadata:
-        - modules
-        - daemons
-        - component
-        - operating_system
-        - tiers
+      - category
+      - modules
+      - daemons
+      - component
+      - os_platform
+      - os_vendor
+      - os_version
+      - tiers
     Optional:
       - tags
   Test:
     Mandatory:
-      - test_logic
-      - checks
+      - description
+      - wazuh_min_version
+      - parameters
+      - behaviour
+      - expected_behaviour
     Optional:
-      - expected_result
-      - test_cases
+      - status 
 
 Test cases field: test_cases
+
+Module info:
+  - test_system: os_platform
+  - test_vendor: os_vendor
+  - test_version: os_version
+  - test_target: component
+
+Test info:
+  - test_wazuh_min_version: wazuh_min_version

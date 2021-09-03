@@ -58,37 +58,23 @@ class Config():
             self.include_paths = "../../tests/"
             self.test_name = args[1]
             self.output_path = args[2]
-            
+            self._read_test_info()
+            self._read_module_info()
 
-    def _initialize_config(self):
-        self.project_path = "../.."
-        self.documentation_path = ".."
-        self.include_paths = []
-        self.include_regex = []
-        self.group_files = ""
-        self.function_regex = []
-        self.ignore_paths = []
-        self.valid_tags = []
-        self.module_fields = _fields()
-        self.test_fields = _fields()
-        self.test_cases_field = None
 
-        try:
-            with open(config_file) as fd:
-                self._config_data = yaml.safe_load(fd)
-        except:
-            logging.error("Cannot load config file")
-            raise Exception("Cannot load config file")
-
-        self._read_project_path()
-        self._read_documentation_path()
-        self._read_include_paths()
-        self._read_include_regex()
-        self._read_group_files()
-        self._read_function_regex()
-        self._read_ignore_paths()
-        self._read_output_fields()
-        self._read_test_cases_field()
+    def _read_test_info(self):
+        '''
+        brief: Reads from the config file the keys to be printed from test info
+        '''
+        if 'Test info' in self._config_data:
+            self.test_info = self._config_data['Test info']
+    
+    def _read_module_info(self):
+        '''
+        brief: Reads from the config file the keys to be printed from module info
+        '''
+        if 'Module info' in self._config_data:
+            self.module_info = self._config_data['Module info']
 
     def _read_project_path(self):
         """

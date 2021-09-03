@@ -10,7 +10,6 @@ license: This program is free software; you can redistribute it
 import os
 import re
 import json
-from types import SimpleNamespace
 import yaml
 from lib.Config import Config, mode
 from lib.CodeParser import CodeParser
@@ -208,8 +207,14 @@ class DocGenerator:
         brief: Print the test info to standard output. If an output path is specified,
                the output is redirected to `output_path/test_info.json`.
         '''
+        print("test_path: "+self.test_path[6:])
         # Use the key that QACTL needs
-        print(test)
+        for field in self.conf.module_info:
+            for k, v in field.items():
+                print(str(k)+": "+str(test[v]))
+        for field in self.conf.test_info:
+            for k, v in field.items():
+                print(str(k)+": "+str(test['tests'][0][v]))
         # dump into file
         if self.conf.output_path:
             return
@@ -230,10 +235,10 @@ class DocGenerator:
                 self.parse_folder(path, self.__id_counter)
         elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
-            test_path = self.locate_test()
-            if test_path:
+            self.test_path = self.locate_test()
+            if self.test_path:
                 logging.debug(f"Parsing '{self.conf.test_name}'")
-                self.create_test(test_path, 0)
+                self.create_test(self.test_path, 0)
             else:
                 logging.error(f"'{self.conf.test_name}' could not be found")
 
