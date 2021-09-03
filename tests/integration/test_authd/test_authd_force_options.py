@@ -65,14 +65,6 @@ def get_configuration(request):
     return request.param
 
 
-def clean_client_keys_file():
-    try:
-        client_file = open(client_keys_path, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
-
-
 def read_hostname():
     return socket.gethostname()
 
@@ -90,7 +82,7 @@ def override_wazuh_conf(configuration):
     write_wazuh_conf(test_config)
 
     # reset_client_keys
-    clean_client_keys_file()
+    truncate_file(client_keys_path)
 
     time.sleep(1)
     # Start Wazuh
@@ -141,7 +133,7 @@ def send_message(message):
 control_service('stop')
 
 # reset_client_keys
-clean_client_keys_file()
+truncate_file(client_keys_path)
 
 # Start Wazuh
 control_service('start')
