@@ -34,7 +34,7 @@ def load_tests(path):
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
 
 # Ossec.conf configurations
