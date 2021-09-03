@@ -15,6 +15,7 @@ from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfigu
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
+from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 
 
 DEPLOY_KEY = 'deployment'
@@ -55,6 +56,22 @@ def set_qactl_logging(qactl_configuration):
         qactl_logger = Logging(QACTL_LOGGER, qactl_configuration.logging_level, True, qactl_configuration.logging_file)
 
 
+def validate_parameters(parameters):
+    if parameters.version is not None:
+        version = parameters.version
+
+        if len((parameters.version).split('.')) != 3:
+            raise ValueError(f"Version parameter has to be in format x.y.z. You entered {version}")
+
+        if not version_is_released(parameters.version):
+            raise ValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.")
+
+        short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
+
+        if not branch_exist(short_version, WAZUH_QA_REPO):
+            raise ValueError(f"{short_version} branch does not exist in Wazuh QA repository.")
+
+
 def main():
     parser = argparse.ArgumentParser()
     configuration_data = {}
@@ -74,6 +91,8 @@ def main():
                         help='Wazuh installation and tests version')
 
     arguments = parser.parse_args()
+
+    validate_parameters(arguments)
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
