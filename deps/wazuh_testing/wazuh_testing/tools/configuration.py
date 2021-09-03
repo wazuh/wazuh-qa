@@ -603,7 +603,7 @@ def local_internal_options_to_dict(local_internal_options):
 
 
 def get_local_internal_options_dict():
-    """Return the local internal options in a dictionary
+    """Return the local internal options in a dictionary.
 
     Returns:
         dict: Local internal options.
@@ -620,7 +620,7 @@ def get_local_internal_options_dict():
 
 
 def set_local_internal_options_dict(dict_local_internal_options):
-    """Set the local internal options using a dictionary
+    """Set the local internal options using a dictionary.
 
     Args:
         local_internal_options_dict (dict): A dictionary containing local internal options.
