@@ -217,8 +217,9 @@ class DocGenerator:
             for field in self.conf.test_info:
                 for k, v in field.items():
                     test_info[k] = test['tests'][0][v]
-            with open(os.path.join(self.conf.output_path, 'test_info.json'), 'w') as fp:
-                json.dump(test_info, fp)
+            with open(os.path.join(self.conf.output_path, self.conf.test_name + '.json'), 'w') as fp:
+                fp.write(json.dumps(test_info, indent=4))
+                fp.write("\n")
         else:
             print("test_path: "+self.test_path[6:])
             # Use the key that QACTL needs
