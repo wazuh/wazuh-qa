@@ -204,7 +204,7 @@
     - tags:
       - manager
       apply_to_modules:
-      - test_authd_pass_tests
+      - test_authd_password_tests
       sections:
       - section: auth
         elements:
