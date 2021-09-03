@@ -11,10 +11,11 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
+from wazuh_testing.tools.github_repository import get_last_wazuh_version
 
 
 class QACTLConfigGenerator:
-    """Class implemented with te purpose of generating the configuration fields needed in a YAML 
+    """Class implemented with te purpose of generating the configuration fields needed in a YAML
     configuration file of the QACTL tool. In order to get te configuration file generated automatically,
     we use the info given by the documentation of the tests that are going to be executed. Plus, there can
     be also a wazuh version parameter that indicates which version of wazuh the user wants to install.
@@ -64,28 +65,14 @@ class QACTLConfigGenerator:
 
     def __init__(self, tests, wazuh_version):
         self.tests = tests
-        self.wazuh_version = self.__get_last_wazuh_version() if wazuh_version is None else wazuh_version
+        self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
         self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
         self.config_file_path = f"{gettempdir()}/config_{get_current_timestamp()}.yaml"
         self.config = {}
         self.hosts = []
 
-    def __get_last_wazuh_version(self):
-        """Get the last version of the wazuh packages available.
-
-        Returns:
-            str: string with the last available version of the wazuh packages.
-        """
-        return '4.2.0'
-
     def __get_qa_branch(self):
-        short_version = f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}"
-
-        # Check if exist QA BRANCH OF short version
-
-        # Else check if master branch version is equal to target version (example 4.3.0 == master)
-
-        # Else raise version error. QA branch not found
+         return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}"
 
     def __qa_docs_mocking(self, test_name):
         mocked_file = f"{gettempdir()}/mocked_data.json"
@@ -125,7 +112,7 @@ class QACTLConfigGenerator:
         tests_info = [
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.2.0',
+                'test_wazuh_min_version': '4.1.0',
                 'test_system': 'linux',
                 'test_vendor': 'ubuntu',
                 'test_os_version': '20.04',
@@ -134,7 +121,7 @@ class QACTLConfigGenerator:
             },
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.2.0',
+                'test_wazuh_min_version': '4.1.0',
                 'test_system': 'linux',
                 'test_vendor': 'centos',
                 'test_os_version': '8',
@@ -143,7 +130,7 @@ class QACTLConfigGenerator:
             },
             {
                 'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.2.0',
+                'test_wazuh_min_version': '4.1.0',
                 'test_system': 'linux',
                 'test_vendor': 'ubuntu',
                 'test_os_version': '20.04',
@@ -155,12 +142,12 @@ class QACTLConfigGenerator:
 
 
     def __validate_test_info(self, test_info, user_input=True, log_error=True):
-        """Validate the test information in order to check that the fields that contains are suitable 
+        """Validate the test information in order to check that the fields that contains are suitable
         for trying to generate a configuration data.
 
         Args:
             test_info (dict): dict containing all the info of the test. This info is by its containing documentation
-            user_input (boolean): boolean that checks if there is going to be an input from the user. 
+            user_input (boolean): boolean that checks if there is going to be an input from the user.
             This parameter is set to True by default.
             log_error (boolean): boolean that checks if there is going to be a logging of the errors.
             This parameter is set to True by default.
@@ -181,7 +168,7 @@ class QACTLConfigGenerator:
             validation has failed.
 
             Agrs:
-                user_input (boolean): boolean that checks if there is going to be an input from the user. 
+                user_input (boolean): boolean that checks if there is going to be an input from the user.
                 This parameter is set to True by default.
                 error_message (string): string containing the error message. This parameter is set to None by default.
                 log_error (boolean): boolean that checks if there is going to be a logging of the errors.
@@ -198,7 +185,7 @@ class QACTLConfigGenerator:
             Args:
                 check (string) : item that is going to be validated.
                 allowed_values (dict): dict containing all the allowed values for the item.
-                user_input (boolean): boolean that checks if there is going to be an input from the user. 
+                user_input (boolean): boolean that checks if there is going to be an input from the user.
                 log_error (boolean): boolean that checks if there is going to be a logging of the errors.
                 test_name (string): name of the test.
                 system (string): name of the system needed for running the test.
@@ -298,7 +285,7 @@ class QACTLConfigGenerator:
             test_name (string): contains the name of the test that is going to be run.
             test_target (string): contains the target of the test.
             test_system (string): The system in where the test needs to be run.
-            vm_cpu (int): number of CPUs that will be dedicated to the new vagrant box. 
+            vm_cpu (int): number of CPUs that will be dedicated to the new vagrant box.
             This parameter is set to 1 by default.
             vm_memory (int): size of the ram that will be dedicated to the new vagrant box.
 
@@ -397,7 +384,7 @@ class QACTLConfigGenerator:
                     self.config['deployment'][f"host_{manager_host_number}"]['provider']['vagrant']['vm_ip']
 
             # QA framework
-            wazuh_qa_branch = 'mocked_branch'
+            wazuh_qa_branch = self.__get_qa_branch()
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': wazuh_qa_branch,
                 'qa_workdir': gettempdir()
@@ -435,7 +422,7 @@ class QACTLConfigGenerator:
     def __process_test_info(self, tests_info):
         """Process all the info of the desired tests that are going to be run in order to generate the data configuration
         for the YAML config file.
-        
+
         Args:
             tests_info(dict object): dict object containing information of all the tests that are going to be run.
         """
