@@ -31,6 +31,7 @@ force_options_tests = load_tests(os.path.join(test_data_path, 'test_authd_force_
 DEFAULT_FORCE_INSERT = 'yes'
 DEFAULT_USE_USER_IP = 'no'
 CLIENT_KEY_ENTRY_LEN = 4
+SLEEP_TIME_FOR_READING_KEYS = 0.5
 
 conf_params = {'USE_SOURCE_IP': [], 'FORCE_INSERT': []}
 
@@ -67,10 +68,10 @@ def get_configuration(request):
     return request.param
 
 
-def override_wazuh_conf(configuration):
+def override_wazuh_conf(configuration, sleep_time=1):
     # Stop Wazuh
     control_service('stop', daemon='wazuh-authd')
-    time.sleep(1)
+    time.sleep(sleep_time)
     check_daemon_status(running=False, daemon='wazuh-authd')
     truncate_file(LOG_FILE_PATH)
 
@@ -82,7 +83,7 @@ def override_wazuh_conf(configuration):
     # reset_client_keys
     truncate_file(client_keys_path)
 
-    time.sleep(1)
+    time.sleep(sleep_time)
     # Start Wazuh
     control_service('start', daemon='wazuh-authd')
 
@@ -90,7 +91,7 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_authd_startup)
-    time.sleep(1)
+    time.sleep(sleep_time)
 
 
 def check_client_keys_file(response):
@@ -176,7 +177,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
                     "Failed response previous '{}': Input: {}".format \
                         (force_options_tests[current_test]['name'], config['input'])
                 if expected == "OSSEC K:'":
-                    time.sleep(0.5)
+                    time.sleep(SLEEP_TIME_FOR_READING_KEYS)
                     assert check_client_keys_file(response) == True, \
                         "Failed test case '{}' checking previous client.keys : Input: {}".format \
                             (force_options_tests[current_test]['name'], config['input'])
@@ -206,7 +207,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
         # if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
-            time.sleep(0.5)
+            time.sleep(SLEEP_TIME_FOR_READING_KEYS)
             if "/32" in response:
                 response = response.replace("/32", "")
             assert check_client_keys_file(response) == True, \
