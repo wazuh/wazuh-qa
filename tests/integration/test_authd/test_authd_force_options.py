@@ -165,7 +165,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
             if config['insert_prev_agent'] == "yes":
                 if 'insert_prev_agent_custom' in config:
                     response = send_message(config['insert_prev_agent_custom'])
-                else
+                else:
                     response = send_message(config['input'])
 
                 # Prev output is expected
