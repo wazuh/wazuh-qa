@@ -149,6 +149,7 @@
   -
     name: "Invalid IP: greater than 255"
     description: "Try register an agent with invalid IP: rejected"
+    # The manager should validate the IP https://github.com/wazuh/wazuh/issues/4965
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.257'"
@@ -158,6 +159,7 @@
   -
     name: "Invalid IP: greater than 255"
     description: "Try register an agent with invalid IP: rejected"
+    # The manager should validate the IP https://github.com/wazuh/wazuh/issues/4965
     test_case:
     -
       input: "OSSEC A:'user1' IP:'257.257.257.257'"
