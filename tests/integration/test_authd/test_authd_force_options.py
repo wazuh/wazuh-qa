@@ -208,8 +208,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         # if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
             time.sleep(SLEEP_TIME_FOR_READING_KEYS)
-            if "/32" in response:
-                response = response.replace("/32", "")
+            response = response.replace('/32', '')
             assert check_client_keys_file(response) == True, \
                 "Failed test case '{}' checking client.keys : Input: {}".format \
                     (force_options_tests[current_test]['name'], config['input'])
