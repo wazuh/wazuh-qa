@@ -141,20 +141,17 @@ log_monitor.start(timeout=30, callback=callback_authd_startup)
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment):
     """Check that every input message in authd port generates the adequate output
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_cases, dict with following keys:
-            - input: message that will be tried to send to the manager
-            - output: expected response
-            - insert_prev_agent: yes or no (for duplicated ip or name cases)
-                1) if insert_prev_agent_custom is present: previous input message is overwrite by the custom message
-                    (insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'")
-                2) if insert_prev_agent_custom is not present: send the masage equals to input
-            - insert_random_pass_in_query:
-              "yes" if is needed add random pass to input query (for register with random pass cases)
-            - insert_hostname_in_query:
-              "yes" if is present add host name to input message
+    Every test case is defined the following way:
+        - input: message that will be tried to send to the manager
+        - output: expected response
+        - insert_prev_agent: yes or no (for duplicated ip or name cases)
+            1) if insert_prev_agent_custom is present: previous input message is overwrite by the custom message
+                (insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'")
+            2) if insert_prev_agent_custom is not present: send the masage equals to input
+        - insert_random_pass_in_query:
+            "yes" if is needed add random pass to input query (for register with random pass cases)
+        - insert_hostname_in_query:
+            "yes" if is present add host name to input message
     """
     current_test = get_current_test()
     test_case = force_options_tests[current_test]['test_case']
