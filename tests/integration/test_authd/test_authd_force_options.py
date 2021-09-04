@@ -162,9 +162,9 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         # insert previous agent to force repeated case
         try:
             if config['insert_prev_agent'] == "yes":
-                try:
+                if 'insert_prev_agent_custom' in config:
                     response = send_message(config['insert_prev_agent_custom'])
-                except KeyError:
+                else
                     response = send_message(config['input'])
 
                 # Prev output is expected
