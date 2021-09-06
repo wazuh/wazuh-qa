@@ -12,6 +12,10 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 
 
 class QACTLConfigGenerator:
@@ -96,10 +100,24 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        self.__qa_docs_mocking(test_name)
-        info = file.read_json_file(f"{gettempdir()}/mocked_data.json")
+        ansible_tasks = [AnsibleTask({'name': f"Run qa-docs tool to get {test_name} info",
+                                      'command': f"qa-docs -T {test_name} -O {gettempdir()}"})]
+        inventory = AnsibleInventory([AnsibleInstance('127.0.0.1', 'local_user', connection_method='local')])
+        playbook_parameters = {'hosts': '127.0.0.1', 'tasks_list': ansible_tasks}
+        try:
+            AnsibleRunner.run_ephemeral_tasks(inventory.inventory_file_path, playbook_parameters, output=True)
+        finally:
+            file.delete_file(inventory.inventory_file_path)
+
+        # Read test data file
+        info = file.read_json_file(f"{gettempdir()}/{test_name}.json")
+
+        # Add test name extra info
         info['test_name'] = test_name
-        file.delete_file(f"{gettempdir()}/mocked_data.json")
+
+        # Delete test data file
+        file.delete_file(f"{gettempdir()}/{test_name}.json")
+
         return info
 
     def __get_all_tests_info(self):
@@ -442,5 +460,5 @@ class QACTLConfigGenerator:
         for host_ip in self.hosts:
             self.__delete_ip_entry(host_ip)
 
-        if os.path.exists(self.config_file_path):
-            os.remove(self.config_file_path)
+        file.delete_file(self.config_file_path)
+
