@@ -604,7 +604,7 @@ def create_file_structure_function(get_files_list):
     delete_file_structure(get_files_list)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.
 
@@ -615,17 +615,17 @@ def configure_local_internal_options_module(request):
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
     except AttributeError as local_internal_configuration_not_set:
-        logger.error('Configure Local Internal Options: Error - local_internal_options is not set')
+        logger.debug('Configure Local Internal Options: Error - local_internal_options is not set')
         raise local_internal_configuration_not_set
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
 
-    logger.error('Configure Local Internal Options: DEBUG - Set local_internal_option to ' +
+    logger.debug('Configure Local Internal Options: DEBUG - Set local_internal_option to ' +
                  f"{str(local_internal_options)}")
     conf.set_local_internal_options_dict(local_internal_options)
 
     yield
 
-    logger.error('Configure Local Internal Options: DEBUG - Restore local_internal_option to ' +
+    logger.debug('Configure Local Internal Options: DEBUG - Restore local_internal_option to ' +
                  f"{str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
