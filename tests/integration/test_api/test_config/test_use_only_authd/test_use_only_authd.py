@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+description:
+    These tests will check if the `use_only_authd` setting of the API is working properly.
+    This setting allows forcing the use of `authd` daemon when registering and removing agents.
+
+tiers:
+    - 0
+
+component:
+    manager
+
+path:
+    tests/integration/test_api/test_config/test_use_only_authd/
+
+daemons:
+    - authd
+    - apid
+    - analysisd
+    - syscheckd
+    - wazuh-db
+
+os_support:
+    - linux, centos 6
+    - linux, centos 7
+    - linux, centos 8
+    - linux, rhel6
+    - linux, rhel7
+    - linux, rhel8
+    - linux, amazon linux 1
+    - linux, amazon linux 2
+    - linux, debian buster
+    - linux, debian stretch
+    - linux, debian wheezy
+    - linux, ubuntu bionic
+    - linux, ubuntu xenial
+    - linux, ubuntu trusty
+    - linux, arch linux
+
+coverage:
+
+pytest_args:
+
+tags:
+    - api
+'''
 import os
 import random
 import time
@@ -51,16 +102,58 @@ def extra_configuration_after_yield():
 ])
 def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
                    restart_api, wait_for_start, get_api_details):
-    """Check if use_only_authd forces the use of wazuh-authd when adding an agent.
+    '''
+    description:
+        Check if `use_only_authd` forces the use of `authd` daemon when adding an agent.
+        Verify that when `use_only_authd` option is enabled, if the `authd` daemon
+        is not active, an error is returned.
 
-    Verify that when 'use_only_authd' option is enabled, if the wazuh-authd service
-    is not active, an error is returned.
+    wazuh_min_version:
+        3.13
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that `status code` 400 (bad request) is received when the request to add the testing agent is made
+          if the `use_only_authd` setting is enabled but the `authd` daemon is not active.
+        - Verify that `status code` 200 (ok) is received when the request to add the testing agent is made
+          if the `use_only_authd` setting is enabled and the `authd` daemon is active.
+        - Verify that `status code` 200 (ok) is received when the request to delete the testing agent is made.
+
+    test_input:
+        A test case is contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    logging:
+        - api.log:
+            - Requests made to the API should be logged.
+
+    tags:
+
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # API variables and random data for the request
@@ -96,16 +189,58 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
 ])
 def test_insert_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
-    """Check if use_only_authd forces the use of wazuh-authd when inserting an agent.
+    '''
+    description:
+        Check if `use_only_authd` forces the use of `authd` daemon when inserting an agent.
+        Verify that when `use_only_authd` option is enabled, if the `authd` daemon
+        is not active, an error is returned.
 
-    Verify that when 'use_only_authd' option is enabled, if the wazuh-authd service
-    is not active, an error is returned.
+    wazuh_min_version:
+        3.13
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that `status code` 400 (bad request) is received when the request to inserting the testing agent
+          is made if the `use_only_authd` setting is enabled but the `authd` daemon is not active.
+        - Verify that `status code` 200 (ok) is received when the request to quickly inserting the testing agent
+          is made if the `use_only_authd` setting is enabled and the `authd` daemon is active.
+        - Verify that `status code` 200 (ok) is received when the request to delete the testing agent is made.
+
+    test_input:
+        A test case is contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    logging:
+        - api.log:
+            - Requests made to the API should be logged.
+
+    tags:
+
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # API variables and random data for the request
@@ -141,16 +276,58 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
 ])
 def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_environment,
                             restart_api, wait_for_start, get_api_details):
-    """Check if use_only_authd forces the use of wazuh-authd when quick inserting an agent.
+    '''
+    description:
+        Check if `use_only_authd` forces the use of `authd` daemon when quickly inserting an agent.
+        Verify that when `use_only_authd` option is enabled, if the `authd` daemon
+        is not active, an error is returned.
 
-    Verify that when 'use_only_authd' option is enabled, if the wazuh-authd service
-    is not active, an error is returned.
+    wazuh_min_version:
+        3.13
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that `status code` 400 (bad request) is received when the request to quickly inserting
+          the testing agent is made if the `use_only_authd` setting is enabled but the `authd` daemon is not active.
+        - Verify that `status code` 200 (ok) is received when the request to quickly inserting
+          the testing agent is made if the `use_only_authd` setting is enabled and the `authd` daemon is active.
+        - Verify that `status code` 200 (ok) is received when the request to delete the testing agent is made.
+
+    test_input:
+        A test case is contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    logging:
+        - api.log:
+            - Requests made to the API should be logged.
+
+    tags:
+
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # API variables
@@ -182,17 +359,61 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
 ])
 def test_delete_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
-    """Check if use_only_authd forces the use of wazuh-authd when deleting an agent.
+    '''
+    description:
+        Check if `use_only_authd` forces the use of `authd` daemon when deleting an agent.
+        Verify that when `use_only_authd` option is enabled, if the `authd` daemon
+        is not active, an error is returned. In this test, `authd` daemon is activated
+        in order to create an agent before it can be deleted.
 
-    Verify that when 'use_only_authd' option is enabled, if the wazuh-authd service
-    is not active, an error is returned. In this test, wazuh-authd is activated in order
-    to create an agent before it can be deleted.
+    wazuh_min_version:
+        3.13
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that `status code` 200 (ok) is received when the request to insert the testing agent is made.
+        - Verify the response received contains the field `total_affected_items` field set to 1
+          when the request to delete the testing agent is made if the `use_only_authd` setting
+          is disabled and the `authd` daemon is active.
+        - Verify the response received contains the field `failed_items` with an error value of 1726
+          when the request to delete the testing agent is made if the `use_only_authd` setting
+          is enabled and the `authd` daemon is stopped.
+
+    test_input:
+        A test case is contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    logging:
+        - api.log:
+            - Requests made to the API should be logged.
+
+    tags:
+
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     use_only_authd = get_configuration['configuration']['use_only_authd']
     api_details = get_api_details()
@@ -205,8 +426,8 @@ def test_delete_agent(tags_to_apply, get_configuration, configure_api_environmen
     # Create an agent to delete (we need wazuh-authd daemon running if use_only_authd in the configuration)
     post_url = api_details['base_url'] + f'/insert/quick?agent_name={token_hex(16)}'
     post_response = requests.post(post_url, headers=api_details['auth_headers'], verify=False)
-    assert post_response.status_code == 200, 'Status code expected after quick inserting agent was 200. Full response: ' \
-                                             f'{post_response.text}'
+    assert post_response.status_code == 200, 'Status code expected after quick inserting agent was 200.' \
+                                             f' Full response: {post_response.text}'
 
     if use_only_authd:
         control_service('stop', daemon='wazuh-authd')
@@ -215,7 +436,7 @@ def test_delete_agent(tags_to_apply, get_configuration, configure_api_environmen
     # It is necessary to wait a bit after adding the agent before deleting or querying it.
     time.sleep(1)
     delete_url = api_details['base_url'] + \
-                 f"?agents_list={post_response.json()['data']['id']}&purge=true&status=&older_than=0s&status=all"
+        f"?agents_list={post_response.json()['data']['id']}&purge=true&status=&older_than=0s&status=all"
     delete_response = requests.delete(delete_url, headers=api_details['auth_headers'], verify=False).json()
 
     # Assert if an error code was returned when wazuh-authd is disabled and use_only_authd enabled.
