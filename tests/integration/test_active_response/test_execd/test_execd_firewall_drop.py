@@ -14,7 +14,6 @@ category:
     integration
 os_platform:
     - linux
-    - windows
 os_vendor:
     - redhat
     - debian
@@ -22,7 +21,6 @@ os_vendor:
     - alas
     - arch-linux
     - centos
-    - windows
 os_version:
     - centos6
     - centos7
@@ -38,12 +36,6 @@ os_version:
     - trusty
     - amazon-linux-1
     - amazon-linux-2
-    - 7
-    - 8
-    - 10
-    - server-2003
-    - server-2012
-    - server-2016
 tiers:
     - 0
 tags:
