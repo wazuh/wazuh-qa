@@ -29,13 +29,17 @@
 -
   name: "Invalid Agent address CIDR"
   description: "Check an invalid CIDR agent_address in auto enrollment configuration"
+  skips: "agent-auth"
   configuration:
     agent_address: "192.168.0.10/100"
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.10/100'."
-  #Known Issue: Invalid CIDR is not checked. Skiped
-  skips:
-    - agent-auth
-    - wazuh-agentd
+-
+  name: "Invalid Agent address CIDR"
+  description: "Check an invalid CIDR agent_address in auto enrollment configuration"
+  skips: "wazuh-agentd"
+  configuration:
+    agent_address: "192.168.0.10/100"
+  expected_error: "ERROR: Invalid IP address provided for sender IP."
 -
   name: "Invalid Agent address"
   description: "Check an invalid agent_address in auto enrollment configuration"
@@ -44,10 +48,10 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
-  #Known Issue: Invalid adress is not checked. Skiped
-  skips:
-    - agent-auth
-    - wazuh-agentd
+  #Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965
+  expected_fail: "yes"
+  message:
+    response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -
   name: "Valid manager address"
   description: "Check a valid manager_address configuration"

@@ -277,19 +277,6 @@ def set_file_owner_and_group(file_path, owner, group):
         os.chown(file_path, uid, gid)
 
 
-<<<<<<< HEAD
-def count_file_lines(filepath):
-    """Count number of lines of a specified file.
-
-    Args:
-        filepath (str): Absolute path of the file.
-    
-    Returns:
-        Integer: Number of lines of the file.
-    """
-    with open(filepath, "r") as file:
-        return sum(1 for line in file if line.strip())
-=======
 def load_tests(path):
     """Loads a yaml file from a path.
 
@@ -301,4 +288,3 @@ def load_tests(path):
     """
     with open(path) as f:
         return yaml.safe_load(f)
->>>>>>> Moving load_tests to file.py

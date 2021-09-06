@@ -5,16 +5,20 @@ import yaml
 import pytest
 import subprocess
 import ssl
+import time
 
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
+from wazuh_testing.agent import AgentAuthParser
+from wazuh_testing.tools.file import load_tests
+
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
+tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 
 # Default data
 
@@ -42,7 +46,6 @@ SERVER_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'manager.pem')
 AGENT_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'agent.key')
 AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
 AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
-AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
 AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else \
     os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
@@ -64,25 +67,6 @@ def parse_configuration_string(configuration):
         if isinstance(value, str):
             configuration[key] = value.format(**CONFIG_PATHS)
 
-
-# Test cases
-
-def load_tests(path):
-    """ Loads a yaml file from a path.
-    Args:
-        path (str): Location of the test to be loaded.
-    Returns:
-        yaml structure: Loaded test.
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
-tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
-
-CURRENT_TEST_CASE = {}
-
-
 @pytest.mark.parametrize('test_case', [case for case in tests])
 @pytest.fixture(scope="function")
 def set_test_case(test_case):
@@ -95,46 +79,6 @@ def set_test_case(test_case):
 
 
 # Agent auth launcher
-class AgentAuthParser:
-    """Creates the right invoke command to call agent-auth with all the different configurations"""
-    def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
-        self._command = []
-        if sudo:
-            self._command.append('sudo')
-        self._command += [BINARY_PATH]
-        if server_address:
-            self._command += ['-m', server_address]
-
-    def get_command(self):
-        return self._command
-
-    def add_agent_name(self, agent_name):
-        self._command += ['-A', agent_name]
-
-    def add_agent_adress(self, agent_adress):
-        self._command += ['-I', agent_adress]
-
-    def add_auto_negotiation(self):
-        self._command += ['-a']
-
-    def add_ciphers(self, ciphers):
-        self._command += ['-c', ciphers]
-
-    def add_agent_certificates(self, key, cert):
-        self._command += ['-k', key, '-x', cert]
-
-    def add_manager_ca(self, ca_cert):
-        self._command += ['-v', ca_cert]
-
-    def use_source_ip(self):
-        self._command += ['-i']
-
-    def add_password(self, password):
-        self._command += ['-P', password]
-
-    def add_groups(self, group_string):
-        self._command += ['-G', group_string]
-
 
 def launch_agent_auth(configuration):
     """Launches agent-auth based on a specific dictionary configuration
@@ -168,27 +112,6 @@ def launch_agent_auth(configuration):
     out.communicate()
 
 
-# Utils
-
-def wait_until(x, log_str):
-    """Callback function to wait for a message in a log file.
-
-    Args:
-        x (str): String containing message.
-        log_str (str): Log file string.
-    """
-    return x if log_str in x else None
-
-
-def clean_log_file():
-    """Completely clean the Wazuh log file"""
-    try:
-        client_file = open(LOG_FILE_PATH, 'w')
-        client_file.close()
-    except IOError as exception:
-        raise
-
-
 # Socket listener
 LAST_MESSAGE = None
 
@@ -209,15 +132,14 @@ def receiver_callback(received):
     return response
 
 
-def get_last_message():
+def get_last_message(timeout):
     """Returns the last received message in the listener socket. Waits 20 seconds of timeout.
     Returns:
         LAST_MESSAGE (str): Decoded data received in the socket.
         None if the response never arrived.
     """
     global LAST_MESSAGE
-    import time
-    timeout = time.time() + 20  # 20 seconds timeout
+    timeout = time.time() + timeout
     while not LAST_MESSAGE and time.time() <= timeout:
         pass
     return LAST_MESSAGE
@@ -270,7 +192,6 @@ def get_temp_yaml(param):
             if elem == 'password':
                 continue
             enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
-        print(enroll_conf)
         temp_conf_file = yaml.safe_load(conf_file)
         temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
     with open(temp, 'w') as temp_file:
@@ -305,15 +226,10 @@ def set_keys(test_case):
         test_case (dict): Current test case.
     """
     keys = test_case.get('pre_existent_keys', [])
-    if not keys:
-        return
-    # Write keys
-    try:
+    if keys:
         with open(CLIENT_KEYS_PATH, "w") as keys_file:
             for key in keys:
                 keys_file.writelines(key)
-    except IOError:
-        raise
 
 
 # Password file
@@ -325,9 +241,6 @@ def set_pass(test_case):
     Args:
         test_case (dict): Current test case.
     """
-    try:
-        with open(AUTHDPASS_PATH, "w") as f:
-            if 'password_file_content' in test_case:
-                f.write(test_case['password_file_content'])
-    except IOError:
-        raise
+    with open(AUTHDPASS_PATH, "w") as f:
+        if 'password_file_content' in test_case:
+            f.write(test_case['password_file_content'])
