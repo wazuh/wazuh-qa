@@ -2,7 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import time
+from time import sleep
 
 import pytest
 
@@ -20,15 +20,11 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_request_agent_info.yaml')
 
 parameters = [
-    {'PROTOCOL': 'udp,tcp'},
-    {'PROTOCOL': 'tcp'},
-    {'PROTOCOL': 'udp'},
+    {'PROTOCOL': 'udp,tcp'}
 ]
 
 metadata = [
-    {'PROTOCOL': 'udp,tcp'},
-    {'PROTOCOL': 'tcp'},
-    {'PROTOCOL': 'udp'},
+    {'PROTOCOL': 'udp,tcp'}
 ]
 
 # test cases
@@ -75,6 +71,8 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
 
         if "disconnected" not in command_request:
             sender, injector = ag.connect(agent, manager_address, protocol)
+        else:
+            sleep(10) # Give time for the remoted socket to be ready.
 
         msg_request = f'{agent.id} {command_request}'
 

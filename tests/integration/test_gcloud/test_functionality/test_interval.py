@@ -21,20 +21,6 @@ pytestmark = pytest.mark.tier(level=0)
 
 # variables
 
-if global_parameters.gcp_project_id is not None:
-    project_id = global_parameters.gcp_project_id
-else:
-    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
-
-if global_parameters.gcp_subscription_name is not None:
-    subscription_name = global_parameters.gcp_subscription_name
-else:
-    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
-
-if global_parameters.gcp_credentials_file is not None:
-    credentials_file = global_parameters.gcp_credentials_file
-else:
-    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 interval = ['30s', '1m']
 pull_on_start = 'yes'
 max_messages = 100
@@ -47,8 +33,9 @@ force_restart_after_restoring = True
 # configurations
 
 monitoring_modes = ['scheduled']
-conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
-               'CREDENTIALS_FILE': credentials_file, 'PULL_ON_START': pull_on_start,
+conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
+               'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
+               'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'PULL_ON_START': pull_on_start,
                'MAX_MESSAGES': max_messages, 'LOGGING': logging, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
