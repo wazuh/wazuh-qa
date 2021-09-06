@@ -57,6 +57,12 @@ def set_qactl_logging(qactl_configuration):
 
 
 def validate_parameters(parameters):
+    if parameters.config and parameters.run_test:
+        raise ValueError('The --run parameter is incompatible with --config. --run will autogenerate the configuration')
+
+    if parameters.dry_run and parameters.run_test is None:
+        raise ValueError('The --dry-run parameter can only be used with --run')
+
     if parameters.version is not None:
         version = parameters.version
 
@@ -84,6 +90,10 @@ def main():
     parser.add_argument('-p', '--persistent', action='store_true',
                         help='Persistent instance mode. Do not destroy the instances once the process has finished.')
 
+    parser.add_argument('-d', '--dry-run', action='store_true',
+                        help='Config generation mode. The test data will be processed and the configuration will be ' \
+                             'generated without running anything.')
+
     parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
                         help='Independent run method. Specify a test or a list of tests to be run')
 
@@ -99,6 +109,9 @@ def main():
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
         config_generator.run()
         configuration_file = config_generator.config_file_path
+
+        if arguments.dry_run:
+            return 0
     else:
         configuration_file = arguments.config
 
