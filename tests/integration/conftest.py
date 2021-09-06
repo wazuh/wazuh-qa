@@ -709,7 +709,7 @@ def file_monitoring(request):
     else:
         file_to_monitor = LOG_FILE_PATH
 
-    logger.debug(f"File monitoring - DEBUG - Initializing file to monitor to {file_to_monitor}")
+    logger.debug(f"Initializing file to monitor to {file_to_monitor}")
 
     file_monitor = FileMonitor(file_to_monitor)
     setattr(request.module, 'log_monitor', file_monitor)
@@ -717,4 +717,4 @@ def file_monitoring(request):
     yield
 
     truncate_file(file_to_monitor)
-    logger.debug(f"File monitoring - DEBUG - Trucanted {file_to_monitor}")
+    logger.debug(f"Trucanted {file_to_monitor}")
