@@ -14,6 +14,7 @@ from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
 from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfiguration
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 
@@ -22,7 +23,7 @@ DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
 
-qactl_logger = None
+qactl_logger = Logging(QACTL_LOGGER, 'DEBUG', True)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 launched = {
     'instance_handler': False,
@@ -32,13 +33,16 @@ launched = {
 
 
 def read_configuration_data(configuration_file_path):
+    qactl_logger.debug('Reading configuration_data')
     with open(configuration_file_path) as config_file_fd:
         configuration_data = yaml.safe_load(config_file_fd)
+    qactl_logger.debug('The configuration data has been read successfully')
 
     return configuration_data
 
 
 def validate_configuration_data(configuration):
+    qactl_logger.debug('Validating configuration schema')
     data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
     schema_file = os.path.join(data_path, 'qactl_conf_validator_schema.json')
 
@@ -46,6 +50,8 @@ def validate_configuration_data(configuration):
         schema = json.load(f)
 
     validate(instance=configuration, schema=schema)
+
+    qactl_logger.debug('Schema validation has passed successfully')
 
 
 def set_qactl_logging(qactl_configuration):
@@ -57,25 +63,29 @@ def set_qactl_logging(qactl_configuration):
 
 
 def validate_parameters(parameters):
+    qactl_logger.debug('Validating input parameters')
     if parameters.config and parameters.run_test:
-        raise ValueError('The --run parameter is incompatible with --config. --run will autogenerate the configuration')
+        raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
+                           'configuration', qactl_logger.critical)
 
     if parameters.dry_run and parameters.run_test is None:
-        raise ValueError('The --dry-run parameter can only be used with --run')
+        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_logger.critical)
 
     if parameters.version is not None:
         version = parameters.version
 
         if len((parameters.version).split('.')) != 3:
-            raise ValueError(f"Version parameter has to be in format x.y.z. You entered {version}")
+            raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}")
 
         if not version_is_released(parameters.version):
-            raise ValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.")
+            raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.")
 
         short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
 
         if not branch_exist(short_version, WAZUH_QA_REPO):
-            raise ValueError(f"{short_version} branch does not exist in Wazuh QA repository.")
+            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.")
+
+    qactl_logger.debug('Input parameters validation has passed successfully')
 
 
 def main():
@@ -91,7 +101,7 @@ def main():
                         help='Persistent instance mode. Do not destroy the instances once the process has finished.')
 
     parser.add_argument('-d', '--dry-run', action='store_true',
-                        help='Config generation mode. The test data will be processed and the configuration will be ' \
+                        help='Config generation mode. The test data will be processed and the configuration will be '
                              'generated without running anything.')
 
     parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
@@ -106,18 +116,21 @@ def main():
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
+        qactl_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
         config_generator.run()
         configuration_file = config_generator.config_file_path
+        qactl_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
 
         if arguments.dry_run:
+            qactl_logger.info(f"Run as dry-run mode. Configuration file saved in {config_generator.config_file_path}")
             return 0
     else:
         configuration_file = arguments.config
 
     # Check configuration file path exists
-    assert os.path.exists(configuration_file), f"{configuration_file} file doesn't exists or could not be "\
-                                                'generated correctly'
+    if not os.path.exists(configuration_file):
+        raise QAValueError(f"{configuration_file} file doesn't exists or could not be generated correctly")
 
     # Read configuration data
     configuration_data = read_configuration_data(configuration_file)
