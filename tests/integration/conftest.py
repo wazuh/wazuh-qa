@@ -629,47 +629,47 @@ def daemons_handler(get_configuration, request):
         if 'daemons' in daemons_handler_configuration and not wazuh_control:
             daemons = daemons_handler_configuration['daemons']
             if not daemons or (type(daemons) == list and len(daemons) == 0):
-                logger.error('Daemons Handler: Daemons list is not set')
+                logger.error('Daemons list is not set')
                 raise ValueError
 
         if 'wazuh_control' in daemons_handler_configuration:
-            logger.debug(f"Daemons Handler: Wazuh control set to {daemons_handler_configuration['wazuh_control']}")
+            logger.debug(f"Wazuh control set to {daemons_handler_configuration['wazuh_control']}")
             wazuh_control = daemons_handler_configuration['wazuh_control']
 
         if 'ignore_errors' in daemons_handler_configuration:
-            logger.debug(f"Daemons Handler: Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+            logger.debug(f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
             ignore_errors = daemons_handler_configuration['ignore_errors']
 
     except AttributeError as daemon_configuration_not_set:
-        logger.error('Daemons Handler: Error - daemons_handler_configuration is not set')
+        logger.error('daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
     try:
         if wazuh_control:
-            logger.debug('Daemons Handler: Debug - Restarting wazuh using wazuh-control')
+            logger.debug('Restarting wazuh using wazuh-control')
             # Restart daemon instead of starting due to legacy used fixture in the test suite.
             control_service('restart')
         else:
             for daemon in daemons:
-                logger.debug(f"Daemons Handler: Restarting {daemon}")
+                logger.debug(f"Restarting {daemon}")
                 # Restart daemon instead of starting due to legacy used fixture in the test suite.
                 control_service('restart', daemon=daemon)
 
     except ValueError as value_error:
-        logger.error(f"Daemons Handler: Error - {str(value_error)}")
+        logger.error(f"{str(value_error)}")
         if not ignore_errors:
             raise value_error
     except subprocess.CalledProcessError as called_process_error:
-        logger.error(f"Daemons Handler: Error - {str(called_process_error)}")
+        logger.error(f"{str(called_process_error)}")
         if not ignore_errors:
             raise called_process_error
 
     yield
 
     if wazuh_control:
-        logger.debug('Daemons Handler: Debug - Stopping wazuh using wazuh-control')
+        logger.debug('Stopping wazuh using wazuh-control')
         control_service('stop')
     else:
         for daemon in daemons:
-            logger.debug(f"Daemons Handler: Stopping {daemon}")
+            logger.debug(f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
