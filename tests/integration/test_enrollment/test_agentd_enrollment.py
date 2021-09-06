@@ -23,19 +23,28 @@ metadata:
 '''
 
 import pytest
-import ssl
-import yaml
-from wazuh_testing.tools.monitoring import ManInTheMiddle
+import os
+
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import load_tests, truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from conftest import *
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
+configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
+AGENTD_TIMEOUT = 5
+
 # Fixtures
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
@@ -54,31 +63,34 @@ def test_agentd_enrollment(set_test_case, configure_socket_listener, configure_e
             - The enrollment message is generated as expected when the configuration is valid.
             - The error log is generated as expected when the configuration is invalid.
     """
-
-    if 'wazuh-agentd' in test_case.get("skips", []):
+    if 'wazuh-agentd' in test_case.get('skips', []):
         pytest.skip("This test does not apply to agentd")
 
     control_service('stop', daemon='wazuh-agentd')
+
     override_wazuh_conf(test_case.get('configuration', {}), __name__)
 
     if 'expected_error' in test_case:
-        clean_log_file()
+        truncate_file(LOG_FILE_PATH)
         try:
             control_service('start', daemon='wazuh-agentd')
         except Exception:
             pass
-        try:
-            log_monitor = FileMonitor(LOG_FILE_PATH)
-            log_monitor.start(timeout=120, callback=lambda x: wait_until(x, test_case.get('expected_error')))
-        except TimeoutError as err:
-            assert False, f'Expected error log doesn´t occurred'
+
+        log_monitor = FileMonitor(LOG_FILE_PATH)
+        if test_case.get('expected_fail'):
+            with pytest.raises(TimeoutError):
+                log_monitor.start(timeout=AGENTD_TIMEOUT,
+                                  callback=make_callback(test_case.get('expected_error'), prefix='.*', escape=True))
+        else:
+            log_monitor.start(timeout=AGENTD_TIMEOUT,
+                              callback=make_callback(test_case.get('expected_error'), prefix='.*', escape=True),
+                              error_message='Expected error log does not occured')
 
     else:
         clear_last_message()
         control_service('start', daemon='wazuh-agentd')
-        result = get_last_message()
-        assert result is not None, "Enrollment request message never arrived"
+        result = get_last_message(AGENTD_TIMEOUT)
+        assert result is not None, 'Enrollment request message never arrived'
         assert result == test_case['message']['expected'].format(**DEFAULT_VALUES),  \
             'Expected enrollment request message does not match'
-
-    return

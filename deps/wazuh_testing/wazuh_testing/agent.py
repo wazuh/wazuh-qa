@@ -51,7 +51,7 @@ CONFIG_PATHS = {
 
 
 class AgentAuthParser:
-
+    """Creates the right invoke command to call agent-auth with all the different configurations"""
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
         self._command = []
         if sudo:
@@ -84,12 +84,8 @@ class AgentAuthParser:
     def use_source_ip(self):
         self._command += ['-i']
 
-    def add_password(self, password=None, isFile=False, path=None):
-        with open(path, 'w') as f:
-            if isFile and password:
-                f.write(password)
-            elif password:
-                self._command += ['-P', password]
+    def add_password(self, password):
+        self._command += ['-P', password]
 
     def add_groups(self, group_string):
         self._command += ['-G', group_string]

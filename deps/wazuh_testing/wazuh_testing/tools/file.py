@@ -12,6 +12,7 @@ import zipfile
 import stat
 import shutil
 import socket
+import yaml
 
 from os.path import exists
 
@@ -274,3 +275,16 @@ def set_file_owner_and_group(file_path, owner, group):
         gid = getgrnam(group).gr_gid
 
         os.chown(file_path, uid, gid)
+
+
+def load_tests(path):
+    """Loads a yaml file from a path.
+
+    Args:
+        path (string): Yaml full path.
+
+    Returns:
+       dict: Yaml structure.
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
