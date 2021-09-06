@@ -29,9 +29,9 @@ def main():
     args = parser.parse_args()
 
     if args.debug_level:
-        start_logging("logs", logging.DEBUG)
+        start_logging("wazuh_testing/qa_docs/logs", logging.DEBUG)
     else:
-        start_logging("logs")
+        start_logging("wazuh_testing/qa_docs/logs")
 
     if args.version:
         print(f"DocGenerator v{VERSION}")

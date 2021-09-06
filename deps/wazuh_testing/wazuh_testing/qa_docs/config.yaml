@@ -1,6 +1,6 @@
 Project path: "../../tests/integration"
 
-Output path: "output"
+Output path: "wazuh_testing/qa_docs/output"
 
 Include paths:
   - "../../tests/integration/test_wazuh_db"
