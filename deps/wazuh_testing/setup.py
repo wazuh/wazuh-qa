@@ -34,7 +34,8 @@ setup(name='wazuh_testing',
             'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
             'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
             'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
-            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main'
+            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
+            'qa-docs=wazuh_testing.scripts.qa_docs:main'
         ],
       },
       include_package_data=True,

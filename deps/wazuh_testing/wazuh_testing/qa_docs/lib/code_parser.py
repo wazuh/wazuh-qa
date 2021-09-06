@@ -11,8 +11,8 @@ import ast
 import os
 import re
 import yaml
-from lib.PytestWrap import PytestWrap
-from lib.Utils import remove_inexistent
+from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
+from wazuh_testing.qa_docs.lib.utils import remove_inexistent
 import warnings
 import logging
 
