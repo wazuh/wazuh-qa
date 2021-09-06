@@ -257,7 +257,8 @@ class QACTLConfigGenerator:
             if not ip_is_already_used(host_ip, self.qactl_used_ips_file):
                 break
             if _ip == 255:
-                raise QAValueError(f"Could not find an IP available in {HOST_NETWORK}")
+                raise QAValueError(f"Could not find an IP available in {HOST_NETWORK}",
+                                   QACTLConfigGenerator.LOGGER.error)
 
         # Write new used IP in used IPs file
         with open(self.qactl_used_ips_file, 'a') as used_ips_file:

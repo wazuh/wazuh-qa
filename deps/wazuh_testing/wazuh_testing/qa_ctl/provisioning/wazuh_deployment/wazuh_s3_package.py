@@ -93,7 +93,7 @@ class WazuhS3Package(WazuhPackage):
                                                 self.revision, self.system, architecture)
         else:
             raise QAValueError(f"Could not get Wazuh Package S3 URL from {hosts} host. s3_package_url or "
-                               '(version, repository, sistem, revision) has None value')
+                               '(version, repository, sistem, revision) has None value', WazuhS3Package.LOGGER.error)
 
         package_name = Path(s3_package_url).name
         WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")

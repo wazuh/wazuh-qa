@@ -66,24 +66,26 @@ def validate_parameters(parameters):
     qactl_logger.debug('Validating input parameters')
     if parameters.config and parameters.run_test:
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
-                           'configuration', qactl_logger.critical)
+                           'configuration', qactl_logger.error)
 
     if parameters.dry_run and parameters.run_test is None:
-        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_logger.critical)
+        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_logger.error)
 
     if parameters.version is not None:
         version = parameters.version
 
         if len((parameters.version).split('.')) != 3:
-            raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}")
+            raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}",
+                               qactl_logger.error)
 
         if not version_is_released(parameters.version):
-            raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.")
+            raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
+                               qactl_logger.error)
 
         short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
 
         if not branch_exist(short_version, WAZUH_QA_REPO):
-            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.")
+            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.", qactl_logger.error)
 
     qactl_logger.debug('Input parameters validation has passed successfully')
 
@@ -130,7 +132,8 @@ def main():
 
     # Check configuration file path exists
     if not os.path.exists(configuration_file):
-        raise QAValueError(f"{configuration_file} file doesn't exists or could not be generated correctly")
+        raise QAValueError(f"{configuration_file} file doesn't exists or could not be generated correctly",
+                           qactl_logger.error)
 
     # Read configuration data
     configuration_data = read_configuration_data(configuration_file)
