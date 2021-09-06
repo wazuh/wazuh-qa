@@ -620,12 +620,10 @@ def configure_local_internal_options_module(request):
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
 
-    logger.debug('Set local_internal_option to ' +
-                 f"{str(local_internal_options)}")
+    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
     conf.set_local_internal_options_dict(local_internal_options)
 
     yield
 
-    logger.debug('Restore local_internal_option to ' +
-                 f"{str(backup_local_internal_options)}")
+    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
