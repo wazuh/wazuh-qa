@@ -54,7 +54,7 @@ class IndexData:
         brief: Opens every file found in the path and appends the content into a list.
         """
         for file in files:
-            with open(os.path.join(self.path, file)) as f:
+            with open(file) as f:
                 lines = json.load(f)
                 self.output.append(lines)
 

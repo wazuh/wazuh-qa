@@ -46,7 +46,7 @@ def main():
     elif args.launch_app:
         indexData = IndexData(args.launch_app, Config(CONFIG_PATH))
         indexData.run()
-        os.chdir("Search-UI")
+        os.chdir('wazuh_testing/qa_docs/Search-UI')
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:
         docs = DocGenerator(Config(CONFIG_PATH))
