@@ -227,10 +227,12 @@ def set_section_wazuh_conf(sections, template=None):
 
         Args:
             str_list (list or str): The content of the ossec.conf file in a list of str.
-            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</ossec_config>"
+            root_delimeter (str, optional: The expected string to identify when the first root element ends,
+            by default "</ossec_config>"
 
         Returns:
-            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.
+            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of
+            the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
@@ -277,7 +279,8 @@ def set_section_wazuh_conf(sections, template=None):
         Args:
             wazuh_conf (ElementTree): An ElementTree object with all the data of the ossec.conf
             section (str): Name of the tag or configuration section to search for. For example: vulnerability_detector
-            attributes (list\<dict\> ): List with section attributes. Needed to check if the section exists with all the searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
+            attributes (list of dict): List with section attributes. Needed to check if the section exists with all the
+            searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
         Returns:
             ElementTree: An ElementTree object with the section data found in ossec.conf. None if nothing was found.
         """
@@ -399,7 +402,8 @@ def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list 
     Args:
         yaml_file_path (str): Full path of the YAML file to be loaded.
         test_name (str): Name of the file which contains the test that will be executed.
-        params (list, optional) : List of dicts where each dict represents a replacement MATCH -\> REPLACEMENT. Default `None`
+        params (list, optional) : List of dicts where each dict represents a replacement
+        MATCH/REPLACEMENT. Default `None`
         metadata (list, optional): Custom metadata to be inserted in the configuration. Default `None`
 
     Returns:
@@ -439,7 +443,8 @@ def set_correct_prefix(configurations, new_prefix):
         new_prefix (str): Prefix to be inserted before every path.
 
     Returns:
-        configurations (list): List of configurations with the correct prefix added in the directories and ignore sections.
+        configurations (list): List of configurations with the correct prefix added in the directories and
+        ignore sections.
     """
 
     def inserter(path):
@@ -512,7 +517,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 def generate_syscheck_config():
     """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
-    Every configuration is ready to be applied in the tag \<directories\>.
+    Every configuration is ready to be applied in the tag directories.
     """
     check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
@@ -529,7 +534,7 @@ def generate_syscheck_config():
 def generate_syscheck_registry_config():
     """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
 
-    Every configuration is ready to be applied in the tag \<directories\>.
+    Every configuration is ready to be applied in the tag directories.
     """
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
                    'check_group', 'check_perm', 'check_mtime', 'check_type', 'report_changes']
@@ -592,7 +597,7 @@ def local_internal_options_to_dict(local_internal_options):
     Args:
         local_internal_options (List of str): A list containing local internal options.
     """
-    dict_local_internal_options= {}
+    dict_local_internal_options = {}
     no_comments_options = [line.strip() for line in local_internal_options
                            if not (line.startswith('#') or line == '\n')]
     for line in no_comments_options:
