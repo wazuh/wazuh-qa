@@ -17,7 +17,6 @@ from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
@@ -599,7 +598,7 @@ def create_file_structure_function(get_files_list):
     delete_file_structure(get_files_list)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.
 
