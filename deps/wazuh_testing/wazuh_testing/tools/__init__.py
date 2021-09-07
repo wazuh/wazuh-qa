@@ -103,8 +103,8 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 
-ANALYSISD_ANALISIS_SOCKET_PATH= os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
-ANALYSISD_QUEUE_SOCKET_PATH= os.path.join(QUEUE_SOCKETS_PATH, 'queue')
+ANALYSISD_ANALISIS_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
+ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
@@ -117,7 +117,7 @@ MODULESD_DOWNLOAD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'download')
 MODULESD_CONTROL_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'control')
 MODULESD_KREQUEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'krequest')
 MODULESD_C_INTERNAL_SOCKET_PATH = os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')
-ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH,'ar')
+ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH, 'ar')
 
 WAZUH_SOCKETS = {
     'wazuh-agentd': [],
@@ -146,3 +146,21 @@ WAZUH_OPTIONAL_SOCKETS = [
     MODULESD_KREQUEST_SOCKET_PATH,
     AUTHD_SOCKET_PATH
 ]
+
+DISABLE_MONITORD_ROTATE_LOG_OPTION = {'monitord.rotate_log': '0'}
+REMOTED_LOCAL_INTERNAL_OPTIONS = {'remoted.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+ANALYSISD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+AGENTD_LOCAL_INTERNAL_OPTIONS = {'agent.debug': '2', 'execd': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+FIM_LOCAL_INTERNAL_OPTIONS_MANAGER = {'syscheck.debug': '2',
+                                      'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+FIM_LOCAL_INTERNAL_OPTIONS_AGENT_UNIX = {'syscheck.debug': '2',
+                                         'agent.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+FIM_LOCAL_INTERNAL_OPTIONS_AGENT_WINDOWS = {'syscheck.debug': '2',
+                                            'windows.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+GCLOUD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2',
+                                 'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+LOGTEST_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}
+REMOTED_LOCAL_INTERNAL_OPTIONS = {'remoted.debug': '2', 'wazuh_database.interval': '2', 'wazuh_db.commit_time': '2',
+                                  'wazuh_db.commit_time_max': '3'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+VD_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
+WPK_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}
