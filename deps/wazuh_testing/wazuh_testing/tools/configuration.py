@@ -11,7 +11,7 @@ from typing import List, Any, Set
 
 import pytest
 import yaml
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
@@ -553,8 +553,11 @@ def get_local_internal_options_dict():
         configuration_options = local_internal_option_file.readlines()
         for configuration_option in configuration_options:
             if not configuration_option.startswith('#'):
-                option_name, option_value = configuration_option.split('=')
-                local_internal_option_dict[option_name] = option_value
+                try:
+                    option_name, option_value = configuration_option.split('=')
+                    local_internal_option_dict[option_name] = option_value
+                except ValueError:
+                    logger.error("Invalid local_internal_options value: {configuration_option}")
 
     return local_internal_option_dict
 
