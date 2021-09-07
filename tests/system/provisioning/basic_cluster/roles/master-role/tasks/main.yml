@@ -1,4 +1,8 @@
 ---
+- name: "Check and update debian repositories"
+  shell:
+    cmd: apt-get update --allow-releaseinfo-change
+
 - name: "Installing dependencies using apt"
   apt:
     pkg:
@@ -13,9 +17,9 @@
       - autoconf
       - libtool
       - sqlite3
-    force_apt_get: True
+    force_apt_get: yes
     state: present
-    update-cache: true
+    update_cache: yes
     cache_valid_time: 3600
 
 - name: "Clone wazuh repository"
