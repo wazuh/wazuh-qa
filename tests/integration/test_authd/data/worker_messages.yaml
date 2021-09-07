@@ -60,7 +60,7 @@
     port_input: "OSSEC A:'user_' IP:'192.0.0.0'"
     cluster_input: '{"daemon_name":"authd","message":{"arguments":{"name":"user_","ip":"192.0.0.0","force":0},"function":"add"}}'
     cluster_output: '{"error":9007,"message":"Duplicate IP"}'
-    port_output: "ERROR: Duplicate IP"
+    port_output: 'ERROR: Duplicate IP'
 
 - # Testing messages with agent's key hash
   name: 'Agent message with key hash 1'
