@@ -12,7 +12,7 @@ from typing import List, Any, Set
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -540,3 +540,32 @@ def generate_syscheck_registry_config():
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
         yield ' '.join([yn_str, tag_value])
+
+
+def get_local_internal_options_dict():
+    """Return the local internal options in a dictionary.
+
+    Returns:
+        dict: Local internal options.
+    """
+    local_internal_option_dict = {}
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
+        configuration_options = local_internal_option_file.readlines()
+        for configuration_option in configuration_options:
+            if not configuration_option.startswith('#'):
+                option_name, option_value = configuration_option.split('=')
+                local_internal_option_dict[option_name] = option_value
+
+    return local_internal_option_dict
+
+
+def set_local_internal_options_dict(dict_local_internal_options):
+    """Set the local internal options using a dictionary.
+
+    Args:
+        local_internal_options_dict (dict): A dictionary containing local internal options.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as local_internal_option_file:
+        for option_name, option_value in dict_local_internal_options.items():
+            local_internal_configuration_string = f"{str(option_name)}={str(option_value)}\n"
+            local_internal_option_file.write(local_internal_configuration_string)
