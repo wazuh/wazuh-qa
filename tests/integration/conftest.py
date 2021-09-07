@@ -632,7 +632,7 @@ def daemons_handler(get_configuration, request):
     The  `daemons_handler_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
             will be raised
-        wazuh_control (boolean): Configure to restart all wazuh services. Default `False`.
+        restart_all (boolean): Configure to restart all wazuh services. Default `False`.
         ignore_errors (boolean): Configure if errors in daemon handling should be ignored. This option is available
         in order to use this fixture along with invalid configuration. Default `False`
 
@@ -642,19 +642,19 @@ def daemons_handler(get_configuration, request):
     """
     daemons = []
     ignore_errors = False
-    wazuh_control = False
+    restart_all = False
 
     try:
         daemons_handler_configuration = getattr(request.module, 'daemons_handler_configuration')
-        if 'daemons' in daemons_handler_configuration and not wazuh_control:
+        if 'daemons' in daemons_handler_configuration and not restart_all:
             daemons = daemons_handler_configuration['daemons']
             if not daemons or (type(daemons) == list and len(daemons) == 0):
                 logger.error('Daemons list is not set')
                 raise ValueError
 
-        if 'wazuh_control' in daemons_handler_configuration:
-            logger.debug(f"Wazuh control set to {daemons_handler_configuration['wazuh_control']}")
-            wazuh_control = daemons_handler_configuration['wazuh_control']
+        if 'restart_all' in daemons_handler_configuration:
+            logger.debug(f"Wazuh control set to {daemons_handler_configuration['restart_all']}")
+            restart_all = daemons_handler_configuration['restart_all']
 
         if 'ignore_errors' in daemons_handler_configuration:
             logger.debug(f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
@@ -665,7 +665,7 @@ def daemons_handler(get_configuration, request):
         raise daemon_configuration_not_set
 
     try:
-        if wazuh_control:
+        if restart_all:
             logger.debug('Restarting wazuh using wazuh-control')
             # Restart daemon instead of starting due to legacy used fixture in the test suite.
             control_service('restart')
@@ -686,7 +686,7 @@ def daemons_handler(get_configuration, request):
 
     yield
 
-    if wazuh_control:
+    if restart_all:
         logger.debug('Stopping wazuh using wazuh-control')
         control_service('stop')
     else:
