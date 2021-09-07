@@ -1,7 +1,49 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+'''
+brief:
+    These tests will check if the active responses, which are executed by
+    the `wazuh-execd` program via scripts, run correctly.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+modules:
+    - active response
+daemons:
+    - wazuh-execd
+category:
+    integration
+os_platform:
+    - linux
+os_vendor:
+    - redhat
+    - debian
+    - ubuntu
+    - alas
+    - arch-linux
+    - centos
+os_version:
+    - centos6
+    - centos7
+    - centos8
+    - rhel6
+    - rhel7
+    - rhel8
+    - buster
+    - stretch
+    - wheezy
+    - bionic
+    - xenial
+    - trusty
+    - amazon-linux-1
+    - amazon-linux-2
+tiers:
+    - 0
+tags:
+    - log_monitor
+    - active_response
+component:
+    - agent
+'''
 import os
 import platform
 import pytest
@@ -144,16 +186,37 @@ def build_message(metadata, expected):
 
 def test_execd_restart(set_debug_mode, get_configuration, test_version,
                        configure_environment, start_agent, set_ar_conf_mode):
-    """Check if restart-wazuh Active Response is executed correctly.
-
-    Args:
-        set_debug_mode (fixture): Set execd daemon in debug mode.
-        get_configuration (fixture): Get configurations from the module.
-        test_version (fixture): Validate Wazuh version.
-        configure_environment (fixture): Configure a custom environment for testing.
-        start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
-        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
-    """
+    '''
+    description:
+        Check if `restart-wazuh` command of Active Response is executed correctly.
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Set execd daemon in debug mode.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - test_version:
+            type: fixture
+            brief: Validate Wazuh version.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - start_agent:
+            type: fixture
+            brief: Create Remoted and Authd simulators, register agent and start it.
+        - set_ar_conf_mode:
+            type: fixture
+            brief: Configure Active Responses used in tests.
+    wazuh_min_version:
+        4.2
+    behaviour:
+        - Verify that Active Response is enabled by looking in the `ossec.log` and `active-responses.log` files.
+        - Check that `restart-wazuh` works by verifying that it restarts the agent.
+    expected_behaviour:
+        - The active response `restart-wazuh` is received.
+        - The agent is ready to restart.
+    '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
