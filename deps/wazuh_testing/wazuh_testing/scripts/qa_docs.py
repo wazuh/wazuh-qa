@@ -34,7 +34,7 @@ def main():
         start_logging("wazuh_testing/qa_docs/logs")
 
     if args.version:
-        print(f"DocGenerator v{VERSION}")
+        print(f"qa-docs v{VERSION}")
     elif args.test_config:
         Config(CONFIG_PATH)
     elif args.sanity:
