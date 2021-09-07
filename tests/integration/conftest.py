@@ -578,26 +578,6 @@ def put_env_variables(get_configuration, request):
                 os.unsetenv(env[0])
 
 
-@pytest.fixture(scope="module")
-def create_file_structure_module(get_files_list):
-    """Module scope version of create_file_structure."""
-    create_file_structure(get_files_list)
-
-    yield
-
-    delete_file_structure(get_files_list)
-
-
-@pytest.fixture(scope="function")
-def create_file_structure_function(get_files_list):
-    """Function scope version of create_file_structure."""
-    create_file_structure(get_files_list)
-
-    yield
-
-    delete_file_structure(get_files_list)
-
-
 @pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.
