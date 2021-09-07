@@ -10,6 +10,7 @@ license: This program is free software; you can redistribute it
 import yaml
 import logging
 from enum import Enum
+import os
 
 
 class Config():
@@ -20,8 +21,7 @@ class Config():
     def __init__(self, *args):
         # If it is called using the config file
         self.mode = mode.DEFAULT
-        self.project_path = "../.."
-        self.documentation_path = ".."
+        self.project_path = args[1]
         self.include_paths = []
         self.include_regex = []
         self.group_files = ""
@@ -42,22 +42,18 @@ class Config():
         self._read_function_regex()
         self._read_output_fields()
         self._read_test_cases_field()
+        self._read_documentation_path()
+        self._read_include_paths()
+        self._read_include_regex()
+        self._read_group_files()
+        self._read_ignore_paths()
 
-        if len(args) == 1:
-            self._read_project_path()
-            self._read_documentation_path()
-            self._read_include_paths()
-            self._read_include_regex()
-            self._read_group_files()
-            self._read_ignore_paths()
-            
-        else:
+        if len(args) >= 3:
+            self.documentation_path = args[2]
+        if len(args) == 4:
             # It is called with a single test to parse
             self.mode = mode.SINGLE_TEST
-            # Search it within the whole directory
-            self.include_paths = "../../tests/"
-            self.test_name = args[1]
-            self.output_path = args[2]
+            self.test_name = args[3]
             self._read_test_info()
             self._read_module_info()
 
@@ -97,7 +93,9 @@ class Config():
         if not 'Include paths' in self._config_data:
             logging.error("Config include paths are empty")
             raise Exception("Config include paths are empty")
-        self.include_paths = self._config_data['Include paths']
+        include_paths = self._config_data['Include paths']
+        for path in include_paths:
+            self.include_paths.append(os.path.join(self.project_path, path))
 
     def _read_include_regex(self):
         """
@@ -131,7 +129,9 @@ class Config():
         brief: Reads from the config file all the paths to be excluded from the parsing.
         """
         if 'Ignore paths' in self._config_data:
-            self.ignore_paths = self._config_data['Ignore paths']
+            ignore_paths = self._config_data['Ignore paths']
+            for path in ignore_paths:
+                self.ignore_paths.append(os.path.join(self.project_path, path))
 
     def _read_module_fields(self):
         """

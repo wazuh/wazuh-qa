@@ -2,6 +2,32 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
+import glob
+
+package_data_list = ['data/agent.conf',
+                     'data/syscheck_event.json',
+                     'data/syscheck_event_windows.json',
+                     'data/mitre_event.json',
+                     'data/analysis_alert.json',
+                     'data/analysis_alert_windows.json',
+                     'data/state_integrity_analysis_schema.json',
+                     'data/gcp_event.json',
+                     'data/keepalives.txt',
+                     'data/rootcheck.txt',
+                     'data/syscollector.py',
+                     'data/winevt.py',
+                     'data/sslmanager.key',
+                     'data/sslmanager.cert',
+                     'tools/macos_log/log_generator.m',
+                     'qa_docs/config.yaml'
+                      ]
+
+directories = glob.glob('wazuh_testing/qa_docs/search_ui/')
+for directory in directories:
+    files = glob.glob(directory+'*')
+    for file in files:
+      package_data_list.append(file)
+
 setup(name='wazuh_testing',
       version='4.3.0',
       description='Wazuh testing utilities to help programmers automate tests',
@@ -10,23 +36,7 @@ setup(name='wazuh_testing',
       author_email='hello@wazuh.com',
       license='GPLv2',
       packages=find_packages(),
-      package_data={'wazuh_testing': ['data/agent.conf',
-                                      'data/syscheck_event.json',
-                                      'data/syscheck_event_windows.json',
-                                      'data/mitre_event.json',
-                                      'data/analysis_alert.json',
-                                      'data/analysis_alert_windows.json',
-                                      'data/state_integrity_analysis_schema.json',
-                                      'data/gcp_event.json',
-                                      'data/keepalives.txt',
-                                      'data/rootcheck.txt',
-                                      'data/syscollector.py',
-                                      'data/winevt.py',
-                                      'data/sslmanager.key',
-                                      'data/sslmanager.cert',
-                                      'tools/macos_log/log_generator.m'
-                                      ]
-                    },
+      package_data={'wazuh_testing': package_data_list},
       entry_points={
         'console_scripts': [
             'simulate-agents=wazuh_testing.scripts.simulate_agents:main',

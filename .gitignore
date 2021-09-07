@@ -53,10 +53,6 @@ deps/wazuh_testing/build/
 deps/wazuh_testing/dist/
 deps/wazuh_testing/wazuh_testing.egg-info/
 
-# DocGenerator default output path
-deps/wazuh_testing/wazuh_testing/qa_docs/output
-# DocGenerator logs path
-deps/wazuh_testing/wazuh_testing/qa_docs/logs
 # SearchUI package-lock
 deps/wazuh_testing/wazuh_testing/qa_docs/Search-UI/package-lock.json
 
