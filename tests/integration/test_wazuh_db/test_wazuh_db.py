@@ -167,7 +167,6 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
         test_case(list): List of test_case stages (dicts with input, output and stage keys).
     """
 
-    import pdb; pdb.set_trace()
     for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
@@ -212,20 +211,6 @@ def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sock
             match = (expected_output == response)
         assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
             .format(index + 1, stage['stage'], expected_output, response)
-
-
-def test_wazuh_db_create_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment,
-                               connect_to_sockets_module):
-    """Check that Wazuh DB creates the agent database when a query with a new agent ID is sent"""
-    test = {"name": "Create agent",
-            "description": "Wazuh DB creates automatically the agent's database the first time a query with a new agent"
-                           " ID reaches it. Once the database is created, the query is processed as expected.",
-            "test_case": [{"input": "agent 999 syscheck integrity_check_left",
-                           "output": "err Invalid FIM query syntax, near 'integrity_check_left'",
-                           "stage": "Syscheck - Agent does not exits yet"}]}
-    test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment,
-                                 connect_to_sockets_module, insert_agents_test, test['test_case'])
-    assert os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', "999.db"))
 
 
 def test_wazuh_db_chunks(restart_wazuh, clean_registered_agents, configure_sockets_environment,
