@@ -552,12 +552,13 @@ def get_local_internal_options_dict():
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
         configuration_options = local_internal_option_file.readlines()
         for configuration_option in configuration_options:
-            if not configuration_option.startswith('#'):
+            if not configuration_option.startswith('#') and not configuration_option == '\n':
                 try:
                     option_name, option_value = configuration_option.split('=')
                     local_internal_option_dict[option_name] = option_value
-                except ValueError:
+                except ValueError as invalid_option:
                     logger.error("Invalid local_internal_options value: {configuration_option}")
+                    raise invalid_option
 
     return local_internal_option_dict
 
