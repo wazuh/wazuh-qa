@@ -306,7 +306,7 @@ def duplicate_ip_agent_delete_test(server):
 
 
 def duplicate_name_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated Name.
+    """Register a first agent, then register an agent with duplicate Name.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
