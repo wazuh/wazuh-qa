@@ -610,7 +610,7 @@ def configure_local_internal_options_module(request):
 
     It uses the test variable local_internal_options. This should be
     a dictionary wich keys and values corresponds to the internal option configuration, For example:
-    local_internal_options = ['monitord.rotate_log': '0', 'syscheck.debug': '0' ]
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
     """
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
