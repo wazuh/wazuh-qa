@@ -3,9 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import platform
 import subprocess
-import sys
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
@@ -22,6 +22,7 @@ if sys.platform == 'win32':
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
     ANALYSIS_STATISTICS_FILE = None
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
 
 else:
 
@@ -48,6 +49,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 
     try:
         import grp
