@@ -23,7 +23,7 @@ DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
 
-qactl_logger = Logging(QACTL_LOGGER, 'DEBUG', True)
+qactl_script_logger = Logging('QACTL_SCRIPT', 'DEBUG', True)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 launched = {
     'instance_handler': False,
@@ -33,16 +33,16 @@ launched = {
 
 
 def read_configuration_data(configuration_file_path):
-    qactl_logger.debug('Reading configuration_data')
+    qactl_script_logger.debug('Reading configuration_data')
     with open(configuration_file_path) as config_file_fd:
         configuration_data = yaml.safe_load(config_file_fd)
-    qactl_logger.debug('The configuration data has been read successfully')
+    qactl_script_logger.debug('The configuration data has been read successfully')
 
     return configuration_data
 
 
 def validate_configuration_data(configuration):
-    qactl_logger.debug('Validating configuration schema')
+    qactl_script_logger.debug('Validating configuration schema')
     data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
     schema_file = os.path.join(data_path, 'qactl_conf_validator_schema.json')
 
@@ -51,7 +51,7 @@ def validate_configuration_data(configuration):
 
     validate(instance=configuration, schema=schema)
 
-    qactl_logger.debug('Schema validation has passed successfully')
+    qactl_script_logger.debug('Schema validation has passed successfully')
 
 
 def set_qactl_logging(qactl_configuration):
@@ -63,31 +63,32 @@ def set_qactl_logging(qactl_configuration):
 
 
 def validate_parameters(parameters):
-    qactl_logger.debug('Validating input parameters')
+    qactl_script_logger.debug('Validating input parameters')
     if parameters.config and parameters.run_test:
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
-                           'configuration', qactl_logger.error)
+                           'configuration', qactl_script_logger.error)
 
     if parameters.dry_run and parameters.run_test is None:
-        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_logger.error)
+        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_script_logger.error)
 
     if parameters.version is not None:
-        version = parameters.version
+        version = (parameters.version).replace('v', '')
 
         if len((parameters.version).split('.')) != 3:
             raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}",
-                               qactl_logger.error)
+                               qactl_script_logger.error)
 
         if not version_is_released(parameters.version):
             raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
-                               qactl_logger.error)
+                               qactl_script_logger.error)
 
         short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
 
         if not branch_exist(short_version, WAZUH_QA_REPO):
-            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.", qactl_logger.error)
+            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.",
+                               qactl_script_logger.error)
 
-    qactl_logger.debug('Input parameters validation has passed successfully')
+    qactl_script_logger.debug('Input parameters validation has passed successfully')
 
 
 def main():
@@ -118,14 +119,14 @@ def main():
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
-        qactl_logger.debug('Generating configuration file')
+        qactl_script_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
         config_generator.run()
         configuration_file = config_generator.config_file_path
-        qactl_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
+        qactl_script_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
 
         if arguments.dry_run:
-            qactl_logger.info(f"Run as dry-run mode. Configuration file saved in {config_generator.config_file_path}")
+            qactl_script_logger.info(f"Run as dry-run mode. Configuration file saved in {config_generator.config_file_path}")
             return 0
     else:
         configuration_file = arguments.config
@@ -133,7 +134,7 @@ def main():
     # Check configuration file path exists
     if not os.path.exists(configuration_file):
         raise QAValueError(f"{configuration_file} file doesn't exists or could not be generated correctly",
-                           qactl_logger.error)
+                           qactl_script_logger.error)
 
     # Read configuration data
     configuration_data = read_configuration_data(configuration_file)
@@ -148,41 +149,34 @@ def main():
     set_qactl_logging(qactl_configuration)
 
     # Run QACTL modules
-    # try:
+    try:
+        if DEPLOY_KEY in configuration_data:
+            deploy_dict = configuration_data[DEPLOY_KEY]
+            instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
+            instance_handler.run()
+            launched['instance_handler'] = True
 
-    #     if arguments.version:
-    #         print(f"VERSION -> {arguments.version}")
+        if PROVISION_KEY in configuration_data:
+            provision_dict = configuration_data[PROVISION_KEY]
+            qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
+            qa_provisioning.run()
+            launched['qa_provisioning'] = True
 
-    #     if DEPLOY_KEY in configuration_data:
-    #         deploy_dict = configuration_data[DEPLOY_KEY]
-    #         instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
-    #         instance_handler.run()
-    #         launched['instance_handler'] = True
-    # finally:
-    #     pass
-    #     if PROVISION_KEY in configuration_data:
-    #         provision_dict = configuration_data[PROVISION_KEY]
-    #         qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
-    #         qa_provisioning.run()
-    #         launched['qa_provisioning'] = True
+        if TEST_KEY in configuration_data:
+            test_dict = configuration_data[TEST_KEY]
+            tests_runner = QATestRunner(test_dict, qactl_configuration)
+            tests_runner.run()
+            launched['test_runner'] = True
+    finally:
+        if not arguments.persistent:
+            if DEPLOY_KEY in configuration_data and launched['instance_handler']:
+                instance_handler.destroy()
 
-    #     if TEST_KEY in configuration_data:
-    #         test_dict = configuration_data[TEST_KEY]
-    #         tests_runner = QATestRunner(test_dict, qactl_configuration)
-    #         tests_runner.run()
-    #         launched['test_runner'] = True
+            if PROVISION_KEY in configuration_data and launched['qa_provisioning']:
+                qa_provisioning.destroy()
 
-    # finally:
-    #     if not arguments.persistent:
-    #         print("DESTROY")
-    #         if DEPLOY_KEY in configuration_data and launched['instance_handler']:
-    #             instance_handler.destroy()
-
-    #         if PROVISION_KEY in configuration_data and launched['qa_provisioning']:
-    #             qa_provisioning.destroy()
-
-    #         if TEST_KEY in configuration_data and launched['test_runner']:
-    #             tests_runner.destroy()
+            if TEST_KEY in configuration_data and launched['test_runner']:
+                tests_runner.destroy()
 
 
 if __name__ == '__main__':

@@ -44,10 +44,11 @@ def get_s3_package_url(repository, target, version, revision, system, architectu
     Returns:
         str: The url of the desired package
     """
+    parsed_version = version.replace('v', '')
     if is_repository(repository):
-        return get_repository_url(target, version, system, revision, repository, architecture, short_url)
+        return get_repository_url(target, parsed_version, system, revision, repository, architecture, short_url)
     else:
-        return get_non_repository_url(target, version, system, revision, repository, architecture, DEV_BUCKET,
+        return get_non_repository_url(target, parsed_version, system, revision, repository, architecture, DEV_BUCKET,
                                       install_dir, short_url)
 
 

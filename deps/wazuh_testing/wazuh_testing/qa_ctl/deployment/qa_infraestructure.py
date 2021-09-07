@@ -49,13 +49,14 @@ class QAInfraestructure:
                     continue
 
                 if provider == 'vagrant':
-                    QAInfraestructure.LOGGER.debug(f"Setting {data['vm_name']} vagrant instance for deployment")
+                    vm_name = data['vm_name'].replace('_', '-')
+                    QAInfraestructure.LOGGER.debug(f"Setting {vm_name} vagrant instance for deployment")
                     quiet_out = True if not self.qa_ctl_configuration.vagrant_output else False
                     vagrant_instance = VagrantWrapper(data['vagrantfile_path'], data['vagrant_box'], data['label'],
-                                                      data['vm_name'], data['vm_cpu'], data['vm_memory'],
+                                                      vm_name.replace('_', '-'), data['vm_cpu'], data['vm_memory'],
                                                       data['vm_system'], data['vm_ip'], quiet_out)
                     self.instances.append(vagrant_instance)
-                    QAInfraestructure.LOGGER.debug(f"{data['vm_name']} vagrant instance has been set successfully")
+                    QAInfraestructure.LOGGER.debug(f"{vm_name} vagrant instance has been set successfully")
 
                 elif provider == 'docker':
                     QAInfraestructure.LOGGER.debug(f"Setting {data['name']} docker instance for deployment")

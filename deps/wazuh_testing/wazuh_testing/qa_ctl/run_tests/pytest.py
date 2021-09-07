@@ -83,7 +83,7 @@ class Pytest(Test):
             ansible_inventory_path (str): Path to ansible inventory file
         """
         assets_folder = 'assets/'
-        reports_folder = 'reports/'
+        reports_folder = 'reports'
         assets_zip = "assets.zip"
         html_report_file_name = f"test_report-{datetime.now()}.html"
         plain_report_file_name = f"plain_report-{datetime.now()}.txt"

@@ -53,7 +53,8 @@ class QACTLConfigGenerator:
             'password': 'vagrant',
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
-            'system': 'deb'
+            'system': 'deb',
+            'installation_files_path': '/tmp'
         },
         'qactl/centos_8': {
             'connection_method': 'ssh',
@@ -61,7 +62,8 @@ class QACTLConfigGenerator:
             'password': 'vagrant',
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
-            'system': 'rpm'
+            'system': 'rpm',
+            'installation_files_path': '/tmp'
         }
     }
 
@@ -76,7 +78,7 @@ class QACTLConfigGenerator:
         self.hosts = []
 
     def __get_qa_branch(self):
-         return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}"
+         return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}".replace('v', '')
 
     def __qa_docs_mocking(self, test_name):
         mocked_file = f"{gettempdir()}/mocked_data.json"
@@ -137,24 +139,24 @@ class QACTLConfigGenerator:
                 'test_target': 'manager',
                 'test_name': 'test_general_settings_enabled'
             },
-            {
-                'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.1.0',
-                'test_system': 'linux',
-                'test_vendor': 'centos',
-                'test_os_version': '8',
-                'test_target': 'agent',
-                'test_name': 'test_general_settings_enabled'
-            },
-            {
-                'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.1.0',
-                'test_system': 'linux',
-                'test_vendor': 'ubuntu',
-                'test_os_version': '20.04',
-                'test_target': 'manager',
-                'test_name': 'test_general_settings_enabled'
-            }
+            # {
+            #     'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
+            #     'test_wazuh_min_version': '4.1.0',
+            #     'test_system': 'linux',
+            #     'test_vendor': 'centos',
+            #     'test_os_version': '8',
+            #     'test_target': 'agent',
+            #     'test_name': 'test_general_settings_enabled'
+            # },
+            # {
+            #     'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
+            #     'test_wazuh_min_version': '4.1.0',
+            #     'test_system': 'linux',
+            #     'test_vendor': 'ubuntu',
+            #     'test_os_version': '20.04',
+            #     'test_target': 'manager',
+            #     'test_name': 'test_general_settings_enabled'
+            # }
         ]
         return tests_info
 
@@ -357,9 +359,10 @@ class QACTLConfigGenerator:
             if self.__validate_test_info(test):
                 # Process deployment data
                 host_number = len(self.config['deployment'].keys()) + 1
+                vm_name = f"{test['test_name']}_{get_current_timestamp()}"
                 self.config['deployment'][f"host_{host_number}"] = {
                     'provider': {
-                    'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], test['test_target'],
+                    'vagrant': self.__add_instance(test['test_vendor'], vm_name, test['test_target'],
                                                     test['test_system'])
                     }
                 }
@@ -368,7 +371,7 @@ class QACTLConfigGenerator:
                     host_number += 1
                     self.config['deployment'][f"host_{host_number}"] = {
                         'provider': {
-                            'vagrant': self.__add_instance(test['test_vendor'], test['test_name'], 'manager',
+                            'vagrant': self.__add_instance(test['test_vendor'], vm_name, 'manager',
                                                         test['test_system'])
                         }
                 }
@@ -394,6 +397,7 @@ class QACTLConfigGenerator:
                 'type': 'package',
                 'target': target,
                 's3_package_url': s3_package_url,
+                'installation_files_path': QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path'],
                 'health_check': True
             }
             if target == 'agent':
@@ -427,8 +431,8 @@ class QACTLConfigGenerator:
                 self.config['tests'][instance]['test'] = {
                     'type': 'pytest',
                     'path': {
-                        'test_files_path': f"{gettempdir()}/wazuh_qa/{test['test_path']}",
-                        'run_tests_dir_path': f"{gettempdir()}/wazuh_qa/test/integration",
+                        'test_files_path': f"{gettempdir()}/wazuh-qa/{test['test_path']}",
+                        'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
                         'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
                     }
                 }

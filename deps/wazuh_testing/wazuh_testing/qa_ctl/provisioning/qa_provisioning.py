@@ -146,14 +146,11 @@ class QAProvisioning():
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                           hosts=current_host)
-
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          s3_package_url,
                                                                                           hosts=current_host)
-
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
                                                       inventory_file_path=self.inventory_file_path,
