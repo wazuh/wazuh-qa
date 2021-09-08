@@ -1,0 +1,25 @@
+---
+  -
+    name: 'Overwrite agent name'
+    description: 'Check for register an agent with repeated name'
+    previous_agent_name: 'user1'
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output: "OSSEC K:'002 user1 any "
+  -
+    name: 'Valid and duplicate IP'
+    description: 'Try register an agent with existing IP'
+    previous_agent_name: 'user2'
+    previous_agent_ip: '10.10.10.10'
+    test_case:
+    -
+      input: "OSSEC A:'user_' IP:'10.10.10.10'"
+      output: "OSSEC K:'002 user_ 10.10.10.10 "
+  -
+    name: 'Let manager decide, USE_SOURCE no'
+    description: 'Let manager decide, USE_SOURCE no: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output: "OSSEC K:'001 user1 127.0.0.1 "

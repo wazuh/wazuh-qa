@@ -4,7 +4,6 @@
       apply_to_modules:
       - test_authd
       - test_authd_key_hash
-      - test_authd_force_insert_yes
       sections:
       - section: auth
         elements:
@@ -37,7 +36,7 @@
     - tags:
       - all
       apply_to_modules:
-      - test_authd_force_insert_no
+      - test_authd_force_insert
       sections:
       - section: auth
         elements:
@@ -48,7 +47,7 @@
         - use_source_ip:
             value: 'no'
         - force_insert:
-            value: 'no'
+            value: FORCE_INSERT
         - force_time:
             value: 0
         - purge:
