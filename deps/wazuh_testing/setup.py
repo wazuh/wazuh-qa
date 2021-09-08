@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
-import glob
 import os
 
 package_data_list = ['data/agent.conf',
@@ -37,7 +36,6 @@ def add_package_files(data_list, directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            print(os.path.join(path, filename))
             data_list.append(os.path.join(path, filename))
     return paths
 
