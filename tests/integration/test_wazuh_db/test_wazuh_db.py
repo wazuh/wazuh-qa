@@ -72,9 +72,39 @@ def clean_registered_agents():
     time.sleep(5)
 
 
-@pytest.fixture(scope="module")
-def restart_wazuh():
-    control_service('restart')
+@pytest.fixture(scope='module')
+def pre_insert_agents():
+    """Insert agents. Only used for the global queries"""
+    AGENTS_CANT = 14000
+    AGENTS_OFFSET = 20
+    for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
+        insert_agent(id)
+
+    yield
+
+    for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
+        remove_agent(id)
+
+
+@pytest.fixture(scope='function')
+def insert_agents_test():
+    """Insert agents. Only used for the agent queries"""
+    agent_list = [1, 2]
+    for agent in agent_list:
+        insert_agent(agent)
+
+    yield
+
+    for agent in agent_list:
+        remove_agent(agent)
+
+
+@pytest.fixture(scope='module')
+def stop_all_daemons(request):
+    yield 
+    control_service('stop')
+
+
 
 
 def execute_wazuh_db_query(command):
@@ -125,48 +155,19 @@ def remove_agent(agent_id):
 
 # Tests
 
-
-@pytest.fixture(scope='function')
-def pre_insert_agents():
-    """Insert agents. Only used for the global queries"""
-    AGENTS_CANT = 14000
-    AGENTS_OFFSET = 20
-    for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
-        insert_agent(id)
-
-    yield
-
-    for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
-        remove_agent(id)
-
-
-@pytest.fixture(scope='function')
-def insert_agents_test():
-    """Insert agents. Only used for the agent queries"""
-    agent_list = [1, 2]
-    for agent in agent_list:
-        insert_agent(agent)
-
-    yield
-
-    for agent in agent_list:
-        remove_agent(agent)
-
-
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in agent_module_tests for case in module_data[0]],
                          ids=[f"{module_name}: {case['name']}"
                               for module_data, module_name in agent_module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment,
-                                 connect_to_sockets_module, insert_agents_test, test_case):
+def test_wazuh_db_messages_agent(clean_registered_agents, configure_sockets_environment,
+                                 connect_to_sockets_module, insert_agents_test, stop_all_daemons, test_case):
     """Check that every input agent message in wazuh-db socket generates the adequate output to wazuh-db socket.
 
     Args:
         test_case(list): List of test_case stages (dicts with input, output and stage keys).
     """
-
     for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
@@ -190,7 +191,8 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
                               for module_data, module_name in global_module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sockets_module, 
+                                  stop_all_daemons, test_case):
     """Check that every input global message in wazuh-db socket generates the adequate output to wazuh-db socket.
 
     Args:
@@ -213,10 +215,9 @@ def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sock
             .format(index + 1, stage['stage'], expected_output, response)
 
 
-def test_wazuh_db_chunks(restart_wazuh, clean_registered_agents, configure_sockets_environment,
+def test_wazuh_db_chunks(stop_all_daemons, configure_sockets_environment, clean_registered_agents,
                          connect_to_sockets_module, pre_insert_agents):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size"""
-
     def send_chunk_command(command):
         response = execute_wazuh_db_query(command)
         status = response.split(' ', 1)[0]
