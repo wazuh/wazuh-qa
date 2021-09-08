@@ -11,7 +11,7 @@ VERSION = '0.1'
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'config.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
-SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'Search-UI')
+SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
 
 def start_logging(folder, debug_level=logging.INFO):
     LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log")
@@ -50,7 +50,6 @@ def main():
     elif args.launch_app:
         indexData = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         indexData.run()
-        print(SEARCH_UI_PATH)
         os.chdir(SEARCH_UI_PATH)
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:

@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
 import glob
+import os
 
 package_data_list = ['data/agent.conf',
                      'data/syscheck_event.json',
@@ -22,11 +23,25 @@ package_data_list = ['data/agent.conf',
                      'qa_docs/config.yaml'
                       ]
 
-directories = glob.glob('wazuh_testing/qa_docs/search_ui/')
-for directory in directories:
-    files = glob.glob(directory+'*')
-    for file in files:
-      package_data_list.append(file)
+scripts_list = [
+            'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
+            'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+            'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
+            'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
+            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
+            'qa-docs=wazuh_testing.scripts.qa_docs:main'
+        ]
+
+def add_package_files(data_list, directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            print(os.path.join(path, filename))
+            data_list.append(os.path.join(path, filename))
+    return paths
+
+add_package_files(package_data_list, 'wazuh_testing/qa_docs/search_ui/')
 
 setup(name='wazuh_testing',
       version='4.3.0',
@@ -37,17 +52,7 @@ setup(name='wazuh_testing',
       license='GPLv2',
       packages=find_packages(),
       package_data={'wazuh_testing': package_data_list},
-      entry_points={
-        'console_scripts': [
-            'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
-            'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
-            'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
-            'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
-            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
-            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
-            'qa-docs=wazuh_testing.scripts.qa_docs:main'
-        ],
-      },
+      entry_points={'console_scripts': scripts_list},
       include_package_data=True,
       zip_safe=False
       )
