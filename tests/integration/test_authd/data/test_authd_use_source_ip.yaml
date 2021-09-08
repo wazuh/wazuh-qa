@@ -1,0 +1,34 @@
+---
+  -
+    name: 'Let manager decide, use_source_ip enabled'
+    description: 'Let manager decide, use_source_ip enabled: register'
+    ip_specified: 'yes'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output: "OSSEC K:'001 user1 127.0.0.1 "
+  -
+    name: 'Override use_source_ip'
+    description: 'Setting IP overrides the setting'
+    ip_specified: 'yes'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output: "OSSEC K:'001 user1 10.10.10.10 "
+    USE_SOURCE_IP: 'yes'
+  -
+    name: 'Not specific IP'
+    description: 'Not specific IP'
+    ip_specified: 'no'
+    test_case:
+    -
+      input: "OSSEC A:'user1' "
+      output: "OSSEC K:'001 user1 any "
+  -
+    name: 'Let manager decide'
+    description: 'Let manager decide'
+    ip_specified: 'yes'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output: "OSSEC K:'001 user1 127.0.0.1 "
