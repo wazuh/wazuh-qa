@@ -4,6 +4,7 @@
       apply_to_modules:
       - test_authd
       - test_authd_key_hash
+      - test_authd_valid_name_ip
       sections:
       - section: auth
         elements:
