@@ -22,20 +22,20 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 parameters = [
-    {'FORCE_INSERT': 'yes'},
-    {'FORCE_INSERT': 'no'}
+    {'USE_SOURCE_IP': 'yes'},
+    {'USE_SOURCE_IP': 'no'}
 ]
 
 metadata = [
-    {'force_insert': 'yes'},
-    {'force_insert': 'no'}
+    {'use_source_ip': 'yes'},
+    {'use_source_ip': 'no'}
 ]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-test_authd_force_insert_yes_tests = load_tests(os.path.join(test_data_path, 'test_authd_force_insert.yaml'))
-configuration_ids = [f"Force_insert_{x['FORCE_INSERT']}" for x in parameters]
+test_authd_use_source_ip_tests = load_tests(os.path.join(test_data_path, 'test_authd_use_source_ip.yaml'))
+configuration_ids = [f"Use_source_ip_{x['USE_SOURCE_IP']}" for x in parameters]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Variables
@@ -98,34 +98,13 @@ def tear_down():
     # Start Wazuh
     control_service('start')
 
-@pytest.fixture(scope='function')
-def register_previous_agent(test_case):
-    if 'previous_agent_name' in test_case:
-        previous_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}'"
-        if 'previous_agent_ip' in test_case:
-            previous_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}' IP:'{test_case['previous_agent_ip']}'"
-
-        print("Message: ", previous_agent_message)
-        receiver_sockets[0].open()
-        receiver_sockets[0].send(previous_agent_message, size=False)
-        timeout = time.time() + 10
-        response = ''
-
-        while response == '':
-            response = receiver_sockets[0].receive().decode()
-            if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
-
-    yield
-
 
 # Test
 
-@pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
-                         ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
+@pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
+                         ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
 def test_authd_force_options(clean_client_keys_file, get_configuration, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, test_case, register_previous_agent,
-                             tear_down):
+                             configure_sockets_environment, connect_to_sockets_module, test_case, tear_down):
     """Check that every input message in authd port generates the adequate output
 
     Every test case is defined the following way:
@@ -147,8 +126,8 @@ def test_authd_force_options(clean_client_keys_file, get_configuration, configur
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
 
-        if metadata['force_insert'] == 'no' and ('previous_agent_name' in test_case):
-            expected = 'ERROR: Duplicate'
+        if metadata['use_source_ip'] == 'yes' and test_case['ip_specified'] == 'no':
+            expected = "OSSEC K:'001 user1 127.0.0.1 "
         else:
             expected = stage['output']
 
