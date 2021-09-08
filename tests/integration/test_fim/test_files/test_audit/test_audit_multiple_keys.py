@@ -1,8 +1,6 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-
 import os
 
 import pytest
@@ -15,6 +13,12 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
+
+
+local_internal_options = {'syscheck.debug': '2', 'analysisd.debug': '2', 'monitord.rotate_log': '0'}
+daemons_handler_configuration = {'daemons': ['wazuh-syscheckd', 'wazuh-analysisd', 'wazuh-modulesd']}
+
+
 
 # Variables
 
@@ -66,7 +70,7 @@ def extra_configuration_after_yield():
 
 
 @pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir])
-def test_audit_multiple_keys(directory, get_configuration, configure_environment, restart_syscheckd,
+def test_audit_multiple_keys(directory, get_configuration, configure_environment, configure_local_internal_options_module, file_monitoring, daemons_handler, 
                              wait_for_fim_start):
     """Checks that FIM correctly handles audit rules with multiple keys.
 
@@ -83,14 +87,14 @@ def test_audit_multiple_keys(directory, get_configuration, configure_environment
     """
     check_apply_test({'audit_multiple_keys'}, get_configuration['tags'])
     # Wait until FIM reloads the audit rules.
-    wazuh_log_monitor.start(timeout=audit_rules_reload_interval,
+    log_monitor.start(timeout=audit_rules_reload_interval,
                             callback=fim.callback_audit_reloading_rules,
                             accum_results=1,
                             update_position=True,
                             error_message='Did not receive expected "Audit reloading rules ..." event ')
     fim.create_file(fim.REGULAR, directory, 'testfile')
 
-    key = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    key = log_monitor.start(timeout=global_parameters.default_timeout,
                                   callback=fim.callback_get_audit_key,
                                   accum_results=1,
                                   update_position=True,
@@ -103,9 +107,9 @@ def test_audit_multiple_keys(directory, get_configuration, configure_environment
 
     if directory == '/non_monitored_test_dir':
        with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ')
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ')
     else:
-       event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ').result()
+       event = log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ').result()
        assert get_configuration['metadata']['monitored_dir'] == directory, 'No events should be detected.'
        event_path = event['data']['path']
        assert directory in event_path, f"Expected path = {directory}, event path = {event_path}"
