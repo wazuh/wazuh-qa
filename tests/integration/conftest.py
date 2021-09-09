@@ -21,7 +21,7 @@ from wazuh_testing.logcollector import create_file_structure, delete_file_struct
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, start_daemons, stop_daemons
 from wazuh_testing.tools.time import TimeMachine
 
 if sys.platform == 'win32':
@@ -674,7 +674,7 @@ def daemons_handler(get_configuration, request):
             logger.debug(f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
 
-            
+
 @pytest.fixture(scope='function')
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
@@ -699,7 +699,7 @@ def file_monitoring(request):
     truncate_file(file_to_monitor)
     logger.debug(f"Trucanted {file_to_monitor}")
 
-    
+
 @pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.
@@ -723,3 +723,45 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def daemons_handler_function(request):
+    """Handler of Wazuh daemons.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    try:
+        daemons_handler_configuration = getattr(request.module, 'daemons_handler_configuration')
+
+    except AttributeError as daemon_configuration_not_set:
+        logger.error('daemons_handler_configuration is not set')
+        raise daemon_configuration_not_set
+
+    start_daemons(daemons_handler_configuration['function'])
+
+    yield
+
+    stop_daemons(daemons_handler_configuration['function'])
+
+
+@pytest.fixture(scope='module')
+def daemons_handler_module(request):
+    """Handler of Wazuh daemons.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    try:
+        daemons_handler_configuration = getattr(request.module, 'daemons_handler_configuration')
+
+    except AttributeError as daemon_configuration_not_set:
+        logger.error('daemons_handler_configuration is not set')
+        raise daemon_configuration_not_set
+
+    start_daemons(daemons_handler_configuration['module'])
+
+    yield
+
+    stop_daemons(daemons_handler_configuration['module'])
