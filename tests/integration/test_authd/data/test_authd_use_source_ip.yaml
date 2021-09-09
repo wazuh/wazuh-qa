@@ -15,7 +15,6 @@
     -
       input: "OSSEC A:'user1' IP:'10.10.10.10'"
       output: "OSSEC K:'001 user1 10.10.10.10 "
-    USE_SOURCE_IP: 'yes'
   -
     name: 'Not specific IP'
     description: 'Not specific IP'

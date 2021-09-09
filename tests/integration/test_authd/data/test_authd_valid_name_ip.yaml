@@ -118,42 +118,42 @@
       output: 'ERROR: Invalid IP: '
   -
     name: 'Ip with mask/0'
-    description: 'Ip with mask'
+    description: 'Ip with mask: register'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.10/0'"
       output: "OSSEC K:'001 user1 10.10.10.10/0 "
   -
     name: 'Ip with mask /24 '
-    description: 'Ip with mask /24 '
+    description: 'Ip with mask /24: register'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
       output: "OSSEC K:'001 user1 10.10.10.1/24 "
   -
     name: 'Ip with mask /32'
-    description: 'Ip with mask /32'
+    description: 'Ip with mask /32: register'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
       output: "OSSEC K:'001 user1 10.10.10.1/32"
   -
     name: 'Invalid mask'
-    description: 'Invalid mask'
+    description: 'Invalid mask: rejected'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
       output: 'ERROR: Invalid IP: 10.10.10.1'
   -
     name: 'Invalid mask, wrong character'
-    description: 'Invalid mask, wrong character'
+    description: 'Invalid mask, wrong character: rejected'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.1/2{'"
       output: 'ERROR: Invalid IP: 10.10.10.1'
   -
     name: 'Invalid mask, wrong character'
-    description: 'Invalid mask, wrong character'
+    description: 'Invalid mask, wrong character: rejected'
     test_case:
     -
       input: "OSSEC A:'user1' IP:'10.10.10.1/<'"
