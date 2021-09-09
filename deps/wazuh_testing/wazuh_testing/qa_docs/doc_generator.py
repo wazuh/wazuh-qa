@@ -17,8 +17,6 @@ from wazuh_testing.qa_docs.lib.utils import clean_folder
 import warnings
 import logging
 
-VERSION = '0.1'
-
 
 class DocGenerator:
     """
@@ -150,7 +148,6 @@ class DocGenerator:
                 doc_path = self.conf.documentation_path
                 if self.print_test_info(test) is None:
                     return
-            print(test)
             self.dump_output(test, doc_path)
             logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
             return self.__id_counter
@@ -167,7 +164,7 @@ class DocGenerator:
             - "group_id (string): The id of the group where the new elements belong."
         """
         if not os.path.exists(path):
-            warnings.warn(f"Ipanclude th '{path}' doesn´t exist", stacklevel=2)
+            warnings.warn(f"Include path '{path}' doesn´t exist", stacklevel=2)
             logging.warning(f"Include path '{path}' doesn´t exist")
             return
         if not self.is_valid_folder(path):
@@ -187,10 +184,10 @@ class DocGenerator:
             self.parse_folder(os.path.join(root, folder), group_id)
 
     def locate_test(self):
-        '''
+        """
         brief: try to get the test path
-        '''
-        complete_test_name = self.conf.test_name + ".py"
+        """
+        complete_test_name = f"{self.conf.test_name}.py"
         logging.info(f"Looking for {complete_test_name}")
         for root, dirnames, filenames in os.walk(self.conf.project_path, topdown=True):
             for filename in filenames:
@@ -199,10 +196,10 @@ class DocGenerator:
         return None
 
     def print_test_info(self, test):
-        '''
+        """
         brief: Print the test info to standard output. If an output path is specified,
                the output is redirected to `output_path/test_info.json`.
-        '''
+        """
         # dump into file
         if self.conf.documentation_path:
             test_info = {}
@@ -213,11 +210,10 @@ class DocGenerator:
             for field in self.conf.test_info:
                 for name, schema_field in field.items():
                     test_info[name] = test['tests'][0][schema_field]
-            with open(os.path.join(self.conf.documentation_path, self.conf.test_name + '.json'), 'w') as fp:
+            with open(os.path.join(self.conf.documentation_path, f"{self.conf.test_name}.json"), 'w') as fp:
                 fp.write(json.dumps(test_info, indent=4))
                 fp.write('\n')
         else:
-            print("test_path: "+self.test_path[6:])
             # Use the key that QACTL needs
             for field in self.conf.module_info:
                 for name, schema_field in field.items():
@@ -232,12 +228,10 @@ class DocGenerator:
         brief: Run a complete scan of each include path to parse every test and group found.
                Normal mode: expected behaviour, Single test mode: found the test required and par it
         """
-        print("dentro de run")
-        print(self.conf.mode)
         if self.conf.mode == mode.DEFAULT:
-            print("runnin")
             logging.info("\nStarting documentation parsing")
             clean_folder(self.conf.documentation_path)
+
             for path in self.conf.include_paths:
                 self.scan_path = path
                 logging.debug(f"Going to parse files on '{path}'")
@@ -245,6 +239,7 @@ class DocGenerator:
         elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
             self.test_path = self.locate_test()
+            
             if self.test_path:
                 logging.debug(f"Parsing '{self.conf.test_name}'")
                 self.create_test(self.test_path, 0)

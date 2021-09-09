@@ -4,42 +4,45 @@
 from setuptools import setup, find_packages
 import os
 
-package_data_list = ['data/agent.conf',
-                     'data/syscheck_event.json',
-                     'data/syscheck_event_windows.json',
-                     'data/mitre_event.json',
-                     'data/analysis_alert.json',
-                     'data/analysis_alert_windows.json',
-                     'data/state_integrity_analysis_schema.json',
-                     'data/gcp_event.json',
-                     'data/keepalives.txt',
-                     'data/rootcheck.txt',
-                     'data/syscollector.py',
-                     'data/winevt.py',
-                     'data/sslmanager.key',
-                     'data/sslmanager.cert',
-                     'tools/macos_log/log_generator.m',
-                     'qa_docs/config.yaml'
-                      ]
+package_data_list = [
+    'data/agent.conf',
+    'data/syscheck_event.json',
+    'data/syscheck_event_windows.json',
+    'data/mitre_event.json',
+    'data/analysis_alert.json',
+    'data/analysis_alert_windows.json',
+    'data/state_integrity_analysis_schema.json',
+    'data/gcp_event.json',
+    'data/keepalives.txt',
+    'data/rootcheck.txt',
+    'data/syscollector.py',
+    'data/winevt.py',
+    'data/sslmanager.key',
+    'data/sslmanager.cert',
+    'tools/macos_log/log_generator.m',
+    'qa_docs/config.yaml'
+]
 
 scripts_list = [
-            'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
-            'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
-            'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
-            'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
-            'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
-            'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
-            'qa-docs=wazuh_testing.scripts.qa_docs:main'
-        ]
+    'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
+    'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+    'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
+    'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
+    'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+    'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
+    'qa-docs=wazuh_testing.scripts.qa_docs:main'
+]
 
-def add_package_files(data_list, directory):
+
+def get_files_from_directory(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            data_list.append(os.path.join(path, filename))
+            paths.append(os.path.join(path, filename))
     return paths
 
-add_package_files(package_data_list, 'wazuh_testing/qa_docs/search_ui/')
+
+package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui/'))
 
 setup(name='wazuh_testing',
       version='4.3.0',

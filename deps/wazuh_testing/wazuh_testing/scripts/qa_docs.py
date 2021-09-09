@@ -14,7 +14,7 @@ LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_d
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
 
 def start_logging(folder, debug_level=logging.INFO):
-    LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log")
+    LOG_PATH = os.path.join(folder, f"{os.path.splitext(os.path.basename(__file__))[0]}.log")
     if not os.path.exists(folder):
         os.makedirs(folder)
     logging.basicConfig(filename=LOG_PATH, level=debug_level)
