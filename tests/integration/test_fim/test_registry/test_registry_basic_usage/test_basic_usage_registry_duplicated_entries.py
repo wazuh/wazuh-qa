@@ -1,25 +1,19 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 
 import pytest
 from wazuh_testing import global_parameters
 import wazuh_testing.fim as fim
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
 
 
 # Helper functions
 
 def extra_configuration_after_yield():
-    fim.delete_registry(fim.registry_parser[key], sub_key_1, fim.KEY_WOW64_32KEY)
+    fim.delete_registry(fim.registry_parser[key], sub_key_2, fim.KEY_WOW64_64KEY)
 
 
 def check_event_type_and_path(fim_event, monitorized_registry):
     check_event = False
-
     if fim_event['type'] == 'added':
         registry_event_path = fim_event['path']
         if monitorized_registry.lower() == registry_event_path.lower():
@@ -53,7 +47,9 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_duplicated_regist
 parameters, metadata = fim.generate_params(extra_params=conf_params, modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
-registry_list = [(key, sub_key_1, fim.KEY_WOW64_32KEY), (key, sub_key_2, fim.KEY_WOW64_32KEY)]
+registry_list = [(key, sub_key_1, fim.KEY_WOW64_64KEY), (key, sub_key_2, fim.KEY_WOW64_64KEY)]
+daemons_handler_configuration = {'daemons': ['wazuh-syscheckd']}
+local_internal_options = {'syscheck.debug': '2', 'monitord.rotate_log': '0'}
 
 
 # Fixtures
@@ -64,18 +60,12 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module', params=configurations)
-def stop_syscheckd_module(request):
-    """Stop syscheckd module after test execution."""
-    yield
-    control_service('stop', daemon='wazuh-syscheckd')
-
-
 # Test
 
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_fim_start, stop_syscheckd_module):
+                                   file_monitoring, configure_local_internal_options_module, daemons_handler,
+                                   wait_for_fim_start):
     """Two registries with capital differences must trigger just one modify the event.
 
     Test to check that two registries monitored with the same name but
@@ -95,24 +85,25 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuratio
     Raises:
         TimeoutError: If an expected event (registry modified) couldn't be captured.
     """
+
     mode = get_configuration['metadata']['fim_mode']
     scheduled = mode == 'scheduled'
     monitorized_registry = os.path.join(key, subkey2)
 
     fim.create_registry(fim.registry_parser[key], subkey2, arch)
 
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    fim.check_time_travel(scheduled, monitor=log_monitor)
 
-    fim_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
-                                        error_message='Did not receive expected "Sending Fim event: ..." \
-                                        event').result()
+    fim_event = log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
+                                  error_message='Did not receive expected "Sending Fim event: ..." \
+                                  event').result()
 
     if check_event_type_and_path(fim_event['data'], monitorized_registry):
         with pytest.raises(TimeoutError):
-            fim_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=fim.callback_detect_event,
-                                                error_message='Did not receive expected '
-                                                '"Sending Fim event: ..." event').result()
+            fim_event = log_monitor.start(timeout=global_parameters.default_timeout,
+                                          callback=fim.callback_detect_event,
+                                          error_message='Did not receive expected '
+                                          '"Sending Fim event: ..." event').result()
 
             if check_event_type_and_path(fim_event['data'], monitorized_registry):
                 raise pytest.fail('Only one added event for the registry was expected.')

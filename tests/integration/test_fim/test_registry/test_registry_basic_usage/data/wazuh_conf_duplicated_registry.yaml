@@ -13,9 +13,9 @@
         value: WINDOWS_DUPLICATED_REGISTRY_1
         attributes:
           - ATTRIBUTE
-          - arch: "32bit"
+          - arch: "64bit"
     - windows_registry:
         value: WINDOWS_DUPLICATED_REGISTRY_2
         attributes:
           - ATTRIBUTE
-          - arch: "32bit"
+          - arch: "64bit"
