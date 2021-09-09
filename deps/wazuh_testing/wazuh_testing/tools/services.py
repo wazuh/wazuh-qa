@@ -7,6 +7,7 @@ import sys
 import time
 
 import psutil
+from wazuh_testing import logger
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
@@ -270,3 +271,98 @@ def control_event_log_service(control):
         raise ValueError(f"Event log service did not stop correctly")
 
     time.sleep(1)
+
+
+def start_daemons(daemons_handler_configuration):
+    """Function that starts Wazuh daemons.
+
+    It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
+    The  `daemons_handler_configuration` should be a dictionary with the following keys:
+        daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
+            will be raised
+        all_daemons (boolean): Configure to restart all wazuh services. Default `False`.
+        ignore_errors (boolean): Configure if errors in daemon handling should be ignored. This option is available
+        in order to use this fixture along with invalid configuration. Default `False`
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    daemons = []
+    ignore_errors = False
+    all_daemons = False
+
+    if 'daemons' in daemons_handler_configuration and not all_daemons:
+        daemons = daemons_handler_configuration['daemons']
+        if not daemons or (type(daemons) == list and len(daemons) == 0):
+            logger.error('Daemons list is not set')
+            raise ValueError
+    if 'all_daemons' in daemons_handler_configuration:
+        logger.debug(f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
+        all_daemons = daemons_handler_configuration['all_daemons']
+    if 'ignore_errors' in daemons_handler_configuration:
+        logger.debug(f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+        ignore_errors = daemons_handler_configuration['ignore_errors']
+
+
+    try:
+        if all_daemons:
+            logger.debug('Restarting wazuh using wazuh-control')
+            # Restart daemon instead of starting due to legacy used fixture in the test suite.
+            control_service('restart')
+        else:
+            for daemon in daemons:
+                logger.debug(f"Restarting {daemon}")
+                # Restart daemon instead of starting due to legacy used fixture in the test suite.
+                control_service('restart', daemon=daemon)
+
+    except ValueError as value_error:
+        logger.error(f"{str(value_error)}")
+        if not ignore_errors:
+            raise value_error
+    except subprocess.CalledProcessError as called_process_error:
+        logger.error(f"{str(called_process_error)}")
+        if not ignore_errors:
+            raise called_process_error
+
+
+
+
+def stop_daemons(daemons_handler_configuration):
+    """Function that starts Wazuh daemons.
+
+    It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
+    The  `daemons_handler_configuration` should be a dictionary with the following keys:
+        daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
+            will be raised
+        all_daemons (boolean): Configure to restart all wazuh services. Default `False`.
+        ignore_errors (boolean): Configure if errors in daemon handling should be ignored. This option is available
+        in order to use this fixture along with invalid configuration. Default `False`
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    daemons = []
+    ignore_errors = False
+    all_daemons = False
+
+
+    if 'daemons' in daemons_handler_configuration and not all_daemons:
+        daemons = daemons_handler_configuration['daemons']
+        if not daemons or (type(daemons) == list and len(daemons) == 0):
+            logger.error('Daemons list is not set')
+            raise ValueError
+    if 'all_daemons' in daemons_handler_configuration:
+        logger.debug(f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
+        all_daemons = daemons_handler_configuration['all_daemons']
+    if 'ignore_errors' in daemons_handler_configuration:
+        logger.debug(f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+        ignore_errors = daemons_handler_configuration['ignore_errors']
+
+
+    if all_daemons:
+        logger.debug('Stopping wazuh using wazuh-control')
+        control_service('stop')
+    else:
+        for daemon in daemons:
+            logger.debug(f"Stopping {daemon}")
+            control_service('stop', daemon=daemon)
