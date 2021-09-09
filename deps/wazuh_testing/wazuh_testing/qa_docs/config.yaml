@@ -1,0 +1,68 @@
+Include paths:
+  - "integration/test_active_response"
+  - "integration/test_api"
+  - "integration/test_wazuh_db"
+  - "integration/test_vulnerability_detector"
+  - "integration/test_remoted"
+  - "integration/test_agentd"
+
+Include regex:
+  - "^test_.*py$"
+
+Group files:
+  - "README.md"
+
+Function regex:
+  - "^test_"
+
+Ignore paths:
+  - "integration/test_active_response/test_execd/data"
+  - "integration/test_api/test_config/test_cache/data"
+  - "integration/test_api/test_config/test_cors/data"
+  - "integration/test_api/test_config/test_DOS_blocking_system/data"
+  - "integration/test_api/test_config/test_drop_privileges/data"
+  - "integration/test_api/test_config/test_experimental_features/data"
+  - "integration/test_api/test_config/test_host_port/data"
+  - "integration/test_api/test_config/test_https/data"
+  - "integration/test_api/test_config/test_jwt_token_exp_timeout/data"
+  - "integration/test_api/test_config/test_logs/data"
+  - "integration/test_api/test_config/test_rbac/data" 
+  - "integration/test_api/test_config/test_request_timeout/data"
+  - "integration/test_api/test_config/test_use_only_authd/data"
+  - "integration/test_wazuh_db/data"
+  - "integration/test_api/test_config/test_bruteforce_blocking_system/data"
+
+Output fields:
+  Module:
+    Mandatory:
+      - brief
+      - category
+      - modules
+      - daemons
+      - component
+      - os_platform
+      - os_vendor
+      - os_version
+      - tiers
+    Optional:
+      - tags
+  Test:
+    Mandatory:
+      - description
+      - wazuh_min_version
+      - parameters
+      - behaviour
+      - expected_behaviour
+    Optional:
+      - status 
+
+Test cases field: test_cases
+
+Module info:
+  - test_system: os_platform
+  - test_vendor: os_vendor
+  - test_version: os_version
+  - test_target: component
+
+Test info:
+  - test_wazuh_min_version: wazuh_min_version

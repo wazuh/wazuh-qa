@@ -12,7 +12,7 @@ import re
 import json
 import ast
 import logging
-from lib.Utils import check_existance
+from wazuh_testing.qa_docs.lib.utils import check_existance
 
 
 class Sanity():

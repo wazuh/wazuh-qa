@@ -11,17 +11,11 @@ import os
 import re
 import json
 import yaml
-from lib.Config import Config
-from lib.CodeParser import CodeParser
-from lib.Sanity import Sanity
-from lib.Utils import clean_folder
-from lib.IndexData import IndexData
+from wazuh_testing.qa_docs.lib.config import mode
+from wazuh_testing.qa_docs.lib.code_parser import CodeParser
+from wazuh_testing.qa_docs.lib.utils import clean_folder
 import warnings
 import logging
-import argparse
-
-VERSION = "0.1"
-CONFIG_PATH = "config.yaml"
 
 
 class DocGenerator:
@@ -37,8 +31,9 @@ class DocGenerator:
         for ignore_regex in self.conf.ignore_paths:
             self.ignore_regex.append(re.compile(ignore_regex))
         self.include_regex = []
-        for include_regex in self.conf.include_regex:
-            self.include_regex.append(re.compile(include_regex))
+        if self.conf.mode == mode.DEFAULT:
+            for include_regex in self.conf.include_regex:
+                self.include_regex.append(re.compile(include_regex))
 
     def is_valid_folder(self, path):
         """
@@ -147,7 +142,12 @@ class DocGenerator:
         self.__id_counter = self.__id_counter + 1
         test = self.parser.parse_test(path, self.__id_counter, group_id)
         if test:
-            doc_path = self.get_test_doc_path(path)
+            if self.conf.mode == mode.DEFAULT:
+                doc_path = self.get_test_doc_path(path)
+            elif self.conf.mode == mode.SINGLE_TEST:
+                doc_path = self.conf.documentation_path
+                if self.print_test_info(test) is None:
+                    return
             self.dump_output(test, doc_path)
             logging.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
             return self.__id_counter
@@ -183,55 +183,65 @@ class DocGenerator:
         for folder in folders:
             self.parse_folder(os.path.join(root, folder), group_id)
 
+    def locate_test(self):
+        """
+        brief: try to get the test path
+        """
+        complete_test_name = f"{self.conf.test_name}.py"
+        logging.info(f"Looking for {complete_test_name}")
+        for root, dirnames, filenames in os.walk(self.conf.project_path, topdown=True):
+            for filename in filenames:
+                if filename == complete_test_name:
+                    return os.path.join(root, complete_test_name)
+        return None
+
+    def print_test_info(self, test):
+        """
+        brief: Print the test info to standard output. If an output path is specified,
+               the output is redirected to `output_path/test_info.json`.
+        """
+        # dump into file
+        if self.conf.documentation_path:
+            test_info = {}
+            test_info['test_path'] = self.test_path[6:]
+            for field in self.conf.module_info:
+                for name, schema_field in field.items():
+                    test_info[name] = test[schema_field]
+            for field in self.conf.test_info:
+                for name, schema_field in field.items():
+                    test_info[name] = test['tests'][0][schema_field]
+            with open(os.path.join(self.conf.documentation_path, f"{self.conf.test_name}.json"), 'w') as fp:
+                fp.write(json.dumps(test_info, indent=4))
+                fp.write('\n')
+        else:
+            # Use the key that QACTL needs
+            for field in self.conf.module_info:
+                for name, schema_field in field.items():
+                    print(str(name)+": "+str(test[schema_field]))
+            for field in self.conf.test_info:
+                for name, schema_field in field.items():
+                    print(str(name)+": "+str(test['tests'][0][schema_field]))
+            return None
+
     def run(self):
         """
         brief: Run a complete scan of each include path to parse every test and group found.
+               Normal mode: expected behaviour, Single test mode: found the test required and par it
         """
-        logging.info("\nStarting documentation parsing")
-        clean_folder(self.conf.documentation_path)
-        for path in self.conf.include_paths:
-            self.scan_path = path
-            logging.debug(f"Going to parse files on '{path}'")
-            self.parse_folder(path, self.__id_counter)
+        if self.conf.mode == mode.DEFAULT:
+            logging.info("\nStarting documentation parsing")
+            clean_folder(self.conf.documentation_path)
 
-
-def start_logging(folder, debug_level=logging.INFO):
-    LOG_PATH = os.path.join(folder, os.path.splitext(os.path.basename(__file__))[0]+".log")
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    logging.basicConfig(filename=LOG_PATH, level=debug_level)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-s', help="Run a sanity check", action='store_true', dest='sanity')
-    parser.add_argument('-v', help="Print version", action='store_true', dest="version")
-    parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
-    parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
-    parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
-    parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launch_app')
-    args = parser.parse_args()
-
-    if args.debug_level:
-        start_logging("logs", logging.DEBUG)
-    else:
-        start_logging("logs")
-
-    if args.version:
-        print(f"DocGenerator v{VERSION}")
-    elif args.test_config:
-        Config(CONFIG_PATH)
-    elif args.sanity:
-        sanity = Sanity(Config(CONFIG_PATH))
-        sanity.run()
-    elif args.index_name:
-        indexData = IndexData(args.index_name, Config(CONFIG_PATH))
-        indexData.run()
-    elif args.launch_app:
-        indexData = IndexData(args.launch_app, Config(CONFIG_PATH))
-        indexData.run()
-        os.chdir("Search-UI")
-        os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
-    else:
-        docs = DocGenerator(Config(CONFIG_PATH))
-        docs.run()
+            for path in self.conf.include_paths:
+                self.scan_path = path
+                logging.debug(f"Going to parse files on '{path}'")
+                self.parse_folder(path, self.__id_counter)
+        elif self.conf.mode == mode.SINGLE_TEST:
+            logging.info("\nStarting test documentation parsing")
+            self.test_path = self.locate_test()
+            
+            if self.test_path:
+                logging.debug(f"Parsing '{self.conf.test_name}'")
+                self.create_test(self.test_path, 0)
+            else:
+                logging.error(f"'{self.conf.test_name}' could not be found")

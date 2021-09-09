@@ -9,15 +9,19 @@ license: This program is free software; you can redistribute it
 
 import yaml
 import logging
+from enum import Enum
+import os
 
 
 class Config():
     """
     brief: Class that parses the configuration file and exposes the available configurations.
+           It exists two modes of execution: Normal and Single test.
     """
-    def __init__(self, config_file):
-        self.project_path = "../.."
-        self.documentation_path = ".."
+    def __init__(self, *args):
+        # If it is called using the config file
+        self.mode = mode.DEFAULT
+        self.project_path = args[1]
         self.include_paths = []
         self.include_regex = []
         self.group_files = ""
@@ -29,21 +33,44 @@ class Config():
         self.test_cases_field = None
 
         try:
-            with open(config_file) as fd:
+            with open(args[0]) as fd:
                 self._config_data = yaml.safe_load(fd)
         except:
             logging.error("Cannot load config file")
             raise Exception("Cannot load config file")
 
-        self._read_project_path()
+        self._read_function_regex()
+        self._read_output_fields()
+        self._read_test_cases_field()
         self._read_documentation_path()
         self._read_include_paths()
         self._read_include_regex()
         self._read_group_files()
-        self._read_function_regex()
         self._read_ignore_paths()
-        self._read_output_fields()
-        self._read_test_cases_field()
+
+        if len(args) >= 3:
+            self.documentation_path = args[2]
+        if len(args) == 4:
+            # It is called with a single test to parse
+            self.mode = mode.SINGLE_TEST
+            self.test_name = args[3]
+            self._read_test_info()
+            self._read_module_info()
+
+
+    def _read_test_info(self):
+        '''
+        brief: Reads from the config file the keys to be printed from test info
+        '''
+        if 'Test info' in self._config_data:
+            self.test_info = self._config_data['Test info']
+    
+    def _read_module_info(self):
+        '''
+        brief: Reads from the config file the keys to be printed from module info
+        '''
+        if 'Module info' in self._config_data:
+            self.module_info = self._config_data['Module info']
 
     def _read_project_path(self):
         """
@@ -66,7 +93,9 @@ class Config():
         if not 'Include paths' in self._config_data:
             logging.error("Config include paths are empty")
             raise Exception("Config include paths are empty")
-        self.include_paths = self._config_data['Include paths']
+        include_paths = self._config_data['Include paths']
+        for path in include_paths:
+            self.include_paths.append(os.path.join(self.project_path, path))
 
     def _read_include_regex(self):
         """
@@ -100,7 +129,9 @@ class Config():
         brief: Reads from the config file all the paths to be excluded from the parsing.
         """
         if 'Ignore paths' in self._config_data:
-            self.ignore_paths = self._config_data['Ignore paths']
+            ignore_paths = self._config_data['Ignore paths']
+            for path in ignore_paths:
+                self.ignore_paths.append(os.path.join(self.project_path, path))
 
     def _read_module_fields(self):
         """
@@ -158,3 +189,10 @@ class _fields:
     def __init__(self):
         self.mandatory = []
         self.optional = []
+
+class mode(Enum):
+    '''
+    brief: Enumeration for classificate differents behaviours for DocGenerator
+    '''
+    DEFAULT = 1
+    SINGLE_TEST = 2
