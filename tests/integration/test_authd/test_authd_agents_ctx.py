@@ -255,7 +255,7 @@ def register_agent_local_server(Name, Group=None, IP=None):
 
 # Tests
 def duplicate_ip_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated IP.
+    """Register a first agent, then register an agent with duplicate IP.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
