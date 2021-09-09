@@ -143,10 +143,10 @@
   pre_existent_keys:
     - '001 user1 any 998bb619f50225fa0a4ec3b2a4888ae0a9b1d249189827462a5689d1d5586deb'
   test_case:
-  # The output message isn't giving details about the same key, it still uses the 'Duplicated name' message
+  # The output message isn't giving details about the same key, it still uses the 'Duplicate name' message
   -
     input: '{"arguments":{"force":1,"name":"user1","ip":"any","key_hash":"74ccacd341a6087b2d3a31656b07664a9c5bb307"},"function":"add"}'
-    output: '{"error":9008,"message":"Duplicated name"}'
+    output: '{"error":9008,"message":"Duplicate name"}'
 -
   name: 'Agent with key hash 4'
   description: 'Complete request with key hash for new user'
@@ -178,7 +178,7 @@
   test_case:
   -
     input: '{"arguments":{"force":1,"name":"user1","ip":"10.10.10.10","groups":"Group1","key_hash":"74ccacd341a6087b2d3a31656b07664a9c5bb307"},"function":"add"}'
-    output: '{"error":9008,"message":"Duplicated name"}'
+    output: '{"error":9008,"message":"Duplicate name"}'
 -
   name: 'Agent with key hash 7'
   description: 'Complete request with right key hash for existing IP'
@@ -189,4 +189,4 @@
   test_case:
   -
     input: '{"arguments":{"force":1,"name":"user_","ip":"10.10.10.10","groups":"Group1","key_hash":"74ccacd341a6087b2d3a31656b07664a9c5bb307"},"function":"add"}'
-    output: '{"error":9007,"message":"Duplicated IP"}'
+    output: '{"error":9007,"message":"Duplicate IP"}'
