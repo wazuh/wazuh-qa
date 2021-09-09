@@ -270,6 +270,7 @@
       - manager
       apply_to_modules:
       - test_authd_password_tests
+      - test_authd_use_password
       sections:
       - section: auth
         elements:
