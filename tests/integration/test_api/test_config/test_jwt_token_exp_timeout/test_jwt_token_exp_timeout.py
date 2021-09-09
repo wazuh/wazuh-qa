@@ -9,45 +9,53 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check if the `auth_token_exp_timeout` setting of the API is working properly.
     This setting allows specifying the expiration time of the `JWT` token used for authentication.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_jwt_token_exp_timeout/
+    tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#auth-token-exp-timeout
+    - https://en.wikipedia.org/wiki/JSON_Web_Token
 
 tags:
     - api
@@ -93,47 +101,41 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
         and after the expiration time, waiting for a valid `HTTP status code`.
 
     wazuh_min_version:
-        3.13
+        4.2
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
-
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Checks if the `status code` 200 (ok) is received when a request is made before the token expires.
-        - Checks if the `status code` 401 (unauthorized) is received when a request is made after the token expires.
+        - Verify that the API requests are successful if the `JWT` token has not expired and vice versa.
 
-    test_input:
+    input_description:
         Different test cases are contained in an external `YAML` file (conf_exp_timeout.yaml)
-        which includes API configuration parameters.
+        which includes API configuration parameters (timeouts for token expiration).
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'200' ('OK' HTTP status code if the token has not expired)
+        - r'401' ('Unauthorized' HTTP status code if the token has expired)
 
     tags:
-
+        - token
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     short_exp = get_configuration['tags'][0] == 'short_exp_time'

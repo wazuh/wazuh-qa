@@ -9,44 +9,51 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check that the API works correctly using the `HTTPS` protocol.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_https/
+    tests/integration/test_api/test_config/test_https/test_https.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#https
 
 tags:
     - api
@@ -91,48 +98,42 @@ def test_https(tags_to_apply, get_configuration, configure_api_environment,
                restart_api, wait_for_start, get_api_details):
     '''
     description:
-        Check that the API works with `http` and `https` protocols.
+        Check that the API works with `HTTP` and `HTTPS` protocols.
         To do this, it configures the API to use both protocols
         and makes requests to it, waiting for a correct response.
 
     wazuh_min_version:
-        3.13
+        4.2
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
-
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Check if `status code` 200 (ok) is received when a request is made using the `HTTP` and `HTTPS` protocols.
+        - Verify that the API requests are made correctly using both `HTTP` and `HTTPS` protocols.
 
-    test_input:
+    input_description:
         Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters.
+        which includes API configuration parameters (HTTPS settings).
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'200' ('OK' HTTP status code)
 
     tags:
         - ssl

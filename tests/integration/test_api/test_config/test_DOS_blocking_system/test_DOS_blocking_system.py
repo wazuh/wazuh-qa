@@ -9,45 +9,53 @@ copyright:
 type:
     integration
 
-description:
-    These tests will check if the DOS attacks blocking feature
-    of the API handled by the `apid` daemon is working properly.
+brief:
+    These tests will check if the DOS (Denial-of-service attack) blocking feature
+    of the API handled by the `wazuh-apid` daemon is working properly.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_DOS_blocking_system/
+    tests/integration/test_api/test_config/test_DOS_blocking_system/test_DOS_blocking_system.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#access
+    - https://en.wikipedia.org/wiki/Denial-of-service_attack
 
 tags:
     - api
@@ -88,50 +96,45 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
                              wait_for_start, get_api_details):
     '''
     description:
-        Verify that the blocking system for IPs detected as DOS attack works.
-        For this purpose, the test causes an IP blocking, make a request
-        within the same minute, make a request after the minute.
+        Verify that the blocking system for IP addresses detected as DOS attack works.
+        For this purpose, the test causes an IP blocking, makes a request within
+        the same minute, makes a request after the minute.
 
     wazuh_min_version:
-        4.1
+        4.2
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
-
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Verify that the IP is blocked using multiple request.
-        - Check if the IP is still blocked within the one-minute block time.
-        - Verify that the IP is not blocked when expires the block time.
+        - Verify that the IP address is blocked using multiple requests.
+        - Verify that the IP address is still blocked within the one-minute block time.
+        - Verify that the IP address is not blocked when expires the blocking time.
 
-    test_input:
+    input_description:
         Different test cases are contained in an external `YAML` file (conf.yaml)
         which includes API configuration parameters.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'429' ('Too Many Requests' HTTP status code)
+        - r'200' ('OK' HTTP status code)
 
     tags:
         - dos_attack

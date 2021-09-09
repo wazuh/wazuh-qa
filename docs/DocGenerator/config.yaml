@@ -3,9 +3,9 @@ Project path: "../../tests/integration"
 Output path: "../output"
 
 Include paths:
-  - "../../tests/integration/test_active_response"
-  - "../../tests/integration/test_agentd"
-  - "../../tests/integration/test_analysisd"
+#  - "../../tests/integration/test_active_response"
+#  - "../../tests/integration/test_agentd"
+#  - "../../tests/integration/test_analysisd"
   - "../../tests/integration/test_api"
 
 Include regex:
@@ -47,25 +47,28 @@ Output fields:
     Mandatory:
       - copyright
       - type
-      - description
-      - tiers
-      - component
+      - brief
+      - tier
+      - modules
+      - components
       - path
       - daemons
-      - os_support
+      - os_platform
+      - os_version
     Optional:
-      - coverage
+      - references
       - pytest_args
       - tags
   Test:
     Mandatory:
       - description
       - wazuh_min_version
-      - assertions
-      - test_input
-      - logging
-    Optional:
       - parameters
+      - assertions
+      - inputs
+      - input_description
+      - expected_output
+    Optional:
       - tags
 
-Test cases field: test_cases
+Test cases field: inputs

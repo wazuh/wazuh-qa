@@ -9,45 +9,53 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check if the CORS (Cross-origin resource sharing) feature
-    of the API handled by the `apid` daemon is working properly.
+    of the API handled by the `wazuh-apid` daemon is working properly.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_cors/
+    tests/integration/test_api/test_config/test_cors/test_cors.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#cors
+    - https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
 
 tags:
     - api
@@ -94,54 +102,49 @@ def test_cors(origin, tags_to_apply, get_configuration, configure_api_environmen
         of the API.
 
     wazuh_min_version:
-        3.13
+        4.2
 
     parameters:
-        - origin : str
+        - origin:
             type: set
             brief: Origin path to be appended as a header in the request.
-
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
-
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Check if when CORS is enabled, the `Access-Control-Allow-Origin` header is received.
-        - Check if when CORS is enabled, the `Access-Control-Expose-Headers` header is received.
-        - Check if when CORS is enabled, the `Access-Control-Allow-Credentials` header is received.
+        - Verify that when CORS is enabled, the `Access-Control-Allow-Origin` header is received.
+        - Verify that when CORS is enabled, the `Access-Control-Expose-Headers` header is received.
+        - Verify that when CORS is enabled, the `Access-Control-Allow-Credentials` header is received.
         - Verify that when CORS is disabled, the `Access-Control-Allow-Origin` header is not received.
 
-    test_input:
+    input_description:
         A test case is contained in an external `YAML` file (conf.yaml)
         which includes API configuration parameters.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'Access-Control-Allow-Origin'
+        - r'Access-Control-Expose-Headers'
+        - r'https://test_url.com'
+        - r'true'
 
     tags:
-        - cors 
-
+        - cors
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     api_details = get_api_details()
