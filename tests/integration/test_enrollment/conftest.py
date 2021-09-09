@@ -67,16 +67,6 @@ def parse_configuration_string(configuration):
         if isinstance(value, str):
             configuration[key] = value.format(**CONFIG_PATHS)
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
-@pytest.fixture(scope="function")
-def set_test_case(test_case):
-    """Sets the current test case as a global variable accesible for different fixtures and callbacks.
-
-    Args: test_case (dict): The current test case.
-    """
-    global CURRENT_TEST_CASE
-    CURRENT_TEST_CASE = test_case
-
 
 # Agent auth launcher
 
@@ -112,49 +102,6 @@ def launch_agent_auth(configuration):
     out.communicate()
 
 
-# Socket listener
-LAST_MESSAGE = None
-
-
-def receiver_callback(received):
-    """Callback function to handle a message received by the socket listener.
-    Args:
-        received (bytes): Raw data received in the socket.
-    Returns:
-        response (bytes): Raw data to be responded to in the socket.
-    """
-    if len(received) == 0:
-        return b""
-
-    global LAST_MESSAGE
-    LAST_MESSAGE = received.decode()
-    response = CURRENT_TEST_CASE['message']['response'].format(**DEFAULT_VALUES).encode()
-    return response
-
-
-def get_last_message(timeout):
-    """Returns the last received message in the listener socket. Waits 20 seconds of timeout.
-    Returns:
-        LAST_MESSAGE (str): Decoded data received in the socket.
-        None if the response never arrived.
-    """
-    global LAST_MESSAGE
-    timeout = time.time() + timeout
-    while not LAST_MESSAGE and time.time() <= timeout:
-        pass
-    return LAST_MESSAGE
-
-
-def clear_last_message():
-    """Clears the last received message in the listener socket to wait for a new message."""
-    global LAST_MESSAGE
-    LAST_MESSAGE = None
-
-
-socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']), family='AF_INET',
-                                 connection_protocol='SSL', func=receiver_callback)
-
-
 @pytest.fixture(scope="module")
 def create_certificates():
     cert_controller = CertificateController()
@@ -163,9 +110,10 @@ def create_certificates():
     cert_controller.store_ca_certificate(cert_controller.get_root_ca_cert(), AGENT_CERT_PATH)
 
 
-@pytest.fixture(scope="function")
-def configure_socket_listener():
+def configure_socket_listener(receiver_callback):
     """Configures the socket listener to start listening on the socket."""
+    socket_listener = ManInTheMiddle(address=(DEFAULT_VALUES['manager_address'], DEFAULT_VALUES['port']),
+                                     family='AF_INET', connection_protocol='SSL', func=receiver_callback)
     socket_listener.start()
     socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
                                                    certificate=AGENT_CERT_PATH,
@@ -177,8 +125,7 @@ def configure_socket_listener():
         socket_listener.queue.get_nowait()
     socket_listener.event.clear()
 
-    yield
-    socket_listener.shutdown()
+    return socket_listener
 
 
 # Wazuh conf
