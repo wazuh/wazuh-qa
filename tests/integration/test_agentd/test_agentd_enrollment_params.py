@@ -15,7 +15,7 @@ from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
 
 from conftest import *
-
+import sys
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -178,6 +178,7 @@ def check_log_error_conf(msg):
 
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
+@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
 def test_agent_agentd_enrollment(configure_authd_server, configure_environment, test_case: list):
     global remoted_server
     print(f'Test: {test_case["name"]}')
