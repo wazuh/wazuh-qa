@@ -23,18 +23,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """ Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
 # Variables
@@ -264,7 +255,7 @@ def register_agent_local_server(Name, Group=None, IP=None):
 
 # Tests
 def duplicate_ip_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated IP.
+    """Register a first agent, then register an agent with duplicate IP.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
@@ -306,7 +297,7 @@ def duplicate_ip_agent_delete_test(server):
 
 
 def duplicate_name_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated Name.
+    """Register a first agent, then register an agent with duplicate Name.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters

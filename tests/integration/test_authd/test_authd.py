@@ -11,6 +11,7 @@ import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import load_tests
 
 # Marks
 
@@ -19,21 +20,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """Loads a yaml file from a path
-    Args:
-        path (str): path to the file.
-
-    Returns:
-        dict: dictionary containing the test info.
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = load_tests(os.path.join(test_data_path, 'enroll_messages.yaml'))
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
 # Variables
