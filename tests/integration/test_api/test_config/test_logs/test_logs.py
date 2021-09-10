@@ -9,46 +9,53 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check if the `level` setting of the API is working properly.
     This setting allows specifying the level of detail (INFO, DEBUG)
     of the messages written to the `api.log` file.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_logs/
+    tests/integration/test_api/test_config/test_logs/test_logs.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#logs
 
 tags:
     - api
@@ -107,27 +114,24 @@ def extra_configuration_before_yield():
 def test_logs(tags_to_apply, get_configuration, configure_api_environment, restart_api):
     '''
     description:
-        Check that the logs are saved in the desired path and with desired level.
+        Check if the logs are saved in the desired path and with desired level.
         Logs are usually store in `/var/ossec/logs/api.log` and with level `info`.
         In this test the API log has a different path and `debug` level configured.
         It checks if logs are saved in the new path and with `debug` level.
 
     wazuh_min_version:
-        3.13
+        4.2
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
@@ -136,16 +140,15 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
         - Verify that no `DEBUG` messages are written when the value of the `level` setting is set to `info`.
         - Verify that `DEBUG` messages are written when the value of the `level` setting is set to `debug`.
 
-    test_input:
+    input_description:
         Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters.
+        which includes API configuration parameters (log paths and log levels).
 
-    logging:
-        - api.log:
-            - r".*DEBUG: (.*)"
+    expected_output:
+        - r'.*DEBUG: (.*)'
 
     tags:
-
+        - logs
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

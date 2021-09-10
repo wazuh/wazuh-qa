@@ -112,10 +112,11 @@ def test_cache(tags_to_apply, get_configuration, configure_api_environment, rest
                wait_for_start, get_api_details):
     '''
     description:
-        Verify that the stored response is returned when the cache is enabled.
+        Check if the stored response is returned when the cache is enabled.
         Calls to rules endpoints can be cached. This test verifies if the result
-        of the first call to a rule endpoint is equal to the second within a period
-        established in the configuration, even though a new file has been created during the process.
+        of the first call to the rule endpoint is equal to the second call within
+        a period established in the configuration, even though a new file
+        has been created during the process.
 
     wazuh_min_version:
         4.2

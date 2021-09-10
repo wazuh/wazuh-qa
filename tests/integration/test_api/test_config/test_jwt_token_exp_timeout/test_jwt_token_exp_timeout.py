@@ -96,7 +96,7 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
                                wait_for_start, get_api_details):
     '''
     description:
-        Verify that the API `JWT` token expires after defined time. For this purpose,
+        Check if the API `JWT` token expires after defined time. For this purpose,
         an expiration time is set for the token, and API requests are made before
         and after the expiration time, waiting for a valid `HTTP status code`.
 

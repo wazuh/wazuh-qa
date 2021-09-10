@@ -9,46 +9,54 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check if the `rbac_mode` (Role-Based Access Control) setting
     of the API is working properly. This setting allows you to specify the
     operating mode between `whitelist mode` and `blacklist mode`.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_config/test_rbac/
+    tests/integration/test_api/test_config/test_rbac/test_rbac_mode.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#rbac-mode
+    - https://en.wikipedia.org/wiki/Role-based_access_control
 
 tags:
     - api
@@ -114,54 +122,50 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
                    wait_for_start, get_api_details):
     '''
     description:
-        Verify that the `RBAC` mode selected in `api.yaml` is applied. This test creates a user
+        Check if the `RBAC` mode selected in `api.yaml` is applied. This test creates a user
         without any assigned permission. For this reason, when `RBAC` is in `white mode`,
         there is no endpoint that the user can execute, so the `HTTP status code`
         must be 403 (forbidden). On the other hand, when it is in `black mode`,
         there is no endpoint that has it denied, so the status code must be 200 (ok).
 
     wazuh_min_version:
-        3.13
+        4.2
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_api_environment:
             type: fixture
             brief: Configure a custom environment for API testing.
-
         - restart_api:
             type: fixture
             brief: Reset `api.log` and start a new monitor.
-
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Verify that `status code` 200 (ok) is received when the value
-          of the `rbac_mode` setting is set to `black`.
-        - Verify that `status code` 403 (forbidden) is received when the value
-          of the `rbac_mode` setting is set to `white`.
+        - Check that when the value of the `rbac_mode` setting is set to `white`,
+          the API forbids requests.
+        - Verify that when the value of the `rbac_mode` setting is set to `black`,
+          the API requests are performed correctly.
 
-    test_input:
+    input_description:
         Different test cases are contained in an external `YAML` file (conf_mode.yaml)
-        which includes API configuration parameters. Two SQL scripts are also used to
-        add (schema_add_user.sql) and remove (schema_delete_user.sql) the testing user.
+        which includes API configuration parameters (rbac operation modes).
+        Two `SQL` scripts are also used to add (schema_add_user.sql)
+        and remove (schema_delete_user.sql) the testing user.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'200' ('OK' HTTP status code if `rbac_white == True`)
+        - r'403' ('Forbidden' HTTP status code if `rbac_white == False`)
 
     tags:
         - rbac

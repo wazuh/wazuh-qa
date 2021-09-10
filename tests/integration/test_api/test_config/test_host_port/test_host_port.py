@@ -101,7 +101,7 @@ def test_host_port(expected_exception, tags_to_apply,
                    get_configuration, configure_api_environment, restart_api, get_api_details):
     '''
     description:
-        Try different host and port configurations. For this purpose, apply multiple
+        Check different host and port configurations. For this purpose, apply multiple
         combinations of host and port, verify that the `aiohttp` http framework correctly
         publishes that value in the `api.log` and check that the request returns the expected one.
 

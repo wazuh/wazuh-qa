@@ -94,7 +94,9 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
                                restart_api, wait_for_start, get_api_details):
     '''
     description:
-        Check if requests to an experimental API endpoint are allowed according to the configuration.
+        Check if requests to an experimental API endpoint are allowed according
+        to the configuration. For this purpose, it configures the API to use
+        this functionality and makes requests to it, waiting for a correct response.
 
     wazuh_min_version:
         4.2

@@ -98,8 +98,8 @@ def test_https(tags_to_apply, get_configuration, configure_api_environment,
                restart_api, wait_for_start, get_api_details):
     '''
     description:
-        Check that the API works with `HTTP` and `HTTPS` protocols.
-        To do this, it configures the API to use both protocols
+        Check if the API works with `HTTP` and `HTTPS` protocols.
+        For this purpose, it configures the API to use both protocols
         and makes requests to it, waiting for a correct response.
 
     wazuh_min_version:

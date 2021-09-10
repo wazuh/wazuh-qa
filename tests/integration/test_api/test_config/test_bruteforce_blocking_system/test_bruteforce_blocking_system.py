@@ -94,7 +94,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
                                     wait_for_start, get_api_details):
     '''
     description:
-        Check that the blocking time for IP addresses detected as brute-force attack works.
+        Check if the blocking time for IP addresses detected as brute-force attack works.
         For this purpose, the test causes an IP blocking, make a request before
         the blocking time finishes and one after the blocking time.
 

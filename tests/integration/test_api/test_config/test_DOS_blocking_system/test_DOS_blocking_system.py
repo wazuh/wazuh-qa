@@ -96,7 +96,7 @@ def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_env
                              wait_for_start, get_api_details):
     '''
     description:
-        Verify that the blocking system for IP addresses detected as DOS attack works.
+        Check if the API blocking system for IP addresses detected as DOS attack works.
         For this purpose, the test causes an IP blocking, makes a request within
         the same minute, makes a request after the minute.
 
