@@ -51,6 +51,7 @@ def extra_configuration_after_yield():
     {'cache_enabled'},
     {'cache_disabled'}
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_cache(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                wait_for_start, get_api_details):
     """Verify that the stored response is returned when cache is enabled.

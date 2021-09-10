@@ -33,6 +33,7 @@ def get_configuration(request):
     {'config1'},
     {'config2'}
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                                     wait_for_start, get_api_details):
     """Check that the blocking time for IPs detected as brute-force attack works.
