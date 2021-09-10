@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the setting use_source_ip
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+metadata:
+    component:
+        - Manager
+    modules:
+        - Authd
+    daemons:
+        - authd
+    operating_system:
+        - Ubuntu
+        - CentOS
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Authd
+'''
 
 import os
 import socket
@@ -47,6 +67,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Functions
 
+
 def send_message(message):
     address, family, connection_protocol = receiver_sockets_params[0]
     SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
@@ -62,10 +83,12 @@ def send_message(message):
 
 # Fixtures
 
+
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
+
 
 @pytest.fixture(scope='function')
 def clean_client_keys_file():
@@ -81,6 +104,7 @@ def clean_client_keys_file():
 
     # Start Wazuh
     control_service('start')
+
 
 @pytest.fixture(scope='module')
 def tear_down():
@@ -105,11 +129,14 @@ def tear_down():
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
 def test_authd_force_options(clean_client_keys_file, get_configuration, configure_environment,
                              configure_sockets_environment, connect_to_sockets_module, test_case, tear_down):
-    """Check that every input message in authd port generates the adequate output
+    """
+        test_logic:
+            "Check that every input message in authd port generates the adequate output"
 
-    Every test case is defined the following way:
-        - input: message that will be tried to send to the manager
-        - output: expected response
+        checks:
+            - The manager uses the agent's IP as requested
+            - Setting an IP overrides the configuration
+            - If the IP is not defined an the setting is disabled, use 'any'
     """
 
     metadata = get_configuration['metadata']

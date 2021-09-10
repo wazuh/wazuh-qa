@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the setting force_insert
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+metadata:
+    component:
+        - Manager
+    modules:
+        - Authd
+    daemons:
+        - authd
+    operating_system:
+        - Ubuntu
+        - CentOS
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Authd
+'''
 
 import os
 import socket
@@ -47,6 +67,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Functions
 
+
 def send_message(message):
     address, family, connection_protocol = receiver_sockets_params[0]
     SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
@@ -62,10 +83,12 @@ def send_message(message):
 
 # Fixtures
 
+
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
+
 
 @pytest.fixture(scope='function')
 def clean_client_keys_file():
@@ -81,6 +104,7 @@ def clean_client_keys_file():
 
     # Start Wazuh
     control_service('start')
+
 
 @pytest.fixture(scope='module')
 def tear_down():
@@ -98,16 +122,16 @@ def tear_down():
     # Start Wazuh
     control_service('start')
 
+
 @pytest.fixture(scope='function')
 def register_previous_agent(test_case):
     if 'previous_agent_name' in test_case:
-        previous_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}'"
+        prev_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}'"
         if 'previous_agent_ip' in test_case:
-            previous_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}' IP:'{test_case['previous_agent_ip']}'"
+            prev_agent_message = f"OSSEC A:'{test_case['previous_agent_name']}' IP:'{test_case['previous_agent_ip']}'"
 
-        print("Message: ", previous_agent_message)
         receiver_sockets[0].open()
-        receiver_sockets[0].send(previous_agent_message, size=False)
+        receiver_sockets[0].send(prev_agent_message, size=False)
         timeout = time.time() + 10
         response = ''
 
@@ -124,13 +148,15 @@ def register_previous_agent(test_case):
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
 def test_authd_force_options(clean_client_keys_file, get_configuration, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, test_case, register_previous_agent,
-                             tear_down):
-    """Check that every input message in authd port generates the adequate output
+                             configure_sockets_environment, connect_to_sockets_module, test_case,
+                             register_previous_agent, tear_down):
+    """
+        test_logic:
+            "Check that every input message in authd port generates the adequate output"
 
-    Every test case is defined the following way:
-        - input: message that will be tried to send to the manager
-        - output: expected response
+        checks:
+            - The received output must match with expected when the setting is used
+            - The agent can't have a duplicate IP or name when the setting is disabled
     """
 
     metadata = get_configuration['metadata']

@@ -1,6 +1,26 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+brief: This module verifies the correct behavior of the setting use_password
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+metadata:
+    component:
+        - Manager
+    modules:
+        - Authd
+    daemons:
+        - authd
+    operating_system:
+        - Ubuntu
+        - CentOS
+    tiers:
+        - 0
+    tags:
+        - Enrollment
+        - Authd
+'''
 
 import os
 import socket
@@ -54,6 +74,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Functions
 
+
 def send_message(message):
     address, family, connection_protocol = receiver_sockets_params[0]
     SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
@@ -84,6 +105,7 @@ def read_random_pass():
 
 # Fixtures
 
+
 @pytest.fixture(scope='function')
 def reset_password(test_case, get_configuration):
 
@@ -103,7 +125,7 @@ def reset_password(test_case, get_configuration):
     control_service('stop')
 
     # in case of random pass, remove /etc/authd.pass
-    if set_password == 'random' or set_password == 'undefined' :
+    if set_password == 'random' or set_password == 'undefined':
         try:
             os.remove(authd_default_password_path)
         except FileNotFoundError:
@@ -128,6 +150,7 @@ def reset_password(test_case, get_configuration):
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
+
 
 @pytest.fixture(scope='function')
 def clean_client_keys_file():
@@ -176,11 +199,14 @@ def tear_down():
 def test_authd_force_options(clean_client_keys_file, reset_password, get_configuration, configure_environment,
                              configure_sockets_environment, connect_to_sockets_module, test_case,
                              tear_down):
-    """Check that every input message in authd port generates the adequate output
+    """
+        test_logic:
+            "Check that every input message in authd port generates the adequate output"
 
-    Every test case is defined the following way:
-        - input: message that will be tried to send to the manager
-        - output: expected response
+        checks:
+            - The random password works as expected
+            - A wrong password is rejected
+            - A request with password and use_password = 'no' is rejected
     """
 
     metadata = get_configuration['metadata']
