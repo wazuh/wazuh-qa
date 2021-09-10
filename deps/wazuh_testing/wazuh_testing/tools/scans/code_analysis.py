@@ -165,7 +165,7 @@ def get_new_flaws(bandit_results, known_flaws, directory, flaws_already_found, n
         new_flaws_output_dir (str): Path where the new flaws are going to be stored.
 
     Returns:
-        dict: Updated known flaws.
+        dict: Dictionary containing directories as keys and their flaws as values.
     """
     new_flaws = [flaw for flaw in bandit_results if
                  flaw not in known_flaws['to_fix'] and flaw not in known_flaws['false_positives']]

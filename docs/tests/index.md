@@ -8,4 +8,4 @@ interaction between integrated units.
 - **[system](system)**: Testing level that evaluates the behavior of a fully integrated software system based on
 predetermined specifications and requirements.
 
-- **[security](security)**: Testing level that checks possible vulnerabilities in the Wazuh Python code and dependencies.
+- **[scans](scans)**: Testing level that checks possible vulnerabilities in the Wazuh Python code and dependencies.
