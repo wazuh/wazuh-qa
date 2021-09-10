@@ -7,6 +7,7 @@ import os
 import yaml
 
 from jsonschema import validate
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
@@ -17,11 +18,14 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
+from wazuh_testing.qa_ctl.provisioning.local_actions import download_local_wazuh_qa_repository, run_local_command
+from wazuh_testing.tools.github_repository import get_last_wazuh_version
 
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
+WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh-qa')
 
 qactl_script_logger = Logging('QACTL_SCRIPT', 'DEBUG', True)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -63,14 +67,20 @@ def set_qactl_logging(qactl_configuration):
 
 
 def validate_parameters(parameters):
-    qactl_script_logger.debug('Validating input parameters')
+    qactl_script_logger.info('Validating input parameters')
+
+    # Check incompatible parameters
     if parameters.config and parameters.run_test:
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
                            'configuration', qactl_script_logger.error)
 
-    if parameters.dry_run and parameters.run_test is None:
-        raise QAValueError('The --dry-run parameter can only be used with --run', qactl_script_logger.error)
+    if parameters.version and parameters.run_test is None:
+        raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_script_logger.error)
 
+    if parameters.dry_run and parameters.run_test is None:
+        raise QAValueError('The -d, --dry-run parameter can only be used with -r, --run', qactl_script_logger.error)
+
+    # Check version parameter
     if parameters.version is not None:
         version = (parameters.version).replace('v', '')
 
@@ -88,7 +98,22 @@ def validate_parameters(parameters):
             raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.",
                                qactl_script_logger.error)
 
-    qactl_script_logger.debug('Input parameters validation has passed successfully')
+    # Check if tests exist
+    if parameters.run_test:
+        if parameters.version:
+            qa_branch = f"{parameters.version.split('.')[0]}.{parameters.version.split('.')[1]}".replace('v', '')
+        else:
+            version = get_last_wazuh_version()
+            qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
+
+        qa_branch = '1803-development'  # Delete this when merging on master
+        download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
+
+        for test in parameters.run_test:
+            if not 'test exists' in run_local_command(f"qa-docs -e {test} -I {WAZUH_QA_FILES}/tests/"):
+                raise QAValueError(f"{test} does not exist in {WAZUH_QA_FILES}/tests/", qactl_script_logger.error)
+
+    qactl_script_logger.info('Input parameters validation has passed successfully')
 
 
 def main():
@@ -120,13 +145,14 @@ def main():
     # Generate or get the qactl configuration file
     if arguments.run_test:
         qactl_script_logger.debug('Generating configuration file')
-        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version)
+        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, WAZUH_QA_FILES)
         config_generator.run()
         configuration_file = config_generator.config_file_path
         qactl_script_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
 
         if arguments.dry_run:
-            qactl_script_logger.info(f"Run as dry-run mode. Configuration file saved in {config_generator.config_file_path}")
+            qactl_script_logger.info(f"Run as dry-run mode. Configuration file saved in "
+                                     f"{config_generator.config_file_path}")
             return 0
     else:
         configuration_file = arguments.config
