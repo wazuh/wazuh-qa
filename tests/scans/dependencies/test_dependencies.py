@@ -5,12 +5,12 @@ import tempfile
 from json import loads
 from urllib.request import urlretrieve
 
-from python_packages_vuln_scan import export_report, report_for_pytest
+from wazuh_testing.tools.scans.dependencies import export_report, report_for_pytest
 
 REQUIREMENTS_TEMP_FILE = tempfile.NamedTemporaryFile()
 
 
-def test_python_packages_vuln_scan(pytestconfig):
+def test_python_dependencies_vuln_scan(pytestconfig):
     branch = pytestconfig.getoption('--branch')
     repo = pytestconfig.getoption('--repo')
     requirements_path = pytestconfig.getoption('--requirements-path')

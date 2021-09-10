@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import re
 import subprocess
-from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime
 from json import dumps, loads
@@ -15,20 +14,6 @@ from safety.safety import check
 python_bin = environ['_']
 package_list = []
 package_tuple = namedtuple('Package', ['key', 'version'])
-
-
-def get_args():
-    """Command line argument parsing method
-
-    Returns:
-        Namespace(args*): Optional and Positional Parsing
-    """
-    parser = ArgumentParser()
-    input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument('-r', dest='input', type=str, help='specify requirements file path.')
-    input_group.add_argument('-p', dest='pip_mode', action='store_true', help='enable pip scan mode.')
-    parser.add_argument('-o', dest='output', type=str, help='specify output file.')
-    return parser.parse_args()
 
 
 def run_report():
@@ -103,7 +88,7 @@ def export_report(output, output_file_path):
 
 
 def report_for_pytest(requirements_file):
-    """Method used by pytest since it does not use this as a script.
+    """Method used by pytest to generate a report.
 
     Args:
         requirements_file (str): path to the input file.
@@ -113,14 +98,3 @@ def report_for_pytest(requirements_file):
     """
     prepare_input(False, requirements_file)
     return run_report()
-
-
-if __name__ == '__main__':
-    options = get_args()
-    opt_pip_mode = options.pip_mode
-    opt_output_file_path = options.output
-    opt_input_file_path = options.input
-
-    prepare_input(opt_pip_mode, opt_input_file_path)
-    output_data = run_report()
-    export_report(output_data, opt_output_file_path)
