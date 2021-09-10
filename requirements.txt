@@ -34,3 +34,7 @@ cryptography==3.3.2; platform_system == "Linux" or platform_system == "MacOS" or
 urllib3>=1.26.5
 elasticsearch>=7.14.1 ; platform_system == "Linux"
 numpydoc>=1.1.0
+ansible-runner>=2.0.1 ; platform_system == "Linux"
+docker>=5.0.0 ; platform_system == "Linux"
+python-vagrant>=0.5.15 ; platform_system == "Linux"
+ansible>=3.1.0 ; platform_system == "Linux"
