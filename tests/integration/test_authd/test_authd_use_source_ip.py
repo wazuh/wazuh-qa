@@ -91,7 +91,23 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope='function')
-def clean_client_keys_file():
+def clean_client_keys_file_function():
+    # Stop Wazuh
+    control_service('stop')
+
+    # Clean client.keys
+    try:
+        with open(client_keys_path, 'w') as client_file:
+            client_file.close()
+    except IOError as exception:
+        raise
+
+    # Start Wazuh
+    control_service('start')
+
+
+@pytest.fixture(scope='module')
+def clean_client_keys_file_module():
     # Stop Wazuh
     control_service('stop')
 
@@ -127,8 +143,9 @@ def tear_down():
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
-def test_authd_force_options(clean_client_keys_file, get_configuration, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, test_case, tear_down):
+def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_file_function,
+                             get_configuration, configure_environment, configure_sockets_environment,
+                             connect_to_sockets_module, test_case, tear_down):
     """
         test_logic:
             "Check that every input message in authd port generates the adequate output"
