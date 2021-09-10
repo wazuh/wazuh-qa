@@ -205,7 +205,7 @@ class DocGenerator:
         # dump into file
         if self.conf.documentation_path:
             test_info = {}
-            test_info['test_path'] = self.test_path[6:]
+            test_info['test_path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
             for field in self.conf.module_info:
                 for name, schema_field in field.items():
                     test_info[name] = test[schema_field]
@@ -233,7 +233,6 @@ class DocGenerator:
         if self.conf.mode == mode.DEFAULT:
             logging.info("\nStarting documentation parsing")
             clean_folder(self.conf.documentation_path)
-
             for path in self.conf.include_paths:
                 self.scan_path = path
                 logging.debug(f"Going to parse files on '{path}'")
@@ -241,7 +240,6 @@ class DocGenerator:
         elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
             self.test_path = self.locate_test()
-            
             if self.test_path:
                 logging.debug(f"Parsing '{self.conf.test_name}'")
                 self.create_test(self.test_path, 0)
