@@ -62,9 +62,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "Consider possible security implications associated with check_output module.",
-            "line_number": 16,
+            "line_number": 14,
             "line_range": [
-                16
+                14
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
             "test_id": "B404",
@@ -76,9 +76,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "Starting a process with a partial executable path",
-            "line_number": 41,
+            "line_number": 39,
             "line_range": [
-                41
+                39
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b607_start_process_with_partial_path.html",
             "test_id": "B607",
@@ -90,9 +90,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 41,
+            "line_number": 39,
             "line_range": [
-                41
+                39
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -104,27 +104,13 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible binding to all interfaces.",
-            "line_number": 66,
+            "line_number": 64,
             "line_range": [
-                66
+                64
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
             "test_name": "hardcoded_bind_all_interfaces"
-        },
-        {
-            "code": "     failed_files = list()\n     zip_file_path = os.path.join(common.wazuh_path, 'queue', 'cluster', name, f'{name}-{time()}-{str(random())[2:]}.zip')\n     if not os.path.exists(os.path.dirname(zip_file_path)):\n",
-            "filename": "framework/wazuh/core/cluster/cluster.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-            "line_number": 317,
-            "line_range": [
-                317
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b311-random",
-            "test_id": "B311",
-            "test_name": "blacklist"
         },
         {
             "code": "         'port': 1516,\n         'bind_addr': '0.0.0.0',\n         'nodes': ['NODE_IP'],\n         'hidden': 'no'\n     }\n \n     try:\n         config_cluster = get_ossec_conf(section='cluster', conf_file=config_file, from_import=from_import)['cluster']\n     except WazuhException as e:\n63         if e.code == 1106:\n64             # If no cluster configuration is present in ossec.conf, return default configuration but disabling it.\n65             cluster_default_configuration['disabled'] = True\n",
@@ -395,6 +381,20 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
             "test_name": "subprocess_without_shell_equals_true"
+        },
+        {
+            "code": "     failed_files = list()\n     zip_file_path = path.join(common.wazuh_path, 'queue', 'cluster', name, f'{name}-{time()}-{str(random())[2:]}.zip')\n     if not path.exists(path.dirname(zip_file_path)):\n",
+            "filename": "framework/wazuh/core/cluster/cluster.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+            "line_number": 306,
+            "line_range": [
+                306
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b311-random",
+            "test_id": "B311",
+            "test_name": "blacklist"
         }
     ],
     "to_fix": []
