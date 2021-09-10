@@ -39,7 +39,8 @@ class QAFramework():
         dependencies_task = AnsibleTask({'name': 'Install python dependencies',
                                          'shell': 'python3 -m pip install -r requirements.txt --no-cache-dir --upgrade '
                                                   '--only-binary=:cryptography,grpcio: --ignore-installed',
-                                         'args': {'chdir': self.workdir}})
+                                         'args': {'chdir': self.workdir},
+                                         'become': True})
         ansible_tasks = [dependencies_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
         QAFramework.LOGGER.debug(f"Installing python dependencies in {hosts} hosts")
