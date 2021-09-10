@@ -14,7 +14,7 @@ import json
 from wazuh_testing import tools
 from wazuh_testing.tools.monitoring import make_callback, FileMonitor
 from datetime import datetime
-from wazuh_testing.tools import WAZUH_PATH, get_version
+from wazuh_testing.tools import WAZUH_PATH, get_version, get_service
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file, count_file_lines
@@ -42,6 +42,8 @@ UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_r
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
+mark_skip_agentLinux = pytest.mark.skipif(get_service() == 'wazuh-agent' and
+                                          sys_platform == 'Linux', reason="It will be blocked by wazuh/wazuh#9763")
 
 if not global_parameters.wpk_version:
     raise Exception("The WPK package version must be defined by parameter. See README.md")
@@ -344,6 +346,7 @@ def prepare_agent_version(get_configuration):
                             '-C', '/'])
 
 
+@mark_skip_agentLinux
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     metadata = get_configuration['metadata']
