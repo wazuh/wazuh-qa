@@ -1,4 +1,5 @@
 import os
+import random
 
 from tempfile import gettempdir
 from sys import exit
@@ -12,10 +13,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
 
 
 class QACTLConfigGenerator:
@@ -69,29 +67,17 @@ class QACTLConfigGenerator:
 
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, tests, wazuh_version):
+    def __init__(self, tests, wazuh_version, qa_files_path=f"{gettempdir()}/wazuh-qa"):
         self.tests = tests
         self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
         self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
         self.config_file_path = f"{gettempdir()}/config_{get_current_timestamp()}.yaml"
         self.config = {}
         self.hosts = []
+        self.qa_files_path = qa_files_path
 
     def __get_qa_branch(self):
-         return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}".replace('v', '')
-
-    def __qa_docs_mocking(self, test_name):
-        mocked_file = f"{gettempdir()}/mocked_data.json"
-        mocking_data = {
-            'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-            'test_wazuh_min_version': '4.2.0',
-            'test_system': 'linux',
-            'test_vendor': 'ubuntu',
-            'test_os_version': '20.04',
-            'test_target': 'manager'
-        }
-
-        file.write_json_file(mocked_file, mocking_data)
+        return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}".replace('v', '')
 
     def __get_test_info(self, test_name):
         """Get information from a documented test.
@@ -102,17 +88,17 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        ansible_tasks = [AnsibleTask({'name': f"Run qa-docs tool to get {test_name} info",
-                                      'command': f"qa-docs -T {test_name} -O {gettempdir()}"})]
-        inventory = AnsibleInventory([AnsibleInstance('127.0.0.1', 'local_user', connection_method='local')])
-        playbook_parameters = {'hosts': '127.0.0.1', 'tasks_list': ansible_tasks}
-        try:
-            AnsibleRunner.run_ephemeral_tasks(inventory.inventory_file_path, playbook_parameters, output=True)
-        finally:
-            file.delete_file(inventory.inventory_file_path)
+        qa_docs_command = f"qa-docs -T {test_name} -o {gettempdir()} -I {self.qa_files_path}/tests"
+
+        run_local_command(qa_docs_command)
 
         # Read test data file
-        info = file.read_json_file(f"{gettempdir()}/{test_name}.json")
+        try:
+            info = file.read_json_file(f"{gettempdir()}/{test_name}.json")
+        except FileNotFoundError:
+            raise QAValueError(f"Could not find {gettempdir()}/{test_name}.json file. Perhaps qa-docs has not "
+                               f"generated it correctly. Try manually with command: {qa_docs_command}",
+                               QACTLConfigGenerator.LOGGER.error)
 
         # Add test name extra info
         info['test_name'] = test_name
@@ -128,38 +114,9 @@ class QACTLConfigGenerator:
         Returns:
             dict object : dict containing all the information of the tests given from their documentation.
         """
-        #tests_info = [ __get_test_info(test) for test in self.tests ]
-        tests_info = [
-            {
-                'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-                'test_wazuh_min_version': '4.1.0',
-                'test_system': 'linux',
-                'test_vendor': 'ubuntu',
-                'test_os_version': '20.04',
-                'test_target': 'manager',
-                'test_name': 'test_general_settings_enabled'
-            },
-            # {
-            #     'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-            #     'test_wazuh_min_version': '4.1.0',
-            #     'test_system': 'linux',
-            #     'test_vendor': 'centos',
-            #     'test_os_version': '8',
-            #     'test_target': 'agent',
-            #     'test_name': 'test_general_settings_enabled'
-            # },
-            # {
-            #     'test_path': 'tests/integration/test_vulnerability_detector/test_general_settings/test_general_settings_enabled.py',
-            #     'test_wazuh_min_version': '4.1.0',
-            #     'test_system': 'linux',
-            #     'test_vendor': 'ubuntu',
-            #     'test_os_version': '20.04',
-            #     'test_target': 'manager',
-            #     'test_name': 'test_general_settings_enabled'
-            # }
-        ]
-        return tests_info
+        tests_info = [self.__get_test_info(test) for test in self.tests]
 
+        return tests_info
 
     def __validate_test_info(self, test_info, user_input=True, log_error=True):
         """Validate the test information in order to check that the fields that contains are suitable
@@ -180,7 +137,7 @@ class QACTLConfigGenerator:
             user_continue = input('Do you want to continue with qa-ctl running? [y/n]: ')
             if user_continue.lower() != 'y':
                 QACTLConfigGenerator.LOGGER.debug('The user has decided to stop execution due to incompatibility '
-                                                    'between test and qa-ctl')
+                                                  'between test and qa-ctl')
                 exit(0)
 
         def _validation_error(log_error=True, error_message=None, user_input=True):
@@ -199,23 +156,23 @@ class QACTLConfigGenerator:
             if user_input:
                 _ask_user_input()
 
-        def _check_validate(check, allowed_values, user_input, log_error, test_name, system):
+        def _check_validate(check, test_info, allowed_values, user_input, log_error):
             """Check if the validation process for a field has succeed.
 
             Args:
                 check (string) : item that is going to be validated.
+                test_info (dict) : test info data to validate.
                 allowed_values (dict): dict containing all the allowed values for the item.
                 user_input (boolean): boolean that checks if there is going to be an input from the user.
                 log_error (boolean): boolean that checks if there is going to be a logging of the errors.
-                test_name (string): name of the test.
-                system (string): name of the system needed for running the test.
 
             Returns:
                 boolean : True in case the validation checking has succeed, false otherwise.
             """
-            if check not in allowed_values:
-                error_message = f"{test_name} cannot be launched. Reason: Currently we do not "\
-                                f"support {system}. Allowed values: {allowed_values}"
+            # Intersection of allowed values and test info values
+            if len(list(set(test_info[check]) & set(allowed_values))) == 0:
+                error_message = f"{test_info['test_name']} cannot be launched. Reason: Currently we do not "\
+                                f"support {test_info[check]}. Allowed values: {allowed_values}"
                 _validation_error(log_error, error_message, user_input)
 
                 return False
@@ -223,20 +180,15 @@ class QACTLConfigGenerator:
             return True
 
         allowed_info = {
-            'systems': ['linux'],
-            'vendors': ['centos', 'ubuntu']
+            'test_system': ['linux'],
+            'test_vendor': ['centos', 'ubuntu']
         }
 
-        checks = {
-            test_info['test_system']: allowed_info['systems'],
-            test_info['test_vendor']: allowed_info['vendors']
-        }
         validation_ok = True
 
         # Validate checks
-        for check, allowed_values in checks.items():
-            validation_ok = _check_validate(check, allowed_values, user_input, log_error, test_info['test_name'],
-                                            test_info['test_system'])
+        for check, allowed_values in allowed_info.items():
+            validation_ok = _check_validate(check, test_info, allowed_values, user_input, log_error)
             if not validation_ok:
                 return False
 
@@ -311,7 +263,9 @@ class QACTLConfigGenerator:
             vm_memory (int): size of the ram that will be dedicated to the new vagrant box.
 
         Returns:
-            dict object: dict containing all the field required for generating a new vagrant box in the deployment module."""
+            dict object: dict containing all the field required for generating a new vagrant box in the deployment
+                         module.
+        """
         instance_ip = self.__get_host_IP()
         instance = {
             'enabled': True,
@@ -357,13 +311,23 @@ class QACTLConfigGenerator:
 
         for test in tests_info:
             if self.__validate_test_info(test):
+                # Choose items from the available list. To be improved in future versions
+                if 'ubuntu' in test['test_vendor'] and 'centos' in test['test_vendor']:
+                    vendors = ['ubuntu', 'centos']
+                    test['test_vendor'] = random.choice(vendors)
+                else:
+                    test['test_vendor'] = 'ubuntu' if 'ubuntu' in test['test_vendor'] else 'centos'
+
+                test['test_target'] = 'manager' if 'manager' in test['test_target'] else 'agent'
+                test['test_system'] = 'linux'
+
                 # Process deployment data
                 host_number = len(self.config['deployment'].keys()) + 1
                 vm_name = f"{test['test_name']}_{get_current_timestamp()}"
                 self.config['deployment'][f"host_{host_number}"] = {
                     'provider': {
-                    'vagrant': self.__add_instance(test['test_vendor'], vm_name, test['test_target'],
-                                                    test['test_system'])
+                        'vagrant': self.__add_instance(test['test_vendor'], vm_name, test['test_target'],
+                                                       test['test_system'])
                     }
                 }
                 # Add manager if the target is an agent
@@ -372,9 +336,9 @@ class QACTLConfigGenerator:
                     self.config['deployment'][f"host_{host_number}"] = {
                         'provider': {
                             'vagrant': self.__add_instance(test['test_vendor'], vm_name, 'manager',
-                                                        test['test_system'])
+                                                           test['test_system'])
                         }
-                }
+                    }
 
     def __process_provision_data(self):
         """Generate the data for the provision module using the fields from the already generated deployment module."""
@@ -423,28 +387,27 @@ class QACTLConfigGenerator:
         test_host_number = len(self.config['tests'].keys()) + 1
 
         for test in tests_info:
-            if self.__validate_test_info(test, False, False):
-                instance = f"host_{test_host_number}"
-                self.config['tests'][instance] = {'host_info': {}, 'test': {}}
-                self.config['tests'][instance]['host_info'] = \
-                    dict(self.config['provision']['hosts'][instance]['host_info'])
-                self.config['tests'][instance]['test'] = {
-                    'type': 'pytest',
-                    'path': {
-                        'test_files_path': f"{gettempdir()}/wazuh-qa/{test['test_path']}",
-                        'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
-                        'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
-                    }
+            instance = f"host_{test_host_number}"
+            self.config['tests'][instance] = {'host_info': {}, 'test': {}}
+            self.config['tests'][instance]['host_info'] = \
+                dict(self.config['provision']['hosts'][instance]['host_info'])
+            self.config['tests'][instance]['test'] = {
+                'type': 'pytest',
+                'path': {
+                    'test_files_path': f"{gettempdir()}/wazuh-qa/{test['test_path']}",
+                    'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
+                    'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
                 }
+            }
+            test_host_number += 1
+            # If it is an agent test then we skip the next manager instance since no test will be launched in that
+            # instance
+            if test['test_target'] == 'agent':
                 test_host_number += 1
-                # If it is an agent test then we skip the next manager instance since no test will be launched in that
-                # instance
-                if test['test_target'] == 'agent':
-                    test_host_number += 1
 
     def __process_test_info(self, tests_info):
-        """Process all the info of the desired tests that are going to be run in order to generate the data configuration
-        for the YAML config file.
+        """Process all the info of the desired tests that are going to be run in order to generate the data
+           configuration for the YAML config file.
 
         Args:
             tests_info(dict object): dict object containing information of all the tests that are going to be run.
@@ -465,4 +428,3 @@ class QACTLConfigGenerator:
             self.__delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
-

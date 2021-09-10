@@ -4,16 +4,16 @@ class QACTLConfiguration:
 
     Args:
         configuration_data (dict) : Dict with all the info needed for this module coming from config file.
-    
+
     Attributes:
         configuration_data (dict) : Dict with all the info needed for this module coming from config file.
         vagrant_output (boolean): Defines if the vagrant's outputs are going to be replaced by customized
         outputs or if they remain with the default outputs. This parameter is set to 'False' by default.
-        ansible_output (boolean): Defines if the ansible's outputs are going to be replaced by customized 
+        ansible_output (boolean): Defines if the ansible's outputs are going to be replaced by customized
         outputs or if they remain with the default outputs. This parameter is set to 'False' by default.
         logging_enable (boolean): This field is used for enabling or disabling the logging outputs option.
         Its default value is set to 'True'.
-        logging_level (string): Defines the logging level for the outputs. 
+        logging_level (string): Defines the logging level for the outputs.
         Four options are available: DEBUG, INFO, WARNING, ERROR, CRITICAL.
         logging_file (string): This field defines a path for a file where the outputs will be logged as well
     """
@@ -44,7 +44,6 @@ class QACTLConfiguration:
                     self.logging_level = self.configuration_data['config']['logging']['level']
                 if 'file' in self.configuration_data['config']['logging']:
                     self.logging_file = self.configuration_data['config']['logging']['file']
-
 
     def __str__(self):
         """Define how the class object is to be displayed."""
