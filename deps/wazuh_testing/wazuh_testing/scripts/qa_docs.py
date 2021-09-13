@@ -27,15 +27,21 @@ def main():
     parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
     parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
     parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launch_app')
-    parser.add_argument('-T', help="Test name or path to parse.", dest='test_input')
+    parser.add_argument('-T', help="Test name to parse.", dest='test_input')
     parser.add_argument('-o', help="Output directory path.", dest='output_path')
-    parser.add_argument('-I', help="Tests input directory", dest='test_dir', required=True)
+    parser.add_argument('-I', help="Path where tests are located", dest='test_dir', required=True)
+    parser.add_argument('-e', help="Checks if test exists", dest='test_exist')
     args = parser.parse_args()
 
     if args.debug_level:
         start_logging(LOG_PATH, logging.DEBUG)
     else:
         start_logging(LOG_PATH)
+
+    if args.test_exist:
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
+        if doc_check.locate_test() is not None:
+            print("test exists")
 
     if args.version:
         print(f"qa-docs v{VERSION}")
@@ -53,13 +59,14 @@ def main():
         os.chdir(SEARCH_UI_PATH)
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
     else:
-        docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
-        if args.test_input:
-            if args.output_path:
-                docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
-            else:
-                docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_input))
-        docs.run()
+        if not args.test_exist:
+            docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+            if args.test_input:
+                if args.output_path:
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
+                else:
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_input))
+            docs.run()
 
     if __name__ == '__main__':
         main()

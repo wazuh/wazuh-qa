@@ -193,6 +193,8 @@ class DocGenerator:
             for filename in filenames:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
+
+        print('test does not exist')
         return None
 
     def print_test_info(self, test):

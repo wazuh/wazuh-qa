@@ -38,11 +38,11 @@ def get_files_from_directory(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join(path, filename))
+            paths.append(os.path.join('..', path, filename))
     return paths
 
 
-package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui/'))
+package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(name='wazuh_testing',
       version='4.3.0',
@@ -57,3 +57,4 @@ setup(name='wazuh_testing',
       include_package_data=True,
       zip_safe=False
       )
+
