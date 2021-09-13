@@ -11,6 +11,8 @@ import wazuh_testing.qa_ctl.deployment.vagrantfile as vfile
 from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
+
 
 class VagrantWrapper(Instance):
     """Class to handle Vagrant operations. The class will use the Vagrantfile class to create a vagrantfile in
@@ -31,6 +33,7 @@ class VagrantWrapper(Instance):
         vagrantfile (Vagrantfile): Vagrantfile object containing the vagrantfile information.
         vagrant (Vagrant): Vagrant object to handle vagrant operations
         vm_name (String): Name that will be assigned to the VM
+        vm_box (String): Name or link to the Vagrant box
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
@@ -38,6 +41,7 @@ class VagrantWrapper(Instance):
                  quiet_out=True):
         self.box_folder = os.path.join(vagrant_root_folder, vm_name)
         self.vm_name = vm_name
+        self.vm_box = vm_box
         os.makedirs(self.box_folder, exist_ok=True)
 
         self.vagrantfile = vfile.Vagrantfile(self.box_folder, vm_box, vm_label, vm_name, vm_cpus, vm_memory,
@@ -49,6 +53,10 @@ class VagrantWrapper(Instance):
     def run(self):
         """Write the vagrantfile and starts the VM specified in the vagrantfile."""
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up")
+
+        if len(run_local_command(f"vagrant box list | grep {self.vm_box}")) == 0:
+            VagrantWrapper.LOGGER.info(f"{self.vm_box} vagrant box not found in local repository. Downloading and "
+                                       'running')
         self.vagrant.up()
         VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been created sucessfully")
 
