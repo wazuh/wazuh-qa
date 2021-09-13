@@ -1,5 +1,4 @@
 import os
-import random
 
 from tempfile import gettempdir
 from sys import exit
@@ -312,11 +311,10 @@ class QACTLConfigGenerator:
         for test in tests_info:
             if self.__validate_test_info(test):
                 # Choose items from the available list. To be improved in future versions
-                if 'ubuntu' in test['test_vendor'] and 'centos' in test['test_vendor']:
-                    vendors = ['ubuntu', 'centos']
-                    test['test_vendor'] = random.choice(vendors)
+                if 'centos' in test['test_vendor']:
+                    test['test_vendor'] = 'centos'
                 else:
-                    test['test_vendor'] = 'ubuntu' if 'ubuntu' in test['test_vendor'] else 'centos'
+                    test['test_vendor'] = 'ubuntu'
 
                 test['test_target'] = 'manager' if 'manager' in test['test_target'] else 'agent'
                 test['test_system'] = 'linux'
@@ -396,7 +394,7 @@ class QACTLConfigGenerator:
                 'path': {
                     'test_files_path': f"{gettempdir()}/wazuh-qa/{test['test_path']}",
                     'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
-                    'test_results_path': f"{gettempdir()}/test_{test['test_name']}_{get_current_timestamp()}/"
+                    'test_results_path': f"{gettempdir()}/{test['test_name']}_{get_current_timestamp()}/"
                 }
             }
             test_host_number += 1
