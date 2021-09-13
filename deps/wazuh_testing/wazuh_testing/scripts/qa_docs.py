@@ -13,24 +13,46 @@ OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'q
 LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
 
+
 def start_logging(folder, debug_level=logging.INFO):
     LOG_PATH = os.path.join(folder, f"{os.path.splitext(os.path.basename(__file__))[0]}.log")
     if not os.path.exists(folder):
         os.makedirs(folder)
     logging.basicConfig(filename=LOG_PATH, level=debug_level)
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', help="Run a sanity check", action='store_true', dest='sanity')
-    parser.add_argument('-v', help="Print version", action='store_true', dest="version")
-    parser.add_argument('-t', help="Test configuration", action='store_true', dest='test_config')
-    parser.add_argument('-d', help="Enable debug messages.", action='count', dest='debug_level')
-    parser.add_argument('-i', help="Indexes the data to elasticsearch.", dest='index_name')
-    parser.add_argument('-l', help="Indexes the data and launch the application.", dest='launch_app')
-    parser.add_argument('-T', help="Test name to parse.", dest='test_input')
-    parser.add_argument('-o', help="Output directory path.", dest='output_path')
-    parser.add_argument('-I', help="Path where tests are located", dest='test_dir', required=True)
-    parser.add_argument('-e', help="Checks if test exists", dest='test_exist')
+
+    parser.add_argument('-s', '--sanity-check', action='store_true', dest='sanity',
+                        help="Run a sanity check")
+
+    parser.add_argument('-v', '--version', action='store_true', dest="version",
+                        help="Print qa-docs version")
+
+    parser.add_argument('-t', action='store_true', dest='test_config',
+                        help="Load test configuration.")
+    parser.add_argument('-d', action='count', dest='debug_level',
+                        help="Enable debug messages.")
+
+    parser.add_argument('-i', '--index-data', dest='index_name',
+                        help="Indexes the data named as you specify as argument to elasticsearch.")
+
+    parser.add_argument('-l', '--launch-ui', dest='launch_app',
+                        help="Indexes the data named as you specify as argument and launch SearchUI.")
+
+    parser.add_argument('-T', dest='test_input',
+                        help="Parse the test that you pass as argument.")
+
+    parser.add_argument('-o', dest='output_path',
+                        help="Specifies the output directory for test parsed when -T is used.")
+
+    parser.add_argument('-I', dest='test_dir', required=True,
+                        help="Path where tests are located.")
+
+    parser.add_argument('-e', dest='test_exist',
+                        help="Checks if test exists or not",)
+
     args = parser.parse_args()
 
     if args.debug_level:
