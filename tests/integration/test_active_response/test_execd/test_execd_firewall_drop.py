@@ -286,11 +286,11 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
         parameters for `firewall-drop` command and the expected result.
 
     expected_output:
-        - r"DEBUG: Received message"
-        - r"Starting"
-        - r"active-response/bin/firewall-drop"
-        - r"Ended"
-        - r"Cannot read 'srcip' from data" (If the `active response` fails)
+        - r'DEBUG: Received message'
+        - r'Starting'
+        - r'active-response/bin/firewall-drop'
+        - r'Ended'
+        - r'Cannot read 'srcip' from data' (If the `active response` fails)
 
     tags:
         - simulator

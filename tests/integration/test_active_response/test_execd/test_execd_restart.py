@@ -238,12 +238,12 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version,
         parameters for `restart-wazuh` command and the expected result.
 
     expected_output:
-        - r"DEBUG: Received message"
-        - r"Shutdown received. Deleting responses."
-        - r"Starting"
-        - r"active-response/bin/restart-wazuh"
-        - r"Ended"
-        - r"Invalid input format" (If the `active response` fails)
+        - r'DEBUG: Received message'
+        - r'Shutdown received. Deleting responses.'
+        - r'Starting'
+        - r'active-response/bin/restart-wazuh'
+        - r'Ended'
+        - r'Invalid input format' (If the `active response` fails)
 
     tags:
         - simulator
