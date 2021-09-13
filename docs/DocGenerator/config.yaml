@@ -3,7 +3,7 @@ Project path: "../../tests/integration"
 Output path: "../output"
 
 Include paths:
-#  - "../../tests/integration/test_active_response"
+  - "../../tests/integration/test_active_response"
 #  - "../../tests/integration/test_agentd"
 #  - "../../tests/integration/test_analysisd"
   - "../../tests/integration/test_api"

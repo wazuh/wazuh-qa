@@ -9,49 +9,53 @@ copyright:
 type:
     integration
 
-description:
+brief:
     These tests will check if the active responses, which are executed by
-    the `wazuh-execd` program via scripts, run correctly.
+    the `wazuh-execd` daemon via scripts, run correctly. Active responses
+    execute a script in response to the triggering of specific alerts
+    based on the alert level or rule group.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    agent
+modules:
+    - active_response
+
+components:
+    - agent
 
 path:
-    tests/integration/test_active_response/test_execd/
+    tests/integration/test_active_response/test_execd/test_execd_firewall_drop.py
 
 daemons:
-    - execd
+    - wazuh-analysisd
+    - wazuh-authd
+    - wazuh-execd
+    - wazuh-remoted
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
-    - windows, 7
-    - windows, 8
-    - windows, 10
-    - windows, server 2003
-    - windows, server 2012
-    - windows, server 2016
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
-
-tags:
-    - active_response
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
 '''
 import json
 import os
@@ -153,7 +157,7 @@ def start_agent(request, get_configuration):
 
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
-    """Remove the test IP from iptables if it exist.
+    """Remove the testing IP address from `iptables` if it exists.
 
     Args:
         get_configuration (fixture): Get configurations from the module.
@@ -242,7 +246,10 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     '''
     description:
-        Check if firewall-drop command of Active Response is executed correctly.
+        Check if `firewall-drop` command of `active response` is executed correctly.
+        For this purpose, a simulated agent is used and the active response
+        is sent to it. This response includes an IP address that must be added
+        and removed from iptables, the Linux firewall.
 
     wazuh_min_version:
         4.2
@@ -250,51 +257,43 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
     parameters:
         - set_debug_mode:
             type: fixture
-            brief: Set execd daemon in debug mode.
-
+            brief: Set the `wazuh-execd` daemon in debug mode.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - test_version:
             type: fixture
-            brief: Validate Wazuh version.
-
+            brief: Validate the Wazuh version.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - remove_ip_from_iptables:
             type: fixture
-            brief: Remove the test IP from iptables if it exist.
-
+            brief: Remove the testing IP address from `iptables` if it exists.
         - start_agent:
             type: fixture
-            brief: Create Remoted and Authd simulators, register agent and start it.
-
+            brief: Create `wazuh-remoted` and `wazuh-authd` simulators, register agent and start it.
         - set_ar_conf_mode:
             type: fixture
-            brief: Configure Active Responses used in tests.
+            brief: Configure the active responses used in the test.
 
     assertions:
-        - Check that the sent IP is added to iptables.
-        - Check that the sent IP is removed from iptables.
+        - Verify that the testing IP address is added to `iptables`.
+        - Verify that the testing IP address is removed from `iptables`.
 
-    test_input:
-        Several `firewall-drop` commands with different parameters and the expected result after running them.
+    input_description:
+        Different use cases are found in the test module and include
+        parameters for `firewall-drop` command and the expected result.
 
-    logging:
-        - ossec.log:
-            - r"DEBUG: Received message "
-
-        - active-responses.log:
-            - r"Starting"
-            - r"active-response/bin/firewall-drop "
-            - r"Ended"
-            - r"Cannot read 'srcip' from data"
+    expected_output:
+        - r"DEBUG: Received message"
+        - r"Starting"
+        - r"active-response/bin/firewall-drop"
+        - r"Ended"
+        - r"Cannot read 'srcip' from data" (If the `active response` fails)
 
     tags:
-        - active_response
+        - simulator
     '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
