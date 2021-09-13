@@ -24,12 +24,13 @@ metadata:
 
 import pytest
 import os
+import socket
 
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import load_tests, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, make_callback
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from conftest import *
 
 
@@ -40,10 +41,45 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
-
+host_name = socket.gethostname()
 AGENTD_TIMEOUT = 20
 
+
+def get_temp_yaml(param):
+    """Creates a temporal config file."""
+    temp = os.path.join(test_data_path, 'temp.yaml')
+    with open(configurations_path, 'r') as conf_file:
+        enroll_conf = {'enrollment': {'elements': []}}
+        for elem in param:
+            if elem == 'password':
+                continue
+            enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
+        temp_conf_file = yaml.safe_load(conf_file)
+        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+
+
+def override_wazuh_conf(configuration, test):
+    """Re-writes Wazuh configuration file with new configurations from the test case.
+    Args:
+        configuration (dict): Dictionary with the configuration to overwrite.
+        test (str): Name of the current test.
+    """
+    parse_configuration_string(configuration)
+    # Configuration for testing
+    temp = get_temp_yaml(configuration)
+    conf = load_wazuh_configurations(temp, test, )
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+    # Set new configuration
+    write_wazuh_conf(test_config)
+
+
 # Fixtures
+
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
@@ -92,8 +128,8 @@ def test_agentd_enrollment(configure_environment, create_certificates, set_keys,
 
     else:
         control_service('start', daemon='wazuh-agentd')
-        test_expected = test_case['message']['expected'].format(**DEFAULT_VALUES)
-        test_response = test_case['message']['response'].format(**DEFAULT_VALUES)
+        test_expected = test_case['message']['expected'].format(host_name=host_name)
+        test_response = test_case['message']['response'].format(host_name=host_name)
         receiver_callback = lambda received_event: test_response if test_expected.encode() == received_event else ""
         socket_listener = configure_socket_listener(receiver_callback)
         # Monitor MITM queue
