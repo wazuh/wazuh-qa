@@ -85,8 +85,9 @@ class Pytest(Test):
         assets_folder = 'assets/'
         reports_folder = 'reports'
         assets_zip = "assets.zip"
-        html_report_file_name = f"test_report-{datetime.now()}.html"
-        plain_report_file_name = f"plain_report-{datetime.now()}.txt"
+        date_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')
+        html_report_file_name = f"test_report_{date_time}.html"
+        plain_report_file_name = f"test_report_{date_time}.txt"
         playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
         reports_directory = os.path.join(self.tests_run_dir, reports_folder)
         plain_report_file_path = os.path.join(reports_directory, plain_report_file_name)
@@ -188,7 +189,7 @@ class Pytest(Test):
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name),
                                  test_name=self.tests_path)
 
-        Pytest.LOGGER.debug(f"{self.tests_path} tests of {self.hosts} hosts were saved in {self.tests_result_path}")
+        Pytest.LOGGER.info(f"{self.tests_path} tests results were saved in {self.tests_result_path}")
 
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
