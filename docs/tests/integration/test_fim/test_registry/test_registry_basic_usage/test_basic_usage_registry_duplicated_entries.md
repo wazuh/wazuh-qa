@@ -11,9 +11,9 @@ This test will check that two monitored registries with the same name value but 
 ## Test logic
 
 The test monitor two registries with the same path but different capitalization. It creates
-one registry with the path being one of the two registries monitorized and then tries to grab
-one added event for the registry creation. Finally it tries to grab the added event one second
-time but it should rise one TimeoutError to ensure only one added event was sent.
+one registry with the path being one of the two registries monitored and then tries to grab
+one added event for the registry creation. Finally, it tries to grab the added event one second
+time but it should raise one TimeoutError to ensure only one added event was sent.
 
 ## Execution result
 ```

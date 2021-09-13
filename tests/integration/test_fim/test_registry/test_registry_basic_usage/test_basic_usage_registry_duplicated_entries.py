@@ -12,11 +12,11 @@ def extra_configuration_after_yield():
     fim.delete_registry(fim.registry_parser[key], sub_key_2, fim.KEY_WOW64_64KEY)
 
 
-def check_event_type_and_path(fim_event, monitorized_registry):
+def check_event_type_and_path(fim_event, monitored_registry):
     check_event = False
     if fim_event['type'] == 'added':
         registry_event_path = fim_event['path']
-        if monitorized_registry.lower() == registry_event_path.lower():
+        if monitored_registry.lower() == registry_event_path.lower():
             check_event = True
 
     return check_event
@@ -28,7 +28,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # Variables
 
-key = "HKEY_LOCAL_MACHINE"
+key = 'HKEY_LOCAL_MACHINE'
 classes_subkey = os.path.join('SOFTWARE', 'Classes')
 
 sub_key_1 = os.path.join(classes_subkey, 'testkey')
@@ -88,7 +88,7 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuratio
 
     mode = get_configuration['metadata']['fim_mode']
     scheduled = mode == 'scheduled'
-    monitorized_registry = os.path.join(key, subkey2)
+    monitored_registry = os.path.join(key, subkey2)
 
     fim.create_registry(fim.registry_parser[key], subkey2, arch)
 
@@ -98,14 +98,14 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuratio
                                   error_message='Did not receive expected "Sending Fim event: ..." \
                                   event').result()
 
-    if check_event_type_and_path(fim_event['data'], monitorized_registry):
+    if check_event_type_and_path(fim_event['data'], monitored_registry):
         with pytest.raises(TimeoutError):
             fim_event = log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=fim.callback_detect_event,
                                           error_message='Did not receive expected '
                                           '"Sending Fim event: ..." event').result()
 
-            if check_event_type_and_path(fim_event['data'], monitorized_registry):
+            if check_event_type_and_path(fim_event['data'], monitored_registry):
                 raise pytest.fail('Only one added event for the registry was expected.')
 
     else:
