@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+brief:
+    These tests will check if the `experimental_features` setting of the API is working properly.
+    This setting allows users to access API endpoints containing features that are under development.
+
+tier:
+    0
+
+modules:
+    - api
+
+components:
+    - manager
+
+path:
+    tests/integration/test_api/test_config/test_experimental_features/test_experimental_features.py
+
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#drop-privileges
+
+tags:
+    - api
+'''
 import os
 
 import pytest
@@ -35,13 +92,49 @@ def get_configuration(request):
 ])
 def test_experimental_features(tags_to_apply, get_configuration, configure_api_environment,
                                restart_api, wait_for_start, get_api_details):
-    """Check if requests to an experimental endpoint are allowed according to the configuration.
+    '''
+    description:
+        Check if requests to an experimental API endpoint are allowed according
+        to the configuration. For this purpose, it configures the API to use
+        this functionality and makes requests to it, waiting for a correct response.
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that when `experimental_features` is enabled,
+          it is possible to access experimental API endpoints.
+        - Verify that when `experimental_features` is disabled,
+          it is not possible to access experimental API endpoints.
+
+    input_description:
+        Different test cases are contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters.
+
+    expected_output:
+        - r'200' ('OK' HTTP status code if `experimental_features == true`)
+        - r'404' ('Forbidden' HTTP status code if `experimental_features == false`)
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     experimental = get_configuration['configuration']['experimental_features']
     api_details = get_api_details()
@@ -51,7 +144,9 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
 
     if experimental:
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
-                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. ' \
+                                                f'\nFull response: {get_response.text}'
     else:
         assert get_response.status_code == 404, f'Expected status code was 404, ' \
-                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. ' \
+                                                f'\nFull response: {get_response.text}'

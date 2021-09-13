@@ -1,6 +1,69 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+brief:
+    These tests will check if the `RBAC` (Role-Based Access Control) feature
+    of the API is working properly. Specifically, they will verify that when
+    resources are added with the same identifier of previously existing ones,
+    the previous relationships are not maintained. The `RBAC` capability
+    allows users accessing the API to be assigned a role that will
+    define the privileges they have.
+
+tier:
+    0
+
+modules:
+    - api
+
+components:
+    - manager
+
+path:
+    tests/integration/test_api/test_rbac/test_add_old_resource.py
+
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Security
+    - https://en.wikipedia.org/wiki/Role-based_access_control
+
+tags:
+    - api
+'''
 import requests
 from wazuh_testing.api import get_security_resource_information
 
@@ -10,7 +73,43 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 # Tests
 def test_add_old_user(set_security_resources, get_api_details):
-    """Remove a user with defined relationships and create it with the same ID to see if said relationships remain."""
+    '''
+    description:
+        Check if the security relationships of a previous user are maintained
+        in the system after adding a new user with the same ID.
+
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - set_security_resources:
+            type: fixture
+            brief: Creates a set of security relationships along with a user for testing.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the testing user information exists.
+        - Verify that the request to remove the testing agent is successfully processed.
+        - Verify that the request to add the testing agent is successfully processed.
+        - Verify that security relationships do not exist between the old and the new user.
+
+    inputs:
+        - The testing `user_id` as a module attribute.
+
+    input_description:
+        From the `set_security_resources` fixture information is obtained to perform the test,
+        concretely the `user_id`.
+
+    expected_output:
+        - A `JSON` string in the response body with information of the old user.
+        - r'200' ('OK' HTTP status code at deleting the old user)
+        - r'200' ('OK' HTTP status code at inserting the old user)
+
+    tags:
+        - rbac
+    '''
     api_details = get_api_details()
     old_user_info = get_security_resource_information(user_ids=user_id)
     assert old_user_info, f'There is not information about this role: {user_id}'
@@ -31,7 +130,43 @@ def test_add_old_user(set_security_resources, get_api_details):
 
 
 def test_add_old_role(set_security_resources, get_api_details):
-    """Remove a role with defined relationships and create it with the same ID to see if said relationships remain."""
+    '''
+    description:
+        Check if the security relationships of a previous role are maintained
+        in the system after adding a new role with the same ID.
+
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - set_security_resources:
+            type: fixture
+            brief: Creates a set of security relationships along with a user for testing.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the testing role information exists.
+        - Verify that the request to remove the testing role is successfully processed.
+        - Verify that the request to add the testing role is successfully processed.
+        - Verify that security relationships do not exist between the old and the new role.
+
+    inputs:
+        - The testing `role_id` as a module attribute.
+
+    input_description:
+        From the `set_security_resources` fixture information is obtained to perform the test,
+        concretely the `role_id`.
+
+    expected_output:
+        - A `JSON` string in the response body with information of the old role.
+        - r'200' ('OK' HTTP status code at deleting the old role)
+        - r'200' ('OK' HTTP status code at inserting the old role)
+
+    tags:
+        - rbac
+    '''
     api_details = get_api_details()
     old_role_info = get_security_resource_information(role_ids=role_id)
     assert old_role_info, f'There is not information about this role: {role_id}'
@@ -51,7 +186,43 @@ def test_add_old_role(set_security_resources, get_api_details):
 
 
 def test_add_old_policy(set_security_resources, get_api_details):
-    """Remove a policy with defined relationships and create it with the same ID to see if said relationships remain."""
+    '''
+    description:
+        Check if the security relationships of a previous policy are maintained
+        in the system after adding a new policy with the same ID.
+
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - set_security_resources:
+            type: fixture
+            brief: Creates a set of security relationships along with a user for testing.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the testing policy information exists.
+        - Verify that the request to remove the testing policy is successfully processed.
+        - Verify that the request to add the testing policy is successfully processed.
+        - Verify that security relationships do not exist between the old and the new policy.
+
+    inputs:
+        - The testing `policy_id` as a module attribute.
+
+    input_description:
+        From the `set_security_resources` fixture information is obtained to perform the test,
+        concretely the `policy_id`.
+
+    expected_output:
+        - A `JSON` string in the response body with information of the old policy.
+        - r'200' ('OK' HTTP status code at deleting the old policy)
+        - r'200' ('OK' HTTP status code at inserting the old policy)
+
+    tags:
+        - rbac
+    '''
     api_details = get_api_details()
     old_policy_info = get_security_resource_information(policy_ids=policy_id)
     assert old_policy_info, f'There is not information about this policy: {policy_id}'
@@ -74,7 +245,43 @@ def test_add_old_policy(set_security_resources, get_api_details):
 
 
 def test_add_old_rule(set_security_resources, get_api_details):
-    """Remove a rule with defined relationships and create it with the same ID to see if said relationships remain."""
+    '''
+    description:
+        Check if the security relationships of a previous rule are maintained
+        in the system after adding a new rule with the same ID.
+
+    wazuh_min_version:
+        4.2
+
+    parameters:
+        - set_security_resources:
+            type: fixture
+            brief: Creates a set of security relationships along with a user for testing.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the testing rule information exists.
+        - Verify that the request to remove the testing rule is successfully processed.
+        - Verify that the request to add the testing rule is successfully processed.
+        - Verify that security relationships do not exist between the old and the new rule.
+
+    inputs:
+        - The testing `rule_id` as a module attribute.
+
+    input_description:
+        From the `set_security_resources` fixture information is obtained to perform the test,
+        concretely the `rule_id`.
+
+    expected_output:
+        - A `JSON` string in the response body with information of the old rule.
+        - r'200' ('OK' HTTP status code at deleting the old rule)
+        - r'200' ('OK' HTTP status code at inserting the old rule)
+
+    tags:
+        - rbac
+    '''
     api_details = get_api_details()
     old_rule_info = get_security_resource_information(rule_ids=rule_id)
     assert old_rule_info, f'There is not information about this policy: {rule_id}'

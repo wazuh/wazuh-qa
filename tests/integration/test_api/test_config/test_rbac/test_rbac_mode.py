@@ -1,7 +1,66 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+brief:
+    These tests will check if the `rbac_mode` (Role-Based Access Control) setting
+    of the API is working properly. This setting allows you to specify the
+    operating mode between `whitelist mode` and `blacklist mode`.
+
+tier:
+    0
+
+modules:
+    - api
+
+components:
+    - manager
+
+path:
+    tests/integration/test_api/test_config/test_rbac/test_rbac_mode.py
+
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#rbac-mode
+    - https://en.wikipedia.org/wiki/Role-based_access_control
+
+tags:
+    - api
+'''
 import os
 import sqlite3
 
@@ -61,19 +120,56 @@ def extra_configuration_after_yield():
 ])
 def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                    wait_for_start, get_api_details):
-    """Verify that the RBAC mode selected in api.yaml is applied.
+    '''
+    description:
+        Check if the `RBAC` mode selected in `api.yaml` is applied. This test creates a user
+        without any assigned permission. For this reason, when `RBAC` is in `white mode`,
+        there is no endpoint that the user can execute, so the `HTTP status code`
+        must be 403 (forbidden). On the other hand, when it is in `black mode`,
+        there is no endpoint that has it denied, so the status code must be 200 (ok).
 
-    This test creates a user without any assigned permission.
-    For this reason, when RBAC is in white mode, there is no
-    endpoint that the user can execute, so the response must be 400.
-    On the other hand, when it is in black mode, there is no endpoint
-    that has it denied, so the answer must be 200.
+    wazuh_min_version:
+        4.2
 
-    Parameters
-    ----------
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Check that when the value of the `rbac_mode` setting is set to `white`,
+          the API forbids requests.
+        - Verify that when the value of the `rbac_mode` setting is set to `black`,
+          the API requests are performed correctly.
+
+    input_description:
+        Different test cases are contained in an external `YAML` file (conf_mode.yaml)
+        which includes API configuration parameters (rbac operation modes).
+        Two `SQL` scripts are also used to add (schema_add_user.sql)
+        and remove (schema_delete_user.sql) the testing user.
+
+    expected_output:
+        - r'200' ('OK' HTTP status code if `rbac_white == True`)
+        - r'403' ('Forbidden' HTTP status code if `rbac_white == False`)
+
+    tags:
+        - rbac
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     rbac_white = get_configuration['security_config']['rbac_mode'] == 'white'
     api_details = get_api_details(user='test_user', password='wazuh')
@@ -85,7 +181,9 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
     # If white mode, user can't access that information.
     if rbac_white:
         assert get_response.status_code == 403, f'Expected status code was 403, ' \
-                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. ' \
+                                                f'\nFull response: {get_response.text}'
     else:
         assert get_response.status_code == 200, f'Expected status code was 200, ' \
-                                                f'but {get_response.status_code} was returned. \nFull response: {get_response.text}'
+                                                f'but {get_response.status_code} was returned. ' \
+                                                f'\nFull response: {get_response.text}'

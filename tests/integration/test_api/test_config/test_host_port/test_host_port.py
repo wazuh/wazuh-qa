@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
 
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+brief:
+    These tests will check that the settings related to the API
+    host address and listening port are working correctly.
+
+tier:
+    0
+
+modules:
+    - api
+
+components:
+    - manager
+
+path:
+    tests/integration/test_api/test_config/test_host_port/test_host_port.py
+
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#api-configuration-options
+
+tags:
+    - api
+'''
 import os
 
 import pytest
@@ -42,18 +99,49 @@ def get_configuration(request):
 ])
 def test_host_port(expected_exception, tags_to_apply,
                    get_configuration, configure_api_environment, restart_api, get_api_details):
-    """Try different host and port configurations.
+    '''
+    description:
+        Check different host and port configurations. For this purpose, apply multiple
+        combinations of host and port, verify that the `aiohttp` http framework correctly
+        publishes that value in the `api.log` and check that the request returns the expected one.
 
-    Apply multiple combinations of host and port, verify that aiohttp correctly publishes
-    that value in the api.log and check that the request returns the expected value.
+    wazuh_min_version:
+        4.2
 
-    Parameters
-    ----------
-    expected_exception : bool
-        True if an exception must be raised, false otherwise.
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        -  expected_exception:
+            type: bool
+            brief: True if an exception must be raised, false otherwise.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the API starts listening on the specified IP address and port.
+        - Verify that using a valid configuration, the API requests are performed correctly.
+        - Verify that no unexpected exceptions occur.
+
+    input_description:
+        Different test cases are contained in an external `YAML` file (conf.yaml)
+        which includes API configuration parameters (IP addresses and ports).
+
+    expected_output:
+        - r'.*INFO: Listening on (.+)..'
+        - r'{host}{port}' (`host` and `port` are obtained from each test_case.)
+        - r'200' ('OK' HTTP status code)
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     host = get_configuration['configuration']['host']
     port = get_configuration['configuration']['port']
