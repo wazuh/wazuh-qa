@@ -10,10 +10,10 @@ type:
     integration
 
 brief:
-    These tests will check if the `rbac` (Role-Based Access Control) feature
+    These tests will check if the `RBAC` (Role-Based Access Control) feature
     of the API is working properly. Specifically, they will verify that when
     resources are added with the same identifier of previously existing ones,
-    the previous relationships are not maintained. The `rbac` capability
+    the previous relationships are not maintained. The `RBAC` capability
     allows users accessing the API to be assigned a role that will
     define the privileges they have.
 
@@ -95,6 +95,9 @@ def test_add_old_user(set_security_resources, get_api_details):
         - Verify that the request to add the testing agent is successfully processed.
         - Verify that security relationships do not exist between the old and the new user.
 
+    inputs:
+        - The testing `user_id` as a module attribute.
+
     input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
         concretely the `user_id`.
@@ -149,6 +152,9 @@ def test_add_old_role(set_security_resources, get_api_details):
         - Verify that the request to add the testing role is successfully processed.
         - Verify that security relationships do not exist between the old and the new role.
 
+    inputs:
+        - The testing `role_id` as a module attribute.
+
     input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
         concretely the `role_id`.
@@ -201,6 +207,9 @@ def test_add_old_policy(set_security_resources, get_api_details):
         - Verify that the request to remove the testing policy is successfully processed.
         - Verify that the request to add the testing policy is successfully processed.
         - Verify that security relationships do not exist between the old and the new policy.
+
+    inputs:
+        - The testing `policy_id` as a module attribute.
 
     input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
@@ -257,6 +266,9 @@ def test_add_old_rule(set_security_resources, get_api_details):
         - Verify that the request to remove the testing rule is successfully processed.
         - Verify that the request to add the testing rule is successfully processed.
         - Verify that security relationships do not exist between the old and the new rule.
+
+    inputs:
+        - The testing `rule_id` as a module attribute.
 
     input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,

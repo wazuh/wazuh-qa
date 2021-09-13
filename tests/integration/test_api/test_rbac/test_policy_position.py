@@ -9,48 +9,56 @@ copyright:
 type:
     integration
 
-description:
-    These tests will check if the `rbac` (Role-Based Access Control) feature
+brief:
+    These tests will check if the `RBAC` (Role-Based Access Control) feature
     of the API is working properly. Specifically, they will verify that
     that the policies are applied to the roles in the right order.
-    The `rbac` capability allows users accessing the API to be assigned
+    The `RBAC` capability allows users accessing the API to be assigned
     a role that will define the privileges they have.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_rbac/
+    tests/integration/test_api/test_rbac/test_policy_position.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Security
+    - https://en.wikipedia.org/wiki/Role-based_access_control
 
 tags:
     - api
@@ -134,32 +142,33 @@ def test_policy_position(set_security_resources, add_new_policies, get_api_detai
         removing some of them and adding others using the `position` parameter.
 
     wazuh_min_version:
-        4.1
+        4.2
 
     parameters:
         - set_security_resources:
             type: fixture
             brief: Creates a set of role-based security resources along with a user for testing.
-
         - add_new_policies:
             type: fixture
             brief: Create new policies and relationships between them and the testing role.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
-        - Verify that `status code` 200 (ok) is received when to remove or add a role-policy.
+        - Verify that the request to add or delete a role-policy is done correctly.
         - Verify that the role-policy positions are kept in order when deleting or adding a role-policy.
 
-    test_input:
+    inputs:
+        - The testing `policy_ids` array as a module variable.
+
+    input_description:
         From the `add_new_policies`, `remove_role_policy` and `add_role_policy` fixtures information
         is obtained to perform the test, concretely the `policy_ids` array.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - r'200' ('OK' HTTP status code when deleting or adding a role-policy)
+        - An integer array with the role-policy positions.
 
     tags:
         - rbac

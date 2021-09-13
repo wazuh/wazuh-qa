@@ -9,48 +9,56 @@ copyright:
 type:
     integration
 
-description:
-    These tests will check if the `rbac` (Role-Based Access Control) feature of the API
+brief:
+    These tests will check if the `RBAC` (Role-Based Access Control) feature of the API
     is working properly. Specifically, they will verify that the different relationships
-    between users-roles-policies can be correctly removed. 
-    The `rbac` capability allows users accessing the API to be assigned a role that
+    between users-roles-policies can be correctly removed.
+    The `RBAC` capability allows users accessing the API to be assigned a role that
     will define the privileges they have.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - api
+
+components:
+    - manager
 
 path:
-    tests/integration/test_api/test_rbac/
+    tests/integration/test_api/test_rbac/test_remove_relationship.py
 
 daemons:
-    - apid
-    - analysisd
-    - syscheckd
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
     - wazuh-db
 
-os_support:
-    - linux, centos 6
-    - linux, centos 7
-    - linux, centos 8
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Security
+    - https://en.wikipedia.org/wiki/Role-based_access_control
 
 tags:
     - api
@@ -101,30 +109,34 @@ def test_remove_user_role_relationship(set_security_resources, get_api_details):
         Check if the user and role still exist after removing their relationship.
 
     wazuh_min_version:
-        4.1
+        4.2
 
     parameters:
         - set_security_resources:
             type: fixture
             brief: Creates a set of role-based security resources along with a user for testing.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
         - Verify that the user-role relationship exists.
-        - Verify that `status code` 200 (ok) is received when to remove the relationship.
         - Verify that the user-role relationship is removed.
-        - Verify that the user and role still exists.
+        - Verify that the user and the role still exist independently.
 
-    test_input:
+    inputs:
+        - The testing `user_id` as a module attribute.
+        - The testing `role_id` as a module attribute.
+
+    input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
         concretely the `user_id` and `role_id`.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - A `JSON` string in the response body with information of the user-role relationship.
+        - r'200' ('OK' HTTP status code when deleting the user-role relationship)
+        - A `JSON` string in the response body with information of the role.
+        - A `JSON` string in the response body with information of the user.
 
     tags:
         - rbac
@@ -144,30 +156,34 @@ def test_remove_role_policy_relationship(set_security_resources, get_api_details
         Check if the role and policy still exist after removing their relationship.
 
     wazuh_min_version:
-        4.1
+        4.2
 
     parameters:
         - set_security_resources:
             type: fixture
             brief: Creates a set of role-based security resources along with a user for testing.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
         - Verify that the role-policy relationship exists.
-        - Verify that `status code` 200 (ok) is received when to remove the relationship.
         - Verify that the role-policy relationship is removed.
-        - Verify that the role and policy still exists.
+        - Verify that the role and the policy still exists independently.
 
-    test_input:
+    inputs:
+        - The testing `role_id` as a module attribute.
+        - The testing `policy_id` as a module attribute.
+
+    input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
         concretely the `role_id` and `policy_id`.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - A `JSON` string in the response body with information of the role-policy relationship.
+        - r'200' ('OK' HTTP status code when deleting the role-policy relationship)
+        - A `JSON` string in the response body with information of the role.
+        - A `JSON` string in the response body with information of the policy.
 
     tags:
         - rbac
@@ -187,30 +203,34 @@ def test_remove_role_rule_relationship(set_security_resources, get_api_details):
         Check if the role and rule still exist after removing their relationship.
 
     wazuh_min_version:
-        4.1
+        4.2
 
     parameters:
         - set_security_resources:
             type: fixture
             brief: Creates a set of role-based security resources along with a user for testing.
-
         - get_api_details:
             type: fixture
             brief: Get API information.
 
     assertions:
         - Verify that the role-rule relationship exists.
-        - Verify that `status code` 200 (ok) is received when to remove the relationship.
         - Verify that the role-rule relationship is removed.
-        - Verify that the role and rule still exists.
+        - Verify that the role and the rule still exists independently.
 
-    test_input:
+    inputs:
+        - The testing `role_id` as a module attribute.
+        - The testing `rule_id` as a module attribute.
+
+    input_description:
         From the `set_security_resources` fixture information is obtained to perform the test,
         concretely the `role_id` and `rule_id`.
 
-    logging:
-        - api.log:
-            - Requests made to the API should be logged.
+    expected_output:
+        - A `JSON` string in the response body with information of the role-rule relationship.
+        - r'200' ('OK' HTTP status code when deleting the role-rule relationship)
+        - A `JSON` string in the response body with information of the role.
+        - A `JSON` string in the response body with information of the rule.
 
     tags:
         - rbac

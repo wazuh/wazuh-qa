@@ -10,10 +10,10 @@ type:
     integration
 
 brief:
-    These tests will check if the `rbac` (Role-Based Access Control) feature
+    These tests will check if the `RBAC` (Role-Based Access Control) feature
     of the API is working properly. Specifically, they will verify that
     the different actions that can be performed with admin resources
-    are working correctly. The `rbac` capability allows users
+    are working correctly. The `RBAC` capability allows users
     accessing the API to be assigned a role that will define
     the privileges they have.
 
@@ -161,6 +161,9 @@ def test_admin_users(restart_api, get_api_details):
         - Verify that the request to delete the admin security users is done correctly.
         - Verify that admin security users have not been deleted by checking the response of the request.
 
+    inputs:
+        - The data are obtained from within the test.
+
     input_description:
         From the `get_admin_resources` function information is obtained to perform the test,
         concretely the `admin_ids`.
@@ -203,6 +206,9 @@ def test_admin_roles(restart_api, get_api_details):
         - Verify that the request to collect the admin security roles information is done correctly.
         - Verify that the request to delete the admin security roles is done correctly.
         - Verify that admin security roles have not been deleted by checking the response of the request.
+
+    inputs:
+        - The data are obtained from within the test.
 
     input_description:
         From the `get_admin_resources` function information is obtained to perform the test,
@@ -250,6 +256,9 @@ def test_admin_policies(restart_api, get_api_details):
         - Verify that the request to delete the admin security policies is done correctly.
         - Verify that admin security policies have not been deleted by checking the response of the request.
 
+    inputs:
+        - The data are obtained from within the test.
+
     input_description:
         From the `get_admin_resources` function information is obtained to perform the test,
         concretely the `policy_ids`.
@@ -296,6 +305,9 @@ def test_admin_rules(restart_api, get_api_details):
         - Verify that the request to collect the admin security rules information is done correctly.
         - Verify that the request to delete the admin security rules is done correctly.
         - Verify that admin security rules have not been deleted by checking the response of the request.
+
+    inputs:
+        - The data are obtained from within the test.
 
     input_description:
         From the `get_admin_resources` function information is obtained to perform the test,
