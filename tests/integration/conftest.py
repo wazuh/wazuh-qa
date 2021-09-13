@@ -17,7 +17,7 @@ from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -33,6 +33,18 @@ HOST_TYPES = set("server agent".split())
 catalog = list()
 results = dict()
 
+###############################
+report_files = [LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS]
+
+def set_report_files(files):
+    if files:
+        for file in files:
+            report_files.append(file)
+
+def get_report_files():
+    return report_files
+
+###############################
 
 def pytest_runtest_setup(item):
     # Find if platform applies
@@ -109,7 +121,7 @@ def pytest_addoption(parser):
         metavar="minimum_level",
         default=-1,
         type=int,
-        help="only run tests with a tier level less or equal than 'minimum_level'"
+        help="only run tests with a tier level greater or equal than 'minimum_level'"
     )
     parser.addoption(
         "--tier-maximum",
@@ -190,6 +202,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using a specific WPK package version"
     )
+    parser.addoption(
+        "--save-file",
+        action="append",
+        metavar="file",
+        default=[],
+        type=str,
+        help="add file to the HTML report"
+    )
 
 
 def pytest_configure(config):
@@ -246,6 +266,9 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
+
+    # Set files to add to the HTML report
+    set_report_files(config.getoption("--save-file"))
 
 
 def pytest_html_results_table_header(cells):
@@ -331,10 +354,12 @@ def pytest_runtest_makereport(item, call):
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
 
         # Extra files to be added in 'Links' section
-        for filepath in (LOG_FILE_PATH, WAZUH_CONF):
-            with open(filepath, mode='r', errors='replace') as f:
-                content = f.read()
-                extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
+        files = get_report_files()
+        for filepath in files:
+            if os.path.isfile(filepath):
+                with open(filepath, mode='r', errors='replace') as f:
+                    content = f.read()
+                    extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
         if not report.passed and not report.skipped:
             report.extra = extra
