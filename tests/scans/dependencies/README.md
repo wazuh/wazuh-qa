@@ -13,7 +13,7 @@ Parameters:
     --requirements-path: requirements file path. Default: 'framework/requirements.txt'.
     --report-path: output file path. Default: 'dependencies/report_file.json'.
 ```
-### scanning wazuh-qa requirements file:
+### Scanning wazuh-qa requirements file:
 ```
 ↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh-qa --branch master --requirements-path requirements.txt
 ==================================================================================== test session starts =====================================================================================
@@ -72,7 +72,7 @@ FAILED dependencies/test_dependencies.py::test_python_dependencies_vuln_scan - A
 }
 ```
 
-### scanning wazuh requirements file with a specific output path:
+### Scanning wazuh requirements file with a specific output path:
 ```
 ↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh --branch master --requirements-path framework/requirements.txt --report-path ~/Desktop/report_file.json
 ==================================================================================== test session starts =====================================================================================

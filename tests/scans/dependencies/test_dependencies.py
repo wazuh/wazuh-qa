@@ -11,6 +11,11 @@ REQUIREMENTS_TEMP_FILE = tempfile.NamedTemporaryFile()
 
 
 def test_python_dependencies_vuln_scan(pytestconfig):
+    """Check that the specified dependencies do not have any known vulnerabilities.
+
+    Args:
+        pytestconfig (fixture): Fixture that returns the :class:`_pytest.config.Config` object.
+    """
     branch = pytestconfig.getoption('--branch')
     repo = pytestconfig.getoption('--repo')
     requirements_path = pytestconfig.getoption('--requirements-path')
