@@ -205,7 +205,7 @@ class DocGenerator:
         # dump into file
         if self.conf.documentation_path:
             test_info = {}
-            test_info['test_path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+            test_info['path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
             
             for field in self.conf.module_info:
                 test_info[field] = test[field]
@@ -218,8 +218,7 @@ class DocGenerator:
                 fp.write('\n')
         else:
             # Use the key that QACTL needs
-            test_path = re.sub(r'.*wazuh-qa\/', '', self.test_path)
-            print(f"test_path: {test_path}")
+            test['path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
 
             for field in self.conf.module_info:
                 print(str(field)+": "+str(test[field]))
