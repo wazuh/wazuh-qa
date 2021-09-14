@@ -57,7 +57,7 @@ class WazuhS3Package(WazuhPackage):
                 self.revision is not None:
             architecture = WazuhS3Package.get_architecture(self.system)
             return get_s3_package_url(self.repository, self.wazuh_target, self.version,
-                                                    self.revision, self.system, architecture)
+                                      self.revision, self.system, architecture)
         else:
             raise QAValueError('Could not get Wazuh Package S3 URL. s3_package_url or '
                                '(version, repository, system, revision) has None value', WazuhS3Package.LOGGER.error)

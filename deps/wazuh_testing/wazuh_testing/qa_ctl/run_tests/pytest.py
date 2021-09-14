@@ -124,7 +124,7 @@ class Pytest(Test):
         pytest_command += f"--html='{reports_directory}/{html_report_file_name}'"
 
         create_path_task = {'name': f"Create {reports_directory} path",
-                                        'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'}}
+                                    'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'}}
 
         execute_test_task = {'name': f"Launch pytest in {self.tests_run_dir}",
                              'shell': pytest_command, 'vars':

@@ -213,7 +213,7 @@ class WazuhDeployment(ABC):
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
         tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
-                                                 output=self.qa_ctl_configuration.ansible_output)
+                                                         output=self.qa_ctl_configuration.ansible_output)
         WazuhDeployment.LOGGER.debug(f"Wazuh deployment healthcheck OK in {self.hosts} hosts")
 
         return tasks_result

@@ -3,6 +3,7 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
+
 class WazuhSources(WazuhInstallation):
     """Install Wazuh from the given sources. In this case, the installation
         will be done from the source files of a repository.
@@ -13,16 +14,16 @@ class WazuhSources(WazuhInstallation):
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         wazuh_branch (string): String containing the branch from where the files are going to be downloaded.
         This field is set to 'master' by default.
-        wazuh_repository_url (string): URL from the repo where the wazuh sources files are located. 
+        wazuh_repository_url (string): URL from the repo where the wazuh sources files are located.
         This parameter is set to 'https://github.com/wazuh/wazuh.git' by default.
-    
+
     Attributes:
         wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
         installation_files_path (string): Path where is located the Wazuh instalation files.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
         wazuh_branch (string): String containing the branch from where the files are going to be downloaded.
         This field is set to 'master' by default.
-        wazuh_repository_url (string): URL from the repo where the wazuh sources files are located. 
+        wazuh_repository_url (string): URL from the repo where the wazuh sources files are located.
         This parameter is set to 'https://github.com/wazuh/wazuh.git' by default.
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
@@ -40,7 +41,7 @@ class WazuhSources(WazuhInstallation):
         Args:
             inventory_file_path (string): path where the instalation files are going to be stored
             hosts (string): Parameter set to `all` by default
-        
+
         Returns:
             str: String with the path where the installation files are located
         """

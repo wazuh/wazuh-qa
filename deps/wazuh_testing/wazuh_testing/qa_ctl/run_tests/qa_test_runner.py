@@ -30,7 +30,6 @@ class QATestRunner():
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
-
     def __read_ansible_instance(self, host_info):
         """Read every host info and generate the AnsibleInstance object.
 
@@ -70,7 +69,6 @@ class QATestRunner():
         inventory_instance = AnsibleInventory(ansible_instances=instances_list)
         self.inventory_file_path = inventory_instance.inventory_file_path
         QATestRunner.LOGGER.debug('Inventory data from testing hosts info was processed successfully')
-
 
     def __process_test_data(self, instances_info):
         """Process test data configuration and build the test launchers, setting the related class attribute.
@@ -115,13 +113,14 @@ class QATestRunner():
                 if parameters is not None:
                     test_dict['tiers'] = [] if 'tiers' not in parameters else parameters['tiers']
                     test_dict['stop_after_first_failure'] = False if 'stop_after_first_failure' not in parameters \
-                                                                    else parameters['stop_after_first_failure']
+                        else parameters['stop_after_first_failure']
                     test_dict['keyword_expression'] = None if 'keyword_expression' not in parameters else \
-                                                            parameters['keyword_expression']
+                        parameters['keyword_expression']
                     test_dict['traceback'] = 'auto' if 'traceback' not in parameters else parameters['traceback']
                     test_dict['dry_run'] = False if 'dry_run' not in parameters else parameters['dry_run']
                     test_dict['custom_args'] = [] if 'custom_args' not in parameters else parameters['custom_args']
-                    test_dict['verbose_level'] = False if 'verbose_level' not in parameters else parameters['verbose_level']
+                    test_dict['verbose_level'] = False if 'verbose_level' not in parameters else \
+                        parameters['verbose_level']
                     test_dict['log_level'] = None if 'log_level' not in parameters else parameters['log_level']
                     test_dict['markers'] = [] if 'markers' not in parameters else parameters['markers']
 

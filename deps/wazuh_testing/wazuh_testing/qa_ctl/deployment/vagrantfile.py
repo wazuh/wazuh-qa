@@ -57,7 +57,7 @@ class Vagrantfile():
 
     def __get_box_url(self):
         """Get the box URL of the specified box_image parameter
-        
+
         Returns:
             str: String with the URL of the specified box (if exists). In case the box is not found in the map,
             it will return a 'None' value.
@@ -106,7 +106,6 @@ class Vagrantfile():
         with open(self.file_path, 'w') as vagrantfile_fd:
             vagrantfile_fd.writelines(read_lines)
         Vagrantfile.LOGGER.debug(f"Vagranfile written in {self.file_path}")
-
 
     def remove_vagrantfile(self):
         """Removes the file self.file_path if it exists."""

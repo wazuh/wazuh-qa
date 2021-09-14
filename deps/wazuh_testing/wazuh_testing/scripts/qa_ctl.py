@@ -27,7 +27,7 @@ PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
 WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh-qa')
 
-qactl_script_logger = Logging('QACTL_SCRIPT', 'DEBUG', True)
+qactl_script_logger = Logging('QACTL_SCRIPT', 'INFO', True)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 launched = {
     'instance_handler': False,
@@ -130,11 +130,10 @@ def validate_parameters(parameters):
             version = get_last_wazuh_version()
             qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
 
-        qa_branch = '1803-development'  # Delete this when merging on master
         download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
 
         for test in parameters.run_test:
-            if not 'test exists' in run_local_command(f"qa-docs -e {test} -I {WAZUH_QA_FILES}/tests/"):
+            if 'test exists' not in run_local_command(f"qa-docs -e {test} -I {WAZUH_QA_FILES}/tests/"):
                 raise QAValueError(f"{test} does not exist in {WAZUH_QA_FILES}/tests/", qactl_script_logger.error)
 
     qactl_script_logger.info('Input parameters validation has passed successfully')
