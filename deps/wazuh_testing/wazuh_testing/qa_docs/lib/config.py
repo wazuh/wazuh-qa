@@ -8,9 +8,11 @@ license: This program is free software; you can redistribute it
 """
 
 import yaml
-import logging
 from enum import Enum
 import os
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class Config():
@@ -18,6 +20,8 @@ class Config():
     brief: Class that parses the configuration file and exposes the available configurations.
            It exists two modes of execution: Normal and Single test.
     """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self, *args):
         # If it is called using the config file
         self.mode = mode.DEFAULT
@@ -36,8 +40,8 @@ class Config():
             with open(args[0]) as fd:
                 self._config_data = yaml.safe_load(fd)
         except:
-            logging.error("Cannot load config file")
-            raise Exception("Cannot load config file")
+            Config.LOGGER.error('Cannot load config file')
+            raise QAValueError('Cannot load config file', Config.LOGGER.error)
 
         self._read_function_regex()
         self._read_output_fields()
@@ -91,8 +95,8 @@ class Config():
         brief: Reads from the config file all the paths to be included in the parsing.
         """
         if not 'Include paths' in self._config_data:
-            logging.error("Config include paths are empty")
-            raise Exception("Config include paths are empty")
+            Config.LOGGER.error('Config include paths are empty')
+            raise QAValueError('Config include paths are empty', Config.LOGGER.error)
         include_paths = self._config_data['Include paths']
         for path in include_paths:
             self.include_paths.append(os.path.join(self.project_path, path))
@@ -102,8 +106,8 @@ class Config():
         brief: Reads from the config file the regexes used to identify test files.
         """
         if not 'Include regex' in self._config_data:
-            logging.error("Config include regex is empty")
-            raise Exception("Config include regex is empty")
+            Config.LOGGER.error('Config include regex is empty')
+            raise QAValueError('Config include regex is empty', Config.LOGGER.error)
         self.include_regex = self._config_data['Include regex']
 
     def _read_group_files(self):
@@ -111,8 +115,8 @@ class Config():
         brief: Reads from the config file the file name to be identified with a group.
         """
         if not 'Group files' in self._config_data:
-            logging.error("Config group files is empty")
-            raise Exception("Config group files is empty")
+            Config.LOGGER.error("Config group files is empty")
+            raise QAValueError('Config include paths are empty', Config.LOGGER.error)
         self.group_files = self._config_data['Group files']
 
     def _read_function_regex(self):
@@ -120,8 +124,8 @@ class Config():
         brief: Reads from the config file the regexes used to identify a test method.
         """
         if not 'Function regex' in self._config_data:
-            logging.error("Config function regex is empty")
-            raise Exception("Config function regex is empty")
+            Config.LOGGER.error('Config function regex is empty')
+            raise QAValueError('Config function regex is empty', Config.LOGGER.error)
         self.function_regex = self._config_data['Function regex']
 
     def _read_ignore_paths(self):
@@ -138,12 +142,12 @@ class Config():
         brief: Reads from the config file the optional and mandatory fields for the test module.
         """
         if not 'Module' in self._config_data['Output fields']:
-            logging.error("Config output module fields is missing")
-            raise Exception("Config output module fields is missing")
+            Config.LOGGER.error('Config output module fields is missing')
+            raise QAValueError('Config output module fields is missing', Config.LOGGER.error)
         module_fields = self._config_data['Output fields']['Module']
         if not 'Mandatory' in module_fields and not 'Optional' in module_fields:
-            logging.error("Config output module fields are empty")
-            raise Exception("Config output module fields are empty")
+            Config.LOGGER.error('Config output module fields are empty')
+            raise QAValueError('Config output module fields are empty', Config.LOGGER.error)
         if 'Mandatory' in module_fields:
             self.module_fields.mandatory = module_fields['Mandatory']
         if 'Optional' in module_fields:
@@ -154,12 +158,12 @@ class Config():
         brief: Reads from the config file the optional and mandatory fields for the test functions.
         """
         if not 'Test' in self._config_data['Output fields']:
-            logging.error("Config output test fields is missing")
-            raise Exception("Config output test fields is missing")
+            Config.LOGGER.error('Config output test fields is missing')
+            raise QAValueError('Config output test fields is missing', Config.LOGGER.error)
         test_fields = self._config_data['Output fields']['Test']
         if not 'Mandatory' in test_fields and not 'Optional' in test_fields:
-            logging.error("Config output test fields are empty")
-            raise Exception("Config output test fields are empty")
+            Config.LOGGER.error('Config output test fields are empty')
+            raise QAValueError('Config output test fields are empty', Config.LOGGER.error)
         if 'Mandatory' in test_fields:
             self.test_fields.mandatory = test_fields['Mandatory']
         if 'Optional' in test_fields:
@@ -170,8 +174,8 @@ class Config():
         brief: Reads all the mandatory and optional fields.
         """
         if not 'Output fields' in self._config_data:
-            logging.error("Config output fields is missing")
-            raise Exception("Config output fields is missing")
+            Config.LOGGER.error('Config output fields is missing')
+            raise QAValueError('Config output fields is missing', Config.LOGGER.error)
         self._read_module_fields()
         self._read_test_fields()
 
