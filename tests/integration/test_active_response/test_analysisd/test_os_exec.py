@@ -9,43 +9,54 @@ copyright:
 type:
     integration
 
-description:
-    These tests will check if the `analysisd` daemon processes `Active Response` messages correctly.
+brief:
+    These tests will check if the `wazuh-analysisd` daemon
+    processes `active response` messages correctly. Active responses
+    perform various countermeasures to address active threats,
+    such as blocking access to an agent from the threat source
+    when certain criteria are met.
 
-tiers:
-    - 0
+tier:
+    0
 
-component:
-    manager
+modules:
+    - active_response
+
+components:
+    - manager
 
 path:
-    tests/integration/test_active_response/test_analysisd/
+    tests/integration/test_active_response/test_analysisd/test_os_exec.py
 
 daemons:
-    - analysisd
-    - execd
+    - wazuh-analysisd
+    - wazuh-authd
+    - wazuh-execd
+    - wazuh-remoted
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
 
-pytest_args:
-
-tags:
-    - active_response
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
 '''
 import json
 import os
@@ -236,7 +247,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope="function")
 def restart_service():
-    """Restart Wazuh manager service and clean log file"""
+    """Restart the Wazuh manager and clean the ossec.log file."""
     control_service('stop')
     clean_logs()
     control_service('start')
@@ -397,7 +408,10 @@ def validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, a
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
     '''
     description:
-        Check if `Active Response` message is sent in correct format depending on agent version.
+        Check if `active response` messages are sent in the correct format depending on the agent version used.
+        For this purpose, simulated agents with different properties are created, and messages
+        in two formats (string and `JSON`) are sent to the socket of the `wazuh-analisysd` daemon,
+        which should process them correctly.
 
     wazuh_min_version:
         4.2
@@ -406,33 +420,33 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
         - set_debug_mode:
             type: fixture
             brief: Set execd daemon in debug mode.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - restart_service:
             type: fixture
-            brief: Restart Wazuh manager service and clean the ossec.log file.
-
+            brief: Restart the Wazuh manager and clean the ossec.log file.
         - configure_agents:
             type: fixture
             brief: Create simulated agents for testing.
 
     assertions:
-        - Validate Active Response messages in old string format.
-        - Validate Active Response messages in new `JSON` format.
+        - Verify that the `active response` messages in the old string format are valid.
+        - Verify that the `active response` messages in the new `JSON` format are valid.
 
-    test_input:
-        Different `Active Response` messages sent to Debian and Ubuntu simulated agents.
+    input_description:
+        Different use cases are found in the test module and include parameters
+        for `active response` messages and metadata to configure the testing environment.
 
-    logging:
-        - ossec.log:
-            - r"Active response request received "
+    expected_output:
+        - r'Active response request received'
+        - Active response message with the structure defined in the
+          validate_new_ar_message function (for Wazuh versions >= 4.2).
+        - Active response message with the structure defined in the
+          validate_old_ar_message function (for Wazuh versions < 4.2).
 
     tags:
         - simulator
