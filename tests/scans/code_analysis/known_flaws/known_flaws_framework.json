@@ -29,34 +29,6 @@
             "test_name": "set_bad_file_permissions"
         },
         {
-            "code": "         else:\n             hash1 = hashlib.md5(\"{0}{1}{2}\".format(int(time()), name, platform()).encode())\n             hash1.update(urandom(128))\n",
-            "filename": "framework/wazuh/core/agent.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 816,
-            "line_range": [
-                816
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "             hash1.update(urandom(128))\n             hash2 = hashlib.md5(f\"{ip}{agent_id}\".encode())\n             agent_key = hash1.hexdigest() + hash2.hexdigest()\n",
-            "filename": "framework/wazuh/core/agent.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 818,
-            "line_range": [
-                818
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
             "code": " from shutil import rmtree\n from subprocess import check_output\n from time import time\n",
             "filename": "framework/wazuh/core/cluster/cluster.py",
             "issue_confidence": "HIGH",
@@ -170,35 +142,6 @@
             "test_name": "blacklist"
         },
         {
-            "code": " from os import remove, path as os_path\n from xml.etree.ElementTree import tostring\n \n from defusedxml.minidom import parseString\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Using tostring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace tostring with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-            "line_number": 15,
-            "line_range": [
-                15,
-                16
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
-            "test_id": "B405",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "     # path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".xml\")\n     # create temporary file for parsing xml input and validate XML format\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 676,
-            "line_range": [
-                676
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
-            "test_id": "B108",
-            "test_name": "hardcoded_tmp_directory"
-        },
-        {
             "code": "         try:\n             subprocess.check_output([os_path.join(common.wazuh_path, \"bin\", \"verify-agent-conf\"), '-f', tmp_file_path],\n                                     stderr=subprocess.STDOUT)\n         except subprocess.CalledProcessError as e:\n",
             "filename": "framework/wazuh/core/configuration.py",
             "issue_confidence": "HIGH",
@@ -256,21 +199,6 @@
             "test_name": "blacklist"
         },
         {
-            "code": " from subprocess import CalledProcessError, check_output\n from xml.etree.ElementTree import ElementTree\n \n from cachetools import cached, TTLCache\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-            "line_number": 25,
-            "line_range": [
-                25,
-                26
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
-            "test_id": "B405",
-            "test_name": "blacklist"
-        },
-        {
             "code": "     try:\n         output = check_output(command)\n     except CalledProcessError as error:\n",
             "filename": "framework/wazuh/core/utils.py",
             "issue_confidence": "HIGH",
@@ -283,34 +211,6 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
             "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " def md5(fname):\n     hash_md5 = hashlib.md5()\n     with open(fname, \"rb\") as f:\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 641,
-            "line_range": [
-                641
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "     # Path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".tmp\")\n     try:\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 1755,
-            "line_range": [
-                1755
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
-            "test_id": "B108",
-            "test_name": "hardcoded_tmp_directory"
         },
         {
             "code": "             try:\n                 wdb_conn.execute(\"agent {} sql delete from fim_entry\".format(agent), delete=True)\n                 # Update key fields which contains keys to value 000\n",
@@ -397,5 +297,106 @@
             "test_name": "blacklist"
         }
     ],
-    "to_fix": []
+    "to_fix": [
+        {
+            "code": " from os import remove, path as os_path\n from xml.etree.ElementTree import tostring\n \n from defusedxml.minidom import parseString\n",
+            "filename": "framework/wazuh/core/configuration.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Using tostring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace tostring with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+            "line_number": 15,
+            "line_range": [
+                15,
+                16
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
+            "test_id": "B405",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " from subprocess import CalledProcessError, check_output\n from xml.etree.ElementTree import ElementTree\n \n from cachetools import cached, TTLCache\n",
+            "filename": "framework/wazuh/core/utils.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+            "line_number": 25,
+            "line_range": [
+                25,
+                26
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
+            "test_id": "B405",
+            "test_name": "blacklist"
+        },
+        {
+            "code": "         else:\n             hash1 = hashlib.md5(\"{0}{1}{2}\".format(int(time()), name, platform()).encode())\n             hash1.update(urandom(128))\n",
+            "filename": "framework/wazuh/core/agent.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 816,
+            "line_range": [
+                816
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
+            "test_name": "blacklist"
+        },
+        {
+            "code": "             hash1.update(urandom(128))\n             hash2 = hashlib.md5(f\"{ip}{agent_id}\".encode())\n             agent_key = hash1.hexdigest() + hash2.hexdigest()\n",
+            "filename": "framework/wazuh/core/agent.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 818,
+            "line_range": [
+                818
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " def md5(fname):\n     hash_md5 = hashlib.md5()\n     with open(fname, \"rb\") as f:\n",
+            "filename": "framework/wazuh/core/utils.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 641,
+            "line_range": [
+                641
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
+            "test_name": "blacklist"
+        },
+        {
+            "code": "     # path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".xml\")\n     # create temporary file for parsing xml input and validate XML format\n",
+            "filename": "framework/wazuh/core/configuration.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Probable insecure usage of temp file/directory.",
+            "line_number": 676,
+            "line_range": [
+                676
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
+            "test_id": "B108",
+            "test_name": "hardcoded_tmp_directory"
+        },
+        {
+            "code": "     # Path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".tmp\")\n     try:\n",
+            "filename": "framework/wazuh/core/utils.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Probable insecure usage of temp file/directory.",
+            "line_number": 1755,
+            "line_range": [
+                1755
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
+            "test_id": "B108",
+            "test_name": "hardcoded_tmp_directory"
+        }
+    ]
 }

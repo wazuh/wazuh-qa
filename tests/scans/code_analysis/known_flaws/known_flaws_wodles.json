@@ -1,48 +1,6 @@
 {
     "false_positives": [
         {
-            "code": " \ttry:\n \t\tquery_md5 = hashlib.md5(la_format_query.encode()).hexdigest()\n \t\t# Differentiates the first execution of the script from the rest of the executions.\n",
-            "filename": "wodles/azure/azure-logs.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 246,
-            "line_range": [
-                246
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " \t\ttry:\n \t\t\tgraph_md5 = hashlib.md5(graph_format_query.encode()).hexdigest()\n \t\t\t# first time for this query\n",
-            "filename": "wodles/azure/azure-logs.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 384,
-            "line_range": [
-                384
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " \n \t\tcontainer_md5 = hashlib.md5(name.encode()).hexdigest()\n \t\tnext_marker = None\n",
-            "filename": "wodles/azure/azure-logs.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 530,
-            "line_range": [
-                530
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-            "test_id": "B303",
-            "test_name": "blacklist"
-        },
-        {
             "code": " from os import mkfifo, unlink, devnull\n from subprocess import CalledProcessError, STDOUT, Popen, PIPE\n from getopt import getopt, GetoptError\n",
             "filename": "wodles/oscap/oscap.py",
             "issue_confidence": "HIGH",
@@ -154,6 +112,48 @@
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b311-random",
             "test_id": "B311",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " \ttry:\n \t\tquery_md5 = hashlib.md5(la_format_query.encode()).hexdigest()\n \t\t# Differentiates the first execution of the script from the rest of the executions.\n",
+            "filename": "wodles/azure/azure-logs.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 246,
+            "line_range": [
+                246
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " \t\ttry:\n \t\t\tgraph_md5 = hashlib.md5(graph_format_query.encode()).hexdigest()\n \t\t\t# first time for this query\n",
+            "filename": "wodles/azure/azure-logs.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 384,
+            "line_range": [
+                384
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " \n \t\tcontainer_md5 = hashlib.md5(name.encode()).hexdigest()\n \t\tnext_marker = None\n",
+            "filename": "wodles/azure/azure-logs.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
+            "line_number": 530,
+            "line_range": [
+                530
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
+            "test_id": "B303",
             "test_name": "blacklist"
         }
     ]
