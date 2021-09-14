@@ -1,56 +1,59 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    These tests will verify different situations that may occur at `agent-auth` during enrollment.
-    The objective is to check if the parameters sent by the `agent-auth` to the `wazuh-authd` daemon
-    are consistent with its responses.
+brief: These tests will verify different situations that may occur at `agent-auth` program during enrollment.
+       The objective is to check if the parameters sent by the `agent-auth` program to the `wazuh-authd` daemon
+       are consistent with its responses.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    agent
+modules:
+    - agentd
 
-path:
-    tests/integration/test_agentd/
+components:
+    - agent
 
 daemons:
-    - agentd
-    - authd
+    - wazuh-agentd
+    - wazuh-authd
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
-    - windows, 7
-    - windows, 8
-    - windows, 10
-    - windows, server 2003
-    - windows, server 2012
-    - windows, server 2016
+os_platform:
+    - linux
+    - windows
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/registering/index.html
 
 tags:
     - enrollment
@@ -121,41 +124,37 @@ def configure_authd_server(request):
 @pytest.mark.parametrize('test_case', tests, ids=[case['description'] for case in tests])
 def test_agent_auth_enrollment(configure_authd_server, configure_environment, test_case: list):
     '''
-    description:
-        Test different situations that can occur on the `agent-auth` program during agent enrollment.
+    description: Check different situations that can occur during agent enrollment.
+                 The tests are based on using certain parameters to enroll
+                 the agent with the manager. The enrollment is then started,
+                 and the response received is compared with the expected one.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
             brief: Initializes a simulated authd connection.
-
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - test_case:
             type: list
             brief: List of tests to be performed.
 
     assertions:
-        - Check that the responses received are consistent with the parameters sent.
+        - Verify that expected enrollment request message occurs.
 
-    test_input:
-        The tests are based on using certain parameters to enroll the agent with the manager.
-        The enrollment is then started, and the response received is compared with
-        the expected one. Both parameters and responses are found in a YAML file.
+    input_description: Different test cases are contained in an external `YAML` file (wazuh_enrollment_tests.yaml)
+                       which includes enrollment parameters.
 
-    logging:
-        - ossec.log:
-            - r"Multiple values located in the wazuh_enrollment_tests.yaml file."
+    expected_output:
+        - Multiple messages corresponding to each test case, located in the external input data file.
 
     tags:
-        - enrollment
         - simulator
         - ssl
+        - keys
     '''
     print(f'Test: {test_case["name"]}')
     if 'agent-auth' in test_case.get("skips", []):
