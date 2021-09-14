@@ -28,7 +28,8 @@ directories_to_create = [os.path.join(WAZUH_PATH, "etc", "shared", "test_group")
 files_to_sync = [os.path.join(WAZUH_PATH, "etc", "lists", "test_file"),
                  os.path.join(WAZUH_PATH, "etc", "rules", "test_file"),
                  os.path.join(WAZUH_PATH, "etc", "decoders", "test_file"),
-                 os.path.join(directories_to_create[1], 'merged.mg')]
+                 os.path.join(directories_to_create[1], 'merged.mg'),
+                 os.path.join(directories_to_create[0], 'test_file')]
 
 # Files inside directories where not 'all' files have to be synchronized, according to cluster.json.
 files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
@@ -37,7 +38,6 @@ files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.tmp'),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.lock'),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.swp'),
-                     os.path.join(directories_to_create[0], 'test_file'),
                      os.path.join(directories_to_create[1], 'test_file')]
 
 # merged.mg and agent.conf files that must be created after creating a group folder.
