@@ -39,8 +39,8 @@ class QACTLConfigGenerator:
     """
 
     BOX_MAPPING = {
-        'ubuntu': 'qactl/ubuntu_20_04',
-        'centos': 'qactl/centos_8'
+        'Ubuntu Focal': 'qactl/ubuntu_20_04',
+        'CentOS 8': 'qactl/centos_8'
     }
 
     BOX_INFO = {
@@ -184,8 +184,8 @@ class QACTLConfigGenerator:
             return True
 
         allowed_info = {
-            'test_system': ['linux'],
-            'test_vendor': ['centos', 'ubuntu']
+            'os_platform': ['linux'],
+            'os_version': list(QACTLConfigGenerator.BOX_MAPPING.keys())
         }
 
         validation_ok = True
@@ -197,9 +197,9 @@ class QACTLConfigGenerator:
                 return False
 
         # Validate version requirements
-        if parse(str(test_info['test_wazuh_min_version'])) > parse(str(self.wazuh_version)):
+        if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
-                            f"{test_info['test_wazuh_min_version']} and you are using {self.wazuh_version}"
+                            f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
             _validation_error(log_error, error_message, user_input)
 
             return False
@@ -254,14 +254,14 @@ class QACTLConfigGenerator:
 
         file.write_file(self.qactl_used_ips_file, data)
 
-    def __add_instance(self, test_vendor, test_name, test_target, test_system, vm_cpu=1, vm_memory=1024):
+    def __add_instance(self, os_version, test_name, test_target, os_platform, vm_cpu=1, vm_memory=1024):
         """Add a new provider instance for the deployment module. T
 
         Args:
-            test_vendor (string): name of the vendor of the vagrant box.
+            os_version (string): name of the vendor of the vagrant box.
             test_name (string): contains the name of the test that is going to be run.
             test_target (string): contains the target of the test.
-            test_system (string): The system in where the test needs to be run.
+            os_platform (string): The system in where the test needs to be run.
             vm_cpu (int): number of CPUs that will be dedicated to the new vagrant box.
             This parameter is set to 1 by default.
             vm_memory (int): size of the ram that will be dedicated to the new vagrant box.
@@ -274,11 +274,11 @@ class QACTLConfigGenerator:
         instance = {
             'enabled': True,
             'vagrantfile_path': gettempdir(),
-            'vagrant_box': QACTLConfigGenerator.BOX_MAPPING[test_vendor],
+            'vagrant_box': QACTLConfigGenerator.BOX_MAPPING[os_version],
             'vm_memory': vm_memory,
             'vm_cpu': vm_cpu,
             'vm_name': f"{test_target}_{test_name}",
-            'vm_system': test_system,
+            'vm_system': os_platform,
             'label': f"{test_target}_{test_name}",
             'vm_ip': instance_ip
         }
@@ -316,30 +316,30 @@ class QACTLConfigGenerator:
         for test in tests_info:
             if self.__validate_test_info(test):
                 # Choose items from the available list. To be improved in future versions
-                if 'centos' in test['test_vendor']:
-                    test['test_vendor'] = 'centos'
+                if 'CentOS 8' in test['os_version']:
+                    test['os_version'] = 'CentOS 8'
                 else:
-                    test['test_vendor'] = 'ubuntu'
+                    test['os_version'] = 'Ubuntu Focal'
 
-                test['test_target'] = 'manager' if 'manager' in test['test_target'] else 'agent'
-                test['test_system'] = 'linux'
+                test['components'] = 'manager' if 'manager' in test['components'] else 'agent'
+                test['os_platform'] = 'linux'
 
                 # Process deployment data
                 host_number = len(self.config['deployment'].keys()) + 1
                 vm_name = f"{test['test_name']}_{get_current_timestamp()}"
                 self.config['deployment'][f"host_{host_number}"] = {
                     'provider': {
-                        'vagrant': self.__add_instance(test['test_vendor'], vm_name, test['test_target'],
-                                                       test['test_system'])
+                        'vagrant': self.__add_instance(test['os_version'], vm_name, test['components'],
+                                                       test['os_platform'])
                     }
                 }
                 # Add manager if the target is an agent
-                if test['test_target'] == 'agent':
+                if test['components'] == 'agent':
                     host_number += 1
                     self.config['deployment'][f"host_{host_number}"] = {
                         'provider': {
-                            'vagrant': self.__add_instance(test['test_vendor'], vm_name, 'manager',
-                                                           test['test_system'])
+                            'vagrant': self.__add_instance(test['os_version'], vm_name, 'manager',
+                                                           test['os_platform'])
                         }
                     }
 
@@ -397,7 +397,7 @@ class QACTLConfigGenerator:
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': f"{gettempdir()}/wazuh-qa/{test['test_path']}",
+                    'test_files_path': f"{gettempdir()}/wazuh-qa/{test['path']}",
                     'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
                     'test_results_path': f"{gettempdir()}/{test['test_name']}_{get_current_timestamp()}/"
                 }
@@ -405,7 +405,7 @@ class QACTLConfigGenerator:
             test_host_number += 1
             # If it is an agent test then we skip the next manager instance since no test will be launched in that
             # instance
-            if test['test_target'] == 'agent':
+            if test['components'] == 'agent':
                 test_host_number += 1
 
     def __process_test_info(self, tests_info):
