@@ -30,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
