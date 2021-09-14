@@ -9,6 +9,7 @@ from random import choices
 import pytest
 import requests
 
+from wazuh_testing.tools import API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 
@@ -19,6 +20,8 @@ pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
 # Configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-apid']}
+file_to_monitor = API_LOG_FILE_PATH
 test_data_path = join(dirname(realpath(__file__)), 'data')
 configurations_path = join(test_data_path, 'wazuh_max_upload_size.yaml')
 
@@ -50,9 +53,18 @@ def get_configuration(request):
 
 # Functions
 
-def extra_configuration_after_yield():
-    """Stop all the Wazuh services after the test."""
-    control_service('stop')
+@pytest.fixture(scope='module')
+def restart_required_api_wazuh():
+    """Restart API-required services and stop them all at the end of the test."""
+    required_api_daemons = ['wazuh-modulesd', 'wazuh-analysisd', 'wazuh-execd', 'wazuh-db', 'wazuh-remoted']
+
+    for daemon in required_api_daemons:
+        control_service('restart', daemon=daemon)
+
+    yield
+
+    for daemon in required_api_daemons:
+        control_service('stop')
 
 
 def create_group_name(length):
@@ -93,8 +105,8 @@ def create_cdb_list(min_length):
 @pytest.mark.parametrize('tags_to_apply', [
     {'test_upload_size'}
 ])
-def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_api,
-                         wait_for_start, get_api_details):
+def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_required_api_wazuh,
+                         file_monitoring, daemons_handler, wait_for_start, get_api_details):
     """Verify that a 413 status code is returned if the body is bigger than 'max_upload_size'.
 
     Calls to a PUT and a POST endpoint specifying a body. If the 'max_upload_size'
