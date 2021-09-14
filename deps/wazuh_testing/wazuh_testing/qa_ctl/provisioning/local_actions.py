@@ -11,6 +11,12 @@ LOCAL_ANSIBLE_INSTANCE = [AnsibleInstance('127.0.0.1', 'local_user', connection_
 
 
 def download_local_wazuh_qa_repository(branch, path):
+    """Download wazuh QA repository in local machine.
+
+    Args:
+        branch (string): Wazuh QA repository branch.
+        path (string): Local path where save the repository files.
+    """
     qa_instance = QAFramework(ansible_output=False, qa_branch=branch, workdir=path)
 
     inventory = AnsibleInventory(LOCAL_ANSIBLE_INSTANCE)
@@ -21,6 +27,11 @@ def download_local_wazuh_qa_repository(branch, path):
 
 
 def run_local_command(command):
+    """Run local commands in local machine.
+
+    Args:
+        command (string): Command to run.
+    """
     run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     return run.stdout.read().decode()

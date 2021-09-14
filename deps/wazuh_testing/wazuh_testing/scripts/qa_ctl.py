@@ -37,6 +37,11 @@ launched = {
 
 
 def read_configuration_data(configuration_file_path):
+    """Read qa-ctl configuration data file as yaml and returns it as a dictionary.
+
+    Args:
+        configuration_file_path (string): Local path where is localted the qa-ctl configuration file.
+    """
     qactl_script_logger.debug('Reading configuration_data')
     with open(configuration_file_path) as config_file_fd:
         configuration_data = yaml.safe_load(config_file_fd)
@@ -45,20 +50,30 @@ def read_configuration_data(configuration_file_path):
     return configuration_data
 
 
-def validate_configuration_data(configuration):
+def validate_configuration_data(configuration_data):
+    """Validate the configuration data schema.
+
+    Args:
+        configuration_data (dict): Configuration data info.
+    """
     qactl_script_logger.debug('Validating configuration schema')
     data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
     schema_file = os.path.join(data_path, 'qactl_conf_validator_schema.json')
 
-    with open(os.path.join(_data_path, schema_file), 'r') as f:
-        schema = json.load(f)
+    with open(os.path.join(_data_path, schema_file), 'r') as config_data:
+        schema = json.load(config_data)
 
-    validate(instance=configuration, schema=schema)
+    validate(instance=configuration_data, schema=schema)
 
     qactl_script_logger.debug('Schema validation has passed successfully')
 
 
 def set_qactl_logging(qactl_configuration):
+    """Set qa-ctl logging configuration according to the config section of the qa-ctl configuration file.
+
+    Args:
+        qactl_configuration (dict): Configuration data info.
+    """
     if not qactl_configuration.logging_enable:
         qactl_logger = Logging(QACTL_LOGGER)
         qactl_logger.disable()
@@ -67,6 +82,15 @@ def set_qactl_logging(qactl_configuration):
 
 
 def validate_parameters(parameters):
+    """Validate the input parameters entered by the user of qa-ctl tool.
+
+    Args:
+        parameters (argparse.Namespace): Object with the user parameters.
+
+    Raises:
+        QAValueError: If parameters are incompatible, or version has not a valid format, or the specified wazuh version
+                      has not been released, or wazuh QA branch does not exist (calculated from wazuh_version).
+    """
     qactl_script_logger.info('Validating input parameters')
 
     # Check incompatible parameters
@@ -150,6 +174,7 @@ def main():
         configuration_file = config_generator.config_file_path
         qactl_script_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
 
+        # If dry-run mode, then exit after generating the configuration file
         if arguments.dry_run:
             qactl_script_logger.info(f"Run as dry-run mode. Configuration file saved in "
                                      f"{config_generator.config_file_path}")

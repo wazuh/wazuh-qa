@@ -76,6 +76,11 @@ class QACTLConfigGenerator:
         self.qa_files_path = qa_files_path
 
     def __get_qa_branch(self):
+        """Get Wazuh QA repository branch from Wazuh version.
+
+        Returns:
+            string: Wazuh QA repository branch.
+        """
         return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}".replace('v', '')
 
     def __get_test_info(self, test_name):
