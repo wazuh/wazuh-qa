@@ -540,7 +540,7 @@ class Agent:
                         sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.sha_key}", "data":[]}}'))
             else:
-                raise ValueError(f'WPK SHA key should be configured in agent')
+                raise ValueError('WPK SHA key should be configured in agent')
 
         elif command == 'upgrade':
             if self.upgrade_exec_result:
@@ -648,7 +648,7 @@ class Agent:
     def init_rootcheck(self):
         """Initialize rootcheck module."""
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(self.rootcheck_sample, self.name, self.id)
+            self.rootcheck = Rootcheck(os = self.os, agent_name = self.name, agent_id = self.id, rootcheck_sample = self.rootcheck_sample)
 
     def init_fim(self):
         """Initialize fim module."""
@@ -690,7 +690,7 @@ class Agent:
         """
         return self.get_agent_info('connection_status')
 
-    @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         """Wait until agent status is active in global.db.
 
@@ -934,8 +934,6 @@ class SCA:
 
 
 class Rootcheck:
-    def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
-        self.os = os
     """This class allows the generation of rootcheck events.
 
     Creates rootcheck events by sequentially repeating the events of a sample file file.
@@ -945,7 +943,8 @@ class Rootcheck:
         agent_id (str): Id of the agent.
         rootcheck_sample (str): File with the rootcheck events that are going to be used.
     """
-    def __init__(self, agent_name, agent_id, rootcheck_sample=None):
+    def __init__(self, os, agent_name, agent_id, rootcheck_sample=None):
+        self.os = os
         self.agent_name = agent_name
         self.agent_id = agent_id
         self.rootcheck_tag = 'rootcheck'
@@ -966,7 +965,7 @@ class Rootcheck:
             line = fp.readline()
             while line:
                 if not line.startswith("#"):
-                    msg = "{0}:{1}:{2}".format(self.ROOTCHECK_MQ, self.ROOTCHECK, line.strip("\n"))
+                    msg = "{0}:{1}:{2}".format(self.rootcheck_mq, self.rootcheck_tag, line.strip("\n"))
                     self.messages_list.append(msg)
                 line = fp.readline()
 
@@ -1543,6 +1542,8 @@ class Injector:
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
+        if is_tcp(self.sender.protocol):
+            self.sender.socket.shutdown(socket.SHUT_RDWR)
         self.sender.socket.close()
 
 

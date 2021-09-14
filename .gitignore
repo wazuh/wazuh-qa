@@ -55,3 +55,5 @@ deps/wazuh_testing/wazuh_testing.egg-info/
 
 .idea/
 
+# GCP tests configuration file
+tests/integration/test_gcloud/data/configuration.yaml

@@ -34,8 +34,9 @@ from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
-AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
+MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
 
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
@@ -1016,3 +1017,9 @@ def wait_mtime(path, time_step=5, timeout=-1):
         if last_mtime - tic >= timeout:
             logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
+
+
+def callback_authd_startup(line):
+    if 'Accepting connections on port 1515' in line:
+        return line
+    return None

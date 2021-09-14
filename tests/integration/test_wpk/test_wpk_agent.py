@@ -11,14 +11,16 @@ import subprocess
 import yaml
 import json
 
-from configobj import ConfigObj
+from wazuh_testing import tools
+from wazuh_testing.tools.monitoring import make_callback, FileMonitor
 from datetime import datetime
-from wazuh_testing.tools import WAZUH_PATH, get_version
+from wazuh_testing.tools import WAZUH_PATH, get_version, get_service
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, count_file_lines
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.agent import callback_detect_upgrade_ack_event, callback_upgrade_module_up, callback_exit_cleaning
 from wazuh_testing import global_parameters
 
 
@@ -27,7 +29,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0),
 
 sys_platform = platform.system()
 
-folder = 'etc' if sys_platform == 'Linux' else 'upgrade'
+folder = 'etc' if sys_platform == 'Linux' else '.'
 
 upgrade_result_folder = 'var/upgrade' if sys_platform == 'Linux' else 'upgrade'
 
@@ -40,6 +42,8 @@ UPGRADE_RESULT_PATH = os.path.join(WAZUH_PATH, upgrade_result_folder, 'upgrade_r
 CRYPTO = "aes"
 SERVER_ADDRESS = 'localhost'
 PROTOCOL = "tcp"
+mark_skip_agentLinux = pytest.mark.skipif(get_service() == 'wazuh-agent' and
+                                          sys_platform == 'Linux', reason="It will be blocked by wazuh/wazuh#9763")
 
 if not global_parameters.wpk_version:
     raise Exception("The WPK package version must be defined by parameter. See README.md")
@@ -58,6 +62,14 @@ else:
     error_msg = 'err Could not chmod' \
         if sys_platform == 'Linux' else \
         'err Cannot execute installer'
+
+
+time_to_sleep_until_backup = 10
+time_to_sleep_until_stop = 1
+wait_upgrade_process_timeout = 240
+timeout_ack_response = 300
+timeout_agent_exit = 250
+timeout_upgrade_module_start = 200
 
 test_metadata = [
     # 1. Upgrade from initial_version to new version
@@ -158,10 +170,10 @@ params = [
 
 
 def load_tests(path):
-    """ Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
+    """ Loads a yaml file from a path.
+
+    Args:
+        String: Full path of yaml file.
     """
     with open(path) as f:
         return yaml.safe_load(f)
@@ -174,9 +186,12 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=params,
                                            metadata=test_metadata)
 
-# configurations = configurations[-1:]
-
 remoted_simulator = None
+
+
+def callback_agent_req(id_req):
+    msg = '#! req {id_req}'
+    return make_callback(pattern=msg, prefix=r'.*wazuh-agentd.*')
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -202,14 +217,16 @@ def start_agent(request, get_configuration):
                                          client_keys=CLIENT_KEYS_PATH)
 
     ver_split = _agent_version.replace("v", "").split(".")
+    ver_major = ver_split[0]
+    ver_minor = ver_split[1]
     if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
-        remoted_simulator.set_wcom_message_version('4.1')
+        remoted_simulator.set_wcom_message_version(f"{ver_major}.{ver_minor}")
     else:
         remoted_simulator.set_wcom_message_version(None)
 
     # Clean client.keys file
     truncate_file(CLIENT_KEYS_PATH)
-    time.sleep(1)
+    time.sleep(time_to_sleep_until_stop)
 
     control_service('stop')
     agent_auth_pat = 'bin' if sys_platform == 'Linux' else ''
@@ -286,7 +303,7 @@ def prepare_agent_version(get_configuration):
                 control_service('stop')
             except ValueError:
                 pass
-            time.sleep(10)
+            time.sleep(time_to_sleep_until_backup)
             backup_path = os.path.join(WAZUH_PATH, 'backup')
             subprocess.call(['robocopy', backup_path, WAZUH_PATH,
                              '/E', '/IS', '/NFL', '/NDL', '/NJH',
@@ -314,7 +331,7 @@ def prepare_agent_version(get_configuration):
             control_service('stop')
         except ValueError:
             pass
-        time.sleep(10)
+        time.sleep(time_to_sleep_until_backup)
         backup_path = os.path.join(WAZUH_PATH, 'backup')
         subprocess.call(['robocopy', backup_path, WAZUH_PATH,
                          '/E', '/IS', '/NFL', '/NDL', '/NJH', '/NP', '/NS', '/NC'])
@@ -329,6 +346,7 @@ def prepare_agent_version(get_configuration):
                             '-C', '/'])
 
 
+@mark_skip_agentLinux
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     metadata = get_configuration['metadata']
@@ -339,7 +357,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
            'Initial version does not match Expected for agent'
 
     upgrade_process_result, upgrade_exec_message = \
-        remoted_simulator.wait_upgrade_process(timeout=240)
+        remoted_simulator.wait_upgrade_process(timeout=wait_upgrade_process_timeout)
     assert upgrade_process_result == expected['upgrade_ok'], \
            'Upgrade process result was not the expected'
     if upgrade_process_result:
@@ -348,7 +366,8 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             exp_json = json.loads(upgrade_exec_message)
             upgrade_result_code = int(exp_json['message'])
         else:
-            upgrade_result_code = int(upgrade_exec_message.split(' ')[1])
+            exp_json = json.loads(upgrade_exec_message)
+            upgrade_result_code = int(exp_json['message'])
         assert upgrade_result_code == expected['result_code'], \
                f'Expected upgrade result code was {expected["result_code"]} ' \
                f'but obtained {upgrade_result_code} instead'
@@ -356,21 +375,47 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         if _agent_version == version_to_upgrade and not metadata['simulate_interruption']:
             exp_json = json.loads(upgrade_exec_message)
             upgrade_exec_message = str(exp_json['message'])
-        assert upgrade_exec_message == expected['error_message'], \
-               f'Expected error message does not match'
+        assert upgrade_exec_message == expected['error_message'], 'Expected error message does not match'
+
     if upgrade_process_result and expected['receive_notification']:
-        result = remoted_simulator.wait_upgrade_notification(timeout=180)
+        if sys_platform not in ['win32', 'Windows']:
+            max_retries_truncate_file = 100
+            lines = count_file_lines(tools.LOG_FILE_PATH)
+            truncate_file_lines = lines
+            while truncate_file_lines >= lines and max_retries_truncate_file > 0:
+                --max_retries_truncate_file
+                truncate_file_lines = count_file_lines(tools.LOG_FILE_PATH)
+                time.sleep(1)
+        else:
+            truncate_file(tools.LOG_FILE_PATH)
+
+        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
+
+        if metadata['simulate_rollback']:
+
+            if sys_platform not in ['win32', 'Windows']:
+                wazuh_log_monitor.start(timeout=timeout_agent_exit,
+                                        error_message="Error agentd not stopped",
+                                        callback=callback_exit_cleaning())
+
+            wazuh_log_monitor.start(timeout=timeout_upgrade_module_start,
+                                    error_message="Upgrade module did not start",
+                                    callback=callback_upgrade_module_up())
+
+            remoted_simulator.change_default_listener = True
+
+        event = wazuh_log_monitor.start(timeout=timeout_ack_response, error_message='ACK event not received',
+                                                   callback=callback_detect_upgrade_ack_event).result()
+        result = event['parameters']
+
         if result is not None:
             status = result['status']
             assert status == expected['status'], \
                    'Notification status did not match expected'
         else:
-            assert not expected['receive_notification'], \
-                   'Notification was expected but was not received'
+            assert not expected['receive_notification'], 'Notification was expected but was not received'
 
     if expected['upgrade_ok'] and not metadata['simulate_rollback']:
-        assert get_version() == metadata['agent_version'], \
-                'End version does not match expected!'
+        assert get_version() == metadata['agent_version'], 'End version does not match expected!'
     else:
-        assert get_version() == metadata['initial_version'], \
-                'End version does not match expected!'
+        assert get_version() == metadata['initial_version'], 'End version does not match expected!'
