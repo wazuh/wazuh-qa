@@ -206,23 +206,27 @@ class DocGenerator:
         if self.conf.documentation_path:
             test_info = {}
             test_info['test_path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+            
             for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test[schema_field]
+                test_info[field] = test[field]
+            
             for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test['tests'][0][schema_field]
+                test_info[field] = test['tests'][0][field]
+
             with open(os.path.join(self.conf.documentation_path, f"{self.conf.test_name}.json"), 'w') as fp:
                 fp.write(json.dumps(test_info, indent=4))
                 fp.write('\n')
         else:
             # Use the key that QACTL needs
+            test_path = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+            print(f"test_path: {test_path}")
+
             for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test[schema_field]))
+                print(str(field)+": "+str(test[field]))
+
             for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test['tests'][0][schema_field]))
+                print(str(field)+": "+str(test['tests'][0][field]))
+                
             return None
 
     def run(self):
