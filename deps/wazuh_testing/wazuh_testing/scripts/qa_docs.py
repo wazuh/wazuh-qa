@@ -1,5 +1,4 @@
 import argparse
-import logging
 import os
 
 from wazuh_testing.qa_docs.lib.config import Config
@@ -11,43 +10,48 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION = '0.1'
-qactl_script_logger = Logging('QADOCS_SCRIPT', 'DEBUG', True)
+qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', False)
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'config.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
 
 
-def start_logging(folder, debug_level=logging.INFO):
-    LOG_PATH = os.path.join(folder, f"{os.path.splitext(os.path.basename(__file__))[0]}.log")
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    logging.basicConfig(filename=LOG_PATH, level=debug_level)
-
-
 def set_qadocs_logging(logging_level):
+    """Set the QADOCS logging depending on the level specified.
+
+    Args:
+        logging_level (string): Level used to initialize the logger.
+    """
     if not logging_level:
         qadocs_logger = Logging(QADOCS_LOGGER)
         qadocs_logger.disable()
     else:
-        qadocs_logger = Logging(QADOCS_LOGGER, logging_level, True)
+        qadocs_logger = Logging(QADOCS_LOGGER, logging_level, False)
 
 
 def validate_parameters(parameters):
-    qactl_script_logger.debug('Validating input parameters')
+    """Validate the parameters that qa-docs recieves.
+
+    Args:
+        parameters (list): List of input args.
+    """
+    qadocs_logger.debug('Validating input parameters')
 
     # Check if the directory where the tests are located exist
     if parameters.test_dir:
         if not os.path.exists(parameters.test_dir):
             raise QAValueError(f"{parameters.test_dir} does not exist. Tests directory not found.",
-                               qactl_script_logger.error)
+                               qadocs_logger.error)
 
     # Check that test_input name exists
     if parameters.test_input:
         doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, '', parameters.test_input))
         if doc_check.locate_test() is None:
             raise QAValueError(f"{parameters.test_input} not found.",
-                               qactl_script_logger.error)
+                               qadocs_logger.error)
+
+    qadocs_logger.debug('Input parameters validation successfully finished')
 
 
 def main():
@@ -85,14 +89,11 @@ def main():
 
     args = parser.parse_args()
 
-    validate_parameters(args)
-
+    # Set the qa-docs logger
     if args.debug_level:
-        # set_qadocs_logging('DEBUG')
-        start_logging(LOG_PATH, logging.DEBUG)
-    else:
-        start_logging(LOG_PATH)
-        # set_qadocs_logging('INFO')
+        set_qadocs_logging('DEBUG')
+
+    validate_parameters(args)
 
     if args.test_exist:
         doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
@@ -101,36 +102,43 @@ def main():
 
     if args.version:
         print(f"qa-docs v{VERSION}")
+
     elif args.test_config:
+        qadocs_logger.debug('Loading qa-docs configuration')
         Config(CONFIG_PATH)
+        qadocs_logger.debug('qa-docs configuration loaded')
+
     elif args.sanity:
         sanity = Sanity(Config(CONFIG_PATH))
-        qactl_script_logger.debug('Running sanity check')
+        qadocs_logger.debug('Running sanity check')
         sanity.run()
+
     elif args.index_name:
-        qactl_script_logger.debug(f"Indexing {args.index_name}")
+        qadocs_logger.debug(f"Indexing {args.index_name}")
         indexData = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         indexData.run()
+
     elif args.launch_app:
-        qactl_script_logger.debug(f"Indexing {args.index_name}")
+        qadocs_logger.debug(f"Indexing {args.index_name}")
         indexData = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         indexData.run()
         os.chdir(SEARCH_UI_PATH)
-        qactl_script_logger.debug('Running SearchUI')
+        qadocs_logger.debug('Running SearchUI')
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
+
     else:
         if not args.test_exist:
             docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
             if args.test_input:
-                qactl_script_logger.debug(f"Parsing the following test(s) {args.test_input}")
+                qadocs_logger.info(f"Parsing the following test(s) {args.test_input}")
                 if args.output_path:
-                    qactl_script_logger.debug(f"{args.test_input}.json is going to be generated in {args.output_path}")
+                    qadocs_logger.info(f"{args.test_input}.json is going to be generated in {args.output_path}")
                     docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
                 else:
                     docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_input))
             else:
-                qactl_script_logger.debug(f"Parsing all tests located in {args.test_dir}")
-            qactl_script_logger.debug('Running QADOCS')
+                qadocs_logger.info(f"Parsing all tests located in {args.test_dir}")
+            qadocs_logger.info('Running QADOCS')
             docs.run()
 
     if __name__ == '__main__':
