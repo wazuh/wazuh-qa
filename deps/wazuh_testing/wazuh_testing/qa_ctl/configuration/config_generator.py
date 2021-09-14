@@ -136,31 +136,7 @@ class QACTLConfigGenerator:
         Returns:
             boolean : True if the validation has succeed, False otherwise
         """
-        def _ask_user_input():
-            """Ask if the user desires to continue with the current instance execution"""
-            user_continue = input('Do you want to continue with qa-ctl running? [y/n]: ')
-            if user_continue.lower() != 'y':
-                QACTLConfigGenerator.LOGGER.debug('The user has decided to stop execution due to incompatibility '
-                                                  'between test and qa-ctl')
-                exit(0)
-
-        def _validation_error(log_error=True, error_message=None, user_input=True):
-            """Show the possible validation error and check if the user wants to continue with the execution even if the
-            validation has failed.
-
-            Agrs:
-                user_input (boolean): boolean that checks if there is going to be an input from the user.
-                This parameter is set to True by default.
-                error_message (string): string containing the error message. This parameter is set to None by default.
-                log_error (boolean): boolean that checks if there is going to be a logging of the errors.
-                This parameter is set to True by default.
-            """
-            if log_error:
-                QACTLConfigGenerator.LOGGER.error(error_message)
-            if user_input:
-                _ask_user_input()
-
-        def _check_validate(check, test_info, allowed_values, user_input, log_error):
+        def _check_validate(check, test_info, allowed_values):
             """Check if the validation process for a field has succeed.
 
             Args:
@@ -177,9 +153,7 @@ class QACTLConfigGenerator:
             if len(list(set(test_info[check]) & set(allowed_values))) == 0:
                 error_message = f"{test_info['test_name']} cannot be launched. Reason: Currently we do not "\
                                 f"support {test_info[check]}. Allowed values: {allowed_values}"
-                _validation_error(log_error, error_message, user_input)
-
-                return False
+                raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
 
             return True
 
@@ -188,21 +162,15 @@ class QACTLConfigGenerator:
             'os_version': list(QACTLConfigGenerator.BOX_MAPPING.keys())
         }
 
-        validation_ok = True
-
         # Validate checks
         for check, allowed_values in allowed_info.items():
-            validation_ok = _check_validate(check, test_info, allowed_values, user_input, log_error)
-            if not validation_ok:
-                return False
+            _check_validate(check, test_info, allowed_values)
 
         # Validate version requirements
         if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
                             f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
-            _validation_error(log_error, error_message, user_input)
-
-            return False
+            raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
 
         return True
 
