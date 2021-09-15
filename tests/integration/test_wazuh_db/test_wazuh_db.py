@@ -5,6 +5,8 @@ import json
 import pytest
 import yaml
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.services import control_service, delete_dbs
+from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
 # Marks
 
@@ -94,11 +96,12 @@ def insert_agents_test():
 
 
 @pytest.fixture(scope='module')
-def stop_all_daemons(request):
-    yield 
+def restart_wazuh(request):
+    control_service('start')
+    yield
+
+    delete_dbs()
     control_service('stop')
-
-
 
 
 def execute_wazuh_db_query(command):
@@ -155,8 +158,8 @@ def remove_agent(agent_id):
                               for module_data, module_name in agent_module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages_agent(clean_registered_agents, configure_sockets_environment,
-                                 connect_to_sockets_module, insert_agents_test, stop_all_daemons, test_case):
+def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment,
+                                 connect_to_sockets_module, insert_agents_test, test_case):
     """Check that every input agent message in wazuh-db socket generates the adequate output to wazuh-db socket.
 
     Args:
@@ -185,8 +188,7 @@ def test_wazuh_db_messages_agent(clean_registered_agents, configure_sockets_envi
                               for module_data, module_name in global_module_tests
                               for case in module_data]
                          )
-def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sockets_module, 
-                                  stop_all_daemons, test_case):
+def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test_case):
     """Check that every input global message in wazuh-db socket generates the adequate output to wazuh-db socket.
 
     Args:
@@ -209,7 +211,7 @@ def test_wazuh_db_messages_global(configure_sockets_environment, connect_to_sock
             .format(index + 1, stage['stage'], expected_output, response)
 
 
-def test_wazuh_db_chunks(stop_all_daemons, configure_sockets_environment, clean_registered_agents,
+def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_registered_agents,
                          connect_to_sockets_module, pre_insert_agents):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size"""
     def send_chunk_command(command):
