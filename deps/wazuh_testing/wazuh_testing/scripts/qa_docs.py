@@ -1,5 +1,6 @@
 import argparse
 import os
+from datetime import datetime
 
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
@@ -10,11 +11,12 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION = '0.1'
-qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True)
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'config.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
+qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
+                        f"{datetime.today().strftime('%Y-%m-%d-%H:%M:%S')}-qa-docs.log"))
 
 
 def set_qadocs_logging(logging_level):
