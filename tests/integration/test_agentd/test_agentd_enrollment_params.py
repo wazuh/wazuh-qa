@@ -22,6 +22,7 @@ components:
 daemons:
     - wazuh-agentd
     - wazuh-authd
+    - wazuh-remoted
 
 os_platform:
     - linux
@@ -278,7 +279,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.

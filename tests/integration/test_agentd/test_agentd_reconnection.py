@@ -1,57 +1,61 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    These tests will check if, during enrollment, the agent re-establishes communication with the manager
-    under different situations that interrupt it.
-    The objective is to check that, with different states in the `clients.key` file, the agent
-    successfully enrolls after losing connection with remoted.
+brief: These tests will check if, during enrollment, the agent re-establishes communication
+       with the manager under different situations that interrupt it. The objective is
+       to check that, with different states in the `clients.keys` file, the agent
+       successfully enrolls after losing connection with the `wazuh-remoted` daemon.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    agent
+modules:
+    - agentd
 
-path:
-    tests/integration/test_agentd/
+components:
+    - agent
 
 daemons:
-    - agentd
-    - remoted
+    - wazuh-agentd
+    - wazuh-authd
+    - wazuh-remoted
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
-    - windows, 7
-    - windows, 8
-    - windows, 10
-    - windows, server 2003
-    - windows, server 2012
-    - windows, server 2016
+os_platform:
+    - linux
+    - windows
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/registering/index.html
 
 tags:
     - enrollment
@@ -236,22 +240,20 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 
 def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
     '''
-    description:
-        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-        In this case, the agent starts with keys.
+    description: Check how the agent behaves when losing communication with
+                 the `wazuh-remoted` daemon and a new enrollment is sent to
+                 the `wazuh-authd` daemon.
+                 In this case, the agent starts with keys.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
-
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -259,17 +261,17 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
     assertions:
         - Verify that the agent enrollment is successful.
 
-    test_input:
-        An IP address and port are used for the server using the `TCP` and `UDP` protocols.
+    input_description: Two test cases are found in the test module and include parameters
+                       for the environment setup using the `TCP` and `UDP` protocols.
 
-    logging:
-        - ossec.log:
-            - r"Valid key received"
-            - r"Sending keep alive"
+    expected_output:
+        - r'Valid key received'
+        - r'Sending keep alive'
 
     tags:
-        - enrollment
         - simulator
+        - ssl
+        - keys
     '''
     global remoted_server
 
@@ -320,22 +322,20 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
     '''
-    description:
-        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-        In this case, the agent doesn't have client.keys file.
+    description: Check how the agent behaves when losing communication with
+                 the `wazuh-remoted` daemon and a new enrollment is sent to
+                 the `wazuh-authd` daemon.
+                 In this case, the agent doesn't have the `client.keys` file.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
-
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -343,17 +343,17 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
     assertions:
         - Verify that the agent enrollment is successful.
 
-    test_input:
-        An IP address and port are used for the server using the `TCP` and `UDP` protocols.
+    input_description: Two test cases are found in the test module and include parameters
+                       for the environment setup using the `TCP` and `UDP` protocols.
 
-    logging:
-        - ossec.log:
-            - r"Valid key received"
-            - r"Sending keep alive"
+    expected_output:
+        - r'Valid key received'
+        - r'Sending keep alive'
 
     tags:
-        - enrollment
         - simulator
+        - ssl
+        - keys
     '''
     global remoted_server
 
@@ -407,22 +407,20 @@ and an enrollment is sent to Authd to start communicating with Remoted
 
 def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
     '''
-    description:
-        Check how the agent behaves when losing communication with remoted and a new enrollment is sent to authd.
-        In this case, the agent has its client.keys file empty.
+    description: Check how the agent behaves when losing communication with
+                 the `wazuh-remoted` daemon and a new enrollment is sent to
+                 the `wazuh-authd` daemon.
+                 In this case, the agent has its `client.keys` file empty.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
-
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -430,17 +428,17 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
     assertions:
         - Verify that the agent enrollment is successful.
 
-    test_input:
-        An IP address and port are used for the server using the `TCP` and `UDP` protocols.
+    input_description: Two test cases are found in the test module and include parameters
+                       for the environment setup using the `TCP` and `UDP` protocols.
 
-    logging:
-        - ossec.log:
-            - r"Valid key received"
-            - r"Sending keep alive"
+    expected_output:
+        - r'Valid key received'
+        - r'Sending keep alive'
 
     tags:
-        - enrollment
         - simulator
+        - ssl
+        - keys
     '''
     global remoted_server
 
@@ -495,23 +493,20 @@ and multiple retries are required until the new key is obtained to start communi
 
 def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
     '''
-    description:
-        Check how the agent behaves when it makes multiple enrollment attempts before getting its key.
-        For this, the agent starts without keys and perform multiple enrollment requests
-        to authd before getting the new key to communicate with remoted.
+    description: Check how the agent behaves when it makes multiple enrollment attempts
+                 before getting its key. For this, the agent starts without keys and
+                 performs multiple enrollment requests to the `wazuh-authd` daemon before
+                 getting the new key to communicate with the `wazuh-remoted` daemon.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
-
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -519,18 +514,18 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
     assertions:
         - Verify that the agent enrollment is successful.
 
-    test_input:
-        An IP address and port are used for the server using the `TCP` and `UDP` protocols.
+    input_description: Two test cases are found in the test module and include parameters
+                       for the environment setup using the `TCP` and `UDP` protocols.
 
-    logging:
-        - ossec.log:
-            - r"Requesting a key"
-            - r"Valid key received"
-            - r"Sending keep alive"
+    expected_output:
+        - r'Requesting a key'
+        - r'Valid key received'
+        - r'Sending keep alive'
 
     tags:
-        - enrollment
         - simulator
+        - ssl
+        - keys
     '''
     global remoted_server
 
@@ -589,23 +584,20 @@ and multiple connection retries are required prior to requesting a new enrollmen
 
 def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration):
     '''
-    description:
-        Check how the agent behaves when Remoted is not available and performs multiple connection attempts to it.
-        For this, the agent starts with keys but `remoted` is not available for several seconds,
-        then the agent performs multiple connection retries before requesting a new enrollment.
+    description: Check how the agent behaves when the `wazuh-remoted` daemon is not available
+                 and performs multiple connection attempts to it. For this, the agent starts
+                 with keys but the `wazuh-remoted` daemon is not available for several seconds,
+                 then the agent performs multiple connection retries before requesting a new enrollment.
 
-    wazuh_min_version:
-        4.1
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated authd connection.
-
+            brief: Initializes a simulated `wazuh-authd` connection.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -613,16 +605,16 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
     assertions:
         - Verify that the agent enrollment is successful.
 
-    test_input:
-        An IP address and port are used for the server using the `TCP` and `UDP` protocols.
+    input_description: Two test cases are found in the test module and include parameters
+                       for the environment setup using the `TCP` and `UDP` protocols.
 
-    logging:
-        - ossec.log:
-            - r"Sending keep alive"
+    expected_output:
+        - r'Sending keep alive'
 
     tags:
-        - enrollment
         - simulator
+        - ssl
+        - keys
     '''
     global remoted_server
     REMOTED_KEYS_SYNC_TIME = 10
