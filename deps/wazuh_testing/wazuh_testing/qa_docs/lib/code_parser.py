@@ -11,10 +11,11 @@ import ast
 import os
 import re
 import yaml
+
 from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
 from wazuh_testing.qa_docs.lib.utils import remove_inexistent
-import warnings
-import logging
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
 
 INTERNAL_FIELDS = ['id', 'group_id', 'name']
 STOP_FIELDS = ['tests', 'test_cases']
@@ -24,6 +25,8 @@ class CodeParser:
     """
     brief: Class that parses the content of the test files.
     """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self, config):
         self.conf = config
         self.pytest = PytestWrap()
@@ -70,13 +73,10 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                warnings.warn(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}. \
-                              Error: {inst}", stacklevel=2)
-                logging.warning(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}. \
-                                Error: {inst}")
+                CodeParser.LOGGER.warning(f"Failed to parse comment of function {function.name} "
+                                          "from module {self.scan_file}. Error: {inst}")
             else:
-                warnings.warn(f"Failed to parse comment of module {self.scan_file}. Error: {inst}", stacklevel=2)
-                logging.warning(f"Failed to parse comment of module {self.scan_file}. Error: {inst}")
+                CodeParser.LOGGER.warning(f"Failed to parse comment of module {self.scan_file}. Error: {inst}")
             doc = None
 
         return doc
@@ -89,7 +89,7 @@ class CodeParser:
             -"id (integer): Id of the new test document"
             -"group_id (integer): Id of the group where the new test document belongs."
         """
-        logging.debug(f"Parsing test file '{code_file}'")
+        CodeParser.LOGGER.debug(f"Parsing test file '{code_file}'")
         self.scan_file = code_file
         with open(code_file) as fd:
             file_content = fd.read()
@@ -117,8 +117,7 @@ class CodeParser:
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                warnings.warn(f"Module '{module_doc['name']}' doesn´t contain any test function", stacklevel=2)
-                logging.warning(f"Module '{module_doc['name']}' doesn´t contain any test function")
+                CodeParser.LOGGER.warning(f"Module '{module_doc['name']}' doesn´t contain any test function")
             else:
                 module_doc['tests'] = functions_doc
 
@@ -135,14 +134,13 @@ class CodeParser:
             -"group_id (integer): Id of the group where the new group document belongs."
         """
         MD_HEADER = "# "
-        logging.debug(f"Parsing group file '{group_file}'")
+        CodeParser.LOGGER.debug(f"Parsing group file '{group_file}'")
         with open(group_file) as fd:
             file_header = fd.readline()
             file_content = fd.read()
 
         if not file_header.startswith(MD_HEADER):
-            warnings.warn(f"Group file '{group_file}' doesn´t contain a valid header", stacklevel=2)
-            logging.warning(f"Group file '{group_file}' doesn´t contain a valid header")
+            CodeParser.LOGGER.warning(f"Group file '{group_file}' doesn´t contain a valid header")
             return None
 
         group_doc = {}
