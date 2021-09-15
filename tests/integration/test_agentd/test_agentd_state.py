@@ -1,55 +1,58 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    The statistics files are documents that show real-time information about the Wazuh environment.
-    These tests will check if the content of the `wazuh-agentd` statistics file is valid.
+brief: These tests will check if the content of the `wazuh-agentd` daemon statistics file is valid.
+       The statistics files are documents that show real-time information about the Wazuh environment.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    agent
+modules:
+    - agentd
 
-path:
-    tests/integration/test_agentd/
+components:
+    - agent
 
 daemons:
-    - agentd
-    - remoted
+    - wazuh-agentd
+    - wazuh-remoted
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
-    - windows, 7
-    - windows, 8
-    - windows, 10
-    - windows, server 2003
-    - windows, server 2012
-    - windows, server 2016
+os_platform:
+    - linux
+    - windows
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-agentd-state.html
 
 tags:
     - stats_file
@@ -132,37 +135,31 @@ def add_custom_key():
                          ids=[test_case['name'] for test_case in test_cases])
 def test_agentd_state(configure_environment, test_case: list):
     '''
-    description:
-        Check that the statistics file `wazuh-agentd.state` is created automatically
-        and verify that the content of its fields is correct.
+    description: Check that the statistics file `wazuh-agentd.state` is created automatically
+                 and verify that the content of its fields is correct.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - test_case:
             type: list
             brief: List of tests to be performed.
 
     assertions:
-        - Verify the creation of the statistics file.
-        - Check that the fields in the statistics file are consistent with the connection to remoted.
+        - Verify that the `wazuh-agentd.state` statistics file has been created.
+        - Verify that the information stored in the `wazuh-agentd.state` statistics file
+          is consistent with the connection status to the `wazuh-remoted` daemon.
 
-    test_input:
-        Different use cases that are contained in an external `YAML` file
-        that includes the parameters and expected responses.
+    input_description: Different test cases that are contained in an external
+                       `YAML` file (wazuh_state_tests.yaml) that includes
+                       the parameters and their expected responses.
 
-    logging:
-        - ossec.log:
-            - r"pending"
-            - r"connected"
-
-    tags:
-        - simulator
+    expected_output:
+        - r'pending'
+        - r'connected'
     '''
     global remoted_server
     if remoted_server is not None:
