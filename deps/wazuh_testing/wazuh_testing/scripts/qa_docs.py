@@ -10,7 +10,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION = '0.1'
-qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', False)
+qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True)
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'config.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
@@ -23,11 +23,10 @@ def set_qadocs_logging(logging_level):
     Args:
         logging_level (string): Level used to initialize the logger.
     """
-    if not logging_level:
-        qadocs_logger = Logging(QADOCS_LOGGER)
+    if logging_level is None:
         qadocs_logger.disable()
     else:
-        qadocs_logger = Logging(QADOCS_LOGGER, logging_level, False)
+        qadocs_logger.set_level(logging_level)
 
 
 def validate_parameters(parameters):
@@ -41,15 +40,13 @@ def validate_parameters(parameters):
     # Check if the directory where the tests are located exist
     if parameters.test_dir:
         if not os.path.exists(parameters.test_dir):
-            raise QAValueError(f"{parameters.test_dir} does not exist. Tests directory not found.",
-                               qadocs_logger.error)
+            raise QAValueError(f"{parameters.test_dir} does not exist. Tests directory not found.", qadocs_logger.error)
 
     # Check that test_input name exists
     if parameters.test_input:
         doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, '', parameters.test_input))
         if doc_check.locate_test() is None:
-            raise QAValueError(f"{parameters.test_input} not found.",
-                               qadocs_logger.error)
+            raise QAValueError(f"{parameters.test_input} not found.", qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation successfully finished')
 
