@@ -36,32 +36,34 @@ class Config():
         self.test_fields = _fields()
         self.test_cases_field = None
 
-        try:
-            Config.LOGGER.debug('Loading config file')
-            with open(args[0]) as fd:
-                self._config_data = yaml.safe_load(fd)
-        except:
-            raise QAValueError('Cannot load config file', Config.LOGGER.error)
-
-        self._read_function_regex()
-        self._read_output_fields()
-        self._read_test_cases_field()
-        self._read_include_paths()
-        self._read_include_regex()
-        self._read_group_files()
-        self._read_ignore_paths()
+        self.__load_config_file(args[0])
+        self.__read_function_regex()
+        self.__read_output_fields()
+        self.__read_test_cases_field()
+        self.__read_include_paths()
+        self.__read_include_regex()
+        self.__read_group_files()
+        self.__read_ignore_paths()
 
         if len(args) >= 3:
-            self._set_documentation_path(args[2])
+            self.__set_documentation_path(args[2])
         if len(args) == 4:
             # It is called with a single test to parse
             self.mode = mode.SINGLE_TEST
             self.test_name = args[3]
-            self._read_test_info()
-            self._read_module_info()
+            self.__read_test_info()
+            self.__read_module_info()
 
 
-    def _read_test_info(self):
+    def __load_config_file(self, file):
+        try:
+            Config.LOGGER.debug('Loading config file')
+            with open(file) as config_file:
+                self._config_data = yaml.safe_load(config_file)
+        except:
+            raise QAValueError('Cannot load config file', Config.LOGGER.error)
+
+    def __read_test_info(self):
         """Reads from the config file the keys to be printed from module info.
 
         This functionality is used to print any custom field(s) you want.
@@ -78,7 +80,7 @@ class Config():
         else:
             Config.LOGGER.warning('Cannot read test info fields')
     
-    def _read_module_info(self):
+    def __read_module_info(self):
         """Reads from the config file the fields to be printed from test info.
 
         This functionality is used to print any custom field(s) you want.
@@ -99,18 +101,14 @@ class Config():
         else:
             Config.LOGGER.warning('Cannot read module info fields')
 
-    def _set_documentation_path(self, path):
+    def __set_documentation_path(self, path):
         """
         brief: Sets the path of the documentation output.
         """
         Config.LOGGER.debug('Setting the path documentation')
+        self.documentation_path = path
 
-        if path:
-            self.documentation_path = path
-        else:
-            Config.LOGGER.warning('You have not passed a path where the documentation data is dumped')
-
-    def _read_include_paths(self):
+    def __read_include_paths(self):
         """
         brief: Reads from the config file all the paths to be included in the parsing.
         """
@@ -125,7 +123,7 @@ class Config():
         for path in include_paths:
             self.include_paths.append(os.path.join(self.project_path, path))
 
-    def _read_include_regex(self):
+    def __read_include_regex(self):
         """
         brief: Reads from the config file the regexes used to identify test files.
         """
@@ -136,7 +134,7 @@ class Config():
 
         self.include_regex = self._config_data['Include regex']
 
-    def _read_group_files(self):
+    def __read_group_files(self):
         """
         brief: Reads from the config file the file name to be identified with a group.
         """
@@ -147,7 +145,7 @@ class Config():
 
         self.group_files = self._config_data['Group files']
 
-    def _read_function_regex(self):
+    def __read_function_regex(self):
         """
         brief: Reads from the config file the regexes used to identify a test method.
         """
@@ -158,7 +156,7 @@ class Config():
 
         self.function_regex = self._config_data['Function regex']
 
-    def _read_ignore_paths(self):
+    def __read_ignore_paths(self):
         """
         brief: Reads from the config file all the paths to be excluded from the parsing.
         """
@@ -170,7 +168,7 @@ class Config():
             for path in ignore_paths:
                 self.ignore_paths.append(os.path.join(self.project_path, path))
 
-    def _read_module_fields(self):
+    def __read_module_fields(self):
         """
         brief: Reads from the config file the optional and mandatory fields for the test module.
         """
@@ -190,7 +188,7 @@ class Config():
         if 'Optional' in module_fields:
             self.module_fields.optional = module_fields['Optional']
 
-    def _read_test_fields(self):
+    def __read_test_fields(self):
         """
         brief: Reads from the config file the optional and mandatory fields for the test functions.
         """
@@ -210,17 +208,17 @@ class Config():
         if 'Optional' in test_fields:
             self.test_fields.optional = test_fields['Optional']
 
-    def _read_output_fields(self):
+    def __read_output_fields(self):
         """
         brief: Reads all the mandatory and optional fields.
         """
         if not 'Output fields' in self._config_data:
             raise QAValueError('Config output fields is missing', Config.LOGGER.error)
 
-        self._read_module_fields()
-        self._read_test_fields()
+        self.__read_module_fields()
+        self.__read_test_fields()
 
-    def _read_test_cases_field(self):
+    def __read_test_cases_field(self):
         """
         brief: Reads from the configuration file the key to identify a Test Case list.
         """
