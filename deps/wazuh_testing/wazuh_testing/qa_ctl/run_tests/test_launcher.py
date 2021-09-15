@@ -8,6 +8,7 @@ from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
+
 class TestLauncher:
     """The class encapsulates the execution of a list of tests previously built and passed as a parameter.
 
@@ -35,7 +36,6 @@ class TestLauncher:
         self.ansible_inventory_path = ansible_inventory_path
         self.qa_ctl_configuration = qa_ctl_configuration
         self.tests = tests
-
 
     def __set_local_internal_options(self, hosts):
         """Private method that set the local internal options in the hosts passed by parameter

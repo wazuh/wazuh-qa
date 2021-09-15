@@ -146,14 +146,11 @@ class QAProvisioning():
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                           hosts=current_host)
-
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          s3_package_url,
                                                                                           hosts=current_host)
-
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
                                                       inventory_file_path=self.inventory_file_path,
@@ -182,7 +179,8 @@ class QAProvisioning():
             wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
                 else qa_framework_info['wazuh_qa_branch']
 
-            qa_instance = QAFramework(qa_branch=wazuh_qa_branch, qa_ctl_configuration=self.qa_ctl_configuration)
+            qa_instance = QAFramework(qa_branch=wazuh_qa_branch,
+                                      ansible_output=self.qa_ctl_configuration.ansible_output)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)

@@ -28,7 +28,6 @@ class AgentDeployment(WazuhDeployment):
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
     """
 
-
     def install(self):
         """Child method to install Wazuh in agent
 

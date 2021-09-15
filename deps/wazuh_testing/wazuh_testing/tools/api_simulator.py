@@ -44,7 +44,7 @@ class CustomLogger:
 
 
 class APISimulator:
-    def __init__(self, host, port, protocol='https', frequency=60, user='wazuh', password='wazuh',
+    def __init__(self, host, port, protocol='https', frequency=60, user='wazuh-wui', password='wazuh-wui',
                  external_logger=None, request_percentage=0, request_template=None):
         self.host = host
         self.port = port

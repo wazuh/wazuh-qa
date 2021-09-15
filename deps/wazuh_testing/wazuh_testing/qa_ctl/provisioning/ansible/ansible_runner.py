@@ -56,10 +56,11 @@ class AnsibleRunner:
 
         Args:
             ansible_inventory_path (string): Path were the ansible directory is placed.
-            playbook_parameters : parameters for the ansible playbook.
-            raise_on_error (boolean): Sets if errors or unexpected behaviour are goint to raise errors, Set to 'True' by default.
-            output (boolena): sets if there are going to be outputs. Set to 'False' by default.
-        
+            playbook_parameters : Parameters for the ansible playbook.
+            raise_on_error (boolean): Set if errors or unexpected behaviour are goint to raise errors, Set to 'True'
+                                      by default.
+            output (boolena): Set if there are going to be outputs. Set to 'False' by default.
+
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
 

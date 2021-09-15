@@ -2,8 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from wazuh_testing.tools.exceptions import QAValueError
-
 
 PROD_BUCKET = 'packages.wazuh.com'
 DEV_BUCKET = 'packages-dev.wazuh.com'
@@ -46,10 +44,11 @@ def get_s3_package_url(repository, target, version, revision, system, architectu
     Returns:
         str: The url of the desired package
     """
+    parsed_version = version.replace('v', '')
     if is_repository(repository):
-        return get_repository_url(target, version, system, revision, repository, architecture, short_url)
+        return get_repository_url(target, parsed_version, system, revision, repository, architecture, short_url)
     else:
-        return get_non_repository_url(target, version, system, revision, repository, architecture, DEV_BUCKET,
+        return get_non_repository_url(target, parsed_version, system, revision, repository, architecture, DEV_BUCKET,
                                       install_dir, short_url)
 
 
@@ -84,7 +83,7 @@ def is_repository(folder_path):
     elif folder_path in non_repository_list:
         return False
     else:
-        raise QAValueError(f"{folder_path} is unknown. It was not found in {repository_list} or {non_repository_list}")
+        raise ValueError(f"{folder_path} is unknown. It was not found in {repository_list} or {non_repository_list}")
 
 
 def get_repository_url(target, version, system, revision, repository, architecture, short_url=True):
@@ -170,7 +169,7 @@ def get_non_repository_url(target, version, system, revision, repository, archit
     elif repository == 'warehouse-test':
         non_repository_url += f"/warehouse/test/{short_version}"
     else:
-        raise QAValueError(f"The repository named {repository} is unknown.")
+        raise ValueError(f"The repository named {repository} is unknown.")
 
     if system == SYSTEMS['rpm'] or system == SYSTEMS['rpm5'] or system == SYSTEMS['deb']:
         non_repository_url += f"/{system}{install_dir}"
@@ -226,7 +225,7 @@ def get_package_name(target, version, system, revision, repository, architecture
         deb_architecture = 'armhf'
         rpm_architecture = 'armv7hl'
     else:
-        raise QAValueError(f"{architecture} is an invalid architecture")
+        raise ValueError(f"{architecture} is an invalid architecture")
 
     package_name += target
 
@@ -254,6 +253,6 @@ def get_package_name(target, version, system, revision, repository, architecture
         revision_section = f"-{revision}" if revision != '1' else ''
         package_name = f"wazuh_agent_v{version}{revision_section}_windows.wpk"
     else:
-        raise QAValueError(f"{system} is not a valid system")
+        raise ValueError(f"{system} is not a valid system")
 
     return package_name

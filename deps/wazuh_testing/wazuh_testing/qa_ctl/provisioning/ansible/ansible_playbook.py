@@ -7,6 +7,7 @@ from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 
+
 class AnsiblePlaybook():
     """Class to create playbook file with a custom tasks list
 

@@ -41,7 +41,7 @@ class WazuhLocalPackage(WazuhPackage):
         Args:
             inventory_file_path (string): path where the instalation files are going to be stored.
             hosts (string): Parameter set to `all` by default.
-        
+
         Returns:
             str: String with the complete path of the installation package
         """

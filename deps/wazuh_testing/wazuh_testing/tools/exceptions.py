@@ -1,6 +1,6 @@
 
 class QAValueError(Exception):
     def __init__(self, message, logger=None):
-        self.message = message
+        self.message = f"\033[91m{message}\033[0m"
         logger(message)
         super().__init__(self.message)

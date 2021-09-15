@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the active responses, which are executed by
+       the `wazuh-execd` daemon via scripts, run correctly. Active responses
+       execute a script in response to the triggering of specific alerts
+       based on the alert level or rule group.
+
+tier: 0
+
+modules:
+    - active_response
+
+components:
+    - agent
+
+path: tests/integration/test_active_response/test_execd/test_execd_restart.py
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-authd
+    - wazuh-execd
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
+'''
 import os
 import platform
 import pytest
@@ -144,16 +195,52 @@ def build_message(metadata, expected):
 
 def test_execd_restart(set_debug_mode, get_configuration, test_version,
                        configure_environment, start_agent, set_ar_conf_mode):
-    """Check if restart-wazuh Active Response is executed correctly.
+    '''
+    description: Check if `restart-wazuh` command of `active response` is executed correctly.
+                 For this purpose, a simulated agent is used, to which the active response is sent.
+                 This response includes the order to restart the Wazuh agent,
+                 which must restart after receiving this response.
 
-    Args:
-        set_debug_mode (fixture): Set execd daemon in debug mode.
-        get_configuration (fixture): Get configurations from the module.
-        test_version (fixture): Validate Wazuh version.
-        configure_environment (fixture): Configure a custom environment for testing.
-        start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
-        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Set execd daemon in debug mode.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - test_version:
+            type: fixture
+            brief: Validate Wazuh version.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - start_agent:
+            type: fixture
+            brief: Create Remoted and Authd simulators, register agent and start it.
+        - set_ar_conf_mode:
+            type: fixture
+            brief: Configure Active Responses used in tests.
+
+    assertions:
+        - Check that the active response `restart-wazuh` is received.
+        - Check that the agent is ready to restart.
+
+    input_description: Different use cases are found in the test module and include
+                       parameters for `restart-wazuh` command and the expected result.
+
+    expected_output:
+        - r'DEBUG: Received message'
+        - r'Shutdown received. Deleting responses.'
+        - r'Starting'
+        - r'active-response/bin/restart-wazuh'
+        - r'Ended'
+        - r'Invalid input format' (If the `active response` fails)
+
+    tags:
+        - simulator
+    '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)

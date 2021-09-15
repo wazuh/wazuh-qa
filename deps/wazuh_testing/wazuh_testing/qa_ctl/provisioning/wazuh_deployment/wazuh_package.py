@@ -13,7 +13,7 @@ class WazuhPackage(WazuhInstallation, ABC):
         wazuh_target (string): Type of the Wazuh instance desired (agent or manager).
         installation_files_path (string): Path where is located the Wazuh instalation files.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
-    
+
     Attributes:
         version (string): The version of Wazuh.
         system (string): System of the Wazuh installation files.
