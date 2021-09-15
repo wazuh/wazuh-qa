@@ -104,7 +104,7 @@ def main():
 
     elif args.test_config:
         qadocs_logger.debug('Loading qa-docs configuration')
-        Config(CONFIG_PATH)
+        Config(CONFIG_PATH, args.test_dir)
         qadocs_logger.debug('qa-docs configuration loaded')
 
     elif args.sanity:
