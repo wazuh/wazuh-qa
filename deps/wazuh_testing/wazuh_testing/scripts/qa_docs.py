@@ -11,10 +11,10 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION = '0.1'
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'config.yaml')
-OUTPUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'output')
-LOG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'log')
-SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'qa_docs', 'search_ui')
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'config.yaml')
+OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'output')
+LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
+SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'search_ui')
 qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
                         f"{datetime.today().strftime('%Y-%m-%d-%H:%M:%S')}-qa-docs.log"))
 
@@ -108,7 +108,7 @@ def main():
         qadocs_logger.debug('qa-docs configuration loaded')
 
     elif args.sanity:
-        sanity = Sanity(Config(CONFIG_PATH))
+        sanity = Sanity(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
