@@ -52,9 +52,8 @@ def get_configuration(request):
     return request.param
 
 
-# Functions
-
-def extra_configuration_before_yield():
+@pytest.fixture(scope='module', params=configurations)
+def set_audit_rules():
     # Create the custom audit rules for the non monitored directory
     fim.run_audit_command(directory=non_monitored_test_dir, params=param_list, cmd_type='add')
     # Remove audit rule that FIM configures for each monitored directory
@@ -62,16 +61,16 @@ def extra_configuration_before_yield():
     # Set the audit rule for the monitored directory with more than one key
     fim.run_audit_command(directory=monitored_test_dir, params='-k wazuh_fim -k "a_random_key"', cmd_type='add')
 
+    yield
 
-def extra_configuration_after_yield():
     # Remove the audit rules configured by the test
     fim.run_audit_command(directory=non_monitored_test_dir, params=param_list, cmd_type='delete')
     fim.run_audit_command(directory=monitored_test_dir, params=param_list, cmd_type='delete')
 
 
 @pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir])
-def test_audit_multiple_keys(directory, get_configuration, configure_environment, configure_local_internal_options_module, file_monitoring, daemons_handler, 
-                             wait_for_fim_start):
+def test_audit_multiple_keys(get_configuration, configure_environment, configure_local_internal_options_module,
+                             file_monitoring, set_audit_rules, daemons_handler, wait_for_fim_start, directory):
     """Checks that FIM correctly handles audit rules with multiple keys.
 
     Args:
@@ -86,30 +85,28 @@ def test_audit_multiple_keys(directory, get_configuration, configure_environment
         ValueError: If the path of the event is wrong.
     """
     check_apply_test({'audit_multiple_keys'}, get_configuration['tags'])
+
     # Wait until FIM reloads the audit rules.
     log_monitor.start(timeout=audit_rules_reload_interval,
-                            callback=fim.callback_audit_reloading_rules,
-                            accum_results=1,
-                            update_position=True,
-                            error_message='Did not receive expected "Audit reloading rules ..." event ')
+                      callback=fim.callback_audit_reloading_rules,
+                      error_message='Did not receive expected "Audit reloading rules ..." event ')
+
     fim.create_file(fim.REGULAR, directory, 'testfile')
 
     key = log_monitor.start(timeout=global_parameters.default_timeout,
-                                  callback=fim.callback_get_audit_key,
-                                  accum_results=1,
-                                  update_position=True,
-                                  error_message='Did not receive expected "Match audit_key: ..." event ').result()
+                            callback=fim.callback_get_audit_key,
+                            error_message='Did not receive expected "Match audit_key: ..." event ').result()
 
-
-
-
-    assert (key in custom_keys) or (key == 'wazuh_fim'), f'{key} not found in {custom_keys}'
+    assert (key in custom_keys) or (key == 'wazuh_fim'), f"{key} not found in {custom_keys}"
 
     if directory == '/non_monitored_test_dir':
-       with pytest.raises(TimeoutError):
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ')
+        with pytest.raises(TimeoutError):
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
+                              error_message='Did not receive expected "Sending FIM event..." event ')
     else:
-       event = log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event, error_message='Did not receive expected "Sending FIM event..." event ').result()
-       assert get_configuration['metadata']['monitored_dir'] == directory, 'No events should be detected.'
-       event_path = event['data']['path']
-       assert directory in event_path, f"Expected path = {directory}, event path = {event_path}"
+        event = log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
+                                  error_message='Did not receive expected "Sending FIM event..." event ').result()
+
+        assert get_configuration['metadata']['monitored_dir'] == directory, 'No events should be detected.'
+        event_path = event['data']['path']
+        assert directory in event_path, f"Expected path = {directory}, event path = {event_path}"
