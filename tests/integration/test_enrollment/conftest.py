@@ -2,15 +2,14 @@ import os
 import platform
 import yaml
 import pytest
-import subprocess
 import ssl
-import time
 
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
 from wazuh_testing.tools.file import load_tests
 from wazuh_testing.tools.utils import get_host_name
+from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
@@ -30,8 +29,6 @@ SERVER_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'manager.pem')
 AGENT_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'agent.key')
 AGENT_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'agent.cert')
 AGENT_PEM_PATH = os.path.join(WAZUH_PATH, folder, 'agent.pem')
-AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else \
-    os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 CONFIG_PATHS = {
     'SERVER_PEM_PATH': SERVER_PEM_PATH,
@@ -98,7 +95,7 @@ def configure_socket_listener(request, get_current_test_case):
 def set_keys(get_current_test_case):
     """Writes the keys file with the content defined in the configuration.
     Args:
-        test_case (dict): Current test case.
+        get_current_test_case (dict): Current test case.
     """
     keys = get_current_test_case.get('pre_existent_keys', [])
     if keys:
@@ -113,8 +110,41 @@ def set_keys(get_current_test_case):
 def set_pass(get_current_test_case):
     """Writes the password file with the content defined in the configuration.
     Args:
-        test_case (dict): Current test case.
+        get_current_test_case (dict): Current test case.
     """
     with open(AUTHDPASS_PATH, "w") as f:
         if 'password_file_content' in get_current_test_case:
             f.write(get_current_test_case['password_file_content'])
+
+
+# Wazuh conf
+
+def get_temp_yaml(param):
+    """Creates a temporal config file."""
+    temp = os.path.join(test_data_path, 'temp.yaml')
+    with open(configurations_path, 'r') as conf_file:
+        enroll_conf = {'enrollment': {'elements': []}}
+        for elem in param:
+            if elem == 'password':
+                continue
+            enroll_conf['enrollment']['elements'].append({elem: {'value': param[elem]}})
+        temp_conf_file = yaml.safe_load(conf_file)
+        temp_conf_file[0]['sections'][0]['elements'].append(enroll_conf)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+
+@pytest.fixture(scope='function')
+def override_wazuh_conf(get_current_test_case, request):
+    """Re-writes Wazuh configuration file with new configurations from the test case."""
+    test_name = request.node.originalname
+    configuration = get_current_test_case.get('configuration', {})
+    parse_configuration_string(configuration)
+    # Configuration for testing
+    temp = get_temp_yaml(configuration)
+    conf = load_wazuh_configurations(temp, test_name, )
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+    # Set new configuration
+    write_wazuh_conf(test_config)

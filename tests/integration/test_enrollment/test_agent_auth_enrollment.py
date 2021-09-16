@@ -24,6 +24,8 @@ metadata:
 
 import pytest
 import os
+import platform
+import subprocess
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
@@ -31,7 +33,10 @@ from wazuh_testing.tools.file import load_tests
 from wazuh_testing.tools.monitoring import QueueMonitor, make_callback
 from wazuh_testing.tools.utils import get_host_name
 from wazuh_testing.agent import AgentAuthParser
-from conftest import *
+from wazuh_testing.tools import WAZUH_PATH
+
+AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Linux' else \
+    os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -50,7 +55,6 @@ def launch_agent_auth(configuration):
     Args:
         configuration (dict): Dictionary with the agent-auth configuration.
     """
-    parse_configuration_string(configuration)
     parser = AgentAuthParser(server_address=MANAGER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH,
                              sudo=True if platform.system() == 'Linux' else False)
     if configuration.get('agent_name'):
@@ -85,7 +89,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function', params=tests)
 def get_current_test_case(request):
-    """Get configurations from the module"""
+    """Get current test case from the module"""
     return request.param
 
 
@@ -97,7 +101,7 @@ def test_agent_auth_enrollment(configure_environment, get_current_test_case, cre
             error log. Agent-auth will be executed using the different parameters and with different keys and password
             files scenarios as described in the test cases."
         checks:
-            - The enrollment messages is sent when the configuration is valid
+            - The enrollment message is sent when the configuration is valid
             - The enrollment message is generated as expected when the configuration is valid.
             - The error log is generated as expected when the configuration is invalid.
     """
