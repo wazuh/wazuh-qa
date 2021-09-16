@@ -1,17 +1,12 @@
-"""
-brief: Wazuh DocGenerator tool.
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import re
 import json
 import yaml
-from wazuh_testing.qa_docs.lib.config import Config, mode
+from wazuh_testing.qa_docs.lib.config import Config, Mode
 from wazuh_testing.qa_docs.lib.code_parser import CodeParser
 from wazuh_testing.qa_docs.lib.utils import clean_folder
 from wazuh_testing.qa_docs import QADOCS_LOGGER
@@ -33,7 +28,7 @@ class DocGenerator:
         for ignore_regex in self.conf.ignore_paths:
             self.ignore_regex.append(re.compile(ignore_regex))
         self.include_regex = []
-        if self.conf.mode == mode.DEFAULT:
+        if self.conf.mode == Mode.DEFAULT:
             for include_regex in self.conf.include_regex:
                 self.include_regex.append(re.compile(include_regex))
 
@@ -167,9 +162,9 @@ class DocGenerator:
         test = self.parser.parse_test(path, self.__id_counter, group_id)
 
         if test:
-            if self.conf.mode == mode.DEFAULT:
+            if self.conf.mode == Mode.DEFAULT:
                 doc_path = self.get_test_doc_path(path)
-            elif self.conf.mode == mode.SINGLE_TEST:
+            elif self.conf.mode == Mode.SINGLE_TEST:
                 doc_path = self.conf.documentation_path
                 if self.print_test_info(test) is None:
                     # 
@@ -270,7 +265,7 @@ class DocGenerator:
         brief: Run a complete scan of each include path to parse every test and group found.
                Normal mode: expected behaviour, Single test mode: found the test required and par it
         """
-        if self.conf.mode == mode.DEFAULT:
+        if self.conf.mode == Mode.DEFAULT:
             DocGenerator.LOGGER.info("Starting documentation parsing")
             DocGenerator.LOGGER.debug(f"Cleaning doc folder located in {self.conf.documentation_path}")
             clean_folder(self.conf.documentation_path)
@@ -280,7 +275,7 @@ class DocGenerator:
                 DocGenerator.LOGGER.debug(f"Going to parse files on '{path}'")
                 self.parse_folder(path, self.__id_counter)
 
-        elif self.conf.mode == mode.SINGLE_TEST:
+        elif self.conf.mode == Mode.SINGLE_TEST:
             DocGenerator.LOGGER.info("Starting test documentation parsing")
             self.test_path = self.locate_test()
             
