@@ -120,9 +120,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 246,
+            "line_number": 248,
             "line_range": [
-                246
+                248
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -134,9 +134,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 384,
+            "line_number": 386,
             "line_range": [
-                384
+                386
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -148,9 +148,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 530,
+            "line_number": 532,
             "line_range": [
-                530
+                532
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
