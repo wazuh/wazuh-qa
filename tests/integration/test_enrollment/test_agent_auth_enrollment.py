@@ -93,8 +93,13 @@ def get_current_test_case(request):
     return request.param
 
 
-def test_agent_auth_enrollment(configure_environment, get_current_test_case, create_certificates, set_keys, set_pass,
-                               file_monitoring, configure_socket_listener, request):
+@pytest.fixture(scope='module')
+def shutdown_agentd():
+    control_service('stop', daemon='wazuh-agentd')
+
+
+def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_current_test_case, create_certificates,
+                               set_keys, set_pass, file_monitoring, configure_socket_listener, request):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -107,8 +112,6 @@ def test_agent_auth_enrollment(configure_environment, get_current_test_case, cre
     """
     if 'agent-auth' in get_current_test_case.get('skips', []):
         pytest.skip('This test does not apply to agent-auth')
-
-    control_service('stop', daemon='wazuh-agentd')
 
     if 'expected_error' in get_current_test_case:
         launch_agent_auth(get_current_test_case.get('configuration', {}))

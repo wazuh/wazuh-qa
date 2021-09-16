@@ -61,8 +61,18 @@ def get_current_test_case(request):
     """Get current test case from the module"""
     return request.param
 
+@pytest.fixture(scope='function')
+def restart_agentd():
+    try:
+        control_service('restart', daemon='wazuh-agentd')
+    except:
+        pass
+    yield
+    control_service('stop', daemon='wazuh-agentd')
+
+
 def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_current_test_case, create_certificates,
-                           set_keys, set_pass, file_monitoring, configure_socket_listener, request):
+                           set_keys, set_pass, file_monitoring, configure_socket_listener, restart_agentd, request):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -76,16 +86,8 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
     if 'wazuh-agentd' in get_current_test_case.get('skips', []):
         pytest.skip("This test does not apply to agentd")
 
-    control_service('stop', daemon='wazuh-agentd')
-
     if 'expected_error' in get_current_test_case:
-
         log_monitor = request.module.log_monitor
-        try:
-            control_service('start', daemon='wazuh-agentd')
-        except Exception:
-            pass
-
         if get_current_test_case.get('expected_fail'):
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=AGENTD_TIMEOUT,
@@ -95,9 +97,7 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
                               callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True),
                               error_message='Expected error log does not occured')
 
-
     else:
-        control_service('start', daemon='wazuh-agentd')
         test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
         test_response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
 
