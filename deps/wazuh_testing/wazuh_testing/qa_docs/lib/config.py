@@ -1,11 +1,6 @@
-"""
-brief: Wazuh DocGenerator config parser.
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import yaml
 from enum import Enum
@@ -16,27 +11,46 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 
 class Config():
-    """
-    brief: Class that parses the configuration file and exposes the available configurations.
-           It exists two modes of execution: Normal and Single test.
+    """Class that parses the configuration file and exposes the available configurations.
+    
+    It exists two modes of execution: Normal and Single test.
+
+    Attributes:
+        mode: An enumeration that stores the `doc_generator` mode when it is running.
+        project_path: A string that specifies the path where the tests to parse are located.
+        include_paths: A list of strings that contains the directories to parse.
+        include_regex: A list of strings(regular expressions) used to find test files.
+        group_files: A string that specifies the group definition file.
+        function_regex: A list of strings(regular expressions) used to find test functions.
+        ignore_paths: A string that specifies which paths will be ignored.
+        module_fields: A struct that contains the module documentantion data.
+        test_fields: A struct that contains the test documentantion data.
+        test_cases_field: A string that contains the test cases key.
+        LOGGER: A custom qa-docs logger.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, *args):
-        # If it is called using the config file
+    def __init__(self, config_path, test_dir, output_path='', test_name=None):
+        """Constructor that load the data from the config file.
+
+        Args:
+            config_path:
+            test_dir:
+            output_path:
+            test_name:
+        """
         self.mode = mode.DEFAULT
-        self.project_path = args[1]
+        self.project_path = test_dir
         self.include_paths = []
         self.include_regex = []
         self.group_files = ""
         self.function_regex = []
         self.ignore_paths = []
-        self.valid_tags = []
         self.module_fields = _fields()
         self.test_fields = _fields()
         self.test_cases_field = None
 
-        self.__load_config_file(args[0])
+        self.__load_config_file(config_path)
         self.__read_function_regex()
         self.__read_output_fields()
         self.__read_test_cases_field()
@@ -44,13 +58,12 @@ class Config():
         self.__read_include_regex()
         self.__read_group_files()
         self.__read_ignore_paths()
+        self.__set_documentation_path(output_path)
 
-        if len(args) >= 3:
-            self.__set_documentation_path(args[2])
-        if len(args) == 4:
+        if test_name:
             # It is called with a single test to parse
             self.mode = mode.SINGLE_TEST
-            self.test_name = args[3]
+            self.test_name = test_name
             self.__read_test_info()
             self.__read_module_info()
 

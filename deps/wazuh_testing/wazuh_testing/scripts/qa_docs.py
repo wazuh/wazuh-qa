@@ -1,3 +1,7 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import argparse
 import os
 from datetime import datetime
@@ -49,7 +53,7 @@ def validate_parameters(parameters):
 
     # Check that test_input name exists
     if parameters.test_input:
-        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, '', parameters.test_input))
+        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, test_name=parameters.test_input))
         if doc_check.locate_test() is None:
             raise QAValueError(f"{parameters.test_input} not found.", qadocs_logger.error)
 
@@ -99,7 +103,7 @@ def main():
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_exist))
         if doc_check.locate_test() is not None:
             print("test exists")
 
@@ -148,7 +152,7 @@ def main():
                     docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
                 else:
                     # When no output is specified, it is printed
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_input))
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_input))
             else:
                 qadocs_logger.info(f"Parsing all tests located in {args.test_dir}")
 
