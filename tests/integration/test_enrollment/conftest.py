@@ -10,7 +10,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
 from wazuh_testing.tools.file import load_tests
-
+from wazuh_testing.tools.utils import get_host_name
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
@@ -60,8 +60,18 @@ def create_certificates():
     cert_controller.store_ca_certificate(cert_controller.get_root_ca_cert(), AGENT_CERT_PATH)
 
 
-def configure_socket_listener(receiver_callback):
+@pytest.fixture(scope='function')
+def configure_socket_listener(request, get_current_test_case):
     """Configures the socket listener to start listening on the socket."""
+    if 'message' in get_current_test_case and 'response' in get_current_test_case['message']:
+        response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
+    else:
+        response = "".encode()
+    if 'message' in get_current_test_case and 'expected' in get_current_test_case['message']:
+        expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
+    else:
+        expected = None
+    receiver_callback = lambda received_event: response if not expected or expected == received_event else "".encode()
     socket_listener = ManInTheMiddle(address=(MANAGER_ADDRESS, MANAGER_PORT), family='AF_INET',
                                      connection_protocol='SSL', func=receiver_callback)
     socket_listener.start()
@@ -75,19 +85,22 @@ def configure_socket_listener(receiver_callback):
         socket_listener.queue.get_nowait()
     socket_listener.event.clear()
 
-    return socket_listener
+    setattr(request.module, 'socket_listener', socket_listener)
+
+    yield
+
+    socket_listener.shutdown()
 
 
 # Keys file
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
 @pytest.fixture(scope='function')
-def set_keys(test_case):
+def set_keys(get_current_test_case):
     """Writes the keys file with the content defined in the configuration.
     Args:
         test_case (dict): Current test case.
     """
-    keys = test_case.get('pre_existent_keys', [])
+    keys = get_current_test_case.get('pre_existent_keys', [])
     if keys:
         with open(CLIENT_KEYS_PATH, "w") as keys_file:
             for key in keys:
@@ -96,13 +109,12 @@ def set_keys(test_case):
 
 # Password file
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
 @pytest.fixture(scope='function')
-def set_pass(test_case):
+def set_pass(get_current_test_case):
     """Writes the password file with the content defined in the configuration.
     Args:
         test_case (dict): Current test case.
     """
     with open(AUTHDPASS_PATH, "w") as f:
-        if 'password_file_content' in test_case:
-            f.write(test_case['password_file_content'])
+        if 'password_file_content' in get_current_test_case:
+            f.write(get_current_test_case['password_file_content'])

@@ -24,24 +24,25 @@ metadata:
 
 import pytest
 import os
-import socket
 
-from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import load_tests, truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, make_callback
+from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.monitoring import QueueMonitor, make_callback
+from wazuh_testing.tools.utils import get_host_name
 from wazuh_testing.agent import AgentAuthParser
 from conftest import *
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+tests_path =  os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
+tests = load_tests(tests_path)
 configurations = load_wazuh_configurations(configurations_path, __name__)
-tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
-host_name = socket.gethostname()
 MANAGER_ADDRESS = '127.0.0.1'
-AGENT_AUTH_TIMEOUT = 20
+AGENT_AUTH_TIMEOUT = 10
 
 def launch_agent_auth(configuration):
     """Launches agent-auth based on a specific dictionary configuration
@@ -82,8 +83,14 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agent_auth_enrollment(configure_environment, create_certificates, set_keys, set_pass, file_monitoring, request, test_case: list):
+@pytest.fixture(scope='function', params=tests)
+def get_current_test_case(request):
+    """Get configurations from the module"""
+    return request.param
+
+
+def test_agent_auth_enrollment(configure_environment, get_current_test_case, create_certificates, set_keys, set_pass,
+                               file_monitoring, configure_socket_listener, request):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -94,43 +101,36 @@ def test_agent_auth_enrollment(configure_environment, create_certificates, set_k
             - The enrollment message is generated as expected when the configuration is valid.
             - The error log is generated as expected when the configuration is invalid.
     """
-    if 'agent-auth' in test_case.get('skips', []):
+    if 'agent-auth' in get_current_test_case.get('skips', []):
         pytest.skip('This test does not apply to agent-auth')
 
     control_service('stop', daemon='wazuh-agentd')
 
-
-
-    receiver_callback = lambda received_event: test_response if test_expected == received_event else "".encode()
-    socket_listener = configure_socket_listener(receiver_callback)
-
-    if 'expected_error' in test_case:
-        launch_agent_auth(test_case.get('configuration', {}))
+    if 'expected_error' in get_current_test_case:
+        launch_agent_auth(get_current_test_case.get('configuration', {}))
 
         log_monitor = request.module.log_monitor
-        if test_case.get('expected_fail'):
+        if get_current_test_case.get('expected_fail'):
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=AGENT_AUTH_TIMEOUT,
-                                  callback=make_callback(test_case.get('expected_error'), prefix='.*', escape=True))
+                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True))
         else:
             log_monitor.start(timeout=AGENT_AUTH_TIMEOUT,
-                            callback=make_callback(test_case.get('expected_error'), prefix='.*', escape=True),
+                            callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True),
                             error_message='Expected error log does not occured')
 
     else:
-        test_expected = test_case['message']['expected'].format(host_name=host_name).encode()
-        test_response = test_case['message']['response'].format(host_name=host_name).encode()
+        test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
+        test_response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
         # Monitor MITM queue
-        socket_monitor = QueueMonitor(socket_listener.queue)
+        socket_monitor = QueueMonitor(request.module.socket_listener.queue)
         event = (test_expected, test_response)
 
-        launch_agent_auth(test_case.get('configuration', {}))
+        launch_agent_auth(get_current_test_case.get('configuration', {}))
 
         try:
             # Start socket monitoring
             socket_monitor.start(timeout=AGENT_AUTH_TIMEOUT, callback=lambda received_event: event == received_event,
                                  error_message='Enrollment request message never arrived', update_position=False)
-        except:
-            pass
-
-    socket_listener.shutdown()
+        finally:
+            socket_monitor.stop()

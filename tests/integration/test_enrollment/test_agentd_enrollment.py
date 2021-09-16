@@ -44,6 +44,10 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 host_name = socket.gethostname()
 AGENTD_TIMEOUT = 20
 
+daemons_handler_configuration = {'function': {'daemons': ['wazuh-agentd'], 'ignore_errors': False},
+                                 'module':  {'daemons': ['wazuh-modulesd', 'wazuh-analysisd'], 'ignore_errors': False},
+                                 'configuration': {'daemons': ['wazuh-syscheckd'], 'ignore_errors': False}}
+
 
 def get_temp_yaml(param):
     """Creates a temporal config file."""
@@ -87,7 +91,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('test_case', [case for case in tests])
-def test_agentd_enrollment(configure_environment, create_certificates, set_keys, set_pass, test_case: list):
+def test_agentd_enrollment(configure_environment, create_certificates, set_keys, set_pass, daemons_handler, configure_socket_listener,
+                           test_case: list):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -105,9 +110,11 @@ def test_agentd_enrollment(configure_environment, create_certificates, set_keys,
 
     override_wazuh_conf(test_case.get('configuration', {}), __name__)
 
+    receiver_callback = lambda received_event: ""
+    socket_listener = configure_socket_listener(receiver_callback)
+
     if 'expected_error' in test_case:
-        receiver_callback = lambda received_event: ""
-        socket_listener = configure_socket_listener(receiver_callback)
+
         # Monitor ossec.log file
         truncate_file(LOG_FILE_PATH)
         log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -124,7 +131,7 @@ def test_agentd_enrollment(configure_environment, create_certificates, set_keys,
             log_monitor.start(timeout=AGENTD_TIMEOUT,
                               callback=make_callback(test_case.get('expected_error'), prefix='.*', escape=True),
                               error_message='Expected error log does not occured')
-        socket_listener.shutdown()
+
 
     else:
         control_service('start', daemon='wazuh-agentd')
@@ -141,4 +148,6 @@ def test_agentd_enrollment(configure_environment, create_certificates, set_keys,
             socket_monitor.start(timeout=AGENTD_TIMEOUT, callback=lambda received_event: event == received_event,
                                  error_message='Enrollment request message never arrived', update_position=False)
         finally:
-            socket_listener.shutdown()
+            pass
+
+    socket_listener.shutdown()
