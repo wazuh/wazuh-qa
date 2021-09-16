@@ -11,14 +11,19 @@ import os
 import re
 import json
 import requests
-import logging
 from elasticsearch import Elasticsearch, helpers
+
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class IndexData:
     """
     brief: Class that indexes the data from JSON files into ElasticSearch.
     """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self, index, config):
         self.path = config.documentation_path
         self.index = index
@@ -34,9 +39,8 @@ class IndexData:
             res = requests.get("http://localhost:9200/_cluster/health")
             if res.status_code == 200:
                 return True
-        except Exception as e:
-            logging.exception(f"Connection error:\n{e}")
-            return False
+        except Exception as exception:
+            raise QAValueError(f"Connection error: {exception}", IndexData.LOGGER.error)
 
     def get_files(self):
         """
@@ -63,7 +67,7 @@ class IndexData:
         brief: Deletes an index.
         """
         delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
-        logging.info(f'Delete index {self.index}\n {delete}\n')
+        IndexData.LOGGER.info(f'Delete index {self.index}\n {delete}\n')
 
     def run(self):
         """
@@ -74,7 +78,7 @@ class IndexData:
         self.read_files_content(files)
         if self.test_connection():
             self.remove_index()
-            logging.info("Indexing data...\n")
+            IndexData.LOGGER.info("Indexing data...\n")
             helpers.bulk(self.es, self.output, index=self.index)
             out = json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
-            logging.info(out)
+            IndexData.LOGGER.info(out)

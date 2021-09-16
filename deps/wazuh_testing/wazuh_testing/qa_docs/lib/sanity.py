@@ -11,8 +11,11 @@ import os
 import re
 import json
 import ast
-import logging
+
 from wazuh_testing.qa_docs.lib.utils import check_existance
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 
 class Sanity():
@@ -20,6 +23,8 @@ class Sanity():
     brief: Class in charge of performing a general sanity check on the already parsed documentation.
     It´s in charge of walk every documentation file, and every group file to dump the parsed documentation.
     """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self, config):
         self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)
@@ -39,8 +44,7 @@ class Sanity():
             with open(full_path) as file:
                 return json.load(file)
         except:
-            logging.error(f"Cannot load '{full_path}' file for sanity check")
-            raise Exception(f"Cannot load '{full_path}' file for sanity check")
+            raise QAValueError(f"Cannot load '{full_path}' file for sanity check", Sanity.LOGGER.error)
 
     def validate_fields(self, required_fields, available_fields):
         """
@@ -54,8 +58,8 @@ class Sanity():
         if isinstance(required_fields, dict):
             for field in required_fields:
                 if not check_existance(available_fields, field):
-                    self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
-                    logging.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                    self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
+                    Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                 elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
         elif isinstance(required_fields, list):
@@ -64,8 +68,8 @@ class Sanity():
                     self.validate_fields(field, available_fields)
                 else:
                     if not check_existance(available_fields, field):
-                        self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
-                        logging.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                        self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
+                        Sanity.LOGGER.error(f"Mandatory field '{field}' is missing the in file {self.scan_file}")
 
     def validate_module_fields(self, fields):
         """
@@ -142,40 +146,40 @@ class Sanity():
         """
         brief: Makes a report with all the errors found, the coverage and the tags found.
         """
-        print("")
-        print("During the sanity check:")
+        print("\nDuring the sanity check:")
 
-        print("")
         if self.error_reports:
-            print("The following errors were found:")
+            print("\nThe following errors were found:")
             for error in self.error_reports:
                 print("- "+error)
         else:
-            print("No errors were found:")
+            print("\nNo errors were found:")
 
         if self.found_tags:
-            print("")
-            print("The following tags were found:")
+            print("\nThe following tags were found:")
             for tag in self.found_tags:
                 print("- "+tag)
 
-        print("")
         modules_count = len(self.found_modules)
         tests_count = len(self.found_tests)
         tests_percentage = tests_count / self.project_tests * 100
-        print(f"A total of {len(self.found_tests)} tests were found in {modules_count} modules")
+        print(f"\nA total of {len(self.found_tests)} tests were found in {modules_count} modules")
         print("A {:.2f}% from the tests of {} is covered.".format(tests_percentage, self.conf.project_path))
 
     def run(self):
         """
         brief: Runs a complete sanity check of each documentation file on the output folder.
         """
-        logging.info("\nStarting documentation sanity check")
+        Sanity.LOGGER.info("Starting documentation sanity check")
+
         for (root, *_, files) in os.walk(self.conf.documentation_path, topdown=True):
             files = list(filter(self.files_regex.match, files))
+
             for file in files:
                 full_path = os.path.join(root, file)
+                print(full_path)
                 content = self.get_content(full_path)
+
                 if content:
                     self.scan_file = full_path
                     self.validate_module_fields(content)

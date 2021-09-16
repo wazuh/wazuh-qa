@@ -8,7 +8,10 @@ license: This program is free software; you can redistribute it
 """
 
 import pytest
-import logging
+
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
+
 
 class PytestPlugin:
     """
@@ -28,6 +31,8 @@ class PytestWrap:
     """
     brief: Class that wraps the execution of pytest.
     """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self):
         self.plugin = PytestPlugin()
 
@@ -38,7 +43,7 @@ class PytestWrap:
             - "path (string): Path of the test file to extract the test cases.
         returns: "dictionary: The output of pytest parsed into a dictionary"
         """
-        logging.debug(f"Running pytest to collect testcases for '{path}'")
+        PytestWrap.LOGGER.debug(f"Running pytest to collect test cases for '{path}'")
         pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])
         output = {}
         for item in self.plugin.collected:
