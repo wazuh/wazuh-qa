@@ -126,6 +126,9 @@ def test_validate_socket_responses(configure_sockets_environment, connect_to_soc
     input_description: Different test cases that are contained in an external `YAML` file (syscheck_events.yaml)
                        that includes `syscheck` events data and the expected output.
 
+    inputs:
+        - 4096 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
+
     expected_output:
         - Multiple messages (event logs) corresponding to each test case,
           located in the external input data file.
