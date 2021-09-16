@@ -11,6 +11,7 @@ import requests
 
 from wazuh_testing.tools import API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, load_wazuh_configurations
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 
 # Marks
@@ -61,10 +62,12 @@ def restart_required_api_wazuh():
     for daemon in required_api_daemons:
         control_service('restart', daemon=daemon)
 
+    truncate_file(file_to_monitor)
+
     yield
 
     for daemon in required_api_daemons:
-        control_service('stop')
+        control_service('stop', daemon=daemon)
 
 
 def create_group_name(length):
