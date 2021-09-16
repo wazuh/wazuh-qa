@@ -46,7 +46,7 @@ class DocGenerator:
         """
         for regex in self.ignore_regex:
             if regex.match(path):
-                DocGenerator.LOGGER.warning(f"Folder validation: {regex} not matchin with {path}")
+                DocGenerator.LOGGER.warning(f"Folder validation: {regex} not matching with {path}")
                 return False
 
         return True
@@ -62,12 +62,12 @@ class DocGenerator:
 
         for regex in self.ignore_regex:
             if regex.match(file):
-                DocGenerator.LOGGER.warning(f"File validation: {regex} not matchin with {file}")
+                DocGenerator.LOGGER.warning(f"File validation: {regex} not matching with {file}")
                 return False
 
         for regex in self.include_regex:
             if regex.match(file):
-                DocGenerator.LOGGER.warning(f"File validation: {regex} not matchin with {file}")
+                DocGenerator.LOGGER.warning(f"File validation: {regex} not matching with {file}")
                 return True
 
         return False
@@ -118,20 +118,20 @@ class DocGenerator:
             - "doc_path (string): The path where the information should be dumped."
         """
         if not os.path.exists(os.path.dirname(doc_path)):
-            DocGenerator.LOGGER.warning('Creating documentation folder')
+            DocGenerator.LOGGER.debug('Creating documentation folder')
             os.makedirs(os.path.dirname(doc_path))
 
         try:
             DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
-            with open(doc_path + ".json", "w+") as outfile:
-                outfile.write(json.dumps(content, indent=4))
+            with open(doc_path + ".json", "w+") as out_file:
+                out_file.write(json.dumps(content, indent=4))
         except IOError:
             raise QAValueError(f"Cannot write in {doc_path}.json", DocGenerator.LOGGER.error)
 
         try:
             DocGenerator.LOGGER.debug(f"Writing {doc_path}.yaml")
-            with open(doc_path + ".yaml", "w+") as outfile:
-                outfile.write(yaml.dump(content))
+            with open(doc_path + ".yaml", "w+") as out_file:
+                out_file.write(yaml.dump(content))
         except IOError:
             raise QAValueError(f"Cannot write in {doc_path}.yaml", DocGenerator.LOGGER.error)
 

@@ -73,10 +73,10 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                CodeParser.LOGGER.warning(f"Failed to parse comment of function {function.name} "
+                CodeParser.LOGGER.warning(f"Failed to parse test documentation in {function.name} "
                                           "from module {self.scan_file}. Error: {inst}")
             else:
-                CodeParser.LOGGER.warning(f"Failed to parse comment of module {self.scan_file}. Error: {inst}")
+                CodeParser.LOGGER.warning(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
             doc = None
 
         return doc
