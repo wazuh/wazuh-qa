@@ -43,7 +43,7 @@ class PytestWrap:
             - "path (string): Path of the test file to extract the test cases.
         returns: "dictionary: The output of pytest parsed into a dictionary"
         """
-        PytestWrap.LOGGER.debug(f"Running pytest to collect testcases for '{path}'")
+        PytestWrap.LOGGER.debug(f"Running pytest to collect test cases for '{path}'")
         pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])
         output = {}
         for item in self.plugin.collected:

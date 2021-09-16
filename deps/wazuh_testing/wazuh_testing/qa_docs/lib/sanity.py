@@ -58,8 +58,8 @@ class Sanity():
         if isinstance(required_fields, dict):
             for field in required_fields:
                 if not check_existance(available_fields, field):
-                    self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
-                    Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                    self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
+                    Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                 elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
         elif isinstance(required_fields, list):
@@ -68,8 +68,8 @@ class Sanity():
                     self.validate_fields(field, available_fields)
                 else:
                     if not check_existance(available_fields, field):
-                        self.add_report(f"Mandatory field '{field}' is missing in file {self.scan_file}")
-                        Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in file {self.scan_file}")
+                        self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
+                        Sanity.LOGGER.error(f"Mandatory field '{field}' is missing the in file {self.scan_file}")
 
     def validate_module_fields(self, fields):
         """
