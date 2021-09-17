@@ -7,7 +7,7 @@ import re
 import json
 import yaml
 
-from wazuh_testing.qa_docs.lib.config import Config, Mode
+from wazuh_testing.qa_docs.lib.config import Mode
 from wazuh_testing.qa_docs.lib.code_parser import CodeParser
 from wazuh_testing.qa_docs.lib.utils import clean_folder
 from wazuh_testing.qa_docs import QADOCS_LOGGER

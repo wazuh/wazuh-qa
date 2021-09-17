@@ -5,6 +5,7 @@
 import yaml
 from enum import Enum
 import os
+
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
