@@ -9,7 +9,13 @@ import re
 
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH, LOGTEST_SOCKET_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP, LOCAL_RULES_PATH
+from wazuh_testing.tools import (WAZUH_PATH, LOGTEST_SOCKET_PATH,
+                                 WAZUH_UNIX_USER, LOG_FILE_PATH,
+                                 LOCAL_RULES_PATH, WAZUH_UNIX_GROUP)
+from wazuh_testing.logtest import callback_logtest_started
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file
 
 
 # Marks
@@ -18,11 +24,14 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/')
 messages_path = os.path.join(test_data_path, 'rules_verbose.yaml')
+logtest_startup_timeout = 30
+
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
 receiver_sockets_params = [(LOGTEST_SOCKET_PATH, 'AF_UNIX', 'TCP')]
+receiver_sockets = None
 
 local_rules_debug_messages = ['Trying rule: 880000 - Parent rules verbose', '*Rule 880000 matched',
                               '*Trying child rules', 'Trying rule: 880001 - test last_match', '*Rule 880001 matched',
@@ -32,13 +41,12 @@ local_rules_debug_messages = ['Trying rule: 880000 - Parent rules verbose', '*Ru
 # Fixtures
 @pytest.fixture(scope='function')
 def configure_rules_list(get_configuration, request):
-    """
-    Configure a custom rules for testing.
+    """Configure a custom rules for testing.
     Restart Wazuh is not needed for applying the configuration is optional.
     """
 
     # save current rules
-    shutil.copy(LOCAL_RULES_PATH, LOCAL_RULES_PATH+'.cpy')
+    shutil.copy(LOCAL_RULES_PATH, LOCAL_RULES_PATH + '.cpy')
 
     file_test = get_configuration['rule_file']
     # copy test rules
@@ -48,7 +56,7 @@ def configure_rules_list(get_configuration, request):
     yield
 
     # restore previous configuration
-    shutil.move(LOCAL_RULES_PATH+'.cpy', LOCAL_RULES_PATH)
+    shutil.move(LOCAL_RULES_PATH + '.cpy', LOCAL_RULES_PATH)
     shutil.chown(LOCAL_RULES_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
 
 
@@ -58,8 +66,33 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope='module')
+def wait_for_logtest_startup(request):
+    """Wait until logtest has begun."""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor.start(timeout=logtest_startup_timeout, callback=callback_logtest_started)
+
+
+@pytest.fixture(scope='module')
+def restart_required_logtest_daemons():
+    """Wazuh logtests daemons handler."""
+    required_logtest_daemons = ['wazuh-analysisd']
+
+    truncate_file(LOG_FILE_PATH)
+
+    for daemon in required_logtest_daemons:
+        control_service('restart', daemon=daemon)
+
+    yield
+
+    for daemon in required_logtest_daemons:
+        control_service('stop', daemon=daemon)
+
+
 # Tests
-def test_rules_verbose(get_configuration, configure_rules_list, connect_to_sockets_function):
+def test_rules_verbose(get_configuration, restart_required_logtest_daemons,
+                       configure_rules_list, wait_for_logtest_startup,
+                       connect_to_sockets_function):
     """Check the correct behaviour of logtest `rules_debug` field.
 
     This test writes different inputs at the logtest socket and checks the responses to be the expected.
