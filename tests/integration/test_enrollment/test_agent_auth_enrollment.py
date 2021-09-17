@@ -40,17 +40,19 @@ tests_path = os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml')
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 tests = read_yaml(tests_path)
 configurations = load_wazuh_configurations(configurations_path, __name__)
+configuration_ids = ['agent_auth_enrollment']
+test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
 
 
-@pytest.fixture(scope='function', params=tests)
+@pytest.fixture(scope='function', params=tests, ids=test_case_ids)
 def get_current_test_case(request):
     """Get current test case from the module"""
     return request.param
