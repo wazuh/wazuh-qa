@@ -1326,6 +1326,12 @@ def callback_detect_end_runtime_wildcards(line):
     return match is not None
 
 
+def callback_ignore_realtime_flag(line):
+    match = re.match(r".*Ignoring flag for real time monitoring on directory: (.+)$", line)
+    if match:
+        return True
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
                       timeout=global_parameters.default_timeout):
     """Checks if the conditions for changing the current time and date are met and call to the specific function
@@ -1359,7 +1365,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                           update_position=False,
-                          error_message=f'End of scheduled scan not detected after {timeout} seconds')
+                          error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
 def callback_configuration_warning(line):
@@ -1457,7 +1463,7 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, event_mode=None, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None):
         """Call both 'fetch_events' and 'check_events'.
 
         Args:
@@ -2215,8 +2221,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                               update_position=True,
-                              error_message=f'End of scheduled scan not detected after '
-                              f'{global_parameters.default_timeout} seconds')
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
     # Modify previous text files
     for name, content in file_list.items():
@@ -2232,8 +2238,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                               update_position=True,
-                              error_message=f'End of scheduled scan not detected after '
-                              f'{global_parameters.default_timeout} seconds')
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
     # Delete previous text files
     for name in file_list:
@@ -2249,8 +2255,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                               update_position=True,
-                              error_message=f'End of scheduled scan not detected after '
-                              f'{global_parameters.default_timeout} seconds')
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
 
 def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
