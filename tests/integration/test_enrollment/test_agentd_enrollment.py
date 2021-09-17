@@ -25,6 +25,7 @@ metadata:
 import pytest
 import socket
 import os
+import subprocess
 
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
@@ -62,11 +63,16 @@ def get_current_test_case(request):
 
 
 @pytest.fixture(scope='function')
-def restart_agentd():
-    try:
-        control_service('restart', daemon='wazuh-agentd')
-    except Exception:
-        pass
+def restart_agentd(get_current_test_case):
+    if 'wazuh-agentd' in get_current_test_case.get('skips', []):
+        pytest.skip("This test does not apply to agentd")
+
+    if 'fail_init_agent' in get_current_test_case:
+      with pytest.raises(subprocess.CalledProcessError):
+          control_service('restart', daemon='wazuh-agentd')
+    else:
+          control_service('restart', daemon='wazuh-agentd')
+
     yield
     control_service('stop', daemon='wazuh-agentd')
 
@@ -83,8 +89,6 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             - The enrollment message is generated as expected when the configuration is valid.
             - The error log is generated as expected when the configuration is invalid.
     """
-    if 'wazuh-agentd' in get_current_test_case.get('skips', []):
-        pytest.skip("This test does not apply to agentd")
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
