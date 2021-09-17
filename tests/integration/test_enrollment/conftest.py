@@ -68,7 +68,10 @@ def configure_socket_listener(request, get_current_test_case):
         expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
     else:
         expected = None
-    receiver_callback = lambda received_event: response if not expected or expected == received_event else "".encode()
+
+    def receiver_callback(received_event):
+        return response if not expected or expected == received_event else "".encode()
+
     socket_listener = ManInTheMiddle(address=(MANAGER_ADDRESS, MANAGER_PORT), family='AF_INET',
                                      connection_protocol='SSL', func=receiver_callback)
     socket_listener.start()
@@ -133,6 +136,7 @@ def get_temp_yaml(param):
     with open(temp, 'w') as temp_file:
         yaml.safe_dump(temp_conf_file, temp_file)
     return temp
+
 
 @pytest.fixture(scope='function')
 def override_wazuh_conf(get_current_test_case, request):

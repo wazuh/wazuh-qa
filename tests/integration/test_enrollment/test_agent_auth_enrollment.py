@@ -42,12 +42,13 @@ AGENT_AUTH_BINARY_PATH = '/var/ossec/bin/agent-auth' if platform.system() == 'Li
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-tests_path =  os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml')
+tests_path = os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml')
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 tests = load_tests(tests_path)
 configurations = load_wazuh_configurations(configurations_path, __name__)
 MANAGER_ADDRESS = '127.0.0.1'
 AGENT_AUTH_TIMEOUT = 10
+
 
 def launch_agent_auth(configuration):
     """Launches agent-auth based on a specific dictionary configuration
@@ -78,6 +79,7 @@ def launch_agent_auth(configuration):
 
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out.communicate()
+
 
 # Fixtures
 
@@ -120,11 +122,13 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         if get_current_test_case.get('expected_fail'):
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=AGENT_AUTH_TIMEOUT,
-                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True))
+                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                                                         escape=True))
         else:
             log_monitor.start(timeout=AGENT_AUTH_TIMEOUT,
-                            callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True),
-                            error_message='Expected error log does not occured')
+                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                                                     escape=True),
+                              error_message='Expected error log does not occured')
 
     else:
         test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()

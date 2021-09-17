@@ -48,7 +48,7 @@ daemons_handler_configuration = {'function': {'daemons': ['wazuh-agentd'], 'igno
                                  'configuration': {'daemons': ['wazuh-syscheckd'], 'ignore_errors': False}}
 
 
-    # Fixtures
+# Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -61,11 +61,12 @@ def get_current_test_case(request):
     """Get current test case from the module"""
     return request.param
 
+
 @pytest.fixture(scope='function')
 def restart_agentd():
     try:
         control_service('restart', daemon='wazuh-agentd')
-    except:
+    except Exception:
         pass
     yield
     control_service('stop', daemon='wazuh-agentd')
@@ -91,10 +92,12 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
         if get_current_test_case.get('expected_fail'):
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=AGENTD_TIMEOUT,
-                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True))
+                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                                                         escape=True))
         else:
             log_monitor.start(timeout=AGENTD_TIMEOUT,
-                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*', escape=True),
+                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                                                     escape=True),
                               error_message='Expected error log does not occured')
 
     else:
