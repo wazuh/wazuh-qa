@@ -135,7 +135,8 @@ def test_validate_all_win32_alerts(configure_sockets_environment, connect_to_soc
     input_description: Different test cases that are contained in an external `YAML` file (syscheck_events_win32.yaml)
                        that includes `syscheck` events data and the expected output.
 
-    inputs: 12272 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
+    inputs:
+        - 12272 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
 
     expected_output:
         - Multiple messages (alert logs) corresponding to each test case,

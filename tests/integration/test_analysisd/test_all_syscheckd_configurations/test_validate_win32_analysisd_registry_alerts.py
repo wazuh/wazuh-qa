@@ -136,7 +136,8 @@ def test_validate_all_win32_registry_alerts(configure_sockets_environment, conne
                        `YAML` file (syscheck_registry_events_win32.yaml)
                        that includes `syscheck` events data and the expected output.
 
-    inputs: 20254 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
+    inputs:
+        - 20254 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
 
     expected_output:
         - Multiple messages (alert logs) corresponding to each test case,
