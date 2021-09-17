@@ -1,31 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the active responses, which are executed by
-    the `wazuh-execd` daemon via scripts, run correctly. Active responses
-    execute a script in response to the triggering of specific alerts
-    based on the alert level or rule group.
+brief: These tests will check if the active responses, which are executed by
+       the `wazuh-execd` daemon via scripts, run correctly. Active responses
+       execute a script in response to the triggering of specific alerts
+       based on the alert level or rule group.
 
-tier:
-    0
+tier: 0
 
 modules:
     - active_response
 
 components:
     - agent
-
-path:
-    tests/integration/test_active_response/test_execd/test_execd_firewall_drop.py
 
 daemons:
     - wazuh-analysisd
@@ -37,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
@@ -245,14 +239,12 @@ def build_message(metadata, expected):
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
     '''
-    description:
-        Check if `firewall-drop` command of `active response` is executed correctly.
-        For this purpose, a simulated agent is used and the active response
-        is sent to it. This response includes an IP address that must be added
-        and removed from iptables, the Linux firewall.
+    description: Check if `firewall-drop` command of `active response` is executed correctly.
+                 For this purpose, a simulated agent is used and the active response
+                 is sent to it. This response includes an IP address that must be added
+                 and removed from iptables, the Linux firewall.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_debug_mode:
@@ -281,9 +273,8 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
         - Verify that the testing IP address is added to `iptables`.
         - Verify that the testing IP address is removed from `iptables`.
 
-    input_description:
-        Different use cases are found in the test module and include
-        parameters for `firewall-drop` command and the expected result.
+    input_description: Different use cases are found in the test module and include
+                       parameters for `firewall-drop` command and the expected result.
 
     expected_output:
         - r'DEBUG: Received message'

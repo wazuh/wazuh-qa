@@ -1,54 +1,57 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    Check if `analysisd` generates alerts enriching its fields with `MITRE` information.
-    The objective consists on checking if `analysisd` can generate alerts using custom rules
-    that contains the `mitre` field to enrich those alerts with MITREs IDs, techniques and tactics.
+brief: Check if the `wazuh-analysisd` daemon generates alerts enriching its fields with `MITRE` information.
+       The objective consists on checking if `analysisd` can generate alerts using custom rules
+       that contains the `mitre` field to enrich those alerts with MITREs IDs, techniques and tactics.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    manager
+modules:
+    - analysisd
 
-path:
-    tests/integration/test_analysisd/test_mitre/
+components:
+    - manager
 
 daemons:
-    - analysisd
-    - syscheckd
+    - wazuh-analysisd
     - wazuh-db
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+    - https://attack.mitre.org/
 
 tags:
-
+    - events
+    - mitre
 '''
 import os
 
@@ -89,41 +92,38 @@ def get_configuration(request):
 
 def test_mitre_check_alert(get_configuration, configure_local_rules, restart_wazuh_alerts):
     '''
-    description:
-        Check if `MITRE` alerts are syntactically and semantically correct.
+    description: Check if `MITRE` alerts are syntactically and semantically correct.
+                 For this purpose, customized rules with `MITRE` fields are inserted,
+                 so that the alerts generated include this information which
+                 will be finally validated.
 
-    wazuh_min_version:
-        4.0
+    wazuh_min_version: 4.2
 
     parameters:
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_local_rules:
             type: fixture
             brief: Configure a custom rule in `local_rules.xml` for testing.
-
         - restart_wazuh_alerts:
             type: fixture
             brief: Reset `alerts.json` and start a new monitor.
 
     assertions:
-        - Check that the `MITRE` alerts are generated and that they are correct.
+        - Verify that the `MITRE` alerts are generated and are correct.
 
-    test_input:
-        Different test cases that are contained in external `XML` files (data directory)
-        that include both valid and invalid rules for detecting `MITRE` events.
+    input_description: Different test cases that are contained in an external `XML` files (`data` directory)
+                       that include both valid and invalid rules for detecting `MITRE` events.
 
-    logging:
-        - ossec.log:
-            - r".*Ossec server started.*"
-
-        - alerts.json:
-            -"Multiple alerts related to MITRE events."
+    expected_output:
+        - Multiple messages (mitre alert logs) corresponding to each test case,
+          located in the external input data file.
 
     tags:
-
+        - alerts
+        - man_in_the_middle
+        - wdb_socket
     '''
     # Wait until Mitre's event is detected
     if get_configuration not in invalid_configurations:
