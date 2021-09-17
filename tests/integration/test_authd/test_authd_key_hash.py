@@ -4,22 +4,38 @@ copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-metadata:
-    component:
-        - Manager
-    modules:
-        - Authd
-    daemons:
-        - authd
-    operating_system:
-        - Ubuntu
-        - CentOS
-    tiers:
-        - 0
-    tags:
-        - Enrollment
-        - Authd
+type: integration
+tier:
+    0
+modules:
+    - Authd
+components:
+    - manager
+daemons:
+    - Authd
+path:
+    /tests/integration/test_authd/test_authd_key_hash.py
+os_platform
+    - linux
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+tags:
+    - Enrollment
 '''
 
 import os
@@ -110,19 +126,40 @@ def set_up_groups_keys(request):
 
 def test_ossec_auth_messages_with_key_hash(set_up_groups_keys, get_configuration, configure_environment,
                                            configure_sockets_environment, connect_to_sockets_module,
-                                           wait_for_agentd_startup):
+                                           wait_for_authd_startup):
     """
-        test_logic:
-            "Check that every input message in authd port generates the adequate output"
-
-        checks:
+        description:
+           "Check that every input message in authd port generates the adequate output"
+        assertions:
             - The received output must match with expected
             - The enrollment messages are parsed as expected
             - The agent keys are denied if the hash is the same than the manager's
-
-        Raises:
-            - ConnectionResetError: if wazuh-authd does not send the response to the agent through the socket.
-            - AssertionError: if the response does not match the expected message.
+        wazuh_min_version:
+            4.2
+        parameters:
+            - set_up_groups_keys:
+                type: fixture
+                brief: Set pre-existent groups and keys.
+            - get_configuration:
+                type: fixture
+                brief: Get the configuration of the test.
+            - configure_environment:
+                type: fixture
+                brief: Configure a custom environment for testing.
+            - configure_sockets_environment:
+                type: fixture
+                brief: Configure the socket listener to receive and send messages on the sockets.
+            - connect_to_sockets_module:
+                type: fixture
+                brief: Bind to the configured sockets at module scope.
+            - wait_for_authd_startup:
+                type: fixture
+                brief: Waits until Authd is accepting connections.
+        input_description:
+            Different test cases are contained in an external YAML file (authd_key_hash.yaml) which includes
+            the different possible registration requests and the expected responses.
+        expected_output:
+            - Registration request responses on Authd socket
     """
     test_case = set_up_groups_keys['test_case']
 

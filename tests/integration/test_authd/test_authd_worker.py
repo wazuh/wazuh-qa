@@ -4,24 +4,38 @@ copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-metadata:
-    component:
-        - Manager
-    modules:
-        - Authd
-        - Cluster
-    daemons:
-        - authd
-    operating_system:
-        - Ubuntu
-        - CentOS
-    tiers:
-        - 0
-    tags:
-        - Enrollment
-        - Authd
-        - Worker
+type: integration
+tier:
+    0
+modules:
+    - Authd
+components:
+    - manager
+daemons:
+    - Authd
+path:
+    /tests/integration/test_authd/test_authd_worker_ip.py
+os_platform
+    - linux
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+tags:
+    - Enrollment
 '''
 
 import os
@@ -112,15 +126,41 @@ def get_configuration(request):
 
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
-                             connect_to_sockets_module, wait_for_agentd_startup):
+                             connect_to_sockets_module, wait_for_authd_startup):
     """
-        test_logic:
-            "Check that every message from the agent is correctly formatted for master, and every master
+        description:
+           "Check that every message from the agent is correctly formatted for master, and every master
             response is correctly parsed for agent"
 
-        checks:
+        assertions:
             - The 'port_input' from agent is formatted to 'cluster_input' for master
             - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
+        wazuh_min_version:
+            4.2
+        parameters:
+            - get_configuration:
+                type: fixture
+                brief: Get the configuration of the test.
+            - set_up_groups
+                type: fixture
+                brief: Set the pre-defined groups.
+            - configure_environment:
+                type: fixture
+                brief: Configure a custom environment for testing.
+            - configure_sockets_environment:
+                type: fixture
+                brief: Configure the socket listener to receive and send messages on the sockets.
+            - connect_to_sockets_module:
+                type: fixture
+                brief: Bind to the configured sockets at module scope.
+            - wait_for_authd_startup:
+                type: fixture
+                brief: Waits until Authd is accepting connections.
+        input_description:
+            Different test cases are contained in an external YAML file (worker_messages.yaml) which includes
+            the different possible registration requests and the expected responses.
+        expected_output:
+            - Registration request responses on Authd socket
     """
     test_case = set_up_groups['test_case']
     for stage in test_case:

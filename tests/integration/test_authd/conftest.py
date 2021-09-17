@@ -9,7 +9,7 @@ from wazuh_testing.tools.services import control_service
 DAEMON_NAME = 'wazuh-authd'
 
 @pytest.fixture(scope='function')
-def wait_for_agentd_startup(request):
+def wait_for_authd_startup(request):
     """Wait until agentd has begun"""
 
     def callback_agentd_startup(line):

@@ -4,22 +4,45 @@ copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-metadata:
-    component:
-        - Agent
-    modules:
-        - Agentd
-    daemons:
-        - Agentd
-    operating_system:
-        - Ubuntu
-        - CentOS
-        - Windows
-    tiers:
-        - 0
-    tags:
-        - Enrollment
-        - Agentd
+type: integration
+tier:
+    0
+modules:
+    - Agentd
+components:
+    - agent
+daemons:
+    - Agentd
+path:
+    /tests/integration/test_enrollment/test_agentd_enrollment.py
+os_platform
+    - linux
+    - windows
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+    - Windows 7
+    - Windows 8
+    - Windows 10
+    - Windows Server 2003
+    - Windows Server 2012
+    - Windows Server 2016
+tags:
+    - Enrollment
 '''
 
 import pytest
@@ -78,14 +101,50 @@ def restart_agentd(get_current_test_case):
 def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_current_test_case, create_certificates,
                            set_keys, set_password, file_monitoring, configure_socket_listener, restart_agentd, request):
     """
-        test_logic:
+        description:
             "Check that different configuration generates the adequate enrollment message or the corresponding
-            error log. The configuration, keys and password files will be written with the different scenarios described
+            error log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
-        checks:
+        assertions:
             - The enrollment message is sent when the configuration is valid
             - The enrollment message is generated as expected when the configuration is valid.
             - The error log is generated as expected when the configuration is invalid.
+        wazuh_min_version:
+            4.2
+        parameters:
+            - configure_environment:
+                type: fixture
+                brief: Configure a custom environment for testing.
+            - override_wazuh_conf:
+                type: fixture
+                brief: Write a particular Wazuh configuration for the test case.
+            - get_current_test_case:
+                type: fixture
+                brief: Get the current test case.
+            - create_certificates:
+                type: fixture
+                brief: Write the certificate files used for SSL communication.
+            - set_keys:
+                type: fixture
+                brief: Write pre-existent keys into client.keys.
+            - set_password:
+                type: fixture
+                brief: Write the password file.
+            - file_monitoring:
+                type: fixture
+                brief: Handle the monitoring of a specified file.
+            - restart_agentd:
+                type: fixture
+                brief: Restart Agentd and control if it is expected to fail or not.
+            - request:
+                type: fixture
+                brief: Provide information of the requesting test function.
+        input_description:
+            Different test cases are contained in an external YAML file (wazuh_enrollment_tests.yaml) which includes the
+            different available enrollment-related configurations.
+        expected_output:
+            - Enrollment request message on Authd socket
+            - Error logs related to the wrong configuration block
     """
 
     if 'expected_error' in get_current_test_case:

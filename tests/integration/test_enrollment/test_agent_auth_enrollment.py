@@ -4,22 +4,45 @@ copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-metadata:
-    component:
-        - Agent
-    modules:
-        - agent-auth
-    daemons:
-        - agent-auth
-    operating_system:
-        - Ubuntu
-        - CentOS
-        - Windows
-    tiers:
-        - 0
-    tags:
-        - Enrollment
-        - Agent-auth
+type: integration
+tier:
+    0
+modules:
+    - agent-auth
+components:
+    - agent
+daemons:
+    - agent-auth
+path:
+    /tests/integration/test_enrollment/test_agent_auth_enrollment.py
+os_platform
+    - linux
+    - windows
+os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+    - Windows 7
+    - Windows 8
+    - Windows 10
+    - Windows Server 2003
+    - Windows Server 2012
+    - Windows Server 2016
+tags:
+    - Enrollment
 '''
 
 import pytest
@@ -66,15 +89,52 @@ def shutdown_agentd():
 def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_current_test_case, create_certificates,
                                set_keys, set_password, file_monitoring, configure_socket_listener, request):
     """
-        test_logic:
-            "Check that different configuration generates the adequate enrollment message or the corresponding
-            error log. Agent-auth will be executed using the different parameters and with different keys and password
-            files scenarios as described in the test cases."
-        checks:
-            - The enrollment message is sent when the configuration is valid
-            - The enrollment message is generated as expected when the configuration is valid.
-            - The error log is generated as expected when the configuration is invalid.
+    description:
+        "Check that different configuration generates the adequate enrollment message or the corresponding
+        error log. Agent-auth will be executed using the different parameters and with different keys and password
+        files scenarios as described in the test cases."
+    assertions:
+        - The enrollment message is sent when the configuration is valid
+        - The enrollment message is generated as expected when the configuration is valid.
+        - The error log is generated as expected when the configuration is invalid.
+    wazuh_min_version:
+        4.2
+    parameters:
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - override_wazuh_conf:
+            type: fixture
+            brief: Write a particular Wazuh configuration for the test case.
+        - get_current_test_case:
+            type: fixture
+            brief: Get the current test case.
+        - create_certificates:
+            type: fixture
+            brief: Write the certificate files used for SSL communication.
+        - set_keys:
+            type: fixture
+            brief: Write pre-existent keys into client.keys.
+        - set_password:
+            type: fixture
+            brief: Write the password file.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - restart_agentd:
+            type: fixture
+            brief: Restart Agentd and control if it is expected to fail or not.
+        - request:
+            type: fixture
+            brief: Provide information of the requesting test function.
+    input_description:
+        Different test cases are contained in an external YAML file (wazuh_enrollment_tests.yaml) which includes the
+        different available enrollment-related configurations.
+    expected_output:
+        - Enrollment request message on Authd socket
+        - Error logs related to the wrong configuration block
     """
+
     if 'agent-auth' in get_current_test_case.get('skips', []):
         pytest.skip('This test does not apply to agent-auth')
 
