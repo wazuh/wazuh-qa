@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `SSL` (Secure Socket Layer) protocol-related settings of
+       the `wazuh-authd` daemon are working correctly. The `wazuh-authd` daemon can
+       automatically add a Wazuh agent to a Wazuh manager and provide the key
+       to the agent. It’s used along with the `agent-auth` application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/auth.html
+
+tags:
+    - enrollment
+'''
 import os
 import ssl
 import time
@@ -107,20 +159,38 @@ def override_wazuh_conf(configuration):
 
 
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
-    """Check that every input message in authd port generates the adequate output
+    '''
+    description: Check if the `SSL` settings of the `wazuh-authd` daemon work correctly by enrolling agents
+                 that use different values for these settings. Different types of encryption and secure
+                 connection protocols are tested, in addition to the `ssl_auto_negotiate` option
+                 that automatically chooses the protocol to be used.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_cases, dict with following keys:
-            - expect: What we are expecting to happen
-                1. open_error: Should fail when trying to do ssl handshake
-                2. output: Expects an output message from the manager
-            - ciphers: Value for ssl ciphers
-            - protocol: Value for ssl protocol
-            - input: message that will be tried to send to the manager
-            - output: expected response (if any)
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+
+    assertions:
+        - Verify that the response messages are consistent with the enrollment requests received.
+
+    input_description: Different test cases are contained in an external `YAML` file (enroll_ssl_options_tests.yaml)
+                       that includes enrollment events and the expected output.
+
+    expected_output:
+        - Multiple values located in the `enroll_ssl_options_tests.yaml` file.
+
+    tags:
+        - keys
+        - ssl
+    '''
     current_test = get_current_test()
 
     test_case = ssl_configuration_tests[current_test]['test_case']

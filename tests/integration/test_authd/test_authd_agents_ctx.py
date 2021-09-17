@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `wazuh-authd` daemon handles correctly the enrollment requests
+brief: These tests will check if the `wazuh-authd` daemon correctly handles the enrollment requests
        from agents with pre-existing IP addresses or names. The `wazuh-authd` daemon can automatically
-       add a Wazuh agent to a Wazuh manager and provide the key to the agent. It’is used along with
+       add a Wazuh agent to a Wazuh manager and provide the key to the agent. It’s used along with
        the `agent-auth` application.
 
 tier: 0
@@ -22,7 +22,8 @@ components:
 
 daemons:
     - wazuh-authd
-    - wazuh-remoted
+    - wazuh-db
+    - wazuh-modulesd
 
 os_platform:
     - linux
@@ -434,7 +435,7 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 
     expected_output:
         - r'Accepting connections on port 1515' (When the `wazuh-authd` daemon is ready to accept enrollments)
-        - r'OSSEC K' (When the agent has enrolled)
+        - r'OSSEC K:' (When the agent has enrolled in the manager)
     tags:
         - keys
         - ssl

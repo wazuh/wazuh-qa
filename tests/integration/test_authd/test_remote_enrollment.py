@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `remote enrollment` option of the `wazuh-authd` daemon
+       settings is working properly. The `wazuh-authd` daemon can automatically add
+       a Wazuh agent to a Wazuh manager and provide the key to the agent.
+       It’s used along with the `agent-auth` application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/auth.html#remote-enrollment
+
+tags:
+    - enrollment
+'''
 import os
 import pytest
 
@@ -52,8 +103,8 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 cluster_socket_address = ('localhost', 1516)
 remote_enrollment_address = ('localhost', 1515)
 
-@pytest.fixture(scope="module", params=configurations,
-                ids=[f"{x['id']}" for x in metadata])
+
+@pytest.fixture(scope="module", params=configurations, ids=[f"{x['id']}" for x in metadata])
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
@@ -68,17 +119,43 @@ def not_raises(exception):
 
 
 def test_remote_enrollment(get_configuration, configure_environment, restart_authd):
-    """Check that Authd remote enrollment is enabled/disabled according to the configuration.
+    '''
+    description: Check if the `wazuh-authd` daemon remote enrollment is enabled/disabled according
+                 to the configuration. By default, remote enrollment is enabled. When disabled,
+                 the `authd` `TLS` port (1515 by default) won't be listening to new connections,
+                 but requests to the local socket will still be attended.
 
-    By default, remote enrollment is enabled. When disabled, Authd TLS port (1515 by default) won't be listening
-    to new connection, but requests to local socket will still be attended.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: if the expected logs do not appear or the port 1515 is not available when it should.
-        ConnectionRefusedError: if remote enrollment is enabled but authd refuse external connections.
-        assertRaises: if the expected OSSEC K message doesn't appear in authd response when remote connection
-                      are enabled.
-    """
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_authd:
+            type: fixture
+            brief: Restart the `wazuh-authd` daemon, clear the `ossec.log` file and start a new file monitor.
+
+    assertions:
+        - Verify that the port `1515` opens or closes depending on the value of the `remote_enrollment` option.
+        - Verify that when a `worker` node receives an enrollment request, it tries to connect to the `master` node.
+
+    input_description: Different test cases are found in the test module and include
+                       parameters for the environment setup, the requests
+                       to be made, and the expected result.
+
+    expected_output:
+        - r'Accepting connections on port 1515. No password required.' (When the `wazuh-authd` daemon)
+        - r'OSSEC K:' (When the agent has enrolled in the manager)
+        - r'.*Port 1515 was set as disabled.*' (When remote enrollment is disabled)
+        - r'ERROR: Cannot comunicate with master'
+
+    tags:
+        - keys
+        - ssl
+    '''
     expectation = not_raises(ConnectionRefusedError)
     expected_answer = 'OSSEC K:'
 
@@ -110,4 +187,3 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
         assert expected_answer in response
 
         ssl_socket.close()
-
