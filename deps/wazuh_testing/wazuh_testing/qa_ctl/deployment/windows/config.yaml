@@ -1,0 +1,25 @@
+deployment:
+    host_1:
+        provider:
+            vagrant:
+                enabled: true
+                vagrantfile_path: /tmp
+                vagrant_box: qactl/centos_8
+                vm_memory: 1024
+                vm_cpu: 1
+                vm_name: manager_test_general_settings_enabled_1631885562.550129
+                vm_system: linux
+                label: manager_test_general_settings_enabled_1631885562.550129
+                vm_ip: 10.150.50.4
+    host_2:
+        provider:
+            vagrant:
+                enabled: true
+                vagrantfile_path: /tmp
+                vagrant_box: qactl/ubuntu_20_04
+                vm_memory: 1024
+                vm_cpu: 1
+                vm_name: manager_test_general_settings_enabled_1631885562.550129
+                vm_system: linux
+                label: manager_test_general_settings_enabled_1631885562.550129
+                vm_ip: 10.150.50.5
