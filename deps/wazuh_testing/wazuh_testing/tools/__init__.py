@@ -50,6 +50,8 @@ else:
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
+    AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth') if platform.system() == 'Linux' else \
+                             os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
     try:
         import grp

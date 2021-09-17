@@ -48,8 +48,8 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
-  #Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965
   expected_fail: "yes"
+  expected_fail_reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
   message:
     response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -

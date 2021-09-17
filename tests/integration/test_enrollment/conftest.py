@@ -7,13 +7,11 @@ import ssl
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
-from wazuh_testing.tools.file import load_tests
 from wazuh_testing.tools.utils import get_host_name
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
-tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 
 # Default data
 
@@ -110,7 +108,7 @@ def set_keys(get_current_test_case):
 # Password file
 
 @pytest.fixture(scope='function')
-def set_pass(get_current_test_case):
+def set_password(get_current_test_case):
     """Writes the password file with the content defined in the configuration.
     Args:
         get_current_test_case (dict): Current test case.

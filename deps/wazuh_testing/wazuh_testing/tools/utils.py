@@ -111,5 +111,6 @@ def get_random_string(string_length, digits=True):
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
+
 def get_host_name():
     return socket.gethostname()

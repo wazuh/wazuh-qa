@@ -23,25 +23,24 @@ metadata:
 '''
 
 import pytest
-import os
 import socket
-import yaml
+import os
 
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import QueueMonitor, make_callback
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.utils import get_host_name
+from enrollment import AGENTD_ENROLLMENT_REQUEST_TIMEOUT
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-tests = load_tests(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
+tests = read_yaml(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 host_name = socket.gethostname()
-AGENTD_TIMEOUT = 20
 
 daemons_handler_configuration = {'function': {'daemons': ['wazuh-agentd'], 'ignore_errors': False},
                                  'module':  {'daemons': ['wazuh-modulesd', 'wazuh-analysisd'], 'ignore_errors': False},
@@ -73,7 +72,7 @@ def restart_agentd():
 
 
 def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_current_test_case, create_certificates,
-                           set_keys, set_pass, file_monitoring, configure_socket_listener, restart_agentd, request):
+                           set_keys, set_password, file_monitoring, configure_socket_listener, restart_agentd, request):
     """
         test_logic:
             "Check that different configuration generates the adequate enrollment message or the corresponding
@@ -89,16 +88,17 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
-        if get_current_test_case.get('expected_fail'):
-            with pytest.raises(TimeoutError):
-                log_monitor.start(timeout=AGENTD_TIMEOUT,
-                                  callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
-                                                         escape=True))
-        else:
-            log_monitor.start(timeout=AGENTD_TIMEOUT,
+        try:
+            log_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT,
                               callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
                                                      escape=True),
-                              error_message='Expected error log does not occured')
+                              error_message = 'Expected error log does not occured.')
+        except Exception as error:
+            if get_current_test_case.get('expected_fail'):
+                reason = get_current_test_case.get('expected_fail_reason')
+                pytest.xfail(f'Xfailing due to {reason}')
+            else:
+                raise error
 
     else:
         test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
@@ -110,7 +110,7 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
 
         try:
             # Start socket monitoring
-            socket_monitor.start(timeout=AGENTD_TIMEOUT, callback=lambda received_event: event == received_event,
+            socket_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT, callback=lambda received_event: event == received_event,
                                  error_message='Enrollment request message never arrived', update_position=False)
         finally:
             socket_monitor.stop()
