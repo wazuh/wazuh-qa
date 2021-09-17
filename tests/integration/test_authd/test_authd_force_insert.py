@@ -29,9 +29,9 @@ import time
 import pytest
 import yaml
 from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, load_tests
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import load_tests
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
@@ -60,10 +60,9 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Variables
 
-log_monitor_paths = []
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+receiver_sockets, monitored_sockets = None, None # Set in the fixtures
 
 # Functions
 

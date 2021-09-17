@@ -164,6 +164,7 @@ REMOTED_LOCAL_INTERNAL_OPTIONS = {'remoted.debug': '2', 'wazuh_database.interval
                                     'wazuh_db.commit_time_max': '3' }.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 VD_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 WPK_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}
+AUTHD_LOCAL_INTERNAL_OPTIONS = {'authd.debug': '2'}
 
 
 # Wazuh daemons

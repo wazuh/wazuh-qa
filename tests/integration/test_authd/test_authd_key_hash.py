@@ -27,7 +27,6 @@ import subprocess
 import time
 
 import pytest
-import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
@@ -46,13 +45,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.ya
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
 # Variables
-log_monitor_paths = []
 
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
-receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
+receiver_sockets, monitored_sockets = None, None  # Set in the fixtures
 
 
 # Tests
