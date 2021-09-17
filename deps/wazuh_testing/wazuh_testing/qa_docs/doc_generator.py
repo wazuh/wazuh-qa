@@ -14,6 +14,7 @@ from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
+
 class DocGenerator:
     """Main class of DocGenerator tool.
 
@@ -53,11 +54,11 @@ class DocGenerator:
         """Check if a folder is included so it would be parsed.
 
         That happens when is not ignored using the ignore list.
-        
+
         Args:
             path: A string that contains the folder location to be controlled
 
-        Return: 
+        Return:
             A boolean with False if the path should be ignored. True otherwise.
         """
         for regex in self.ignore_regex:
@@ -134,7 +135,7 @@ class DocGenerator:
 
     def dump_output(self, content, doc_path):
         """Create a JSON and a YAML file with the parsed content of a test module.
-        
+
         Also, create the containing folder if it does not exist.
 
         Args:
@@ -285,7 +286,7 @@ class DocGenerator:
             for field in self.conf.test_info:
                 for name, schema_field in field.items():
                     test_info[name] = test['tests'][0][schema_field]
-            
+
             # If output path does not exist, it is created
             if not os.path.exists(self.conf.documentation_path):
                 os.mkdir(self.conf.documentation_path)
@@ -303,12 +304,12 @@ class DocGenerator:
             for field in self.conf.test_info:
                 for name, schema_field in field.items():
                     print(str(name)+": "+str(test['tests'][0][schema_field]))
-                    
+
         return None
 
     def run(self):
         """Run a complete scan of each included path to parse every test and group found.
-            
+
         Default mode: parse the files within the included paths.
         Single test mode: found the test required and parse it.
 
@@ -334,7 +335,7 @@ class DocGenerator:
         elif self.conf.mode == Mode.SINGLE_TEST:
             DocGenerator.LOGGER.info("Starting test documentation parsing")
             self.test_path = self.locate_test()
-            
+
             if self.test_path:
                 DocGenerator.LOGGER.debug(f"Parsing '{self.conf.test_name}'")
                 self.create_test(self.test_path, 0)
