@@ -24,7 +24,7 @@ qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
 
 
 def set_qadocs_logger_level(logging_level):
-    """Sets the QADOCS logger lever depending on the level specified by the user.
+    """Set the QADOCS logger lever depending on the level specified by the user.
 
     Args:
         logging_level (string): Level used to initialize the logger.
@@ -36,13 +36,13 @@ def set_qadocs_logger_level(logging_level):
 
 
 def validate_parameters(parameters):
-    """Validates the parameters that qa-docs recieves.
+    """Validate the parameters that qa-docs recieves.
 
     Since `config.yaml` will be `schema.yaml`, it runs as config file is correct.
     So we only validate the parameters that the user introduces.
 
     Args:
-        parameters (list): List of input args.
+        parameters: A list of input args.
     """
     qadocs_logger.debug('Validating input parameters')
 
