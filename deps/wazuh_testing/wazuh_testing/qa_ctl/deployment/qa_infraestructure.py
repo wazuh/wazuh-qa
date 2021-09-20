@@ -3,20 +3,28 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import ipaddress
 import docker
+import os
+import yaml
+
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.deployment.docker_wrapper import DockerWrapper
 from wazuh_testing.qa_ctl.deployment.vagrant_wrapper import VagrantWrapper
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible import copy_files_to_remote, remove_paths
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 
 
 class QAInfraestructure:
     """Class to handle multiples instances objects.
 
     Args:
-        instance_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml
+        deployment_data (dict): Dictionary with the information of the instances. Must follow the format of the yaml
         template.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
@@ -34,17 +42,19 @@ class QAInfraestructure:
     DOCKER_NETWORK_NAME = 'wazuh_net'
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, instance_list, qa_ctl_configuration):
+    def __init__(self, deployment_data, qa_ctl_configuration, windows_deployment=False):
+        self.deployment_data = deployment_data
         self.qa_ctl_configuration = qa_ctl_configuration
         self.instances = []
         self.docker_client = None
         self.docker_network = None
         self.network_address = None
+        self.windows_deployment = windows_deployment
 
         QAInfraestructure.LOGGER.debug('Processing deployment configuration')
-        for host in instance_list:
-            for provider in instance_list[host]['provider']:
-                data = instance_list[host]['provider'][provider]
+        for host in deployment_data:
+            for provider in deployment_data[host]['provider']:
+                data = deployment_data[host]['provider'][provider]
                 if not data['enabled']:
                     continue
 
@@ -119,9 +129,41 @@ class QAInfraestructure:
 
     def run(self):
         """Execute the run method on every configured instance."""
+        self.run_unix_deployment() if not self.windows_deployment else self.run_windows_deployment()
+
+
+    def run_unix_deployment(self):
+        QAInfraestructure.LOGGER.info('Running Unix deployment')
         QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
         QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
+
+    def run_windows_deployment(self):
+        QAInfraestructure.LOGGER.info('Running Windows deployment')
+
+        # Generate deployment configuration file
+        config_file_path = f"{gettempdir()}/qa_ctl_deployment_config_{get_current_timestamp()}.yaml"
+
+        with open(config_file_path, 'w') as config_file:
+            config_file.write(yaml.dump({'deployment': self.deployment_data}, allow_unicode=True, sort_keys=False))
+
+        user = 'vagrant'
+        user_password = 'vagrant'
+
+        inventory = AnsibleInventory([AnsibleInstance('172.16.1.13',  connection_user=user,
+                                                      connection_user_password=user_password,
+                                                      connection_method='winrm',
+                                                      connection_port='5986')])
+
+        deployer_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'windows', 'vagrant_deployer.py')
+
+        QAInfraestructure.LOGGER.info('Provisioning deployment files to Windows host')
+
+        copy_files_to_remote(inventory.inventory_file_path, '172.16.1.13', [deployer_file_path, config_file_path],
+                             'C:\\qa_ctl', ansible_output=True)#self.qa_ctl_configuration.ansible_output)
+
+        QAInfraestructure.LOGGER.info('Provisioning has been done successfully')
+
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
