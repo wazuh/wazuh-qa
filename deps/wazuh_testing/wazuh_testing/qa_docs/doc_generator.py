@@ -231,11 +231,12 @@ class DocGenerator:
         brief: Print the test info to standard output. If an output path is specified,
                the output is redirected to `output_path/test_info.json`.
         """
+        relative_path = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+
         # dump into file
         if self.conf.documentation_path:
             test_info = {}
-            # Need to be changed, it is hardcoded
-            test_info['test_path'] = self.test_path[6:]
+            test_info['path'] = relative_path
 
             for field in self.conf.module_info:
                 for name, schema_field in field.items():
@@ -255,6 +256,8 @@ class DocGenerator:
                 fp.write('\n')
         else:
             # Use the key that QACTL needs
+            test['path'] = relative_path
+
             for field in self.conf.module_info:
                 for name, schema_field in field.items():
                     print(str(name)+": "+str(test[schema_field]))

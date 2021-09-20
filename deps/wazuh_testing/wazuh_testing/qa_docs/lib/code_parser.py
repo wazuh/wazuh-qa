@@ -81,30 +81,31 @@ class CodeParser:
 
         return doc
 
-    def parse_test(self, code_file, id, group_id):
+    def parse_test(self, path, id, group_id):
         """
         brief: Parses the content of a test file.
         args:
-            -"code_file (string): Path of the test file to be parsed."
+            -"path (string): Path of the test file to be parsed."
             -"id (integer): Id of the new test document"
             -"group_id (integer): Id of the group where the new test document belongs."
         """
-        CodeParser.LOGGER.debug(f"Parsing test file '{code_file}'")
-        self.scan_file = code_file
-        with open(code_file) as fd:
+        CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
+        self.scan_file = path
+        with open(path) as fd:
             file_content = fd.read()
         module = ast.parse(file_content)
         functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
 
         module_doc = self.parse_comment(module)
         if module_doc:
-            module_doc['name'] = os.path.basename(code_file)
+            module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
             module_doc['group_id'] = group_id
+            module_doc['path'] = re.sub(r'.*wazuh-qa\/', '', path)
 
             test_cases = None
             if self.conf.test_cases_field:
-                test_cases = self.pytest.collect_test_cases(code_file)
+                test_cases = self.pytest.collect_test_cases(path)
 
             functions_doc = []
             for function in functions:
