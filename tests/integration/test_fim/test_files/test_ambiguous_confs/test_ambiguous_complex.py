@@ -1,7 +1,74 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if Wazuh’s File integrity monitoring (`FIM`) system watches selected
+       files and triggering alerts when these files are modified. In particular, ambiguous
+       configurations will be tested along with complex directory paths.
+       The FIM capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-agentd
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        value: realtime
+        brief: Enable real-time/continuous monitoring on Linux (using the inotify system calls) and Windows systems.
+    - fim_mode:
+        value: whodata
+        brief: Implies real-time monitoring but adding the who-data information.
+
+tags:
+    - fim
+'''
 import os
 import sys
 
@@ -202,14 +269,54 @@ def get_checkers(check_list):
 def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
-    """Automatic test for each configuration given in the yaml.
+    '''
+    description: Check if the `wazuh-syscheck` daemon applies different configurations between
+                 subdirectories properly. Example:
+                 <directories
+                    realtime='yes'
+                    report_changes='yes'
+                    check_all='yes'
+                    check_owner='no'> /testdir </directories>
+                 <directories realtime='yes'
+                    report_changes='no'
+                    check_sum='no'
+                    check_owner='yes'> /testdir/subdir </directories>
+                 For this purpose, it specifies different `FIM` settings for each subdirectory and
+                 finally verifies that these have been applied correctly.
 
-    The main purpose of this test is to check that syscheck will apply different configurations between subdirectories
-    properly. Example:
+    wazuh_min_version: 4.2
 
-    <directories realtime='yes' report_changes='yes' check_all='yes' check_owner='no'> /testdir </directories>
-    <directories realtime='yes' report_changes='no' check_sum='no' check_owner='yes'> /testdir/subdir </directories>
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the `wazuh-syscheckd` daemon apply different configurations between subdirectories properly.
+
+    input_description: Different test cases are contained in external `YAML` files
+                       (wazuh_conf_complex.yaml or wazuh_conf_complex_win32.yaml) which includes
+                       configuration settings for the `wazuh-syscheckd` daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' (Initial scan when restarting Wazuh)
+
+    tags:
+        - scheduled
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Standard params for each test
