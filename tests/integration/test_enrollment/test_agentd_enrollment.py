@@ -71,6 +71,7 @@ test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
 # Fixtures
 
+
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """
@@ -96,10 +97,10 @@ def restart_agentd(get_current_test_case):
         pytest.skip("This test does not apply to agentd")
 
     if 'fail_init_agent' in get_current_test_case:
-      with pytest.raises(subprocess.CalledProcessError):
-          control_service('restart', daemon='wazuh-agentd')
+        with pytest.raises(subprocess.CalledProcessError):
+            control_service('restart', daemon='wazuh-agentd')
     else:
-          control_service('restart', daemon='wazuh-agentd')
+        control_service('restart', daemon='wazuh-agentd')
 
     yield
     control_service('stop', daemon='wazuh-agentd')
@@ -109,8 +110,8 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
                            set_keys, set_password, file_monitoring, configure_socket_listener, restart_agentd, request):
     """
         description:
-            "Check that different configuration generates the adequate enrollment message or the corresponding
-            error log. The configuration, keys, and password files will be written with the different scenarios described
+            "Check that different configuration generates the adequate enrollment message or the corresponding error
+            log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
         wazuh_min_version:
             4.2
@@ -160,11 +161,11 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             log_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT,
                               callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
                                                      escape=True),
-                              error_message = 'Expected error log does not occured.')
+                              error_message='Expected error log does not occured.')
         except Exception as error:
             if get_current_test_case.get('expected_fail'):
                 reason = get_current_test_case.get('expected_fail_reason')
-                pytest.xfail(f'Xfailing due to {reason}')
+                pytest.xfail(f"Xfailing due to {reason}")
             else:
                 raise error
 
@@ -178,7 +179,8 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
 
         try:
             # Start socket monitoring
-            socket_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT, callback=lambda received_event: event == received_event,
+            socket_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT,
+                                 callback=lambda received_event: event == received_event,
                                  error_message='Enrollment request message never arrived', update_position=False)
         finally:
             socket_monitor.stop()

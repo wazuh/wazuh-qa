@@ -152,11 +152,11 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
             log_monitor.start(timeout=AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT,
                               callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
                                                      escape=True),
-                              error_message = 'Expected error log does not occured.')
+                              error_message='Expected error log does not occured.')
         except Exception as error:
             if get_current_test_case.get('expected_fail'):
                 reason = get_current_test_case.get('expected_fail_reason')
-                pytest.xfail(f'Xfailing due to {reason}')
+                pytest.xfail(f"Xfailing due to {reason}")
             else:
                 raise error
 
@@ -169,7 +169,8 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
 
         try:
             # Start socket monitoring
-            socket_monitor.start(timeout=AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT, callback=lambda received_event: event == received_event,
+            socket_monitor.start(timeout=AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT,
+                                 callback=lambda received_event: event == received_event,
                                  error_message='Enrollment request message never arrived', update_position=False)
         finally:
             socket_monitor.stop()
