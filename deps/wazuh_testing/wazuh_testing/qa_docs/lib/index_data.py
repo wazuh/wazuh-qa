@@ -17,11 +17,11 @@ class IndexData:
     """Class that indexes the data from JSON files into ElasticSearch.
 
     Attributes:
-        path: A string that contains the path where the parsed documentation is located.
-        index: A string with the index name to be indexed with Elasticsearch.
+        path (str): A string that contains the path where the parsed documentation is located.
+        index (str): A string with the index name to be indexed with Elasticsearch.
         regex: A regular expression to get JSON files.
-        es: An `ElasticSearch` client instance.
-        output: A list to be indexed in Elasticsearch.
+        es (ElasticSearch): An `ElasticSearch` client instance.
+        output (list): A list to be indexed in Elasticsearch.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -31,7 +31,7 @@ class IndexData:
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded data from the config file.
         """
         self.path = config.documentation_path
         self.index = index
@@ -40,7 +40,11 @@ class IndexData:
         self.output = []
 
     def test_connection(self):
-        """Verify with an HTTP request that an OK response is received from ElasticSearch."""
+        """Verify with an HTTP request that an OK response is received from ElasticSearch.
+        
+        Returns:
+            boolean: A boolean with True if the request response is OK.
+        """
         try:
             res = requests.get("http://localhost:9200/_cluster/health")
             if res.status_code == 200:
@@ -49,7 +53,11 @@ class IndexData:
             raise QAValueError(f"Connection error: {exception}", IndexData.LOGGER.error)
 
     def get_files(self):
-        """Find all the files inside the documentation path that matches with the JSON regex."""
+        """Find all the files inside the documentation path that matches with the JSON regex.
+        
+        Returns:
+            doc_files (list): A list with all the files inside the path.
+        """
         doc_files = []
 
         for (root, *_, files) in os.walk(self.path):
@@ -63,7 +71,7 @@ class IndexData:
         """Open every file found in the path and appends the content into a list.
 
         Args:
-            files: A list with the files that matched with the regex.
+            files (list): A list with the files that matched with the regex.
         """
         for file in files:
             with open(file) as test_file:

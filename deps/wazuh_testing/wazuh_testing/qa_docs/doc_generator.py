@@ -23,11 +23,11 @@ class DocGenerator:
     that matches a include regex, is parsed.
 
     Attributes:
-        conf: A `Config` instance with data loaded from config file.
-        parser: A `CodeParser` instance with parsing utilities.
-        __id_counter: An integer that counts the test/group ID when it is created.
-        ignore_regex: A list with compiled paths to be ignored.
-        include_regex: A list with regular expressions used to parse a file or not.
+        conf (Config): A `Config` instance with data loaded from config file.
+        parser (CodeParser): A `CodeParser` instance with parsing utilities.
+        __id_counter (int): An integer that counts the test/group ID when it is created.
+        ignore_regex (list): A list with compiled paths to be ignored.
+        include_regex (list): A list with regular expressions used to parse a file or not.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -37,7 +37,7 @@ class DocGenerator:
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with the loaded data from config file.
+            config (Config): A `Config` instance with the loaded data from config file.
         """
         self.conf = config
         self.parser = CodeParser(self.conf)
@@ -56,10 +56,10 @@ class DocGenerator:
         That happens when is not ignored using the ignore list.
 
         Args:
-            path: A string that contains the folder location to be controlled
+            path (str): A string that contains the folder location to be controlled
 
         Return:
-            A boolean with False if the path should be ignored. True otherwise.
+            boolean: A boolean with False if the path should be ignored. True otherwise.
         """
         for regex in self.ignore_regex:
             if regex.match(path):
@@ -74,10 +74,10 @@ class DocGenerator:
         Also, that file could be ignored(because it is in the ignore list or does not match with the regexes).
 
         Args:
-            file: A string that contains the file name to be checked.
+            file (str): A string that contains the file name to be checked.
 
         Returns:
-            A boolean with True when matches with an include regex. False if the file should be ignored
+            boolean: A boolean with True when matches with an include regex. False if the file should be ignored
             (because it matches with an ignore path or does not match with any include regular expression).
         """
         for regex in self.ignore_regex:
@@ -96,10 +96,10 @@ class DocGenerator:
         """Check if a file path should be considered as a file containing group information.
 
         Args:
-            path: A string that contains the file name to be checked
+            path (str): A string that contains the file name to be checked
 
         Returns:
-            A boolean with True if the file is a group file. False otherwise."
+            boolean: A boolean with True if the file is a group file. False otherwise."
         """
         for group_file in self.conf.group_files:
             if path == group_file:
@@ -110,7 +110,8 @@ class DocGenerator:
     def get_group_doc_path(self, group):
         """Get the name of the group file in the documentation output based on the original file name.
 
-        Returns: A string that contains the name of the documentation group file.
+        Returns:
+            doc_path (str): A string that contains the name of the documentation group file.
         """
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
         doc_path = os.path.join(base_path, group['name']+".group")
@@ -121,10 +122,10 @@ class DocGenerator:
         """Get the name of the test file in the documentation output based on the original file name.
 
         Args:
-            path: A string that contains the original file name.
+            path (str): A string that contains the original file name.
 
         Returns:
-            A string with the name of the documentation test file.
+            doc_path (str): A string with the name of the documentation test file.
         """
 
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
@@ -139,8 +140,8 @@ class DocGenerator:
         Also, create the containing folder if it does not exist.
 
         Args:
-            content: A dict that contains the parsed content of a test file.
-            doc_path: A string with the path where the information should be dumped.
+            content (dict): A dict that contains the parsed content of a test file.
+            doc_path (str): A string with the path where the information should be dumped.
 
         Raises:
             QAValueError: Cannot write in {doc_path}.json
@@ -168,11 +169,11 @@ class DocGenerator:
         """Parse the content of a group file and dump the content into a file.
 
         Args:
-            path: A string with the path of the group file to be parsed.
-            group_id: A string with the id of the group where the new group belongs.
+            path (str): A string with the path of the group file to be parsed.
+            group_id (str): A string with the id of the group where the new group belongs.
 
         Returns:
-            An integer with the ID of the newly generated group document.
+            __id.counter (int): An integer with the ID of the newly generated group document.
             None if the test does not have documentation.
         """
         self.__id_counter = self.__id_counter + 1
@@ -191,11 +192,11 @@ class DocGenerator:
         """Parse the content of a test file and dumps the content into a file.
 
         Args:
-            path: A string with the path of the test file to be parsed.
-            group_id: A string with the id of the group where the new test belongs.
+            path (str): A string with the path of the test file to be parsed.
+            group_id (str): A string with the id of the group where the new test belongs.
 
         Returns:
-            An integer with the ID of the new generated test document.
+            __id.counter (int): An integer with the ID of the new generated test document.
             None if the test does not have documentation.
         """
         self.__id_counter = self.__id_counter + 1
@@ -221,8 +222,8 @@ class DocGenerator:
         """Search in a specific folder to parse possible group files and each test file.
 
         Args:
-            path: A string with the path of the folder to be parsed.
-            group_id: A string with the id of the group where the new elements belong.
+            path (str): A string with the path of the folder to be parsed.
+            group_id (str): A string with the id of the group where the new elements belong.
         """
         if not os.path.exists(path):
             DocGenerator.LOGGER.warning(f"Include path '{path}' doesn´t exist")
@@ -250,7 +251,7 @@ class DocGenerator:
         """Get the test path when a test is specified by the user.
 
         Returns:
-            A string with the test path.
+            str: A string with the test path.
         """
         complete_test_name = f"{self.conf.test_name}.py"
         DocGenerator.LOGGER.info(f"Looking for {complete_test_name}")

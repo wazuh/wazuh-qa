@@ -20,17 +20,17 @@ class Config():
     https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#schema-blocks
 
     Attributes:
-        mode: An enumeration that stores the `doc_generator` mode when it is running.
-        project_path: A string that specifies the path where the tests to parse are located.
-        include_paths: A list of strings that contains the directories to parse.
-        include_regex: A list of strings(regular expressions) used to find test files.
-        group_files: A string that specifies the group definition file.
-        function_regex: A list of strings(regular expressions) used to find test functions.
-        ignore_paths: A string that specifies which paths will be ignored.
-        module_fields: A struct that contains the module documentation data.
-        test_fields: A struct that contains the test documentation data.
-        test_cases_field: A string that contains the test cases key.
-        LOGGER: A custom qa-docs logger.
+        mode (Mode): An enumeration that stores the `doc_generator` mode when it is running.
+        project_path (str): A string that specifies the path where the tests to parse are located.
+        include_paths (str): A list of strings that contains the directories to parse.
+        include_regex (str): A list of strings(regular expressions) used to find test files.
+        group_files (str): A string that specifies the group definition file.
+        function_regex (list): A list of regular expressions used to find test functions.
+        ignore_paths (str): A string that specifies which paths will be ignored.
+        module_fields (_fields): A struct that contains the module documentation data.
+        test_fields (_fields): A struct that contains the test documentation data.
+        test_cases_field (_fields): A string that contains the test cases key.
+        LOGGER (_fields): A custom qa-docs logger.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -46,10 +46,10 @@ class Config():
         you pass an output path, it has no effect in `default mode`.
 
         Args:
-            config_path: A string that contains the config file path.
-            test_dir: A string that contains the path of the tests.
-            output_path: A string that contains the doc output path.
-            test_name: A string that represents a test name.
+            config_path (str): A string that contains the config file path.
+            test_dir (str): A string that contains the path of the tests.
+            output_path (str): A string that contains the doc output path.
+            test_name (str): A string that represents a test name.
         """
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
@@ -83,7 +83,7 @@ class Config():
         """Read configuration file.
 
         Raises:
-            QAValuerError: Cannot load config file.
+            QAValuerError (IOError): Cannot load config file.
         """
         try:
             Config.LOGGER.debug('Loading config file')
@@ -296,7 +296,7 @@ class Mode(Enum):
             mode = Mode.DEFAULT
 
     Args:
-        Enum: Base class for creating enumerated constants.
+        Enum (Class): Base class for creating enumerated constants.
     """
     DEFAULT = 1
     SINGLE_TEST = 2

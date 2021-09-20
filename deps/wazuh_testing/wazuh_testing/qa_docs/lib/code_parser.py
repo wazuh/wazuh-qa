@@ -20,9 +20,9 @@ class CodeParser:
     """Class that parses the content of the test files.
 
     Attributes:
-        conf: A `Config` instance with the config file data.
-        pytest: A `PytestWrap` instance to wrap the pytest execution.
-        function_regexes: A list of strings(regular expressions) used to find test functions..
+        conf (Config): A `Config` instance with the config file data.
+        pytest (PytestWrap): A `PytestWrap` instance to wrap the pytest execution.
+        function_regexes (list): A list of regular expressions used to find test functions.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -32,7 +32,7 @@ class CodeParser:
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded data from the config file.
         """
         self.conf = config
         self.pytest = PytestWrap()
@@ -44,10 +44,10 @@ class CodeParser:
         """Check if a specific method matches with the regexes to be documented.
 
         Args:
-            function: Function class(_ast.FunctionDef) with all the information of the method.
+            function (_ast.FunctionDef): Function class with all the information of the method.
 
         Returns:
-            A boolean with True if the method should be documented. False otherwise
+            boolean: A boolean with True if the method should be documented. False otherwise
         """
         for regex in self.function_regexes:
             if regex.match(function.name):
@@ -58,7 +58,7 @@ class CodeParser:
         """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
 
         Args:
-            doc: A dict that contains the parsed documentation block"
+            doc (dict): A dict that contains the parsed documentation block"
         """
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
@@ -73,10 +73,10 @@ class CodeParser:
         """Parse one self-contained documentation block.
 
         Args:
-            function: Function class(_ast.FunctionDef) with all the information of the method"
+            function (_ast.FunctionDef): Function class with all the information of the method"
 
         Returns:
-            A dictionary with the documentation block parsed.
+            doc (dict): A dictionary with the documentation block parsed.
         """
         docstring = ast.get_docstring(function)
 
@@ -101,12 +101,12 @@ class CodeParser:
         """Parse the content of a test file.
 
         Args:
-            path: A string with the path of the test file to be parsed.
-            id: An integer with the ID of the new test document.
-            group_id: An integer with the ID of the group where the new test document belongs.
+            path (str): A string with the path of the test file to be parsed.
+            id (str): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
 
         Returns:
-            A dictionary with the documentation block parsed with module and tests fields.
+            module_doc (dict): A dictionary with the documentation block parsed with module and tests fields.
         """
         CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
         self.scan_file = path
@@ -150,12 +150,12 @@ class CodeParser:
         """Parse the content of a group file.
 
         Args:
-            group_file: A string with the path of the group file to be parsed.
-            id: An integer with the ID of the new test document.
-            group_id: An integer with the ID of the group where the new test document belongs.
+            group_file (str): A string with the path of the group file to be parsed.
+            id (int): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
 
         Returns:
-            A dictionary with the parsed information from `group_file`.
+            group_doc (dict): A dictionary with the parsed information from `group_file`.
         """
         MD_HEADER = "# "
         CodeParser.LOGGER.debug(f"Parsing group file '{group_file}'")

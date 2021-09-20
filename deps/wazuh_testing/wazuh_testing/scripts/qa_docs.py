@@ -42,7 +42,7 @@ def validate_parameters(parameters):
     So we only validate the parameters that the user introduces.
 
     Args:
-        parameters: A list of input args.
+        parameters (list): A list of input args.
     """
     qadocs_logger.debug('Validating input parameters')
 

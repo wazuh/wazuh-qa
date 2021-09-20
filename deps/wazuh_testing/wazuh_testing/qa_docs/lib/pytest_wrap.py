@@ -12,7 +12,7 @@ class PytestPlugin:
     """Plugin to extract information from a pytest execution.
 
     Attributes:
-        collected: A list with the collected data from pytest execution
+        collected (list): A list with the collected data from pytest execution
     """
     def __init__(self):
         self.collected = []
@@ -21,7 +21,7 @@ class PytestPlugin:
         """Callback to receive the output of a pytest execution.
 
         Args:
-            items: A list with the metadata from each test case.
+            items (list): A list with the metadata from each test case.
         """
         for item in items:
             self.collected.append(item.nodeid)
@@ -31,7 +31,7 @@ class PytestWrap:
     """Class that wraps the execution of pytest.
 
     Attributes:
-        plugin: A `PytestPlugin` instance.
+        plugin (PytestPlugin): A `PytestPlugin` instance.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -42,9 +42,10 @@ class PytestWrap:
         """Execute pytest in 'collect-only' mode to extract all the test cases found for a test file.
 
         Args:
-            path: A string with the path of the test file to extract the test cases.
+            path (str): A string with the path of the test file to extract the test cases.
 
-        Returns: A dictionary that contains the pytest parsed output.
+        Returns:
+            outpout (dict): A dictionary that contains the pytest parsed output.
         """
         PytestWrap.LOGGER.debug(f"Running pytest to collect test cases for '{path}'")
         pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])

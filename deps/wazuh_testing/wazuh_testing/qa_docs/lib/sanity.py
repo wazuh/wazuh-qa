@@ -19,13 +19,13 @@ class Sanity():
     It is in charge of walk every documentation file, and every group file to dump the parsed documentation.
 
     Attributes:
-        conf: A `Config` instance with the loaded data from the config file.
-        files_regex: A regular expression to get the JSON files previously generated.
-        error_reports: A list that contains all the errors obtained within the check.
-        found_tags: A set with all the tags found within the check.
-        found_tests: A set with all the tests found within the check.
-        found_modules: A set with all the modules found within the check.
-        project_tests: An integer that contains the tests count within the project folder.
+        conf (Config): A `Config` instance with the loaded data from the config file.
+        files_regex (re): A regular expression to get the JSON files previously generated.
+        error_reports (list): A list that contains all the errors obtained within the check.
+        found_tags (set): A set with all the tags found within the check.
+        found_tests (set): A set with all the tests found within the check.
+        found_modules (set): A set with all the modules found within the check.
+        project_tests (int): An integer that contains the tests count within the project folder.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
@@ -35,7 +35,7 @@ class Sanity():
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded data from the config file.
         """
         self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)
@@ -49,13 +49,13 @@ class Sanity():
         """Load a documentation file into a JSON dictionary.
 
         Args:
-            full_path: A string with the documentation file.
+            full_path (str): A string with the documentation file.
 
         Returns:
-            Test file content.
+            dict: A dictionary with the test file content.
 
         Raises:
-            IOError: Cannot load '{full_path}' file for sanity check.
+            QAValueError (IOError): Cannot load '{full_path}' file for sanity check.
         """
         try:
             with open(full_path) as file:
@@ -70,8 +70,8 @@ class Sanity():
         If a required field is not found, the error is logged and written in a report structure for future print.
 
         Args:
-            required_fields: A dictionary that contains the fields that must exist.
-            available_fields: A dictionary that contains the fields found into the documentation file.
+            required_fields (dict): A dictionary that contains the fields that must exist.
+            available_fields (dict): A dictionary that contains the fields found into the documentation file.
         """
         if isinstance(required_fields, dict):
             for field in required_fields:
@@ -96,7 +96,7 @@ class Sanity():
         """Check if all the mandatory module fields are present.
 
         Args:
-            fields: A dictionary that contains the module fields found in the documentation file.
+            fields (dict): A dictionary that contains the module fields found in the documentation file.
         """
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
@@ -104,7 +104,7 @@ class Sanity():
         """Check if all the mandatory test fields are present.
 
         Args:
-            fields: A dictionary that contains the test fields found in the documentation file.
+            fields (dict): A dictionary that contains the test fields found in the documentation file.
         """
         if 'tests' in fields:
             for test_fields in fields['tests']:
@@ -114,7 +114,7 @@ class Sanity():
         """Identify every new tag found in the documentation files and saves it for future reporting.
 
         Args:
-            content: A dictionary that contains the dictionary content of a documentation file.
+            content (dict): A dictionary that contains the dictionary content of a documentation file.
         """
         if 'metadata' in content and 'tags' in content['metadata']:
             for tag in content['metadata']['tags']:
@@ -124,7 +124,7 @@ class Sanity():
         """Identify every new test found in the documentation files and saves it for future reporting.
 
         Args:
-            content: A dictionary that contains the dictionary content of a documentation file.
+            content (dict): A dictionary that contains the dictionary content of a documentation file.
         """
         if 'tests' in content:
             for test in content['tests']:
@@ -161,7 +161,7 @@ class Sanity():
         """Add a new entry to the report.
 
         Args:
-            message: A string that contains the message to be included in the report.
+            message(str): A string that contains the message to be included in the report.
         """
         self.error_reports.append(message)
 

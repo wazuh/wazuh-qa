@@ -15,11 +15,11 @@ def check_existance(source, key):
     """Check recursively if a key exists into a dictionary.
 
     Args:
-        source: The source dictionary where the key should be found.
-        key: A string with the name of the key to look into the source dictionary.
+        source (dict): The source dictionary where the key should be found.
+        key (str): A string with the name of the key to look into the source dictionary.
 
     Returns:
-        A boolean with True if it exists. False otherwise.
+        boolean: A boolean with True if it exists. False otherwise.
     """
     if not isinstance(source, dict) and not isinstance(source, list):
         return False
@@ -49,9 +49,9 @@ def remove_inexistent(source, check_list, stop_list=None):
     """Check recursively if a source dictionary contains invalid keys that must be deleted.
 
     Args:
-        source: The source dictionary where the key should be found.
-        check_list: A dictionary with all the valid keys.
-        stop_list: A list with the keys that ends the recursivity.
+        source (dict): The source dictionary where the key should be found.
+        check_list (dict): A dictionary with all the valid keys.
+        stop_list (list): A list with the keys that ends the recursivity.
     """
     for element in list(source):
         if stop_list and element in stop_list:
@@ -67,10 +67,10 @@ def get_keys_dict(_dic):
     """Flat a dictionary into a list of its keys.
 
     Args:
-        _dic: The source dictionary to be flattened."
+        _dic (dict): The source dictionary to be flattened."
 
     Returns:
-        A list of flattened keys. If there is only a key, that one is returned.
+        keys (list): A list of flattened keys. If there is only a key, that one is returned.
     """
     keys = []
 
@@ -98,10 +98,10 @@ def get_keys_list(_list):
     """Flat a list of dictionaries into a list of its keys.
 
     Args:
-        _list: The source list to be flattened.
+        _list (list): The source list to be flattened.
 
     Returns:
-        A list of flattened keys. If there is only a key, that one is returned.
+        keys (list): A list of flattened keys. If there is only a key, that one is returned.
     """
     keys = []
 
@@ -127,11 +127,11 @@ def find_item(search_item, check):
     """Search for a specific key into a list of dictionaries or values.
 
     Args:
-        search_item: A string that contains the key to be found.
-        check: A list of dictionaries or values where the key should be found.
+        search_item (str): A string that contains the key to be found.
+        check (list): A list of dictionaries or values where the key should be found.
 
     Returns:
-        The value of the finding. None if the key could not be found.
+        item (str): The value of the finding. None if the key could not be found.
 """
     for item in check:
         if isinstance(item, dict):
@@ -149,11 +149,11 @@ def check_missing_field(source, check):
     """Check recursively if a source dictionary contains all the expected keys.
 
     Args:
-        source: The source dictionary where the key should be found.
-        check: A list with the expected keys.
+        source (dict): The source dictionary where the key should be found.
+        check (list): A list with the expected keys.
 
     Returns:
-        If not found, the missing key is returned. None otherwise.
+        str: If not found, the missing key is returned. None otherwise.
     """
     missing_filed = None
 
@@ -195,7 +195,7 @@ def clean_folder(folder):
     """Completely clean the content of a folder.
 
     Args:
-        folder: A string with the path of the folder to be cleaned.
+        folder (str): A string with the path of the folder to be cleaned.
     """
     if not os.path.exists(folder):
         return
