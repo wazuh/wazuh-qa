@@ -1,11 +1,6 @@
-"""
-brief: Wazuh DocGeneratot sanity check module
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import re
@@ -19,13 +14,29 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 
 class Sanity():
-    """
-    brief: Class in charge of performing a general sanity check on the already parsed documentation.
-    It´s in charge of walk every documentation file, and every group file to dump the parsed documentation.
+    """Class in charge of performing a general sanity check on the already parsed documentation.
+    
+    It is in charge of walk every documentation file, and every group file to dump the parsed documentation.
+    
+    Attributes:
+        conf: A `Config` instance with the loaded data from the config file.
+        files_regex: A regular expression to get the JSON files previously generated.
+        error_reports: A list that contains all the errors obtained within the check.
+        found_tags: A set with all the tags found within the check.
+        found_tests: A set with all the tests found within the check.
+        found_modules: A set with all the modules found within the check.
+        project_tests: An integer that contains the tests count within the project folder.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
     def __init__(self, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config: A `Config` instance with the loaded data from the config file.
+        """
         self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)
         self.error_reports = []
@@ -35,10 +46,16 @@ class Sanity():
         self.project_tests = 0
 
     def get_content(self, full_path):
-        """
-        brief: Loads a documentation file into a JSON dictionary.
-        args:
-            - "full_path (str): The documentation file."
+        """Load a documentation file into a JSON dictionary.
+
+        Args:
+            full_path: A string with the documentation file.
+
+        Returns:
+            Test file content.
+
+        Raises:
+            QaValueError: Cannot load '{full_path}' file for sanity check.
         """
         try:
             with open(full_path) as file:
@@ -47,13 +64,14 @@ class Sanity():
             raise QAValueError(f"Cannot load '{full_path}' file for sanity check", Sanity.LOGGER.error)
 
     def validate_fields(self, required_fields, available_fields):
-        """
-        brief: Method to check if all the required fields are present into the found ones.
-               This method will be called recursively for nested dictionaries.
-               If a required field isn´t found, the error is logged and written in a report structure for future print.
-        args:
-            - "required_fields (dict): The fields that must exist."
-            - "available_fields (dict): The fields found into the documentation file."
+        """Check if all the required fields are present into the found ones.
+               
+        This method will be called recursively for nested dictionaries.
+        If a required field is not found, the error is logged and written in a report structure for future print.
+
+        Args:
+            required_fields: A dictionary that contains the fields that must exist.
+            available_fields: A dictionary that contains the fields found into the documentation file.
         """
         if isinstance(required_fields, dict):
             for field in required_fields:
@@ -72,47 +90,47 @@ class Sanity():
                         Sanity.LOGGER.error(f"Mandatory field '{field}' is missing the in file {self.scan_file}")
 
     def validate_module_fields(self, fields):
-        """
-        brief: Checks if all the mandatory module fields are present.
-        args:
-            - "fields(dict): The module fields found in the documentation file."
+        """Check if all the mandatory module fields are present.
+
+        Args:
+            fields: A dictionary that contains the module fields found in the documentation file.
         """
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
     def validate_test_fields(self, fields):
-        """
-        brief: Checks if all the mandatory test fields are present.
-        args:
-            - "fields(dict): The test fields found in the documentation file."
+        """Checks if all the mandatory test fields are present.
+
+        Args:
+            fields: A dictionary that contains the test fields found in the documentation file.
         """
         if 'tests' in fields:
             for test_fields in fields['tests']:
                 self.validate_fields(self.conf.test_fields.mandatory, test_fields)
 
     def identify_tags(self, content):
-        """
-        brief: Identifies every new tag found in the documentation files and saves it for future reporting.
-        args:
-            - "content(dict): The dictionary content of a documentation file."
+        """Identify every new tag found in the documentation files and saves it for future reporting.
+
+        Args:
+            content: A dictionary that contains the dictionary content of a documentation file.
         """
         if 'metadata' in content and 'tags' in content['metadata']:
             for tag in content['metadata']['tags']:
                 self.found_tags.add(tag)
 
     def identify_tests(self, content):
-        """
-        brief: Identifies every new test found in the documentation files and saves it for future reporting.
-        args:
-            - "content(dict): The dictionary content of a documentation file."
+        """Identify every new test found in the documentation files and saves it for future reporting.
+
+        Args:
+            content: A dictionary that contains the dictionary content of a documentation file.
         """
         if 'tests' in content:
             for test in content['tests']:
                 self.found_tests.add(test['name'])
 
     def count_project_tests(self):
-        """
-        brief: Count how many tests are into every test file into the Project folder.
-               This information will be used for a coverage report.
+        """Count how many tests are into every test file into the Project folder.
+        
+        This information will be used for a coverage report.
         """
         file_regexes = []
         function_regexes = []
@@ -135,17 +153,15 @@ class Sanity():
                                 self.project_tests = self.project_tests + 1
 
     def add_report(self, message):
-        """
-        brief: Adds a new entry to the report.
-        args:
-            - "message (string): Message to be included in the report."
+        """Add a new entry to the report.
+
+        Args:
+            message: A string that contains the message to be included in the report.
         """
         self.error_reports.append(message)
 
     def print_report(self):
-        """
-        brief: Makes a report with all the errors found, the coverage and the tags found.
-        """
+        """Make a report with all the errors found, the coverage and the tags found."""
         print("\nDuring the sanity check:")
 
         if self.error_reports:
@@ -167,9 +183,7 @@ class Sanity():
         print("A {:.2f}% from the tests of {} is covered.".format(tests_percentage, self.conf.project_path))
 
     def run(self):
-        """
-        brief: Runs a complete sanity check of each documentation file on the output folder.
-        """
+        """Run a complete sanity check of each documentation file on the output folder."""
         Sanity.LOGGER.info("Starting documentation sanity check")
 
         for (root, *_, files) in os.walk(self.conf.documentation_path, topdown=True):
