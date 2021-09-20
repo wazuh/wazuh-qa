@@ -37,7 +37,7 @@ class DocGenerator:
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with data loaded from config file.
+            config: A `Config` instance with the loaded data from config file.
         """
         self.conf = config
         self.parser = CodeParser(self.conf)

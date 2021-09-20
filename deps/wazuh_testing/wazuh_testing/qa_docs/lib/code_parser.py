@@ -27,6 +27,13 @@ class CodeParser:
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
     def __init__(self, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config: A `Config` instance with the loaded data from config file.
+        """
         self.conf = config
         self.pytest = PytestWrap()
         self.function_regexes = []

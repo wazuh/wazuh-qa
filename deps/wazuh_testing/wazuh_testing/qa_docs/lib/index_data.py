@@ -1,11 +1,6 @@
-"""
-brief: Wazuh DocGenerator data indexer.
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 04, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import re
@@ -19,12 +14,25 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 
 class IndexData:
-    """
-    brief: Class that indexes the data from JSON files into ElasticSearch.
+    """Class that indexes the data from JSON files into ElasticSearch.
+
+    Attributes:
+        path: A string that contains the path where the parsed documentation is located.
+        index: A string with the index name to be indexed with Elasticsearch.
+        regex: A regular expression to get JSON files.
+        es: An `ElasticSearch` client instance.
+        output: A list to be indexed in Elasticsearch.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
     def __init__(self, index, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config: A `Config` instance with the loaded data from config file.
+        """
         self.path = config.documentation_path
         self.index = index
         self.regex = re.compile(".*json")
@@ -32,9 +40,7 @@ class IndexData:
         self.output = []
 
     def test_connection(self):
-        """
-        brief: It verifies with an HTTP request that an OK response is received from ElasticSearch.
-        """
+        """Verify with an HTTP request that an OK response is received from ElasticSearch."""
         try:
             res = requests.get("http://localhost:9200/_cluster/health")
             if res.status_code == 200:
@@ -43,19 +49,21 @@ class IndexData:
             raise QAValueError(f"Connection error: {exception}", IndexData.LOGGER.error)
 
     def get_files(self):
-        """
-        brief: Finds all the files inside the documentation path that matches with doc_file_regex.
-        """
+        """Find all the files inside the documentation path that matches with the JSON regex."""
         doc_files = []
+
         for (root, *_, files) in os.walk(self.path):
             for file in files:
                 if self.regex.match(file):
                     doc_files.append(os.path.join(root, file))
+
         return doc_files
 
     def read_files_content(self, files):
-        """
-        brief: Opens every file found in the path and appends the content into a list.
+        """Open every file found in the path and appends the content into a list.
+        
+        Args:
+            files: A list with the files that matched with the regex.
         """
         for file in files:
             with open(file) as test_file:
@@ -63,19 +71,16 @@ class IndexData:
                 self.output.append(lines)
 
     def remove_index(self):
-        """
-        brief: Deletes an index.
-        """
+        """Deletes an index."""
         delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
         IndexData.LOGGER.info(f'Delete index {self.index}\n {delete}\n')
 
     def run(self):
-        """
-        brief: Collects all the documentation files and makes a request to the BULK API to index the new data.
-        """
+        """Collects all the documentation files and makes a request to the BULK API to index the new data."""
         self.test_connection()
         files = self.get_files()
         self.read_files_content(files)
+
         if self.test_connection():
             self.remove_index()
             IndexData.LOGGER.info("Indexing data...\n")
