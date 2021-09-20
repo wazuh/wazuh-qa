@@ -101,7 +101,7 @@ class Sanity():
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
     def validate_test_fields(self, fields):
-        """Checks if all the mandatory test fields are present.
+        """Check if all the mandatory test fields are present.
 
         Args:
             fields: A dictionary that contains the test fields found in the documentation file.

@@ -71,12 +71,12 @@ class IndexData:
                 self.output.append(lines)
 
     def remove_index(self):
-        """Deletes an index."""
+        """Delete an index."""
         delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
         IndexData.LOGGER.info(f'Delete index {self.index}\n {delete}\n')
 
     def run(self):
-        """Collects all the documentation files and makes a request to the BULK API to index the new data."""
+        """Collect all the documentation files and makes a request to the BULK API to index the new data."""
         self.test_connection()
         files = self.get_files()
         self.read_files_content(files)
