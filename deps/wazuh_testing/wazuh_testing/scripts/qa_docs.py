@@ -125,14 +125,14 @@ def main():
     # Index the previous parsed tests into Elasticsearch
     elif args.index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        indexData = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
-        indexData.run()
+        index_data = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data.run()
 
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.launch_app:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        indexData = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
-        indexData.run()
+        index_data = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data.run()
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")

@@ -61,7 +61,7 @@ class IndexData:
 
     def read_files_content(self, files):
         """Open every file found in the path and appends the content into a list.
-        
+
         Args:
             files: A list with the files that matched with the regex.
         """
