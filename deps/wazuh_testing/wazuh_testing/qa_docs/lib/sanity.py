@@ -78,12 +78,15 @@ class Sanity():
                 if not check_existance(available_fields, field):
                     self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                     Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
+
                 elif isinstance(required_fields[field], dict) or isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
+
         elif isinstance(required_fields, list):
             for field in required_fields:
                 if isinstance(field, dict) or isinstance(field, list):
                     self.validate_fields(field, available_fields)
+
                 else:
                     if not check_existance(available_fields, field):
                         self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
@@ -142,11 +145,13 @@ class Sanity():
         for (root, *_, files) in os.walk(self.conf.project_path, topdown=True):
             for regex in file_regexes:
                 test_files = list(filter(regex.match, files))
+
                 for test_file in test_files:
                     with open(os.path.join(root, test_file)) as fd:
                         file_content = fd.read()
                     module = ast.parse(file_content)
                     functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
+
                     for function in functions:
                         for regex in function_regexes:
                             if regex.match(function.name):
