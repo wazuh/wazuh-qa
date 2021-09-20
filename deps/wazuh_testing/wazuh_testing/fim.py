@@ -2213,8 +2213,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel, monitor=log_monitor)
 
-    event_checker.fetch_and_check('added', event_mode=event_mode, min_timeout=min_timeout,
-                                  triggers_event=triggers_event)
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -2230,8 +2230,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel, monitor=log_monitor)
 
-    event_checker.fetch_and_check('modified', event_mode=event_mode, min_timeout=min_timeout,
-                                  triggers_event=triggers_event)
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -2247,8 +2247,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel, monitor=log_monitor)
 
-    event_checker.fetch_and_check('deleted', event_mode=event_mode, min_timeout=min_timeout,
-                                  triggers_event=triggers_event)
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
