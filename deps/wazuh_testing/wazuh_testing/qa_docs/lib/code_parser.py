@@ -97,33 +97,33 @@ class CodeParser:
 
         return doc
 
-    def parse_test(self, code_file, id, group_id):
+    def parse_test(self, path, id, group_id):
         """Parse the content of a test file.
 
         Args:
-            code_file: A string with the path of the test file to be parsed.
+            path: A string with the path of the test file to be parsed.
             id: An integer with the ID of the new test document.
             group_id: An integer with the ID of the group where the new test document belongs.
 
         Returns:
             A dictionary with the documentation block parsed with module and tests fields.
         """
-        CodeParser.LOGGER.debug(f"Parsing test file '{code_file}'")
-        self.scan_file = code_file
-        with open(code_file) as fd:
+        CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
+        self.scan_file = path
+        with open(path) as fd:
             file_content = fd.read()
         module = ast.parse(file_content)
         functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
 
         module_doc = self.parse_comment(module)
         if module_doc:
-            module_doc['name'] = os.path.basename(code_file)
+            module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
             module_doc['group_id'] = group_id
 
             test_cases = None
             if self.conf.test_cases_field:
-                test_cases = self.pytest.collect_test_cases(code_file)
+                test_cases = self.pytest.collect_test_cases(path)
 
             functions_doc = []
             for function in functions:
