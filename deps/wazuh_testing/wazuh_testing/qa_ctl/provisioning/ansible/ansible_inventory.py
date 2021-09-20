@@ -44,11 +44,18 @@ class AnsibleInventory():
                         'ansible_password': instance.connection_user_password,
                         'ansible_connection': instance.connection_method,
                         'ansible_port': instance.connection_port,
-                        'ansible_python_interpreter': instance.ansible_python_interpreter,
                         'ansible_ssh_private_key_file': instance.ssh_private_key_file_path,
+
                         'vars': instance.host_vars,
                         'ansible_ssh_common_args': "-o UserKnownHostsFile=/dev/null"
+
                         }
+
+            if instance.connection_method == 'winrm':
+                host_info.update({
+                    'ansible_winrm_transport': 'basic',
+                    'ansible_winrm_server_cert_validation': 'ignore'
+                })
 
             # Remove ansible vars with None value
             host_info = {key: value for key, value in host_info.items() if value is not None}
