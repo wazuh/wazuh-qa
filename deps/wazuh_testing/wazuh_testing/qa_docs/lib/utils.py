@@ -1,51 +1,57 @@
-"""
-brief: Wazuh DocGeneratot utils module
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os, shutil
+import os
+import shutil
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 
 utils_logger = Logging.get_logger(QADOCS_LOGGER)
 
+
 def check_existance(source, key):
-    """
-        brief: Checks recursively if a key exists into a dictionary.
-        args:
-            - "source (dict): The source dictionary where the key should be found."
-            - "key (string): The name of the key to look into the source dictionary."
+    """Check recursively if a key exists into a dictionary.
+
+    Args:
+        source: The source dictionary where the key should be found.
+        key: A string with the name of the key to look into the source dictionary.
+
+    Returns:
+        A boolean with True if it exists. False otherwise.
     """
     if not isinstance(source, dict) and not isinstance(source, list):
         return False
 
     if key in source:
         return True
+
     elif isinstance(source, dict):
         for item in source:
             if check_existance(source[item], key):
                 return True
+
         return False
+
     elif isinstance(source, list):
         for item in source:
             if check_existance(item, key):
                 return True
+
         return False
+
     else:
         return False
 
+
 def remove_inexistent(source, check_list, stop_list=None):
-    """
-        brief: Checks recursively if a source dictionary contains invalid keys that must be deleted.
-        args:
-            - "source (dict): The source dictionary where the key should be found."
-            - "check_list (dict): Dictionary with all the valid keys."
-            - "check_list (list): Keys where the recursive must finish"
+    """Check recursively if a source dictionary contains invalid keys that must be deleted.
+
+    Args:
+        source: The source dictionary where the key should be found.
+        check_list: A dictionary with all the valid keys.
+        stop_list: A list with the keys that ends the recursivity.
     """
     for element in list(source):
         if stop_list and element in stop_list:
@@ -56,21 +62,29 @@ def remove_inexistent(source, check_list, stop_list=None):
         elif isinstance(source[element], dict):
             remove_inexistent(source[element], check_list, stop_list)
 
+
 def get_keys_dict(_dic):
-    """
-        brief: Flat a dictionary into a list of its keys.
-        args:
-            - "_dic (dict): The source dictionary to be flattened."
+    """Flat a dictionary into a list of its keys.
+
+    Args:
+        _dic: The source dictionary to be flattened."
+
+    Returns:
+        A list of flattened keys. If there is only a key, that one is returned.
     """
     keys = []
+
     for item in _dic:
         value = _dic[item]
+
         if isinstance(value, dict):
             result = get_keys_dict(value)
-            keys.append({item : result})
+            keys.append({item: result})
+
         elif isinstance(value, list):
             result = get_keys_list(value)
-            keys.append({item : result})
+            keys.append({item: result})
+
         else:
             keys.append(item)
 
@@ -79,20 +93,27 @@ def get_keys_dict(_dic):
     else:
         return keys
 
+
 def get_keys_list(_list):
-    """
-        brief: Flat a list of dictionaries into a list of its keys.
-        args:
-            - "_list (list): The source list to be flattened."
+    """Flat a list of dictionaries into a list of its keys.
+
+    Args:
+        _list: The source list to be flattened.
+
+    Returns:
+        A list of flattened keys. If there is only a key, that one is returned.
     """
     keys = []
+
     for item in _list:
         if isinstance(item, dict):
             result = get_keys_dict(item)
             keys.append(result)
+
         elif isinstance(item, list):
             result = get_keys_list(item)
             keys.append(result)
+
         else:
             keys.append(item)
 
@@ -101,14 +122,17 @@ def get_keys_list(_list):
     else:
         return keys
 
+
 def find_item(search_item, check):
-    """
-        brief: Search for a specific key into a list of dictionaries or values.
-        args:
-              - "search_item (string): The key to be found."
-              - "check (list): A list of dictionaries or values where the key should be found."
-        returns: None if the key couldn´t be found. The value of the finding.
-    """
+    """Search for a specific key into a list of dictionaries or values.
+
+    Args:
+        search_item: A string that contains the key to be found.
+        check: A list of dictionaries or values where the key should be found.
+
+    Returns:
+        The value of the finding. None if the key could not be found.
+"""
     for item in check:
         if isinstance(item, dict):
             list_element = list(item.keys())
@@ -120,12 +144,16 @@ def find_item(search_item, check):
 
     return None
 
+
 def check_missing_field(source, check):
-    """
-        brief: Checks recursively if a source dictionary contains all the expected keys.
-        args:
-            - "source (dict): The source dictionary where the key should be found."
-            - "check (list): The expected keys."
+    """Check recursively if a source dictionary contains all the expected keys.
+
+    Args:
+        source: The source dictionary where the key should be found.
+        check: A list with the expected keys.
+
+    Returns:
+        If not found, the missing key is returned. None otherwise.
     """
     missing_filed = None
 
@@ -135,7 +163,7 @@ def check_missing_field(source, check):
             found_item = find_item(key, check)
 
             if not found_item:
-                print(f"Missing key {source_field}")
+                utils_logger.warning(f"Missing key {source_field}")
                 return key
 
             missing_filed = check_missing_field(source_field[key], found_item)
@@ -157,16 +185,17 @@ def check_missing_field(source, check):
             found_item = find_item(source_field, check)
 
             if not found_item:
-                print(f"Missing key {source_field}")
+                utils_logger.warning(f"Missing key {source_field}")
                 return source_field
 
     return missing_filed
 
+
 def clean_folder(folder):
-    """
-        brief: Completely cleans the content of a folder.
-        args:
-            - "folder (string): The path of the folder to be cleaned."
+    """Completely clean the content of a folder.
+
+    Args:
+        folder: A string with the path of the folder to be cleaned.
     """
     if not os.path.exists(folder):
         return
