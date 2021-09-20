@@ -9,9 +9,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.logtest import (callback_logtest_started,
                                    callback_remove_session,
                                    callback_session_initialized)
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, LOGTEST_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, SocketController
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import truncate_file
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -22,15 +24,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
+logtest_startup_timeout = 30
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
-
+local_internal_options = {'analysisd.debug': str(1)}
 msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 "event": "Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928",
 "log_format": "syslog", "location": "master->/var/log/syslog"}}"""
-
-
-local_internal_options = {'analysisd.debug': str(1)}
 
 
 @pytest.fixture(scope='module')
@@ -41,7 +40,7 @@ def get_local_internal_options():
 
 # Function to manage the comunication with Wazuh-logtest
 def create_connection():
-    return SocketController(address=logtest_sock, family='AF_UNIX', connection_protocol='TCP')
+    return SocketController(address=LOGTEST_SOCKET_PATH, family='AF_UNIX', connection_protocol='TCP')
 
 
 def remove_connection(connection):
@@ -56,17 +55,38 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope='module')
+def wait_for_logtest_startup(request):
+    """Wait until logtest has begun."""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor.start(timeout=logtest_startup_timeout, callback=callback_logtest_started)
+
+
+@pytest.fixture(scope='module')
+def restart_required_logtest_daemons():
+    """Wazuh logtests daemons handler."""
+    required_logtest_daemons = ['wazuh-analysisd', 'wazuh-db']
+
+    truncate_file(LOG_FILE_PATH)
+
+    for daemon in required_logtest_daemons:
+        control_service('restart', daemon=daemon)
+
+    yield
+
+    for daemon in required_logtest_daemons:
+        control_service('stop', daemon=daemon)
+
+
 # Test
-def test_remove_old_session(get_local_internal_options, configure_local_internal_options,
-                            get_configuration, configure_environment, restart_wazuh):
-    """
-    Create more sessions than allowed and wait for the message which
+def test_remove_old_session(get_local_internal_options,
+                            configure_local_internal_options,
+                            get_configuration, configure_environment,
+                            restart_required_logtest_daemons,
+                            wait_for_logtest_startup):
+    """Create more sessions than allowed and wait for the message which
     informs that Wazuh-logtest has removed the oldest session.
     """
-
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_logtest_started,
-                            error_message='Event not found')
 
     max_sessions = int(get_configuration['sections'][0]['elements'][2]['max_sessions']['value'])
 
