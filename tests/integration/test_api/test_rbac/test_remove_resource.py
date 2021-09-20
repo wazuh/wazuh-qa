@@ -1,23 +1,18 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `RBAC` (Role-Based Access Control) feature of the API
-    is working properly. Specifically, they will verify that the different security
-    resources (users, roles, policies, and rules) can be correctly removed.
-    The `RBAC` capability allows users accessing the API to be assigned a role that
-    will define the privileges they have.
+brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+       Specifically, they will verify that the different security resources (users, roles, policies, and rules)
+       can be correctly removed. The `RBAC` capability allows users accessing the API to be assigned a role that
+       will define the privileges they have.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
@@ -25,8 +20,6 @@ modules:
 components:
     - manager
 
-path:
-    tests/integration/test_api/test_rbac/test_remove_resource.py
 daemons:
     - wazuh-apid
     - wazuh-analysisd
@@ -37,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -113,11 +107,10 @@ def check_resources(deleted_resource, resource_id):
 # Tests
 def test_remove_rule(set_security_resources, get_api_details):
     '''
-    description:
-        Check if relationships between security resources stay the same after removing the linked rule.
+    description: Check if relationships between security resources stay the same
+                 after removing the linked rule.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -138,13 +131,12 @@ def test_remove_rule(set_security_resources, get_api_details):
         - The testing `role_id` as a module attribute.
         - The testing `rule_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `role_id` and the `rule_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `role_id` and the `rule_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-based relationships.
-        - r'200' ('OK' HTTP status code when deleting the linked rule)
+        - r'200' (`OK` HTTP status code when deleting the linked rule)
 
     tags:
         - rbac
@@ -166,11 +158,10 @@ def test_remove_rule(set_security_resources, get_api_details):
 
 def test_remove_policy(set_security_resources, get_api_details):
     '''
-    description:
-        Check if relationships between security resources stay the same after removing the linked policy.
+    description: Check if relationships between security resources stay the same
+                 after removing the linked policy.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -191,13 +182,12 @@ def test_remove_policy(set_security_resources, get_api_details):
         - The testing `role_id` as a module attribute.
         - The testing `policy_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `role_id` and the `policy_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `role_id` and the `policy_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-based relationships.
-        - r'200' ('OK' HTTP status code when deleting the linked policy)
+        - r'200' (`OK` HTTP status code when deleting the linked policy)
 
     tags:
         - rbac
@@ -219,11 +209,10 @@ def test_remove_policy(set_security_resources, get_api_details):
 
 def test_remove_user(set_security_resources, get_api_details):
     '''
-    description:
-        Check if relationships between security resources stay the same after removing the linked user.
+    description: Check if relationships between security resources stay the same
+                 after removing the linked user.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -244,13 +233,12 @@ def test_remove_user(set_security_resources, get_api_details):
         - The testing `role_id` as a module attribute.
         - The testing `user_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `role_id` and the `user_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `role_id` and the `user_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-based relationships.
-        - r'200' ('OK' HTTP status code when deleting the linked user)
+        - r'200' (`OK` HTTP status code when deleting the linked user)
 
     tags:
         - rbac
@@ -272,11 +260,10 @@ def test_remove_user(set_security_resources, get_api_details):
 
 def test_remove_role(set_security_resources, get_api_details):
     '''
-    description:
-        Check if relationships between security resources stay the same after removing the linked role.
+    description: Check if relationships between security resources stay the same
+                 after removing the linked role.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -297,13 +284,12 @@ def test_remove_role(set_security_resources, get_api_details):
         - The testing `user_id` as a module attribute.
         - The testing `role_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `user_id` and the `role_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `user_id` and the `role_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-based relationships.
-        - r'200' ('OK' HTTP status code when deleting the linked role)
+        - r'200' (`OK` HTTP status code when deleting the linked role)
 
     tags:
         - rbac

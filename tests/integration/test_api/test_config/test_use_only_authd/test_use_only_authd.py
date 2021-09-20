@@ -1,29 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `use_only_authd` setting of the API is working properly.
-    This setting allows forcing the use of `wazuh-authd` daemon when registering and removing agents.
+brief: These tests will check if the `use_only_authd` setting of the API is working properly.
+       This setting allows forcing the use of `wazuh-authd` daemon when registering and removing agents.
+       The Wazuh API is an open source `RESTful` API that allows for interaction with the Wazuh manager
+       from a web browser, command line tool like `cURL` or any script or program that can make web requests.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_config/test_use_only_authd/test_use_only_authd.py
 
 daemons:
     - wazuh-authd
@@ -36,22 +31,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -110,13 +106,11 @@ def extra_configuration_after_yield():
 def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
                    restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if `use_only_authd` forces the use of the `wazuh-authd` daemon when adding an agent.
-        Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
-        is stopped, the request made is not completed correctly.
+    description: Check if `use_only_authd` forces the use of the `wazuh-authd` daemon when adding an agent.
+                 Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
+                 is stopped, the request made is not completed correctly.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -145,14 +139,13 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
           when the `use_only_authd` setting is disabled.
         - Verify that the request to remove the testing agent is processed correctly.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters (`use_only_authd`).
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters (`use_only_authd`).
 
     expected_output:
-        - r'400' ('Internal server error' HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
-        - r'200' ('OK' HTTP status code if `use_only_authd == no`)
-        - r'200' ('OK' HTTP status code if the testing agent is removed successfully)
+        - r'400' (`Internal server error` HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
+        - r'200' (`OK` HTTP status code if `use_only_authd == no`)
+        - r'200' (`OK` HTTP status code if the testing agent is removed successfully)
 
     tags:
         - authd
@@ -193,13 +186,11 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
 def test_insert_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if `use_only_authd` forces the use of `wazuh-authd` daemon when inserting an agent.
-        Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
-        is stopped, the request made is not completed correctly.
+    description: Check if `use_only_authd` forces the use of `wazuh-authd` daemon when inserting an agent.
+                 Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
+                 is stopped, the request made is not completed correctly.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -227,13 +218,12 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
         - Verify that the request to insert the testing agent is successfully processed
           when the `use_only_authd` setting is disabled.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters (`use_only_authd`).
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters (`use_only_authd`).
 
     expected_output:
-        - r'400' ('Internal server error' HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
-        - r'200' ('OK' HTTP status code if `use_only_authd == no`)
+        - r'400' (`Internal server error` HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
+        - r'200' (`OK` HTTP status code if `use_only_authd == no`)
 
     tags:
         - authd
@@ -274,13 +264,12 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
 def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_environment,
                             restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if `use_only_authd` forces the use of `wazuh-authd` daemon when quickly inserting an agent.
-        Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
-        is stopped, the request made is not completed correctly.
+    description: Check if `use_only_authd` forces the use of `wazuh-authd` daemon when
+                 quickly inserting an agent. Verify that when `use_only_authd` option
+                 is enabled and the `wazuh-authd` daemon is stopped,
+                 the request made is not completed correctly.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -308,13 +297,12 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
         - Verify that the request to quickly inserting the testing agent is successfully processed
           when the `use_only_authd` setting is disabled.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters (`use_only_authd`).
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters (`use_only_authd`).
 
     expected_output:
-        - r'400' ('Internal server error' HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
-        - r'200' ('OK' HTTP status code if `use_only_authd == no`)
+        - r'400' (`Internal server error` HTTP status code if `use_only_authd == yes` and `wazuh-authd` is stopped)
+        - r'200' (`OK` HTTP status code if `use_only_authd == no`)
 
     tags:
         - authd
@@ -351,14 +339,12 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
 def test_delete_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if `use_only_authd` forces the use of `wazuh-authd` daemon when deleting an agent.
-        Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
-        is not active, an error is returned. In this test, `wazuh-authd` daemon is started
-        in order to create an agent before it can be deleted.
+    description: Check if `use_only_authd` forces the use of `wazuh-authd` daemon when deleting an agent.
+                 Verify that when `use_only_authd` option is enabled and the `wazuh-authd` daemon
+                 is not active, an error is returned. In this test, `wazuh-authd` daemon is started
+                 in order to create an agent before it can be deleted.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -387,12 +373,11 @@ def test_delete_agent(tags_to_apply, get_configuration, configure_api_environmen
         - Verify that the request to delete the testing agent cannot finish successfully when
           the `use_only_authd` setting is enabled and the `wazuh-authd` daemon is stopped.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters (`use_only_authd`).
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters (`use_only_authd`).
 
     expected_output:
-        - r'200' ('OK' HTTP status code at inserting the testing agent)
+        - r'200' (`OK` HTTP status code at inserting the testing agent)
         - r '1' (Value of the 'total_affected_items' field in the response body when `use_only_authd == yes`)
         - r '1726' (Error code in the response body when `use_only_authd == yes` and `wazuh-authd` is stopped)
 

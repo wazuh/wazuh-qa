@@ -1,29 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the IP blocking feature of the API handled
-    by the `wazuh-apid` daemon is working properly.
+brief: These tests will check if the IP blocking feature of the API handled by the `wazuh-apid` daemon
+       is working properly. The Wazuh API is an open source `RESTful` API that allows for interaction
+       with the Wazuh manager from a web browser, command line tool like `cURL` or any script
+       or program that can make web requests.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_config/test_bruteforce_blocking_system/test_bruteforce_blocking_system.py
 
 daemons:
     - wazuh-apid
@@ -35,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -93,13 +89,11 @@ def get_configuration(request):
 def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                                     wait_for_start, get_api_details):
     '''
-    description:
-        Check if the blocking time for IP addresses detected as brute-force attack works.
-        For this purpose, the test causes an IP blocking, make a request before
-        the blocking time finishes and one after the blocking time.
+    description: Check if the blocking time for IP addresses detected as brute-force attack works.
+                 For this purpose, the test causes an IP blocking, make a request before
+                 the blocking time finishes and one after the blocking time.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -126,9 +120,8 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
         - Verify that the IP address is still blocked even when using
           the correct credentials within the blocking time.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters.
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters.
 
     expected_output:
         - r"Error obtaining login token"

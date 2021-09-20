@@ -1,29 +1,25 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
 brief:
-    These tests will check if the CORS (Cross-origin resource sharing) feature
-    of the API handled by the `wazuh-apid` daemon is working properly.
+    These tests will check if the `CORS` (Cross-origin resource sharing) feature of the API handled
+    by the `wazuh-apid` daemon is working properly. The Wazuh API is an open source `RESTful` API
+    that allows for interaction with the Wazuh manager from a web browser, command line tool
+    like `cURL` or any script or program that can make web requests.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_config/test_cors/test_cors.py
 
 daemons:
     - wazuh-apid
@@ -35,22 +31,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -95,14 +92,12 @@ def get_configuration(request):
 def test_cors(origin, tags_to_apply, get_configuration, configure_api_environment,
               restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if expected headers are returned when CORS is enabled.
-        When CORS is enabled, special headers must be returned in case the
-        request origin matches the one established in the CORS configuration
-        of the API.
+    description: Check if expected headers are returned when `CORS` is enabled.
+                 When `CORS` is enabled, special headers must be returned in case the
+                 request origin matches the one established in the `CORS` configuration
+                 of the API.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - origin:
@@ -133,9 +128,8 @@ def test_cors(origin, tags_to_apply, get_configuration, configure_api_environmen
         - Verify that when CORS is enabled, the `Access-Control-Allow-Credentials` header is received.
         - Verify that when CORS is disabled, the `Access-Control-Allow-Origin` header is not received.
 
-    input_description:
-        A test case is contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters.
+    input_description: A test case is contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters.
 
     expected_output:
         - r'Access-Control-Allow-Origin'
