@@ -24,7 +24,8 @@ package_data_list = [
     'qa_ctl/deployment/dockerfiles/*',
     'qa_ctl/deployment/vagrantfile_template.txt',
     'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
-    'data/qactl_conf_validator_schema.json'
+    'data/qactl_conf_validator_schema.json',
+    'qa_ctl/deployment/windows/vagrant_deployer.py'
 ]
 
 scripts_list = [
