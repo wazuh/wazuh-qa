@@ -14,8 +14,7 @@ new cdb list are correctly loaded when a new session of logtest is opened
 
 |Tier | Total | Time spent |
 | :--:| :--:  | :--:       |
-| 0   |    N |    1s  |
-
+| 0   |    1 |    8.4s  |
 
 ## Expected behavior
 
