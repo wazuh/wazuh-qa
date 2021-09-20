@@ -15,9 +15,9 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 class Sanity():
     """Class in charge of performing a general sanity check on the already parsed documentation.
-    
+
     It is in charge of walk every documentation file, and every group file to dump the parsed documentation.
-    
+
     Attributes:
         conf: A `Config` instance with the loaded data from the config file.
         files_regex: A regular expression to get the JSON files previously generated.
@@ -55,17 +55,17 @@ class Sanity():
             Test file content.
 
         Raises:
-            QaValueError: Cannot load '{full_path}' file for sanity check.
+            IOError: Cannot load '{full_path}' file for sanity check.
         """
         try:
             with open(full_path) as file:
                 return json.load(file)
-        except:
+        except IOError:
             raise QAValueError(f"Cannot load '{full_path}' file for sanity check", Sanity.LOGGER.error)
 
     def validate_fields(self, required_fields, available_fields):
         """Check if all the required fields are present into the found ones.
-               
+
         This method will be called recursively for nested dictionaries.
         If a required field is not found, the error is logged and written in a report structure for future print.
 
@@ -78,7 +78,7 @@ class Sanity():
                 if not check_existance(available_fields, field):
                     self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                     Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
-                elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
+                elif isinstance(required_fields[field], dict) or isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
         elif isinstance(required_fields, list):
             for field in required_fields:
@@ -129,7 +129,7 @@ class Sanity():
 
     def count_project_tests(self):
         """Count how many tests are into every test file into the Project folder.
-        
+
         This information will be used for a coverage report.
         """
         file_regexes = []
@@ -143,7 +143,7 @@ class Sanity():
             for regex in file_regexes:
                 test_files = list(filter(regex.match, files))
                 for test_file in test_files:
-                    with open(os.path.join(root,test_file)) as fd:
+                    with open(os.path.join(root, test_file)) as fd:
                         file_content = fd.read()
                     module = ast.parse(file_content)
                     functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]

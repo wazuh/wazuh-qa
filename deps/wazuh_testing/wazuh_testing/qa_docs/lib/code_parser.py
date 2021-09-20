@@ -32,7 +32,7 @@ class CodeParser:
         Initialize every attribute.
 
         Args:
-            config: A `Config` instance with the loaded data from config file.
+            config: A `Config` instance with the loaded data from the config file.
         """
         self.conf = config
         self.pytest = PytestWrap()
@@ -41,7 +41,7 @@ class CodeParser:
             self.function_regexes.append(re.compile(regex))
 
     def is_documentable_function(self, function):
-        """Checks if a specific method matches with the regexes to be documented.
+        """Check if a specific method matches with the regexes to be documented.
 
         Args:
             function: Function class(_ast.FunctionDef) with all the information of the method.
@@ -55,7 +55,7 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        """Removes the fields from a parsed test file to delete the fields that are not mandatory or optional.
+        """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
 
         Args:
             doc: A dict that contains the parsed documentation block"
@@ -70,7 +70,7 @@ class CodeParser:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def parse_comment(self, function):
-        """Parses one self-contained documentation block.
+        """Parse one self-contained documentation block.
 
         Args:
             function: Function class(_ast.FunctionDef) with all the information of the method"
@@ -98,7 +98,7 @@ class CodeParser:
         return doc
 
     def parse_test(self, code_file, id, group_id):
-        """Parses the content of a test file.
+        """Parse the content of a test file.
 
         Args:
             code_file: A string with the path of the test file to be parsed.
@@ -147,7 +147,7 @@ class CodeParser:
         return module_doc
 
     def parse_group(self, group_file, id, group_id):
-        """Parses the content of a group file.
+        """Parse the content of a group file.
 
         Args:
             group_file: A string with the path of the group file to be parsed.

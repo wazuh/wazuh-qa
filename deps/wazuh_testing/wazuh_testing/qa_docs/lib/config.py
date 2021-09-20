@@ -80,7 +80,7 @@ class Config():
             self.__read_module_info()
 
     def __read_config_file(self, file):
-        """Reads configuration file.
+        """Read configuration file.
 
         Raises:
             QAValuerError: Cannot load config file.
@@ -89,11 +89,11 @@ class Config():
             Config.LOGGER.debug('Loading config file')
             with open(file) as config_file:
                 self._config_data = yaml.safe_load(config_file)
-        except Config.LOGGER.error:
+        except IOError:
             raise QAValueError('Cannot load config file', Config.LOGGER.error)
 
     def __read_test_info(self):
-        """Reads from the config file the keys to be printed from module info.
+        """Read from the config file the keys to be printed from module info.
 
         This functionality is used to print any custom field(s) you want.
         You can use it if you only need a few fields to parse when a single test is run.
@@ -110,7 +110,7 @@ class Config():
             Config.LOGGER.warning('Cannot read test info fields')
 
     def __read_module_info(self):
-        """Reads from the config file the fields to be printed from test info.
+        """Read from the config file the fields to be printed from test info.
 
         This functionality is used to print any custom field(s) you want.
         You can use it if you only need a few fields to parse when a single test is run.
@@ -131,12 +131,12 @@ class Config():
             Config.LOGGER.warning('Cannot read module info fields')
 
     def __set_documentation_path(self, path):
-        """Sets the path of the documentation output."""
+        """Set the path of the documentation output."""
         Config.LOGGER.debug('Setting the path documentation')
         self.documentation_path = path
 
     def __read_include_paths(self):
-        """Reads from the config file all the paths to be included in the parsing process.
+        """Read from the config file all the paths to be included in the parsing process.
 
         Raises:
             QAValueError: The include paths field is empty in the config file
@@ -153,7 +153,7 @@ class Config():
             self.include_paths.append(os.path.join(self.project_path, path))
 
     def __read_include_regex(self):
-        """Reads from the config file the regexes used to identify test files.
+        """Read from the config file the regexes used to identify test files.
 
         Raises:
             QAValueError: The include regex field is empty in the config file
@@ -166,7 +166,7 @@ class Config():
         self.include_regex = self._config_data['Include regex']
 
     def __read_group_files(self):
-        """Reads from the config file the file name to be identified in a group.
+        """Read from the config file the file name to be identified in a group.
 
         Raises:
             QAValueError: The group files field is empty in config file
@@ -179,7 +179,7 @@ class Config():
         self.group_files = self._config_data['Group files']
 
     def __read_function_regex(self):
-        """Reads from the config file the regexes used to identify a test method.
+        """Read from the config file the regexes used to identify a test method.
 
         Raises:
             QAValueError: The function regex field is empty in the config file
@@ -192,7 +192,7 @@ class Config():
         self.function_regex = self._config_data['Function regex']
 
     def __read_ignore_paths(self):
-        """Reads from the config file all the paths to be excluded from the parsing."""
+        """Read from the config file all the paths to be excluded from the parsing."""
 
         if 'Ignore paths' in self._config_data:
             ignore_paths = self._config_data['Ignore paths']
@@ -201,7 +201,7 @@ class Config():
                 self.ignore_paths.append(os.path.join(self.project_path, path))
 
     def __read_module_fields(self):
-        """Reads from the config file the optional and mandatory fields for the test module.
+        """Read from the config file the optional and mandatory fields for the test module.
 
         If the module block fields are not defined in the config file, an error will be raised.
 
@@ -226,7 +226,7 @@ class Config():
             self.module_fields.optional = module_fields['Optional']
 
     def __read_test_fields(self):
-        """Reads from the config file the optional and mandatory fields for the test functions.
+        """Read from the config file the optional and mandatory fields for the test functions.
 
         If the test block fields are not defined in the config file, an error will be raised.
 
@@ -251,7 +251,7 @@ class Config():
             self.test_fields.optional = test_fields['Optional']
 
     def __read_output_fields(self):
-        """Reads all the mandatory and optional fields from config file.
+        """Read all the mandatory and optional fields from config file.
 
         Raises:
             QAValueError: Documentation schema not defined in the config file
@@ -263,7 +263,7 @@ class Config():
         self.__read_test_fields()
 
     def __read_test_cases_field(self):
-        """Reads from the configuration file the key to identify a Test Case list."""
+        """Read from the configuration file the key to identify a Test Case list."""
         Config.LOGGER.debug('Reading Test Case key from the config file')
 
         if 'Test cases field' in self._config_data:
