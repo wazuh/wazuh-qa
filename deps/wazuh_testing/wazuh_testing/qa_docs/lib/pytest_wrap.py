@@ -26,6 +26,7 @@ class PytestPlugin:
         for item in items:
             self.collected.append(item.nodeid)
 
+
 class PytestWrap:
     """Class that wraps the execution of pytest.
 
@@ -54,7 +55,7 @@ class PytestWrap:
             tmp = tmp[1].split("[")
             test = tmp[0]
 
-            if not test in output:
+            if test not in output:
                 output[test] = []
 
             if len(tmp) >= 2:
