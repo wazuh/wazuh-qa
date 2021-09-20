@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will verify if the `agent-key-polling` module works correctly in a cluster environment,
+       specifically using a `worker` node. This module allows retrieving the agent information from
+       an external database, like `MySQL` or any database engine, for registering it to the `client.keys` file.
+
+tier: 0
+
+modules:
+    - cluster
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-clusterd
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/agent-key-polling.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/wodle-agent-key-polling.html
+    - https://documentation.wazuh.com/current/user-manual/configuring-cluster/basics.html
+    - https://documentation.wazuh.com/current/development/wazuh-cluster.html#worker
+
+tags:
+    - key-polling
+    - worker
+'''
 import os
 
 import pytest
@@ -63,23 +117,51 @@ def get_configuration(request):
 ])
 def test_key_polling_worker(cmd, counter, payload, configure_environment, configure_sockets_environment,
                             detect_initial_worker_connected, connect_to_sockets_function):
-    """
-    Test worker behavior with agent key-polling.
+    '''
+    description: Check if the Wazuh worker node correctly forwards agent key-polling requests to the master node.
+                 For this purpose, a simulated master node is used to receive key-polling requests from the worker node.
+                 After sending such requests, the test checks if the master node has received them correctly.
 
-    This test uses a fictional master node to test wazuh worker behavior against agent-key-polling messages. After
-    connecting the worker to the simulated master, the test simulates a key-polling request message from remoted by
-    sending a message to the worker local socket. Then, we ensure that the worker completed his duty by checking the
-    received message in the other end, in this case, the fictional master node.
+    wazuh_min_version: 4.2
 
-    Parameters
-    ----------
-    cmd : bytes
-        Cluster message command
-    counter : int
-        Cluster message counter
-    payload : bytes
-        Cluster message payload data
-    """
+    parameters:
+        - cmd:
+            type: bytes
+            brief: Cluster message command.
+        - counter:
+            type: int
+            brief: Cluster message counter.
+        - payload:
+            type: bytes
+            brief: Cluster message payload data.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - detect_initial_worker_connected:
+            type: fixture
+            brief: Make sure that the worker node is connected to master one
+                   after restarting the `wazuh-clusterd` daemon.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Function scope version of the `connect_to_sockets` fixture.
+
+    assertions:
+        - Verify that the master node correctly receives the payload of key-polling by agent ID.
+        - Verify that the master node correctly receives the payload of key-polling by agent IP address.
+
+    input_description: Two test cases are found in the test module and include the requests
+                       to be made and the expected result.
+
+    expected_output:
+        - The payload of key-polling by agent ID (001) in the body response.
+        - The payload of key-polling by agent IP address (124.0.0.1) in the body response.
+
+    tags:
+        - keys
+    '''
     # Build message to send to c-internal.sock in the worker and send it
     message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=False)
     receiver_sockets[0].send(message)
