@@ -45,6 +45,7 @@ class CodeParser:
 
         Args:
             function: Function class(_ast.FunctionDef) with all the information of the method.
+
         Returns:
             A boolean with True if the method should be documented. False otherwise
         """
@@ -73,6 +74,9 @@ class CodeParser:
 
         Args:
             function: Function class(_ast.FunctionDef) with all the information of the method"
+
+        Returns:
+            A dictionary with the documentation block parsed.
         """
         docstring = ast.get_docstring(function)
 
@@ -100,6 +104,9 @@ class CodeParser:
             code_file: A string with the path of the test file to be parsed.
             id: An integer with the ID of the new test document.
             group_id: An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            A dictionary with the documentation block parsed with module and tests fields.
         """
         CodeParser.LOGGER.debug(f"Parsing test file '{code_file}'")
         self.scan_file = code_file
@@ -146,6 +153,9 @@ class CodeParser:
             group_file: A string with the path of the group file to be parsed.
             id: An integer with the ID of the new test document.
             group_id: An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            A dictionary with the parsed information from `group_file`.
         """
         MD_HEADER = "# "
         CodeParser.LOGGER.debug(f"Parsing group file '{group_file}'")
