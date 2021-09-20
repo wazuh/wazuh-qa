@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `wazuh-authd` daemon correctly handles the enrollment requests,
+       generating consistent responses to the requests received on its local UNIX socket.
+       The `wazuh-authd` daemon can automatically add a Wazuh agent to a Wazuh manager and provide
+       the key to the agent. It’s used along with the `agent-auth` application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+    - https://documentation.wazuh.com/current/user-manual/reference/tools/agent_groups.html
+
+tags:
+    - enrollment
+'''
 import os
 import subprocess
 
@@ -82,13 +134,48 @@ def clean_client_keys_file():
 
 def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
                              configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    '''
+    description: Check if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
+                 it responds appropriately to them. In this case, the enrollment requests
+                 are sent to a local `UNIX` socket.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - clean_client_keys_file:
+            type: fixture
+            brief: Delete the agent keys stored in the `client.keys` file.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - set_up_groups:
+            type: fixture
+            brief: Create a testing group for agents and provide the test case list.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of `connect_to_sockets` fixture.
+        - wait_for_agentd_startup:
+            type: fixture
+            brief: Wait until the `wazuh-agentd` has begun.
+
+    assertions:
+        - Verify that the response messages are consistent with the enrollment requests received.
+
+    input_description: Different test cases are contained in an external `YAML` file (local_enroll_messages.yaml)
+                       that includes enrollment events and the expected output.
+
+    expected_output:
+        - Multiple values located in the `local_enroll_messages.yaml` file.
+
+    tags:
+        - keys
+    '''
     test_case = set_up_groups['test_case']
     for stage in test_case:
         # Reopen socket (socket is closed by maanger after sending message with client key)
@@ -98,5 +185,5 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
         receiver_sockets[0].send(stage['input'], size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         assert response[:len(expected)] == expected, \
-            'Failed test case {}: Response was: {} instead of: {}'.format \
-                (test_case.index(stage) + 1, response, expected)
+               'Failed test case {}: Response was: {} instead of: {}' \
+               .format(test_case.index(stage) + 1, response, expected)

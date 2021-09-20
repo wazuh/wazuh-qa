@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `wazuh-authd` daemon correctly handles the enrollment requests
+       under different conditions that affect the name and IP address used by the agents.
+       The `wazuh-authd` daemon can automatically add a Wazuh agent to a Wazuh manager and
+       provide the key to the agent. It’s used along with the `agent-auth` application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+
+tags:
+    - enrollment
+'''
 import os
 import socket
 import ssl
@@ -213,23 +264,37 @@ log_monitor.start(timeout=30, callback=callback_agentd_startup)
 
 # @pytest.mark.parametrize('test_case', [case['test_case'] for case in ssl_configuration_tests])
 def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, configure_sockets_environment):
-    """Check that every input message in authd port generates the adequate output
+    '''
+    description: Check if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
+                 it responds appropriately to them. The requests include different combinations
+                 of hostname, IP address, and password (if any) used by the agent.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_cases, dict with following keys:
-            - input: message that will be tried to send to the manager
-            - output: expected response
-            - insert_prev_agent: yes or no (for duplicated ip or name cases)
-                1) if insert_prev_agent_custom is present: previous input message is overwrite by the custom message
-                    (insert_prev_agent_custom: "OSSEC A:'user0' IP:'10.10.10.10'")
-                2) if insert_prev_agent_custom is not present: send the masage equals to input
-            - insert_random_pass_in_query:
-              "yes" if is needed add random pass to input query (for register with random pass cases)
-            - insert_hostname_in_query:
-              "yes" if is present add host name to input message
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+
+    assertions:
+        - Verify that the response messages are consistent with the enrollment requests received.
+
+    input_description: Different test cases are contained in an external `YAML` file (name_ip_pass_tests.yaml)
+                       that includes enrollment events and the expected output.
+
+    expected_output:
+        - Multiple values located in the `name_ip_pass_tests.yaml` file.
+
+    tags:
+        - keys
+        - ssl
+    '''
     current_test = get_current_test()
 
     # setup the password enviroment to password test
@@ -257,21 +322,22 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
                 # Prev output is expected
                 expected = "OSSEC K:'"
                 assert response, \
-                    'Failed connection previous insert for {}: {}'.format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
+                    'Failed connection previous insert for {}: {}' \
+                    .format(ip_name_configuration_tests[current_test]['name'], config['input'])
                 assert response[:len(expected)] == expected, \
-                    "Failed response previous '{}': Input: {}".format \
-                        (ip_name_configuration_tests[current_test]['name'], config['input'])
+                    "Failed response previous '{}': Input: {}" \
+                    .format(ip_name_configuration_tests[current_test]['name'], config['input'])
                 if expected == "OSSEC K:'":
                     time.sleep(0.5)
-                    assert check_client_keys_file(response) == True, \
-                        "Failed test case '{}' checking previous client.keys : Input: {}".format \
-                            (ip_name_configuration_tests[current_test]['name'], config['input'])
+                    assert check_client_keys_file(response) is True, \
+                        "Failed test case '{}' checking previous client.keys : Input: {}" \
+                        .format(ip_name_configuration_tests[current_test]['name'], config['input'])
         except KeyError:
             pass
 
-        # in case of test random and correct password register, read the random pass generated by os_authd and insert in query
-        # in case of test random and wrong password keep the password of the original query
+        # In case of test random and correct password register, read the random pass
+        # generated by os_authd and insert in query.
+        # In case of test random and wrong password keep the password of the original query
         if set_password and set_password == 'random':
             try:
                 if config['insert_random_pass_in_query'] == 'yes':
@@ -293,21 +359,21 @@ def test_ossec_auth_name_ip_pass(get_configuration, configure_environment, confi
         # Output is expected
         expected = config['output']
         response = send_message(config['input'])
-        assert response, "Failed connection stage '{}'': '{}'".format \
-            (ip_name_configuration_tests[current_test]['name'], config['input'])
+        assert response, "Failed connection stage '{}'': '{}'" \
+                         .format(ip_name_configuration_tests[current_test]['name'], config['input'])
         if response[:len(expected)] != expected:
             if config.get('expected_fail') == 'yes':
                 pytest.xfail("Test expected to fail by configuration")
             else:
-                raise AssertionError("Failed test case '{}': Input: {}".format \
-                                         (ip_name_configuration_tests[current_test]['name'], config['input']))
+                raise AssertionError("Failed test case '{}': Input: {}"
+                                     .format(ip_name_configuration_tests[current_test]['name'], config['input']))
 
         # if expect a key check with client.keys file
         if expected[:len("OSSEC K:'")] == "OSSEC K:'":
             time.sleep(0.5)
             if "/32" in response:
                 response = response.replace("/32", "")
-            assert check_client_keys_file(response) == True, \
-                "Failed test case '{}' checking client.keys : Input: {}".format \
-                    (ip_name_configuration_tests[current_test]['name'], config['input'])
+            assert check_client_keys_file(response) is True, \
+                "Failed test case '{}' checking client.keys : Input: {}" \
+                .format(ip_name_configuration_tests[current_test]['name'], config['input'])
     return

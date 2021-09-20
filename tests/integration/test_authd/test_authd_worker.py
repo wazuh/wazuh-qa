@@ -1,7 +1,60 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if a Wazuh cluster `worker` node correctly handles agent enrollment requests
+       sent to the `wazuh-authd` daemon socket. The `wazuh-authd` daemon can automatically add
+       a Wazuh agent to a Wazuh manager and provide the key to the agent.
+       It’s used along with the `agent-auth` application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-clusterd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+    - https://documentation.wazuh.com/current/user-manual/configuring-cluster/basics.html#worker
+
+tags:
+    - enrollment
+'''
 import os
 import subprocess
 import time
@@ -100,13 +153,47 @@ def get_configuration(request):
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_agentd_startup):
-    """Check that every input message in authd port generates the adequate output
+    '''
+    description: Check if a `worker` node in the Wazuh cluster correctly redirects agent enrollment requests
+                 to the `master` node, which is the only one responsible for enrolling agents.
+                 For this purpose, a cluster environment is simulated in where a worker node sends
+                 enrollment requests to the `wazuh-authd` daemon socket of the master node.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys).
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - set_up_groups:
+            type: fixture
+            brief: Create a testing group for agents and provide the test case list.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of `connect_to_sockets` fixture.
+        - wait_for_agentd_startup:
+            type: fixture
+            brief: Wait until the `wazuh-agentd` has begun.
+
+    assertions:
+        - Verify that the response messages are consistent with the enrollment requests received.
+
+    input_description: Different test cases are contained in an external `YAML` file (worker_messages.yaml)
+                       that includes enrollment events and the expected output.
+
+    expected_output:
+        - Multiple values located in the `worker_messages.yaml` file.
+
+    tags:
+        - keys
+        - ssl
+    '''
     test_case = set_up_groups['test_case']
     for stage in test_case:
         # Push expected info to mitm queue
