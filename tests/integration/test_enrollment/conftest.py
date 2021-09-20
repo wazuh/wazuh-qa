@@ -49,6 +49,9 @@ def parse_configuration_string(configuration):
 
 @pytest.fixture(scope='module')
 def create_certificates():
+    """
+    Writes the certificate files used for SSL communication.
+    """
     cert_controller = CertificateController()
     cert_controller.get_root_ca_cert().sign(cert_controller.get_root_key(), cert_controller.digest)
     cert_controller.store_private_key(cert_controller.get_root_key(), AGENT_KEY_PATH)
@@ -57,7 +60,9 @@ def create_certificates():
 
 @pytest.fixture(scope='function')
 def configure_socket_listener(request, get_current_test_case):
-    """Configures the socket listener to start listening on the socket."""
+    """
+    Configures the socket listener to start listening on the socket.
+    """
     if 'message' in get_current_test_case and 'response' in get_current_test_case['message']:
         response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
     else:
@@ -94,7 +99,8 @@ def configure_socket_listener(request, get_current_test_case):
 
 @pytest.fixture(scope='function')
 def set_keys(get_current_test_case):
-    """Writes the keys file with the content defined in the configuration.
+    """
+    Writes the keys file with the content defined in the configuration.
     Args:
         get_current_test_case (dict): Current test case.
     """
@@ -121,7 +127,9 @@ def set_password(get_current_test_case):
 # Wazuh conf
 
 def get_temp_yaml(param):
-    """Creates a temporal config file."""
+    """
+    Creates a temporal config file.
+    """
     temp = os.path.join(test_data_path, 'temp.yaml')
     with open(configurations_path, 'r') as conf_file:
         enroll_conf = {'enrollment': {'elements': []}}
@@ -138,7 +146,9 @@ def get_temp_yaml(param):
 
 @pytest.fixture(scope='function')
 def override_wazuh_conf(get_current_test_case, request):
-    """Re-writes Wazuh configuration file with new configurations from the test case."""
+    """
+    Re-writes Wazuh configuration file with new configurations from the test case.
+    """
     test_name = request.node.originalname
     configuration = get_current_test_case.get('configuration', {})
     parse_configuration_string(configuration)

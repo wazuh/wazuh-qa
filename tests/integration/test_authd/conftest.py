@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -10,13 +8,11 @@ DAEMON_NAME = 'wazuh-authd'
 
 @pytest.fixture(scope='function')
 def wait_for_authd_startup(request):
-    """Wait until agentd has begun"""
-
+    """Wait until authd has begun"""
     def callback_agentd_startup(line):
         if 'Accepting connections on port 1515' in line:
             return line
         return None
-
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
 

@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of the setting use_password
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of the setting use_password
 tier:
     0
 modules:
@@ -39,17 +39,15 @@ tags:
 '''
 
 import os
-import socket
 import ssl
 import time
 import pytest
-import yaml
-from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, load_tests
-from wazuh_testing.tools.monitoring import SocketController, FileMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status
+
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.monitoring import SocketController
+from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -70,7 +68,7 @@ metadata = [
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-test_authd_use_password_tests = load_tests(os.path.join(test_data_path, 'test_authd_use_password.yaml'))
+test_authd_use_password_tests = read_yaml(os.path.join(test_data_path, 'test_authd_use_password.yaml'))
 configuration_ids = [f"Use_password_{x['USE_PASSWORD']}" for x in parameters]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 authd_default_password_path = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
@@ -90,22 +88,10 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Functions
 
-
-def send_message(message):
-    address, family, connection_protocol = receiver_sockets_params[0]
-    SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
-    try:
-        SSL_socket.open()
-    except ssl.SSLError as exception:
-        # We did not expect this error, fail test
-        raise
-    SSL_socket.send(message, size=False)
-    response = SSL_socket.receive().decode()
-    SSL_socket.close()
-    return response
-
-
 def read_random_pass():
+    """
+    Search for the random password creation in Wazuh logs
+    """
     osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     passw = None
     try:
@@ -124,7 +110,9 @@ def read_random_pass():
 
 @pytest.fixture(scope='function')
 def reset_password(test_case, get_configuration):
-
+    """
+    Write the password file.
+    """
     metadata = get_configuration['metadata']
     set_password = None
     try:
@@ -164,12 +152,17 @@ def reset_password(test_case, get_configuration):
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """
+    Get configurations from the module
+    """
     return request.param
 
 
 @pytest.fixture(scope='function')
 def clean_client_keys_file_function():
+    """
+    Stops Wazuh and cleans any previus key in client.keys file at function scope.
+    """
     # Stop Wazuh
     control_service('stop')
 
@@ -186,6 +179,9 @@ def clean_client_keys_file_function():
 
 @pytest.fixture(scope='module')
 def clean_client_keys_file_module():
+    """
+    Stops Wazuh and cleans any previus key in client.keys file at module scope.
+    """
     # Stop Wazuh
     control_service('stop')
 
@@ -202,6 +198,9 @@ def clean_client_keys_file_module():
 
 @pytest.fixture(scope='module')
 def tear_down():
+    """
+    Roll back the daemon and client.keys state after the test ends.
+    """
     yield
     # Stop Wazuh
     control_service('stop')
@@ -235,10 +234,6 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
     """
         description:
            "Check that every input message in authd port generates the adequate output"
-        assertions:
-            - The random password works as expected
-            - A wrong password is rejected
-            - A request with password and use_password = 'no' is rejected
         wazuh_min_version:
             4.2
         parameters:
@@ -272,6 +267,10 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
             - tear_down:
                 type: fixture
                 brief: Roll back the daemon and client.keys state after the test ends.
+        assertions:
+            - The random password works as expected
+            - A wrong password is rejected
+            - A request with password and use_password = 'no' is rejected
         input_description:
             Different test cases are contained in an external YAML file (test_authd_use_password.yaml) which includes
             the different possible registration requests and the expected responses.

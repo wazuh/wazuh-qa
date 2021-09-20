@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Worker)
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Worker)
 tier:
     0
 modules:
@@ -43,12 +43,11 @@ import subprocess
 import time
 
 import pytest
-import yaml
 from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
 from wazuh_testing.tools import WAZUH_PATH, CLUSTER_LOGS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
-from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 
@@ -88,7 +87,7 @@ class WorkerMID(ManInTheMiddle):
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-message_tests = load_tests(os.path.join(test_data_path, 'worker_messages.yaml'))
+message_tests = read_yaml(os.path.join(test_data_path, 'worker_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 params = [{'FERNET_KEY': FERNET_KEY}]
 metadata = [{'fernet_key': FERNET_KEY}]
@@ -111,6 +110,9 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 @pytest.fixture(scope="function", params=message_tests)
 def set_up_groups(request):
+    """
+    Set the pre-defined groups.
+    """
     groups = request.param.get('groups', [])
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', f'{group}', '-q'])
@@ -121,7 +123,9 @@ def set_up_groups(request):
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """
+    Get configurations from the module
+    """
     yield request.param
 
 
@@ -131,10 +135,6 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         description:
            "Check that every message from the agent is correctly formatted for master, and every master
             response is correctly parsed for agent"
-
-        assertions:
-            - The 'port_input' from agent is formatted to 'cluster_input' for master
-            - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
         wazuh_min_version:
             4.2
         parameters:
@@ -156,6 +156,9 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
             - wait_for_authd_startup:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
+        assertions:
+            - The 'port_input' from agent is formatted to 'cluster_input' for master
+            - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
         input_description:
             Different test cases are contained in an external YAML file (worker_messages.yaml) which includes
             the different possible registration requests and the expected responses.

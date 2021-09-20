@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of Wazuh Agentd during the enrollment under different configurations.
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of Wazuh Agentd during the enrollment under different configurations.
 tier:
     0
 modules:
@@ -73,18 +73,25 @@ test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """
+    Get configurations from the module
+    """
     return request.param
 
 
 @pytest.fixture(scope='function', params=tests, ids=test_case_ids)
 def get_current_test_case(request):
-    """Get current test case from the module"""
+    """
+    Get current test case from the module
+    """
     return request.param
 
 
 @pytest.fixture(scope='function')
 def restart_agentd(get_current_test_case):
+    """
+    Restart Agentd and control if it is expected to fail or not.
+    """
     if 'wazuh-agentd' in get_current_test_case.get('skips', []):
         pytest.skip("This test does not apply to agentd")
 
@@ -105,10 +112,6 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             "Check that different configuration generates the adequate enrollment message or the corresponding
             error log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
-        assertions:
-            - The enrollment message is sent when the configuration is valid
-            - The enrollment message is generated as expected when the configuration is valid.
-            - The error log is generated as expected when the configuration is invalid.
         wazuh_min_version:
             4.2
         parameters:
@@ -139,6 +142,10 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             - request:
                 type: fixture
                 brief: Provide information of the requesting test function.
+        assertions:
+            - The enrollment message is sent when the configuration is valid
+            - The enrollment message is generated as expected when the configuration is valid.
+            - The error log is generated as expected when the configuration is invalid.
         input_description:
             Different test cases are contained in an external YAML file (wazuh_enrollment_tests.yaml) which includes the
             different available enrollment-related configurations.

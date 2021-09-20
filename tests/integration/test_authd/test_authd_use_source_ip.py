@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of the setting use_source_ip
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of the setting use_source_ip
 tier:
     0
 modules:
@@ -39,17 +39,14 @@ tags:
 '''
 
 import os
-import socket
 import ssl
 import time
 import pytest
-import yaml
-from wazuh_testing.fim import generate_params
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, load_tests
-from wazuh_testing.tools.monitoring import SocketController, FileMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.monitoring import SocketController
+from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -70,7 +67,7 @@ metadata = [
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-test_authd_use_source_ip_tests = load_tests(os.path.join(test_data_path, 'test_authd_use_source_ip.yaml'))
+test_authd_use_source_ip_tests = read_yaml(os.path.join(test_data_path, 'test_authd_use_source_ip.yaml'))
 configuration_ids = [f"Use_source_ip_{x['USE_SOURCE_IP']}" for x in parameters]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
@@ -81,33 +78,22 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
-# Functions
-
-
-def send_message(message):
-    address, family, connection_protocol = receiver_sockets_params[0]
-    SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol)
-    try:
-        SSL_socket.open()
-    except ssl.SSLError as exception:
-        # We did not expect this error, fail test
-        raise
-    SSL_socket.send(message, size=False)
-    response = SSL_socket.receive().decode()
-    SSL_socket.close()
-    return response
-
 # Fixtures
 
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """
+    Get configurations from the module
+    """
     return request.param
 
 
 @pytest.fixture(scope='function')
 def clean_client_keys_file_function():
+    """
+    Stops Wazuh and cleans any previus key in client.keys file at function scope.
+    """
     # Stop Wazuh
     control_service('stop')
 
@@ -124,6 +110,9 @@ def clean_client_keys_file_function():
 
 @pytest.fixture(scope='module')
 def clean_client_keys_file_module():
+    """
+    Stops Wazuh and cleans any previus key in client.keys file at module scope.
+    """
     # Stop Wazuh
     control_service('stop')
 
@@ -140,6 +129,9 @@ def clean_client_keys_file_module():
 
 @pytest.fixture(scope='module')
 def tear_down():
+    """
+    Roll back the daemon and client.keys state after the test ends.
+    """
     yield
     # Stop Wazuh
     control_service('stop')
@@ -165,10 +157,6 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
     """
         description:
            "Check that every input message in authd port generates the adequate output"
-        assertions:
-            - The manager uses the agent's IP as requested
-            - Setting an IP overrides the configuration
-            - If the IP is not defined an the setting is disabled, use 'any'
         wazuh_min_version:
             4.2
         parameters:
@@ -196,6 +184,10 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
             - tear_down:
                 type: fixture
                 brief: Roll back the daemon and client.keys state after the test ends.
+        assertions:
+            - The manager uses the agent's IP as requested
+            - Setting an IP overrides the configuration
+            - If the IP is not defined an the setting is disabled, use 'any'
         input_description:
             Different test cases are contained in an external YAML file (test_authd_use_source_ip.yaml) which includes
             the different possible registration requests and the expected responses.

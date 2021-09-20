@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Master)
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Master)
 tier:
     0
 modules:
@@ -47,7 +47,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 # TODO Move to utils
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 
@@ -57,7 +57,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-message_tests = load_tests(os.path.join(test_data_path, 'local_enroll_messages.yaml'))
+message_tests = read_yaml(os.path.join(test_data_path, 'local_enroll_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
@@ -82,6 +82,9 @@ def get_configuration(request):
 
 @pytest.fixture(scope="function", params=message_tests)
 def set_up_groups_keys(request):
+    """
+    Set pre-existent groups and keys.
+    """
     client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
     keys = request.param.get('pre_existent_keys', [])
@@ -119,10 +122,6 @@ def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_en
     """
         description:
             "Check that every input message in trough local authd port generates the adequate response to worker"
-        assertions:
-            - The received output must match with expected
-            - The enrollment messages are parsed as expected
-            - The agent keys are denied if the hash is the same than the manager's
         wazuh_min_version:
             4.2
         parameters:
@@ -144,6 +143,10 @@ def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_en
             - wait_for_authd_startup:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
+        assertions:
+            - The received output must match with expected
+            - The enrollment messages are parsed as expected
+            - The agent keys are denied if the hash is the same than the manager's
         input_description:
             Different test cases are contained in an external YAML file (local_enroll_messages.yaml) which includes
             the different possible registration requests and the expected responses.

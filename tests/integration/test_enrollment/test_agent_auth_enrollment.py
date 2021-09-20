@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
 tier:
     0
 modules:
@@ -83,6 +83,9 @@ def get_current_test_case(request):
 
 @pytest.fixture(scope='module')
 def shutdown_agentd():
+    """
+    Shutdown agentd to avoid interferences with agent-auth test
+    """
     control_service('stop', daemon='wazuh-agentd')
 
 
@@ -93,16 +96,15 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         "Check that different configuration generates the adequate enrollment message or the corresponding
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
-    assertions:
-        - The enrollment message is sent when the configuration is valid
-        - The enrollment message is generated as expected when the configuration is valid.
-        - The error log is generated as expected when the configuration is invalid.
     wazuh_min_version:
         4.2
     parameters:
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - shutdown_agentd:
+            type: fixture
+            brief: Shutdown agentd to avoid interferences with agent-auth test
         - override_wazuh_conf:
             type: fixture
             brief: Write a particular Wazuh configuration for the test case.
@@ -127,6 +129,10 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         - request:
             type: fixture
             brief: Provide information of the requesting test function.
+    assertions:
+        - The enrollment message is sent when the configuration is valid
+        - The enrollment message is generated as expected when the configuration is valid.
+        - The error log is generated as expected when the configuration is invalid.
     input_description:
         Different test cases are contained in an external YAML file (wazuh_enrollment_tests.yaml) which includes the
         different available enrollment-related configurations.

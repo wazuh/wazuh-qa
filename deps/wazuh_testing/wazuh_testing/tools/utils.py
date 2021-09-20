@@ -113,4 +113,9 @@ def get_random_string(string_length, digits=True):
 
 
 def get_host_name():
+    """
+    Gets the system host name.
+    Returns:
+        str: The host name.
+    """
     return socket.gethostname()

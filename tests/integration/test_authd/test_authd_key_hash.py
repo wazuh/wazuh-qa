@@ -1,10 +1,10 @@
 '''
-brief: This module verifies the correct behavior of the enrollment daemon authd under different messages
 copyright:
     Copyright (C) 2015-2021, Wazuh Inc.
     Created by Wazuh, Inc. <info@wazuh.com>.
     This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
+brief: This module verifies the correct behavior of the enrollment daemon authd under different messages
 tier:
     0
 modules:
@@ -46,7 +46,7 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 
@@ -56,7 +56,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-message_tests = load_tests(os.path.join(test_data_path, 'authd_key_hash.yaml'))
+message_tests = read_yaml(os.path.join(test_data_path, 'authd_key_hash.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
@@ -73,11 +73,16 @@ receiver_sockets, monitored_sockets = None, None  # Set in the fixtures
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
-    """Get configurations from the module"""
+    """
+    Get configurations from the module
+    """
     yield request.param
 
 
 def clean_client_keys_file():
+    """
+    Stops Wazuh and cleans any previus key in client.keys file.
+    """
     client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     # Stop Wazuh
     control_service('stop')
@@ -95,6 +100,9 @@ def clean_client_keys_file():
 
 @pytest.fixture(scope="module", params=message_tests)
 def set_up_groups_keys(request):
+    """
+    Set pre-existent groups and keys.
+    """
     client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     # Stop Wazuh
     control_service('stop')
@@ -130,10 +138,6 @@ def test_ossec_auth_messages_with_key_hash(set_up_groups_keys, get_configuration
     """
         description:
            "Check that every input message in authd port generates the adequate output"
-        assertions:
-            - The received output must match with expected
-            - The enrollment messages are parsed as expected
-            - The agent keys are denied if the hash is the same than the manager's
         wazuh_min_version:
             4.2
         parameters:
@@ -155,6 +159,10 @@ def test_ossec_auth_messages_with_key_hash(set_up_groups_keys, get_configuration
             - wait_for_authd_startup:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
+        assertions:
+            - The received output must match with expected
+            - The enrollment messages are parsed as expected
+            - The agent keys are denied if the hash is the same than the manager's
         input_description:
             Different test cases are contained in an external YAML file (authd_key_hash.yaml) which includes
             the different possible registration requests and the expected responses.
