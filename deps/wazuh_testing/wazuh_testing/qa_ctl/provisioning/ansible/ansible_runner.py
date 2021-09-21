@@ -6,6 +6,7 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_output import AnsibleOutp
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePlaybook
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import AnsibleException
 
 
 class AnsibleRunner:
@@ -46,7 +47,7 @@ class AnsibleRunner:
         ansible_output = AnsibleOutput(runner)
 
         if ansible_output.rc != 0:
-            raise Exception(f"The playbook execution has failed. RC = {ansible_output.rc}")
+            raise AnsibleException(f"The playbook execution has failed. RC = {ansible_output.rc}")
 
         return ansible_output
 
@@ -69,12 +70,14 @@ class AnsibleRunner:
         quiet = not output
 
         try:
+            AnsibleRunner.LOGGER.debug(f"Running {ansible_playbook.playbook_file_path} ansible-playbook with "
+                                       f"{ansible_inventory_path} inventory")
             runner = ansible_runner.run(playbook=ansible_playbook.playbook_file_path, inventory=ansible_inventory_path,
                                         quiet=quiet)
             ansible_output = AnsibleOutput(runner)
 
             if ansible_output.rc != 0 and raise_on_error:
-                raise Exception(f'Failed: {ansible_output}')
+                raise AnsibleException(f'Failed: {ansible_output}')
 
             return ansible_output
 
