@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `who-data` feature of Wazuh’s File Integrity Monitoring (`FIM`)
+       system works properly. `who-data` information contains the user who made the changes on
+       the monitored files and also the program name or process used to carry them out.
+       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time/continuous monitoring on Linux (using the inotify system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the who-data information.
+
+tags:
+    - fim
+'''
 import os
 
 import pytest
@@ -46,9 +103,49 @@ def get_configuration(request):
 ])
 def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_variables, configure_environment,
                                         restart_syscheckd, wait_for_fim_start):
-    """
-    Test alerts are generated when monitor environment variables
-    """
+    '''
+    description: Check if when using the options who-data and real-time at the same time
+                 the value of `whodata` is the one used. For example, when using `whodata=yes`
+                 and `realtime=no` on the same directory, real-time file monitoring
+                 will be enabled, as who-data requires it.
+                 For this purpose, the configuration is applied and it is verified that when
+                 `who-data` is set to `yes`, the `realtime` value is not taken into account,
+                 enabling in this case the real-time file monitoring.
+
+    wazuh_min_version: 4.2
+
+    parameters:
+        - whodata_enabled:
+            type: bool
+            brief: Who-data status.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+
+    assertions:
+        - Verify that real-time file monitoring is active.
+
+    input_description: A test case is contained in external `YAML` file
+                       (wazuh_conf_whodata_prevails_over_realtime.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - realtime 
+        - who-data
+    '''
     filename = "testfile"
 
     create_file(REGULAR, directory, filename, content="")

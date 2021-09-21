@@ -7,9 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if Wazuh’s File integrity monitoring (`FIM`) system watches selected
-       files and triggering alerts when these files are modified. In particular, ambiguous
-       configurations will be tested along with complex directory paths.
+brief: These tests will check if Wazuh’s File Integrity Monitoring (`FIM`) system watches selected
+       files and triggering alerts when these files are modified. All these tests will be performed
+       using complex directory paths and ambiguous directory configurations, such as directories and
+       subdirectories with opposite monitoring settings.
        The FIM capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
@@ -60,11 +61,16 @@ references:
 
 pytest_args:
     - fim_mode:
+<<<<<<< Updated upstream
         value: realtime
         brief: Enable real-time/continuous monitoring on Linux (using the inotify system calls) and Windows systems.
     - fim_mode:
         value: whodata
         brief: Implies real-time monitoring but adding the who-data information.
+=======
+        realtime: Enable real-time/continuous monitoring on Linux (using the inotify system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the who-data information.
+>>>>>>> Stashed changes
 
 tags:
     - fim
@@ -270,6 +276,7 @@ def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     '''
+<<<<<<< Updated upstream
     description: Check if the `wazuh-syscheck` daemon applies different configurations between
                  subdirectories properly. Example:
                  <directories
@@ -283,6 +290,14 @@ def test_ambiguous_complex(tags_to_apply,
                     check_owner='yes'> /testdir/subdir </directories>
                  For this purpose, it specifies different `FIM` settings for each subdirectory and
                  finally verifies that these have been applied correctly.
+=======
+    description: Check if the `wazuh-syscheckd` daemon applies different configurations between
+                 subdirectories properly. For example, `realtime=yes report_changes=yes check_owner=no`
+                 for the `/testdir` directory and `report_changes=no check_owner=yes` for
+                 the `/testdir/subdir` directory. For this purpose, it applies different
+                 `FIM` settings for each subdirectory and finally verifies that
+                 these have been applied correctly.
+>>>>>>> Stashed changes
 
     wazuh_min_version: 4.2
 
