@@ -6,6 +6,7 @@ import os
 import re
 import json
 import yaml
+import pprint
 
 from wazuh_testing.qa_docs.lib.config import Mode
 from wazuh_testing.qa_docs.lib.code_parser import CodeParser
@@ -154,7 +155,7 @@ class DocGenerator:
         try:
             DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
             with open(doc_path + ".json", "w+") as out_file:
-                out_file.write(json.dumps(content, indent=4))
+                out_file.write(("{}\n".format(json.dumps(content, indent=4))))
         except IOError:
             raise QAValueError(f"Cannot write in {doc_path}.json", DocGenerator.LOGGER.error)
 
@@ -191,6 +192,14 @@ class DocGenerator:
     def create_test(self, path, group_id):
         """Parse the content of a test file and dumps the content into a file.
 
+        Modes:
+            Single test:
+                When a single test is going to be parsed, if it has not an output directory, the content is printed.
+                If it has an output dir, the content is dumped into that dir.
+
+            Default:
+                The content is dumped into the corresponding directory.
+
         Args:
             path (str): A string with the path of the test file to be parsed.
             group_id (str): A string with the id of the group where the new test belongs.
@@ -205,11 +214,17 @@ class DocGenerator:
         if test:
             if self.conf.mode == Mode.DEFAULT:
                 doc_path = self.get_test_doc_path(path)
+
             elif self.conf.mode == Mode.SINGLE_TEST:
                 doc_path = self.conf.documentation_path
-                if self.print_test_info(test) is None:
-                    # When only a test is parsed, exit
+
+                # If the user does not specify an output dir
+                if not doc_path:
+                    self.print_test_info(test)
                     return
+                # If the user specifies an output dir
+                else:
+                    doc_path = os.path.join(doc_path, self.conf.test_name)
 
             self.dump_output(test, doc_path)
             DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
@@ -265,51 +280,15 @@ class DocGenerator:
         return None
 
     def print_test_info(self, test):
-        """Print the test info to standard output. If an output path is specified by the user,
-           the output is redirected to `output_path/{test_name}.json`.
-
-        Return None to avoid the default parsing behaviour.
-        This method will change, will only print the test data but the JSON will be generated using `dump_output`.
+        """Print the test info to standard output.
 
         Args:
             test: A dict with the parsed test data
         """
         relative_path = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+        test['path'] = relative_path
 
-        # dump into file
-        if self.conf.documentation_path:
-            test_info = {}
-            test_info['path'] = relative_path
-
-            for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test[schema_field]
-
-            for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test['tests'][0][schema_field]
-
-            # If output path does not exist, it is created
-            if not os.path.exists(self.conf.documentation_path):
-                os.mkdir(self.conf.documentation_path)
-
-            # Dump data
-            with open(os.path.join(self.conf.documentation_path, f"{self.conf.test_name}.json"), 'w') as fp:
-                fp.write(json.dumps(test_info, indent=4))
-                fp.write('\n')
-        else:
-            # Use the key that QACTL needs
-            test['path'] = relative_path
-
-            for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test[schema_field]))
-
-            for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test['tests'][0][schema_field]))
-
-        return None
+        print(json.dumps(test, indent=4))
 
     def run(self):
         """Run a complete scan of each included path to parse every test and group found.
