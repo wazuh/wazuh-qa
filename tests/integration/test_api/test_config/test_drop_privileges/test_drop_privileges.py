@@ -1,30 +1,25 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `drop_privileges` setting of the API is working properly.
-    This setting allows the user who starts the `wazuh-apid` daemon
-    to be different from the `root` user.
+brief: These tests will check if the `drop_privileges` setting of the API is working properly.
+       This setting allows the user who starts the `wazuh-apid` daemon to be different from
+       the `root` user. The Wazuh API is an open source `RESTful` API that allows for interaction
+       with the Wazuh manager from a web browser, command line tool like `cURL` or any script
+       or program that can make web requests.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_config/test_drop_privileges/test_drop_privileges.py
 
 daemons:
     - wazuh-apid
@@ -36,22 +31,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -95,14 +91,12 @@ def get_configuration(request):
 def test_drop_privileges(tags_to_apply, get_configuration, configure_api_environment,
                          restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if `drop_privileges` affects the user of the API process.
-        In this test, the PID of the API process is obtained. After that,
-        it gets the user (root or wazuh) and checks if it matches the
-        `drop_privileges` setting.
+    description: Check if `drop_privileges` affects the user of the API process.
+                 In this test, the `PID` of the API process is obtained. After that,
+                 it gets the user (`root` or `wazuh`) and checks if it matches the
+                 `drop_privileges` setting.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -128,9 +122,8 @@ def test_drop_privileges(tags_to_apply, get_configuration, configure_api_environ
         - Verify that when `drop_privileges` is enabled the user who has started the `wazuh-apid` daemon is `wazuh`.
         - Verify that when `drop_privileges` is disabled the user who has started the `wazuh-apid` daemon is `root`.
 
-    input_description:
-        Different test cases are contained in an external `YAML` file (conf.yaml)
-        which includes API configuration parameters.
+    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters.
 
     expected_output:
         - PID of the `wazuh-apid` process.

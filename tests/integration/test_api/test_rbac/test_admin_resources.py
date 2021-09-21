@@ -1,33 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `RBAC` (Role-Based Access Control) feature
-    of the API is working properly. Specifically, they will verify that
-    the different actions that can be performed with admin resources
-    are working correctly. The `RBAC` capability allows users
-    accessing the API to be assigned a role that will define
-    the privileges they have.
+brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+       Specifically, they will verify that the different actions that can be performed with admin resources
+       are working correctly. The `RBAC` capability allows users accessing the API to be assigned a role
+       that will define the privileges they have.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_rbac/test_admin_resources.py
 
 daemons:
     - wazuh-apid
@@ -39,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -141,12 +133,10 @@ def modify_admin_resources(api_details, admin_ids, endpoint, body):
 # Tests
 def test_admin_users(restart_api, get_api_details):
     '''
-    description:
-        Check if the admin security users can be removed. For this purpose,
-        it tries to delete these users, expecting an error as a response.
+    description: Check if the admin security users can be removed. For this purpose,
+                 it tries to delete these users, expecting an error as a response.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - restart_api:
@@ -164,13 +154,12 @@ def test_admin_users(restart_api, get_api_details):
     inputs:
         - The data are obtained from within the test.
 
-    input_description:
-        From the `get_admin_resources` function information is obtained to perform the test,
-        concretely the `admin_ids`.
+    input_description: From the `get_admin_resources` function information is obtained to perform
+                       the test, concretely the `admin_ids`.
 
     expected_output:
-        - r'200' ('OK' HTTP status code at collect the admin security users information)
-        - r'200' ('OK' HTTP status code when trying to delete the admin security users)
+        - r'200' (`OK` HTTP status code at collect the admin security users information)
+        - r'200' (`OK` HTTP status code when trying to delete the admin security users)
         - r'1' (Size of the `failed_items` array from the response body)
         - r'5004' (Error code of the `failed_items[0]` array from the response body)
 
@@ -187,12 +176,10 @@ def test_admin_users(restart_api, get_api_details):
 
 def test_admin_roles(restart_api, get_api_details):
     '''
-    description:
-        Check if the admin security roles can be removed. For this purpose,
-        it tries to delete these roles, expecting an error as a response.
+    description: Check if the admin security roles can be removed. For this purpose,
+                 it tries to delete these roles, expecting an error as a response.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - restart_api:
@@ -210,13 +197,12 @@ def test_admin_roles(restart_api, get_api_details):
     inputs:
         - The data are obtained from within the test.
 
-    input_description:
-        From the `get_admin_resources` function information is obtained to perform the test,
-        concretely the `role_ids`.
+    input_description: From the `get_admin_resources` function information is obtained
+                       to perform the test, concretely the `role_ids`.
 
     expected_output:
-        - r'200' ('OK' HTTP status code at collect the admin security roles information)
-        - r'200' ('OK' HTTP status code when trying to delete the admin security roles)
+        - r'200' (`OK` HTTP status code at collect the admin security roles information)
+        - r'200' (`OK` HTTP status code when trying to delete the admin security roles)
         - r'1' (Size of the `failed_items` array from the response body)
         - r'4008' (Error code of the `failed_items[0]` array from the response body)
 
@@ -236,12 +222,10 @@ def test_admin_roles(restart_api, get_api_details):
 
 def test_admin_policies(restart_api, get_api_details):
     '''
-    description:
-        Check if the admin security policies can be removed. For this purpose,
-        it tries to delete these policies, expecting an error as a response.
+    description: Check if the admin security policies can be removed. For this purpose,
+                 it tries to delete these policies, expecting an error as a response.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - restart_api:
@@ -259,13 +243,12 @@ def test_admin_policies(restart_api, get_api_details):
     inputs:
         - The data are obtained from within the test.
 
-    input_description:
-        From the `get_admin_resources` function information is obtained to perform the test,
-        concretely the `policy_ids`.
+    input_description: From the `get_admin_resources` function information is obtained
+                       to perform the test, concretely the `policy_ids`.
 
     expected_output:
-        - r'200' ('OK' HTTP status code at collect the admin security policies information)
-        - r'200' ('OK' HTTP status code when trying to delete the admin security policies)
+        - r'200' (`OK` HTTP status code at collect the admin security policies information)
+        - r'200' (`OK` HTTP status code when trying to delete the admin security policies)
         - r'1' (Size of the `failed_items` array from the response body)
         - r'4008' (Error code of the `failed_items[0]` array from the response body)
 
@@ -286,12 +269,10 @@ def test_admin_policies(restart_api, get_api_details):
 
 def test_admin_rules(restart_api, get_api_details):
     '''
-    description:
-        Check if the admin security rules can be removed. For this purpose,
-        it tries to delete these rules, expecting an error as a response.
+    description: Check if the admin security rules can be removed. For this purpose,
+                 it tries to delete these rules, expecting an error as a response.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - restart_api:
@@ -309,13 +290,12 @@ def test_admin_rules(restart_api, get_api_details):
     inputs:
         - The data are obtained from within the test.
 
-    input_description:
-        From the `get_admin_resources` function information is obtained to perform the test,
-        concretely the `rule_ids`.
+    input_description: From the `get_admin_resources` function information is obtained
+                       to perform the test, concretely the `rule_ids`.
 
     expected_output:
-        - r'200' ('OK' HTTP status code at collect the admin security rules information)
-        - r'200' ('OK' HTTP status code when trying to delete the admin security rules)
+        - r'200' (`OK` HTTP status code at collect the admin security rules information)
+        - r'200' (`OK` HTTP status code when trying to delete the admin security rules)
         - r'1' (Size of the `failed_items` array from the response body)
         - r'4008' (Error code of the `failed_items[0]` array from the response body)
 

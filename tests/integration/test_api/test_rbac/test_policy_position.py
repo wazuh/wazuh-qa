@@ -1,32 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `RBAC` (Role-Based Access Control) feature
-    of the API is working properly. Specifically, they will verify that
-    that the policies are applied to the roles in the right order.
-    The `RBAC` capability allows users accessing the API to be assigned
-    a role that will define the privileges they have.
+brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+       Specifically, they will verify that that the policies are applied to the roles in the right order.
+       The `RBAC` capability allows users accessing the API to be assigned a role
+       that will define the privileges they have.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_rbac/test_policy_position.py
 
 daemons:
     - wazuh-apid
@@ -38,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -137,12 +130,10 @@ def add_role_policy(api_details, p_id, position):
 # Tests
 def test_policy_position(set_security_resources, add_new_policies, get_api_details):
     '''
-    description:
-        Check if the correct order between role-policy relationships remain after
-        removing some of them and adding others using the `position` parameter.
+    description: Check if the correct order between role-policy relationships remain after
+                 removing some of them and adding others using the `position` parameter.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -162,12 +153,11 @@ def test_policy_position(set_security_resources, add_new_policies, get_api_detai
     inputs:
         - The testing `policy_ids` array as a module variable.
 
-    input_description:
-        From the `add_new_policies`, `remove_role_policy` and `add_role_policy` fixtures information
-        is obtained to perform the test, concretely the `policy_ids` array.
+    input_description: From the `add_new_policies`, `remove_role_policy` and `add_role_policy` fixtures
+                       information is obtained to perform the test, concretely the `policy_ids` array.
 
     expected_output:
-        - r'200' ('OK' HTTP status code when deleting or adding a role-policy)
+        - r'200' (`OK` HTTP status code when deleting or adding a role-policy)
         - An integer array with the role-policy positions.
 
     tags:

@@ -1,3 +1,61 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will verify if the `agent-key-polling` module works correctly in a cluster environment,
+       specifically using a `master` node. This module allows retrieving the agent information from
+       an external database, like `MySQL` or any database engine, for registering it to the `client.keys` file.
+
+tier: 0
+
+modules:
+    - cluster
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-clusterd
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/agent-key-polling.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/wodle-agent-key-polling.html
+    - https://documentation.wazuh.com/current/user-manual/configuring-cluster/basics.html
+    - https://documentation.wazuh.com/current/development/wazuh-cluster.html#master
+
+tags:
+    - key-polling
+    - master
+'''
 import os
 import re
 
@@ -68,25 +126,58 @@ def get_configuration(request):
 ])
 def test_key_polling_master(cmd, counter, payload, expected, configure_environment, configure_sockets_environment,
                             detect_initial_master_serving, connect_to_sockets_module, send_initial_worker_hello):
-    """
-    Test master behavior with agent key-polling.
+    '''
+    description: Check if the Wazuh master node correctly handles the `agent-key-polling` module to retrieve
+                 externally stored agent information. For this purpose, a simulated worker node is used
+                 to send key-polling requests to the master node. After sending such requests, the test
+                 checks if the socket managed by the `wazuh-modulesd` daemon has received them correctly.
 
-    This test uses a fictional worker node to test wazuh master behavior against agent-key-polling messages. After
-    connecting the fictional worker to the master and sending the initial hello, the test sends another worker simulated
-    message representing a key-polling request. Then, we ensure that the master completed his duty by checking the
-    received message in the other end, in this case, krequest socket handled by modulesd.
+    wazuh_min_version: 4.2
 
-    Parameters
-    ----------
-    cmd : bytes
-        Cluster message command
-    counter : int
-        Cluster message counter
-    payload : bytes
-        Cluster message payload data
-    expected : str
-        Expected message in krequest socket
-    """
+    parameters:
+        - cmd:
+            type: bytes
+            brief: Cluster message command.
+        - counter:
+            type: int
+            brief: Cluster message counter.
+        - payload:
+            type: bytes
+            brief: Cluster message payload data.
+        - expected:
+            type: str
+            brief: Expected message in krequest socket.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - detect_initial_master_serving:
+            type: fixture
+            brief: Make sure that the master node is serving after restarting the `wazuh-clusterd` daemon.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of the `connect_to_sockets` fixture.
+        - send_initial_worker_hello:
+            type: fixture
+            brief: Send initial hello message to the master node.
+
+    assertions:
+        - Verify that the master node correctly receives key-polling messages by agent ID.
+        - Verify that the master node correctly receives key-polling messages by agent IP address.
+
+    input_description: Two test cases are found in the test module and include the requests
+                       to be made and the expected result.
+
+    expected_output:
+        - r'id:001'
+        - r'ip:124.0.0.1'
+
+    tags:
+        - keys
+        - fernet
+    '''
     # Build message and send it to the master
     message = cluster_msg_build(cmd=cmd, counter=counter, payload=payload, encrypt=True)
     receiver_sockets[0].send(message)

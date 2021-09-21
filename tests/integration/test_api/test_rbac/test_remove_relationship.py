@@ -1,32 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the `RBAC` (Role-Based Access Control) feature of the API
-    is working properly. Specifically, they will verify that the different relationships
-    between users-roles-policies can be correctly removed.
-    The `RBAC` capability allows users accessing the API to be assigned a role that
-    will define the privileges they have.
+brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+       Specifically, they will verify that the different relationships between users-roles-policies can be
+       correctly removed. The `RBAC` capability allows users accessing the API to be assigned a role
+       that will define the privileges they have.
 
-tier:
-    0
+tier: 0
 
 modules:
     - api
 
 components:
     - manager
-
-path:
-    tests/integration/test_api/test_rbac/test_remove_relationship.py
 
 daemons:
     - wazuh-apid
@@ -38,22 +30,23 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
+    - Red Hat 7
+    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -105,11 +98,9 @@ def remove_relationship(api_details, endpoint, resource, related_resource, relat
 # Tests
 def test_remove_user_role_relationship(set_security_resources, get_api_details):
     '''
-    description:
-        Check if the user and role still exist after removing their relationship.
+    description: Check if the user and role still exist after removing their relationship.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -128,13 +119,12 @@ def test_remove_user_role_relationship(set_security_resources, get_api_details):
         - The testing `user_id` as a module attribute.
         - The testing `role_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `user_id` and `role_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `user_id` and `role_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the user-role relationship.
-        - r'200' ('OK' HTTP status code when deleting the user-role relationship)
+        - r'200' (`OK` HTTP status code when deleting the user-role relationship)
         - A `JSON` string in the response body with information of the role.
         - A `JSON` string in the response body with information of the user.
 
@@ -152,11 +142,9 @@ def test_remove_user_role_relationship(set_security_resources, get_api_details):
 
 def test_remove_role_policy_relationship(set_security_resources, get_api_details):
     '''
-    description:
-        Check if the role and policy still exist after removing their relationship.
+    description: Check if the role and policy still exist after removing their relationship.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -175,13 +163,12 @@ def test_remove_role_policy_relationship(set_security_resources, get_api_details
         - The testing `role_id` as a module attribute.
         - The testing `policy_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `role_id` and `policy_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `role_id` and `policy_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-policy relationship.
-        - r'200' ('OK' HTTP status code when deleting the role-policy relationship)
+        - r'200' (`OK` HTTP status code when deleting the role-policy relationship)
         - A `JSON` string in the response body with information of the role.
         - A `JSON` string in the response body with information of the policy.
 
@@ -199,11 +186,9 @@ def test_remove_role_policy_relationship(set_security_resources, get_api_details
 
 def test_remove_role_rule_relationship(set_security_resources, get_api_details):
     '''
-    description:
-        Check if the role and rule still exist after removing their relationship.
+    description: Check if the role and rule still exist after removing their relationship.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2
 
     parameters:
         - set_security_resources:
@@ -222,13 +207,12 @@ def test_remove_role_rule_relationship(set_security_resources, get_api_details):
         - The testing `role_id` as a module attribute.
         - The testing `rule_id` as a module attribute.
 
-    input_description:
-        From the `set_security_resources` fixture information is obtained to perform the test,
-        concretely the `role_id` and `rule_id`.
+    input_description: From the `set_security_resources` fixture information is obtained
+                       to perform the test, concretely the `role_id` and `rule_id`.
 
     expected_output:
         - A `JSON` string in the response body with information of the role-rule relationship.
-        - r'200' ('OK' HTTP status code when deleting the role-rule relationship)
+        - r'200' (`OK` HTTP status code when deleting the role-rule relationship)
         - A `JSON` string in the response body with information of the role.
         - A `JSON` string in the response body with information of the rule.
 
