@@ -152,15 +152,17 @@ class DocGenerator:
             DocGenerator.LOGGER.debug('Creating documentation folder')
             os.makedirs(os.path.dirname(doc_path))
 
+        DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
+
         try:
-            DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
-            with open(doc_path + ".json", "w+") as out_file:
-                out_file.write(("{}\n".format(json.dumps(content, indent=4))))
+            with open(f"{doc_path}.json", 'w+') as out_file:
+                out_file.write(f"{json.dumps(content, indent=4)}\n")
         except IOError:
             raise QAValueError(f"Cannot write in {doc_path}.json", DocGenerator.LOGGER.error)
 
+        DocGenerator.LOGGER.debug(f"Writing {doc_path}.yaml")
+
         try:
-            DocGenerator.LOGGER.debug(f"Writing {doc_path}.yaml")
             with open(doc_path + ".yaml", "w+") as out_file:
                 out_file.write(yaml.dump(content))
         except IOError:
