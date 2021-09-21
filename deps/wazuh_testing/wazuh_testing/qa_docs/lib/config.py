@@ -29,7 +29,7 @@ class Config():
         ignore_paths (str): A string that specifies which paths will be ignored.
         module_fields (_fields): A struct that contains the module documentation data.
         test_fields (_fields): A struct that contains the test documentation data.
-        test_cases_field (_fields): A string that contains the test cases key.
+        test_cases_field (_fields): A string that contains the test_cases key.
         LOGGER (_fields): A custom qa-docs logger.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
@@ -76,8 +76,6 @@ class Config():
             # When a name is passed, it is using just a single test.
             self.mode = Mode.SINGLE_TEST
             self.test_name = test_name
-            self.__read_test_info()
-            self.__read_module_info()
 
     def __read_config_file(self, file):
         """Read configuration file.
@@ -91,44 +89,6 @@ class Config():
                 self._config_data = yaml.safe_load(config_file)
         except IOError:
             raise QAValueError('Cannot load config file', Config.LOGGER.error)
-
-    def __read_test_info(self):
-        """Read from the config file the keys to be printed from module info.
-
-        This functionality is used to print any custom field(s) you want.
-        You can use it if you only need a few fields to parse when a single test is run.
-
-            For example, you have this in your config.yaml:
-
-            Test info:
-                - test_wazuh_min_version: wazuh_min_version
-        """
-        Config.LOGGER.debug('Reading test info from the config file')
-        if 'Test info' in self._config_data:
-            self.test_info = self._config_data['Test info']
-        else:
-            Config.LOGGER.warning('Cannot read test info fields')
-
-    def __read_module_info(self):
-        """Read from the config file the fields to be printed from test info.
-
-        This functionality is used to print any custom field(s) you want.
-        You can use it if you only need a few fields to parse when a single test is run.
-
-            For example you have this in your config.yaml:
-
-            Module info:
-                - test_system: os_platform
-                - test_vendor: os_vendor
-                - test_version: os_version
-                - test_target: component
-        """
-        Config.LOGGER.debug('Reading module info from config file')
-
-        if 'Module info' in self._config_data:
-            self.module_info = self._config_data['Module info']
-        else:
-            Config.LOGGER.warning('Cannot read module info fields')
 
     def __set_documentation_path(self, path):
         """Set the path of the documentation output."""
@@ -144,10 +104,10 @@ class Config():
         Config.LOGGER.debug('Reading include paths from config file')
 
         # Will be replaced by --type --module and --test , so you can run what you need
-        if 'Include paths' not in self._config_data:
+        if 'include_paths' not in self._config_data:
             raise QAValueError('The include paths field is empty in the config file', Config.LOGGER.error)
 
-        include_paths = self._config_data['Include paths']
+        include_paths = self._config_data['include_paths']
 
         for path in include_paths:
             self.include_paths.append(os.path.join(self.project_path, path))
@@ -160,10 +120,10 @@ class Config():
         """
         Config.LOGGER.debug('Reading the regular expressions from the config file to include test files')
 
-        if 'Include regex' not in self._config_data:
+        if 'include_regex' not in self._config_data:
             raise QAValueError('The include regex field is empty in the config file', Config.LOGGER.error)
 
-        self.include_regex = self._config_data['Include regex']
+        self.include_regex = self._config_data['include_regex']
 
     def __read_group_files(self):
         """Read from the config file the file name to be identified in a group.
@@ -173,10 +133,10 @@ class Config():
         """
         Config.LOGGER.debug('Reading group files from the config file')
 
-        if 'Group files' not in self._config_data:
+        if 'group_files' not in self._config_data:
             raise QAValueError('The group files field is empty in config file', Config.LOGGER.error)
 
-        self.group_files = self._config_data['Group files']
+        self.group_files = self._config_data['group_files']
 
     def __read_function_regex(self):
         """Read from the config file the regexes used to identify a test method.
@@ -186,16 +146,16 @@ class Config():
         """
         Config.LOGGER.debug('Reading the regular expressions to include test methods from the config file')
 
-        if 'Function regex' not in self._config_data:
+        if 'function_regex' not in self._config_data:
             raise QAValueError('The function regex field is empty in the config file', Config.LOGGER.error)
 
-        self.function_regex = self._config_data['Function regex']
+        self.function_regex = self._config_data['function_regex']
 
     def __read_ignore_paths(self):
         """Read from the config file all the paths to be excluded from the parsing."""
 
-        if 'Ignore paths' in self._config_data:
-            ignore_paths = self._config_data['Ignore paths']
+        if 'ignore_paths' in self._config_data:
+            ignore_paths = self._config_data['ignore_paths']
 
             for path in ignore_paths:
                 self.ignore_paths.append(os.path.join(self.project_path, path))
@@ -206,24 +166,24 @@ class Config():
         If the module block fields are not defined in the config file, an error will be raised.
 
         Raises:
-            QAValueError: Module fields are missing in the config file
-            QAValueError: Mandatory module fields are missing in the config file
+            QAValueError: module fields are missing in the config file
+            QAValueError: mandatory module fields are missing in the config file
         """
         Config.LOGGER.debug('Reading mandatory and optional module fields from the config file')
 
-        if 'Module' not in self._config_data['Output fields']:
-            raise QAValueError('Module fields are missing in the config file', Config.LOGGER.error)
+        if 'module' not in self._config_data['output_fields']:
+            raise QAValueError('module fields are missing in the config file', Config.LOGGER.error)
 
-        module_fields = self._config_data['Output fields']['Module']
+        module_fields = self._config_data['output_fields']['module']
 
-        if 'Mandatory' not in module_fields and 'Optional' not in module_fields:
-            raise QAValueError('Mandatory module fields are missing in the config file', Config.LOGGER.error)
+        if 'mandatory' not in module_fields and 'optional' not in module_fields:
+            raise QAValueError('mandatory module fields are missing in the config file', Config.LOGGER.error)
 
-        if 'Mandatory' in module_fields:
-            self.module_fields.mandatory = module_fields['Mandatory']
+        if 'mandatory' in module_fields:
+            self.module_fields.mandatory = module_fields['mandatory']
 
-        if 'Optional' in module_fields:
-            self.module_fields.optional = module_fields['Optional']
+        if 'optional' in module_fields:
+            self.module_fields.optional = module_fields['optional']
 
     def __read_test_fields(self):
         """Read from the config file the optional and mandatory fields for the test functions.
@@ -231,24 +191,24 @@ class Config():
         If the test block fields are not defined in the config file, an error will be raised.
 
         Raises:
-           QAValueError: Test fields are missing in the config file
-           QAValueError: Mandatory module fields are missing in the config file
+           QAValueError: test_fields are missing in the config file
+           QAValueError: mandatory module fields are missing in the config file
         """
         Config.LOGGER.debug('Reading mandatory and optional test fields from the config file')
 
-        if 'Test' not in self._config_data['Output fields']:
-            raise QAValueError('Test fields are missing in the config file', Config.LOGGER.error)
+        if 'test' not in self._config_data['output_fields']:
+            raise QAValueError('test_fields are missing in the config file', Config.LOGGER.error)
 
-        test_fields = self._config_data['Output fields']['Test']
+        test_fields = self._config_data['output_fields']['test']
 
-        if 'Mandatory' not in test_fields and 'Optional' not in test_fields:
-            raise QAValueError('Mandatory module fields are missing in the config file', Config.LOGGER.error)
+        if 'mandatory' not in test_fields and 'optional' not in test_fields:
+            raise QAValueError('mandatory module fields are missing in the config file', Config.LOGGER.error)
 
-        if 'Mandatory' in test_fields:
-            self.test_fields.mandatory = test_fields['Mandatory']
+        if 'mandatory' in test_fields:
+            self.test_fields.mandatory = test_fields['mandatory']
 
-        if 'Optional' in test_fields:
-            self.test_fields.optional = test_fields['Optional']
+        if 'optional' in test_fields:
+            self.test_fields.optional = test_fields['optional']
 
     def __read_output_fields(self):
         """Read all the mandatory and optional fields from config file.
@@ -256,7 +216,7 @@ class Config():
         Raises:
             QAValueError: Documentation schema not defined in the config file
         """
-        if 'Output fields' not in self._config_data:
+        if 'output_fields' not in self._config_data:
             raise QAValueError('Documentation schema not defined in the config file', Config.LOGGER.error)
 
         self.__read_module_fields()
@@ -266,8 +226,8 @@ class Config():
         """Read from the configuration file the key to identify a Test Case list."""
         Config.LOGGER.debug('Reading Test Case key from the config file')
 
-        if 'Test cases field' in self._config_data:
-            self.test_cases_field = self._config_data['Test cases field']
+        if 'test_cases_field' in self._config_data:
+            self.test_cases_field = self._config_data['test_cases_field']
 
 
 class _fields:

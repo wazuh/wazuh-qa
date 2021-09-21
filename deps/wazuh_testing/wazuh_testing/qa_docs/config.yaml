@@ -1,4 +1,4 @@
-Include paths:
+include_paths:
   - "integration/test_active_response"
   - "integration/test_api"
   - "integration/test_wazuh_db"
@@ -6,16 +6,16 @@ Include paths:
   - "integration/test_remoted"
   - "integration/test_agentd"
 
-Include regex:
+include_regex:
   - "^test_.*py$"
 
-Group files:
+group_files:
   - "README.md"
 
-Function regex:
+function_regex:
   - "^test_"
 
-Ignore paths:
+ignore_paths:
   - "integration/test_active_response/test_execd/data"
   - "integration/test_api/test_config/test_cache/data"
   - "integration/test_api/test_config/test_cors/data"
@@ -32,9 +32,9 @@ Ignore paths:
   - "integration/test_wazuh_db/data"
   - "integration/test_api/test_config/test_bruteforce_blocking_system/data"
 
-Output fields:
-  Module:
-    Mandatory:
+output_fields:
+  module:
+    mandatory:
       - brief
       - path
       - category
@@ -45,26 +45,16 @@ Output fields:
       - os_vendor
       - os_version
       - tiers
-    Optional:
+    optional:
       - tags
-  Test:
-    Mandatory:
+  test:
+    mandatory:
       - description
       - wazuh_min_version
       - parameters
       - behaviour
       - expected_behaviour
-    Optional:
+    optional:
       - status 
 
-Test cases field: test_cases
-
-Module info:
-  - path: path
-  - test_system: os_platform
-  - test_vendor: os_vendor
-  - test_version: os_version
-  - test_target: component
-
-Test info:
-  - test_wazuh_min_version: wazuh_min_version
+test_cases_field: test_cases
