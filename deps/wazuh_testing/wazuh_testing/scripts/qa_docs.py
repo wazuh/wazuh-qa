@@ -1,3 +1,7 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import argparse
 import os
 from datetime import datetime
@@ -19,8 +23,8 @@ qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
                         f"{datetime.today().strftime('%Y-%m-%d-%H:%M:%S')}-qa-docs.log"))
 
 
-def set_qadocs_logging(logging_level):
-    """Set the QADOCS logging depending on the level specified.
+def set_qadocs_logger_level(logging_level):
+    """Set the QADOCS logger lever depending on the level specified by the user.
 
     Args:
         logging_level (string): Level used to initialize the logger.
@@ -34,8 +38,11 @@ def set_qadocs_logging(logging_level):
 def validate_parameters(parameters):
     """Validate the parameters that qa-docs recieves.
 
+    Since `config.yaml` will be `schema.yaml`, it runs as config file is correct.
+    So we only validate the parameters that the user introduces.
+
     Args:
-        parameters (list): List of input args.
+        parameters (list): A list of input args.
     """
     qadocs_logger.debug('Validating input parameters')
 
@@ -46,7 +53,7 @@ def validate_parameters(parameters):
 
     # Check that test_input name exists
     if parameters.test_input:
-        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, '', parameters.test_input))
+        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, test_name=parameters.test_input))
         if doc_check.locate_test() is None:
             raise QAValueError(f"{parameters.test_input} not found.", qadocs_logger.error)
 
@@ -88,55 +95,67 @@ def main():
 
     args = parser.parse_args()
 
-    # Set the qa-docs logger
+    # Set the qa-docs logger level
     if args.debug_level:
-        set_qadocs_logging('DEBUG')
+        set_qadocs_logger_level('DEBUG')
 
     validate_parameters(args)
 
+    # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_exist))
         if doc_check.locate_test() is not None:
             print("test exists")
 
     if args.version:
         print(f"qa-docs v{VERSION}")
 
+    # Load configuration if you want to test it
     elif args.test_config:
         qadocs_logger.debug('Loading qa-docs configuration')
         Config(CONFIG_PATH, args.test_dir)
         qadocs_logger.debug('qa-docs configuration loaded')
 
+    # Run a sanity check thru tests directory
     elif args.sanity:
         sanity = Sanity(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
+    # Index the previous parsed tests into Elasticsearch
     elif args.index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        indexData = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
-        indexData.run()
+        index_data = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data.run()
 
+    # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.launch_app:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        indexData = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
-        indexData.run()
+        index_data = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data.run()
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
 
+    # Parse tests
     else:
         if not args.test_exist:
             docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+
+            # Parse single test
             if args.test_input:
                 qadocs_logger.info(f"Parsing the following test(s) {args.test_input}")
+
+                # When output path is specified by user, a json is generated within that path
                 if args.output_path:
                     qadocs_logger.info(f"{args.test_input}.json is going to be generated in {args.output_path}")
                     docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
                 else:
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_input))
+                    # When no output is specified, it is printed
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_input))
             else:
                 qadocs_logger.info(f"Parsing all tests located in {args.test_dir}")
+
             qadocs_logger.info('Running QADOCS')
             docs.run()
 

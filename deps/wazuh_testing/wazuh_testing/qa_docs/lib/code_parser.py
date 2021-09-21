@@ -1,11 +1,6 @@
-"""
-brief: Wazuh DocGenerator code parser.
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import ast
 import os
@@ -22,12 +17,23 @@ STOP_FIELDS = ['tests', 'test_cases']
 
 
 class CodeParser:
-    """
-    brief: Class that parses the content of the test files.
+    """Class that parses the content of the test files.
+
+    Attributes:
+        conf (Config): A `Config` instance with the config file data.
+        pytest (PytestWrap): A `PytestWrap` instance to wrap the pytest execution.
+        function_regexes (list): A list of regular expressions used to find test functions.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
     def __init__(self, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config (Config): A `Config` instance with the loaded data from the config file.
+        """
         self.conf = config
         self.pytest = PytestWrap()
         self.function_regexes = []
@@ -35,11 +41,13 @@ class CodeParser:
             self.function_regexes.append(re.compile(regex))
 
     def is_documentable_function(self, function):
-        """
-        brief: Checks if a specific method matches with the regexes to be documented.
-        args:
-            -"function (_ast.FunctionDef): Function class with all the information of the method"
-        returns: "boolean: True if the method should be documentd. False otherwise"
+        """Check if a specific method matches with the regexes to be documented.
+
+        Args:
+            function (_ast.FunctionDef): Function class with all the information of the method.
+
+        Returns:
+            boolean: A boolean with True if the method should be documented. False otherwise
         """
         for regex in self.function_regexes:
             if regex.match(function.name):
@@ -47,27 +55,34 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        """
-        brief: Removes the fields from a parsed test file to delete the fields that are not mandatory or optional.
-        args:
-            -"doc (dict): The parsed documentation block"
+        """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
+
+        Args:
+            doc (dict): A dict that contains the parsed documentation block"
         """
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
+
         if 'tests' in doc:
             allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
+
             for test in doc['tests']:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def parse_comment(self, function):
-        """
-        brief: Parses one self-contained documentation block.
-        args:
-            -"function (_ast.FunctionDef): Function class with all the information of the method"
+        """Parse one self-contained documentation block.
+
+        Args:
+            function (_ast.FunctionDef): Function class with all the information of the method"
+
+        Returns:
+            doc (dict): A dictionary with the documentation block parsed.
         """
         docstring = ast.get_docstring(function)
+
         try:
             doc = yaml.safe_load(docstring)
+
             if hasattr(function, 'name'):
                 doc['name'] = function.name
 
@@ -77,17 +92,21 @@ class CodeParser:
                                           "from module {self.scan_file}. Error: {inst}")
             else:
                 CodeParser.LOGGER.warning(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
+
             doc = None
 
         return doc
 
     def parse_test(self, path, id, group_id):
-        """
-        brief: Parses the content of a test file.
-        args:
-            -"path (string): Path of the test file to be parsed."
-            -"id (integer): Id of the new test document"
-            -"group_id (integer): Id of the group where the new test document belongs."
+        """Parse the content of a test file.
+
+        Args:
+            path (str): A string with the path of the test file to be parsed.
+            id (str): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            module_doc (dict): A dictionary with the documentation block parsed with module and tests fields.
         """
         CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
         self.scan_file = path
@@ -111,10 +130,12 @@ class CodeParser:
             for function in functions:
                 if self.is_documentable_function(function):
                     function_doc = self.parse_comment(function)
+
                     if function_doc:
                         if test_cases and not (self.conf.test_cases_field in function_doc) \
                            and test_cases[function.name]:
                             function_doc[self.conf.test_cases_field] = test_cases[function.name]
+
                         functions_doc.append(function_doc)
 
             if not functions_doc:
@@ -127,12 +148,15 @@ class CodeParser:
         return module_doc
 
     def parse_group(self, group_file, id, group_id):
-        """
-        brief: Parses the content of a group file.
-        args:
-            -"group_file (string): Path of the group file to be parsed."
-            -"id (integer): Id of the new group document"
-            -"group_id (integer): Id of the group where the new group document belongs."
+        """Parse the content of a group file.
+
+        Args:
+            group_file (str): A string with the path of the group file to be parsed.
+            id (int): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            group_doc (dict): A dictionary with the parsed information from `group_file`.
         """
         MD_HEADER = "# "
         CodeParser.LOGGER.debug(f"Parsing group file '{group_file}'")

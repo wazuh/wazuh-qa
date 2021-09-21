@@ -1,11 +1,6 @@
-"""
-brief: Wazuh DocGeneratot sanity check module
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 import re
@@ -19,13 +14,29 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 
 class Sanity():
-    """
-    brief: Class in charge of performing a general sanity check on the already parsed documentation.
-    It´s in charge of walk every documentation file, and every group file to dump the parsed documentation.
+    """Class in charge of performing a general sanity check on the already parsed documentation.
+
+    It is in charge of walk every documentation file, and every group file to dump the parsed documentation.
+
+    Attributes:
+        conf (Config): A `Config` instance with the loaded data from the config file.
+        files_regex (re): A regular expression to get the JSON files previously generated.
+        error_reports (list): A list that contains all the errors obtained within the check.
+        found_tags (set): A set with all the tags found within the check.
+        found_tests (set): A set with all the tests found within the check.
+        found_modules (set): A set with all the modules found within the check.
+        project_tests (int): An integer that contains the tests count within the project folder.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
     def __init__(self, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config (Config): A `Config` instance with the loaded data from the config file.
+        """
         self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)
         self.error_reports = []
@@ -35,84 +46,94 @@ class Sanity():
         self.project_tests = 0
 
     def get_content(self, full_path):
-        """
-        brief: Loads a documentation file into a JSON dictionary.
-        args:
-            - "full_path (str): The documentation file."
+        """Load a documentation file into a JSON dictionary.
+
+        Args:
+            full_path (str): A string with the documentation file.
+
+        Returns:
+            dict: A dictionary with the test file content.
+
+        Raises:
+            QAValueError (IOError): Cannot load '{full_path}' file for sanity check.
         """
         try:
             with open(full_path) as file:
                 return json.load(file)
-        except:
+        except IOError:
             raise QAValueError(f"Cannot load '{full_path}' file for sanity check", Sanity.LOGGER.error)
 
     def validate_fields(self, required_fields, available_fields):
-        """
-        brief: Method to check if all the required fields are present into the found ones.
-               This method will be called recursively for nested dictionaries.
-               If a required field isn´t found, the error is logged and written in a report structure for future print.
-        args:
-            - "required_fields (dict): The fields that must exist."
-            - "available_fields (dict): The fields found into the documentation file."
+        """Check if all the required fields are present into the found ones.
+
+        This method will be called recursively for nested dictionaries.
+        If a required field is not found, the error is logged and written in a report structure for future print.
+
+        Args:
+            required_fields (dict): A dictionary that contains the fields that must exist.
+            available_fields (dict): A dictionary that contains the fields found into the documentation file.
         """
         if isinstance(required_fields, dict):
             for field in required_fields:
                 if not check_existance(available_fields, field):
                     self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                     Sanity.LOGGER.error(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
-                elif isinstance(required_fields[field], dict) or  isinstance(required_fields[field], list):
+
+                elif isinstance(required_fields[field], dict) or isinstance(required_fields[field], list):
                     self.validate_fields(required_fields[field], available_fields)
+
         elif isinstance(required_fields, list):
             for field in required_fields:
                 if isinstance(field, dict) or isinstance(field, list):
                     self.validate_fields(field, available_fields)
+
                 else:
                     if not check_existance(available_fields, field):
                         self.add_report(f"Mandatory field '{field}' is missing in the file {self.scan_file}")
                         Sanity.LOGGER.error(f"Mandatory field '{field}' is missing the in file {self.scan_file}")
 
     def validate_module_fields(self, fields):
-        """
-        brief: Checks if all the mandatory module fields are present.
-        args:
-            - "fields(dict): The module fields found in the documentation file."
+        """Check if all the mandatory module fields are present.
+
+        Args:
+            fields (dict): A dictionary that contains the module fields found in the documentation file.
         """
         self.validate_fields(self.conf.module_fields.mandatory, fields)
 
     def validate_test_fields(self, fields):
-        """
-        brief: Checks if all the mandatory test fields are present.
-        args:
-            - "fields(dict): The test fields found in the documentation file."
+        """Check if all the mandatory test fields are present.
+
+        Args:
+            fields (dict): A dictionary that contains the test fields found in the documentation file.
         """
         if 'tests' in fields:
             for test_fields in fields['tests']:
                 self.validate_fields(self.conf.test_fields.mandatory, test_fields)
 
     def identify_tags(self, content):
-        """
-        brief: Identifies every new tag found in the documentation files and saves it for future reporting.
-        args:
-            - "content(dict): The dictionary content of a documentation file."
+        """Identify every new tag found in the documentation files and saves it for future reporting.
+
+        Args:
+            content (dict): A dictionary that contains the dictionary content of a documentation file.
         """
         if 'metadata' in content and 'tags' in content['metadata']:
             for tag in content['metadata']['tags']:
                 self.found_tags.add(tag)
 
     def identify_tests(self, content):
-        """
-        brief: Identifies every new test found in the documentation files and saves it for future reporting.
-        args:
-            - "content(dict): The dictionary content of a documentation file."
+        """Identify every new test found in the documentation files and saves it for future reporting.
+
+        Args:
+            content (dict): A dictionary that contains the dictionary content of a documentation file.
         """
         if 'tests' in content:
             for test in content['tests']:
                 self.found_tests.add(test['name'])
 
     def count_project_tests(self):
-        """
-        brief: Count how many tests are into every test file into the Project folder.
-               This information will be used for a coverage report.
+        """Count how many tests are into every test file into the Project folder.
+
+        This information will be used for a coverage report.
         """
         file_regexes = []
         function_regexes = []
@@ -124,28 +145,28 @@ class Sanity():
         for (root, *_, files) in os.walk(self.conf.project_path, topdown=True):
             for regex in file_regexes:
                 test_files = list(filter(regex.match, files))
+
                 for test_file in test_files:
-                    with open(os.path.join(root,test_file)) as fd:
+                    with open(os.path.join(root, test_file)) as fd:
                         file_content = fd.read()
                     module = ast.parse(file_content)
                     functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
+
                     for function in functions:
                         for regex in function_regexes:
                             if regex.match(function.name):
                                 self.project_tests = self.project_tests + 1
 
     def add_report(self, message):
-        """
-        brief: Adds a new entry to the report.
-        args:
-            - "message (string): Message to be included in the report."
+        """Add a new entry to the report.
+
+        Args:
+            message(str): A string that contains the message to be included in the report.
         """
         self.error_reports.append(message)
 
     def print_report(self):
-        """
-        brief: Makes a report with all the errors found, the coverage and the tags found.
-        """
+        """Make a report with all the errors found, the coverage and the tags found."""
         print("\nDuring the sanity check:")
 
         if self.error_reports:
@@ -167,9 +188,7 @@ class Sanity():
         print("A {:.2f}% from the tests of {} is covered.".format(tests_percentage, self.conf.project_path))
 
     def run(self):
-        """
-        brief: Runs a complete sanity check of each documentation file on the output folder.
-        """
+        """Run a complete sanity check of each documentation file on the output folder."""
         Sanity.LOGGER.info("Starting documentation sanity check")
 
         for (root, *_, files) in os.walk(self.conf.documentation_path, topdown=True):
