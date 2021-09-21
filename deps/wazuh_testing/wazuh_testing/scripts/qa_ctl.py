@@ -8,6 +8,7 @@ import yaml
 
 from jsonschema import validate
 from tempfile import gettempdir
+from getpass import getpass
 
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
@@ -20,6 +21,7 @@ from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGener
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning.local_actions import download_local_wazuh_qa_repository, run_local_command
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible import check_windows_ansible_credentials
 
 
 DEPLOY_KEY = 'deployment'
@@ -81,6 +83,26 @@ def set_qactl_logging(qactl_configuration):
         qactl_logger = Logging(QACTL_LOGGER, qactl_configuration.logging_level, True, qactl_configuration.logging_file)
 
 
+def set_parameters(parameters):
+    """Update script parameters and add extra information.
+
+    Args:
+        (argparse.Namespace): Object with the user parameters.
+    """
+    def ask_user_credentials(parameters):
+        """Ask and set user and password credentials"""
+        parameters.user = input('Enter the username of Windows host: ')
+        parameters.user_password = getpass(f"Enter the password of {parameters.user} user: ")
+
+    if parameters.run_test and parameters.windows:  # Automatic mode
+        ask_user_credentials(parameters)
+    elif parameters.config and parameters.windows:  # Manual mode
+        configuration_data = read_configuration_data(parameters.config)
+
+        if DEPLOY_KEY in configuration_data:
+            ask_user_credentials(parameters)
+
+
 def validate_parameters(parameters):
     """Validate the input parameters entered by the user of qa-ctl tool.
 
@@ -103,6 +125,12 @@ def validate_parameters(parameters):
 
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The -d, --dry-run parameter can only be used with -r, --run', qactl_script_logger.error)
+
+    # Check if Windows user credentials are correct
+    if parameters.user and parameters.user_password:
+        if not check_windows_ansible_credentials(parameters.user, parameters.user_password):
+            raise QAValueError('Windows credentials are not correct. Please check user and password and try again',
+                               qactl_script_logger.error)
 
     # Check version parameter
     if parameters.version is not None:
@@ -161,7 +189,12 @@ def main():
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
                         help='Wazuh installation and tests version')
 
+    parser.add_argument('-w', '--windows', action='store_true', help='Flag to indicate that the deployment environment '
+                        'will be deployed on native Windows.')
+
     arguments = parser.parse_args()
+
+    set_parameters(arguments)
 
     validate_parameters(arguments)
 
@@ -202,8 +235,14 @@ def main():
     try:
         if DEPLOY_KEY in configuration_data:
             deploy_dict = configuration_data[DEPLOY_KEY]
+            local_environment_info = {
+                'system': 'windows' if arguments.windows else 'unix',
+                'user': arguments.user if arguments.user else None,
+                'password': arguments.user_password if arguments.user_password else None
+            }
             instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
-            instance_handler.run()
+
+            instance_handler.run(local_environment_info)
             launched['instance_handler'] = True
 
         if PROVISION_KEY in configuration_data:

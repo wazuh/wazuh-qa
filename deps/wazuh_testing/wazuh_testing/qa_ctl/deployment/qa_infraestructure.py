@@ -10,7 +10,7 @@ from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.deployment.docker_wrapper import DockerWrapper
 from wazuh_testing.qa_ctl.deployment.vagrant_wrapper import VagrantWrapper
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible import copy_files_to_remote, remove_paths
+from wazuh_testing.qa_ctl.provisioning.ansible.ansible import copy_files_to_remote, launch_remote_commands
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -42,14 +42,13 @@ class QAInfraestructure:
     DOCKER_NETWORK_NAME = 'wazuh_net'
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, deployment_data, qa_ctl_configuration, windows_deployment=False):
+    def __init__(self, deployment_data, qa_ctl_configuration):
         self.deployment_data = deployment_data
         self.qa_ctl_configuration = qa_ctl_configuration
         self.instances = []
         self.docker_client = None
         self.docker_network = None
         self.network_address = None
-        self.windows_deployment = windows_deployment
 
         QAInfraestructure.LOGGER.debug('Processing deployment configuration')
         for host in deployment_data:
@@ -127,43 +126,69 @@ class QAInfraestructure:
         for runner_thread in threads:
             runner_thread.join()
 
-    def run(self):
-        """Execute the run method on every configured instance."""
-        self.run_unix_deployment() if not self.windows_deployment else self.run_windows_deployment()
-
+    def run(self, local_environment_info):
+        """Launch instances deployment according to the local host system."""
+        if local_environment_info['system'] == 'unix':
+            self.run_unix_deployment()
+        elif local_environment_info['system'] == 'windows':
+            self.run_windows_deployment(local_environment_info['user'], local_environment_info['password'])
+        else:
+            raise QAValueError(f"local_environment_info['system'] is not a valid system for QAInfraestructure "
+                               "runnning method", QAInfraestructure.LOGGER.error)
 
     def run_unix_deployment(self):
+        """Run the instances deployment when the local host is UNIX."""
         QAInfraestructure.LOGGER.info('Running Unix deployment')
         QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
+
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
+
         QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
 
-    def run_windows_deployment(self):
+    def run_windows_deployment(self, user, user_password):
+        """Run the instances deployment when the local host is Windows.
+
+        This will provision the Windows host with the vagrant deployer script and deployment config file, and it will
+        launch that script using Ansible.
+
+        Args:
+            user (str): Windows local user.
+            user_password(str): Windows local user password.
+        """
         QAInfraestructure.LOGGER.info('Running Windows deployment')
 
         # Generate deployment configuration file
-        config_file_path = f"{gettempdir()}/qa_ctl_deployment_config_{get_current_timestamp()}.yaml"
+        config_file_name = f"qa_ctl_deployment_config_{get_current_timestamp()}.yaml"
+        config_file_path = f"{gettempdir()}/{config_file_name}"
 
         with open(config_file_path, 'w') as config_file:
             config_file.write(yaml.dump({'deployment': self.deployment_data}, allow_unicode=True, sort_keys=False))
 
-        user = 'vagrant'
-        user_password = 'vagrant'
-
-        inventory = AnsibleInventory([AnsibleInstance('172.16.1.13',  connection_user=user,
-                                                      connection_user_password=user_password,
-                                                      connection_method='winrm',
-                                                      connection_port='5986')])
+        inventory = AnsibleInventory([
+            AnsibleInstance('127.0.0.1', connection_user=user, connection_user_password=user_password,
+                            connection_method='winrm', connection_port='5986')
+        ])
 
         deployer_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'windows', 'vagrant_deployer.py')
+        windows_tmp_files_path = f"C:\\qa_ctl\\{get_current_timestamp()}"
+        windows_vagrant_deployer_path = f"{windows_tmp_files_path}\\vagrant_deployer.py"
+        windows_config_file_path = f"{windows_tmp_files_path}\\{config_file_path}"
+        vagrant_deployer_command = f"python {windows_vagrant_deployer_path} -c {windows_config_file_path}"
 
         QAInfraestructure.LOGGER.info('Provisioning deployment files to Windows host')
 
-        copy_files_to_remote(inventory.inventory_file_path, '172.16.1.13', [deployer_file_path, config_file_path],
-                             'C:\\qa_ctl', ansible_output=True)#self.qa_ctl_configuration.ansible_output)
+        # Provision vagrant deployer and deployment config file in Windows host
+        copy_files_to_remote(inventory.inventory_file_path, '127.0.0.1', [deployer_file_path, config_file_path],
+                             windows_tmp_files_path, ansible_output=self.qa_ctl_configuration.ansible_output)
 
         QAInfraestructure.LOGGER.info('Provisioning has been done successfully')
+        QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment on Windows host")
 
+        # Launch vagrant deployer script
+        launch_remote_commands(inventory.inventory_file_path, '127.0.0.1', vagrant_deployer_command,
+                               ansible_output=self.qa_ctl_configuration.ansible_output)
+
+        QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
