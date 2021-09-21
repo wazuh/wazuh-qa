@@ -36,6 +36,7 @@ Output fields:
   Module:
     Mandatory:
       - brief
+      - path
       - category
       - modules
       - daemons
@@ -59,6 +60,7 @@ Output fields:
 Test cases field: test_cases
 
 Module info:
+  - path: path
   - test_system: os_platform
   - test_vendor: os_vendor
   - test_version: os_version

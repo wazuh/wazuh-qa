@@ -120,6 +120,7 @@ class CodeParser:
             module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
             module_doc['group_id'] = group_id
+            module_doc['path'] = re.sub(r'.*wazuh-qa\/', '', path)
 
             test_cases = None
             if self.conf.test_cases_field:
