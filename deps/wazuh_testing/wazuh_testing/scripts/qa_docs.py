@@ -34,6 +34,29 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
+def check_incompatible_parameters(parameters):
+    """Check the parameters that qa-docs receives and check any incompatibilities.
+    
+    Args:
+        parameters (argparse.Namespace): The parameters that the tool receives.
+    """
+    if parameters.test_config and (parameters.index_name or parameters.app_index_name or parameters.test_names
+                                   or parameters.test_exist):
+        raise QAValueError('The -t, --test-config parameter is incompatible with -T, -i, -l, -T, -e options. '
+                           'This option tests the configuration loaded for debugging purposes.',
+                           qadocs_logger.error)
+
+    if parameters.tests_path is None and (parameters.test_config or parameters.test_names or parameters.test_exist
+                                        or parameters.sanity):
+        raise QAValueError('The following options need the path where the tests are located: -t, -T, --test, '
+                           '  -e, --exist, -s, --sanity-check. You must specify it by using '
+                           '-I, --tests-path path_to_tests.',
+                           qadocs_logger.error)
+
+    if parameters.output_path and parameters.test_names is None:
+        raise QAValueError('The -o parameter is used to set where the parsed data with -T, --tests options '
+                           ' will be written. -T, --tests are not used.',
+                           qadocs_logger.error)
 
 def validate_parameters(parameters):
     """Validate the parameters that qa-docs recieves.
@@ -46,18 +69,28 @@ def validate_parameters(parameters):
     """
     qadocs_logger.debug('Validating input parameters')
 
+    check_incompatible_parameters(parameters)
+
     # Check if the directory where the tests are located exist
-    if parameters.test_dir:
-        if not os.path.exists(parameters.test_dir):
-            raise QAValueError(f"{parameters.test_dir} does not exist. Tests directory not found.", qadocs_logger.error)
+    if parameters.tests_path:
+        if not os.path.exists(parameters.tests_path):
+            raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.", qadocs_logger.error)
 
     # Check that test_input name exists
     if parameters.test_names:
-        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, test_names=parameters.test_names))
+        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.tests_path, test_names=parameters.test_names))
         
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
                 raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
+
+    # Check that the index exists
+    if parameters.index_name or parameters.app_index_name:
+        check_index_name_exists = None
+
+    # Check that the output path has permissions to write the file(s)
+    if parameters.output_path:
+        check_output_path_has_permissions = None
 
     qadocs_logger.debug('Input parameters validation successfully finished')
 
@@ -80,7 +113,7 @@ def main():
     parser.add_argument('-d', '--debug', action='count', dest='debug_level',
                         help="Enable debug messages.")
 
-    parser.add_argument('-I', '--tests_path', dest='test_dir',
+    parser.add_argument('-I', '--tests-path', dest='tests_path',
                         help="Path where tests are located.")
 
     parser.add_argument('-i', '--index-data', dest='index_name',
@@ -109,7 +142,7 @@ def main():
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_names=args.test_exist))
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_exist))
         
         for test_name in args.test_exist:
             if doc_check.locate_test(test_name) is not None:
@@ -121,25 +154,25 @@ def main():
     # Load configuration if you want to test it
     elif args.test_config:
         qadocs_logger.debug('Loading qa-docs configuration')
-        Config(CONFIG_PATH, args.test_dir)
+        Config(CONFIG_PATH, args.tests_path)
         qadocs_logger.debug('qa-docs configuration loaded')
 
     # Run a sanity check thru tests directory
     elif args.sanity:
-        sanity = Sanity(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        sanity = Sanity(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
     # Index the previous parsed tests into Elasticsearch
     elif args.index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data = IndexData(args.index_name, Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
 
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.app_index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.app_index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data = IndexData(args.app_index_name, Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
@@ -148,7 +181,7 @@ def main():
     # Parse tests
     else:
         if not args.test_exist:
-            docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+            docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
 
             # Parse single test
             if args.test_names:
@@ -156,12 +189,12 @@ def main():
 
                 # When output path is specified by user, a json is generated within that path
                 if args.output_path:
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_names))
+                    docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, args.output_path, args.test_names))
                 else:
                     # When no output is specified, it is printed
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_names=args.test_names))
+                    docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_names))
             else:
-                qadocs_logger.info(f"Parsing all tests located in {args.test_dir}")
+                qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
 
             qadocs_logger.info('Running QADOCS')
             docs.run()
