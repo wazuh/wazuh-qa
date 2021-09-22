@@ -5,6 +5,7 @@
 import argparse
 import os
 from datetime import datetime
+import sys
 
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
@@ -53,12 +54,12 @@ def check_incompatible_parameters(parameters):
                            '-I, --tests-path path_to_tests.',
                            qadocs_logger.error)
 
-    if parameters.output_path and parameters.test_names is None:
+    if parameters.output_path and not parameters.test_names:
         raise QAValueError('The -o parameter is used to set where the parsed data with -T, --tests options '
                            ' will be written. -T, --tests are not used.',
                            qadocs_logger.error)
 
-def validate_parameters(parameters):
+def validate_parameters(parameters, parser):
     """Validate the parameters that qa-docs recieves.
 
     Since `config.yaml` will be `schema.yaml`, it runs as config file is correct.
@@ -68,6 +69,12 @@ def validate_parameters(parameters):
         parameters (list): A list of input args.
     """
     qadocs_logger.debug('Validating input parameters')
+
+    # If qa-docs runs without any parameter or just `-d` option, it raises an error and prints the help message.
+    if len(sys.argv) < 2 or (len(sys.argv) < 3 and parameters.debug_level):
+        qadocs_logger.error('qa-docs has been run without any parameter.')
+        parser.print_help()
+        exit(1)
 
     check_incompatible_parameters(parameters)
 
@@ -137,8 +144,7 @@ def main():
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
 
-    if args:
-        validate_parameters(args)
+    validate_parameters(args, parser)
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
