@@ -34,7 +34,7 @@ class Config():
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, config_path, test_dir, output_path='', test_name=None):
+    def __init__(self, config_path, test_dir, output_path='', test_names=None):
         """Constructor that loads the data from the config file.
 
         Also, if a test name is passed, it will be run in single test mode.
@@ -49,7 +49,7 @@ class Config():
             config_path (str): A string that contains the config file path.
             test_dir (str): A string that contains the path of the tests.
             output_path (str): A string that contains the doc output path.
-            test_name (str): A string that represents a test name.
+            test_names (list): A list that contains the test names that the user specifies.
         """
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
@@ -72,10 +72,10 @@ class Config():
         self.__read_ignore_paths()
         self.__set_documentation_path(output_path)
 
-        if test_name:
+        if test_names is not None:
             # When a name is passed, it is using just a single test.
             self.mode = Mode.SINGLE_TEST
-            self.test_name = test_name
+            self.test_names = test_names
 
     def __read_config_file(self, file):
         """Read configuration file.

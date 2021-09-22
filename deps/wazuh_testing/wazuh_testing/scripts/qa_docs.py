@@ -52,10 +52,12 @@ def validate_parameters(parameters):
             raise QAValueError(f"{parameters.test_dir} does not exist. Tests directory not found.", qadocs_logger.error)
 
     # Check that test_input name exists
-    if parameters.test_input:
-        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, test_name=parameters.test_input))
-        if doc_check.locate_test() is None:
-            raise QAValueError(f"{parameters.test_input} not found.", qadocs_logger.error)
+    if parameters.test_names:
+        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.test_dir, test_names=parameters.test_names))
+        
+        for test_name in parameters.test_names:
+            if doc_check.locate_test(test_name) is None:
+                raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation successfully finished')
 
@@ -84,13 +86,13 @@ def main():
     parser.add_argument('-l', '--launch-ui', dest='launch_app',
                         help="Indexes the data named as you specify as argument and launch SearchUI.")
 
-    parser.add_argument('-T', dest='test_input',
+    parser.add_argument('-T', '--tests', nargs='+', default=[], dest='test_names',
                         help="Parse the test that you pass as argument.")
 
     parser.add_argument('-o', dest='output_path',
                         help="Specifies the output directory for test parsed when -T is used.")
 
-    parser.add_argument('-e', dest='test_exist',
+    parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
                         help="Checks if test exists or not",)
 
     args = parser.parse_args()
@@ -103,9 +105,11 @@ def main():
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_exist))
-        if doc_check.locate_test() is not None:
-            print("test exists")
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_names=args.test_exist))
+        
+        for test_name in args.test_exist:
+            if doc_check.locate_test(test_name) is not None:
+                print(f"{test_name} exists")
 
     if args.version:
         print(f"qa-docs v{VERSION}")
@@ -143,16 +147,15 @@ def main():
             docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
 
             # Parse single test
-            if args.test_input:
-                qadocs_logger.info(f"Parsing the following test(s) {args.test_input}")
+            if args.test_names:
+                qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
 
                 # When output path is specified by user, a json is generated within that path
                 if args.output_path:
-                    qadocs_logger.info(f"{args.test_input}.json is going to be generated in {args.output_path}")
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_input))
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, args.output_path, args.test_names))
                 else:
                     # When no output is specified, it is printed
-                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_name=args.test_input))
+                    docs = DocGenerator(Config(CONFIG_PATH, args.test_dir, test_names=args.test_names))
             else:
                 qadocs_logger.info(f"Parsing all tests located in {args.test_dir}")
 

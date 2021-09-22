@@ -191,7 +191,7 @@ class DocGenerator:
             DocGenerator.LOGGER.warning(f"Content for {path} is empty, ignoring it")
             return None
 
-    def create_test(self, path, group_id):
+    def create_test(self, path, group_id, test_name=None):
         """Parse the content of a test file and dumps the content into a file.
 
         Modes:
@@ -205,6 +205,7 @@ class DocGenerator:
         Args:
             path (str): A string with the path of the test file to be parsed.
             group_id (str): A string with the id of the group where the new test belongs.
+            test_name (str): A string with the name of the test that is going to be parsed.
 
         Returns:
             __id.counter (int): An integer with the ID of the new generated test document.
@@ -226,7 +227,7 @@ class DocGenerator:
                     return
                 # If the user specifies an output dir
                 else:
-                    doc_path = os.path.join(doc_path, self.conf.test_name)
+                    doc_path = os.path.join(doc_path, test_name)
 
             self.dump_output(test, doc_path)
             DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
@@ -264,13 +265,23 @@ class DocGenerator:
         for folder in folders:
             self.parse_folder(os.path.join(root, folder), group_id)
 
-    def locate_test(self):
+    def parse_test_list(self):
+        """Parse the tests that the user has specified."""
+        for test_name in self.conf.test_names:
+            self.test_path = self.locate_test(test_name)
+
+            if self.test_path:
+                self.create_test(self.test_path, 0, test_name)
+            else:
+                DocGenerator.LOGGER.error(f"'{self.conf.test_name}' could not be found")
+
+    def locate_test(self, test_name):
         """Get the test path when a test is specified by the user.
 
         Returns:
             str: A string with the test path.
         """
-        complete_test_name = f"{self.conf.test_name}.py"
+        complete_test_name = f"{test_name}.py"
         DocGenerator.LOGGER.info(f"Looking for {complete_test_name}")
 
         for root, dirnames, filenames in os.walk(self.conf.project_path, topdown=True):
@@ -278,7 +289,7 @@ class DocGenerator:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
 
-        print('test does not exist')
+        print(f"{test_name} does not exist")
         return None
 
     def print_test_info(self, test):
@@ -307,8 +318,9 @@ class DocGenerator:
             qa-docs -I ../../tests/ -T test_cache -o /tmp -> It would be running as `single test mode`
             creating `/tmp/test_cache.json`
         """
+        DocGenerator.LOGGER.info("Starting test documentation parsing")
+
         if self.conf.mode == Mode.DEFAULT:
-            DocGenerator.LOGGER.info("Starting documentation parsing")
             DocGenerator.LOGGER.debug(f"Cleaning doc folder located in {self.conf.documentation_path}")
             clean_folder(self.conf.documentation_path)
 
@@ -318,11 +330,4 @@ class DocGenerator:
                 self.parse_folder(path, self.__id_counter)
 
         elif self.conf.mode == Mode.SINGLE_TEST:
-            DocGenerator.LOGGER.info("Starting test documentation parsing")
-            self.test_path = self.locate_test()
-
-            if self.test_path:
-                DocGenerator.LOGGER.debug(f"Parsing '{self.conf.test_name}'")
-                self.create_test(self.test_path, 0)
-            else:
-                DocGenerator.LOGGER.error(f"'{self.conf.test_name}' could not be found")
+            self.parse_test_list()
