@@ -237,6 +237,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     file_list = ['example.csv']
@@ -300,6 +301,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
 
     tags:
         - scheduled
+        - time_travel
     '''
     def report_changes_validator(event):
         """Validate content_changes event property exists in the event."""
@@ -391,6 +393,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -611,6 +614,7 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, co
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'

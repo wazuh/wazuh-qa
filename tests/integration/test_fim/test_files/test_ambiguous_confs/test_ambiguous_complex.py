@@ -268,28 +268,12 @@ def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     '''
-<<<<<<< Updated upstream
-    description: Check if the `wazuh-syscheck` daemon applies different configurations between
-                 subdirectories properly. Example:
-                 <directories
-                    realtime='yes'
-                    report_changes='yes'
-                    check_all='yes'
-                    check_owner='no'> /testdir </directories>
-                 <directories realtime='yes'
-                    report_changes='no'
-                    check_sum='no'
-                    check_owner='yes'> /testdir/subdir </directories>
-                 For this purpose, it specifies different `FIM` settings for each subdirectory and
-                 finally verifies that these have been applied correctly.
-=======
     description: Check if the `wazuh-syscheckd` daemon applies different configurations between
                  subdirectories properly. For example, `realtime=yes report_changes=yes check_owner=no`
                  for the `/testdir` directory and `report_changes=no check_owner=yes` for
                  the `/testdir/subdir` directory. For this purpose, it applies different
                  `FIM` settings for each subdirectory and finally verifies that
                  these have been applied correctly.
->>>>>>> Stashed changes
 
     wazuh_min_version: 4.2
 
