@@ -63,37 +63,40 @@ def validate_parameters(parameters):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit.')
 
     parser.add_argument('-s', '--sanity-check', action='store_true', dest='sanity',
-                        help="Run a sanity check")
+                        help="Run a sanity check.")
 
     parser.add_argument('-v', '--version', action='store_true', dest="version",
-                        help="Print qa-docs version")
+                        help="Print qa-docs version.")
 
-    parser.add_argument('-t', action='store_true', dest='test_config',
+    parser.add_argument('-t', '--test-cfg', action='store_true', dest='test_config',
                         help="Load test configuration.")
 
-    parser.add_argument('-d', action='count', dest='debug_level',
+    parser.add_argument('-d', '--debug', action='count', dest='debug_level',
                         help="Enable debug messages.")
 
-    parser.add_argument('-I', dest='test_dir', required=True,
+    parser.add_argument('-I', '--tests_path', dest='test_dir',
                         help="Path where tests are located.")
 
     parser.add_argument('-i', '--index-data', dest='index_name',
                         help="Indexes the data named as you specify as argument to elasticsearch.")
 
-    parser.add_argument('-l', '--launch-ui', dest='launch_app',
+    parser.add_argument('-l', '--launch-ui', dest='app_index_name',
                         help="Indexes the data named as you specify as argument and launch SearchUI.")
 
     parser.add_argument('-T', '--tests', nargs='+', default=[], dest='test_names',
-                        help="Parse the test that you pass as argument.")
+                        help="Parse the test(s) that you pass as argument.")
 
     parser.add_argument('-o', dest='output_path',
-                        help="Specifies the output directory for test parsed when -T is used.")
+                        help="Specifies the output directory for test parsed when `-T, --tests` is used.")
 
     parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
-                        help="Checks if test exists or not",)
+                        help="Checks if test(s) exist or not.",)
 
     args = parser.parse_args()
 
@@ -101,7 +104,8 @@ def main():
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
 
-    validate_parameters(args)
+    if args:
+        validate_parameters(args)
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
@@ -133,9 +137,9 @@ def main():
         index_data.run()
 
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
-    elif args.launch_app:
+    elif args.app_index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.launch_app, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
+        index_data = IndexData(args.app_index_name, Config(CONFIG_PATH, args.test_dir, OUTPUT_PATH))
         index_data.run()
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
