@@ -123,19 +123,19 @@ def validate_parameters(parameters):
     # Check incompatible parameters
     if parameters.config and parameters.run_test:
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
-                           'configuration', qactl_logger.error)
+                           'configuration', qactl_logger.error, QACTL_LOGGER)
 
     if parameters.version and parameters.run_test is None:
         raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_logger.error)
 
     if parameters.dry_run and parameters.run_test is None:
-        raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error)
+        raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
 
     # Check if Windows user credentials are correct
     if 'user' in parameters and 'user_password' in parameters:
         if not check_windows_ansible_credentials(parameters.user, parameters.user_password):
             raise QAValueError('Windows credentials are not correct. Please check user and password and try again',
-                               qactl_logger.error)
+                               qactl_logger.error, QACTL_LOGGER)
 
     # Check version parameter
     if parameters.version is not None:
@@ -143,17 +143,17 @@ def validate_parameters(parameters):
 
         if len((parameters.version).split('.')) != 3:
             raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}",
-                               qactl_logger.error)
+                               qactl_logger.error, QACTL_LOGGER)
 
         if not version_is_released(parameters.version):
             raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
-                               qactl_logger.error)
+                               qactl_logger.error, QACTL_LOGGER)
 
         short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
 
         if not branch_exist(short_version, WAZUH_QA_REPO):
             raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.",
-                               qactl_logger.error)
+                               qactl_logger.error, QACTL_LOGGER)
 
     # Check if tests exist
     if parameters.run_test:
@@ -167,7 +167,8 @@ def validate_parameters(parameters):
 
         for test in parameters.run_test:
             if 'test exists' not in run_local_command(f"qa-docs -e {test} -I {WAZUH_QA_FILES}/tests/"):
-                raise QAValueError(f"{test} does not exist in {WAZUH_QA_FILES}/tests/", qactl_logger.error)
+                raise QAValueError(f"{test} does not exist in {WAZUH_QA_FILES}/tests/", qactl_logger.error,
+                                   QACTL_LOGGER)
 
     qactl_logger.info('Input parameters validation has passed successfully')
 
@@ -224,7 +225,7 @@ def main():
     # Check configuration file path exists
     if not os.path.exists(configuration_file):
         raise QAValueError(f"{configuration_file} file doesn't exists or could not be generated correctly",
-                           qactl_logger.error)
+                           qactl_logger.error, QACTL_LOGGER)
 
     # Read configuration data
     configuration_data = read_configuration_data(configuration_file)

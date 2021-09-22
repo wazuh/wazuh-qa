@@ -47,7 +47,8 @@ class AnsibleRunner:
         ansible_output = AnsibleOutput(runner)
 
         if ansible_output.rc != 0:
-            raise AnsibleException(f"The playbook execution has failed. RC = {ansible_output.rc}")
+            raise AnsibleException(f"The playbook execution has failed. RC = {ansible_output.rc}",
+                                   AnsibleRunner.LOGGER.error, QACTL_LOGGER)
 
         return ansible_output
 
@@ -77,7 +78,7 @@ class AnsibleRunner:
             ansible_output = AnsibleOutput(runner)
 
             if ansible_output.rc != 0 and raise_on_error:
-                raise AnsibleException(f'Failed: {ansible_output}')
+                raise AnsibleException(f'Failed: {ansible_output}', AnsibleRunner.LOGGER.error, QACTL_LOGGER)
 
             return ansible_output
 
