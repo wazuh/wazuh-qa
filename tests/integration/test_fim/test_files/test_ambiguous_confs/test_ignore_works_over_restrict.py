@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if Wazuh’s File Integrity Monitoring (`FIM`) system watches selected
-       files and triggering alerts when these files are modified. All these tests will be performed
-       using ambiguous directory configurations, such as directories and subdirectories with opposite
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected files
+       and triggering alerts when these files are modified. All these tests will be performed using
+       ambiguous directory configurations, such as directories and subdirectories with opposite
        monitoring settings. In particular, it will be verified that the value of the `ignore` attribute
        prevails over the `restrict` one.
        The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
