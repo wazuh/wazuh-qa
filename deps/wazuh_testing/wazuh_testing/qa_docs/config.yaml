@@ -1,19 +1,11 @@
-include_paths:
-  - "integration/test_active_response"
-  - "integration/test_api"
-  - "integration/test_wazuh_db"
-  - "integration/test_vulnerability_detector"
-  - "integration/test_remoted"
-  - "integration/test_agentd"
-
 include_regex:
   - "^test_.*py$"
 
-group_files:
-  - "README.md"
-
 function_regex:
   - "^test_"
+
+group_files:
+  - "README.md"
 
 ignore_paths:
   - "integration/test_active_response/test_execd/data"

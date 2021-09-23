@@ -129,6 +129,9 @@ def main():
     parser.add_argument('-l', '--launch-ui', dest='app_index_name',
                         help="Indexes the data named as you specify as argument and launch SearchUI.")
 
+    parser.add_argument('--types', nargs='+', default=[], dest='test_types',
+                        help="Parse the tests from type(s) that you pass as argument.")
+
     parser.add_argument('-T', '--tests', nargs='+', default=[], dest='test_names',
                         help="Parse the test(s) that you pass as argument.")
 
@@ -185,25 +188,32 @@ def main():
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
 
     # Parse tests
-    else:
-        if not args.test_exist:
-            docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
+    elif not args.test_exist:
+        docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
 
-            # Parse single test
-            if args.test_names:
-                qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
+        # Parse a list of tests
+        if args.test_names:
+            qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
 
-                # When output path is specified by user, a json is generated within that path
-                if args.output_path:
-                    docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, args.output_path, args.test_names))
-                else:
-                    # When no output is specified, it is printed
-                    docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_names))
+            # When output path is specified by user, a json is generated within that path
+            if args.output_path:
+                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, args.output_path, test_names=args.test_names))
+            # When no output is specified, it is printed
             else:
-                qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
+                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_names))
 
-            qadocs_logger.info('Running QADOCS')
-            docs.run()
+        # Parse a list of modules
+        elif args.test_types:
+            qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
+
+            docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
+
+        # Parse the whole path
+        else:
+            qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
+
+        qadocs_logger.info('Running QADOCS')
+        docs.run()
 
     if __name__ == '__main__':
         main()

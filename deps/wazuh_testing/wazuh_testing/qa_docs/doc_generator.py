@@ -6,7 +6,6 @@ import os
 import re
 import json
 import yaml
-import pprint
 
 from wazuh_testing.qa_docs.lib.config import Mode
 from wazuh_testing.qa_docs.lib.code_parser import CodeParser
@@ -128,7 +127,6 @@ class DocGenerator:
         Returns:
             doc_path (str): A string with the name of the documentation test file.
         """
-
         base_path = os.path.join(self.conf.documentation_path, os.path.basename(self.scan_path))
         relative_path = path.replace(self.scan_path, "")
         doc_path = os.path.splitext(base_path + relative_path)[0]
@@ -218,7 +216,7 @@ class DocGenerator:
             if self.conf.mode == Mode.DEFAULT:
                 doc_path = self.get_test_doc_path(path)
 
-            elif self.conf.mode == Mode.SINGLE_TEST:
+            elif self.conf.mode == Mode.PARSE_TESTS:
                 doc_path = self.conf.documentation_path
 
                 # If the user does not specify an output dir
@@ -329,5 +327,5 @@ class DocGenerator:
                 DocGenerator.LOGGER.debug(f"Going to parse files on '{path}'")
                 self.parse_folder(path, self.__id_counter)
 
-        elif self.conf.mode == Mode.SINGLE_TEST:
+        elif self.conf.mode == Mode.PARSE_TESTS:
             self.parse_test_list()

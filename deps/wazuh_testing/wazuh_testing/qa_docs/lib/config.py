@@ -5,6 +5,7 @@
 import yaml
 from enum import Enum
 import os
+import re
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -34,7 +35,7 @@ class Config():
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, config_path, test_dir, output_path='', test_names=None):
+    def __init__(self, config_path, test_dir, output_path='', test_types=None, test_names=None):
         """Constructor that loads the data from the config file.
 
         Also, if a test name is passed, it will be run in single test mode.
@@ -49,7 +50,8 @@ class Config():
             config_path (str): A string that contains the config file path.
             test_dir (str): A string that contains the path of the tests.
             output_path (str): A string that contains the doc output path.
-            test_names (list): A list that contains the test names that the user specifies.
+            test_types (list): A list that contains the tests type(s) to be parsed.
+            test_names (list): A list that contains the test name(s) that the user specifies.
         """
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
@@ -66,7 +68,6 @@ class Config():
         self.__read_function_regex()
         self.__read_output_fields()
         self.__read_test_cases_field()
-        self.__read_include_paths()
         self.__read_include_regex()
         self.__read_group_files()
         self.__read_ignore_paths()
@@ -74,8 +75,18 @@ class Config():
 
         if test_names is not None:
             # When a name is passed, it is using just a single test.
-            self.mode = Mode.SINGLE_TEST
+            self.mode = Mode.PARSE_TESTS
             self.test_names = test_names
+
+        # Add all the types within the tests directory by default
+        if test_types is None:
+            self.__get_test_types()
+        # Add the user types to include_paths
+        else:
+            self.test_types = test_types
+
+        # Get the tests types to parse
+        self.__get_include_paths()
 
     def __read_config_file(self, file):
         """Read configuration file.
@@ -95,22 +106,28 @@ class Config():
         Config.LOGGER.debug('Setting the path documentation')
         self.documentation_path = path
 
-    def __read_include_paths(self):
-        """Read from the config file all the paths to be included in the parsing process.
+    def __get_test_types(self):
+        """Get all the test types within wazuh-qa framework."""
+        self.test_types = []
 
-        Raises:
-            QAValueError: The include paths field is empty in the config file
+        for name in os.listdir(self.project_path):
+            if os.path.isdir(os.path.join(self.project_path, name)):
+                self.test_types.append(name)
+
+    def __get_include_paths(self):
+        """Get all the modules to include within all the specified types.
+        
+        The paths to be included are generated using this info.
         """
-        Config.LOGGER.debug('Reading include paths from config file')
+        dir_regex = re.compile("test_.")
+        self.include_paths = []
 
-        # Will be replaced by --type --module and --test , so you can run what you need
-        if 'include_paths' not in self._config_data:
-            raise QAValueError('The include paths field is empty in the config file', Config.LOGGER.error)
+        for type in self.test_types:
+            subset_tests = os.path.join(self.project_path, type)
 
-        include_paths = self._config_data['include_paths']
-
-        for path in include_paths:
-            self.include_paths.append(os.path.join(self.project_path, path))
+            for name in os.listdir(subset_tests):
+                if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
+                    self.include_paths.append(os.path.join(subset_tests, name))
 
     def __read_include_regex(self):
         """Read from the config file the regexes used to identify test files.
@@ -248,8 +265,9 @@ class Mode(Enum):
     The current modes that `doc_generator` has are these:
 
         Modes:
-            DEFAULT: `default mode` parses all tests within tests directory
-            SINGLE_TEST: `single test mode` only uses a single test represented by its name
+            DEFAULT: `default mode` parses all tests within tests directory.
+            PARSE_TESTS: `single tests mode` parses a list of tests.
+            PARSE_TYPES
 
             For example, if you want to declare that it is running thru all tests directory, you must specify it by:
 
@@ -259,4 +277,4 @@ class Mode(Enum):
         Enum (Class): Base class for creating enumerated constants.
     """
     DEFAULT = 1
-    SINGLE_TEST = 2
+    PARSE_TESTS = 2
