@@ -100,8 +100,6 @@ def tear_down():
     except IOError as exception:
         raise
 
-    # Start Wazuh
-    control_service('start')
 
 
 @pytest.fixture(scope='function')
@@ -131,9 +129,9 @@ def register_previous_agent(test_case):
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
-def test_authd_force_options(clean_client_keys_file_module, get_configuration,
-                             configure_environment, configure_sockets_environment, connect_to_sockets_module,
-                             test_case, register_previous_agent, restart_authd, tear_down):
+def test_authd_force_options(clean_client_keys_file_module, configure_sockets_environment, configure_environment,
+                             restart_authd, wait_for_authd_startup, connect_to_sockets_configuration,
+                             register_previous_agent, tear_down, test_case, get_configuration):
     """
         description:
            "Check that every input message in authd port generates the adequate output"
@@ -143,9 +141,6 @@ def test_authd_force_options(clean_client_keys_file_module, get_configuration,
             - clean_client_keys_file_module:
                 type: fixture
                 brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
             - configure_environment:
                 type: fixture
                 brief: Configure a custom environment for testing.
@@ -155,15 +150,24 @@ def test_authd_force_options(clean_client_keys_file_module, get_configuration,
             - connect_to_sockets_module:
                 type: fixture
                 brief: Bind to the configured sockets at module scope.
-            - test_case:
-                type: list
-                brief: List with all the test cases for the test.
             - register_previous_agent:
                 type: fixture
                 brief: Register agents to simulate a scenario with pre existent keys.
             - tear_down:
                 type: fixture
                 brief: Roll back the daemon and client.keys state after the test ends.
+            restart_authd:
+                type: fixture
+                brief: Restart Authd daemon to force new configurations.
+            wait_for_authd_startup:
+                type: fixcture
+                brief: Wait until Authd is accepting connections.
+            - get_configuration:
+                type: fixture
+                brief: Get the configuration of the test.
+            - test_case:
+                type: list
+                brief: List with all the test cases for the test.
         assertions:
             - The received output must match with expected when the setting is used
             - The agent can't have a duplicate IP or name when the setting is disabled

@@ -464,6 +464,14 @@ def connect_to_sockets_function(request):
 
 
 @pytest.fixture(scope='module')
+def connect_to_sockets_configuration(request, get_configuration):
+    """Configuration scope version of connect_to_sockets."""
+    receiver_sockets = connect_to_sockets(request)
+    yield receiver_sockets
+    close_sockets(receiver_sockets)
+
+
+@pytest.fixture(scope='module')
 def configure_environment(get_configuration, request):
     """Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration."""
 
@@ -693,7 +701,7 @@ def configure_local_internal_options_module(request):
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
-    
+
 @pytest.fixture(scope='module')
 def daemons_handler(get_configuration, request):
     """Handler of Wazuh daemons.
@@ -764,7 +772,7 @@ def daemons_handler(get_configuration, request):
             logger.debug(f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
 
-            
+
 @pytest.fixture(scope='function')
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
