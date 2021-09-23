@@ -41,27 +41,27 @@ def check_incompatible_parameters(parameters):
     Args:
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
-    if parameters.test_config and (parameters.index_name or parameters.app_index_name or parameters.test_names
-                                   or parameters.test_exist or parameters.test_types):
+    default_run = parameters.index_name or parameters.app_index_name or parameters.test_names \
+                  or parameters.test_exist or parameters.test_types or parameters.test_modules
+
+    if parameters.test_config and default_run:
         raise QAValueError('The -t, --test-config parameter is incompatible with -T, -i, -l, -T, -e options. '
                            'This option tests the configuration loaded for debugging purposes.',
                            qadocs_logger.error)
 
-    if parameters.tests_path is None and (parameters.test_config or parameters.test_names or parameters.test_exist
-                                        or parameters.sanity or parameters.test_types):
+    if parameters.tests_path is None and default_run:
         raise QAValueError('The following options need the path where the tests are located: -t, -T, --test, '
-                           '  -e, --exist, --types, -s, --sanity-check. You must specify it by using '
+                           '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
                            '-I, --tests-path path_to_tests.',
                            qadocs_logger.error)
 
-    if parameters.output_path and (parameters.test_config or parameters.test_exist or parameters.sanity
-                                   or parameters.test_types or not parameters.test_names):
+    if parameters.output_path and default_run:
         raise QAValueError('The -o parameter only works with -T, --tests options in isolation. The default output '
                            'path is generated within the qa-docs tool to index it and visualize it.',
                            qadocs_logger.error)
                     
-    if parameters.test_types and parameters.test_names:
-        raise QAValueError('The --type parameter parse the data, index it, and visualize it, so it cannot be used with '
+    if (parameters.test_types or parameters.test_modules) and parameters.test_names:
+        raise QAValueError('The --types, --modules parameters parse the data, index it, and visualize it, so it cannot be used with '
                            '-T, --tests because they get specific tests information.',
                         qadocs_logger.error)
 
@@ -105,6 +105,12 @@ def validate_parameters(parameters, parser):
     if parameters.output_path:
         check_output_path_has_permissions = None
 
+    # Check that modules selection is done within a test type
+    if parameters.test_modules and len(parameters.test_types) != 1:
+        raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just one'
+                           ' type if you want to parse some modules within a test type.',
+                           qadocs_logger.error)
+        
     qadocs_logger.debug('Input parameters validation successfully finished')
 
 
@@ -137,6 +143,9 @@ def main():
 
     parser.add_argument('--types', nargs='+', default=[], dest='test_types',
                         help="Parse the tests from type(s) that you pass as argument.")
+
+    parser.add_argument('--modules', nargs='+', default=[], dest='test_modules',
+                        help="Parse the tests from modules(s) that you pass as argument.")
 
     parser.add_argument('-T', '--tests', nargs='+', default=[], dest='test_names',
                         help="Parse the test(s) that you pass as argument.")
@@ -208,11 +217,15 @@ def main():
             else:
                 docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_names))
 
-        # Parse a list of modules
+        # Parse a list of test types
         elif args.test_types:
             qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
 
-            docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
+            # Parse a list of test modules
+            if args.test_modules:
+                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types, args.test_modules))
+            else:
+                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
 
         # Parse the whole path
         else:

@@ -31,11 +31,14 @@ class Config():
         module_fields (_fields): A struct that contains the module documentation data.
         test_fields (_fields): A struct that contains the test documentation data.
         test_cases_field (_fields): A string that contains the test_cases key.
+        test_types (list): A list with the types to be parsed.
+        test_modules (list): A list with the modules to be parsed.
+        test_names (list): A list with the tests to be parsed.
         LOGGER (_fields): A custom qa-docs logger.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, config_path, test_dir, output_path='', test_types=None, test_names=None):
+    def __init__(self, config_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None):
         """Constructor that loads the data from the config file.
 
         Also, if a test name is passed, it will be run in single test mode.
@@ -51,6 +54,8 @@ class Config():
             test_dir (str): A string that contains the path of the tests.
             output_path (str): A string that contains the doc output path.
             test_types (list): A list that contains the tests type(s) to be parsed.
+            test_types (list): A list that contains the test type(s) that the user specifies.
+            test_modules (list): A list that contains the test module(s) that the user specifies.
             test_names (list): A list that contains the test name(s) that the user specifies.
         """
         self.mode = Mode.DEFAULT
@@ -63,6 +68,8 @@ class Config():
         self.module_fields = _fields()
         self.test_fields = _fields()
         self.test_cases_field = None
+        self.test_types = []
+        self.test_modules = []
 
         self.__read_config_file(config_path)
         self.__read_function_regex()
@@ -84,6 +91,9 @@ class Config():
         # Add the user types to include_paths
         else:
             self.test_types = test_types
+
+            if test_modules:
+                self.test_modules = test_modules
 
         # Get the tests types to parse
         self.__get_include_paths()
@@ -108,8 +118,6 @@ class Config():
 
     def __get_test_types(self):
         """Get all the test types within wazuh-qa framework."""
-        self.test_types = []
-
         for name in os.listdir(self.project_path):
             if os.path.isdir(os.path.join(self.project_path, name)):
                 self.test_types.append(name)
@@ -125,9 +133,13 @@ class Config():
         for type in self.test_types:
             subset_tests = os.path.join(self.project_path, type)
 
-            for name in os.listdir(subset_tests):
-                if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
+            if self.test_modules:
+                for name in self.test_modules:
                     self.include_paths.append(os.path.join(subset_tests, name))
+            else:
+                for name in os.listdir(subset_tests):
+                    if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
+                        self.include_paths.append(os.path.join(subset_tests, name))
 
     def __read_include_regex(self):
         """Read from the config file the regexes used to identify test files.
