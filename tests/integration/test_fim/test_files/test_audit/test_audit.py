@@ -306,7 +306,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                        and testing directories to monitor.
 
     expected_output:
-        - r'(6030): Audit: connected'
+        - r'Audit: connected'
         - r'.*Added audit rule for monitoring directory'
 
     tags:

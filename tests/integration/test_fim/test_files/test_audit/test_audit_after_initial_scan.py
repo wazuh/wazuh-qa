@@ -208,7 +208,7 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
     expected_output:
         - r'.*Sending FIM event: (.+)$' (Initial scan when restarting Wazuh)
         - r'.*Audit: connection closed.'
-        - r'(6030): Audit: connected'
+        - r'Audit: connected'
 
     tags:
         - who-data
