@@ -13,6 +13,7 @@ if sys.platform == 'win32':
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys')
     PREFIX = os.path.join('c:', os.sep)
     GEN_OSSEC = None
     WAZUH_API_CONF = None
@@ -43,6 +44,7 @@ else:
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')

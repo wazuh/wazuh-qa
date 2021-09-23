@@ -45,6 +45,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.services import control_service
+from authd import validate_authd_response
 
 # Marks
 
@@ -70,7 +71,7 @@ configuration_ids = [f"Force_insert_{x['FORCE_INSERT']}" for x in parameters]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Variables
-
+log_monitor_paths = []
 receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
@@ -82,45 +83,6 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def get_configuration(request):
     """Get configurations from the module"""
     return request.param
-
-
-@pytest.fixture(scope='function')
-def clean_client_keys_file_function():
-    """
-    Stops Wazuh and cleans any previus key in client.keys file at function scope.
-    """
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-@pytest.fixture(scope='module')
-def clean_client_keys_file_module():
-    """
-    Stops Wazuh and cleans any previus key in client.keys file at module scope.
-    """
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
 
 @pytest.fixture(scope='module')
 def tear_down():
@@ -169,9 +131,9 @@ def register_previous_agent(test_case):
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
-def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_file_function, get_configuration,
+def test_authd_force_options(clean_client_keys_file_module, get_configuration,
                              configure_environment, configure_sockets_environment, connect_to_sockets_module,
-                             test_case, register_previous_agent, tear_down):
+                             test_case, register_previous_agent, restart_authd, tear_down):
     """
         description:
            "Check that every input message in authd port generates the adequate output"
@@ -181,9 +143,6 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
             - clean_client_keys_file_module:
                 type: fixture
                 brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - clean_client_keys_file_function:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at function scope.
             - get_configuration:
                 type: fixture
                 brief: Get the configuration of the test.
@@ -230,8 +189,8 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
                 raise ConnectionResetError('Manager did not respond to sent message!')
 
         if metadata['force_insert'] == 'no' and ('previous_agent_name' in test_case):
-            expected = 'ERROR: Duplicate'
+            expected = {'status': 'error', 'message': r'^Duplicate'}
         else:
             expected = stage['output']
 
-        assert response[:len(expected)] == expected, 'Failed: Response is different from expected'
+        validate_authd_response(response, expected)

@@ -78,25 +78,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def clean_client_keys_file_function():
-    """
-    Stops Wazuh and cleans any previus key in client.keys file at function scope.
-    """
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
 @pytest.fixture(scope='module')
 def clean_client_keys_file_module():
     """
@@ -155,7 +136,7 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
                 brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
             - clean_client_keys_file_function:
                 type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at function scope.
+                brief: Cleans any previus key in client.keys file at function scope.
             - get_configuration:
                 type: fixture
                 brief: Get the configuration of the test.

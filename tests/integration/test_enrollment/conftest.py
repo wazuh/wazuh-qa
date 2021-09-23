@@ -4,7 +4,7 @@ import yaml
 import pytest
 import ssl
 
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
 from wazuh_testing.tools.utils import get_host_name
@@ -19,7 +19,6 @@ MANAGER_ADDRESS = '127.0.0.1'
 MANAGER_PORT = 1515
 
 folder = 'etc' if platform.system() == 'Linux' else ''
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, folder, 'client.keys')  # for unix add 'etc'
 AUTHDPASS_PATH = os.path.join(WAZUH_PATH, folder, 'authd.pass')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, folder, 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, folder, 'manager.cert')
