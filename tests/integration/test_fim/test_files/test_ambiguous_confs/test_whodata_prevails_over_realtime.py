@@ -7,9 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `who-data` feature of Wazuh’s File Integrity Monitoring (`FIM`)
-       system works properly. `who-data` information contains the user who made the changes on
-       the monitored files and also the program name or process used to carry them out.
+brief: These tests will check if the `who-data` feature of the File Integrity Monitoring (`FIM`) system
+       works properly. `who-data` information contains the user who made the changes on the monitored
+       files and also the program name or process used to carry them out. In particular, it will be
+       verified that the value of the `whodata` attribute prevails over the `relatime` one.
        The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
@@ -115,21 +116,24 @@ def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_va
     wazuh_min_version: 4.2
 
     parameters:
-        - whodata_enabled:
-            type: bool
-            brief: Who-data status.
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
+        - directory:
+            type: str
+            brief: Testing directory.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - put_env_variables:
+            type: fixture
+            brief: Create environment variables.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
             brief: Clear the `ossec.log` file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
         - Verify that real-time file monitoring is active.
@@ -143,7 +147,7 @@ def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_va
         - r'.*Sending FIM event: (.+)$'
 
     tags:
-        - realtime 
+        - realtime
         - who-data
     '''
     filename = "testfile"

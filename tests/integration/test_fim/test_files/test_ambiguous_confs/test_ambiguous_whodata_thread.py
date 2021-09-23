@@ -7,11 +7,11 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `who-data` feature of Wazuh’s File Integrity Monitoring (`FIM`)
-       system works properly. `who-data` information contains the user who made the changes on
-       the monitored files and also the program name or process used to carry them out.
-       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
-       for changes to the checksums, permissions, and ownership.
+brief: These tests will check if the `who-data` feature of the File Integrity Monitoring (`FIM`)
+       system works properly. `who-data` information contains the user who made the changes
+       on the monitored files and also the program name or process used to carry them out.
+       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks
+       configured files for changes to the checksums, permissions, and ownership.
 
 tier: 2
 
@@ -26,6 +26,7 @@ daemons:
 
 os_platform:
     - linux
+    - windows
 
 os_version:
     - Arch Linux
@@ -45,6 +46,12 @@ os_version:
     - Red Hat 8
     - Red Hat 7
     - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html

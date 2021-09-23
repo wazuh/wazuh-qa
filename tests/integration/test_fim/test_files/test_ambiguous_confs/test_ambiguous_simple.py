@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if Wazuh’s File Integrity Monitoring (`FIM`) system watches selected
-       files and triggering alerts when these files are modified. All these tests will be performed
-       using ambiguous directory configurations, such as directories and subdirectories with opposite
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected files
+       and triggering alerts when these files are modified. All these tests will be performed using
+       ambiguous directory configurations, such as directories and subdirectories with opposite
        monitoring settings. In particular, it will be tested that changes in the files are correctly
        detected through their properties. Several monitoring attribute are also tested,
        such as recursion level, file restrictions, tags, or changes reporting.
@@ -237,6 +237,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     file_list = ['example.csv']
@@ -300,6 +301,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
 
     tags:
         - scheduled
+        - time_travel
     '''
     def report_changes_validator(event):
         """Validate content_changes event property exists in the event."""
@@ -391,6 +393,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
@@ -611,6 +614,7 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, co
 
     tags:
         - scheduled
+        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
