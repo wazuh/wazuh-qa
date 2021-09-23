@@ -245,8 +245,8 @@ def main():
             deploy_dict = configuration_data[DEPLOY_KEY]
             local_environment_info = {
                 'system': 'windows' if arguments.windows else 'unix',
-                'user': arguments.user if arguments.user else None,
-                'password': arguments.user_password if arguments.user_password else None
+                'user': arguments.user  if'user' in arguments else None,
+                'password': arguments.user_password if 'user_password' in arguments else None
             }
             instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
 
