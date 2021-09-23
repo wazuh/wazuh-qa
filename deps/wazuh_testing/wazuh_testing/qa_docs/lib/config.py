@@ -15,7 +15,7 @@ from wazuh_testing.tools.exceptions import QAValueError
 class Config():
     """Class that parses the configuration file and exposes the available configurations.
 
-    Exist two modes of execution: `default mode` and `single test mode`.
+    Two modes of execution exist : `default mode` and `single test mode`.
     The following attributes may change because the config file will be deprecated soon. It will be renamed to
     `schema.yaml` and it will specify the schema fields and pre-defined values that you can check here:
     https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#schema-blocks
@@ -41,13 +41,12 @@ class Config():
     def __init__(self, config_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None):
         """Constructor that loads the data from the config file.
 
-        Also, if a test name is passed, it will be run in single test mode.
+        If a test name is passed, it would be run in `single test mode`.
         And if an output path is not received, when is running in single test mode, it will be printed using the
         standard output. But if an output path is passed, there will be generated a JSON file with the same data that
         would be printed in `single test` mode.
 
-        The default output path for `default mode` is `qa_docs_installation/output`, it cannot be changed. Even when
-        you pass an output path, it has no effect in `default mode`.
+        The default output path for `default mode` is `qa_docs_installation/output`, it cannot be changed.
 
         Args:
             config_path (str): A string that contains the config file path.
@@ -85,17 +84,15 @@ class Config():
             self.mode = Mode.PARSE_TESTS
             self.test_names = test_names
 
-        # Add all the types within the tests directory by default
         if test_types is None:
             self.__get_test_types()
-        # Add the user types to include_paths
         else:
             self.test_types = test_types
 
             if test_modules:
                 self.test_modules = test_modules
 
-        # Get the tests types to parse
+        # Get the paths to parse
         self.__get_include_paths()
 
     def __read_config_file(self, file):
@@ -279,7 +276,6 @@ class Mode(Enum):
         Modes:
             DEFAULT: `default mode` parses all tests within tests directory.
             PARSE_TESTS: `single tests mode` parses a list of tests.
-            PARSE_TYPES
 
             For example, if you want to declare that it is running thru all tests directory, you must specify it by:
 

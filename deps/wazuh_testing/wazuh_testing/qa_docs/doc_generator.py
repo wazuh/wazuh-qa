@@ -22,6 +22,8 @@ class DocGenerator:
     Every folder is checked so they are ignored when the path matches. Then, every test from folders not ignored
     that matches a include regex, is parsed.
 
+    The included paths are generated using the types and modules from the wazuh-qa framework.
+
     Attributes:
         conf (Config): A `Config` instance with data loaded from config file.
         parser (CodeParser): A `CodeParser` instance with parsing utilities.
