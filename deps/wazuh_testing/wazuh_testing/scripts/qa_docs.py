@@ -42,22 +42,28 @@ def check_incompatible_parameters(parameters):
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
     if parameters.test_config and (parameters.index_name or parameters.app_index_name or parameters.test_names
-                                   or parameters.test_exist):
+                                   or parameters.test_exist or parameters.test_types):
         raise QAValueError('The -t, --test-config parameter is incompatible with -T, -i, -l, -T, -e options. '
                            'This option tests the configuration loaded for debugging purposes.',
                            qadocs_logger.error)
 
     if parameters.tests_path is None and (parameters.test_config or parameters.test_names or parameters.test_exist
-                                        or parameters.sanity):
+                                        or parameters.sanity or parameters.test_types):
         raise QAValueError('The following options need the path where the tests are located: -t, -T, --test, '
-                           '  -e, --exist, -s, --sanity-check. You must specify it by using '
+                           '  -e, --exist, --types, -s, --sanity-check. You must specify it by using '
                            '-I, --tests-path path_to_tests.',
                            qadocs_logger.error)
 
-    if parameters.output_path and not parameters.test_names:
-        raise QAValueError('The -o parameter is used to set where the parsed data with -T, --tests options '
-                           ' will be written. -T, --tests are not used.',
+    if parameters.output_path and (parameters.test_config or parameters.test_exist or parameters.sanity
+                                   or parameters.test_types or not parameters.test_names):
+        raise QAValueError('The -o parameter only works with -T, --tests options in isolation. The default output '
+                           'path is generated within the qa-docs tool to index it and visualize it.',
                            qadocs_logger.error)
+                    
+    if parameters.test_types and parameters.test_names:
+        raise QAValueError('The --type parameter parse the data, index it, and visualize it, so it cannot be used with '
+                           '-T, --tests because they get specific tests information.',
+                        qadocs_logger.error)
 
 def validate_parameters(parameters, parser):
     """Validate the parameters that qa-docs recieves.
