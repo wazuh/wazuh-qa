@@ -102,7 +102,7 @@ class QACTLConfigGenerator:
         except FileNotFoundError:
             raise QAValueError(f"Could not find {gettempdir()}/{test_name}.json file. Perhaps qa-docs has not "
                                f"generated it correctly. Try manually with command: {qa_docs_command}",
-                               QACTLConfigGenerator.LOGGER.error)
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         # Add test name extra info
         info['test_name'] = test_name
@@ -153,7 +153,7 @@ class QACTLConfigGenerator:
             if len(list(set(test_info[check]) & set(allowed_values))) == 0:
                 error_message = f"{test_info['test_name']} cannot be launched. Reason: Currently we do not "\
                                 f"support {test_info[check]}. Allowed values: {allowed_values}"
-                raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
+                raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
             return True
 
@@ -170,7 +170,7 @@ class QACTLConfigGenerator:
         if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
                             f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
-            raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
+            raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         return True
 
@@ -202,7 +202,7 @@ class QACTLConfigGenerator:
                 break
             if _ip == 255:
                 raise QAValueError(f"Could not find an IP available in {HOST_NETWORK}",
-                                   QACTLConfigGenerator.LOGGER.error)
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         # Write new used IP in used IPs file
         with open(self.qactl_used_ips_file, 'a') as used_ips_file:

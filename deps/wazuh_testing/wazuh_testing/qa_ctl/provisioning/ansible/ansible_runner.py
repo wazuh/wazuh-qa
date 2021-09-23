@@ -32,8 +32,11 @@ class AnsibleRunner:
         self.private_data_dir = private_data_dir
         self.output = output
 
-    def run(self):
+    def run(self, log_ansible_error=True):
         """Run the ansible playbook in the indicated hosts.
+
+        Args:
+            log_ansible_error (boolean): True for logging the error exception message if any.
 
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
@@ -47,12 +50,14 @@ class AnsibleRunner:
         ansible_output = AnsibleOutput(runner)
 
         if ansible_output.rc != 0:
-            raise AnsibleException(f"The playbook execution has failed. RC = {ansible_output.rc}")
+            raise AnsibleException(f'Failed: {ansible_output}', AnsibleRunner.LOGGER.error, QACTL_LOGGER) if \
+                log_ansible_error else AnsibleException(f'Failed: {ansible_output}')
 
         return ansible_output
 
     @staticmethod
-    def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=True, output=False):
+    def run_ephemeral_tasks(ansible_inventory_path, playbook_parameters, raise_on_error=True, output=False,
+                            log_ansible_error=True):
         """Run the ansible tasks given from playbook parameters
 
         Args:
@@ -60,7 +65,8 @@ class AnsibleRunner:
             playbook_parameters : Parameters for the ansible playbook.
             raise_on_error (boolean): Set if errors or unexpected behaviour are goint to raise errors, Set to 'True'
                                       by default.
-            output (boolena): Set if there are going to be outputs. Set to 'False' by default.
+            output (boolean): Set if there are going to be outputs. Set to 'False' by default.
+            log_ansible_error (boolean): True for logging the error exception message if any.
 
         Returns:
             AnsibleOutput: Result of the ansible playbook run.
@@ -77,7 +83,8 @@ class AnsibleRunner:
             ansible_output = AnsibleOutput(runner)
 
             if ansible_output.rc != 0 and raise_on_error:
-                raise AnsibleException(f'Failed: {ansible_output}')
+                raise AnsibleException(f'Failed: {ansible_output}', AnsibleRunner.LOGGER.error, QACTL_LOGGER) if \
+                    log_ansible_error else AnsibleException(f'Failed: {ansible_output}')
 
             return ansible_output
 

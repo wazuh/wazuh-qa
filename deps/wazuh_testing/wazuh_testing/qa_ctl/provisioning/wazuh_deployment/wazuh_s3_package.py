@@ -60,7 +60,8 @@ class WazuhS3Package(WazuhPackage):
                                       self.revision, self.system, architecture)
         else:
             raise QAValueError('Could not get Wazuh Package S3 URL. s3_package_url or '
-                               '(version, repository, system, revision) has None value', WazuhS3Package.LOGGER.error)
+                               '(version, repository, system, revision) has None value', WazuhS3Package.LOGGER.error,
+                               QACTL_LOGGER)
 
     @staticmethod
     def get_architecture(system):

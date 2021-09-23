@@ -87,7 +87,7 @@ class DockerWrapper(Instance):
                                      'subnets. Please check if you have already set this docker network ' \
                                      '(run `docker network ls`) and then remove it if it is created with ' \
                                      'docker network rm `<network_id>`'
-                raise QAValueError(exception_message, DockerWrapper.LOGGER.error)
+                raise QAValueError(exception_message, DockerWrapper.LOGGER.error, QACTL_LOGGER)
 
     def restart(self):
         """Restart the container.

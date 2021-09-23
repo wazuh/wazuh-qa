@@ -5,19 +5,20 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleI
 from wazuh_testing.tools.exceptions import AnsibleException
 
 
-def _ansible_runner(inventory_file_path, playbook_parameters, ansible_output=False):
+def _ansible_runner(inventory_file_path, playbook_parameters, ansible_output=False, log_ansible_error=True):
     """Ansible runner method. Launch the playbook tasks with the indicated host.
 
     Args:
         inventory_file_path (str): Path where is located the inventory file.
         playbook_parameters (dict): Playbook parameters to create and launch.
         ansible_output (boolean): True for showing ansible output, False otherwise.
+        log_ansible_error (boolean): True for logging the error exception message if any.
 
     Returns:
         AnsibleOutput: Result of the ansible run.
     """
-    tasks_result = AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters, output=ansible_output)
-
+    tasks_result = AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters, output=ansible_output,
+                                                     log_ansible_error=log_ansible_error)
     return tasks_result
 
 
@@ -148,7 +149,7 @@ def launch_remote_commands(inventory_file_path, hosts, commands, become=False, a
                                                  'become': become}, ansible_output)
 
 
-def check_windows_ansible_credentials(user, password):
+def check_windows_ansible_credentials(user, password, log_ansible_error=False):
     """Check if the windows ansible credentials are correct.
 
     This method must be run in a Windows WSL.
@@ -156,6 +157,7 @@ def check_windows_ansible_credentials(user, password):
     Args:
         user (str): Windows user.
         password (str): Windows user password.
+        log_ansible_error (boolean): True for logging the error exception message if any.
 
     Returns:
         boolean: True if credentials are correct, False otherwise.
@@ -177,7 +179,8 @@ def check_windows_ansible_credentials(user, password):
 
     try:
         _ansible_runner(inventory_file_path, {'tasks_list': tasks_list, 'hosts': '127.0.0.1', 'gather_facts': True,
-                                              'become': False}, ansible_output=False)
+                                              'become': False}, ansible_output=False,
+                                              log_ansible_error=log_ansible_error)
         return True
     except AnsibleException:
         return False
