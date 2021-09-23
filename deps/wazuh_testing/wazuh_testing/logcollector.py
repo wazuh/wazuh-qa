@@ -766,27 +766,36 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
 
     return macos_message
 
-def compose_macos_log_command(type="", level="", predicate="", is_sierra=False):
+def compose_macos_log_command(type='', level='', predicate='', is_sierra=False):
     """
     This function replicates how the command 'log' will be called from the Wazuh agent given the query parameters
+
+    Args:
+        type (str): < activity | log | trace > Limit streaming to a given event type.
+        level (str): < default | info | debug > Include events at, and below, the given level.
+        predicate (str): Filter events using the given predicate.
+        is_sierra (boolean): True if running on macOS Sierra, False otherwise.
+    
+    Returns:
+        string: Full log command composed with the given parameters.
     """
 
-    settings_str = ""
+    settings_str = ''
 
     if (is_sierra):
-        settings_str = "/usr/bin/script -q /dev/null "
+        settings_str = '/usr/bin/script -q /dev/null '
 
-    settings_str += "/usr/bin/log stream --style syslog "
+    settings_str += '/usr/bin/log stream --style syslog '
 
     if (type):
-        for t in type.split(","):
-            settings_str += "--type " + t + " "
+        for t in type.split(','):
+            settings_str += '--type ' + t + ' '
 
     if (level):
-        level = level.replace(" ", "")
-        settings_str += "--level " + level + " "
+        level = level.replace(' ', '')
+        settings_str += '--level ' + level + ' '
 
     if(predicate):
-        settings_str += "--predicate " + predicate
+        settings_str += '--predicate ' + predicate
 
     return settings_str

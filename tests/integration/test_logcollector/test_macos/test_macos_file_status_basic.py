@@ -7,12 +7,10 @@ import re
 import pytest
 import wazuh_testing.logcollector as logcollector
 
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
-from wazuh_testing.remote import check_agent_received_message
-from wazuh_testing.tools.monitoring import wait_file
-from wazuh_testing.tools.file import read_json
-from time import sleep
+from wazuh_testing.tools.monitoring import FileMonitor, wait_file
+from wazuh_testing.tools.file import read_json, truncate_file
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
@@ -26,13 +24,35 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f'{x["ONLY_FUTURE_EVENTS"]}' for x in parameters]
+configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'ignore_errors': False}
+
+# Max number of characters to be displayed in the log's debug message
+sample_log_length = 100
 # Time in seconds to update the file_status.json
 file_status_update_time = 4
 
-local_internal_options = {'logcollector.vcheck_files': str(file_status_update_time)}
+local_internal_options = { 'logcollector.vcheck_files': file_status_update_time,
+                           'logcollector.sample_log_length': sample_log_length }
 
+macos_message = {   'command': 'logger',
+                    'message': 'Logger testing message - file status'   }
+
+# Maximum waiting time in seconds to find the logs on ossec.log
+file_monitor_timeout = 30
+
+wazuh_log_monitor = None
+
+expected_message = logcollector.format_macos_message_pattern(macos_message['command'], macos_message['message'])
+
+
+# Fixtures
+@pytest.fixture(scope='module')
+def startup_cleanup():
+    """Truncate ossec.log and remove logcollector's file_status.json file."""
+    truncate_file(LOG_FILE_PATH)
+    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
 
 @pytest.fixture(scope='module')
 def get_local_internal_options():
@@ -40,28 +60,40 @@ def get_local_internal_options():
     return local_internal_options
 
 
-# Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.fixture(scope='module')
-def get_connection_configuration():
-    """Get configurations from the module."""
-    return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+def wait_macos_uls_log(line):
+    """Callback function to wait for the macOS' ULS log collected by logcollector."""
+    if re.search(expected_message, line):
+        return True
+
+    return None
 
 
-def extra_configuration_before_yield():
-    """Delete file status file."""
-    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
+def wait_logcollector_log_stream(line):
+    """Check if 'line' has the logcollector's macOS ULS module start message."""
+    if re.search(r'Monitoring macOS logs with: (.+?)log stream', line):
+        return True
+
+    return None
+
+def wait_macos_key_file_status(line):
+    """Check if 'line' has the 'macos' key on it."""
+    if re.search(r'macos', line):
+        return True
+
+    return None
 
 
-def test_macos_file_status_basic(get_local_internal_options, configure_local_internal_options, get_configuration,
-                                 configure_environment, get_connection_configuration, init_authd_remote_simulator,
-                                 restart_logcollector):
-
+def test_macos_file_status_basic(startup_cleanup,
+                                 configure_local_internal_options, 
+                                 get_configuration,
+                                 configure_environment,
+                                 daemons_handler):
     """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
     This test uses logger tool and a custom log to generate an ULS event. The agent is connected to the authd simulator
@@ -72,28 +104,31 @@ def test_macos_file_status_basic(get_local_internal_options, configure_local_int
         FileNotFoundError: If the file_status.json is not available in the expected time.
     """
 
-    macos_message = {
-        'command': 'logger',
-        'message': 'Logger testing message - file status',
-    }
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
-    wazuh_log_monitor.start(timeout=15, callback=macos_logcollector_monitored,
+    wazuh_log_monitor.start(timeout=file_monitor_timeout,
+                            callback=logcollector.callback_monitoring_macos_logs,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-    # Waits 20 seconds to give time to logcollector to start the module
-    sleep(20)
+    # Watches the ossec.log to check when logcollector starts the macOS ULS module
+    wazuh_log_monitor.start(timeout=file_monitor_timeout,
+                            callback=wait_logcollector_log_stream,
+                            error_message='Logcollector did not start')
 
     logcollector.generate_macos_logger_log(macos_message['message'])
-    expected_message = logcollector.format_macos_message_pattern(macos_message['command'], macos_message['message'])
 
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_message, timeout=15)
+    wazuh_log_monitor.start(timeout=file_monitor_timeout,
+                            callback=wait_macos_uls_log,
+                            error_message='MacOS ULS log was not found')
 
-    # Waiting for file_status.json to be created, with a timeout about the time needed to update the file
-    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_status_update_time+1)
+    # Waits for file_status.json to be created, with a timeout about the time needed to update the file
+    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_monitor_timeout)
 
-    # Waits 10 seconds to give time to logcollector to update the file_status.json file
-    sleep(10)
+    # Watches the file_status.json file for the "macos" key
+    file_status_monitor = FileMonitor(LOGCOLLECTOR_FILE_STATUS_PATH)
+    file_status_monitor.start(timeout=file_monitor_timeout,
+                            callback=wait_macos_key_file_status,
+                            error_message="The 'macos' key could not be found on the file_status.json file")
 
     file_status_json = read_json(LOGCOLLECTOR_FILE_STATUS_PATH)
 
@@ -102,17 +137,17 @@ def test_macos_file_status_basic(get_local_internal_options, configure_local_int
     conf_type = get_configuration['sections'][0]['elements'][2]['query']['attributes'][1]['type']
 
     # Check if json has a structure
-    assert file_status_json['macos'], 'Error finding "macos" key'
+    assert file_status_json['macos'], "Error finding 'macos' key"
 
-    assert file_status_json['macos']['timestamp'], 'Error finding "timestamp" key inside "macos"'
+    assert file_status_json['macos']['timestamp'], "Error finding 'timestamp' key inside 'macos'"
 
     assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}-\d{4}$',
                     file_status_json['macos']['timestamp']), \
-        'Error of timestamp format'
+                    'Error of timestamp format'
 
-    assert file_status_json['macos']['settings'], 'Error finding "settings" key inside "macos"'
+    assert file_status_json['macos']['settings'], "Error finding 'settings' key inside 'macos'"
 
     assert file_status_json['macos']['settings'] \
-        == logcollector.compose_macos_log_command(conf_type,
-                                                  conf_level,
-                                                  conf_predicate)
+                        == logcollector.compose_macos_log_command(conf_type,
+                                                                conf_level,
+                                                                conf_predicate)

@@ -6,11 +6,11 @@ import os
 import pytest
 import re
 
-from wazuh_testing.logcollector import DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+# from wazuh_testing.logcollector import DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
-from wazuh_testing.tools.monitoring import wait_file
-from wazuh_testing.tools.file import read_json
+from wazuh_testing.tools.monitoring import FileMonitor, wait_file
+from wazuh_testing.tools.file import read_json, truncate_file
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
@@ -24,15 +24,30 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f'{x["ONLY_FUTURE_EVENTS"]}' for x in parameters]
+configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
-# Maximum waiting time in seconds to find the logs on ossec.log
-wazuh_log_monitor_timeout = 30
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'ignore_errors': False}
 
+# Max number of characters to be displayed in the log's debug message
+sample_log_length = 100
 # Time in seconds to update the file_status.json
 file_status_update_time = 4
 
-local_internal_options = {'logcollector.vcheck_files': str(file_status_update_time)}
+local_internal_options = { 'logcollector.vcheck_files': file_status_update_time,
+                           'logcollector.sample_log_length': sample_log_length }
+
+# Maximum waiting time in seconds to find the logs on ossec.log
+file_monitor_timeout = 30
+
+wazuh_log_monitor = None
+
+
+# Fixtures
+@pytest.fixture(scope='module')
+def startup_cleanup():
+    """Truncate ossec.log and remove logcollector's file_status.json file."""
+    truncate_file(LOG_FILE_PATH)
+    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
 
 
 @pytest.fixture(scope='module')
@@ -41,12 +56,14 @@ def get_local_internal_options():
     return local_internal_options
 
 
-def extra_configuration_before_yield():
-    """Delete file status file."""
-    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
 
 
 def callback_log_bad_predicate(line):
+    """Check if 'line' has the macOS ULS bad predicate message on it."""
     match = re.match(r'.*Execution error \'log:', line)
     if match:
         return True
@@ -54,28 +71,18 @@ def callback_log_bad_predicate(line):
 
 
 def callback_log_exit_log(line):
+    """Check if 'line' has the macOS ULS log stream exited message on it."""
     match = re.match(r'.*macOS \'log stream\' process exited, pid:', line)
     if match:
         return True
     return None
 
 
-# Fixtures
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.fixture(scope='module')
-def get_connection_configuration():
-    """Get configurations from the module."""
-    return DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
-
-
-def test_macos_file_status_predicate(get_local_internal_options, configure_local_internal_options, get_configuration,
-                                     configure_environment, get_connection_configuration, init_authd_remote_simulator,
-                                     restart_logcollector):
+def test_macos_file_status_predicate(startup_cleanup,
+                                     configure_local_internal_options,
+                                     get_configuration,
+                                     configure_environment,
+                                     daemons_handler):
 
     """Checks that logcollector does not store 'macos'-formatted localfile data since its predicate is erroneous.
 
@@ -86,22 +93,23 @@ def test_macos_file_status_predicate(get_local_internal_options, configure_local
         TimeoutError: If the callbacks, that checks the expected logs, are not satisfied in the expected time.
         FileNotFoundError: If the file_status.json is not available in the expected time.
     """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    wazuh_log_monitor.start(timeout=wazuh_log_monitor_timeout,
+    wazuh_log_monitor.start(timeout=file_monitor_timeout,
                             callback=callback_log_bad_predicate,
                             error_message='Expected log that matches the regex '
                                           '".*Execution error \'log:" could not be found')
 
-    wazuh_log_monitor.start(timeout=wazuh_log_monitor_timeout,
+    wazuh_log_monitor.start(timeout=file_monitor_timeout,
                             callback=callback_log_exit_log,
                             error_message='Expected log that matches the regex '
                                           '".*macOS \'log stream\' process exited, pid:" could not be found')
 
     # Waiting for file_status.json to be created, with a timeout about the time needed to update the file
-    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_status_update_time+2)
+    wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, file_monitor_timeout)
 
     file_status_json = read_json(LOGCOLLECTOR_FILE_STATUS_PATH)
 
     # Check if json has a structure
     if 'macos' in file_status_json:
-        assert False, 'Error, macos should not be present on the status file'
+        assert False, 'Error, "macos" key should not be present on the status file'
