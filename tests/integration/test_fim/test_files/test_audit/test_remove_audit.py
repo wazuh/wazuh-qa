@@ -1,8 +1,70 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `wazuh-syscheckd` and `auditd` daemons work together properly.
+       In particular, it will be verified that when there is no `auditd` package installed on
+       the system, the directories monitored with `who-data` mode are monitored with `realtime`.
+       The `who-data` feature of the of the File Integrity Monitoring (`FIM`) system uses
+       the Linux Audit subsystem to get the information about who made the changes in a monitored directory.
+       These changes produce audit events that are processed by `syscheck` and reported to the manager.
+       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://man7.org/linux/man-pages/man8/auditd.8.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+
+tags:
+    - fim
+    - auditd
+'''
 import os
 import re
 import subprocess
@@ -74,20 +136,48 @@ def uninstall_install_audit():
 ])
 def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_install_audit,
                                   configure_environment, restart_syscheckd):
-    """Check folders monitored with Whodata change to Real-time if auditd is not installed
+    '''
+    description: Check if `FIM` switches the monitoring mode of the testing directories from `who-data`
+                 to `realtime` when the `auditd` package is not installed. For this purpose, the test
+                 will monitor several folders using `whodata` and uninstall the `authd` package.
+                 Once `FIM` starts, it will wait until the monitored directories using `whodata`
+                 are monitored with `realtime` verifying that the proper `FIM` events are generated.
+                 Finally, the test will install the `auditd` package again.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        uninstall_install_audit (fixture): Uninstall auditd before the test and install auditd again after the test is
-                                           executed.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-    """
+    wazuh_min_version: 4.2
 
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - uninstall_install_audit:
+            type: fixture
+            brief: Uninstall `auditd` before the test and install it again after the test run.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+
+    assertions:
+        - Verify that `FIM` switches the monitoring mode of the testing directories from `whodata` to `realtime`
+          if the `authd` package is not installed.
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Who-data engine could not start. Switching who-data to real-time.'
+
+    tags:
+        - realtime
+        - who-data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_cannot_start,

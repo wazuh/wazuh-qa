@@ -1,7 +1,68 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the `wazuh-syscheckd` and `auditd` daemons work together properly.
+       The `who-data` feature of the of the File Integrity Monitoring (`FIM`) system uses
+       the Linux Audit subsystem to get the information about who made the changes in a monitored directory.
+       These changes produce audit events that are processed by `syscheck` and reported to the manager.
+       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://man7.org/linux/man-pages/man8/auditd.8.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+
+tags:
+    - fim
+    - auditd
+'''
 import os
 import subprocess
 
@@ -47,19 +108,41 @@ def get_configuration(request):
 ])
 def test_audit_health_check(tags_to_apply, get_configuration,
                             configure_environment, restart_syscheckd):
-    """Check if the health check is passed.
+    '''
+    description: Check if the health check of the `auditd` daemon is passed.
+                 For this purpose, the test will monitor a testing folder using
+                 `who-data` and it will check that the health check passed
+                 verifying that the proper `FIM` event is generated.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that the `who-data` health check of `FIM` is passed.
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'Whodata health-check: Success.'
+
+    tags:
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -72,20 +155,42 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 ])
 def test_added_rules(tags_to_apply, get_configuration,
                      configure_environment, restart_syscheckd):
-    """Check if the specified folders are added to Audit rules list.
+    '''
+    description: Check if the specified folders are added to the `audit` rules list.
+                 For this purpose, the test will monitor several folders using `who-data`.
+                 Once `FIM` starts, the test will check if the a rule for every monitored
+                 directory is added verifying that the proper `FIM` event is generated.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that `FIM` adds `audit` rules for the monitored directories.
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Added audit rule for monitoring directory'
+
+    tags:
+        - audit-rules
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
     logger.info('Checking the event...')
@@ -105,20 +210,44 @@ def test_added_rules(tags_to_apply, get_configuration,
 ])
 def test_readded_rules(tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd):
-    """Check if the removed rules are added to Audit rules list.
+    '''
+    description: Check if the removed rules are added to the audit rules list.
+                 For this purpose, the test will monitor several folders using `who-data`.
+                 Once `FIM` starts, the test will remove the audit rule (using `auditctl`)
+                 and will wait until the manipulation event is triggered. Finally, the test
+                 will check that the `audit` rule is added again verifying that
+                 the proper `FIM` event is generated.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that `FIM` is able to re-add `audit` rules for the monitored directories.
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Added audit rule for monitoring directory'
+
+    tags:
+        - audit-rules
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -145,20 +274,45 @@ def test_readded_rules(tags_to_apply, get_configuration,
 ])
 def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                                   configure_environment, restart_syscheckd):
-    """Check if the rules are added to Audit when it restarts.
+    '''
+    description: Check if `FIM` is able to add the `audit` rules when the `auditd` daemon is restarted.
+                 For this purpose, the test will monitor a folder using `whodata`. Once FIM starts,
+                 the test will restart the `auditd` daemon and, it will wait until it has started.
+                 After `auditd` is running, the test will wait for the `FIM` `connect` and
+                 `load rule` events to be generated.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that `FIM` adds the `audit` rules for the monitored directories
+          after the `auditd` daemon restarting.
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'(6030): Audit: connected'
+        - r'.*Added audit rule for monitoring directory'
+
+    tags:
+        - audit-rules
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -188,19 +342,43 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 ])
 def test_move_rules_realtime(tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd):
-    """Check if the rules are changed to realtime when Audit stops.
+    '''
+    description: Check if `FIM` switches the monitoring mode of the testing directories from `who-data`
+                 to `realtime` when the `auditd` daemon stops. For this purpose, the test will monitor
+                 several folders using `whodata`. Once `FIM` starts, the test will stop the auditd service.
+                 Then it will wait until the monitored directories using `whodata` are monitored with
+                 `realtime`, verifying that the proper `FIM` events are generated.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    wazuh_min_version: 4.2
 
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+
+    assertions:
+        - Verify that `FIM` switches the monitoring mode of the testing directories from `whodata` to `realtime`
+
+    input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Directory added for real time monitoring'
+
+    tags:
+        - realtime
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -228,22 +406,46 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     ("custom_audit_key", "/testdir1")
 ])
 def test_audit_key(audit_key, path, get_configuration, configure_environment, restart_syscheckd):
-    """Check `<audit_key>` functionality by adding a audit rule and checking if alerts with that key are triggered when
-    a file is created.
+    '''
+    description: Check the `audit_key` functionality by adding a `audit` rule and checking if alerts with
+                 that key are triggered when a file is created. The `audit` keys are keywords that allow
+                 identifying which audit rules generate particular events. For this purpose, the test
+                 will manually add a rule for a monitored path using a custom `audit` key. After `FIM` starts,
+                 the test will check that the events that are generated with the custom key are processed.
 
-    Args:
-        audit_key (str): Name of the audit_key to monitor.
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    parameters:
+        - audit_key:
+            type: str
+            brief: Name of the `audit_key` to monitor.
+        - path:
+            type: str
+            brief: Path to the audit_key
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that the `Match audit_key` event of `FIM` is generated correctly.
+
+    input_description: A test case (audit_key) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'Match audit_key' (`key="wazuh_hc"` and `key="wazuh_fim"` must not appear in the event)
+
+    tags:
+        - audit-keys
+        - who-data
+    '''
     logger.info('Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
 
@@ -276,23 +478,49 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     ({'restart_audit_false'}, False)
 ])
 def test_restart_audit(tags_to_apply, should_restart, get_configuration, configure_environment, restart_syscheckd):
-    """Check `<restart_audit>` functionality by removing the plugin and monitoring audit to see if it restart and create
-    the file again.
+    '''
+    description: Check the `restart_audit` functionality by removing the `af_wazuh.conf` plugin used
+                 by the `auditd` daemon and monitoring the `auditd` process to see if it restart and
+                 and finally, it checks if the deleted plugin is created again.
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        should_restart (boolean): True if Auditd should restart, False otherwise
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the time before the and after the restart are equal when auditd has been restarted or if the time
-                    before and after the restart are different when auditd hasn't been restarted
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - should_restart:
+            type: bool
+            brief: True if the `auditd` daemon should restart, False otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
+    assertions:
+        - Verify that the `auditd` process is created again when restarting
+          this service by checking its creation time.
+        - Verify that the `auditd` process is not killed when the restart command
+          is not sent by checking its creation time.
+        - Verify that the `af_wazuh.conf` plugin of the `auditd` daemon
+          is created again after being deleted.
+
+    input_description: Two test cases (audit_key and restart_audit_false) are contained in external
+                       `YAML` file (wazuh_conf.yaml) which includes configuration settings for
+                       the `wazuh-syscheckd` daemon and testing directories to monitor.
+
+    expected_output:
+        - The creation time of the `auditd` daemon process.
+
+    tags:
+        - audit-keys
+        - who-data
+    '''
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":

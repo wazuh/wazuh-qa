@@ -9,6 +9,7 @@ Include paths:
   - "../../tests/integration/test_api"
   - "../../tests/integration/test_authd"
   - "../../tests/integration/test_cluster"
+  - "../../tests/integration/test_fim"
 
 Include regex:
   - "^test_.*py$"
@@ -45,6 +46,8 @@ Ignore paths:
   - "../../tests/integration/test_api/test_config/test_use_only_authd/data"
   - "../../tests/integration/test_authd/data"
   - "../../tests/integration/test_cluster/test_key_polling/data"
+  - "../../tests/integration/test_fim/test_files/test_ambiguous_confs/data"
+  - "../../tests/integration/test_fim/test_files/test_audit/data"
 
 Output fields:
   Module:

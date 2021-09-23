@@ -61,8 +61,8 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time/continuous monitoring on Linux (using the inotify system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the who-data information.
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
 
 tags:
     - fim

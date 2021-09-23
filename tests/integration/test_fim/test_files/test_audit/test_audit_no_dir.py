@@ -1,8 +1,68 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system doesn't add audit rules for
+       non-existing directories. The `who-data` feature of the `FIM` system uses the Linux Audit subsystem
+       to get the information about who made the changes in a monitored directory. These changes produce
+       audit events that are processed by `syscheck` and reported to the manager. The `FIM` capability
+       is managed by the `wazuh-syscheckd` daemon, which checks configured files for changes
+       to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://man7.org/linux/man-pages/man8/auditd.8.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+
+tags:
+    - fim
+    - auditd
+'''
 import os
 import shutil
 import sys
@@ -62,25 +122,49 @@ def extra_configuration_after_yield():
     {'audit_no_dir'}
 ])
 def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
-    """Monitor non-existent directory in whodata. Check that it is added to the rules after creating it.
+    '''
+    description: Monitor non-existent directory with `who-data` and check that it is added
+                 to the rules after creating it. For this purpose, the test will monitor
+                 a non-existing folder using `who-data`. Once FIM starts, the test
+                 will check that the audit rule is not added. Then, it will create
+                 the folder and wait until the rule is added again.
+                 The audit thread runs always a directory that is configured to be monitored
+                 in `who-data` mode. Does not matter if it exists at start-up or not. Once that
+                 thread is up, the audit rules are reloaded every 30 seconds (not configurable),
+                 so when the directory is created, it starts to be monitored.
 
-    The audit thread runs always a directory that is configured to be monitored in
-    who-data mode. Doesn't matter if it exists at start-up or not. Once that thread
-    is up, the audit rules are reloaded every 30 seconds (not configurable), so
-    when the directory is created, it starts to be monitored.
+    wazuh_min_version: 4.2
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the path of the event is wrong.
-    """
+    assertions:
+        - Verify that `FIM` does not add rules for non-existing directories.
+        - Verify that `FIM` is able to monitor a folder after it's creation.
 
+    input_description: A test case (audit_no_dir) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon
+                       and testing directories to monitor.
+
+    expected_output:
+        - r'.*Unable to add audit rule for'
+        - r'.*Added audit rule for monitoring directory'
+
+    tags:
+        - audit-rules
+        - who-data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Assert message is generated: Unable to add audit rule for ....
