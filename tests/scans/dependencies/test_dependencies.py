@@ -20,10 +20,10 @@ def test_python_dependencies_vuln_scan(pytestconfig):
     repo = pytestconfig.getoption('--repo')
     requirements_path = pytestconfig.getoption('--requirements-path')
     report_path = pytestconfig.getoption('--report-path')
-    requirements_url = f'https://raw.githubusercontent.com/wazuh/{repo}/{branch}/{requirements_path}'
+    requirements_url = f"https://raw.githubusercontent.com/wazuh/{repo}/{branch}/{requirements_path}"
     urlretrieve(requirements_url, REQUIREMENTS_TEMP_FILE.name)
     result = report_for_pytest(REQUIREMENTS_TEMP_FILE.name)
     REQUIREMENTS_TEMP_FILE.close()
     export_report(result, report_path)
     assert loads(result)['vulnerabilities_found'] == 0, f'Vulnerables packages were found, full report at: ' \
-                                                        f'{report_path}'
+                                                        f"{report_path}"
