@@ -45,7 +45,7 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.services import control_service
+from authd import validate_authd_response
 
 # Marks
 
@@ -78,52 +78,13 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module')
-def clean_client_keys_file_module():
-    """
-    Stops Wazuh and cleans any previus key in client.keys file at module scope.
-    """
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-@pytest.fixture(scope='module')
-def tear_down():
-    """
-    Roll back the daemon and client.keys state after the test ends.
-    """
-    yield
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
 # Test
 
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_valid_name_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
-def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_file_function,
-                             get_configuration, configure_environment, configure_sockets_environment,
+def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
                              connect_to_sockets_module, test_case, tear_down):
     """
         description:
@@ -168,19 +129,18 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
     for stage in test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
-        message = stage['input']
-        expected = stage['output']
         # Checking 'hostname' test case
         try:
             if stage['insert_hostname_in_query'] == 'yes':
                 stage['input'] = stage['input'].format(hostname)
-                stage['output'] = stage['output'].format(hostname)
+                if 'message' in stage['output']:
+                    stage['output']['message'] = stage['output']['message'].format(hostname)
         except KeyError:
             pass
         except IndexError:
             raise
 
-        receiver_sockets[0].send(message, size=False)
+        receiver_sockets[0].send(stage['input'], size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':
@@ -188,8 +148,8 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
 
-        if response[:len(expected)] != expected:
-            if stage.get('expected_fail') == 'yes':
-                pytest.xfail("Test expected to fail by configuration")
-            else:
-                raise AssertionError('Failed: Response is different from expected')
+        if stage.get('expected_fail') == 'yes':
+            with pytest.raises(Exception):
+                validate_authd_response(response, stage['output'])
+        else:
+            validate_authd_response(response, stage['output'])
