@@ -1,7 +1,7 @@
 import pytest
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor, make_callback
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from authd import DAEMON_NAME
 
@@ -57,7 +57,7 @@ def wait_for_authd_startup_module(get_configuration):
     """Wait until authd has begun"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
-                              callback=make_callback('Accepting connections on port 1515', prefix='.*',
+                              callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
                                                      escape=True),
                               error_message='Authd doesn´t started correctly.')
 
@@ -67,7 +67,7 @@ def wait_for_authd_startup_function():
     """Wait until authd has begun with function scope"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
-                              callback=make_callback('Accepting connections on port 1515', prefix='.*',
+                              callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
                                                      escape=True),
                               error_message='Authd doesn´t started correctly.')
 

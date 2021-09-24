@@ -132,21 +132,15 @@ def tear_down():
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
-def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_file_function,
-                             get_configuration, configure_environment, configure_sockets_environment,
-                             connect_to_sockets_module, test_case, tear_down):
+def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_module, clean_client_keys_file_function,
+                             wait_for_authd_startup_function, connect_to_sockets_module, test_case, tear_down):
     """
         description:
            "Check that every input message in authd port generates the adequate output"
         wazuh_min_version:
             4.2
         parameters:
-            - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - clean_client_keys_file_function:
-                type: fixture
-                brief: Cleans any previus key in client.keys file at function scope.
             - get_configuration:
                 type: fixture
                 brief: Get the configuration of the test.
@@ -156,6 +150,15 @@ def test_authd_force_options(clean_client_keys_file_module, clean_client_keys_fi
             - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets.
+             - clean_client_keys_file_module:
+                type: fixture
+                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
+            - clean_client_keys_file_function:
+                type: fixture
+                brief: Cleans any previus key in client.keys file at function scope.
+            - wait_for_authd_startup_function:
+                type: fixture
+                brief: Waits until Authd is accepting connections.
             - connect_to_sockets_module:
                 type: fixture
                 brief: Bind to the configured sockets at module scope.

@@ -451,7 +451,9 @@ def close_sockets(receiver_sockets):
 def connect_to_sockets_module(request):
     """Module scope version of connect_to_sockets."""
     receiver_sockets = connect_to_sockets(request)
+
     yield receiver_sockets
+
     close_sockets(receiver_sockets)
 
 
@@ -459,7 +461,9 @@ def connect_to_sockets_module(request):
 def connect_to_sockets_function(request):
     """Function scope version of connect_to_sockets."""
     receiver_sockets = connect_to_sockets(request)
+
     yield receiver_sockets
+
     close_sockets(receiver_sockets)
 
 
@@ -467,7 +471,9 @@ def connect_to_sockets_function(request):
 def connect_to_sockets_configuration(request, get_configuration):
     """Configuration scope version of connect_to_sockets."""
     receiver_sockets = connect_to_sockets(request)
+
     yield receiver_sockets
+
     close_sockets(receiver_sockets)
 
 

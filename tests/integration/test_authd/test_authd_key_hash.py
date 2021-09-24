@@ -110,8 +110,8 @@ def set_up_groups_keys(request):
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
-def test_ossec_auth_messages_with_key_hash(clean_client_keys_file_module, get_configuration, configure_environment,
-                                           configure_sockets_environment, set_up_groups_keys,
+def test_ossec_auth_messages_with_key_hash(get_configuration, configure_environment,  configure_sockets_environment,
+                                           clean_client_keys_file_module, set_up_groups_keys,
                                            wait_for_authd_startup_function, connect_to_sockets_function):
     """
         description:
@@ -119,9 +119,6 @@ def test_ossec_auth_messages_with_key_hash(clean_client_keys_file_module, get_co
         wazuh_min_version:
             4.2
         parameters:
-            - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
             - get_configuration:
                 type: fixture
                 brief: Get the configuration of the test.
@@ -131,6 +128,9 @@ def test_ossec_auth_messages_with_key_hash(clean_client_keys_file_module, get_co
             - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets.
+            - clean_client_keys_file_module:
+                type: fixture
+                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
             - set_up_groups_keys:
                 type: fixture
                 brief: Set pre-existent groups and keys.

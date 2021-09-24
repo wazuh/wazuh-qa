@@ -112,7 +112,7 @@ def register_previous_agent(test_case):
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
-def test_authd_force_options(clean_client_keys_file_module, configure_sockets_environment, configure_environment,
+def test_authd_force_options(configure_sockets_environment, configure_environment, clean_client_keys_file_module,
                              restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
                              register_previous_agent, tear_down, test_case, get_configuration):
     """
@@ -121,15 +121,15 @@ def test_authd_force_options(clean_client_keys_file_module, configure_sockets_en
         wazuh_min_version:
             4.2
         parameters:
-            - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
             - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets.
             - configure_environment:
                 type: fixture
                 brief: Configure a custom environment for testing.
+            - clean_client_keys_file_module:
+                type: fixture
+                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
             - restart_authd:
                 type: fixture
                 brief: Restart Authd daemon to force new configurations.
