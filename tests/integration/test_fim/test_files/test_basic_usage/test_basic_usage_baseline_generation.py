@@ -151,9 +151,9 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
         - Verify that a `FIM` addition event was generated during the initial scan.
 
     input_description: A test case (ossec_conf) is contained in external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
-
+                       which includes configuration settings for the `wazuh-syscheckd` daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
+                       
     expected_output:
         - r'.*Sending FIM event: (.+)$'
 

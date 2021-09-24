@@ -1,7 +1,71 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected files
+       and triggering alerts when these files are modified. Specifically, they will check if when a
+       monitored folder is deleted, the files inside it generate `FIM` events of the type `deleted`.
+       The FIM capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-agentd
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+
+tags:
+    - fim
+'''
 import os
 import shutil
 from collections import Counter
@@ -53,23 +117,59 @@ def get_configuration(request):
 def test_delete_folder(folder, file_list, filetype, tags_to_apply,
                        get_configuration, configure_environment,
                        restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheckd detects 'deleted' events from the files contained
-    in a folder that is being deleted.
+    '''
+    description: Check if the `wazuh-syscheckd` daemon detects 'deleted' events from the files contained
+                 in a folder that is being deleted. For example, the folder `/testdir` is monitored, and
+                 the files `r1`, `r2` and `r3` are inside `/testdir`. If `/testdir` is deleted, three
+                 events of type `deleted` must be generated, one for each of the regular files.
+                 For this purpose, the test will monitor a folder using the `scheduled` monitoring mode,
+                 create the testing files inside it, and change the system time until the next
+                 scheduled scan. Then, remove the monitored folder, and finally, the test
+                 verifies that the `deleted` events have been generated.
 
-    If we are monitoring /testdir and we have r1, r2, r3 withing /testdir, if we delete /testdir,
-    we must see 3 events of the type 'deleted'. One for each one of the regular files.
+    wazuh_min_version: 4.2
 
-    Parameters
-    ----------
-    folder : str
-        Directory where the files will be created.
-    file_list : list
-        Names of the files.
-    filetype : str
-        Type of the files that will be created.
-    """
+    parameters:
+        - folder:
+            type: str
+            brief: Path to the monitored testing directory.
+        - file_list:
+            type: list
+            brief: Used names for the testing files.
+        - filetype:
+            type: str
+            brief: Type of the testing file.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
+    assertions:
+        - Verify that when a monitored folder is deleted, the files inside it
+          generate `FIM` events of the type `deleted`.
+
+    input_description: A test case (ossec_conf) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     mode = get_configuration['metadata']['fim_mode']
@@ -80,8 +180,8 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                                     accum_results=len(file_list), error_message='Did not receive expected '
-                                                                                 '"Sending FIM event: ..." event').result()
+                                     accum_results=len(file_list),
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     for ev in events:
         validate_event(ev, mode=mode)
 
