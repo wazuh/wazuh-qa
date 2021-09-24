@@ -28,7 +28,7 @@ def validate_authd_response(response, expected):
         agent_key = response[1].split('\'')[1::2][0].split()
         id = agent_key[0]
         name = agent_key[1]
-        ip = agent_key [2]
+        ip = agent_key[2]
         key = agent_key[3]
         if 'id' in expected:
             assert id == expected['id'], f'Invalid id response \'{id}\' '

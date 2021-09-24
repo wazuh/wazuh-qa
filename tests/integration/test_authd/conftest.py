@@ -15,7 +15,7 @@ def truncate_client_keys_file():
     """
     try:
         control_service("stop", DAEMON_NAME)
-    except:
+    except Exception:
         pass
     truncate_file(CLIENT_KEYS_PATH)
 
@@ -41,6 +41,7 @@ def restart_authd(get_configuration):
     """
     Restart Authd.
     """
+    truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=DAEMON_NAME)
 
 
@@ -49,6 +50,7 @@ def restart_authd_function():
     """
     Restart Authd.
     """
+    truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=DAEMON_NAME)
 
 
@@ -57,9 +59,9 @@ def wait_for_authd_startup_module(get_configuration):
     """Wait until authd has begun"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
-                              callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
-                                                     escape=True),
-                              error_message='Authd doesn´t started correctly.')
+                      callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
+                                             escape=True),
+                      error_message='Authd doesn´t started correctly.')
 
 
 @pytest.fixture(scope='function')
@@ -67,9 +69,9 @@ def wait_for_authd_startup_function():
     """Wait until authd has begun with function scope"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
-                              callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
-                                                     escape=True),
-                              error_message='Authd doesn´t started correctly.')
+                      callback=make_callback('Accepting connections on port 1515', prefix=AUTHD_DETECTOR_PREFIX,
+                                             escape=True),
+                      error_message='Authd doesn´t started correctly.')
 
 
 @pytest.fixture(scope='module')

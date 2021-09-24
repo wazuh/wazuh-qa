@@ -47,6 +47,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import SocketController
 from wazuh_testing.tools.services import control_service
+from authd import validate_authd_response
 
 # Marks
 
@@ -133,8 +134,8 @@ def tear_down():
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_module, clean_client_keys_file_function,
-                             wait_for_authd_startup_function, connect_to_sockets_module, test_case, tear_down):
+                             restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
+                             test_case, tear_down):
     """
         description:
            "Check that every input message in authd port generates the adequate output"
@@ -150,18 +151,12 @@ def test_authd_force_options(get_configuration, configure_environment, configure
             - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets.
-             - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - clean_client_keys_file_function:
-                type: fixture
-                brief: Cleans any previus key in client.keys file at function scope.
             - wait_for_authd_startup_function:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
-            - connect_to_sockets_module:
+            - connect_to_sockets_configuration:
                 type: fixture
-                brief: Bind to the configured sockets at module scope.
+                brief: Bind to the configured sockets at configuration scope.
             - test_case:
                 type: list
                 brief: List with all the test cases for the test.
@@ -194,8 +189,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
                 raise ConnectionResetError('Manager did not respond to sent message!')
 
         if metadata['use_source_ip'] == 'yes' and test_case['ip_specified'] == 'no':
-            expected = "OSSEC K:'001 user1 127.0.0.1 "
+            expected = {"status": "success", "name": "user1", "ip": "127.0.0.1"}
         else:
             expected = stage['output']
 
-        assert response[:len(expected)] == expected, 'Failed: Response is different from expected'
+        validate_authd_response(response, expected)
