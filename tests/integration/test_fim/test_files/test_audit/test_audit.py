@@ -135,7 +135,8 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'Whodata health-check: Success.'
@@ -182,7 +183,8 @@ def test_added_rules(tags_to_apply, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'.*Added audit rule for monitoring directory'
@@ -239,7 +241,8 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'.*Added audit rule for monitoring directory'
@@ -303,7 +306,8 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'Audit: connected'
@@ -370,7 +374,8 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'.*Directory added for real time monitoring'
@@ -437,7 +442,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     input_description: A test case (audit_key) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'Match audit_key' (`key="wazuh_hc"` and `key="wazuh_fim"` must not appear in the event)
@@ -512,7 +518,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     input_description: Two test cases (audit_key and restart_audit_false) are contained in external
                        `YAML` file (wazuh_conf.yaml) which includes configuration settings for
-                       the `wazuh-syscheckd` daemon and testing directories to monitor.
+                       the `wazuh-syscheckd` daemon.
 
     expected_output:
         - The creation time of the `auditd` daemon process.

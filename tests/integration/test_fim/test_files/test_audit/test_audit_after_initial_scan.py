@@ -146,7 +146,8 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored defined
+                       in this module.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' (Initial scan when restarting Wazuh)
@@ -202,8 +203,7 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
         - Verify that `FIM` can recover from loosing its connection to the `auditd` daemon.
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       which includes configuration settings for the `wazuh-syscheckd` daemon.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' (Initial scan when restarting Wazuh)
