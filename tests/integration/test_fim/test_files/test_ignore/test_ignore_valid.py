@@ -18,7 +18,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = pytest.mark.tier(level=2)
 
 # variables
-
+ignore_valid_timeout = 15
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf.yaml')
@@ -110,7 +110,7 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+        event = wazuh_log_monitor.start(timeout=ignore_valid_timeout * 2,
                                         callback=callback_detect_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
@@ -118,7 +118,7 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+            ignored_file = wazuh_log_monitor.start(timeout=ignore_valid_timeout * 2,
                                                    callback=callback_ignore).result()
             if ignored_file == os.path.join(folder, filename):
                 break
