@@ -43,7 +43,7 @@ import subprocess
 
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 # TODO Move to utils
 from wazuh_testing.tools.services import control_service
@@ -85,8 +85,6 @@ def set_up_groups_keys(request):
     """
     Set pre-existent groups and keys.
     """
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-
     keys = request.param.get('pre_existent_keys', [])
 
     # Stop Wazuh
@@ -95,7 +93,7 @@ def set_up_groups_keys(request):
     try:
         # The client.keys file is cleaned always
         # but the keys are added only if pre_existent_keys has values
-        with open(client_keys_path, "w") as keys_file:
+        with open(CLIENT_KEYS_PATH, "w") as keys_file:
             if(keys is not None):
                 for key in keys:
                     keys_file.write(key + '\n')

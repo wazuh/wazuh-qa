@@ -1,5 +1,9 @@
 import re
 
+
+DAEMON_NAME = 'wazuh-authd'
+
+
 def validate_authd_response(response, expected):
     response = response.split(sep=" ", maxsplit=1)
     status = response[0]

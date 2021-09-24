@@ -84,23 +84,6 @@ def get_configuration(request):
     """Get configurations from the module"""
     return request.param
 
-@pytest.fixture(scope='module')
-def tear_down():
-    """
-    Roll back the daemon and client.keys state after the test ends.
-    """
-    yield
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-
 
 @pytest.fixture(scope='function')
 def register_previous_agent(test_case):
@@ -130,7 +113,7 @@ def register_previous_agent(test_case):
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
 def test_authd_force_options(clean_client_keys_file_module, configure_sockets_environment, configure_environment,
-                             restart_authd, wait_for_authd_startup, connect_to_sockets_configuration,
+                             restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
                              register_previous_agent, tear_down, test_case, get_configuration):
     """
         description:
@@ -141,27 +124,27 @@ def test_authd_force_options(clean_client_keys_file_module, configure_sockets_en
             - clean_client_keys_file_module:
                 type: fixture
                 brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
             - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets.
-            - connect_to_sockets_module:
+            - configure_environment:
                 type: fixture
-                brief: Bind to the configured sockets at module scope.
+                brief: Configure a custom environment for testing.
+            - restart_authd:
+                type: fixture
+                brief: Restart Authd daemon to force new configurations.
+            - wait_for_authd_startup_module:
+                type: fixcture
+                brief: Wait until Authd is accepting connections.
+            - connect_to_sockets_configuration:
+                type: fixture
+                brief: Bind to the configured sockets at configuration scope.
             - register_previous_agent:
                 type: fixture
                 brief: Register agents to simulate a scenario with pre existent keys.
             - tear_down:
                 type: fixture
                 brief: Roll back the daemon and client.keys state after the test ends.
-            restart_authd:
-                type: fixture
-                brief: Restart Authd daemon to force new configurations.
-            wait_for_authd_startup:
-                type: fixcture
-                brief: Wait until Authd is accepting connections.
             - get_configuration:
                 type: fixture
                 brief: Get the configuration of the test.

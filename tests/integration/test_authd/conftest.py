@@ -3,8 +3,9 @@ from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback
 from wazuh_testing.tools.services import control_service
+from authd import DAEMON_NAME
 
-DAEMON_NAME = 'wazuh-authd'
+
 AUTHD_STARTUP_TIMEOUT = 30
 
 
@@ -42,10 +43,31 @@ def restart_authd(get_configuration):
 
 
 @pytest.fixture(scope='module')
-def wait_for_authd_startup(get_configuration):
+def wait_for_authd_startup_module(get_configuration):
     """Wait until authd has begun"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
                               callback=make_callback('Accepting connections on port 1515', prefix='.*',
                                                      escape=True),
                               error_message='Authd doesn´t started correctly.')
+
+
+@pytest.fixture(scope='function')
+def wait_for_authd_startup_function():
+    """Wait until authd has begun with function scope"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor.start(timeout=AUTHD_STARTUP_TIMEOUT,
+                              callback=make_callback('Accepting connections on port 1515', prefix='.*',
+                                                     escape=True),
+                              error_message='Authd doesn´t started correctly.')
+
+
+@pytest.fixture(scope='module')
+def tear_down():
+    """
+    Roll back the daemon and client.keys state after the test ends.
+    """
+    yield
+    # Stop Wazuh
+    control_service('stop')
+    truncate_file(CLIENT_KEYS_PATH)
