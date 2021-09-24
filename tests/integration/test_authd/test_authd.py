@@ -52,25 +52,8 @@ def get_configuration(request):
     yield request.param
 
 
-@pytest.fixture(scope="module")
-def clean_client_keys_file():
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
 def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, wait_for_authd_startup):
+                             configure_sockets_environment, connect_to_sockets_module, wait_for_authd_startup_module):
     """Check that every input message in authd port generates the adequate output
 
     Raises:

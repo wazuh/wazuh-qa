@@ -116,7 +116,7 @@ def set_up_groups_keys(request):
 
 def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_environment,
                              configure_sockets_environment_function, connect_to_sockets_function,
-                             wait_for_authd_startup):
+                             wait_for_authd_startup_module):
     """
         description:
             "Check that every input message in trough local authd port generates the adequate response to worker"
@@ -138,7 +138,7 @@ def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_en
             - connect_to_sockets_function:
                 type: fixture
                 brief: Bind to the configured sockets at function scope.
-            - wait_for_authd_startup:
+            - wait_for_authd_startup_module:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
         assertions:

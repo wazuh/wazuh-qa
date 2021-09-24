@@ -130,7 +130,7 @@ def get_configuration(request):
 
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
-                             connect_to_sockets_module, wait_for_authd_startup):
+                             connect_to_sockets_module, wait_for_authd_startup_module):
     """
         description:
            "Check that every message from the agent is correctly formatted for master, and every master

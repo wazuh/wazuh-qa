@@ -9,12 +9,14 @@ from authd import DAEMON_NAME
 AUTHD_STARTUP_TIMEOUT = 30
 
 
-def clean_client_keys_file():
+def truncate_client_keys_file():
     """
     Cleans any previus key in client.keys file.
     """
-    truncate_file(CLIENT_KEYS_PATH)
-    yield
+    try:
+        control_service("stop", DAEMON_NAME)
+    except:
+        pass
     truncate_file(CLIENT_KEYS_PATH)
 
 
@@ -23,7 +25,7 @@ def clean_client_keys_file_function():
     """
     Cleans any previus key in client.keys file at function scope.
     """
-    clean_client_keys_file()
+    truncate_client_keys_file()
 
 
 @pytest.fixture(scope='module')
@@ -31,11 +33,19 @@ def clean_client_keys_file_module():
     """
     Cleans any previus key in client.keys file at module scope.
     """
-    clean_client_keys_file()
+    truncate_client_keys_file()
 
 
 @pytest.fixture(scope='module')
 def restart_authd(get_configuration):
+    """
+    Restart Authd.
+    """
+    control_service("restart", daemon=DAEMON_NAME)
+
+
+@pytest.fixture(scope='function')
+def restart_authd_function():
     """
     Restart Authd.
     """
