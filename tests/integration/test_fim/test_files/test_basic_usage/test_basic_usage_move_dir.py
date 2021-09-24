@@ -63,10 +63,10 @@ def extra_configuration_after_yield():
 
 @pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, \
                 triggers_delete_event, triggers_add_event', [
-    (testdir4, testdir2, 'subdir', {'ossec_conf'}, False, True),
-    (testdir1, PREFIX, 'subdir', {'ossec_conf'}, True, False),
-    (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
-    (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
+    (testdir4, testdir2, 'subdir', {'wazuh_conf'}, False, True),
+    (testdir1, PREFIX, 'subdir', {'wazuh_conf'}, True, False),
+    (testdir3, testdir2, 'subdir2', {'wazuh_conf'}, True, True),
+    (testdir3, testdir2, f'subdir3{os.path.sep}', {'wazuh_conf'}, True, True)
 ])
 def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event,
                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):

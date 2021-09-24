@@ -12,7 +12,7 @@ from typing import List, Any, Set
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools import WAZUH_PATH, GEN_WAZUH, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -89,23 +89,24 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     Generate a configuration file for Wazuh.
 
     Args:
-        args (list, optional): Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
+        args (list, optional): Arguments to generate manager.conf (install_type, distribuition, version). Default `None`
 
     Returns:
-        (ET.ElementTree): New Wazuh configuration generated from 'gen_ossec.sh'.
+        (ET.ElementTree): New Wazuh configuration generated from 'gen_wazuh.sh'.
     """
-    gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
-    wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
+    gen_wazuh_args = args if args else ['conf', 'manager', 'rhel', '7']
+    wazuh_config = check_output([GEN_WAZUH] + gen_wazuh_args).decode(encoding='utf-8', errors='ignore')
 
     return ET.ElementTree(ET.fromstring(wazuh_config))
 
 
 def get_wazuh_conf() -> List[str]:
     """
-    Get current `ossec.conf` file content.
+    Get current configuration file content.
 
     Returns
-        List of str: A list containing all the lines of the `ossec.conf` file.
+        List of str: A list containing all the lines of the configuration ('manager.conf' or 'agent.conf)'.
+
     """
     with open(WAZUH_CONF) as f:
         lines = f.readlines()
@@ -132,10 +133,12 @@ def get_api_conf(path) -> dict:
 
 def write_wazuh_conf(wazuh_conf: List[str]):
     """
-    Write a new configuration in 'ossec.conf' file.
+    Write a new configuration file.
 
     Args:
-        wazuh_conf (list or str): Lines to be written in the ossec.conf file.
+        wazuh_conf (list or str): Lines to be written in configuration file.
+                                 If it's a Server, the file name is 'manager.conf'
+                                 else the file name is 'agent.conf'.
     """
     with open(WAZUH_CONF, 'w') as f:
         f.writelines(wazuh_conf)
@@ -218,26 +221,24 @@ def set_section_wazuh_conf(sections, template=None):
                 tag.tail = "\n    "
         tag.tail = "\n  "
 
-    def purge_multiple_root_elements(str_list: List[str], root_delimiter: str = "</wazuh_config>") -> List[str]:
+    def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</wazuh_config>") -> List[str]:
         """
         Remove from the list all the lines located after the root element ends.
 
-        This operation is needed before attempting to convert the list to ElementTree because if the ossec.conf had more
+        This operation is needed before attempting to convert the list to ElementTree because if the configuration had more
         than one `<wazuh_config>` element as root the conversion would fail.
 
         Args:
-            str_list (list or str): The content of the ossec.conf file in a list of str.
-            root_delimiter (str, optional): The expected string to identify when the first root element ends, 
-                                            by default "</wazuh_config>"
+            str_list (list or str): The content of the configuration file (manager.conf or agent.conf) in a list of str.
+            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</wazuh_config>"
 
         Returns:
-            list of str : The first N lines of the specified str_list until the root_delimiter is found. 
-                        The rest of the list will be ignored.
+            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
             line_counter += 1
-            if root_delimiter in line:
+            if root_delimeter in line:
                 return str_list[0:line_counter]
         else:
             return str_list
@@ -250,7 +251,7 @@ def set_section_wazuh_conf(sections, template=None):
         `purge_multiple_root_elements` to ensure there is only one root element.
 
         Args:
-            str_list (list of str): A list of strings with every line of the ossec conf.
+            str_list (list of str): A list of strings with every line of the configuration file (manager.conf or agent.conf)
 
         Returns:
             ElementTree: A ElementTree object with the data of the `str_list`
@@ -263,25 +264,25 @@ def set_section_wazuh_conf(sections, template=None):
         Turn an ElementTree object into a list of str.
 
         Args:
-            elementTree (ElementTree): A ElementTree object with all the data of the ossec.conf.
+            elementTree (ElementTree): A ElementTree object with all the data of  the configuration file (manager.conf or agent.conf).
 
         Returns:
-            (list of str): A list of str containing all the lines of the ossec.conf.
+            (list of str): A list of str containing all the lines of the configuration file.
         """
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
         """
-        Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
+        Check if a certain configuration section exists in configuration file (manager.conf or agent.conf) and returns the corresponding block if exists.
         (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
         section but different attributes).
 
         Args:
-            wazuh_conf (ElementTree): An ElementTree object with all the data of the ossec.conf
+            wazuh_conf (ElementTree): An ElementTree object with all the data of the configuration file (manager.conf or agent.conf)
             section (str): Name of the tag or configuration section to search for. For example: vulnerability_detector
             attributes (list\<dict\> ): List with section attributes. Needed to check if the section exists with all the searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
         Returns:
-            ElementTree: An ElementTree object with the section data found in ossec.conf. None if nothing was found.
+            ElementTree: An ElementTree object with the section data found in configuration file (manager.conf or agent.conf). None if nothing was found.
         """
         if attributes is None:
             return wazuh_conf.find(section)
@@ -548,7 +549,7 @@ def get_wazuh_local_internal_options() -> List[str]:
     """Get current `internal_options.conf` file content.
 
     Returns
-        List of str: A list containing all the lines of the `ossec.conf` file.
+        List of str: A list containing all the lines of the `local_internal_options.conf` or  file.
     """
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS) as f:
         lines = f.readlines()
@@ -559,7 +560,7 @@ def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
     """Set up Wazuh `local_internal_options.conf` file content.
 
     Returns
-        List of str: A list containing all the lines of the `local_interal_options.conf` file.
+        List of str: A list containing all the lines of the `local_internal_options.conf` file.
     """
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as f:
         f.writelines(wazuh_local_internal_options)

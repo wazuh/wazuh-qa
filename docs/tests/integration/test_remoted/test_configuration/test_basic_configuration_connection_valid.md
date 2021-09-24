@@ -19,7 +19,7 @@ To confirm `protocol` option allows valid values.
 - Fail if remoted does not start correctly.
 - Fail if remoted does not show expected warning if use more than one protocol for syslog connection.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match the 
-  introduced configuration on ossec.conf.
+  introduced configuration from the manager.conf.
 
 ## Code documentation
 

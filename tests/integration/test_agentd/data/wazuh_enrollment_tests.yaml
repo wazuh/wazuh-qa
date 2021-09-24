@@ -111,26 +111,6 @@
     agent_name: "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" 
   expected_error: "ERROR: Invalid agent name"
 -
-  name: "SSL - Auto Negotiation TLSv1_1"
-  description: "Try auto negotiation option using TLSv1_1"
-  enrollment:
-    id: 1
-    protocol: "TLSv1_1"
-    response: "OSSEC K:'001 test_agent_1 any TopSecret'\n"
-  configuration:
-    agent_name: "test_agent_1"
-    auto_method: "yes"
--
-  name: "SSL - Auto Negotiation TLSv1_2"
-  description: "Try auto negotiation option using TLSv1_2"
-  enrollment:
-    response: "OSSEC K:'001 test_agent_1 any TopSecret'\n"
-    id: 1
-    protocol: "TLSv1_2"
-  configuration:
-    agent_name: "test_agent_1"
-    auto_method: "yes"
--
   name: "SSL - Auto Negotiation Negative"
   description: "Try TLSv1_1 without auto_negotiation"
   enrollment:

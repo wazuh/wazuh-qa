@@ -3,18 +3,43 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import sys
 import platform
 import subprocess
-import sys
+
+
+def get_version():
+    if platform.system() in ['Windows', 'win32']:
+        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
+            version = f.read()
+            return version[:version.rfind('\n')]
+
+    else:  # Linux, sunos5, darwin, aix...
+        return subprocess.check_output([os.path.join(WAZUH_PATH, 'bin', 'wazuh-control'),
+                                        'info', '-v'], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+
+
+def get_service():
+    if platform.system() in ['Windows', 'win32']:
+        return 'wazuh-agent'
+
+    else:  # Linux, sunos5, darwin, aix...
+        service = subprocess.check_output([
+          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"], stderr=subprocess.PIPE).decode('utf-8').strip()
+
+    return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+
+
+BASE_SHARED_CONF = 'shared.conf'
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
-    WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
+    WAZUH_CONF = os.path.join(WAZUH_PATH, 'agent.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'wazuh.log')
     PREFIX = os.path.join('c:', os.sep)
-    GEN_OSSEC = None
+    GEN_WAZUH = None
     WAZUH_API_CONF = None
     WAZUH_SECURITY_CONF = None
     API_LOG_FILE_PATH = None
@@ -24,21 +49,24 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
 
 else:
-
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
         PREFIX = os.path.join('/', 'private', 'var', 'root')
-        GEN_OSSEC = None
+        GEN_WAZUH = None
     else:
         WAZUH_PATH = os.path.join("/", "var", "ossec")
-        GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
+        GEN_WAZUH = os.path.join(WAZUH_SOURCES, 'gen_wazuh.sh')
         PREFIX = os.sep
 
-    WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
-    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
+    if get_service() == 'wazuh-manager':
+        WAZUH_CONF_RELATIVE = os.path.join('etc', 'manager.conf')
+    else:
+        WAZUH_CONF_RELATIVE = os.path.join('etc', 'agent.conf')
+
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
+    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'wazuh.log')
@@ -49,6 +77,7 @@ else:
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    REMOTE_AGENT_CONF = os.path.join(WAZUH_PATH, BASE_SHARED_CONF)
 
     try:
         import grp
@@ -59,32 +88,8 @@ else:
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
-
-def get_version():
-
-    if platform.system() in ['Windows', 'win32']:
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            return version[:version.rfind('\n')]
-
-    else:  # Linux, sunos5, darwin, aix...
-        return subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-        ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
-
-
-def get_service():
-    if platform.system() in ['Windows', 'win32']:
-        return 'wazuh-agent'
-
-    else:  # Linux, sunos5, darwin, aix...
-        service = subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
-        ], stderr=subprocess.PIPE).decode('utf-8').strip()
-
-    return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
-
-
+state_path = os.path.join(WAZUH_PATH, 'var', 'run')
+db_path = os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
@@ -110,7 +115,7 @@ MODULESD_DOWNLOAD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'download')
 MODULESD_CONTROL_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'control')
 MODULESD_KREQUEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'krequest')
 MODULESD_C_INTERNAL_SOCKET_PATH = os.path.join(CLUSTER_SOCKET_PATH, 'c-internal.sock')
-ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH,'ar')
+ACTIVE_RESPONSE_SOCKET_PATH = os.path.join(QUEUE_ALERTS_PATH, 'ar')
 
 WAZUH_SOCKETS = {
     'wazuh-agentd': [],

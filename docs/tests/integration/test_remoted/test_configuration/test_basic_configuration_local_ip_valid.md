@@ -18,7 +18,7 @@ To confirm `local_ip` can be configured to any ip address of all available netwo
 
 - Fail if remoted does not start correctly.
 - Fail if API query `{protocol}://{host}:{port}/manager/configuration?section=remote` doesn't match the introduced 
-  configuration on ossec.conf.
+  configuration from the manager.conf.
 
 ## Code documentation
 
