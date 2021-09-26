@@ -254,7 +254,7 @@ def download_wpk(get_configuration):
     agent_version = metadata['agent_version']
     current_plaform = sys_platform.lower()
     protocol = 'http://' if metadata['use_http'] else 'https://'
-    wpk_repo = 'packages-dev.wazuh.com/trash/wpk/'
+    wpk_repo = global_parameters.wpk_package_path[0]
     architecture = 'x86_64'
     wpk_file_path = ''
     # Generating file name
