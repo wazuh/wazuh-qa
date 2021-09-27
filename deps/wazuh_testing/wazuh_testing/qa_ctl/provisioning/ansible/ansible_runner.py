@@ -1,4 +1,4 @@
-import ansible_runner
+import sys
 import shutil
 from tempfile import gettempdir
 
@@ -8,6 +8,8 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import AnsibleException
 
+if sys.platform != 'win32':
+    import ansible_runner
 
 class AnsibleRunner:
     """Allow to run ansible playbooks in the indicated hosts.

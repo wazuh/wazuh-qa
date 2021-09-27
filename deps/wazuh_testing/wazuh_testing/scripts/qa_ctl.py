@@ -8,7 +8,6 @@ import yaml
 
 from jsonschema import validate
 from tempfile import gettempdir
-from getpass import getpass
 
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
@@ -21,7 +20,6 @@ from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGener
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning.local_actions import download_local_wazuh_qa_repository, run_local_command
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible import check_windows_ansible_credentials
 
 
 DEPLOY_KEY = 'deployment'
@@ -84,28 +82,16 @@ def set_qactl_logging(qactl_configuration):
         qactl_logger.logging_file = qactl_configuration.logging_file
         qactl_logger.update_configuration()
 
+
 def set_parameters(parameters):
     """Update script parameters and add extra information.
 
     Args:
         (argparse.Namespace): Object with the user parameters.
     """
-    def ask_user_credentials(parameters):
-        """Ask and set user and password credentials"""
-        parameters.user = input('Enter the username of Windows host: ')
-        parameters.user_password = getpass(f"Enter the password of {parameters.user} user: ")
-
     #  Set logging level
     level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
     qactl_logger.set_level(level)
-
-    if parameters.run_test and parameters.windows:  # Automatic mode
-        ask_user_credentials(parameters)
-    elif parameters.config and parameters.windows:  # Manual mode
-        configuration_data = read_configuration_data(parameters.config)
-
-        if DEPLOY_KEY in configuration_data:
-            ask_user_credentials(parameters)
 
 
 def validate_parameters(parameters):
@@ -130,12 +116,6 @@ def validate_parameters(parameters):
 
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
-
-    # Check if Windows user credentials are correct
-    if 'user' in parameters and 'user_password' in parameters:
-        if not check_windows_ansible_credentials(parameters.user, parameters.user_password):
-            raise QAValueError('Windows credentials are not correct. Please check user and password and try again',
-                               qactl_logger.error, QACTL_LOGGER)
 
     # Check version parameter
     if parameters.version is not None:
@@ -163,12 +143,13 @@ def validate_parameters(parameters):
             version = get_last_wazuh_version()
             qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
 
-        download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
+        qa_branch = '1900-qa-ctl-windows'
+        download_local_wazuh_qa_repository(branch=qa_branch, path=os.path.join(gettempdir(), 'wazuh-qa'))
 
         for test in parameters.run_test:
-            if 'test exists' not in run_local_command(f"qa-docs -e {test} -I {WAZUH_QA_FILES}/tests/"):
-                raise QAValueError(f"{test} does not exist in {WAZUH_QA_FILES}/tests/", qactl_logger.error,
-                                   QACTL_LOGGER)
+            tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
+            if 'test exists' not in run_local_command(f"qa-docs -e {test} -I {tests_path}"):
+                raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
     qactl_logger.info('Input parameters validation has passed successfully')
 
@@ -197,9 +178,6 @@ def main():
 
     parser.add_argument('-d', '--debug', action='count', default=0, help='Run in debug mode. You can increase the debug'
                                                                          ' level with more [-d+]')
-    parser.add_argument('-w', '--windows', action='store_true', help='Flag to indicate that the deployment environment '
-                        'will be deployed on native Windows.')
-
     arguments = parser.parse_args()
 
     set_parameters(arguments)
@@ -243,14 +221,8 @@ def main():
     try:
         if DEPLOY_KEY in configuration_data:
             deploy_dict = configuration_data[DEPLOY_KEY]
-            local_environment_info = {
-                'system': 'windows' if arguments.windows else 'unix',
-                'user': arguments.user  if'user' in arguments else None,
-                'password': arguments.user_password if 'user_password' in arguments else None
-            }
             instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
-
-            instance_handler.run(local_environment_info)
+            instance_handler.run()
             launched['instance_handler'] = True
 
         if PROVISION_KEY in configuration_data:
