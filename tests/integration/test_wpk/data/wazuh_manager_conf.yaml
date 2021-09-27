@@ -18,6 +18,33 @@
             value: WPK_REPOSITORY
         - chunk_size:
             value: CHUNK_SIZE
+      - section: sca
+          elements:
+              - enabled:
+                value: 'no'
+      - section: rootcheck
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: syscheck
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: wodle
+        attributes:
+          - name: 'syscollector'
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: auth
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: rule_test
+        elements:
+          - enabled:
+              value: 'no'
+
     - tags:
       - all
       apply_to_modules:
@@ -39,3 +66,29 @@
             value: CHUNK_SIZE
         - max_threads:
             value: MAX_THREADS
+      - section: sca
+          elements:
+              - enabled:
+                value: 'no'
+      - section: rootcheck
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: syscheck
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: wodle
+        attributes:
+          - name: 'syscollector'
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: auth
+        elements:
+          - disabled:
+              value: 'yes'
+      - section: rule_test
+        elements:
+          - enabled:
+              value: 'no'
