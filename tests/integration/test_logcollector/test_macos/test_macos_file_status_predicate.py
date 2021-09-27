@@ -7,9 +7,10 @@ import pytest
 import re
 
 # from wazuh_testing.logcollector import DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools.monitoring import FileMonitor, wait_file, make_callback
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, wait_file
+from wazuh_testing.logcollector import prefix as logcollector_prefix
 from wazuh_testing.tools.file import read_json, truncate_file
 
 # Marks
@@ -46,14 +47,9 @@ wazuh_log_monitor = None
 @pytest.fixture(scope='module')
 def startup_cleanup():
     """Truncate ossec.log and remove logcollector's file_status.json file."""
+    truncate_file(WAZUH_LOCAL_INTERNAL_OPTIONS)
     truncate_file(LOG_FILE_PATH)
     os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
-
-
-@pytest.fixture(scope='module')
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
 
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
@@ -62,28 +58,21 @@ def get_configuration(request):
     return request.param
 
 
-def callback_log_bad_predicate(line):
+def callback_log_bad_predicate():
     """Check if 'line' has the macOS ULS bad predicate message on it."""
-    match = re.match(r'.*Execution error \'log:', line)
-    if match:
-        return True
-    return None
+    return make_callback(pattern="Execution error 'log:", prefix=logcollector_prefix)
 
 
-def callback_log_exit_log(line):
+def callback_log_exit_log():
     """Check if 'line' has the macOS ULS log stream exited message on it."""
-    match = re.match(r'.*macOS \'log stream\' process exited, pid:', line)
-    if match:
-        return True
-    return None
+    return make_callback(pattern="macOS 'log stream' process exited, pid:", prefix=logcollector_prefix)
 
 
 def test_macos_file_status_predicate(startup_cleanup,
-                                     configure_local_internal_options,
+                                     configure_local_internal_options_module,
                                      get_configuration,
                                      configure_environment,
                                      daemons_handler):
-
     """Checks that logcollector does not store 'macos'-formatted localfile data since its predicate is erroneous.
 
     The agent is connected to the authd simulator and uses a dummy localfile (/Library/Ossec/logs/active-responses.log)
@@ -96,12 +85,12 @@ def test_macos_file_status_predicate(startup_cleanup,
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     wazuh_log_monitor.start(timeout=file_monitor_timeout,
-                            callback=callback_log_bad_predicate,
+                            callback=callback_log_bad_predicate(),
                             error_message='Expected log that matches the regex '
                                           '".*Execution error \'log:" could not be found')
 
     wazuh_log_monitor.start(timeout=file_monitor_timeout,
-                            callback=callback_log_exit_log,
+                            callback=callback_log_exit_log(),
                             error_message='Expected log that matches the regex '
                                           '".*macOS \'log stream\' process exited, pid:" could not be found')
 

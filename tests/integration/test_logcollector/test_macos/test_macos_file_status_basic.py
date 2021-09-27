@@ -7,10 +7,12 @@ import re
 import pytest
 import wazuh_testing.logcollector as logcollector
 
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH, LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools.monitoring import FileMonitor, wait_file, make_callback
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, wait_file
+from wazuh_testing.logcollector import prefix as logcollector_prefix
 from wazuh_testing.tools.file import read_json, truncate_file
+from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
@@ -33,7 +35,8 @@ sample_log_length = 100
 # Time in seconds to update the file_status.json
 file_status_update_time = 4
 
-local_internal_options = { 'logcollector.vcheck_files': file_status_update_time,
+local_internal_options = { 'logcollector.debug': 2,
+                           'logcollector.vcheck_files': file_status_update_time,
                            'logcollector.sample_log_length': sample_log_length }
 
 macos_message = {   'command': 'logger',
@@ -42,22 +45,17 @@ macos_message = {   'command': 'logger',
 # Maximum waiting time in seconds to find the logs on ossec.log
 file_monitor_timeout = 30
 
-wazuh_log_monitor = None
-
+# Expected message to be used on the "callback_macos_uls_log" callback
 expected_message = logcollector.format_macos_message_pattern(macos_message['command'], macos_message['message'])
+
+wazuh_log_monitor = None
 
 
 # Fixtures
 @pytest.fixture(scope='module')
 def startup_cleanup():
     """Truncate ossec.log and remove logcollector's file_status.json file."""
-    truncate_file(LOG_FILE_PATH)
-    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
-
-@pytest.fixture(scope='module')
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
+    truncate_file(WAZUH_LOCAL_INTERNAL_OPTIONS)
 
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
@@ -66,34 +64,47 @@ def get_configuration(request):
     return request.param
 
 
-def wait_macos_uls_log(line):
+@pytest.fixture(scope='module')
+def restart_required_logcollector_daemons():
+    """Wazuh logcollector daemons handler."""
+
+    required_logcollector_daemons = ['wazuh-logcollector']
+
+    for daemon in required_logcollector_daemons:
+        control_service('stop', daemon=daemon)
+
+    truncate_file(LOG_FILE_PATH)
+    os.remove(LOGCOLLECTOR_FILE_STATUS_PATH) if os.path.exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
+
+    for daemon in required_logcollector_daemons:
+        control_service('start', daemon=daemon)
+
+    yield
+
+    for daemon in required_logcollector_daemons:
+        control_service('stop', daemon=daemon)
+
+
+def callback_macos_uls_log():
     """Callback function to wait for the macOS' ULS log collected by logcollector."""
-    if re.search(expected_message, line):
-        return True
-
-    return None
+    return make_callback(pattern=expected_message, prefix=logcollector_prefix, escape=False)
 
 
-def wait_logcollector_log_stream(line):
-    """Check if 'line' has the logcollector's macOS ULS module start message."""
-    if re.search(r'Monitoring macOS logs with: (.+?)log stream', line):
-        return True
+def callback_logcollector_log_stream_log():
+    """Check for logcollector's macOS ULS module start message."""
+    return make_callback(pattern='Monitoring macOS logs with:(.+?)log stream', prefix=logcollector_prefix, escape=False)
 
-    return None
 
-def wait_macos_key_file_status(line):
-    """Check if 'line' has the 'macos' key on it."""
-    if re.search(r'macos', line):
-        return True
-
-    return None
+def callback_file_status_macos_key(line):
+    """Check for 'macos' key."""
+    return make_callback(pattern='"macos"', prefix='')
 
 
 def test_macos_file_status_basic(startup_cleanup,
-                                 configure_local_internal_options, 
+                                 configure_local_internal_options_module, 
                                  get_configuration,
                                  configure_environment,
-                                 daemons_handler):
+                                 restart_required_logcollector_daemons):
     """Checks if logcollector stores correctly "macos"-formatted localfile data.
 
     This test uses logger tool and a custom log to generate an ULS event. The agent is connected to the authd simulator
@@ -112,13 +123,13 @@ def test_macos_file_status_basic(startup_cleanup,
 
     # Watches the ossec.log to check when logcollector starts the macOS ULS module
     wazuh_log_monitor.start(timeout=file_monitor_timeout,
-                            callback=wait_logcollector_log_stream,
+                            callback=callback_logcollector_log_stream_log(),
                             error_message='Logcollector did not start')
 
     logcollector.generate_macos_logger_log(macos_message['message'])
 
     wazuh_log_monitor.start(timeout=file_monitor_timeout,
-                            callback=wait_macos_uls_log,
+                            callback=callback_macos_uls_log(),
                             error_message='MacOS ULS log was not found')
 
     # Waits for file_status.json to be created, with a timeout about the time needed to update the file
@@ -127,7 +138,7 @@ def test_macos_file_status_basic(startup_cleanup,
     # Watches the file_status.json file for the "macos" key
     file_status_monitor = FileMonitor(LOGCOLLECTOR_FILE_STATUS_PATH)
     file_status_monitor.start(timeout=file_monitor_timeout,
-                            callback=wait_macos_key_file_status,
+                            callback=callback_file_status_macos_key,
                             error_message="The 'macos' key could not be found on the file_status.json file")
 
     file_status_json = read_json(LOGCOLLECTOR_FILE_STATUS_PATH)
