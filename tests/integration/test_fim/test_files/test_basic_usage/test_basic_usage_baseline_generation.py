@@ -21,6 +21,7 @@ modules:
 
 components:
     - agent
+    - manager
 
 daemons:
     - wazuh-agentd
@@ -63,6 +64,10 @@ pytest_args:
     - fim_mode:
         realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the `who-data` information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
     - fim
@@ -153,7 +158,7 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
     input_description: A test case (ossec_conf) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon and, it
                        is combined with the testing directories to be monitored defined in this module.
-                       
+
     expected_output:
         - r'.*Sending FIM event: (.+)$'
 

@@ -20,6 +20,7 @@ modules:
 
 components:
     - agent
+    - manager
 
 daemons:
     - wazuh-agentd
@@ -62,6 +63,10 @@ pytest_args:
     - fim_mode:
         realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the `who-data` information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
     - fim

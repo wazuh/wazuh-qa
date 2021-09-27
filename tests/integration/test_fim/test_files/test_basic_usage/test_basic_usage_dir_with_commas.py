@@ -20,6 +20,7 @@ modules:
 
 components:
     - agent
+    - manager
 
 daemons:
     - wazuh-agentd
@@ -62,6 +63,10 @@ pytest_args:
     - fim_mode:
         realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the `who-data` information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
     - fim
@@ -117,7 +122,7 @@ def test_directories_with_commas(directory, get_configuration, put_env_variables
                  whose name contains commas. For this purpose, the test will monitor a testing folder
                  using the `scheduled` monitoring mode, and create the testing files inside it.
                  Then, perform CUD (creation, update, and delete) operations and finally verify that
-                 the `FIM` events are generated correctly. 
+                 the `FIM` events are generated correctly.
 
     wazuh_min_version: 4.2
 
