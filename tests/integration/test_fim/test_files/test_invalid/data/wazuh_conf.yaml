@@ -19,6 +19,20 @@
         value: "aaaa"
         attributes:
         - type: "sregexxxx"
+    - section: sca
+        elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+        elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+        attributes:
+        - name: 'syscollector'
+        elements:
+        - disabled:
+            value: 'yes'
 # conf 2
 - tags:
   - invalid_no_regex
@@ -40,6 +54,20 @@
         value: "aaaa"
         attributes:
         - type: "sregexxxx"
+    - section: sca
+        elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+        elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+        attributes:
+        - name: 'syscollector'
+        elements:
+        - disabled:
+            value: 'yes'
 # conf 3
 - tags:
   - invalid_scan
@@ -57,6 +85,20 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
+    - section: sca
+        elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+        elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+        attributes:
+        - name: 'syscollector'
+        elements:
+        - disabled:
+            value: 'yes'
 # conf 4
 - tags:
   - invalid_scan
@@ -74,6 +116,20 @@
         value: TEST_DIRECTORIES
         attributes:
         - check_all: 'yes'
+    - section: sca
+        elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+        elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+        attributes:
+        - name: 'syscollector'
+        elements:
+        - disabled:
+            value: 'yes'
 
 # conf 5
 - tags:
@@ -93,3 +149,17 @@
             value: 'yes'
         - entries:
             value: '-10'
+    - section: sca
+        elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+        elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+        attributes:
+        - name: 'syscollector'
+        elements:
+        - disabled:
+            value: 'yes'
