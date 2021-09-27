@@ -74,7 +74,7 @@ class Config():
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
         self.__read_test_cases_field()
-        self.__set_documentation_path(output_path)
+        self.__set_documentation_path(output_path.replace('\\','/'))
 
         if test_names is not None:
             # When a name is passed, it is using just a single test.
