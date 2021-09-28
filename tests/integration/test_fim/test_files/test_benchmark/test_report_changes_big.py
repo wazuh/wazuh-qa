@@ -184,7 +184,7 @@ def write_csv(data):
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.benchmark
 @pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf'}
+    {'wazuh_conf'}
 ])
 @pytest.mark.parametrize('n_files', [
     10, 100, 1000, 2000

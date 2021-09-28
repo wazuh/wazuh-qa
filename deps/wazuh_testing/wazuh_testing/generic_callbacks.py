@@ -3,7 +3,7 @@ from wazuh_testing.tools import WAZUH_CONF, monitoring
 GENERIC_CALLBACK_ERROR_MESSAGE = 'The expected error output has not been produced'
 
 def callback_invalid_value(option, value, prefix, severity='ERROR'):
-    """Create a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -18,7 +18,7 @@ def callback_invalid_value(option, value, prefix, severity='ERROR'):
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 def callback_invalid_attribute(option, attribute, value, prefix, severity='WARNING'):
-    """Create a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.
@@ -35,7 +35,7 @@ def callback_invalid_attribute(option, attribute, value, prefix, severity='WARNI
 
 
 def callback_error_in_configuration(severity, prefix, conf_path=WAZUH_CONF):
-    """Create a callback to detect configuration error in ossec.conf file.
+    """Create a callback to detect configuration error in manager.conf file.
 
     Args:
         severity (str): ERROR or CRITICAL.
@@ -65,7 +65,7 @@ def callback_invalid_conf_for_localfile(field, prefix,  severity='ERROR'):
 
 
 def callback_error_invalid_value_for(option, prefix):
-    """Create a callback to detect invalid values in ossec.conf file.
+    """Create a callback to detect invalid values in manager.conf file.
 
     Args:
         option (str): Wazuh manager configuration option.

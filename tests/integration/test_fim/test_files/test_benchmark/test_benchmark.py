@@ -53,10 +53,10 @@ def get_configuration(request):
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/1449')
 @pytest.mark.benchmark
 @pytest.mark.parametrize('files, folder, tags_to_apply', [
-    (file_list[0:10], testdir1, {'ossec_conf'}),
-    (file_list[0:100], testdir1, {'ossec_conf'}),
-    (file_list[0:1000], testdir1, {'ossec_conf'}),
-    (file_list, testdir1, {'ossec_conf'})
+    (file_list[0:10], testdir1, {'wazuh_conf'}),
+    (file_list[0:100], testdir1, {'wazuh_conf'}),
+    (file_list[0:1000], testdir1, {'wazuh_conf'}),
+    (file_list, testdir1, {'wazuh_conf'})
 ])
 def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd,

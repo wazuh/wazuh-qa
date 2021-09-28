@@ -61,7 +61,7 @@ Also, there are optional parameters related to schedule:
 
 ## Configuration example
 
-To use this integration, it is necessary to add the configuration to ossec.conf:
+To use this integration, it is necessary to add the configuration to the configuration file:
 
 ```shell script
 <gcp-pubsub>
@@ -129,7 +129,7 @@ echo 'wazuh_modules.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 echo 'analysisd.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time (only for agents)
-sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
+sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" $WAZUH_CONF
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
@@ -165,7 +165,7 @@ echo 'analysisd.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Avoid agent disconnections when travelling in time
 brew install gnu-sed
-gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /Library/Ossec/etc/ossec.conf
+gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /Library/Ossec/etc/agent.conf
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf

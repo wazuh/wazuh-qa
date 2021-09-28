@@ -24,7 +24,7 @@ from typing import Sequence, Union, Generator, Any
 import pytest
 from jsonschema import validate
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, WAZUH_CONF
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 
@@ -952,14 +952,13 @@ def change_internal_options(param, value, opt_path=None, value_regex='[0-9]*'):
 
 
 def change_conf_param(param, value):
-    """Change the value of a given parameter in ossec.conf.
+    """Change the value of a given parameter in configuration file (manager.conf  or agent.conf)
 
     Args:
         param (str): parameter to change.
         value (obj): new value.
     """
-    conf_path = os.path.join(WAZUH_PATH, 'ossec.conf') if sys.platform == 'win32' else \
-        os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+    conf_path = WAZUH_CONF
 
     with open(conf_path, "r") as sources:
         lines = sources.readlines()

@@ -57,7 +57,7 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
     It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
     we should have 3 inode entries and a path count of 4.
     """
-    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+    check_apply_test({'wazuh_conf'}, get_configuration['tags'])
 
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                   callback=callback_entries_path_count,

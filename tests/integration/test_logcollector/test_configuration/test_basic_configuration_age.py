@@ -11,7 +11,7 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF_RELATIVE, WAZUH_CONF
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 import subprocess as sb
@@ -27,17 +27,16 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 wazuh_component = get_service()
 
 
-
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
-    wazuh_configuration = 'ossec.conf'
+    wazuh_configuration = WAZUH_CONF
     prefix = AGENT_DETECTOR_PREFIX
     no_restart_windows_after_configuration_set = True
     force_restart_after_restoring = True
 
 else:
     location = '/tmp/testing.txt'
-    wazuh_configuration = 'etc/ossec.conf'
+    wazuh_configuration = WAZUH_CONF_RELATIVE
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 parameters = [

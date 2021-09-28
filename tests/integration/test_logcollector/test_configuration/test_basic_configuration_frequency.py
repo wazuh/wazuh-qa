@@ -10,7 +10,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
 import wazuh_testing.generic_callbacks as gc
-from wazuh_testing.tools import get_service, LOG_FILE_PATH
+from wazuh_testing.tools import get_service, LOG_FILE_PATH, WAZUH_CONF_RELATIVE, WAZUH_CONF
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.logcollector import LOGCOLLECTOR_DAEMON
@@ -34,13 +34,13 @@ if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
     force_restart_after_restoring = True
     command = 'tasklist'
-    wazuh_configuration = 'ossec.conf'
+    wazuh_configuration = WAZUH_CONF
     prefix = AGENT_DETECTOR_PREFIX
 
 else:
     command = 'ps -aux'
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-    wazuh_configuration = 'etc/ossec.conf'
+    wazuh_configuration = WAZUH_CONF_RELATIVE
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': f'{command}', 'FREQUENCY': '3'},

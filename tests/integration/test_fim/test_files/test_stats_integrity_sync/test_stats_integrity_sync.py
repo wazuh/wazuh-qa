@@ -47,10 +47,8 @@ state_configuration = {
 class Cases(Enum):
     """
         Case 0: In this case, we start from an empty database.
-
         Case 1: Once the synchronization process is completed,
         a random checksum in the database will be changed.
-
         Case 2: Modifies all the checksums of the database entries.
     """
     case0 = 0
@@ -80,14 +78,12 @@ def modify_local_internal_options():
 
 def db_query(agent, query):
     """Run a query against wazuh_db for a specific agent.
-
     Parameters
     ----------
     agent : str
         Database identifier.
     query : str
         Query to be executed.
-
     Returns
     -------
     str
@@ -105,12 +101,10 @@ def db_query(agent, query):
 
 def get_total_disk_info(daemon):
     """Get total disk read/write info from /proc/[pid]/io.
-
     Parameters
     ----------
     daemon : str
         Daemon for whom we will get the stats.
-
     Returns
     -------
     tuple of str
@@ -141,12 +135,10 @@ def get_total_disk_info(daemon):
 
 def get_total_cpu_info(daemon):
     """Get the total CPU usage by the specified daemon.
-
     Parameters
     ----------
     daemon : str
         Daemon to be monitored.
-
     Returns
     -------
     int
@@ -163,12 +155,10 @@ def get_total_cpu_info(daemon):
 
 def get_stats(daemon):
     """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
-
     Parameters
     ----------
     daemon : str
         Daemon for whom we will get the stats.
-
     Returns
     -------
     list of str
@@ -195,14 +185,12 @@ def get_stats(daemon):
 
 def calculate_stats(old_stats, current_stats):
     """Get CPU, RAM, disk read and disk write stats using ps and pidstat.
-
     Parameters
     ----------
     old_stats : dict
         Dict with the previous daemon stats.
     current_stats : dict
         Dict with the current daemon stats.
-
     Returns
     -------
     list of str
@@ -223,12 +211,10 @@ def calculate_stats(old_stats, current_stats):
 
 def n_attempts(agent):
     """Return n_attempts in sync_info table.
-
     Parameters
     ----------
     agent : str
         Check the number of attempts for this agent.
-
     Returns
     -------
     int
@@ -245,12 +231,10 @@ def n_attempts(agent):
 
 def n_completions(agent):
     """Return n_completions in sync_info table.
-
     Parameters
     ----------
     agent : str
         Check the number of completions for this agent.
-
     Returns
     -------
     int
@@ -267,7 +251,6 @@ def n_completions(agent):
 
 def get_files_with_checksum(agent, checksum, total_files=5000):
     """Get the number of files with the specified checksum in the agent database.
-
     Parameters
     ----------
     agent : str
@@ -276,7 +259,6 @@ def get_files_with_checksum(agent, checksum, total_files=5000):
         Specified checksum.
     total_files : int
         Total files of this test.
-
     Returns
     -------
     str
@@ -291,7 +273,6 @@ def get_files_with_checksum(agent, checksum, total_files=5000):
 def get_agents():
     """These function extract all agent ids in the client.keys file. It will not extract the ids that are removed (!)
     or not active.
-
     Returns
     -------
     dict
@@ -348,12 +329,10 @@ def replace_conf(sync_eps, fim_eps, directory, buffer):
 
 def check_all_n_completions(agents_list):
     """Return min value of n_completions between all agents.
-
     Parameters
     ----------
     agents_list : list
         List of agent ids.
-
     Returns
     -------
     int
@@ -368,7 +347,6 @@ def check_all_n_completions(agents_list):
 
 def modify_database(agent_id, directory, prefix, total_files, modify_file, modify_all, restore_all):
     """Modify the database files
-
     Parameters
     ----------
     agent_id : str
@@ -410,14 +388,12 @@ def modify_database(agent_id, directory, prefix, total_files, modify_file, modif
 
 def append_to_dataframe(filename, df):
     """This function append the dataframe to the filename (csv)
-
     Parameters
     ----------
     filename : str
         CSV filename.
     df : pandas.DataFrame
         Current dataframe
-
     Returns
     -------
     pandas.DataFrame
@@ -434,7 +410,6 @@ def append_to_dataframe(filename, df):
 def agent_checker(case, agent_id, agents_dict, attempts_info, database_params, configuration, num_files):
     """Check that the current agent is restarted. When it has been restarted, marks the start time of the agent.
     If n_completions of the agent_id is greater than 0, the info_collector must be called.
-
     Parameters
     ----------
     case : int
@@ -489,9 +464,7 @@ def agent_checker(case, agent_id, agents_dict, attempts_info, database_params, c
 def info_collector(agents_dict, agent_id, attempts_info, configuration, actual_n_attempts,
                    actual_n_completions, num_files, state='complete', checksum=None):
     """Write the stats of the agent during the test.
-
     This stats will be written when the agent finish its test process (n_completions(agent_id) > 0).
-
     Parameters
     ----------
     agents_dict : dict
@@ -535,7 +508,6 @@ def info_collector(agents_dict, agent_id, attempts_info, configuration, actual_n
 
 def finish_agent_info(agents_dict):
     """Write the agent info after all agents were complete.
-
     Parameters
     ----------
     agents_dict : dict
@@ -559,7 +531,6 @@ def finish_agent_info(agents_dict):
 def state_collector(agents_dict, configuration, stats_path, attempts_info):
     """Get the stats of the .state files in the WAZUH_PATH/var/run folder.
     We can define the stats to get from each daemon in the daemons_dict.
-
     Parameters
     ----------
     agents_dict : dict of shared dict
@@ -639,7 +610,6 @@ def state_collector(agents_dict, configuration, stats_path, attempts_info):
 
 def stats_collector(filename, daemon, agents_dict, attempts_info, configuration):
     """Collect the stats of the current daemon until all agents have finished the integrity process.
-
     Parameters
     ----------
     filename : str
@@ -692,12 +662,10 @@ def stats_collector(filename, daemon, agents_dict, attempts_info, configuration)
 
 def protocol_detection(ossec_conf_path=WAZUH_CONF):
     """Detect the protocol configuration.
-
     Parameters
     ----------
     ossec_conf_path : str
-        ossec.conf path.
-
+        manager.conf path.
     Returns
     -------
     str

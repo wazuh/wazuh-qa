@@ -21,7 +21,7 @@ _We are using **CentOS** for this example:_
 
 - Install **Wazuh**
 
-- Disable all components in `ossec.conf`
+- Disable all components in the configuration.
 
 - Disable firewall (only for **CentOS**)
 
@@ -52,7 +52,7 @@ echo 'wazuh_db.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
 
 # Avoid agent disconnections when travelling in time (only for agents)
-sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
+sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" $WAZUH_CONF
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
@@ -80,7 +80,7 @@ python3 wazuh-qa/deps/wazuh_testing/setup.py install
 
 - Install **Wazuh**
 
-- Disable all components in `ossec.conf`
+- Disable all components in the configuration.
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
@@ -94,7 +94,7 @@ choco install jq
 ```
 
 
-- Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
+- Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\agent.conf`
 
 __xml__
 ```
@@ -134,7 +134,7 @@ python3 wazuh-qa/deps/wazuh_testing/setup.py install
 
 - Install **Wazuh**
 
-- Disable all components in `ossec.conf`
+- Disable all components in the configuration.
 
 - Install Python and the development tools
 
@@ -159,7 +159,7 @@ echo 'wazuh_db.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
 # Avoid agent disconnections when travelling in time
 brew install gnu-sed
 gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g"
-/Library/Ossec/etc/ossec.conf
+/Library/Ossec/etc/agent.conf
 
 # Disable log rotation
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf

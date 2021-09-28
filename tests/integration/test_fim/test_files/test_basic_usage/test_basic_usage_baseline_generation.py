@@ -70,7 +70,7 @@ def test_wait_until_baseline(get_configuration, configure_environment, restart_s
     It creates a file, checks if the baseline has generated before the file addition event, and then
     if this event has generated.
     """
-    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+    check_apply_test({'wazuh_conf'}, get_configuration['tags'])
 
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message
     create_file(REGULAR, testdir1, f'test_{int(round(time() * 10 ** 6))}', content='')

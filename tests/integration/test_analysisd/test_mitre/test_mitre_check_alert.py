@@ -50,4 +50,3 @@ def test_mitre_check_alert(get_configuration, configure_local_rules, restart_waz
         with pytest.raises(jsonschema.exceptions.ValidationError):
             event = wazuh_alert_monitor.start(timeout=30, callback=callback_detect_mitre_event).result()
             validate_mitre_event(event)
-

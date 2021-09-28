@@ -46,7 +46,7 @@ def get_configuration(request):
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf'}
+    {'wazuh_conf'}
 ])
 def test_create_after_delete(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                              wait_for_fim_start):

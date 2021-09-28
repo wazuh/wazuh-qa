@@ -60,8 +60,8 @@ def clean_directories(request):
 # tests
 @pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8948')
 @pytest.mark.parametrize('folder, tags_to_apply', [
-    (testdir1, {'ossec_conf'}),
-    (testdir2, {'ossec_conf'})
+    (testdir1, {'wazuh_conf'}),
+    (testdir2, {'wazuh_conf'})
 ])
 def test_rename(folder, tags_to_apply,
                 get_configuration, clean_directories, configure_environment,
