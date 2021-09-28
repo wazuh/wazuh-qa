@@ -195,7 +195,7 @@ def test_basic_usage_wildcards_runtime(subfolder_name, file_name, tags_to_apply,
         - r'.*Sending FIM event: (.+)$' (`added`, `modified` and `deleted` events)
 
     tags:
-        - realtime
+        - scheduled
         - who-data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
