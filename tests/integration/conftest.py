@@ -210,6 +210,14 @@ def pytest_addoption(parser):
         type=str,
         help="add file to the HTML report"
     )
+    parser.addoption(
+        "--wpk_package_path",
+        action="append",
+        metavar="wpk_package_path",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package path"
+    )
 
 
 def pytest_configure(config):
@@ -270,6 +278,10 @@ def pytest_configure(config):
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
 
+   # Set WPK package path
+    global_parameters.wpk_package_path = config.getoption("--wpk_package_path")
+    if global_parameters.wpk_package_path:
+        global_parameters.wpk_package_path = global_parameters.wpk_package_path
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
