@@ -30,6 +30,7 @@ daemons:
 
 os_platform:
     - linux
+    - windows
 
 os_version:
     - Amazon Linux 1
@@ -48,7 +49,6 @@ os_version:
     - Ubuntu Bionic
     - Ubuntu Trusty
     - Ubuntu Xenial
-    - Windows
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#max-files-per-second
