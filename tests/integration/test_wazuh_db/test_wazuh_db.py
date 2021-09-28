@@ -192,6 +192,13 @@ def remove_agent(agent_id):
     assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
 
 
+@pytest.fixture(scope="module")
+def start_wazuh_db():
+    control_service('restart', daemon="wazuh-db")
+    yield
+    control_service('stop', daemon="wazuh-db")
+
+
 # Tests
 
 @pytest.mark.parametrize('test_case',
@@ -273,7 +280,7 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
 
 
-def test_wazuh_db_range_checksum(configure_sockets_environment, connect_to_sockets_module, prepare_range_checksum_data):
+def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module, prepare_range_checksum_data):
     """Check the checksum range during the synchroniation of the DBs"""
 
     command = """agent 003 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
