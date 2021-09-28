@@ -80,8 +80,7 @@ class QAInfraestructure:
                         if network != self.network_address:
                             exception_message = 'Two different networks where found for docker containers when only ' \
                                                 f"one network is allowed: {network} != {self.network_address}"
-                            raise QAValueError(exception_message, QAInfraestructure.LOGGER.error, QACTL_LOGGER,
-                                               QACTL_LOGGER)
+                            raise QAValueError(exception_message, QAInfraestructure.LOGGER.error, QACTL_LOGGER)
 
                         if not self.docker_network:
                             # Try to get the DOCKER_NETWORK_NAME network, if it fails, try to create it.
@@ -121,11 +120,8 @@ class QAInfraestructure:
 
     def run(self):
         """Run the instances deployment when the local host is UNIX."""
-        QAInfraestructure.LOGGER.info('Running Unix deployment')
         QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
-
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
-
         QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
 
     def halt(self):

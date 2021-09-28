@@ -1,4 +1,5 @@
 import os
+import sys
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
@@ -130,21 +131,25 @@ class QATestRunner():
 
     def run(self):
         """Run testing threads. One thread per TestLauncher object"""
-        runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
-        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests")
+        if sys.platform == 'win32':
+            print("DOCKER RUN WINDOWS TESTING")
+        else:
+            runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 
-        for runner_thread in runner_threads:
-            runner_thread.start()
+            QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests")
 
-        QATestRunner.LOGGER.info('Waiting for tests to finish')
+            for runner_thread in runner_threads:
+                runner_thread.start()
 
-        for runner_thread in runner_threads:
-            runner_thread.join()
+            QATestRunner.LOGGER.info('Waiting for tests to finish')
 
-        QATestRunner.LOGGER.info('The test run is finished')
+            for runner_thread in runner_threads:
+                runner_thread.join()
+
+            QATestRunner.LOGGER.info('The test run is finished')
 
     def destroy(self):
         """"Destroy all the temporary files created during a running QAtestRunner instance"""
-        if os.path.exists(self.inventory_file_path):
+        if os.path.exists(self.inventory_file_path) and sys.platform != 'win32':
             os.remove(self.inventory_file_path)

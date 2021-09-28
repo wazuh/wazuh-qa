@@ -1,4 +1,5 @@
 import os
+import sys
 
 from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
@@ -96,7 +97,7 @@ class QAProvisioning():
 
         if 'wazuh_deployment' in host_provision_info:
             deploy_info = host_provision_info['wazuh_deployment']
-            health_check = True if 'health_check' not in host_provision_info['wazuh_deployment'] \
+            health_check = False if 'health_check' not in host_provision_info['wazuh_deployment'] \
                 else host_provision_info['wazuh_deployment']['health_check']
             install_target = None if 'target' not in deploy_info else deploy_info['target']
             install_type = None if 'type' not in deploy_info else deploy_info['type']
@@ -140,23 +141,23 @@ class QAProvisioning():
                     installation_files_parameters['repository'] = repository
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
                 elif s3_package_url is None and local_package_path is not None:
                     installation_files_parameters['local_package_path'] = local_package_path
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
-                                                      inventory_file_path=self.inventory_file_path,
-                                                      install_mode=install_type, hosts=current_host,
-                                                      server_ip=manager_ip,
-                                                      qa_ctl_configuration=self.qa_ctl_configuration)
+                                                    inventory_file_path=self.inventory_file_path,
+                                                    install_mode=install_type, hosts=current_host,
+                                                    server_ip=manager_ip,
+                                                    qa_ctl_configuration=self.qa_ctl_configuration)
             if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
@@ -168,7 +169,7 @@ class QAProvisioning():
                 # Wait for Wazuh initialization before health_check
                 health_check_sleep_time = 60
                 QAProvisioning.LOGGER.info(f"Waiting {health_check_sleep_time} seconds before performing the "
-                                           f"healthcheck in {current_host} host")
+                                        f"healthcheck in {current_host} host")
                 sleep(health_check_sleep_time)
                 deployment_instance.health_check()
 
@@ -180,7 +181,7 @@ class QAProvisioning():
                 else qa_framework_info['wazuh_qa_branch']
 
             qa_instance = QAFramework(qa_branch=wazuh_qa_branch,
-                                      ansible_output=self.qa_ctl_configuration.ansible_output)
+                                    ansible_output=self.qa_ctl_configuration.ansible_output)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
@@ -203,20 +204,25 @@ class QAProvisioning():
 
     def run(self):
         """Provision all hosts in a parallel way"""
-        self.__check_hosts_connection()
-        provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
-                             for _, host_value in self.provision_info['hosts'].items()]
-        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
-        for runner_thread in provision_threads:
-            runner_thread.start()
+        if sys.platform == 'win32':
+            print("DOCKER RUN WINDOWS PROVISIONING")
+        else:
+            self.__check_hosts_connection()
+            provision_threads = [ThreadExecutor(self.__process_config_data,
+                                                parameters={'host_provision_info': host_value})
+                                for _, host_value in self.provision_info['hosts'].items()]
+            QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
-        for runner_thread in provision_threads:
-            runner_thread.join()
+            for runner_thread in provision_threads:
+                runner_thread.start()
 
-        QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
+            for runner_thread in provision_threads:
+                runner_thread.join()
+
+            QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object"""
-        if os.path.exists(self.inventory_file_path):
+        if os.path.exists(self.inventory_file_path) and sys.platform != 'win32':
             os.remove(self.inventory_file_path)
