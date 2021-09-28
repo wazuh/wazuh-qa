@@ -48,6 +48,7 @@ os_version:
     - Ubuntu Bionic
     - Ubuntu Trusty
     - Ubuntu Xenial
+    - Windows
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#max-files-per-second
@@ -62,9 +63,6 @@ pytest_args:
     - fim_mode:
         value: "whodata"
         brief: Uses whodata file monitoring option.
-
-tags:
-    - 
 '''
 
 
@@ -120,9 +118,6 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
     description: 
         Check that FIM sleeps for one second when the option max_files_per_second is enabled
     
-    wazuh_min_verion:
-        4.2
-    
     parameters:
         - inode_collision:
             type: boolean
@@ -145,12 +140,6 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
         - No output if max_files_per_second=0
         - In case not events are found it Raises:
             TimeoutError: If an expected event couldn't be captured.
-    tags:
-        -
-    """
-
-    """TODO Fix test - It does not properly check that the ammount of tests found in a second matches max_files_per_second
-       TODO Add assertions - It works by raising exceptions instead of assertions.
     """
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
