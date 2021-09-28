@@ -32,24 +32,6 @@ os_platform:
     - linux
     - windows
 
-os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
-    - Arch Linux
-    - CentOS 6
-    - CentOS 7
-    - CentOS 8
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
-    - Red Hat 8
-    - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
-
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#max-files-per-second
 
