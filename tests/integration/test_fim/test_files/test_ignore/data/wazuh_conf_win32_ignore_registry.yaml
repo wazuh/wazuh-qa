@@ -13,10 +13,6 @@
     elements:
     - disabled:
         value: 'yes'
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'yes'
   - section: active-response
     elements:
     - disabled:
@@ -68,10 +64,6 @@
     - enabled:
         value: 'no'
   - section: rootcheck
-    elements:
-    - disabled:
-        value: 'yes'
-  - section: syscheck
     elements:
     - disabled:
         value: 'yes'
