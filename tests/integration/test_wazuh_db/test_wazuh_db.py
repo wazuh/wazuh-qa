@@ -5,7 +5,7 @@ import json
 import pytest
 import yaml
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, WAZUH_DB_PREFIX
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
@@ -34,10 +34,9 @@ for file in os.listdir(global_message_files):
 # Variables
 log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor_paths = []
-
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
+WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT = 20
 
 # mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
 # monitored_sockets_params is a List of daemons to start with optional ManInTheMiddle to monitor
@@ -289,9 +288,15 @@ def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, 
     # Checksum Range calculus expected the first time
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
-    log_monitor.start(timeout=20, callback=wait_range_checksum_calculated)
+    log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
+                      callback=make_callback('range checksum: Time: ', prefix=WAZUH_DB_PREFIX,
+                                             escape=True),
+                      error_message='Checksum Range wasn´t calculate the first time')
 
     # Checksum Range avoid expected the next times
     receiver_sockets[0].send(command, size=True)
     response = receiver_sockets[0].receive(size=True).decode()
-    log_monitor.start(timeout=20, callback=wait_range_checksum_avoided)
+    log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
+                      callback=make_callback('range checksum avoided', prefix=WAZUH_DB_PREFIX,
+                                             escape=True),
+                      error_message='Checksum Range wasn´t avoided the second time')
