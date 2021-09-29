@@ -11,7 +11,7 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.tools import file
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
+from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
 
 class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
@@ -137,7 +137,7 @@ class QATestRunner():
 
     def run(self):
         """Run testing threads. One thread per TestLauncher object"""
-
+        # If Windows, then run a Linux docker container to run testing stage with qa-ctl testing
         if sys.platform == 'win32':
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
             tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
@@ -145,17 +145,10 @@ class QATestRunner():
             file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
             try:
-                debug_arg = '' if self.qa_ctl_configuration.debug_level == 0 else \
-                    ('-d' if self.qa_ctl_configuration.debug_level == 1 else '-dd')
-                docker_args = f"1900-qa-ctl-windows {tmp_config_file_name} --no-validation-logging {debug_arg}"
-                QATestRunner.LOGGER.debug('Creating a Linux container for launching the tests')
-
-                run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
-
-                QATestRunner.LOGGER.debug('The container for launching the tests was run sucessfully')
+                QATestRunner.LOGGER.info('Creating a Linux container for launching the tests')
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level)
             finally:
                 file.remove_file(tmp_config_file)
-
         else:
             runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 

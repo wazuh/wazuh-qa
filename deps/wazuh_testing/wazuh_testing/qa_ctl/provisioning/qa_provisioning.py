@@ -19,7 +19,7 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.tools import file
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
+from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
 
 
 class QAProvisioning():
@@ -209,7 +209,7 @@ class QAProvisioning():
 
     def run(self):
         """Provision all hosts in a parallel way"""
-
+        # If Windows, then run a Linux docker container to run provisioning stage with qa-ctl provision
         if sys.platform == 'win32':
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
             tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
@@ -217,19 +217,10 @@ class QAProvisioning():
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
             try:
-                debug_arg = '' if self.qa_ctl_configuration.debug_level == 0 else \
-                    ('-d' if self.qa_ctl_configuration.debug_level == 1 else '-dd')
-
-                docker_args = f"1900-qa-ctl-windows {tmp_config_file_name} --no-validation-logging {debug_arg}"
-
-                QAProvisioning.LOGGER.debug('Creating a Linux container for provisioning the instances')
-
-                run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
-
-                QAProvisioning.LOGGER.debug('The container for provisioning the instances was run sucessfully')
+                QAProvisioning.LOGGER.info('Creating a Linux container for provisioning the instances')
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level)
             finally:
                 file.remove_file(tmp_config_file)
-
         else:
             self.__check_hosts_connection()
             provision_threads = [ThreadExecutor(self.__process_config_data,

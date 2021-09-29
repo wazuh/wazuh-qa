@@ -1,4 +1,6 @@
 import subprocess
+import os
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -13,6 +15,9 @@ def run_local_command(command):
 
     Args:
         command (string): Command to run.
+
+    Raises:
+        QAValueError: If the run command has failed (rc != 0).
     """
     run = subprocess.Popen(command, shell=True)
 
@@ -48,3 +53,21 @@ def download_local_wazuh_qa_repository(branch, path):
     """
     command = f"git clone https://github.com/wazuh/wazuh-qa --branch {branch} --single-branch {path}"
     run_local_command_with_output(command)
+
+
+def qa_ctl_docker_run(config_file, debug_level):
+    """Run qa-ctl in a Linux docker container. Useful when running qa-ctl in native Windows host.
+
+    Args:
+        config_file (str): qa-ctl configuration file name to run.
+        debug_level (int): qa-ctl debug level.
+    """
+    debug_args = '' if debug_level == 0 else ('-d' if debug_level == 1 else '-dd')
+    docker_args = f"1900-qa-ctl-windows {config_file} --no-validation-logging {debug_args}"
+    docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'deployment',
+                                     'dockerfiles', 'qa_ctl')
+
+    LOGGER.info('Building docker image')
+    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t wazuh/qa-ctl .")
+
+    run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
