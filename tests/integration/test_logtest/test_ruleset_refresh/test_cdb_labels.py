@@ -2,19 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
 import os
-import shutil
-
 import pytest
-import yaml
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, get_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools import WAZUH_PATH, LOGTEST_SOCKET_PATH, LOG_FILE_PATH
-from wazuh_testing.logtest import callback_logtest_started
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import truncate_file
 
+from wazuh_testing.tools import WAZUH_PATH
+from yaml import safe_load
+from shutil import copy
+from json import loads
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -22,10 +16,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'cdb_list.yaml')
-logtest_startup_timeout = 30
 
 with open(messages_path) as f:
-    test_cases = yaml.safe_load(f)
+    test_cases = safe_load(f)
 
 # Variables
 logtest_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
@@ -48,7 +41,7 @@ def configure_cdbs_list(get_configuration, request):
     file_cdb_test = os.path.join(test_data_path, get_configuration['cdb_file'])
     file_cdb_dst = os.path.join(cdb_dir, get_configuration['cdb_file'])
 
-    shutil.copy(file_cdb_test, file_cdb_dst)
+    copy(file_cdb_test, file_cdb_dst)
 
     # rule configuration for testing
     rule_dir = os.path.join(WAZUH_PATH, get_configuration['rule_dir'])
@@ -58,7 +51,7 @@ def configure_cdbs_list(get_configuration, request):
     file_rule_test = os.path.join(test_data_path, get_configuration['rule_file'])
     file_rule_dst = os.path.join(rule_dir, get_configuration['rule_file'])
 
-    shutil.copy(file_rule_test, file_rule_dst)
+    copy(file_rule_test, file_rule_dst)
 
     yield
 
@@ -77,29 +70,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module')
-def wait_for_logtest_startup(request):
-    """Wait until logtest has begun."""
-    log_monitor = FileMonitor(LOG_FILE_PATH)
-    log_monitor.start(timeout=logtest_startup_timeout, callback=callback_logtest_started)
-
-
-@pytest.fixture(scope='module')
-def restart_required_logtest_daemons():
-    """Wazuh logtests daemons handler."""
-    required_logtest_daemons = ['wazuh-analysisd']
-
-    truncate_file(LOG_FILE_PATH)
-    for daemon in required_logtest_daemons:
-        control_service('restart', daemon=daemon)
-
-    yield
-
-    for daemon in required_logtest_daemons:
-        control_service('stop', daemon=daemon)
-
-
-# Tests
 def test_cdb_list(restart_required_logtest_daemons, get_configuration,
                   configure_environment, configure_cdbs_list,
                   wait_for_logtest_startup, connect_to_sockets_function):
@@ -110,7 +80,7 @@ def test_cdb_list(restart_required_logtest_daemons, get_configuration,
 
     # receive logtest reply and parse it
     response = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
-    result = json.loads(response)
+    result = loads(response)
 
     assert result['error'] == 0
     if 'test_exclude' in get_configuration:
