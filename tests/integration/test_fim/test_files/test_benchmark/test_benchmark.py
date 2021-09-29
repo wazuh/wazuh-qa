@@ -12,7 +12,7 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        before the specified time expires. The FIM capability is managed by the 'wazuh-syscheckd' daemon,
        which checks configured files for changes to the checksums, permissions, and ownership.
 
-tier: 0
+tier: 3
 
 modules:
     - fim
