@@ -62,11 +62,11 @@ def test_realtime_unsupported(folder, file, get_configuration, configure_environ
             flag event and then waits for the initial FIM scan event.
     """
 
-    file_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
+    log_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
                             error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
                             directory: ...' event", update_position=False)
 
-    detect_initial_scan(file_monitor)
+    detect_initial_scan(log_monitor)
 
-    regular_file_cud(folder, file_monitor, file_list=[file], time_travel=True, triggers_event=True,
+    regular_file_cud(folder, log_monitor, file_list=[file], time_travel=True, triggers_event=True,
                      event_mode="scheduled")
