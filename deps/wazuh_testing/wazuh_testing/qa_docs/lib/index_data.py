@@ -54,8 +54,8 @@ class IndexData:
         brief: Opens every file found in the path and appends the content into a list.
         """
         for file in files:
-            with open(os.path.join(self.path, file)) as f:
-                lines = json.load(f)
+            with open(file) as test_file:
+                lines = json.load(test_file)
                 self.output.append(lines)
 
     def remove_index(self):

@@ -11,13 +11,13 @@ import ast
 import os
 import re
 import yaml
-from lib.PytestWrap import PytestWrap
-from lib.Utils import remove_inexistent
+from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
+from wazuh_testing.qa_docs.lib.utils import remove_inexistent
 import warnings
 import logging
 
 INTERNAL_FIELDS = ['id', 'group_id', 'name']
-STOP_FIELDS = ['tests','test_cases']
+STOP_FIELDS = ['tests', 'test_cases']
 
 
 class CodeParser:
@@ -111,7 +111,7 @@ class CodeParser:
                 if self.is_documentable_function(function):
                     function_doc = self.parse_comment(function)
                     if function_doc:
-                        if test_cases and not self.conf.test_cases_field in function_doc \
+                        if test_cases and not (self.conf.test_cases_field in function_doc) \
                            and test_cases[function.name]:
                             function_doc[self.conf.test_cases_field] = test_cases[function.name]
                         functions_doc.append(function_doc)
