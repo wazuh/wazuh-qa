@@ -1,5 +1,6 @@
 import os
 import sys
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
@@ -8,7 +9,9 @@ from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
-
+from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.tools import file
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
 
 class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
@@ -21,13 +24,16 @@ class QATestRunner():
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
             qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+             test_parameters (dict): a dictionary containing all the required data to build the tests
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, tests_parameters, qa_ctl_configuration):
         self.inventory_file_path = None
         self.test_launchers = []
+        self.test_parameters = tests_parameters
         self.qa_ctl_configuration = qa_ctl_configuration
+
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
@@ -133,7 +139,23 @@ class QATestRunner():
         """Run testing threads. One thread per TestLauncher object"""
 
         if sys.platform == 'win32':
-            print("DOCKER RUN WINDOWS TESTING")
+            tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
+            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
+
+            file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
+
+            try:
+                debug_arg = '' if self.qa_ctl_configuration.debug_level == 0 else \
+                    ('-d' if self.qa_ctl_configuration.debug_level == 1 else '-dd')
+                docker_args = f"1900-qa-ctl-windows {tmp_config_file_name} --no-validation-logging {debug_arg}"
+                QATestRunner.LOGGER.debug('Creating a Linux container for launching the tests')
+
+                run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
+
+                QATestRunner.LOGGER.debug('The container for launching the tests was run sucessfully')
+            finally:
+                file.remove_file(tmp_config_file)
+
         else:
             runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
 

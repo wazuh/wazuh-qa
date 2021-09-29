@@ -1,5 +1,7 @@
 import os
 import sys
+from tempfile import gettempdir
+
 
 from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
@@ -15,6 +17,9 @@ from wazuh_testing.qa_ctl.provisioning.qa_framework.qa_framework import QAFramew
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.tools import file
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
 
 
 class QAProvisioning():
@@ -132,8 +137,8 @@ class QAProvisioning():
             if install_type == 'sources':
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
                 installation_instance = WazuhSources(**installation_files_parameters)
-            if install_type == 'package':
 
+            if install_type == 'package':
                 if s3_package_url is None and local_package_path is None:
                     installation_files_parameters['system'] = system
                     installation_files_parameters['version'] = version
@@ -206,7 +211,25 @@ class QAProvisioning():
         """Provision all hosts in a parallel way"""
 
         if sys.platform == 'win32':
-            print("DOCKER RUN WINDOWS PROVISIONING")
+            tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
+            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
+
+            file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
+
+            try:
+                debug_arg = '' if self.qa_ctl_configuration.debug_level == 0 else \
+                    ('-d' if self.qa_ctl_configuration.debug_level == 1 else '-dd')
+
+                docker_args = f"1900-qa-ctl-windows {tmp_config_file_name} --no-validation-logging {debug_arg}"
+
+                QAProvisioning.LOGGER.debug('Creating a Linux container for provisioning the instances')
+
+                run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
+
+                QAProvisioning.LOGGER.debug('The container for provisioning the instances was run sucessfully')
+            finally:
+                file.remove_file(tmp_config_file)
+
         else:
             self.__check_hosts_connection()
             provision_threads = [ThreadExecutor(self.__process_config_data,

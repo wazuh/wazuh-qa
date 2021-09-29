@@ -26,6 +26,7 @@ class QACTLConfiguration:
         self.logging_enable = True
         self.logging_level = 'INFO'
         self.logging_file = None
+        self.debug_level = debug_level
 
         self.__read_configuration_data()
 
