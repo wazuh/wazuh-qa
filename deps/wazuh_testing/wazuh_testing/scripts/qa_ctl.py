@@ -77,6 +77,7 @@ def set_qactl_logging(qactl_configuration):
     if not qactl_configuration.logging_enable:
         qactl_logger.disable()
     else:
+        qactl_logger.enable()
         qactl_logger.set_level(qactl_configuration.logging_level)
         qactl_logger.stdout = True
         qactl_logger.logging_file = qactl_configuration.logging_file
@@ -89,9 +90,11 @@ def set_parameters(parameters):
     Args:
         (argparse.Namespace): Object with the user parameters.
     """
-    #  Set logging level
-    level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
-    qactl_logger.set_level(level)
+    if parameters.no_validation_logging:
+        qactl_logger.disable()
+    else:
+        level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
+        qactl_logger.set_level(level)
 
 
 def validate_parameters(parameters):
@@ -148,7 +151,7 @@ def validate_parameters(parameters):
 
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
-            if 'test exists' not in run_local_command_with_output(f"qa-docs -e {test} -I {tests_path}"):
+            if 'test exists' not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path}"):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
     qactl_logger.info('Input parameters validation has passed successfully')
@@ -178,6 +181,8 @@ def main():
 
     parser.add_argument('-d', '--debug', action='count', default=0, help='Run in debug mode. You can increase the debug'
                                                                          ' level with more [-d+]')
+    parser.add_argument('--no-validation-logging', action='store_true', help='Disable initial logging of parameter '
+                                                                             'validations')
     arguments = parser.parse_args()
 
     set_parameters(arguments)
