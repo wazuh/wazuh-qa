@@ -1,9 +1,9 @@
 import os
 import re
 import time
-import json
 import pytest
 import yaml
+import json
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, WAZUH_DB_PREFIX
 from wazuh_testing.tools.file import truncate_file
@@ -85,24 +85,28 @@ def wait_range_checksum_calculated(line):
 
 @pytest.fixture(scope="function")
 def prepare_range_checksum_data():
+    command = 'agent 003 syscheck save2 '
+    payload = {'path': "file",
+               'timestamp': 1575421292,
+               'attributes': {
+                   'type': 'file',
+                   'size': 0,
+                   'perm': 'rw-r--r--',
+                   'uid': '0',
+                   'gid': '0',
+                   'user_name': 'root',
+                   'group_name': 'root',
+                   'inode': 16879,
+                   'mtime': 1575421292,
+                   'hash_md5': 'd41d8cd98f00b204e9800998ecf8427e',
+                   'hash_sha1': 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
+                   'hash_sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                   'checksum': 'f65b9f66c5ef257a7566b98e862732640d502b6f'}}
 
-    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file1\",\"timestamp\":1575421292,
-                 \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
-                 \"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
-                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",
-                 \"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
-                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
-                 \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
-    receiver_sockets[0].send(command, size=True)
-
-    command = """agent 003 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,
-                 \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
-                 \"user_name\":\"root\",\"group_name\":\"root\",\"inode\":16879,\"mtime\":1575421292,
-                 \"hash_md5\":\"d41d8cd98f00b204e9800998ecf8427e\",
-                 \"hash_sha1\":\"da39a3ee5e6b4b0d3255bfef95601890afd80709\",
-                 \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
-                 \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
-    receiver_sockets[0].send(command, size=True)
+    payload['path'] = '/home/test/file1'
+    receiver_sockets[0].send(command+json.dumps(payload), size=True)
+    payload['path'] = '/home/test/file2'
+    receiver_sockets[0].send(command+json.dumps(payload), size=True)
 
 
 @pytest.fixture(scope="function")
@@ -279,6 +283,7 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
+
 
 def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module,
                                  prepare_range_checksum_data, reset_ossec_log, request):
