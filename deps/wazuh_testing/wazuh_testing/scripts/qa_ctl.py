@@ -18,7 +18,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
-from wazuh_testing.qa_ctl.provisioning.local_actions import download_local_wazuh_qa_repository, run_local_command
+from wazuh_testing.qa_ctl.provisioning import local_actions
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
 
 
@@ -144,11 +144,11 @@ def validate_parameters(parameters):
             qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
 
         qa_branch = '1900-qa-ctl-windows'
-        download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
+        local_actions.download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
 
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
-            if 'test exists' not in run_local_command(f"qa-docs -e {test} -I {tests_path}"):
+            if 'test exists' not in run_local_command_with_output(f"qa-docs -e {test} -I {tests_path}"):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
     qactl_logger.info('Input parameters validation has passed successfully')

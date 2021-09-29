@@ -12,7 +12,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
 
 
 class QACTLConfigGenerator:
@@ -94,7 +94,7 @@ class QACTLConfigGenerator:
         """
         qa_docs_command = f"qa-docs -T {test_name} -o {gettempdir()} -I {self.qa_files_path}/tests"
 
-        run_local_command(qa_docs_command)
+        run_local_command_with_output(qa_docs_command)
 
         # Read test data file
         try:
