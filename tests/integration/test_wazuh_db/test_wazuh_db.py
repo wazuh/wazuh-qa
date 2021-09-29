@@ -32,7 +32,6 @@ for file in os.listdir(global_message_files):
         global_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
 # Variables
-log_monitor = FileMonitor(LOG_FILE_PATH)
 log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
@@ -86,7 +85,6 @@ def wait_range_checksum_calculated(line):
 
 @pytest.fixture(scope="function")
 def prepare_range_checksum_data():
-    truncate_file(LOG_FILE_PATH)
 
     command = """agent 003 syscheck save2 {\"path\":\"/home/test/file1\",\"timestamp\":1575421292,
                  \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
@@ -96,7 +94,6 @@ def prepare_range_checksum_data():
                  \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
                  \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
     receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
 
     command = """agent 003 syscheck save2 {\"path\":\"/home/test/file2\",\"timestamp\":1575421292,
                  \"attributes\":{\"type\":\"file\",\"size\":0,\"perm\":\"rw-r--r--\",\"uid\":\"0\",\"gid\":\"0\",
@@ -106,7 +103,6 @@ def prepare_range_checksum_data():
                  \"hash_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",
                  \"checksum\":\"f65b9f66c5ef257a7566b98e862732640d502b6f\"}}"""
     receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
 
 
 @pytest.fixture(scope="function")
@@ -189,6 +185,12 @@ def remove_agent(agent_id):
     """
     data = execute_wazuh_db_query(f"global delete-agent {agent_id}").split(' ', 1)
     assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
+
+
+@pytest.fixture(scope="module")
+def get_configuration():
+    """Get a dummy empty configurations from the module"""
+    yield
 
 
 @pytest.fixture(scope="module")
@@ -278,16 +280,17 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     # Check disconnect-agents chunk limit
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
 
-
-def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module, prepare_range_checksum_data):
+def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module,
+                                 prepare_range_checksum_data, reset_ossec_log, request):
     """Check the checksum range during the synchroniation of the DBs"""
 
     command = """agent 003 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
                  \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
 
+    log_monitor = request.module.wazuh_log_monitor
+
     # Checksum Range calculus expected the first time
     receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
     log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
                       callback=make_callback('range checksum: Time: ', prefix=WAZUH_DB_PREFIX,
                                              escape=True),
@@ -295,7 +298,6 @@ def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, 
 
     # Checksum Range avoid expected the next times
     receiver_sockets[0].send(command, size=True)
-    response = receiver_sockets[0].receive(size=True).decode()
     log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
                       callback=make_callback('range checksum avoided', prefix=WAZUH_DB_PREFIX,
                                              escape=True),
