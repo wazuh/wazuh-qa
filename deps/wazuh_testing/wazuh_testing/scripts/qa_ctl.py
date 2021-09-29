@@ -144,7 +144,7 @@ def validate_parameters(parameters):
             qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
 
         qa_branch = '1900-qa-ctl-windows'
-        download_local_wazuh_qa_repository(branch=qa_branch, path=os.path.join(gettempdir(), 'wazuh-qa'))
+        download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
 
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
