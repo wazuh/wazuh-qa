@@ -113,8 +113,9 @@ def register_previous_agent(test_case):
 @pytest.mark.parametrize('test_case', [case for case in test_authd_force_insert_yes_tests],
                          ids=[test_case['name'] for test_case in test_authd_force_insert_yes_tests])
 def test_authd_force_options(configure_sockets_environment, configure_environment, clean_client_keys_file_module,
-                             restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
-                             register_previous_agent, tear_down, test_case, get_configuration):
+                             file_monitoring, restart_authd, wait_for_authd_startup_module,
+                             connect_to_sockets_configuration, register_previous_agent, tear_down, test_case,
+                             get_configuration):
     """
         description:
            "Check that every input message in authd port generates the adequate output"
