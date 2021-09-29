@@ -192,12 +192,6 @@ def remove_agent(agent_id):
 
 
 @pytest.fixture(scope="module")
-def get_configuration():
-    """Get a dummy empty configurations from the module"""
-    yield
-
-
-@pytest.fixture(scope="module")
 def start_wazuh_db():
     control_service('restart', daemon="wazuh-db")
     yield
@@ -286,13 +280,13 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
 
 
 def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module,
-                                 prepare_range_checksum_data, reset_ossec_log, request):
+                                 prepare_range_checksum_data, file_monitoring, request):
     """Check the checksum range during the synchroniation of the DBs"""
 
     command = """agent 003 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
                  \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
 
-    log_monitor = request.module.wazuh_log_monitor
+    log_monitor = request.module.log_monitor
 
     # Checksum Range calculus expected the first time
     receiver_sockets[0].send(command, size=True)
