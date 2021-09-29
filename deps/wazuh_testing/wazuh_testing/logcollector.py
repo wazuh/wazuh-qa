@@ -17,9 +17,10 @@ GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventcha
 GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
-LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
+
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
