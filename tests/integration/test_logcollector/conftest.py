@@ -6,13 +6,15 @@ from shutil import copyfile
 import pytest
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, LOGCOLLECTOR_FILE_STATUS_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH
+from os.path import exists
+from os import remove
 
 DAEMON_NAME = "wazuh-logcollector"
 
@@ -86,3 +88,19 @@ def configure_local_internal_options_logcollector():
         control_service('restart')
     else:
         yield
+
+
+@pytest.fixture(scope='function')
+def delete_file_status_json():
+    """Delete file_status.json from logcollector"""
+    remove(LOGCOLLECTOR_FILE_STATUS_PATH) if exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
+
+    yield
+
+
+@pytest.fixture(scope='function')
+def truncate_log_file():
+    """Truncate the log file (ossec.log)"""
+    truncate_file(LOG_FILE_PATH)
+
+    yield
