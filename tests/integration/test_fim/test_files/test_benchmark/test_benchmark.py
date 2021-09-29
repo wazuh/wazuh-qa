@@ -7,11 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected
-       files and triggering alerts when these files are modified. Specifically, they will check
-       if `FIM` CUD events are generated for each modified file before the specified time expires.
-       The `FIM` capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
-       for changes to the checksums, permissions, and ownership.
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files
+       are modified. Specifically, these tests will check if FIM CUD events are generated for each modified file
+       before the specified time expires. The FIM capability is managed by the 'wazuh-syscheckd' daemon,
+       which checks configured files for changes to the checksums, permissions, and ownership.
 
 tier: 0
 
@@ -23,7 +22,6 @@ components:
     - manager
 
 daemons:
-    - wazuh-agentd
     - wazuh-syscheckd
 
 os_platform:
@@ -54,6 +52,7 @@ os_version:
     - Windows Server 2016
     - Windows server 2012
     - Windows server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -61,15 +60,15 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the `who-data` information.
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim
+    - fim_benchmark
 '''
 import os
 
@@ -130,13 +129,13 @@ def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration
                                  configure_environment, restart_syscheckd,
                                  wait_for_fim_start):
     '''
-    description: Check if the `wazuh-syscheckd` daemon detects CUD events (`added`, `modified`, and `deleted`)
+    description: Check if the 'wazuh-syscheckd' daemon detects CUD events ('added', 'modified', and 'deleted')
                  in a certain volume of file changes. For this purpose, the test will monitor a folder with
                  multiple testing files and perform modifications on them (add, modify and delete). Finally,
                  the test will verify that all FIM events have been generated for each change made
                  to each file before the set timeout expires.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - files:
@@ -156,20 +155,20 @@ def test_benchmark_regular_files(files, folder, tags_to_apply, get_configuration
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the `ossec.log` file and start a new monitor.
+            brief: Clear the 'ossec.log' file and start a new monitor.
         - wait_for_fim_start:
             type: fixture
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
-        - Verify that `FIM` CUD events are generated for each modified file before the specified time expires.
+        - Verify that FIM CUD events are generated for each modified file before the specified time expires.
 
-    input_description: A test case (ossec_conf) is contained in external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-syscheckd` daemon and, it
+    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the wazuh-syscheckd daemon and, it
                        is combined with the testing files to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' (`added`, `modified`, and `deleted` events)
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
 
     tags:
         - realtime
