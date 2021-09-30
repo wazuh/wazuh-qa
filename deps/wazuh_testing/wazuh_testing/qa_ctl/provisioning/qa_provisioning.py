@@ -214,11 +214,12 @@ class QAProvisioning():
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
             tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
 
+             # Write a custom configuration file with only provision section
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
             try:
-                QAProvisioning.LOGGER.info('Creating a Linux container for provisioning the instances')
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level)
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
+                                  topic='for provisioning the instances')
             finally:
                 file.remove_file(tmp_config_file)
         else:

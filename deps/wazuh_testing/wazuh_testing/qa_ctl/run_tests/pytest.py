@@ -189,8 +189,6 @@ class Pytest(Test):
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name),
                                  test_name=self.tests_path)
 
-        Pytest.LOGGER.info(f"{self.tests_path} tests results were saved in {self.tests_result_path}")
-
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
             Pytest.LOGGER.info(self.result)

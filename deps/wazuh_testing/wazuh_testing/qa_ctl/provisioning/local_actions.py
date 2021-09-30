@@ -55,19 +55,21 @@ def download_local_wazuh_qa_repository(branch, path):
     run_local_command_with_output(command)
 
 
-def qa_ctl_docker_run(config_file, debug_level):
+def qa_ctl_docker_run(config_file, debug_level, topic):
     """Run qa-ctl in a Linux docker container. Useful when running qa-ctl in native Windows host.
 
     Args:
         config_file (str): qa-ctl configuration file name to run.
         debug_level (int): qa-ctl debug level.
+        topic (str): Reason for running the qa-ctl docker.
     """
     debug_args = '' if debug_level == 0 else ('-d' if debug_level == 1 else '-dd')
     docker_args = f"1900-qa-ctl-windows {config_file} --no-validation-logging {debug_args}"
     docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'deployment',
                                      'dockerfiles', 'qa_ctl')
 
-    LOGGER.info('Building docker image')
+    LOGGER.info(f"Building docker image for {topic}")
     run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t wazuh/qa-ctl .")
 
+    LOGGER.info(f"Running the Linux container {topic}")
     run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")

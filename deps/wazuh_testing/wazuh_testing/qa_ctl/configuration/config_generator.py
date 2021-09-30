@@ -1,7 +1,6 @@
 import os
 
 from tempfile import gettempdir
-from sys import exit
 from packaging.version import parse
 
 from wazuh_testing.tools import file
@@ -38,6 +37,9 @@ class QACTLConfigGenerator:
         generated.
     """
 
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+    LINUX_TMP = '/tmp'
+
     BOX_MAPPING = {
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'CentOS 8': 'qactl/centos_8'
@@ -51,7 +53,7 @@ class QACTLConfigGenerator:
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
-            'installation_files_path': '/tmp'
+            'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
             'connection_method': 'ssh',
@@ -60,11 +62,9 @@ class QACTLConfigGenerator:
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'rpm',
-            'installation_files_path': '/tmp'
+            'installation_files_path': LINUX_TMP
         }
     }
-
-    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, tests, wazuh_version, qa_files_path=f"{gettempdir()}/wazuh-qa"):
         self.tests = tests
@@ -345,7 +345,7 @@ class QACTLConfigGenerator:
             wazuh_qa_branch = self.__get_qa_branch()
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': wazuh_qa_branch,
-                'qa_workdir': gettempdir()
+                'qa_workdir': self.LINUX_TMP
             }
 
     def __process_test_data(self, tests_info):
@@ -365,8 +365,8 @@ class QACTLConfigGenerator:
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': f"{gettempdir()}/wazuh-qa/{test['path']}",
-                    'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
+                    'test_files_path': f"{self.LINUX_TMP}/wazuh-qa/{test['path']}",
+                    'run_tests_dir_path': f"{self.LINUX_TMP}/wazuh-qa/test/integration",
                     'test_results_path': f"{gettempdir()}/{test['test_name']}_{get_current_timestamp()}/"
                 }
             }

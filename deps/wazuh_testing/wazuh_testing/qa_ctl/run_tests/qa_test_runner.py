@@ -142,11 +142,36 @@ class QATestRunner():
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
             tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
 
+            # Save original directory where to store the results in Windows host
+            original_result_paths = [ self.test_parameters[host_key]['test']['path']['test_results_path'] \
+                for host_key, _ in self.test_parameters.items()]
+
+            # Change the destination directory, as the results will initially be stored in the shared volume between
+            # the Windows host and the docker container (Windows tmp as /qa_ctl).
+            test_results_folder = f"test_results_{get_current_timestamp()}"
+            temp_test_results_files_path = f"/qa_ctl/{test_results_folder}"
+
+            index = 0
+            for host_key, _ in self.test_parameters.items():
+                self.test_parameters[host_key]['test']['path']['test_results_path'] = \
+                    f"{temp_test_results_files_path}_{index}"
+                index += 1
+
+            # Write a custom configuration file with only running test section
             file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
             try:
-                QATestRunner.LOGGER.info('Creating a Linux container for launching the tests')
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level)
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
+                                  topic='for launching the tests')
+                # Move all test results to their original paths specified in Windows qa-ctl configuration
+                index = 0
+                for _, host_data in self.test_parameters.items():
+                    source_directory = os.path.join(gettempdir(), f"{test_results_folder}_{index}")
+                    file.move_everything_from_one_directory_to_another(source_directory,  original_result_paths[index])
+                    file.delete_path_recursively(source_directory)
+                    QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
+                                             f"have been saved in {original_result_paths[index]}")
+                    index += 1
             finally:
                 file.remove_file(tmp_config_file)
         else:
@@ -163,6 +188,10 @@ class QATestRunner():
                 runner_thread.join()
 
             QATestRunner.LOGGER.info('The test run is finished')
+
+            for _, host_data in self.test_parameters.items():
+                QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
+                                         f"have been saved in {host_data['test']['path']['test_results_path']}")
 
     def destroy(self):
         """"Destroy all the temporary files created during a running QAtestRunner instance"""
