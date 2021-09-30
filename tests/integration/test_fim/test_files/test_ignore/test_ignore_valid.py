@@ -18,7 +18,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = pytest.mark.tier(level=2)
 
 # variables
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf.yaml')
