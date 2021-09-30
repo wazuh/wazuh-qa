@@ -82,10 +82,10 @@ class Pytest(Test):
         Args:
             ansible_inventory_path (str): Path to ansible inventory file
         """
+        date_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')
         assets_folder = 'assets/'
         reports_folder = 'reports'
-        assets_zip = "assets.zip"
-        date_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')
+        assets_zip = f"assets_{date_time}.zip"
         html_report_file_name = f"test_report_{date_time}.html"
         plain_report_file_name = f"test_report_{date_time}.txt"
         playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
