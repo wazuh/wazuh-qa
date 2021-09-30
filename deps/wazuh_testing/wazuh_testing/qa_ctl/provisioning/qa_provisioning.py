@@ -172,9 +172,8 @@ class QAProvisioning():
 
             if health_check:
                 # Wait for Wazuh initialization before health_check
-                health_check_sleep_time = 60
-                QAProvisioning.LOGGER.info(f"Waiting {health_check_sleep_time} seconds before performing the "
-                                        f"healthcheck in {current_host} host")
+                health_check_sleep_time = 30
+                QAProvisioning.LOGGER.info(f"Performing a Wazuh installation healthcheck in {current_host} host")
                 sleep(health_check_sleep_time)
                 deployment_instance.health_check()
 
@@ -219,7 +218,7 @@ class QAProvisioning():
 
             try:
                 qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
-                                  topic='for provisioning the instances')
+                                  topic='provisioning the instances')
             finally:
                 file.remove_file(tmp_config_file)
         else:

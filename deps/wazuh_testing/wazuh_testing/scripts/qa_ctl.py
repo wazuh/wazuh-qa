@@ -199,8 +199,7 @@ def main():
 
         # If dry-run mode, then exit after generating the configuration file
         if arguments.dry_run:
-            qactl_logger.info(f"Run as dry-run mode. Configuration file saved in "
-                                     f"{config_generator.config_file_path}")
+            qactl_logger.info(f"Run as dry-run mode. Configuration file saved in {config_generator.config_file_path}")
             return 0
     else:
         configuration_file = arguments.config
