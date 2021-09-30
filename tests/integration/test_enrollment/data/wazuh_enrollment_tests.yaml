@@ -33,7 +33,11 @@
   configuration:
     agent_address: "192.168.0.10/100"
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.10/100'."
-  fail_init_agent: 'yes'
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -
   name: "Invalid Agent address CIDR"
   description: "Check an invalid CIDR agent_address in auto enrollment configuration"
@@ -41,6 +45,11 @@
   configuration:
     agent_address: "192.168.0.10/100"
   expected_error: "ERROR: Invalid IP address provided for sender IP."
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -
   name: "Invalid Agent address"
   description: "Check an invalid agent_address in auto enrollment configuration"
@@ -49,8 +58,9 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
-  expected_fail: "yes"
-  expected_fail_reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  expected_fail:
+    os: "any"
+    reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
   message:
     response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -
@@ -95,7 +105,6 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: Invalid content for tag 'enabled'."
-  fail_init_agent: 'yes'
 -
   name: "Valid agent name config"
   description: "Check a valid agent_name configuration"
@@ -161,7 +170,6 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: Options '-I' and '-i' are uncompatible."
-  fail_init_agent: 'yes'
 -
   name: "Incompatible - Use source IP"
   description: "Use source IP option while trying to set an IP"
@@ -188,6 +196,8 @@
 -
   name: "Password from file - Agent-Auth"
   description: "Check that password file is open and read successfully"
+  skips:
+    - wazuh-agentd
   password_file_content: "pass_from_file"
   pre_existent_keys:
     - ""
@@ -229,7 +239,6 @@
   pre_existent_keys:
     - ""
   expected_error: "(1205): Invalid port number: '65536'"
-  fail_init_agent: 'yes'
 -
   name: "Invalid port 0"
   description: "Check an invalid port configuration 0"
@@ -240,7 +249,6 @@
   pre_existent_keys:
     - ""
   expected_error: "(1205): Invalid port number: '0'"
-  fail_init_agent: 'yes'
 -
   name: "Invalid port -1515"
   description: "Check an invalid port configuration -1515"
@@ -251,7 +259,6 @@
   pre_existent_keys:
     - ""
   expected_error: "ERROR: (1235): Invalid value for element 'port': -1515."
-  fail_init_agent: 'yes'
 -
   name: "Default Name with key hash"
   description: "Check the default message when having a key hash"

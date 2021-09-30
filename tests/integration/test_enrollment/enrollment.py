@@ -16,6 +16,7 @@ from wazuh_testing.tools import AGENT_AUTH_BINARY_PATH
 
 AGENTD_ENROLLMENT_REQUEST_TIMEOUT = 20
 AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT = 10
+AGENT_AUTH_LAUNCH_TIMEOUT = 2
 MANAGER_ADDRESS = '127.0.0.1'
 
 
@@ -47,4 +48,4 @@ def launch_agent_auth(configuration):
         parser.add_groups(configuration.get('groups'))
 
     out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out.communicate()
+    out.communicate(timeout=AGENT_AUTH_LAUNCH_TIMEOUT)

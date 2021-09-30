@@ -11,7 +11,7 @@ AUTHD_STARTUP_TIMEOUT = 30
 
 def truncate_client_keys_file():
     """
-    Cleans any previus key in client.keys file.
+    Cleans any previous key in client.keys file.
     """
     try:
         control_service("stop", DAEMON_NAME)
@@ -23,7 +23,7 @@ def truncate_client_keys_file():
 @pytest.fixture(scope='function')
 def clean_client_keys_file_function():
     """
-    Cleans any previus key in client.keys file at function scope.
+    Cleans any previous key in client.keys file at function scope.
     """
     truncate_client_keys_file()
 
@@ -31,7 +31,7 @@ def clean_client_keys_file_function():
 @pytest.fixture(scope='module')
 def clean_client_keys_file_module():
     """
-    Cleans any previus key in client.keys file at module scope.
+    Cleans any previous key in client.keys file at module scope.
     """
     truncate_client_keys_file()
 

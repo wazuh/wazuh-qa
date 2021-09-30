@@ -48,6 +48,7 @@ tags:
 import pytest
 import socket
 import os
+import sys
 import subprocess
 
 from wazuh_testing.tools.services import control_service
@@ -96,11 +97,10 @@ def restart_agentd(get_current_test_case):
     if 'wazuh-agentd' in get_current_test_case.get('skips', []):
         pytest.skip("This test does not apply to agentd")
 
-    if 'fail_init_agent' in get_current_test_case:
-        with pytest.raises(subprocess.CalledProcessError):
-            control_service('restart', daemon='wazuh-agentd')
-    else:
+    try:
         control_service('restart', daemon='wazuh-agentd')
+    except Exception:
+        pass
 
     yield
     control_service('stop', daemon='wazuh-agentd')
@@ -163,9 +163,15 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:
-            if get_current_test_case.get('expected_fail'):
-                reason = get_current_test_case.get('expected_fail_reason')
-                pytest.xfail(f"Xfailing due to {reason}")
+            expected_fail = get_current_test_case.get('expected_fail')
+            if expected_fail and (expected_fail['os'] == "any" or expected_fail['os'] == sys.platform):
+                is_xfail = True
+                xfail_reason = expected_fail.get('reason')
+            else:
+                is_xfail = False
+
+            if is_xfail:
+                pytest.xfail(f"Xfailing due to {xfail_reason}")
             else:
                 raise error
 

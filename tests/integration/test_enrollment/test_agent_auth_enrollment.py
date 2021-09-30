@@ -47,6 +47,7 @@ tags:
 
 import pytest
 import os
+import sys
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
@@ -154,9 +155,14 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:
-            if get_current_test_case.get('expected_fail'):
-                reason = get_current_test_case.get('expected_fail_reason')
-                pytest.xfail(f"Xfailing due to {reason}")
+            expected_fail = get_current_test_case.get('expected_fail')
+            if expected_fail and (expected_fail['os'] == "any" or expected_fail['os'] == sys.platform):
+                is_xfail = True
+                xfail_reason = expected_fail.get('reason')
+            else:
+                is_xfail = False
+            if is_xfail:
+                pytest.xfail(f"Xfailing due to {xfail_reason}")
             else:
                 raise error
 
