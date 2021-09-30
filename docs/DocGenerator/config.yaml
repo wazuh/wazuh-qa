@@ -51,6 +51,8 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_basic_usage/data"
   - "../../tests/integration/test_fim/test_files/test_benchmark/data"
   - "../../tests/integration/test_fim/test_files/test_checks/data"
+  - "../../tests/integration/test_fim/test_files/test_env_variables/data"
+  - "../../tests/integration/test_fim/test_files/test_file_limit/data"
 
 Output fields:
   Module:
