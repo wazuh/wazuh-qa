@@ -196,7 +196,7 @@ class QACTLConfigGenerator:
             open(self.qactl_used_ips_file, 'a').close()
 
         # Get a free IP in HOST_NETWORK range
-        for _ip in range(1, 256):
+        for _ip in range(2, 256):
             host_ip = HOST_NETWORK.replace('x', str(_ip))
             if not ip_is_already_used(host_ip, self.qactl_used_ips_file):
                 break
