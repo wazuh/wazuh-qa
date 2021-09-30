@@ -8,9 +8,8 @@ import socket
 import sqlite3
 
 from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
-
+from wazuh_testing.tools.services import control_service
 
 def callback_wazuhdb_response(item):
     if isinstance(item, tuple):
@@ -138,8 +137,6 @@ def query_wdb(command):
     data = []
 
     try:
-        #import pdb; pdb.set_trace()
-
         sock.send(wazuh_pack(len(command)) + command.encode())
 
         rcv = sock.recv(4)
