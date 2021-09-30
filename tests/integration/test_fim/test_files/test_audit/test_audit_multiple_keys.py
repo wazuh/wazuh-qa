@@ -52,7 +52,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope='function')
 def set_audit_rules():
     # Create the custom audit rules for the non monitored directory
     fim.run_audit_command(directory=non_monitored_test_dir, params=param_list, cmd_type='add')
