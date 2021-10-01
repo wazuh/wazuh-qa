@@ -84,11 +84,12 @@ def qa_ctl_docker_run(config_file, debug_level, topic):
     """
     debug_args = '' if debug_level == 0 else ('-d' if debug_level == 1 else '-dd')
     docker_args = f"1900-qa-ctl-windows {config_file} --no-validation-logging {debug_args}"
+    docker_image_name = 'wazuh/qa-ctl'
     docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'deployment',
                                      'dockerfiles', 'qa_ctl')
 
     LOGGER.info(f"Building docker image for {topic}")
-    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t wazuh/qa-ctl .")
+    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     LOGGER.info(f"Running the Linux container for {topic}")
-    run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl qa-ctl {docker_args}")
+    run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl {docker_image_name} {docker_args}")
