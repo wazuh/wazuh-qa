@@ -1,4 +1,7 @@
 import os
+import sys
+from tempfile import gettempdir
+
 
 from time import sleep
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
@@ -14,6 +17,9 @@ from wazuh_testing.qa_ctl.provisioning.qa_framework.qa_framework import QAFramew
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.tools import file
+from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
 
 
 class QAProvisioning():
@@ -96,7 +102,7 @@ class QAProvisioning():
 
         if 'wazuh_deployment' in host_provision_info:
             deploy_info = host_provision_info['wazuh_deployment']
-            health_check = True if 'health_check' not in host_provision_info['wazuh_deployment'] \
+            health_check = False if 'health_check' not in host_provision_info['wazuh_deployment'] \
                 else host_provision_info['wazuh_deployment']['health_check']
             install_target = None if 'target' not in deploy_info else deploy_info['target']
             install_type = None if 'type' not in deploy_info else deploy_info['type']
@@ -131,8 +137,8 @@ class QAProvisioning():
             if install_type == 'sources':
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
                 installation_instance = WazuhSources(**installation_files_parameters)
-            if install_type == 'package':
 
+            if install_type == 'package':
                 if s3_package_url is None and local_package_path is None:
                     installation_files_parameters['system'] = system
                     installation_files_parameters['version'] = version
@@ -140,23 +146,23 @@ class QAProvisioning():
                     installation_files_parameters['repository'] = repository
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
                 elif s3_package_url is None and local_package_path is not None:
                     installation_files_parameters['local_package_path'] = local_package_path
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                          hosts=current_host)
+                                                                                        hosts=current_host)
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
-                                                      inventory_file_path=self.inventory_file_path,
-                                                      install_mode=install_type, hosts=current_host,
-                                                      server_ip=manager_ip,
-                                                      qa_ctl_configuration=self.qa_ctl_configuration)
+                                                    inventory_file_path=self.inventory_file_path,
+                                                    install_mode=install_type, hosts=current_host,
+                                                    server_ip=manager_ip,
+                                                    qa_ctl_configuration=self.qa_ctl_configuration)
             if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
@@ -166,9 +172,8 @@ class QAProvisioning():
 
             if health_check:
                 # Wait for Wazuh initialization before health_check
-                health_check_sleep_time = 60
-                QAProvisioning.LOGGER.info(f"Waiting {health_check_sleep_time} seconds before performing the "
-                                           f"healthcheck in {current_host} host")
+                health_check_sleep_time = 30
+                QAProvisioning.LOGGER.info(f"Performing a Wazuh installation healthcheck in {current_host} host")
                 sleep(health_check_sleep_time)
                 deployment_instance.health_check()
 
@@ -179,6 +184,8 @@ class QAProvisioning():
             wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
                 else qa_framework_info['wazuh_qa_branch']
 
+            QAProvisioning.LOGGER.info(f"Provisioning the {current_host} host with the Wazuh QA framework using "
+                                       f"{wazuh_qa_branch} branch.")
             qa_instance = QAFramework(qa_branch=wazuh_qa_branch,
                                       ansible_output=self.qa_ctl_configuration.ansible_output)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
@@ -203,20 +210,35 @@ class QAProvisioning():
 
     def run(self):
         """Provision all hosts in a parallel way"""
-        self.__check_hosts_connection()
-        provision_threads = [ThreadExecutor(self.__process_config_data, parameters={'host_provision_info': host_value})
-                             for _, host_value in self.provision_info['hosts'].items()]
-        QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
+        # If Windows, then run a Linux docker container to run provisioning stage with qa-ctl provision
+        if sys.platform == 'win32':
+            tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
+            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
 
-        for runner_thread in provision_threads:
-            runner_thread.start()
+             # Write a custom configuration file with only provision section
+            file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
-        for runner_thread in provision_threads:
-            runner_thread.join()
+            try:
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
+                                  topic='provisioning the instances')
+            finally:
+                file.remove_file(tmp_config_file)
+        else:
+            self.__check_hosts_connection()
+            provision_threads = [ThreadExecutor(self.__process_config_data,
+                                                parameters={'host_provision_info': host_value})
+                                for _, host_value in self.provision_info['hosts'].items()]
+            QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
-        QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
+            for runner_thread in provision_threads:
+                runner_thread.start()
+
+            for runner_thread in provision_threads:
+                runner_thread.join()
+
+            QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object"""
-        if os.path.exists(self.inventory_file_path):
+        if os.path.exists(self.inventory_file_path) and sys.platform != 'win32':
             os.remove(self.inventory_file_path)

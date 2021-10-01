@@ -120,9 +120,7 @@
             "^host[0-9]*$": {
               "type": "object",
               "required": [
-                "host_info",
-                "wazuh_deployment",
-                "qa_framework"
+                "host_info"
               ],
               "properties": {
                 "host_info": {
@@ -219,8 +217,8 @@
                           {"required": ["s3_package_url"]},
                           {"required": [
                             "system",
-                            "version", 
-                            "revision", 
+                            "version",
+                            "revision",
                             "repository"]}
                         ]
                       }

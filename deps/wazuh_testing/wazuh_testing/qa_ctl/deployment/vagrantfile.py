@@ -63,7 +63,7 @@ class Vagrantfile():
             it will return a 'None' value.
         """
         box_mapping = {
-            'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu20_04.box',
+            'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu_20_04.box',
             'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box'
         }
 

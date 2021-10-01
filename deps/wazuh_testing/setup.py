@@ -22,9 +22,10 @@ package_data_list = [
     'tools/macos_log/log_generator.m',
     'qa_docs/config.yaml',
     'qa_ctl/deployment/dockerfiles/*',
+    'qa_ctl/deployment/dockerfiles/qa_ctl/*',
     'qa_ctl/deployment/vagrantfile_template.txt',
     'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
-    'data/qactl_conf_validator_schema.json'
+    'data/qactl_conf_validator_schema.json',
 ]
 
 scripts_list = [

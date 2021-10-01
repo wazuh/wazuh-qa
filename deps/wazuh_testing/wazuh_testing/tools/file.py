@@ -13,7 +13,6 @@ import stat
 import string
 import xml.etree.ElementTree as ET
 import zipfile
-from os.path import exists
 
 import filetype
 import requests
@@ -146,7 +145,7 @@ def download_file(source_url, dest_path):
 
 
 def remove_file(file_path):
-    if exists(file_path):
+    if os.path.exists(file_path):
         os.remove(file_path)
 
 
@@ -168,7 +167,7 @@ def validate_xml_file(file_path):
 
 
 def get_file_info(file_path, info_type="extension"):
-    if exists(file_path) and filetype.guess(file_path) is not None:
+    if os.path.exists(file_path) and filetype.guess(file_path) is not None:
         file = filetype.guess(file_path)
         return file.extension if info_type == "extension" else file.mime
 
@@ -297,7 +296,8 @@ def set_file_owner_and_group(file_path, owner, group):
 
 def recursive_directory_creation(path):
     """Recursive function to create folders.
-       Args:
+
+    Args:
         path (str): Path to create. If a folder doesn't exists, it will create it.
     """
     parent, _ = os.path.split(path)
@@ -308,3 +308,26 @@ def recursive_directory_creation(path):
 
     if not os.path.exists(path):
         os.mkdir(path)
+
+
+def move_everything_from_one_directory_to_another(source_directory, destination_directory):
+    """Move all files and directories from one directory to another.
+
+    Important note: Copied files must not exist on destination directory.
+
+    Args:
+        source_directory (str): Source_directory path.
+        destination_directory (str): Destination_directory path.
+    Raises:
+        ValueError: If source_directory or destination_directory does not exist.
+    """
+    if not os.path.exists(source_directory):
+        raise ValueError(f"{source_directory} does not exist")
+
+    if not os.path.exists(destination_directory):
+        raise ValueError(f"{destination_directory} does not exist")
+
+    file_names = os.listdir(source_directory)
+
+    for file_name in file_names:
+        shutil.move(os.path.join(source_directory, file_name), destination_directory)

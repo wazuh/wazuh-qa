@@ -1,4 +1,6 @@
 import os
+import sys
+from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
@@ -7,7 +9,9 @@ from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
-
+from wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.tools import file
+from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
 
 class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
@@ -20,13 +24,16 @@ class QATestRunner():
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
             qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+             test_parameters (dict): a dictionary containing all the required data to build the tests
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, tests_parameters, qa_ctl_configuration):
         self.inventory_file_path = None
         self.test_launchers = []
+        self.test_parameters = tests_parameters
         self.qa_ctl_configuration = qa_ctl_configuration
+
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
@@ -130,21 +137,64 @@ class QATestRunner():
 
     def run(self):
         """Run testing threads. One thread per TestLauncher object"""
-        runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
+        # If Windows, then run a Linux docker container to run testing stage with qa-ctl testing
+        if sys.platform == 'win32':
+            tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
+            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
 
-        QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests")
+            # Save original directory where to store the results in Windows host
+            original_result_paths = [ self.test_parameters[host_key]['test']['path']['test_results_path'] \
+                for host_key, _ in self.test_parameters.items()]
 
-        for runner_thread in runner_threads:
-            runner_thread.start()
+            # Change the destination directory, as the results will initially be stored in the shared volume between
+            # the Windows host and the docker container (Windows tmp as /qa_ctl).
+            test_results_folder = f"test_results_{get_current_timestamp()}"
+            temp_test_results_files_path = f"/qa_ctl/{test_results_folder}"
 
-        QATestRunner.LOGGER.info('Waiting for tests to finish')
+            index = 0
+            for host_key, _ in self.test_parameters.items():
+                self.test_parameters[host_key]['test']['path']['test_results_path'] = \
+                    f"{temp_test_results_files_path}_{index}"
+                index += 1
 
-        for runner_thread in runner_threads:
-            runner_thread.join()
+            # Write a custom configuration file with only running test section
+            file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
-        QATestRunner.LOGGER.info('The test run is finished')
+            try:
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
+                                  topic='launching the tests')
+                # Move all test results to their original paths specified in Windows qa-ctl configuration
+                index = 0
+                for _, host_data in self.test_parameters.items():
+                    source_directory = os.path.join(gettempdir(), f"{test_results_folder}_{index}")
+                    file.move_everything_from_one_directory_to_another(source_directory,  original_result_paths[index])
+                    file.delete_path_recursively(source_directory)
+                    QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
+                                             f"have been saved in {original_result_paths[index]}")
+                    index += 1
+            finally:
+                file.remove_file(tmp_config_file)
+        else:
+            runner_threads = [ThreadExecutor(test_launcher.run) for test_launcher in self.test_launchers]
+
+            QATestRunner.LOGGER.info(f"Launching {len(runner_threads)} tests")
+
+            for runner_thread in runner_threads:
+                runner_thread.start()
+
+            QATestRunner.LOGGER.info('Waiting for tests to finish')
+
+            for runner_thread in runner_threads:
+                runner_thread.join()
+
+            QATestRunner.LOGGER.info('The test run is finished')
+
+            for _, host_data in self.test_parameters.items():
+                if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+                    QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
+                                             f"have been saved in {host_data['test']['path']['test_results_path']}")
 
     def destroy(self):
         """"Destroy all the temporary files created during a running QAtestRunner instance"""
-        if os.path.exists(self.inventory_file_path):
+        if os.path.exists(self.inventory_file_path) and sys.platform != 'win32':
             os.remove(self.inventory_file_path)

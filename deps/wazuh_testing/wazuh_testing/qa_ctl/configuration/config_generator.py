@@ -1,7 +1,6 @@
 import os
 
 from tempfile import gettempdir
-from sys import exit
 from packaging.version import parse
 
 from wazuh_testing.tools import file
@@ -12,7 +11,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
 
 
 class QACTLConfigGenerator:
@@ -38,6 +37,9 @@ class QACTLConfigGenerator:
         generated.
     """
 
+    LOGGER = Logging.get_logger(QACTL_LOGGER)
+    LINUX_TMP = '/tmp'
+
     BOX_MAPPING = {
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'CentOS 8': 'qactl/centos_8'
@@ -51,7 +53,7 @@ class QACTLConfigGenerator:
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
-            'installation_files_path': '/tmp'
+            'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
             'connection_method': 'ssh',
@@ -60,11 +62,9 @@ class QACTLConfigGenerator:
             'connection_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'rpm',
-            'installation_files_path': '/tmp'
+            'installation_files_path': LINUX_TMP
         }
     }
-
-    LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, tests, wazuh_version, qa_files_path=f"{gettempdir()}/wazuh-qa"):
         self.tests = tests
@@ -94,7 +94,7 @@ class QACTLConfigGenerator:
         """
         qa_docs_command = f"qa-docs -T {test_name} -o {gettempdir()} -I {self.qa_files_path}/tests"
 
-        run_local_command(qa_docs_command)
+        run_local_command_with_output(qa_docs_command)
 
         # Read test data file
         try:
@@ -102,7 +102,7 @@ class QACTLConfigGenerator:
         except FileNotFoundError:
             raise QAValueError(f"Could not find {gettempdir()}/{test_name}.json file. Perhaps qa-docs has not "
                                f"generated it correctly. Try manually with command: {qa_docs_command}",
-                               QACTLConfigGenerator.LOGGER.error)
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         # Add test name extra info
         info['test_name'] = test_name
@@ -153,7 +153,7 @@ class QACTLConfigGenerator:
             if len(list(set(test_info[check]) & set(allowed_values))) == 0:
                 error_message = f"{test_info['test_name']} cannot be launched. Reason: Currently we do not "\
                                 f"support {test_info[check]}. Allowed values: {allowed_values}"
-                raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
+                raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
             return True
 
@@ -170,7 +170,7 @@ class QACTLConfigGenerator:
         if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
                             f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
-            raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error)
+            raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         return True
 
@@ -196,13 +196,13 @@ class QACTLConfigGenerator:
             open(self.qactl_used_ips_file, 'a').close()
 
         # Get a free IP in HOST_NETWORK range
-        for _ip in range(1, 256):
+        for _ip in range(2, 256):
             host_ip = HOST_NETWORK.replace('x', str(_ip))
             if not ip_is_already_used(host_ip, self.qactl_used_ips_file):
                 break
             if _ip == 255:
                 raise QAValueError(f"Could not find an IP available in {HOST_NETWORK}",
-                                   QACTLConfigGenerator.LOGGER.error)
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         # Write new used IP in used IPs file
         with open(self.qactl_used_ips_file, 'a') as used_ips_file:
@@ -345,7 +345,7 @@ class QACTLConfigGenerator:
             wazuh_qa_branch = self.__get_qa_branch()
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': wazuh_qa_branch,
-                'qa_workdir': gettempdir()
+                'qa_workdir': self.LINUX_TMP
             }
 
     def __process_test_data(self, tests_info):
@@ -365,8 +365,8 @@ class QACTLConfigGenerator:
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': f"{gettempdir()}/wazuh-qa/{test['path']}",
-                    'run_tests_dir_path': f"{gettempdir()}/wazuh-qa/test/integration",
+                    'test_files_path': f"{self.LINUX_TMP}/wazuh-qa/{test['path']}",
+                    'run_tests_dir_path': f"{self.LINUX_TMP}/wazuh-qa/test/integration",
                     'test_results_path': f"{gettempdir()}/{test['test_name']}_{get_current_timestamp()}/"
                 }
             }

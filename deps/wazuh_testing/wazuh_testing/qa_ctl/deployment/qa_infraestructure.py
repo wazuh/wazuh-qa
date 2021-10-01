@@ -16,7 +16,7 @@ class QAInfraestructure:
     """Class to handle multiples instances objects.
 
     Args:
-        instance_list (dict): Dictionary with the information of the instances. Must follow the format of the yaml
+        deployment_data (dict): Dictionary with the information of the instances. Must follow the format of the yaml
         template.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
 
@@ -34,7 +34,8 @@ class QAInfraestructure:
     DOCKER_NETWORK_NAME = 'wazuh_net'
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, instance_list, qa_ctl_configuration):
+    def __init__(self, deployment_data, qa_ctl_configuration):
+        self.deployment_data = deployment_data
         self.qa_ctl_configuration = qa_ctl_configuration
         self.instances = []
         self.docker_client = None
@@ -42,9 +43,9 @@ class QAInfraestructure:
         self.network_address = None
 
         QAInfraestructure.LOGGER.debug('Processing deployment configuration')
-        for host in instance_list:
-            for provider in instance_list[host]['provider']:
-                data = instance_list[host]['provider'][provider]
+        for host in deployment_data:
+            for provider in deployment_data[host]['provider']:
+                data = deployment_data[host]['provider'][provider]
                 if not data['enabled']:
                     continue
 
@@ -79,7 +80,7 @@ class QAInfraestructure:
                         if network != self.network_address:
                             exception_message = 'Two different networks where found for docker containers when only ' \
                                                 f"one network is allowed: {network} != {self.network_address}"
-                            raise QAValueError(exception_message, QAInfraestructure.LOGGER.error)
+                            raise QAValueError(exception_message, QAInfraestructure.LOGGER.error, QACTL_LOGGER)
 
                         if not self.docker_network:
                             # Try to get the DOCKER_NETWORK_NAME network, if it fails, try to create it.
@@ -118,7 +119,7 @@ class QAInfraestructure:
             runner_thread.join()
 
     def run(self):
-        """Execute the run method on every configured instance."""
+        """Run the instances deployment when the local host is UNIX."""
         QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
         QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
