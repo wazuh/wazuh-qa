@@ -184,8 +184,10 @@ class QAProvisioning():
             wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
                 else qa_framework_info['wazuh_qa_branch']
 
+            QAProvisioning.LOGGER.info(f"Provisioning the {current_host} host with the Wazuh QA framework using "
+                                       f"{wazuh_qa_branch} branch.")
             qa_instance = QAFramework(qa_branch=wazuh_qa_branch,
-                                    ansible_output=self.qa_ctl_configuration.ansible_output)
+                                      ansible_output=self.qa_ctl_configuration.ansible_output)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_framework(inventory_file_path=self.inventory_file_path, hosts=current_host)
