@@ -1,48 +1,52 @@
 '''
-brief:
-    These tests will check if the active responses, which are executed by
-    the `wazuh-execd` program via scripts, run correctly.
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Active responses execute a script in response to the triggering of specific alerts based
+       on the alert level or rule group. These tests will check if the 'active responses',
+       which are executed by the 'wazuh-execd' daemon via scripts, run correctly.
+
+tier: 0
+
 modules:
-    - active response
+    - active_response
+
+components:
+    - agent
+
 daemons:
+    - wazuh-analysisd
     - wazuh-execd
-category:
-    integration
+
 os_platform:
     - linux
-os_vendor:
-    - redhat
-    - debian
-    - ubuntu
-    - alas
-    - arch-linux
-    - centos
+
 os_version:
-    - centos6
-    - centos7
-    - centos8
-    - rhel6
-    - rhel7
-    - rhel8
-    - buster
-    - stretch
-    - wheezy
-    - bionic
-    - xenial
-    - trusty
-    - amazon-linux-1
-    - amazon-linux-2
-tiers:
-    - 0
-tags:
-    - log_monitor
-    - active_response
-component:
-    - agent
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
 '''
 import os
 import platform
@@ -187,8 +191,13 @@ def build_message(metadata, expected):
 def test_execd_restart(set_debug_mode, get_configuration, test_version,
                        configure_environment, start_agent, set_ar_conf_mode):
     '''
-    description:
-        Check if `restart-wazuh` command of Active Response is executed correctly.
+    description: Check if 'restart-wazuh' command of 'active response' is executed correctly.
+                 For this purpose, a simulated agent is used, to which the active response is sent.
+                 This response includes the order to restart the Wazuh agent,
+                 which must restart after receiving this response.
+
+    wazuh_min_version: 4.2.0
+
     parameters:
         - set_debug_mode:
             type: fixture
@@ -208,14 +217,24 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version,
         - set_ar_conf_mode:
             type: fixture
             brief: Configure Active Responses used in tests.
-    wazuh_min_version:
-        4.2
-    behaviour:
-        - Verify that Active Response is enabled by looking in the `ossec.log` and `active-responses.log` files.
-        - Check that `restart-wazuh` works by verifying that it restarts the agent.
-    expected_behaviour:
-        - The active response `restart-wazuh` is received.
-        - The agent is ready to restart.
+
+    assertions:
+        - Verify that the 'active response' 'restart-wazuh' is received.
+        - Verify that the agent is ready to restart.
+
+    input_description: Different use cases are found in the test module and include
+                       parameters for 'restart-wazuh' command and the expected result.
+
+    expected_output:
+        - r'DEBUG: Received message'
+        - r'Shutdown received. Deleting responses.'
+        - r'Starting'
+        - r'active-response/bin/restart-wazuh'
+        - r'Ended'
+        - r'Invalid input format' (If the 'active response' fails)
+
+    tags:
+        - simulator
     '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
