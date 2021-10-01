@@ -1,6 +1,7 @@
 From ubuntu:focal
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV RUNNING_ON_DOCKER_CONTAINER=true
 
 RUN apt-get -q update && \
     apt-get install -y \

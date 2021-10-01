@@ -190,8 +190,9 @@ class QATestRunner():
             QATestRunner.LOGGER.info('The test run is finished')
 
             for _, host_data in self.test_parameters.items():
-                QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
-                                         f"have been saved in {host_data['test']['path']['test_results_path']}")
+                if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+                    QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
+                                             f"have been saved in {host_data['test']['path']['test_results_path']}")
 
     def destroy(self):
         """"Destroy all the temporary files created during a running QAtestRunner instance"""
