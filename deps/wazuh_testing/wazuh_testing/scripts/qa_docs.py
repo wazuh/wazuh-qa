@@ -16,7 +16,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION = '0.1'
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'config.yaml')
+SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'schema.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'search_ui')
@@ -91,7 +91,7 @@ def validate_parameters(parameters, parser):
 
     # Check that test_input name exists
     if parameters.test_names:
-        doc_check = DocGenerator(Config(CONFIG_PATH, parameters.tests_path, test_names=parameters.test_names))
+        doc_check = DocGenerator(Config(SCHEMA_PATH, parameters.tests_path, test_names=parameters.test_names))
         
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
@@ -166,7 +166,7 @@ def main():
 
     # Print that test gave by the user(using `-e` option) exists or not.
     if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_exist))
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
         
         for test_name in args.test_exist:
             if doc_check.locate_test(test_name) is not None:
@@ -178,25 +178,25 @@ def main():
     # Load configuration if you want to test it
     elif args.test_config:
         qadocs_logger.debug('Loading qa-docs configuration')
-        Config(CONFIG_PATH, args.tests_path)
+        Config(SCHEMA_PATH, args.tests_path)
         qadocs_logger.debug('qa-docs configuration loaded')
 
     # Run a sanity check thru tests directory
     elif args.sanity:
-        sanity = Sanity(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
+        sanity = Sanity(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
     # Index the previous parsed tests into Elasticsearch
     elif args.index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.index_name, Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
+        index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
 
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.app_index_name:
         qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.app_index_name, Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
+        index_data = IndexData(args.app_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
@@ -204,7 +204,7 @@ def main():
 
     # Parse tests
     elif not args.test_exist:
-        docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH))
+        docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
 
         # Parse a list of tests
         if args.test_names:
@@ -212,10 +212,10 @@ def main():
 
             # When output path is specified by user, a json is generated within that path
             if args.output_path:
-                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, args.output_path, test_names=args.test_names))
+                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
             # When no output is specified, it is printed
             else:
-                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, test_names=args.test_names))
+                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_names))
 
         # Parse a list of test types
         elif args.test_types:
@@ -223,9 +223,9 @@ def main():
 
             # Parse a list of test modules
             if args.test_modules:
-                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types, args.test_modules))
+                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types, args.test_modules))
             else:
-                docs = DocGenerator(Config(CONFIG_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
+                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
 
         # Parse the whole path
         else:

@@ -38,8 +38,8 @@ class Config():
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, config_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None):
-        """Constructor that loads the data from the config file.
+    def __init__(self, schema_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None):
+        """Constructor that loads the schema file.
 
         If a test name is passed, it would be run in `single test mode`.
         And if an output path is not received, when is running in single test mode, it will be printed using the
@@ -49,7 +49,7 @@ class Config():
         The default output path for `default mode` is `qa_docs_installation/output`, it cannot be changed.
 
         Args:
-            config_path (str): A string that contains the config file path.
+            schema_path (str): A string that contains the schema file path.
             test_dir (str): A string that contains the path of the tests.
             output_path (str): A string that contains the doc output path.
             test_types (list): A list that contains the tests type(s) to be parsed.
@@ -60,9 +60,9 @@ class Config():
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
         self.include_paths = []
-        self.include_regex = []
-        self.group_files = ""
-        self.function_regex = []
+        self.include_regex = ["^test_.*py$"]
+        self.group_files = "README.md"
+        self.function_regex = ["^test_"]
         self.ignore_paths = []
         self.module_fields = _fields()
         self.test_fields = _fields()
@@ -70,12 +70,9 @@ class Config():
         self.test_types = []
         self.test_modules = []
 
-        self.__read_config_file(config_path)
-        self.__read_function_regex()
+        self.__read_schema_file(schema_path)
         self.__read_output_fields()
         self.__read_test_cases_field()
-        self.__read_include_regex()
-        self.__read_group_files()
         self.__read_ignore_paths()
         self.__set_documentation_path(output_path)
 
@@ -95,18 +92,18 @@ class Config():
         # Get the paths to parse
         self.__get_include_paths()
 
-    def __read_config_file(self, file):
-        """Read configuration file.
+    def __read_schema_file(self, file):
+        """Read schema file.
 
         Raises:
-            QAValuerError (IOError): Cannot load config file.
+            QAValuerError (IOError): Cannot load schema file.
         """
         try:
-            Config.LOGGER.debug('Loading config file')
+            Config.LOGGER.debug('Loading schema file')
             with open(file) as config_file:
                 self._config_data = yaml.safe_load(config_file)
         except IOError:
-            raise QAValueError('Cannot load config file', Config.LOGGER.error)
+            raise QAValueError('Cannot load schema file', Config.LOGGER.error)
 
     def __set_documentation_path(self, path):
         """Set the path of the documentation output."""

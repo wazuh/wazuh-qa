@@ -1,0 +1,30 @@
+output_fields:
+  module:
+    mandatory:
+      - copyright
+      - type
+      - brief
+      - tier
+      - modules
+      - daemons
+      - components
+      - path
+      - os_platform
+      - os_version
+    optional:
+      - references
+      - pytest_args
+      - tags
+  test:
+    mandatory:
+      - description
+      - wazuh_min_version
+      - parameters
+      - assertions
+      - inputs
+      - input_description
+      - expected_behaviour
+    optional:
+      - tags 
+
+test_cases_field: test_cases
