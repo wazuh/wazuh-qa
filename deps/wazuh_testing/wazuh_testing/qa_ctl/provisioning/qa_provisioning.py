@@ -181,7 +181,7 @@ class QAProvisioning():
 
         if 'qa_framework' in host_provision_info:
             qa_framework_info = host_provision_info['qa_framework']
-            wazuh_qa_branch = None if 'wazuh_qa_branch' not in qa_framework_info \
+            wazuh_qa_branch = 'master' if 'wazuh_qa_branch' not in qa_framework_info \
                 else qa_framework_info['wazuh_qa_branch']
 
             QAProvisioning.LOGGER.info(f"Provisioning the {current_host} host with the Wazuh QA framework using "
@@ -219,8 +219,8 @@ class QAProvisioning():
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
             try:
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
-                                  topic='provisioning the instances')
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.script_parameters.qa_branch,
+                                  self.qa_ctl_configuration.debug_level, topic='provisioning the instances')
             finally:
                 file.remove_file(tmp_config_file)
         else:

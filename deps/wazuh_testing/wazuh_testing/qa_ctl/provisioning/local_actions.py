@@ -66,30 +66,31 @@ def download_local_wazuh_qa_repository(branch, path):
 
     if os.path.exists(wazuh_qa_path):
         LOGGER.info(f"Pulling remote repository changes in {wazuh_qa_path} local repository")
-        run_local_command_with_output(f"cd {wazuh_qa_path} && git pull {mute_output} && git checkout {branch} "
-                                      f"{mute_output}")
+        run_local_command_with_output(f"cd {wazuh_qa_path} && git pull {mute_output} && "
+                                      f"git checkout {branch} {mute_output}")
     else:
         LOGGER.info(f"Downloading wazuh-qa repository in {wazuh_qa_path}")
-        run_local_command_with_output(f"git clone https://github.com/wazuh/wazuh-qa --branch {branch} "
-                                      f"--single-branch {wazuh_qa_path} {mute_output}")
+        run_local_command_with_output(f"cd {path} && git clone https://github.com/wazuh/wazuh-qa {mute_output} && "
+                                      f"cd {wazuh_qa_path} && git checkout {branch} {mute_output}")
 
 
-def qa_ctl_docker_run(config_file, debug_level, topic):
+def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
     """Run qa-ctl in a Linux docker container. Useful when running qa-ctl in native Windows host.
 
     Args:
         config_file (str): qa-ctl configuration file name to run.
+        qa_branch (str): Wazuh qa branch with which qa-ctl will be launched.
         debug_level (int): qa-ctl debug level.
         topic (str): Reason for running the qa-ctl docker.
     """
     debug_args = '' if debug_level == 0 else ('-d' if debug_level == 1 else '-dd')
-    docker_args = f"1900-qa-ctl-windows {config_file} --no-validation-logging {debug_args}"
+    docker_args = f"{qa_branch} {config_file} --no-validation-logging {debug_args}"
     docker_image_name = 'wazuh/qa-ctl'
     docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'deployment',
                                      'dockerfiles', 'qa_ctl')
 
     LOGGER.info(f"Building docker image for {topic}")
-    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
-
+    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} "
+                                  f"--build-arg qa_branch={qa_branch} .")
     LOGGER.info(f"Running the Linux container for {topic}")
     run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl {docker_image_name} {docker_args}")

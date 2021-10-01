@@ -161,8 +161,8 @@ class QATestRunner():
             file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
             try:
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.debug_level,
-                                  topic='launching the tests')
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.script_parameters.qa_branch,
+                                  self.qa_ctl_configuration.debug_level, topic='launching the tests')
                 # Move all test results to their original paths specified in Windows qa-ctl configuration
                 index = 0
                 for _, host_data in self.test_parameters.items():
