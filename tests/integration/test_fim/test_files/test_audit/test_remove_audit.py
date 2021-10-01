@@ -169,7 +169,8 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'.*Who-data engine could not start. Switching who-data to real-time.'

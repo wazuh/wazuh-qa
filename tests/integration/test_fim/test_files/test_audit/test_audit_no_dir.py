@@ -155,7 +155,8 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
 
     input_description: A test case (audit_no_dir) is contained in external `YAML` file (wazuh_conf.yaml)
                        which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       and, it is combined with the testing directories to be monitored
+                       defined in this module.
 
     expected_output:
         - r'.*Unable to add audit rule for'

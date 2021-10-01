@@ -144,8 +144,8 @@ def test_remove_rule_five_times(tags_to_apply, folder, audit_key,
           from `whodata` to `realtime` when an user edits the `audit` rules.
 
     input_description: A test case (config1) is contained in external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-syscheckd` daemon
-                       and testing directories to monitor.
+                       which includes configuration settings for the `wazuh-syscheckd` daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
 
     expected_output:
         - r'Detected Audit rules manipulation'

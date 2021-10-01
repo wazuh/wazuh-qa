@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected files
+       and triggering alerts when these files are modified. Specifically, they will check that
+       the modifications made on files during the initial scan (`baseline`) generate events when
+       the scan is finished.
+       The FIM capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-agentd
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim
+'''
 import os
 from time import time
 
@@ -62,14 +132,39 @@ def extra_configuration_before_yield():
 
 
 def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
-    """
-    Check if events are appearing after the baseline
-    The message 'File integrity monitoring scan ended' informs about the end of the first scan,
-    which generates the baseline
+    '''
+    description: Check if `FIM` events are appearing after the `baseline`. The log message
+                 `File integrity monitoring scan ended` informs about the end of the first scan,
+                 which generates the `baseline`. For this purpose, the test creates a test file
+                 while the initial scan is being performed. When the baseline has been generated
+                 it checks if the `FIM` addition event has been triggered.
 
-    It creates a file, checks if the baseline has generated before the file addition event, and then
-    if this event has generated.
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+
+    assertions:
+        - Verify that a `FIM` addition event was generated during the initial scan.
+
+    input_description: A test case (ossec_conf) is contained in external `YAML` file (wazuh_conf.yaml)
+                       which includes configuration settings for the `wazuh-syscheckd` daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - realtime
+    '''
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     # Create a file during initial scan to check if the event is logged after the 'scan ended' message

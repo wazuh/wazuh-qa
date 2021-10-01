@@ -1,7 +1,76 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the File Integrity Monitoring (`FIM`) system watches selected files
+       and triggering alerts when these files are modified. Specifically, they will verify that when
+       the `wazuh-syscheckd` daemon is disabled, no `FIM` events are generated.
+       The FIM capability is managed by the `wazuh-syscheckd` daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-agentd
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the `inotify` system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the `who-data` information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim
+'''
 import os
 
 import pytest
@@ -45,13 +114,37 @@ def get_configuration(request):
 # tests
 
 def test_disabled(get_configuration, configure_environment, restart_syscheckd):
-    """Check if syscheckd sends events when disabled="yes".
+    '''
+    description: Check if the `wazuh-syscheckd` daemon generates `FIM` events when it is disabled
+                 in the main configuration file. For this purpose, the test will monitor a testing
+                 folder and finally verifies that no `FIM` events have been generated.
 
-    Parameters
-    ----------
-    folder : str
-        Path where files will be created.
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+
+    assertions:
+        - Verify that when the `wazuh-syscheckd` daemon is disabled, no `FIM` events are generated.
+
+    input_description: A test case is contained in external `YAML` file (wazuh_conf_disabled.yaml) which
+                       includes configuration settings for the `wazuh-syscheckd` daemon and, it is combined
+                       with the testing directory to be monitored defined in this module.
+
+    expected_output:
+        - No `FIM` events should be generated.
+
+    tags:
+        - scheduled
+    '''
     # Expect a timeout when checking for syscheckd initial scan
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=10, callback=callback_detect_end_scan)

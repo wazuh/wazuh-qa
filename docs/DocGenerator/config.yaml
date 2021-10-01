@@ -48,6 +48,7 @@ Ignore paths:
   - "../../tests/integration/test_cluster/test_key_polling/data"
   - "../../tests/integration/test_fim/test_files/test_ambiguous_confs/data"
   - "../../tests/integration/test_fim/test_files/test_audit/data"
+  - "../../tests/integration/test_fim/test_files/test_basic_usage/data"
 
 Output fields:
   Module:
