@@ -32,9 +32,9 @@ testinfra==5.0.0
 jq==1.1.2; platform_system == "Linux" or platform_system == "MacOS"
 cryptography==3.3.2; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
 urllib3>=1.26.5
-elasticsearch>=7.14.1 ; platform_system == "Linux" or platform_system=='Windows'
 numpydoc>=1.1.0
-ansible-runner>=2.0.1 ; platform_system == "Linux" or platform_system=='Windows'
+ansible-runner>=2.0.1 ; platform_system == "Linux"
 docker>=5.0.0 ; platform_system == "Linux" or platform_system=='Windows'
 python-vagrant>=0.5.15 ; platform_system == "Linux" or platform_system=='Windows'
 ansible>=3.1.0 ; platform_system == "Linux"
+elasticsearch>=7.14.1 ; platform_system == "Linux" or platform_system=='Windows'
