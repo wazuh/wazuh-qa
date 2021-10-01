@@ -33,3 +33,5 @@ testinfra==5.0.0
 jq==1.1.2; platform_system == "Linux" or platform_system == "MacOS"
 cryptography==3.3.2; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
 urllib3>=1.26.5
+bandit==1.7.0
+git-repo==1.10.3
