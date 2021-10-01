@@ -45,7 +45,7 @@ def check_incompatible_parameters(parameters):
                   or parameters.test_exist or parameters.test_types or parameters.test_modules
 
     if parameters.test_config and default_run:
-        raise QAValueError('The -t, --test-config parameter is incompatible with -T, -i, -l, -T, -e options. '
+        raise QAValueError('The -t, --temst-config paraeter is incompatible with -T, -i, -l, -T, -e options. '
                            'This option tests the configuration loaded for debugging purposes.',
                            qadocs_logger.error)
 
@@ -66,10 +66,7 @@ def check_incompatible_parameters(parameters):
                         qadocs_logger.error)
 
 def validate_parameters(parameters, parser):
-    """Validate the parameters that qa-docs recieves.
-
-    Since `config.yaml` will be `schema.yaml`, it runs as config file is correct.
-    So we only validate the parameters that the user introduces.
+    """Validate the parameters that qa-docs receives.
 
     Args:
         parameters (list): A list of input args.

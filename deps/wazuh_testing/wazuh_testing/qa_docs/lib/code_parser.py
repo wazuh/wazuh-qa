@@ -20,7 +20,7 @@ class CodeParser:
     """Class that parses the content of the test files.
 
     Attributes:
-        conf (Config): A `Config` instance with the config file data.
+        conf (Config): A `Config` instance with the loaded configuration.
         pytest (PytestWrap): A `PytestWrap` instance to wrap the pytest execution.
         function_regexes (list): A list of regular expressions used to find test functions.
     """
@@ -32,7 +32,7 @@ class CodeParser:
         Initialize every attribute.
 
         Args:
-            config (Config): A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded configuration.
         """
         self.conf = config
         self.pytest = PytestWrap()

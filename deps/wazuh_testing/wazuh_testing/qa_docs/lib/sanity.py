@@ -19,7 +19,7 @@ class Sanity():
     It is in charge of walk every documentation file, and every group file to dump the parsed documentation.
 
     Attributes:
-        conf (Config): A `Config` instance with the loaded data from the config file.
+        conf (Config): A `Config` instance with the loaded configuration.
         files_regex (re): A regular expression to get the JSON files previously generated.
         error_reports (list): A list that contains all the errors obtained within the check.
         found_tags (set): A set with all the tags found within the check.
@@ -35,7 +35,7 @@ class Sanity():
         Initialize every attribute.
 
         Args:
-            config (Config): A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded configuration.
         """
         self.conf = config
         self.files_regex = re.compile("^(?!.*group)test.*json$", re.IGNORECASE)

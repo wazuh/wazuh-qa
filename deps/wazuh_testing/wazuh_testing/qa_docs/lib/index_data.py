@@ -31,7 +31,7 @@ class IndexData:
         Initialize every attribute.
 
         Args:
-            config (Config): A `Config` instance with the loaded data from the config file.
+            config (Config): A `Config` instance with the loaded configuration.
         """
         self.path = config.documentation_path
         self.index = index

@@ -25,7 +25,7 @@ class DocGenerator:
     The included paths are generated using the types and modules from the wazuh-qa framework.
 
     Attributes:
-        conf (Config): A `Config` instance with data loaded from config file.
+        conf (Config): A `Config` instance with the loaded configuration.
         parser (CodeParser): A `CodeParser` instance with parsing utilities.
         __id_counter (int): An integer that counts the test/group ID when it is created.
         ignore_regex (list): A list with compiled paths to be ignored.
@@ -39,7 +39,7 @@ class DocGenerator:
         Initialize every attribute.
 
         Args:
-            config (Config): A `Config` instance with the loaded data from config file.
+            config (Config): A `Config` instance with the loaded configuration.
         """
         self.conf = config
         self.parser = CodeParser(self.conf)
