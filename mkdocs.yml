@@ -535,6 +535,8 @@ nav:
           - Test update password:  tests/system/test_jwt_invalidation/test_update_password.md
       - Scans:
         - tests/scans/index.md
+        - Dependencies:
+            - Test Python dependencies: tests/scans/dependencies/test_dependencies.md
         - Code Analysis:
             - Test Python flaws: tests/scans/code_analysis/test_python_flaws.md
       - Legacy:
