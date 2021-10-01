@@ -30,6 +30,7 @@ WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh-qa')
 qactl_logger = Logging(QACTL_LOGGER)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 launched = {
+    'config_generator': False,
     'instance_handler': False,
     'qa_provisioning': False,
     'test_runner': False
@@ -146,7 +147,6 @@ def validate_parameters(parameters):
             version = get_last_wazuh_version()
             qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
 
-        qa_branch = '1900-qa-ctl-windows'
         local_actions.download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
 
         for test in parameters.run_test:
@@ -194,6 +194,7 @@ def main():
         qactl_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, WAZUH_QA_FILES)
         config_generator.run()
+        launched['config_generator'] = True
         configuration_file = config_generator.config_file_path
         qactl_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
 
@@ -251,6 +252,8 @@ def main():
             if TEST_KEY in configuration_data and launched['test_runner']:
                 tests_runner.destroy()
 
+            if arguments.run_test and launched['config_generator']:
+                config_generator.destroy()
 
 if __name__ == '__main__':
     main()
