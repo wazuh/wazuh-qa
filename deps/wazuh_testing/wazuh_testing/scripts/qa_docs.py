@@ -51,13 +51,13 @@ def check_incompatible_parameters(parameters):
                            qadocs_logger.error)
 
     if parameters.output_path and default_run:
-        raise QAValueError('The -o parameter only works with -T, --tests options in isolation. The default output '
+        raise QAValueError('The -o parameter only works with -t, --tests options in isolation. The default output '
                            'path is generated within the qa-docs tool to index it and visualize it.',
                            qadocs_logger.error)
                     
     if (parameters.test_types or parameters.test_modules) and parameters.test_names:
         raise QAValueError('The --types, --modules parameters parse the data, index it, and visualize it, so it cannot be used with '
-                           '-T, --tests because they get specific tests information.',
+                           '-t, --tests because they get specific tests information.',
                         qadocs_logger.error)
 
 def validate_parameters(parameters, parser):
@@ -124,11 +124,8 @@ def main():
     parser.add_argument('-I', '--tests-path', dest='tests_path',
                         help="Path where tests are located.")
 
-    parser.add_argument('-i', '--index-data', dest='index_name',
-                        help="Indexes the data named as you specify as argument to elasticsearch.")
-
-    parser.add_argument('-l', '--launch-ui', dest='app_index_name',
-                        help="Indexes the data named as you specify as argument and launch SearchUI.")
+    parser.add_argument('-t', '--tests', nargs='+', default=[], dest='test_names',
+                        help="Parse the test(s) that you pass as argument.")
 
     parser.add_argument('--types', nargs='+', default=[], dest='test_types',
                         help="Parse the tests from type(s) that you pass as argument.")
@@ -136,11 +133,17 @@ def main():
     parser.add_argument('--modules', nargs='+', default=[], dest='test_modules',
                         help="Parse the tests from modules(s) that you pass as argument.")
 
-    parser.add_argument('-t', '--tests', nargs='+', default=[], dest='test_names',
-                        help="Parse the test(s) that you pass as argument.")
+    parser.add_argument('-i', '--index-data', dest='index_name',
+                        help="Indexes the data named as you specify as argument to elasticsearch.")
+
+    parser.add_argument('-l', '--launch-ui', dest='app_index_name',
+                        help="Launch SearchUI using the index that you specify.")
+
+    parser.add_argument('-il', dest='launching_index_name',
+                        help="Indexes the data named as you specify as argument and launch SearchUI.")
 
     parser.add_argument('-o', dest='output_path',
-                        help="Specifies the output directory for test parsed when `-T, --tests` is used.")
+                        help="Specifies the output directory for test parsed when `-t, --tests` is used.")
 
     parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
                         help="Checks if test(s) exist or not.",)
@@ -176,11 +179,19 @@ def main():
         index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
 
-    # Index the previous parsed tests into Elasticsearch and then launch SearchUI
+    # Launch SearchUI with the 
     elif args.app_index_name:
-        qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.app_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+        # When SearchUI index is not hardcoded, it will be use args.app_index_name 
+        os.chdir(SEARCH_UI_PATH)
+        qadocs_logger.debug('Running SearchUI')
+        os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
+
+    # Index the previous parsed tests into Elasticsearch and then launch SearchUI
+    elif args.launching_index_name:
+        qadocs_logger.debug(f"Indexing {args.launching_index_name}")
+        index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
+        # When SearchUI index is not hardcoded, it will be use args.launching_index_name 
         os.chdir(SEARCH_UI_PATH)
         qadocs_logger.debug('Running SearchUI')
         os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
