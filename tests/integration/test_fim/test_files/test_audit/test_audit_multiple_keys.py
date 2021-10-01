@@ -9,6 +9,11 @@ import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf
+from wazuh_testing.tools.services import control_service
+import wazuh_testing.tools.monitoring as monitoring
+from wazuh_testing.tools import LOG_FILE_PATH
 
 # Marks
 
@@ -52,7 +57,34 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
+def ensure_audit_plugin_installed():
+
+    audit2_plugin = '/etc/audisp/plugins.d/af_wazuh.conf'
+    audit3_plugin = '/etc/audit/plugins.d/af_wazuh.conf'
+
+    if not os.path.exists(audit2_plugin) and not os.path.exists(audit3_plugin):
+
+        os.makedirs('/tmp/testing_audit', exist_ok=True)
+        configuration_audit = [{'section': 'syscheck', 'elements': [{'disabled': {'value': 'no'}}, {'directories': {'value': '/tmp/testing_audit', 'attributes': [{'whodata': 'yes'}]}}]}]
+
+        backup_config = get_wazuh_conf()
+
+        # Configuration for testing
+        test_config = set_section_wazuh_conf(configuration_audit)
+
+        control_service('restart')
+
+        whodata_log_monitor = monitoring.FileMonitor(LOG_FILE_PATH)
+
+        whodata_log_monitor.start(timeout=40, callback=fim.callback_end_audit_reload_rules)
+
+        control_service('stop')
+        truncate_file(LOG_FILE_PATH)
+        os.system('/sbin/service auditd restart')
+
+
+@pytest.fixture(scope='module')
 def set_audit_rules():
     # Create the custom audit rules for the non monitored directory
     fim.run_audit_command(directory=non_monitored_test_dir, params=param_list, cmd_type='add')
@@ -69,8 +101,9 @@ def set_audit_rules():
 
 
 @pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir])
-def test_audit_multiple_keys(get_configuration, configure_environment, configure_local_internal_options_module,
-                             file_monitoring, set_audit_rules, daemons_handler, wait_for_fim_start, directory):
+def test_audit_multiple_keys(ensure_audit_plugin_installed, get_configuration, configure_environment, configure_local_internal_options_module,
+                             file_monitoring, set_audit_rules, daemons_handler,
+                             wait_for_fim_start, directory):
     """Checks that FIM correctly handles audit rules with multiple keys.
 
     Args:
