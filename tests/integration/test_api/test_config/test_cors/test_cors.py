@@ -1,7 +1,51 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+'''
+brief:
+    These tests will check if the CORS (Cross-origin resource sharing) feature
+    of the API handled by the `apid` daemon is working properly.
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+    Created by Wazuh, Inc. <info@wazuh.com>.
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+modules:
+    - api
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-wazuh-db
+category:
+    integration
+os_platform:
+    - linux
+os_vendor:
+    - redhat
+    - debian
+    - ubuntu
+    - alas
+    - arch-linux
+    - centos
+os_version:
+    - centos6
+    - centos7
+    - centos8
+    - rhel6
+    - rhel7
+    - rhel8
+    - buster
+    - stretch
+    - wheezy
+    - bionic
+    - xenial
+    - trusty
+    - amazon-linux-1
+    - amazon-linux-2
+tiers:
+    - 0
+tags:
+    - api
+component:
+    - manager
+'''
 import os
 
 import pytest
@@ -36,19 +80,41 @@ def get_configuration(request):
 ])
 def test_cors(origin, tags_to_apply, get_configuration, configure_api_environment,
               restart_api, wait_for_start, get_api_details):
-    """Check if expected headers are returned when CORS is enabled.
-
-    When CORS is enabled, special headers must be returned in case the
-    request origin matches the one established in the CORS configuration
-    of the API.
-
-    Parameters
-    ----------
-    origin : str
-        Origin path to be appended as a header in the request.
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    '''
+    description:
+        Check if expected headers are returned when CORS is enabled.
+        When CORS is enabled, special headers must be returned in case the
+        request origin matches the one established in the CORS configuration
+        of the API.
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset `api.log` and start a new monitor.
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+    wazuh_min_version:
+        3.13
+    behaviour:
+        - Perform different requests with CORS enabled and disabled, then check the responses for matching headers.
+    expected_behaviour:
+        - The `Access-Control-Allow-Origin` header is received when CORS is enabled.
+        - The `Access-Control-Expose-Headers` header is received when CORS is enabled.
+        - The `Access-Control-Allow-Credentials` header is received when CORS is enabled.
+        - the `Access-Control-Allow-Origin` header is not received when CORS is disabled.
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     api_details = get_api_details()
     api_details['auth_headers']['origin'] = origin
