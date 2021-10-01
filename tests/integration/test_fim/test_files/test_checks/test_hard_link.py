@@ -1,7 +1,69 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files
+       are modified. Specifically, these tests will check if FIM events are generated when 'hard links'
+       of a monitored file are modified but are located in a different directory than the source file.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+    - https://en.wikipedia.org/wiki/Inode
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_checks
+'''
 import os
 import sys
 import time
@@ -55,28 +117,66 @@ def get_configuration(request):
 ])
 def test_hard_link(path_file, file_name, path_link, link_name, num_links, get_configuration,
                    configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Test the check_inode option when used with Hard links by creating a hard link file inside and outside the
-    monitored directory.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events when the 'check_inode' attribute is used
+                 and 'hard links' are modified while inside and outside the monitored directory.
+                 When a regular file with one or more hard links pointing to it is modified, the FIM event
+                 raised will have a field named 'hard_links' that must contain a list with the path to those
+                 'hard links'. Only modification events for the regular file are expected, not for the 'hard links'
+                 even if the 'hard link' is modified. For this purpose, the test will monitor a directory where
+                 it will add a testing file, create several 'hard links' pointing to it and verify that these
+                 operations have generated the appropriate FIM 'added' events. Then it will modify the testing file
+                 and check if the 'modified' events have been generated for that file only. Finally, the test
+                 will verify that appropriate FIM events are generated if one of the 'hard links'
+                 within the monitored directory is modified.
 
-    When a regular file with one or more hard links pointing to it is modified the event raised will have a field named
-    'hard_links' that must contain a list with the path to those hard links. Only modification events for the regular
-    file are expected, not for the hard links, even if we modify a hard link.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path_file : str
-        The path to the regular file to be created.
-    file_name : str
-        The name of the regular file to be created.
-    path_link : str
-        The path to the Hard links to be created.
-    link_name : str
-        The name of the Hard links to be created.
-    num_links : int
-        Number of hard links to create. All of them will be pointing to the same regular file.
-    """
+    parameters:
+        - path_file:
+            type: str
+            brief: Path to the regular file to be created.
+        - file_name:
+            type: str
+            brief: Name of the regular file to be created.
+        - path_link:
+            type: str
+            brief: Path to the 'hard links' to be created.
+        - link_name:
+            type: str
+            brief: Name of the 'hard links' to be created.
+        - num_links:
+            type: int
+            brief: Number of hard links to create. All of them will be pointing to the same regular file.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
+    assertions:
+        - Verify that the FIM events generated contain contain the proper number of 'hard links'
+          in the 'hard_links' field.
+        - Verify that only FIM events are generated when the regular file being monitored is modified.
+
+    input_description: A test case (test_hard_link) is contained in external YAML file
+                       (wazuh_hard_link.yaml) which includes configuration settings for
+                       the 'wazuh-syscheckd' daemon and testing directory to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     def detect_and_validate_event(expected_file, mode, expected_hard_links):
         event_checker.events = event_checker.fetch_events(min_timeout=global_parameters.default_timeout)
 
