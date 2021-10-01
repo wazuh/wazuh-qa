@@ -123,9 +123,6 @@ def main():
     parser.add_argument('-v', '--version', action='store_true', dest="version",
                         help="Print qa-docs version.")
 
-    parser.add_argument('-t', '--test-cfg', action='store_true', dest='test_config',
-                        help="Load test configuration.")
-
     parser.add_argument('-d', '--debug', action='count', dest='debug_level',
                         help="Enable debug messages.")
 
@@ -144,7 +141,7 @@ def main():
     parser.add_argument('--modules', nargs='+', default=[], dest='test_modules',
                         help="Parse the tests from modules(s) that you pass as argument.")
 
-    parser.add_argument('-T', '--tests', nargs='+', default=[], dest='test_names',
+    parser.add_argument('-t', '--tests', nargs='+', default=[], dest='test_names',
                         help="Parse the test(s) that you pass as argument.")
 
     parser.add_argument('-o', dest='output_path',
@@ -171,12 +168,6 @@ def main():
 
     if args.version:
         print(f"qa-docs v{VERSION}")
-
-    # Load configuration if you want to test it
-    elif args.test_config:
-        qadocs_logger.debug('Loading qa-docs configuration')
-        Config(SCHEMA_PATH, args.tests_path)
-        qadocs_logger.debug('qa-docs configuration loaded')
 
     # Run a sanity check thru tests directory
     elif args.sanity:
