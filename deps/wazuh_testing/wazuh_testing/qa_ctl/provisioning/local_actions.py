@@ -20,7 +20,10 @@ def run_local_command(command):
     Raises:
         QAValueError: If the run command has failed (rc != 0).
     """
-    run = subprocess.Popen(command, shell=True)
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command])
 
     # Wait for the process to finish
     run.communicate()
@@ -40,7 +43,10 @@ def run_local_command_with_output(command):
     Returns:
         str: Command output
     """
-    run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command], stdout=subprocess.PIPE)
 
     return run.stdout.read().decode()
 
@@ -60,7 +66,8 @@ def download_local_wazuh_qa_repository(branch, path):
 
     if os.path.exists(wazuh_qa_path):
         LOGGER.info(f"Pulling remote repository changes in {wazuh_qa_path} local repository")
-        run_local_command(f"cd {wazuh_qa_path} && git pull {mute_output} && git checkout {branch} {mute_output}")
+        run_local_command_with_output(f"cd {wazuh_qa_path} && git pull {mute_output} && git checkout {branch} "
+                                      f"{mute_output}")
     else:
         LOGGER.info(f"Downloading wazuh-qa repository in {wazuh_qa_path}")
         run_local_command_with_output(f"git clone https://github.com/wazuh/wazuh-qa --branch {branch} "
