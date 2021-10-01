@@ -44,13 +44,8 @@ def check_incompatible_parameters(parameters):
     default_run = parameters.index_name or parameters.app_index_name or parameters.test_names \
                   or parameters.test_exist or parameters.test_types or parameters.test_modules
 
-    if parameters.test_config and default_run:
-        raise QAValueError('The -t, --temst-config paraeter is incompatible with -T, -i, -l, -T, -e options. '
-                           'This option tests the configuration loaded for debugging purposes.',
-                           qadocs_logger.error)
-
     if parameters.tests_path is None and default_run:
-        raise QAValueError('The following options need the path where the tests are located: -t, -T, --test, '
+        raise QAValueError('The following options need the path where the tests are located: -t, --test, '
                            '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
                            '-I, --tests-path path_to_tests.',
                            qadocs_logger.error)
