@@ -1,7 +1,74 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM stops monitoring
+       the target of a 'symbolic_link' found in the monitored directory when the attribute
+       'follow_symbolic_link' is disabled.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - macos
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_follow_symbolic_link
+'''
 import os
 
 import pytest
@@ -53,28 +120,67 @@ def get_configuration(request):
 def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_dir1, non_monitored_dir2,
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
                                                  restart_syscheckd, wait_for_fim_start):
-    """Check what happens with a symlink and its target when syscheck monitors a directory with a symlink
-    and not the symlink itself.
-
+    """
     When this happens, the symbolic link is considered a regular file and it will not follow its target path.
     It will only generate events if it changes somehow, not its target (file or directory)
-
-
-    Args:
-        monitored_dir (str): Monitored directory.
-        non_monitored_dir1 (str): Non-monitored directory.
-        non_monitored_dir2 (str): Non-monitored directory.
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-
-    Raises:
-        TimeoutError: If a expected event wasn't triggered.
-        AttributeError: If a unexpected event was captured.
-        ValueError: If the event's type and path are not the expected.
     """
+
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events when monitoring a directory with a symlink and
+                 not the symlink itself. For this purpose, the test will create some files in a non-monitored folder
+                 and will not expect any events. Then, it will create a 'symbolic link' inside the monitored folder
+                 pointing to the non-monitored folder. The test will expect an FIM 'added' event with the path
+                 of the 'symbolic link', as it is within a monitored directory. It will create some events in
+                 the link target and will not expect any events. Finally, the test will change the link target,
+                 and it will expect an FIM 'modified' event.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - monitored_dir:
+            type: str
+            brief: Directory that is being monitored.
+        - non_monitored_dir1:
+            type: str
+            brief: Directory that is being monitored.
+        - non_monitored_dir2:
+            type: str
+            brief: Directory that is being monitored.
+        - sym_target:
+            type: str
+            brief: Path to the target of the 'symbolic link'.
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that no FIM events are generated when performing file operations
+          on a 'symbolic link' target in a monitored directory.
+        - Verify that FIM events are generated when adding or modifying the 'symbolic link' itself.
+
+    input_description: A test case (non_monitored_dir) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directories to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     name1 = f'{sym_target}regular1'
     name2 = f'{sym_target}regular2'
@@ -90,7 +196,7 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     target = a_path if sym_target == 'file' else non_monitored_dir1
     fim.create_file(fim.SYMLINK, monitored_dir, sl_name, target=target)
 
-    # Create the syslink and expect its event, since it's withing the monitored directory
+    # Create the symlink and expect its event, since it's withing the monitored directory
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event')
