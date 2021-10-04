@@ -111,12 +111,12 @@ def install_searchui_deps():
         qadocs_logger.info('Installing SearchUI dependencies')
         os.system("npm install")
 
-def run_searchui():
+def run_searchui(index):
     """Run SearchUI installing its dependencies if necessary"""
     os.chdir(SEARCH_UI_PATH)
     install_searchui_deps()
     qadocs_logger.debug('Running SearchUI')
-    os.system("ELASTICSEARCH_HOST=http://localhost:9200 npm start")
+    os.system(f"ELASTICSEARCH_HOST=http://localhost:9200 INDEX={index} npm start")
 
 
 def main():
@@ -195,7 +195,7 @@ def main():
     # Launch SearchUI with the 
     elif args.app_index_name:
         # When SearchUI index is not hardcoded, it will be use args.app_index_name 
-        run_searchui()
+        run_searchui(args.app_index_name)
 
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.launching_index_name:
@@ -203,7 +203,7 @@ def main():
         index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
         index_data.run()
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name 
-        run_searchui()
+        run_searchui(args.launching_index_name)
 
     # Parse tests
     elif not args.test_exist:
