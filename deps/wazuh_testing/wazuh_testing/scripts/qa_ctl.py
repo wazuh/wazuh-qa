@@ -138,8 +138,9 @@ def validate_parameters(parameters):
 
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
-
-    if parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing and not parameters.config:
+    print(parameters)
+    if (parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing) \
+        and not parameters.config:
         raise QAValueError('The --skip parameter can only be used when a custom configuration file has been '
                            'specified with the option -c or --config', qactl_logger.error, QACTL_LOGGER)
 
@@ -294,6 +295,9 @@ def main():
 
             if arguments.run_test and launched['config_generator']:
                 config_generator.destroy()
+        else:
+            if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+                qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
 
 if __name__ == '__main__':
     main()
