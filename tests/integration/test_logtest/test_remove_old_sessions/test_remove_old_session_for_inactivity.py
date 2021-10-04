@@ -29,7 +29,7 @@ logtest_startup_timeout = 30
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 receiver_sockets_params = [(LOGTEST_SOCKET_PATH, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
-local_internal_options = {'analysisd.debug': str(1)}
+local_internal_options = {'analysisd.debug': '1'}
 msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
 "event": "Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928",
 "log_format": "syslog", "location": "master->/var/log/syslog"}}"""
@@ -79,8 +79,7 @@ def get_configuration(request):
 
 
 # Test
-def test_remove_old_session_for_inactivity(get_local_internal_options,
-                                           configure_local_internal_options,
+def test_remove_old_session_for_inactivity(configure_local_internal_options,
                                            get_configuration,
                                            configure_environment,
                                            restart_required_logtest_daemons,

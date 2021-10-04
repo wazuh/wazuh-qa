@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-
+import json
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.logtest import (callback_logtest_started,
@@ -24,12 +24,11 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
-logtest_startup_timeout = 30
+logtest_startup_timeout = 3
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-local_internal_options = {'analysisd.debug': str(1)}
-msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
-"event": "Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928",
-"log_format": "syslog", "location": "master->/var/log/syslog"}}"""
+local_internal_options = {'analysisd.debug': '1'}
+create_session_data = {'version': 1, 'command': 'log_processing', 'parameters': {'event': 'Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928', 'log_format': 'syslog', 'location': 'master->/var/log/syslog'}}
+msg_create_session = json.dumps(create_session_data)
 
 
 @pytest.fixture(scope='module')
