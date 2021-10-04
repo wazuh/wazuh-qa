@@ -11,6 +11,7 @@ from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
 from wazuh_testing.qa_docs.lib.utils import remove_inexistent
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 INTERNAL_FIELDS = ['id', 'group_id', 'name']
 STOP_FIELDS = ['tests', 'test_cases']
@@ -69,16 +70,65 @@ class CodeParser:
             for test in doc['tests']:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
-    def parse_comment(self, function):
+    def check_predefined_values(self, doc, doc_type, path):
+        """Check if the documentation block follows the predefined values.
+        
+        It iterates through the predefined values and checks if the documentation fields contain correct values.
+        If the field does not exist or does not contain a predefined value, it would log it.
+
+        The predefined values are stored in
+        https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#pre-defined-values.
+
+        Args:
+            doc (dict): A dict with the documentation block parsed.
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
+        """
+        for field in self.conf.predefined_values[f"{doc_type}_fields"]:
+            try:
+                doc_field = doc[field]
+            except KeyError:
+                CodeParser.LOGGER.error(f"{field} field missing in {path} {doc_type}")
+                doc_field = None
+
+            # If the field is a list, iterate thru predefined values
+            if isinstance(doc_field, list):
+                for value in doc_field:
+                    if value not in self.conf.predefined_values[field]:
+                        CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                                                f"has an invalid value: {value}. "
+                                                f"Follow the predefined values: {self.conf.predefined_values[field]}."
+                                                 "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                                 "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                        # raise QAValueError(f"{field} field in {path} {doc_type} has an invalid value: {value}. "
+                        #                    f"Follow the predefined values: {self.conf.predefined_values[field]}"
+                        #                    , CodeParser.LOGGER.error)
+            else:
+                if doc_field not in self.conf.predefined_values[field] and doc_field is not None:
+                    CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                                            f"has an invalid value: {doc_type}. "
+                                            f"Follow the predefined values: {self.conf.predefined_values[field]}"
+                                                 "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                                 "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                #     raise QAValueError(f"{field} field in {path} {doc_type} has an invalid value: {doc_field}. "
+                #                        f"Follow the predefined values: {self.conf.predefined_values[field]}"
+                #                        , CodeParser.LOGGER.error)
+
+    def parse_comment(self, function, doc_type, path):
         """Parse one self-contained documentation block.
 
         Args:
             function (_ast.FunctionDef): Function class with all the information of the method"
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
 
         Returns:
             doc (dict): A dictionary with the documentation block parsed.
         """
         docstring = ast.get_docstring(function)
+        if not docstring:
+            CodeParser.LOGGER.error(f"Documentation block not found in {path}")
+            # raise QAValueError(f"Documentation block not found in {path}", CodeParser.LOGGER.error)
 
         try:
             doc = yaml.safe_load(docstring)
@@ -88,12 +138,18 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                CodeParser.LOGGER.warning(f"Failed to parse test documentation in {function.name} "
-                                          "from module {self.scan_file}. Error: {inst}")
+                CodeParser.LOGGER.error(f"Failed to parse test documentation in {function.name} "
+                                         "from module {self.scan_file}. Error: {inst}")
+                # raise QAValueError(f"Failed to parse test documentation in {function.name} "
+                #                     "from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
             else:
-                CodeParser.LOGGER.warning(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
+                CodeParser.LOGGER.error(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
+                # raise QAValueError(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}"
+                #                     , CodeParser.LOGGER.error)
+            return None
 
-            doc = None
+        CodeParser.LOGGER.debug(f"Checking that the documentation block within {path} follow the predefined values.")
+        self.check_predefined_values(doc, doc_type, path)
 
         return doc
 
@@ -115,7 +171,7 @@ class CodeParser:
         module = ast.parse(file_content)
         functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
 
-        module_doc = self.parse_comment(module)
+        module_doc = self.parse_comment(module, 'module', path)
         if module_doc:
             module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
@@ -129,7 +185,7 @@ class CodeParser:
             functions_doc = []
             for function in functions:
                 if self.is_documentable_function(function):
-                    function_doc = self.parse_comment(function)
+                    function_doc = self.parse_comment(function, 'test', path)
 
                     if function_doc:
                         if test_cases and not (self.conf.test_cases_field in function_doc) \

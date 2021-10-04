@@ -28,3 +28,214 @@ output_fields:
       - tags 
 
 test_cases_field: test_cases
+
+predefined_values:
+  module_fields:
+    - type
+    - modules
+    - components
+    - daemons
+    - os_platform
+    - os_version
+    - tags
+  test_fields:
+    - wazuh_min_version
+    - tags
+  type:
+    - integration
+    - performance
+    - system
+    - unit
+  modules:
+    - active_response
+    - agentd
+    - analysisd
+    - api
+    - authd
+    - cluster
+    - fim
+    - gcloud
+    - github
+    - logcollector
+    - logtest
+    - office365
+    - remoted
+    - rids
+    - rootcheck
+    - vulnerability_detector
+    - wazuh_db
+    - wpk
+  os_platform:
+    - aix
+    - linux
+    - hp-ux
+    - macos
+    - solaris
+    - windows
+  os_version:
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - Arch Linux
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Fedora 31
+    - Fedora 32
+    - Fedora 33
+    - Fedora 34
+    - openSUSE 42
+    - Oracle 6
+    - Oracle 7
+    - Oracle 8
+    - Red Hat 6
+    - Red Hat 7
+    - Red Hat 8
+    - Solaris 10
+    - Solaris 11
+    - SUSE 12
+    - SUSE 13
+    - SUSE 14
+    - SUSE 15
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+    - Ubuntu Focal
+    - macOS Server
+    - macOS Catalina
+    - Windows XP
+    - Windows 7
+    - Windows 8
+    - Windows 10
+    - Windows Server 2003
+    - Windows server 2012
+    - Windows server 2016
+  components:
+    - agent
+    - manager
+  daemons:
+    - ossec-agentd
+    - ossec-agentlessd
+    - ossec-analysisd
+    - ossec-authd
+    - ossec-csyslogd
+    - ossec-dbd
+    - ossec-execd
+    - ossec-integratord
+    - ossec-logcollector
+    - ossec-maild
+    - ossec-monitord
+    - ossec-remoted
+    - ossec-reportd
+    - ossec-syscheckd
+    - wazuh-agentd
+    - wazuh-agentlessd
+    - wazuh-analysisd
+    - wazuh-authd
+    - wazuh-csyslogd
+    - wazuh-apid
+    - wazuh-clusterd
+    - wazuh-db
+    - wazuh-dbd
+    - wazuh-execd
+    - wazuh-integratord
+    - wazuh-logcollector
+    - wazuh-maild
+    - wazuh-monitord
+    - wazuh-modulesd
+    - wazuh-remoted
+    - wazuh-reportd
+    - wazuh-syscheckd
+  wazuh_min_version:
+    - 2.1.0
+    - 3.0.0
+    - 3.1.0
+    - 3.2.0
+    - 3.3.0
+    - 3.4.0
+    - 3.5.0
+    - 3.6.0
+    - 3.7.0
+    - 3.8.0
+    - 3.9.0
+    - 3.10.0
+    - 3.11.0
+    - 3.12.0
+    - 3.13.0
+    - 4.0.0
+    - 4.1.0
+    - 4.2.0
+    - 4.3.0
+  tags:
+    - active_response
+    - agentd
+    - alerts
+    - analysisd
+    - api
+    - ar_analysisd
+    - ar_execd
+    - auditd
+    - audit_keys
+    - audit_rules
+    - authd
+    - aws
+    - brute_force_attack
+    - cache
+    - cluster
+    - cors
+    - cpe
+    - dos_attack
+    - download
+    - enrollment
+    - errors
+    - events
+    - experimental
+    - feeds
+    - fernet
+    - fim
+    - fim_ambiguous_confs
+    - fim_audit
+    - fim_basic_usage
+    - fim_benchmark
+    - fim_checks
+    - fim_env_variables
+    - fim_file_limit
+    - fim_follow_symbolic_link
+    - gcloud
+    - github
+    - integrity
+    - keys
+    - key_polling
+    - logcollector
+    - logs
+    - logtest
+    - man_in_the_middle
+    - master
+    - mitre
+    - msu
+    - nvd
+    - office365
+    - oval
+    - rbac
+    - realtime
+    - remoted
+    - rids
+    - rootcheck
+    - rules
+    - scan
+    - settings
+    - simulator
+    - ssl
+    - stats_file
+    - time_travel
+    - token
+    - vulnerability
+    - vulnerability_detector
+    - wazuh_db
+    - wdb_socket
+    - who_data
+    - worker
+    - wpk

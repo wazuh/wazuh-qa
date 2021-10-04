@@ -70,11 +70,13 @@ class Config():
         self.test_cases_field = None
         self.test_types = []
         self.test_modules = []
+        self.predefined_values = {}
 
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
         self.__read_test_cases_field()
         self.__set_documentation_path(output_path.replace('\\','/'))
+        self.__read_predefined_values()
 
         if test_names is not None:
             # When a name is passed, it is using just a single test.
@@ -91,19 +93,6 @@ class Config():
 
         # Get the paths to parse
         self.__get_include_paths()
-
-    def __read_schema_file(self, file):
-        """Read schema file.
-
-        Raises:
-            QAValuerError (IOError): Cannot load schema file.
-        """
-        try:
-            Config.LOGGER.debug('Loading schema file')
-            with open(file) as config_file:
-                self._config_data = yaml.safe_load(config_file)
-        except IOError:
-            raise QAValueError('Cannot load schema file', Config.LOGGER.error)
 
     def __set_documentation_path(self, path):
         """Set the path of the documentation output."""
@@ -135,6 +124,37 @@ class Config():
                     if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
                         self.include_paths.append(os.path.join(subset_tests, name))
 
+    def __read_schema_file(self, file):
+        """Read schema file.
+
+        Args:
+            file (string): A string that contains the file name.
+
+        Raises:
+            QAValuerError (IOError): Cannot load schema file.
+        """
+        try:
+            Config.LOGGER.debug('Loading schema file')
+            with open(file) as config_file:
+                self._schema_data = yaml.safe_load(config_file)
+        except IOError:
+            raise QAValueError('Cannot load schema file', Config.LOGGER.error)
+
+    def __read_predefined_values(self):
+        """Read from the schema file the predefined values for the documentation fields.
+
+        If predefined values are not defined in the schema file, an error will be raised.
+
+        Raises:
+            QAValueError: predefined values are missing in the schema file
+        """
+        Config.LOGGER.debug('Reading predefined values from the schema file')
+
+        if not self._schema_data['predefined_values']:
+            raise QAValueError('predefined values are missing in the schema file', Config.LOGGER.error)
+
+        self.predefined_values = self._schema_data['predefined_values']
+
     def __read_module_fields(self):
         """Read from the schema file the optional and mandatory fields for the test module.
 
@@ -146,10 +166,10 @@ class Config():
         """
         Config.LOGGER.debug('Reading mandatory and optional module fields from the schema file')
 
-        if 'module' not in self._config_data['output_fields']:
+        if 'module' not in self._schema_data['output_fields']:
             raise QAValueError('module fields are missing in the schema file', Config.LOGGER.error)
 
-        module_fields = self._config_data['output_fields']['module']
+        module_fields = self._schema_data['output_fields']['module']
 
         if 'mandatory' not in module_fields and 'optional' not in module_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
@@ -171,10 +191,10 @@ class Config():
         """
         Config.LOGGER.debug('Reading mandatory and optional test fields from the schema file')
 
-        if 'test' not in self._config_data['output_fields']:
+        if 'test' not in self._schema_data['output_fields']:
             raise QAValueError('test_fields are missing in the schema file', Config.LOGGER.error)
 
-        test_fields = self._config_data['output_fields']['test']
+        test_fields = self._schema_data['output_fields']['test']
 
         if 'mandatory' not in test_fields and 'optional' not in test_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
@@ -191,7 +211,7 @@ class Config():
         Raises:
             QAValueError: Documentation schema not defined in the schema file
         """
-        if 'output_fields' not in self._config_data:
+        if 'output_fields' not in self._schema_data:
             raise QAValueError('Documentation schema not defined in the schema file', Config.LOGGER.error)
 
         self.__read_module_fields()
@@ -201,8 +221,8 @@ class Config():
         """Read from the schema file the key to identify a Test Case list."""
         Config.LOGGER.debug('Reading Test Case key from the schema file')
 
-        if 'test_cases_field' in self._config_data:
-            self.test_cases_field = self._config_data['test_cases_field']
+        if 'test_cases_field' in self._schema_data:
+            self.test_cases_field = self._schema_data['test_cases_field']
 
 
 class _fields:
