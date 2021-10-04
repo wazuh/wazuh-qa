@@ -66,22 +66,15 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_files_path=f"{gettempdir()}/wazuh-qa"):
+    def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=f"{gettempdir()}/wazuh-qa"):
         self.tests = tests
         self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
         self.qactl_used_ips_file = f"{gettempdir()}/qactl_used_ips.txt"
         self.config_file_path = f"{gettempdir()}/config_{get_current_timestamp()}.yaml"
         self.config = {}
         self.hosts = []
+        self.qa_branch = qa_branch
         self.qa_files_path = qa_files_path
-
-    def __get_qa_branch(self):
-        """Get Wazuh QA repository branch from Wazuh version.
-
-        Returns:
-            string: Wazuh QA repository branch.
-        """
-        return f"{self.wazuh_version.split('.')[0]}.{self.wazuh_version.split('.')[1]}".replace('v', '')
 
     def __get_test_info(self, test_name):
         """Get information from a documented test.
@@ -122,16 +115,13 @@ class QACTLConfigGenerator:
 
         return tests_info
 
-    def __validate_test_info(self, test_info, user_input=True, log_error=True):
+    def __validate_test_info(self, test_info):
         """Validate the test information in order to check that the fields that contains are suitable
         for trying to generate a configuration data.
 
         Args:
             test_info (dict): dict containing all the info of the test. This info is by its containing documentation
             user_input (boolean): boolean that checks if there is going to be an input from the user.
-            This parameter is set to True by default.
-            log_error (boolean): boolean that checks if there is going to be a logging of the errors.
-            This parameter is set to True by default.
 
         Returns:
             boolean : True if the validation has succeed, False otherwise
@@ -342,9 +332,8 @@ class QACTLConfigGenerator:
                     self.config['deployment'][f"host_{manager_host_number}"]['provider']['vagrant']['vm_ip']
 
             # QA framework
-            wazuh_qa_branch = self.__get_qa_branch()
             self.config['provision']['hosts'][instance]['qa_framework'] = {
-                'wazuh_qa_branch': wazuh_qa_branch,
+                'wazuh_qa_branch': self.qa_branch,
                 'qa_workdir': self.LINUX_TMP
             }
 

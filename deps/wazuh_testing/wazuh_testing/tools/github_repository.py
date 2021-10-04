@@ -56,8 +56,9 @@ def get_wazuh_qa_master_version():
 
 def version_is_released(version):
     releases = get_wazuh_releases()
+    v_version = f"v{version}" if not 'v' in version else version
 
-    return f"v{version}" in releases
+    return v_version in releases
 
 
 def branch_exist(branch_name, repository=WAZUH_REPO):

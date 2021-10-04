@@ -4,8 +4,7 @@ class QACTLConfiguration:
 
     Args:
         configuration_data (dict) : Dict with all the info needed for this module coming from config file.
-        debug_level (int): Debug level. It is indicated in the qa-ctl script parameters.
-
+        script_parameters (argparse.Namespace): qa-ctl script parameters object.
     Attributes:
         configuration_data (dict) : Dict with all the info needed for this module coming from config file.
         vagrant_output (boolean): Defines if the vagrant's outputs are going to be replaced by customized
@@ -19,22 +18,23 @@ class QACTLConfiguration:
         logging_file (string): This field defines a path for a file where the outputs will be logged as well
     """
 
-    def __init__(self, configuration_data, debug_level=0):
+    def __init__(self, configuration_data, script_parameters):
         self.configuration_data = configuration_data
         self.vagrant_output = False
         self.ansible_output = False
         self.logging_enable = True
         self.logging_level = 'INFO'
         self.logging_file = None
-        self.debug_level = debug_level
+        self.script_parameters = script_parameters
+        self.debug_level = script_parameters.debug
 
         self.__read_configuration_data()
 
         # Check debug level parameter set in qa-ctl script parameters. It has a higher priority than indicated in
         # the configuration file.
-        if debug_level == 1:
+        if self.debug_level == 1:
             self.logging_level = 'DEBUG'
-        if debug_level > 1:
+        if self.debug_level > 1:
             self.vagrant_output = True
             self.ansible_output = True
 

@@ -97,6 +97,24 @@ def set_parameters(parameters):
         level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
         qactl_logger.set_level(level)
 
+    parameters.user_version = parameters.version if parameters.version else None
+    parameters.version = parameters.version if parameters.version  else get_last_wazuh_version()
+    parameters.version = (parameters.version).replace('v', '')
+
+    short_version =  f"{(parameters.version).split('.')[0]}.{(parameters.version).split('.')[1]}"
+    parameters.qa_branch = parameters.qa_branch if parameters.qa_branch else short_version
+
+
+def set_environment(parameters):
+    """Prepare the local environment to be run.
+
+    Args:
+        (argparse.Namespace): Object with the user parameters.
+    """
+    if parameters.run_test:
+        # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
+        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
+
 
 def validate_parameters(parameters):
     """Validate the input parameters entered by the user of qa-ctl tool.
@@ -115,40 +133,29 @@ def validate_parameters(parameters):
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
                            'configuration', qactl_logger.error, QACTL_LOGGER)
 
-    if parameters.version and parameters.run_test is None:
+    if parameters.user_version and parameters.run_test is None:
         raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_logger.error)
 
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
 
     # Check version parameter
-    if parameters.version is not None:
-        version = (parameters.version).replace('v', '')
+    if len((parameters.version).split('.')) != 3:
+        raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {parameters.version}",
+                           qactl_logger.error, QACTL_LOGGER)
 
-        if len((parameters.version).split('.')) != 3:
-            raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {version}",
-                               qactl_logger.error, QACTL_LOGGER)
+    # Check if Wazuh has the specified version
+    if not version_is_released(parameters.version):
+        raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
+                           qactl_logger.error, QACTL_LOGGER)
 
-        if not version_is_released(parameters.version):
-            raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
-                               qactl_logger.error, QACTL_LOGGER)
+    # Check if QA branch exists
+    if not branch_exist(parameters.qa_branch, WAZUH_QA_REPO):
+        raise QAValueError(f"{parameters.qa_branch} branch does not exist in Wazuh QA repository.",
+                           qactl_logger.error, QACTL_LOGGER)
 
-        short_version = f"{version.split('.')[0]}.{version.split('.')[1]}"
-
-        if not branch_exist(short_version, WAZUH_QA_REPO):
-            raise QAValueError(f"{short_version} branch does not exist in Wazuh QA repository.",
-                               qactl_logger.error, QACTL_LOGGER)
-
-    # Check if tests exist
+    # Check if specified tests exist. Wazuh-qa repository needs to be downloaded locally before.
     if parameters.run_test:
-        if parameters.version:
-            qa_branch = f"{parameters.version.split('.')[0]}.{parameters.version.split('.')[1]}".replace('v', '')
-        else:
-            version = get_last_wazuh_version()
-            qa_branch = f"{version.split('.')[0]}.{version.split('.')[1]}".replace('v', '')
-
-        local_actions.download_local_wazuh_qa_repository(branch=qa_branch, path=gettempdir())
-
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             if 'test exists' not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path}"):
@@ -157,11 +164,13 @@ def validate_parameters(parameters):
     qactl_logger.info('Input parameters validation has passed successfully')
 
 
-def main():
+def get_script_parameters():
+    """Handle the script parameters. It capturates and validates them.
+
+    Returns:
+        argparse.Namespace: Object with the script parameters.
+    """
     parser = argparse.ArgumentParser()
-    configuration_data = {}
-    instance_handler = None
-    configuration_file = None
 
     parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
@@ -183,16 +192,33 @@ def main():
                                                                          ' level with more [-d+]')
     parser.add_argument('--no-validation-logging', action='store_true', help='Disable initial logging of parameter '
                                                                              'validations')
+
+    parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
+                                       help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
+                                            'has higher priority than the specified in the configuration file')
     arguments = parser.parse_args()
 
+    return arguments
+
+
+def main():
+    configuration_data = {}
+    instance_handler = None
+    configuration_file = None
+
+    arguments = get_script_parameters()
+
     set_parameters(arguments)
+
+    set_environment(arguments)
 
     validate_parameters(arguments)
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
         qactl_logger.debug('Generating configuration file')
-        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, WAZUH_QA_FILES)
+        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, arguments.qa_branch,
+                                                WAZUH_QA_FILES)
         config_generator.run()
         launched['config_generator'] = True
         configuration_file = config_generator.config_file_path
@@ -217,7 +243,7 @@ def main():
     validate_configuration_data(configuration_data)
 
     # Set QACTL configuration
-    qactl_configuration = QACTLConfiguration(configuration_data, arguments.debug)
+    qactl_configuration = QACTLConfiguration(configuration_data, arguments)
 
     # Set QACTL logging
     set_qactl_logging(qactl_configuration)
