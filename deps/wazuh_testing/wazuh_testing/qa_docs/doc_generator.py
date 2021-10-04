@@ -46,11 +46,11 @@ class DocGenerator:
         self.__id_counter = 0
         self.ignore_regex = []
         for ignore_regex in self.conf.ignore_paths:
-            self.ignore_regex.append(re.compile(ignore_regex.replace('\\','/')))
+            self.ignore_regex.append(re.compile(ignore_regex.replace('\\', '/')))
         self.include_regex = []
         if self.conf.mode == Mode.DEFAULT:
             for include_regex in self.conf.include_regex:
-                self.include_regex.append(re.compile(include_regex.replace('\\','/')))
+                self.include_regex.append(re.compile(include_regex.replace('\\', '/')))
 
     def is_valid_folder(self, path):
         """Check if a folder is included so it would be parsed.
