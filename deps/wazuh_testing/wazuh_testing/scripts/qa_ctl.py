@@ -104,6 +104,17 @@ def set_parameters(parameters):
     parameters.qa_branch = parameters.qa_branch if parameters.qa_branch else short_version
 
 
+def set_environment(parameters):
+    """Prepare the local environment to be run.
+
+    Args:
+        (argparse.Namespace): Object with the user parameters.
+    """
+    if parameters.run_test:
+        # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
+        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
+
+
 def validate_parameters(parameters):
     """Validate the input parameters entered by the user of qa-ctl tool.
 
@@ -142,11 +153,8 @@ def validate_parameters(parameters):
         raise QAValueError(f"{parameters.qa_branch} branch does not exist in Wazuh QA repository.",
                            qactl_logger.error, QACTL_LOGGER)
 
-    # Check if specified tests exist
+    # Check if specified tests exist. Wazuh-qa repository needs to be downloaded locally before.
     if parameters.run_test:
-        # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
-        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
-
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             if 'test exists' not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path}"):
@@ -189,7 +197,9 @@ def main():
 
     set_parameters(arguments)
 
-    # validate_parameters(arguments)
+    set_environment(arguments)
+
+    validate_parameters(arguments)
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
