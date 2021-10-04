@@ -97,6 +97,7 @@ def set_parameters(parameters):
         level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
         qactl_logger.set_level(level)
 
+    parameters.user_version = parameters.version if parameters.version else None
     parameters.version = parameters.version if parameters.version  else get_last_wazuh_version()
     parameters.version = (parameters.version).replace('v', '')
 
@@ -132,7 +133,7 @@ def validate_parameters(parameters):
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
                            'configuration', qactl_logger.error, QACTL_LOGGER)
 
-    if parameters.version and parameters.run_test is None:
+    if parameters.user_version and parameters.run_test is None:
         raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_logger.error)
 
     if parameters.dry_run and parameters.run_test is None:
