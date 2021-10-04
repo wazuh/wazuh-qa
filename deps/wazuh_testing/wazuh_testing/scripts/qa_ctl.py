@@ -163,11 +163,13 @@ def validate_parameters(parameters):
     qactl_logger.info('Input parameters validation has passed successfully')
 
 
-def main():
+def get_script_parameters():
+    """Handle the script parameters. It capturates and validates them.
+
+    Returns:
+        argparse.Namespace: Object with the script parameters.
+    """
     parser = argparse.ArgumentParser()
-    configuration_data = {}
-    instance_handler = None
-    configuration_file = None
 
     parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
@@ -194,6 +196,16 @@ def main():
                                        help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
                                             'has higher priority than the specified in the configuration file')
     arguments = parser.parse_args()
+
+    return arguments
+
+
+def main():
+    configuration_data = {}
+    instance_handler = None
+    configuration_file = None
+
+    arguments = get_script_parameters()
 
     set_parameters(arguments)
 
