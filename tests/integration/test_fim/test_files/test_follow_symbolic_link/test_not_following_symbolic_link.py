@@ -120,11 +120,6 @@ def get_configuration(request):
 def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_dir1, non_monitored_dir2,
                                                  sym_target, tags_to_apply, get_configuration, configure_environment,
                                                  restart_syscheckd, wait_for_fim_start):
-    """
-    When this happens, the symbolic link is considered a regular file and it will not follow its target path.
-    It will only generate events if it changes somehow, not its target (file or directory)
-    """
-
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects events when monitoring a directory with a symlink and
                  not the symlink itself. For this purpose, the test will create some files in a non-monitored folder
