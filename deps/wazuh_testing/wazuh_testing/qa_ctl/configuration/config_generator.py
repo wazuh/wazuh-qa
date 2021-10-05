@@ -85,7 +85,7 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        qa_docs_command = f"qa-docs -T {test_name} -o {os.path.join(gettempdir(), 'qa_ctl')} -I {join(self.qa_files_path, 'tests')}"
+        qa_docs_command = f"qa-docs -T {test_name} -o {join(gettempdir(), 'qa_ctl')} -I {join(self.qa_files_path, 'tests')}"
         test_data_file_path = f"{join(gettempdir(), 'qa_ctl', test_name)}.json"
 
         run_local_command_with_output(qa_docs_command)
