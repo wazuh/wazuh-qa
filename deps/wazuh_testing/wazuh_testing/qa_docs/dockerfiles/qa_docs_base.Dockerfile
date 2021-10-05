@@ -1,6 +1,7 @@
 FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
 
+# install packages
 RUN apt-get update && \
     apt-get install -y \
     git \
@@ -24,34 +25,19 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add - && \
     apt-get update && \
     apt-get install wazuh-manager
 
-RUN mkdir tests
-
-WORKDIR tests
-
-# cloning parsed tests
-RUN git clone https://github.com/wazuh/wazuh-qa.git
-
-WORKDIR wazuh-qa
-
-ARG BRANCH
-
-RUN git checkout ${BRANCH}
-
-WORKDIR /
-
 # cloning and installing qa reqs
+WORKDIR /home
+
 RUN git clone https://github.com/wazuh/wazuh-qa.git
 
-WORKDIR wazuh-qa/deps/wazuh_testing/
+WORKDIR /home/wazuh-qa/deps/wazuh_testing/
 
 RUN git checkout 1864-qa-docs-fixes && \
     pip install -r ../../requirements.txt && \
     pip install -r wazuh_testing/qa_docs/requirements.txt && \
-    python3  setup.py install
+    python3 setup.py install
 
-# start services, parse some tests and launch the api
-CMD service elasticsearch start && \
-    service wazuh-manager start && \
-    sleep 8 && \
-    qa-docs -I /tests/wazuh-qa/tests --types integration && \
-    qa-docs -I /tests/wazuh-qa/tests -il qa-docs
+# install npm deps
+WORKDIR /home/wazuh-qa/deps/wazuh_testing/wazuh_testing/qa_docs/search_ui
+
+RUN npm install
