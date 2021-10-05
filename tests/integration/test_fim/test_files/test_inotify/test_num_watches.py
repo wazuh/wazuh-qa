@@ -20,6 +20,7 @@ modules:
 
 components:
     - agent
+    - manager
 
 daemons:
     - wazuh-syscheckd
@@ -200,7 +201,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
                        combined with the testing directories to be monitored defined in the module.
 
     expected_output:
-        - r'.*Folders monitored with real-time engine
+        - r'.*Folders monitored with real-time engine'
 
     tags:
         - realtime

@@ -204,6 +204,9 @@ def test_ignore_subdirectory(folder, filename, content, triggers_event,
                        the 'wazuh-syscheckd' daemon and, these are combined with the testing directories
                        to be monitored defined in the module.
 
+    inputs:
+        - 936 test cases including multiple regular expressions and names for testing files and directories.
+
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added' events)
         - r'.*Ignoring .* due to'
