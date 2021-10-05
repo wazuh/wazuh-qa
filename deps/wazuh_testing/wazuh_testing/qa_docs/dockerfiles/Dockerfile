@@ -33,7 +33,9 @@ RUN git clone https://github.com/wazuh/wazuh-qa.git
 
 WORKDIR wazuh-qa
 
-RUN git checkout 1796-migrate-doc-schema-2
+ARG BRANCH
+
+RUN git checkout ${BRANCH}
 
 WORKDIR /
 
@@ -51,5 +53,5 @@ RUN git checkout 1864-qa-docs-fixes && \
 CMD service elasticsearch start && \
     service wazuh-manager start && \
     sleep 8 && \
-    qa-docs -I /tests/wazuh-qa/tests --type integration --modules test_active_response test_agentd test_analysisd test_api test_authd test_cluster && \
+    qa-docs -I /tests/wazuh-qa/tests --types integration && \
     qa-docs -I /tests/wazuh-qa/tests -il qa-docs
