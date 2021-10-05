@@ -138,7 +138,7 @@ def validate_parameters(parameters):
 
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
-    print(parameters)
+
     if (parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing) \
         and not parameters.config:
         raise QAValueError('The --skip parameter can only be used when a custom configuration file has been '
