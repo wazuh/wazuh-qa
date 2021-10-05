@@ -103,7 +103,7 @@ class WazuhS3Package(WazuhPackage):
             str: String with the complete path of the downloaded installation package
         """
         package_name = Path(self.s3_package_url).name
-        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from <url> in {hosts} hosts")
+        WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from {self.s3_package_url} in {hosts} hosts")
 
         download_s3_package = AnsibleTask({'name': 'Download S3 package',
                                            'get_url': {'url': self.s3_package_url,
