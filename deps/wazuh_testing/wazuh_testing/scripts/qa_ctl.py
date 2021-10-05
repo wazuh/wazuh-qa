@@ -20,6 +20,7 @@ from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGener
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning import local_actions
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
+from wazuh_testing.tools.file import recursive_directory_creation
 
 
 DEPLOY_KEY = 'deployment'
@@ -113,6 +114,7 @@ def set_environment(parameters):
     """
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
+        recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
         local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
 
 

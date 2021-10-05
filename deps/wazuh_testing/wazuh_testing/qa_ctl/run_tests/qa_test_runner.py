@@ -140,7 +140,7 @@ class QATestRunner():
         # If Windows, then run a Linux docker container to run testing stage with qa-ctl testing
         if sys.platform == 'win32':
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
-            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
+            tmp_config_file = os.path.join(gettempdir(), 'qa_ctl', tmp_config_file_name)
 
             # Save original directory where to store the results in Windows host
             original_result_paths = [ self.test_parameters[host_key]['test']['path']['test_results_path'] \
@@ -166,7 +166,7 @@ class QATestRunner():
                 # Move all test results to their original paths specified in Windows qa-ctl configuration
                 index = 0
                 for _, host_data in self.test_parameters.items():
-                    source_directory = os.path.join(gettempdir(), f"{test_results_folder}_{index}")
+                    source_directory = os.path.join(gettempdir(), 'qa_ctl', f"{test_results_folder}_{index}")
                     file.move_everything_from_one_directory_to_another(source_directory,  original_result_paths[index])
                     file.delete_path_recursively(source_directory)
                     QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "
