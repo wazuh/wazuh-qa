@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import vagrant
+import sys
 
 from shutil import rmtree
 
@@ -54,7 +55,8 @@ class VagrantWrapper(Instance):
         """Write the vagrantfile and starts the VM specified in the vagrantfile."""
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up")
 
-        if len(run_local_command_with_output(f"vagrant box list | grep {self.vm_box}")) == 0:
+        filter_command = 'findstr' if sys.platform == 'win32' else 'grep'
+        if len(run_local_command_with_output(f"vagrant box list | {filter_command} {self.vm_box}")) == 0:
             VagrantWrapper.LOGGER.info(f"{self.vm_box} vagrant box not found in local repository. Downloading and "
                                        'running')
         self.vagrant.up()
