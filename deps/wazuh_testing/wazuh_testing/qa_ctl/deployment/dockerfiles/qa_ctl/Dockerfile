@@ -1,7 +1,5 @@
 From ubuntu:focal
 
-ARG qa_branch
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RUNNING_ON_DOCKER_CONTAINER=true
 
@@ -14,7 +12,7 @@ RUN apt-get -q update && \
         python3-pip \
         python3-setuptools
 
-ADD https://raw.githubusercontent.com/wazuh/wazuh-qa/$qa_branch/requirements.txt /tmp/requirements.txt
+ADD https://raw.githubusercontent.com/wazuh/wazuh-qa/master/requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt --ignore-installed
 
 RUN mkdir /qa_ctl

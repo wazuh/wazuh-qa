@@ -139,6 +139,11 @@ def validate_parameters(parameters):
     if parameters.dry_run and parameters.run_test is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
 
+    if (parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing) \
+        and not parameters.config:
+        raise QAValueError('The --skip parameter can only be used when a custom configuration file has been '
+                           'specified with the option -c or --config', qactl_logger.error, QACTL_LOGGER)
+
     # Check version parameter
     if len((parameters.version).split('.')) != 3:
         raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {parameters.version}",
@@ -183,19 +188,29 @@ def get_script_parameters():
                              'generated without running anything.')
 
     parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
-                        help='Independent run method. Specify a test or a list of tests to be run')
+                        help='Independent run method. Specify a test or a list of tests to be run.')
 
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
-                        help='Wazuh installation and tests version')
+                        help='Wazuh installation and tests version.')
 
     parser.add_argument('-d', '--debug', action='count', default=0, help='Run in debug mode. You can increase the debug'
                                                                          ' level with more [-d+]')
     parser.add_argument('--no-validation-logging', action='store_true', help='Disable initial logging of parameter '
-                                                                             'validations')
+                                                                             'validations.')
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                                        help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
-                                            'has higher priority than the specified in the configuration file')
+                                            'has higher priority than the specified in the configuration file.')
+
+    parser.add_argument('--skip-deployment', action='store_true',
+                        help='Flag to skip the deployment phase. Set it only if -c or --config was specified.')
+
+    parser.add_argument('--skip-provisioning', action='store_true',
+                        help='Flag to skip the provisioning phase. Set it only if -c or --config was specified.')
+
+    parser.add_argument('--skip-testing', action='store_true',
+                        help='Flag to skip the testing phase. Set it only if -c or --config was specified.')
+
     arguments = parser.parse_args()
 
     return arguments
@@ -250,19 +265,19 @@ def main():
 
     # Run QACTL modules
     try:
-        if DEPLOY_KEY in configuration_data:
+        if DEPLOY_KEY in configuration_data and not arguments.skip_deployment:
             deploy_dict = configuration_data[DEPLOY_KEY]
             instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
             instance_handler.run()
             launched['instance_handler'] = True
 
-        if PROVISION_KEY in configuration_data:
+        if PROVISION_KEY in configuration_data and not arguments.skip_provisioning:
             provision_dict = configuration_data[PROVISION_KEY]
             qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
             qa_provisioning.run()
             launched['qa_provisioning'] = True
 
-        if TEST_KEY in configuration_data:
+        if TEST_KEY in configuration_data and not arguments.skip_testing:
             test_dict = configuration_data[TEST_KEY]
             tests_runner = QATestRunner(test_dict, qactl_configuration)
             tests_runner.run()
@@ -280,6 +295,9 @@ def main():
 
             if arguments.run_test and launched['config_generator']:
                 config_generator.destroy()
+        else:
+            if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+                qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
 
 if __name__ == '__main__':
     main()
