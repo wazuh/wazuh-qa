@@ -66,11 +66,11 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=join(gettempdir(), 'wazuh-qa')):
+    def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=join(gettempdir(), 'qa_ctl', 'wazuh-qa')):
         self.tests = tests
         self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
-        self.qactl_used_ips_file = join(gettempdir(), 'qactl_used_ips.txt')
-        self.config_file_path = join(gettempdir(), f"config_{get_current_timestamp()}.yaml")
+        self.qactl_used_ips_file = join(gettempdir(), 'qa_ctl', 'qactl_used_ips.txt')
+        self.config_file_path = join(gettempdir(), 'qa_ctl', f"config_{get_current_timestamp()}.yaml")
         self.config = {}
         self.hosts = []
         self.qa_branch = qa_branch
@@ -85,8 +85,8 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        qa_docs_command = f"qa-docs -T {test_name} -o {gettempdir()} -I {join(self.qa_files_path, 'tests')}"
-        test_data_file_path = f"{join(gettempdir(), test_name)}.json"
+        qa_docs_command = f"qa-docs -T {test_name} -o {os.path.join(gettempdir(), 'qa_ctl')} -I {join(self.qa_files_path, 'tests')}"
+        test_data_file_path = f"{join(gettempdir(), 'qa_ctl', test_name)}.json"
 
         run_local_command_with_output(qa_docs_command)
 
