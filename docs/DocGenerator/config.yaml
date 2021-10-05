@@ -54,6 +54,9 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_env_variables/data"
   - "../../tests/integration/test_fim/test_files/test_file_limit/data"
   - "../../tests/integration/test_fim/test_files/test_follow_symbolic_link/data"
+  - "../../tests/integration/test_fim/test_files/test_ignore/data"
+  - "../../tests/integration/test_fim/test_files/test_inotify/data"
+  - "../../tests/integration/test_fim/test_files/test_invalid/data"
 
 Output fields:
   Module:
