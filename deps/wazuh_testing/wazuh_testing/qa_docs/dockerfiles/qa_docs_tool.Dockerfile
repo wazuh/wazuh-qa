@@ -18,6 +18,5 @@ WORKDIR /home/wazuh-qa/deps/wazuh_testing
 # start services, parse some tests and launch the api
 CMD service elasticsearch start && \
     service wazuh-manager start && \
-    sleep 8 && \
     qa-docs -I /home/tests/wazuh-qa/tests --types integration && \
     qa-docs -I /home/tests/wazuh-qa/tests -il qa-docs

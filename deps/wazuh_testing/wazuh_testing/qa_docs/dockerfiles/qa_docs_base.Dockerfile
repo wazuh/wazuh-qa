@@ -38,6 +38,6 @@ RUN git checkout 1864-qa-docs-fixes && \
     python3 setup.py install
 
 # install npm deps
-WORKDIR /home/wazuh-qa/deps/wazuh_testing/wazuh_testing/qa_docs/search_ui
+WORKDIR /home/wazuh-qa/deps/wazuh_testing/build/lib/wazuh_testing/qa_docs/search_ui
 
 RUN npm install
