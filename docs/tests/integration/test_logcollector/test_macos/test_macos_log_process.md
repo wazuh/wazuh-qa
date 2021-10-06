@@ -2,7 +2,7 @@
 
 ## Overview 
 
-Check `log stream` process has been killed when Wazuh agent or logcollector demon stop.
+Check `log stream` process has been killed when Wazuh agent or logcollector demon stops.
 
 It has 3 testing functions:
 
@@ -15,14 +15,14 @@ is launched before running Wazuh it doesn't stop working when Wazuh starts its o
 
 #### test_macos_log_process_stop
 
-This method checks that the log process is stopped when Wazuh agent or logcollector daemon stop.
+This method checks that the log process is stopped when Wazuh agent or logcollector daemon stops.
 
 - Fail if `log stream` process still running after `wazuh-agent` stops.
 - Fail if `log stream` process still running after `wazuh-logcollector` stops.
 
 #### test_macos_log_process_stop_suddenly_warning
 
-This method tests what happen when the log process suddenly stops (for example, it is killed). Wazuh must log an error
+This method tests what happens when the log process suddenly stops (for example, it is killed). Wazuh must log an error
 in the ossec.log file
 
 - Fail if that error doesn't appear in the logs
