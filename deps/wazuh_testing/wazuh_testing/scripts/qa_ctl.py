@@ -112,6 +112,9 @@ def set_environment(parameters):
     Args:
         (argparse.Namespace): Object with the user parameters.
     """
+    # Create the qa_ctl temporary folder
+    recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
+    
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
         local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=os.path.join(gettempdir(), 'qa_ctl'))
@@ -221,9 +224,6 @@ def main():
     configuration_data = {}
     instance_handler = None
     configuration_file = None        
-    
-    # Create the qa_ctl temporary folder
-    recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
 
     arguments = get_script_parameters()
 
