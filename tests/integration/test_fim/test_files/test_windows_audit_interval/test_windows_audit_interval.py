@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import platform
 import re
 import sys
 
@@ -18,6 +19,7 @@ if sys.platform == 'win32':
         modify_sacl, \
         get_sacl
 
+skiptest_win10 = True if platform.system()=='Windows' and platform.release()=='10' else False
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -76,6 +78,7 @@ def callback_sacl_restored(line):
 
 
 # tests
+@pytest.mark.skipif(skiptest_win10, reason='refactor required to obtain ACLs on windows 10')
 @pytest.mark.parametrize('tags_to_apply', [
     {'audit_interval'}
 ])
@@ -103,7 +106,7 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
                                                   'of \'...\' has been restored correctly" event').result()
     assert testdir_modify in event, f'{testdir_modify} not detected in SACL modification event'
 
-
+@pytest.mark.skipif(skiptest_win10, reason='refactor required to obtain ACLs on windows 10')
 @pytest.mark.parametrize('tags_to_apply', [
     {'audit_interval'}
 ])
