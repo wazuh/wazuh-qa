@@ -24,6 +24,7 @@ directory_str = os.path.join(PREFIX, 'dir')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_check_realtime.yaml')
 test_file = 'testfile.txt'
+test_directories = [directory_str]
 
 # configurations
 
@@ -46,9 +47,7 @@ def get_configuration(request):
 # tests
 
 
-@pytest.mark.parametrize('folder', directory_str)
-@pytest.mark.parametrize('file', [test_file])
-def test_realtime_unsupported(folder, file, get_configuration, configure_environment, file_monitoring,
+def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
                               configure_local_internal_options_module, daemons_handler):
     """ Check if the current OS platform falls to the scheduled mode when realtime isn't avaible.
 
@@ -68,5 +67,5 @@ def test_realtime_unsupported(folder, file, get_configuration, configure_environ
 
     detect_initial_scan(log_monitor)
 
-    regular_file_cud(folder, log_monitor, file_list=[file], time_travel=True, triggers_event=True,
+    regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=True, triggers_event=True,
                      event_mode="scheduled")
