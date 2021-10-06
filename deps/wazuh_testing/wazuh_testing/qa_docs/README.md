@@ -156,7 +156,7 @@ https://www.elastic.co/es/downloads/elasticsearch
     qa-docs -I /path-to-tests-to-parse/
 
 Using just the `-I` flag , the tool will load the schema file and run a complete parse of the paths in the
-configuration to dump the content into the output folder located in the `qa-docs` build directory.
+configuration to dump the content into the output folder located in the `qa-docs` build directory. e.g: `qa-docs -I /wazuh-qa/tests/`
 
 #### Parse specific type(s)
     qa-docs -I /path-to-tests-to-parse/ --types <TYPE1> <TYPE2>
@@ -209,7 +209,7 @@ Using `-l` option, the tool launches the application with the index previously i
 ### Index output data and launch the api
     qa-docs -I /path-to-tests-to-parse/ -il <INDEX_NAME>
 
-Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the api. The name of the index must be provided as a parameter.
+Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the api. The name of the index must be provided as a parameter. e.g: `qa-docs -I /wazuh-qa/tests/ -il qa-tests`. A previous run must be performed, e.g.`qa-docs -I /wazuh-qa/tests/` so the output data is previously generated.
 
 ## Docker deployment
 
