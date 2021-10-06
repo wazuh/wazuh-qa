@@ -97,7 +97,7 @@ documentation content into the App UI.
 ## Schema
 The schema file of the tool is located at **qa-docs/schema.yaml**.
 
-The shema fields are specified in the [qa-docs wiki](https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#schema-blocks)
+The shema fields are specified in the `qa-docs documenting test`[wiki](https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#schema-blocks) in the schema section.
 
 ## Installation
 
@@ -110,6 +110,8 @@ python3 setup.py install
 This `setup.py` is located in `wazuh-qa/deps/wazuh_testing/setup.py`
 
 ## Usage
+
+For a detailed usage visit the `qa-docs documentation generation` [wiki](https://github.com/wazuh/wazuh-qa/wiki/Documentation-generation-with-qadocs-tool)
 
 ### Dependencies
 
@@ -206,5 +208,5 @@ Using `-l` option, the tool launches the application with the index previously i
 
 ### Index output data and launch the api
     qa-docs -I /path-to-tests-to-parse/ -il <INDEX_NAME>
-    
+
 Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the api. The name of the index must be provided as a parameter.
