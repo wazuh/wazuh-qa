@@ -68,7 +68,7 @@ class Pytest(Test):
         self.log_level = log_level
         self.markers = markers
         self.hosts = hosts
-        self.tests_result_path = gettempdir() if tests_result_path is None else tests_result_path
+        self.tests_result_path = os.path.join(gettempdir(), 'qa_ctl') if tests_result_path is None else tests_result_path
 
         if not os.path.exists(self.tests_result_path):
             os.makedirs(self.tests_result_path)
@@ -88,7 +88,7 @@ class Pytest(Test):
         assets_zip = f"assets_{date_time}.zip"
         html_report_file_name = f"test_report_{date_time}.html"
         plain_report_file_name = f"test_report_{date_time}.txt"
-        playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
+        playbook_file_path = os.path.join(gettempdir(), 'qa_ctl', f"{get_current_timestamp()}.yaml")
         reports_directory = os.path.join(self.tests_run_dir, reports_folder)
         plain_report_file_path = os.path.join(reports_directory, plain_report_file_name)
         html_report_file_path = os.path.join(reports_directory, html_report_file_name)

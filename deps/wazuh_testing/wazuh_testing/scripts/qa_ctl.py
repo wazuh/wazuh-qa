@@ -26,7 +26,7 @@ from wazuh_testing.tools.file import recursive_directory_creation
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
-WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh-qa')
+WAZUH_QA_FILES = os.path.join(gettempdir(), 'qa_ctl', 'wazuh-qa')
 
 qactl_logger = Logging(QACTL_LOGGER)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -115,7 +115,7 @@ def set_environment(parameters):
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
         recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
-        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
+        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=os.path.join(gettempdir(), 'qa_ctl'))
 
 
 def validate_parameters(parameters):

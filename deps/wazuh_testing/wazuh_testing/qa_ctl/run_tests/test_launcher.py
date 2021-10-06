@@ -32,7 +32,7 @@ class TestLauncher:
 
     def __init__(self, tests, ansible_inventory_path, qa_ctl_configuration, qa_framework_path=None):
         self.qa_framework_path = qa_framework_path if qa_framework_path is not None else \
-                                                     os.path.join(gettempdir(), 'wazuh-qa/')
+                                                     os.path.join(gettempdir(), 'qa_ctl', 'wazuh-qa')
         self.ansible_inventory_path = ansible_inventory_path
         self.qa_ctl_configuration = qa_ctl_configuration
         self.tests = tests
@@ -45,7 +45,7 @@ class TestLauncher:
                                   wazuh installation path
         """
         local_internal_options = '\n'.join(self.DEBUG_OPTIONS)
-        playbook_file_path = os.path.join(gettempdir(), f"{get_current_timestamp()}.yaml")
+        playbook_file_path = os.path.join(gettempdir(), 'qa_ctl' f"{get_current_timestamp()}.yaml")
 
         local_internal_path = '/var/ossec/etc/local_internal_options.conf'
 

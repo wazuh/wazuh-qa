@@ -232,7 +232,7 @@ class QACTLConfigGenerator:
         instance_ip = self.__get_host_IP()
         instance = {
             'enabled': True,
-            'vagrantfile_path': gettempdir(),
+            'vagrantfile_path': join(gettempdir(), 'qa_ctl'),
             'vagrant_box': QACTLConfigGenerator.BOX_MAPPING[os_version],
             'vm_memory': vm_memory,
             'vm_cpu': vm_cpu,
@@ -335,7 +335,7 @@ class QACTLConfigGenerator:
             # QA framework
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': self.qa_branch,
-                'qa_workdir': self.LINUX_TMP
+                'qa_workdir': join(self.LINUX_TMP, 'qa_ctl')
             }
 
     def __process_test_data(self, tests_info):
@@ -355,9 +355,9 @@ class QACTLConfigGenerator:
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': f"{self.LINUX_TMP}/wazuh-qa/{test['path']}",
-                    'run_tests_dir_path': f"{self.LINUX_TMP}/wazuh-qa/test/integration",
-                    'test_results_path': f"{gettempdir()}/{test['test_name']}_{get_current_timestamp()}/"
+                    'test_files_path': f"{self.LINUX_TMP}/qa_ctl/wazuh-qa/{test['path']}",
+                    'run_tests_dir_path': f"{self.LINUX_TMP}/qa_ctl/wazuh-qa/test/integration",
+                    'test_results_path': f"{gettempdir()}/qa_ctl/{test['test_name']}_{get_current_timestamp()}/"
                 }
             }
             test_host_number += 1
