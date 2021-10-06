@@ -213,7 +213,7 @@ class QAProvisioning():
         # If Windows, then run a Linux docker container to run provisioning stage with qa-ctl provision
         if sys.platform == 'win32':
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
-            tmp_config_file = os.path.join(gettempdir(), tmp_config_file_name)
+            tmp_config_file = os.path.join(gettempdir(), 'qa_ctl', tmp_config_file_name)
 
              # Write a custom configuration file with only provision section
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})

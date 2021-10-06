@@ -93,4 +93,4 @@ def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
     run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     LOGGER.info(f"Running the Linux container for {topic}")
-    run_local_command(f"docker run --rm -v {gettempdir()}:/qa_ctl {docker_image_name} {docker_args}")
+    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_ctl')}:/qa_ctl {docker_image_name} {docker_args}")

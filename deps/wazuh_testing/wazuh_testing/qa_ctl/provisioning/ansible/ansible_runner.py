@@ -1,6 +1,9 @@
+
 import sys
 import shutil
 from tempfile import gettempdir
+from os.path import join
+
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_output import AnsibleOutput
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePlaybook
@@ -28,7 +31,7 @@ class AnsibleRunner:
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=gettempdir(), output=False):
+    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=join(gettempdir(), 'qa_ctl'), output=False):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir

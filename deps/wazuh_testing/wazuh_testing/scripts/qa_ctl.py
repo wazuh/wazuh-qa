@@ -20,12 +20,13 @@ from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGener
 from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning import local_actions
 from wazuh_testing.tools.github_repository import get_last_wazuh_version
+from wazuh_testing.tools.file import recursive_directory_creation
 
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
-WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh-qa')
+WAZUH_QA_FILES = os.path.join(gettempdir(), 'qa_ctl', 'wazuh-qa')
 
 qactl_logger = Logging(QACTL_LOGGER)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -111,9 +112,12 @@ def set_environment(parameters):
     Args:
         (argparse.Namespace): Object with the user parameters.
     """
+    # Create the qa_ctl temporary folder
+    recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
+    
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
-        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=gettempdir())
+        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=os.path.join(gettempdir(), 'qa_ctl'))
 
 
 def validate_parameters(parameters):
@@ -219,7 +223,7 @@ def get_script_parameters():
 def main():
     configuration_data = {}
     instance_handler = None
-    configuration_file = None
+    configuration_file = None        
 
     arguments = get_script_parameters()
 
