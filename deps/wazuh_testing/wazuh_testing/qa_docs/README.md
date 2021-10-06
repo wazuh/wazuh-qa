@@ -118,7 +118,7 @@ For a detailed usage visit the `qa-docs documentation generation` [wiki](https:/
 First of all, the wazuh-qa framework must be installed following the [`installation section`](#installation).
 The `requirements.txt` file specifies the required Python modules that need to be installed before running the tool.
 
-Also before indexing is mandatory to have `ElasticSearch` up and running.
+Before indexing is mandatory to have `ElasticSearch` up and running. Also, before launching the api is mandatory to have `npm` installed.
 
 ##### ES installation on Linux:
 
