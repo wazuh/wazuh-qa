@@ -210,3 +210,11 @@ Using `-l` option, the tool launches the application with the index previously i
     qa-docs -I /path-to-tests-to-parse/ -il <INDEX_NAME>
 
 Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the api. The name of the index must be provided as a parameter.
+
+## Docker deployment
+
+If you prefer, you can run the script inside the `qa-docs/` directory, which will parse the tests of a branch you pass as an argument:
+
+```
+./deploy_qa_docs.sh 1796-migrate-doc-schema-2
+```
