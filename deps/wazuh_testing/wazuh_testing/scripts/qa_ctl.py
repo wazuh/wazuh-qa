@@ -203,6 +203,8 @@ def get_script_parameters():
     parser.add_argument('--no-validation-logging', action='store_true', help='Disable initial logging of parameter '
                                                                              'validations.')
 
+    parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
+
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                                        help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
                                             'has higher priority than the specified in the configuration file.')
@@ -232,7 +234,8 @@ def main():
 
     set_environment(arguments)
 
-    validate_parameters(arguments)
+    if not arguments.no_validation:
+        validate_parameters(arguments)
 
     # Generate or get the qactl configuration file
     if arguments.run_test:
