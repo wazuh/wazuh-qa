@@ -114,6 +114,8 @@ This `setup.py` is located in `wazuh-qa/deps/wazuh_testing/setup.py`
 
 ## Usage
 
+You can parse the tests and run the API with just one command, e.g. `qa-docs -I /path-to-tests/ --type integration --modules test_active_response -il active-response-index`
+
 For a detailed usage visit the `qa-docs documentation generation` [wiki](https://github.com/wazuh/wazuh-qa/wiki/Documentation-generation-with-qadocs-tool)
 
 ### Dependencies
