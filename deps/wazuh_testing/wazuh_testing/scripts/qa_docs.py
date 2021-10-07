@@ -6,6 +6,7 @@ import argparse
 import os
 from datetime import datetime
 import sys
+from elasticsearch import Elasticsearch
 
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
@@ -90,12 +91,17 @@ def validate_parameters(parameters, parser):
                 raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
 
     # Check that the index exists
-    if parameters.index_name or parameters.app_index_name:
-        check_index_name_exists = None
+    if parameters.app_index_name:
+        es = Elasticsearch()
+        try:
+            es.count(index=parameters.app_index_name)
+        except Exception as index_exception:
+            raise QAValueError(f"Index exception: {index_exception}", qadocs_logger.error)
 
     # Check that the output path has permissions to write the file(s)
-    if parameters.output_path:
-        check_output_path_has_permissions = None
+    if parameters.output_path and not os.access(parameters.output_path, os.W_OK):
+        raise QAValueError(f"You cannot write within this directory {parameters.output_path}, you need write permission.",
+                           qadocs_logger.error)
 
     # Check that modules selection is done within a test type
     if parameters.test_modules and len(parameters.test_types) != 1:
@@ -103,7 +109,7 @@ def validate_parameters(parameters, parser):
                            ' type if you want to parse some modules within a test type.',
                            qadocs_logger.error)
         
-    qadocs_logger.debug('Input parameters validation successfully finished')
+    qadocs_logger.debug('Input parameters validation completed')
 
 def install_searchui_deps():
     """Install SearchUI dependencies if needed"""

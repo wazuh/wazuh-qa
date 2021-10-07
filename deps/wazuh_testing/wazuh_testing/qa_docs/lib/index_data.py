@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+from logging import exception
 import os
 import re
 import json
@@ -90,7 +91,12 @@ class IndexData:
         self.read_files_content(files)
 
         if self.test_connection():
-            self.remove_index()
+            try:
+                if self.es.count(index=self.index):
+                    self.remove_index()
+            except Exception:
+                pass
+
             IndexData.LOGGER.info("Indexing data...\n")
             helpers.bulk(self.es, self.output, index=self.index)
             out = json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
