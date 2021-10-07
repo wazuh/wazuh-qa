@@ -11,7 +11,6 @@ from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
 from wazuh_testing.qa_docs.lib.utils import remove_inexistent
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
-from wazuh_testing.tools.exceptions import QAValueError
 
 INTERNAL_FIELDS = ['id', 'group_id', 'name']
 STOP_FIELDS = ['tests', 'test_cases']
@@ -88,31 +87,25 @@ class CodeParser:
             try:
                 doc_field = doc[field]
             except KeyError:
-                CodeParser.LOGGER.error(f"{field} field missing in {path} {doc_type}")
+                CodeParser.LOGGER.warning(f"{field} field missing in {path} {doc_type}")
                 doc_field = None
 
             # If the field is a list, iterate thru predefined values
             if isinstance(doc_field, list):
                 for value in doc_field:
                     if value not in self.conf.predefined_values[field]:
-                        CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                        CodeParser.LOGGER.warning(f"{field} field in {path} {doc_type} documentation block "
                                                 f"has an invalid value: {value}. "
-                                                f"Follow the predefined values: {self.conf.predefined_values[field]}."
+                                                f"Follow the predefined values: {self.conf.predefined_values[field]}. "
                                                  "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
                                                  "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
-                        # raise QAValueError(f"{field} field in {path} {doc_type} has an invalid value: {value}. "
-                        #                    f"Follow the predefined values: {self.conf.predefined_values[field]}"
-                        #                    , CodeParser.LOGGER.error)
             else:
                 if doc_field not in self.conf.predefined_values[field] and doc_field is not None:
-                    CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                    CodeParser.LOGGER.warning(f"{field} field in {path} {doc_type} documentation block "
                                             f"has an invalid value: {doc_type}. "
-                                            f"Follow the predefined values: {self.conf.predefined_values[field]}"
+                                            f"Follow the predefined values: {self.conf.predefined_values[field]} "
                                                  "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
                                                  "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
-                #     raise QAValueError(f"{field} field in {path} {doc_type} has an invalid value: {doc_field}. "
-                #                        f"Follow the predefined values: {self.conf.predefined_values[field]}"
-                #                        , CodeParser.LOGGER.error)
 
     def parse_comment(self, function, doc_type, path):
         """Parse one self-contained documentation block.
@@ -127,7 +120,7 @@ class CodeParser:
         """
         docstring = ast.get_docstring(function)
         if not docstring:
-            CodeParser.LOGGER.error(f"Documentation block not found in {path}")
+            CodeParser.LOGGER.warning(f"Documentation block not found in {path}")
             # raise QAValueError(f"Documentation block not found in {path}", CodeParser.LOGGER.error)
 
         try:
@@ -138,12 +131,12 @@ class CodeParser:
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                CodeParser.LOGGER.error(f"Failed to parse test documentation in {function.name} "
+                CodeParser.LOGGER.warning(f"Failed to parse test documentation in {function.name} "
                                          "from module {self.scan_file}. Error: {inst}")
                 # raise QAValueError(f"Failed to parse test documentation in {function.name} "
                 #                     "from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
             else:
-                CodeParser.LOGGER.error(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
+                CodeParser.LOGGER.warning(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
                 # raise QAValueError(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}"
                 #                     , CodeParser.LOGGER.error)
             return None
