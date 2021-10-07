@@ -5,6 +5,7 @@ import json
 import argparse
 import os
 import yaml
+import textwrap
 
 from jsonschema import validate
 from tempfile import gettempdir
@@ -180,7 +181,38 @@ def get_script_parameters():
     Returns:
         argparse.Namespace: Object with the script parameters.
     """
-    parser = argparse.ArgumentParser()
+    description = \
+        '''
+        qa-ctl current version = 0.1
+
+        qa-ctl is a tool to launch local QA tests without having to worry about the environment and its provisioning.
+
+        It has two modes:
+
+        - Automatic mode: A test name is specified, and it automatically builds the configuration file to perform
+                          the complete deployment, provisioning and testing process.
+
+                          Run this mode with "qa-ctl -r <test_name>"
+
+        - Manual mode:    A configuration file is specified and the indicated processes are carried out with the
+                          parameters set in that file.
+
+                          Run this mode with "qa-ctl -c <config_file_path>"
+
+        Tip: You can first run qa-ctl in automatic mode with the persistent environment (--persistent parameter) and
+             then use the same configuration file for the next run in manual mode, skipping the desired phases. Useful
+             when you want to relaunch tests in the same environment..
+
+             For example:
+                > qa-ctl -r test_general_settings_enabled --persistent
+                ......
+                INFO - Configuration file saved in /tmp/qa_ctl/config_1633608335.685262.yaml
+                ......
+                > qa-ctl -c config_1633608335.685262.yaml --skip-deployment --skip-provisioning
+        '''
+
+    parser = argparse.ArgumentParser(description=textwrap.dedent(description),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
