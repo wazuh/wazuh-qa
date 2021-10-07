@@ -9,8 +9,8 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
        these files are modified. Specifically, these tests will check if FIM limits the size of
-       the file monitored to generate 'diff' information when the 'diff_size_limit' and
-       the 'report_changes' attributes are used.
+       'diff' information to generate from the file monitored when the 'diff_size_limit' and
+       the 'report_changes' options are enabled.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
@@ -124,7 +124,7 @@ def get_configuration(request):
 ])
 def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon limits the file size to generate 'diff' information from
+    description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
                  the value set in the 'diff_size_limit' attribute when the global 'file_size' tag is different.
                  For this purpose, the test will monitor a directory and, once the FIM is started, it will wait
                  for the FIM event related to the maximum file size to generate 'diff' information. Finally,
@@ -148,8 +148,8 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
             brief: Clear the 'ossec.log' file and start a new monitor.
 
     assertions:
-        - Verify that FIM limits the size of the file monitored, set in the 'diff_size_limit' attribute,
-          to generate 'diff' information when the global 'file_size' tag is different.
+        - Verify that an FIM event is generated indicating the size limit of 'diff' information to generate
+          set in the 'diff_size_limit' attribute when the global 'file_size' tag is different.
 
     input_description: A test case (ossec_conf_diff_size_limit) is contained in external YAML
                        file (wazuh_conf.yaml) which includes configuration settings for
@@ -161,6 +161,7 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
 
     tags:
         - diff
+        - scheduled
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
