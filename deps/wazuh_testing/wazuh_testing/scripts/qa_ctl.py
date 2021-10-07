@@ -27,6 +27,7 @@ DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
 WAZUH_QA_FILES = os.path.join(gettempdir(), 'qa_ctl', 'wazuh-qa')
+RUNNING_ON_DOCKER_CONTAINER = True if 'RUNNING_ON_DOCKER_CONTAINER' in os.environ else False
 
 qactl_logger = Logging(QACTL_LOGGER)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -114,7 +115,7 @@ def set_environment(parameters):
     """
     # Create the qa_ctl temporary folder
     recursive_directory_creation(os.path.join(gettempdir(), 'qa_ctl'))
-    
+
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
         local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=os.path.join(gettempdir(), 'qa_ctl'))
@@ -223,7 +224,7 @@ def get_script_parameters():
 def main():
     configuration_data = {}
     instance_handler = None
-    configuration_file = None        
+    configuration_file = None
 
     arguments = get_script_parameters()
 
@@ -269,7 +270,7 @@ def main():
 
     # Run QACTL modules
     try:
-        if DEPLOY_KEY in configuration_data and not arguments.skip_deployment:
+        if DEPLOY_KEY in configuration_data and not arguments.skip_deployment and not RUNNING_ON_DOCKER_CONTAINER:
             deploy_dict = configuration_data[DEPLOY_KEY]
             instance_handler = QAInfraestructure(deploy_dict, qactl_configuration)
             instance_handler.run()
@@ -300,7 +301,7 @@ def main():
             if arguments.run_test and launched['config_generator']:
                 config_generator.destroy()
         else:
-            if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+            if not RUNNING_ON_DOCKER_CONTAINER:
                 qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
 
 if __name__ == '__main__':

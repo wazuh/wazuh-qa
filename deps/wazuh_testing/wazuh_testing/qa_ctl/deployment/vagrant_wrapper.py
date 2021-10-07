@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import vagrant
 import sys
-
 from shutil import rmtree
 
-import wazuh_testing.qa_ctl.deployment.vagrantfile as vfile
+if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+    import vagrant
 
+import wazuh_testing.qa_ctl.deployment.vagrantfile as vfile
 from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
