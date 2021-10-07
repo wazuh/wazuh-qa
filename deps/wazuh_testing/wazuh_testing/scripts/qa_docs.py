@@ -94,13 +94,17 @@ def check_incompatible_parameters(parameters):
     Args:
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
-    default_run = parameters.index_name or parameters.app_index_name or parameters.test_types or parameters.test_modules
-
+    default_run = parameters.test_types or parameters.test_modules
+    api_run = parameters.index_name or parameters.app_index_name or parameters.launching_index_name
 
     if parameters.tests_path is None and (default_run or parameters.test_names or parameters.test_exist):
         raise QAValueError('The following options need the path where the tests are located: -t, --test, '
                            '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
                            '-I, --tests-path path_to_tests.',
+                           qadocs_logger.error)
+
+    if api_run and (parameters.test_names or parameters.test_exist):
+        raise QAValueError('The -e, -t options do not support API usage.',
                            qadocs_logger.error)
 
     if parameters.output_path and default_run:
@@ -198,25 +202,6 @@ def main():
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
-    # Index the previous parsed tests into Elasticsearch
-    elif args.index_name:
-        qadocs_logger.debug(f"Indexing {args.index_name}")
-        index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-        index_data.run()
-
-    # Launch SearchUI with the 
-    elif args.app_index_name:
-        # When SearchUI index is not hardcoded, it will be use args.app_index_name 
-        run_searchui(args.app_index_name)
-
-    # Index the previous parsed tests into Elasticsearch and then launch SearchUI
-    elif args.launching_index_name:
-        qadocs_logger.debug(f"Indexing {args.launching_index_name}")
-        index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-        index_data.run()
-        # When SearchUI index is not hardcoded, it will be use args.launching_index_name 
-        run_searchui(args.launching_index_name)
-
     elif args.test_exist:
         doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
         
@@ -255,6 +240,24 @@ def main():
 
         qadocs_logger.info('Running QADOCS')
         docs.run()
+
+        # Index the previous parsed tests into Elasticsearch
+        if args.index_name:
+            index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+            index_data.run()
+
+        # Launch SearchUI with the 
+        elif args.app_index_name:
+            # When SearchUI index is not hardcoded, it will be use args.app_index_name 
+            run_searchui(args.app_index_name)
+
+        # Index the previous parsed tests into Elasticsearch and then launch SearchUI
+        elif args.launching_index_name:
+            qadocs_logger.debug(f"Indexing {args.launching_index_name}")
+            index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+            index_data.run()
+            # When SearchUI index is not hardcoded, it will be use args.launching_index_name 
+            run_searchui(args.launching_index_name)
 
     if __name__ == '__main__':
         main()
