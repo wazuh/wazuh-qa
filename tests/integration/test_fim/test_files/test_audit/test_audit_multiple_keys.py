@@ -89,11 +89,12 @@ def ensure_audit_plugin_installed():
 
         yield
 
+    if not os.path.exists(audit2_plugin) and not os.path.exists(audit3_plugin):
         write_wazuh_conf(backup_config)  
 
 
 @pytest.fixture(scope='module')
-def set_audit_rules():
+def set_audit_rules(ensure_audit_plugin_installed):
     # Create the custom audit rules for the non monitored directory
     fim.run_audit_command(directory=non_monitored_test_dir, params=param_list, cmd_type='add')
     # Remove audit rule that FIM configures for each monitored directory
@@ -110,7 +111,7 @@ def set_audit_rules():
 
 @pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir]) 
 def test_audit_multiple_keys(up_wazuh_after_module,truncate_log_file_before_module,
-                             ensure_audit_plugin_installed, get_configuration, configure_environment,
+                             get_configuration, configure_environment,
                              configure_local_internal_options_module,
                              file_monitoring, set_audit_rules, daemons_handler,
                              wait_for_fim_start, directory):
