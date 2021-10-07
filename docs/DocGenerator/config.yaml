@@ -60,6 +60,9 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_max_eps/data"
   - "../../tests/integration/test_fim/test_files/test_max_files_per_second/data"
   - "../../tests/integration/test_fim/test_files/test_moving_files/data"
+  - "../../tests/integration/test_fim/test_files/test_multiple_dirs/data"
+  - "../../tests/integration/test_fim/test_files/test_nodiff/data"
+  - "../../tests/integration/test_fim/test_files/test_prefilter_cmd/data"
 
 Output fields:
   Module:
