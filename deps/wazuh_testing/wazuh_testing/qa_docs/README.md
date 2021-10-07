@@ -77,18 +77,21 @@ documentation content into the App UI.
         |   |   └── qa_docs_tool.Dockerfile     | The dockerfile that builds a docker image with the `qa-docs` running a specific branch
         |   ├── lib
         |   |   ├── __init__.py
-        |   │   ├── code_parser.py     | The module in charge of parsing documentation blocks
-        |   │   ├── config.py          | The module in charge of parsing the configuration file
-        |   |   ├── index_data.py      | The module in charge of the index management
-        |   │   ├── pytest_wrap.py     | The module in charge of dry-running pytest to collect complementary information
-        |   │   ├── sanity.py          | The module in charge of performing a sanity check
-        |   │   └── utils.py           | The module with utility functions
-        |   ├── search_ui              | search-ui module directory
+        |   │   ├── code_parser.py              | The module in charge of parsing documentation blocks
+        |   │   ├── config.py                   | The module in charge of parsing the configuration file
+        |   |   ├── index_data.py               | The module in charge of the index management
+        |   │   ├── pytest_wrap.py              | The module in charge of dry-running pytest to collect complementary information
+        |   │   ├── sanity.py                   | The module in charge of performing a sanity check
+        |   │   └── utils.py                    | The module with utility functions
+        |   ├── search_ui                       | search-ui module directory
         |   ├── __init__.py
+        |   ├── CHANGELOG.md                    | Record of all notable changes made 
         |   ├── deploy_qa_docs.sh               | Script that build the qa-docs images and run them using a specific branch
         |   ├── doc_generator.py                | The main module and the entry point of the tool execution
-        |   ├── requirements.txt                | Contais the modules that qa-docs needs
-        |   └── schema.yaml                     | The configuration file of the tool
+        |   ├── requirements.txt                | Contains the modules that qa-docs needs
+        |   ├── README.MD
+        |   ├── schema.yaml                     | The configuration file of the tool
+        |   └── VERSION.json                    | Tool version
         ├── scripts
         |   ├── qa_docs.py                      | Tool script used by qa framework
         .   .
