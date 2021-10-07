@@ -87,7 +87,7 @@ def ensure_audit_plugin_installed():
 
         os.system('/sbin/service auditd restart')
 
-        yield
+    yield
 
     if not os.path.exists(audit2_plugin) and not os.path.exists(audit3_plugin):
         write_wazuh_conf(backup_config)  
