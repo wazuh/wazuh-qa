@@ -208,7 +208,7 @@ def get_script_parameters():
                 ......
                 INFO - Configuration file saved in /tmp/qa_ctl/config_1633608335.685262.yaml
                 ......
-                > qa-ctl -c config_1633608335.685262.yaml --skip-deployment --skip-provisioning
+                > qa-ctl -c /tmp/qa_ctl/config_1633608335.685262.yaml --skip-deployment --skip-provisioning
         '''
 
     parser = argparse.ArgumentParser(description=textwrap.dedent(description),
