@@ -37,96 +37,14 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
-def check_incompatible_parameters(parameters):
-    """Check the parameters that qa-docs receives and check any incompatibilities.
+
+def get_parameters():
+    """Capture the script parameters
     
-    Args:
-        parameters (argparse.Namespace): The parameters that the tool receives.
+    Returns:
+        argparse.Namespace: Object with the script parameters.
+        argparse.ArgumentParser: Object with from the parser class.
     """
-    default_run = parameters.index_name or parameters.app_index_name or parameters.test_types or parameters.test_modules
-
-
-    if parameters.tests_path is None and (default_run or parameters.test_names or parameters.test_exist):
-        raise QAValueError('The following options need the path where the tests are located: -t, --test, '
-                           '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
-                           '-I, --tests-path path_to_tests.',
-                           qadocs_logger.error)
-
-    if parameters.output_path and default_run:
-        raise QAValueError('The -o parameter only works with -t, --tests options in isolation. The default output '
-                           'path is generated within the qa-docs tool to index it and visualize it.',
-                           qadocs_logger.error)
-                    
-    if (parameters.test_types or parameters.test_modules) and parameters.test_names:
-        raise QAValueError('The --types, --modules parameters parse the data, index it, and visualize it, so it cannot be used with '
-                           '-t, --tests because they get specific tests information.',
-                        qadocs_logger.error)
-
-def validate_parameters(parameters, parser):
-    """Validate the parameters that qa-docs receives.
-
-    Args:
-        parameters (list): A list of input args.
-    """
-    qadocs_logger.debug('Validating input parameters')
-
-    # If qa-docs runs without any parameter or just `-d` option, it raises an error and prints the help message.
-    if len(sys.argv) < 2 or (len(sys.argv) < 3 and parameters.debug_level):
-        qadocs_logger.error('qa-docs has been run without any parameter.')
-        parser.print_help()
-        exit(1)
-
-    check_incompatible_parameters(parameters)
-
-    # Check if the directory where the tests are located exist
-    if parameters.tests_path:
-        if not os.path.exists(parameters.tests_path):
-            raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.", qadocs_logger.error)
-
-    # Check that test_input name exists
-    if parameters.test_names:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, parameters.tests_path, test_names=parameters.test_names))
-        
-        for test_name in parameters.test_names:
-            if doc_check.locate_test(test_name) is None:
-                raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
-
-    # Check that the index exists
-    if parameters.app_index_name:
-        es = Elasticsearch()
-        try:
-            es.count(index=parameters.app_index_name)
-        except Exception as index_exception:
-            raise QAValueError(f"Index exception: {index_exception}")
-
-    # Check that the output path has permissions to write the file(s)
-    if parameters.output_path and not os.access(parameters.output_path, os.W_OK):
-        raise QAValueError(f"You cannot write within this directory {parameters.output_path}, you need write permission.",
-                           qadocs_logger.error)
-
-    # Check that modules selection is done within a test type
-    if parameters.test_modules and len(parameters.test_types) != 1:
-        raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just one'
-                           ' type if you want to parse some modules within a test type.',
-                           qadocs_logger.error)
-        
-    qadocs_logger.debug('Input parameters validation completed')
-
-def install_searchui_deps():
-    """Install SearchUI dependencies if needed"""
-    if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_modules')):
-        qadocs_logger.info('Installing SearchUI dependencies')
-        os.system("npm install")
-
-def run_searchui(index):
-    """Run SearchUI installing its dependencies if necessary"""
-    os.chdir(SEARCH_UI_PATH)
-    install_searchui_deps()
-    qadocs_logger.debug('Running SearchUI')
-    os.system(f"ELASTICSEARCH_HOST=http://localhost:9200 INDEX={index} npm start")
-
-
-def main():
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -168,21 +86,105 @@ def main():
     parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
                         help="Checks if test(s) exist or not.",)
 
-    args = parser.parse_args()
+    return parser.parse_args(), parser
+
+def check_incompatible_parameters(parameters):
+    """Check the parameters that qa-docs receives and check any incompatibilities.
+    
+    Args:
+        parameters (argparse.Namespace): The parameters that the tool receives.
+    """
+    default_run = parameters.index_name or parameters.app_index_name or parameters.test_types or parameters.test_modules
+
+
+    if parameters.tests_path is None and (default_run or parameters.test_names or parameters.test_exist):
+        raise QAValueError('The following options need the path where the tests are located: -t, --test, '
+                           '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
+                           '-I, --tests-path path_to_tests.',
+                           qadocs_logger.error)
+
+    if parameters.output_path and default_run:
+        raise QAValueError('The -o parameter only works with -t, --tests options in isolation. The default output '
+                           'path is generated within the qa-docs tool to index it and visualize it.',
+                           qadocs_logger.error)
+                    
+    if (parameters.test_types or parameters.test_modules) and parameters.test_names:
+        raise QAValueError('The --types, --modules parameters parse the data so you can index it and visualize it. '
+                           '-t, --tests get specific tests information.',
+                        qadocs_logger.error)
+
+def validate_parameters(parameters, parser):
+    """Validate the parameters that qa-docs receives.
+
+    Args:
+        parameters (list): A list of input args.
+    """
+    qadocs_logger.debug('Validating input parameters')
+
+    # If qa-docs runs without any parameter or just `-d` option, it raises an error and prints the help message.
+    if len(sys.argv) < 2 or (len(sys.argv) < 3 and parameters.debug_level):
+        qadocs_logger.error('qa-docs has been run without any parameter.')
+        parser.print_help()
+        exit(1)
+
+    check_incompatible_parameters(parameters)
+
+    # Check if the directory where the tests are located exist
+    if parameters.tests_path:
+        if not os.path.exists(parameters.tests_path):
+            raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.", qadocs_logger.error)
+
+    # Check that test_input name exists
+    if parameters.test_names:
+        doc_check = DocGenerator(Config(SCHEMA_PATH, parameters.tests_path, test_names=parameters.test_names))
+        
+        for test_name in parameters.test_names:
+            if doc_check.locate_test(test_name) is None:
+                raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
+
+    # Check that the index exists
+    if parameters.app_index_name:
+        es = Elasticsearch()
+        try:
+            es.count(index=parameters.app_index_name)
+        except Exception as index_exception:
+            raise QAValueError(f"Index exception: {index_exception}", qadocs_logger.error)
+
+    # Check that the output path has permissions to write the file(s)
+    if parameters.output_path and not os.access(parameters.output_path, os.W_OK):
+        raise QAValueError(f"You cannot write within this directory {parameters.output_path}, you need write permission.",
+                           qadocs_logger.error)
+
+    # Check that modules selection is done within a test type
+    if parameters.test_modules and len(parameters.test_types) != 1:
+        raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just one'
+                           ' type if you want to parse some modules within a test type.',
+                           qadocs_logger.error)
+        
+    qadocs_logger.debug('Input parameters validation completed')
+
+def install_searchui_deps():
+    """Install SearchUI dependencies if needed"""
+    if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_modules')):
+        qadocs_logger.info('Installing SearchUI dependencies')
+        os.system("npm install")
+
+def run_searchui(index):
+    """Run SearchUI installing its dependencies if necessary"""
+    os.chdir(SEARCH_UI_PATH)
+    install_searchui_deps()
+    qadocs_logger.debug('Running SearchUI')
+    os.system(f"ELASTICSEARCH_HOST=http://localhost:9200 INDEX={index} npm start")
+
+
+def main():
+    args, parser = get_parameters()
+
+    validate_parameters(args, parser)
 
     # Set the qa-docs logger level
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
-
-    validate_parameters(args, parser)
-
-    # Print that test gave by the user(using `-e` option) exists or not.
-    if args.test_exist:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
-        
-        for test_name in args.test_exist:
-            if doc_check.locate_test(test_name) is not None:
-                print(f"{test_name} exists")
 
     if args.version:
         with open(VERSION_PATH, 'r') as version_file:
@@ -215,8 +217,15 @@ def main():
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name 
         run_searchui(args.launching_index_name)
 
+    elif args.test_exist:
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
+        
+        for test_name in args.test_exist:
+            if doc_check.locate_test(test_name) is not None:
+                print(f"{test_name} exists")
+
     # Parse tests
-    elif not args.test_exist:
+    else:
         docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
 
         # Parse a list of tests
