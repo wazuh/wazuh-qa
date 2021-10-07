@@ -20,7 +20,8 @@ package_data_list = [
     'data/sslmanager.key',
     'data/sslmanager.cert',
     'tools/macos_log/log_generator.m',
-    'qa_docs/schema.yaml'
+    'qa_docs/schema.yaml',
+    'qa_docs/VERSION.json'
 ]
 
 scripts_list = [

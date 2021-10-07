@@ -4,8 +4,9 @@
 
 import argparse
 import os
-from datetime import datetime
 import sys
+import json
+from datetime import datetime
 from elasticsearch import Elasticsearch
 
 from wazuh_testing.qa_docs.lib.config import Config
@@ -16,7 +17,7 @@ from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 
-VERSION = '0.1'
+VERSION_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'VERSION.json')
 SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'schema.yaml')
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
@@ -96,7 +97,7 @@ def validate_parameters(parameters, parser):
         try:
             es.count(index=parameters.app_index_name)
         except Exception as index_exception:
-            raise QAValueError(f"Index exception: {index_exception}", qadocs_logger.error)
+            raise QAValueError(f"Index exception: {index_exception}")
 
     # Check that the output path has permissions to write the file(s)
     if parameters.output_path and not os.access(parameters.output_path, os.W_OK):
@@ -184,7 +185,10 @@ def main():
                 print(f"{test_name} exists")
 
     if args.version:
-        print(f"qa-docs v{VERSION}")
+        with open(VERSION_PATH, 'r') as version_file:
+            version_data = version_file.read()
+            version = json.loads(version_data)
+            print(f"qa-docs v{version['version']}")
 
     # Run a sanity check thru tests directory
     elif args.sanity:
