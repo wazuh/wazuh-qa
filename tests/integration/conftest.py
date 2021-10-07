@@ -870,3 +870,18 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='module')
+def up_wazuh_after_module():
+    """Restart wazuh after module."""
+
+    yield
+
+    control_service('restart')
+
+
+@pytest.fixture(scope='module')
+def truncate_log_file_before_module():
+    """Truncate log file before module."""
+    truncate_file(LOG_FILE_PATH)

@@ -8,7 +8,7 @@ import wazuh_testing.fim as fim
 
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf
 from wazuh_testing.tools.services import control_service
@@ -59,6 +59,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='module')
 def ensure_audit_plugin_installed():
+    """ Ensure audit plugin is installed."""
 
     audit2_plugin = '/etc/audisp/plugins.d/af_wazuh.conf'
     audit3_plugin = '/etc/audit/plugins.d/af_wazuh.conf'
@@ -66,12 +67,13 @@ def ensure_audit_plugin_installed():
     if not os.path.exists(audit2_plugin) and not os.path.exists(audit3_plugin):
 
         os.makedirs('/tmp/testing_audit', exist_ok=True)
-        configuration_audit = [{'section': 'syscheck', 'elements': [{'disabled': {'value': 'no'}}, {'directories': {'value': '/tmp/testing_audit', 'attributes': [{'whodata': 'yes'}]}}]}]
+        configuration_audit = [{'section': 'syscheck', 'elements': [{'disabled': {'value': 'no'}}, 
+                               {'directories': {'value': '/tmp/testing_audit', 'attributes': [{'whodata': 'yes'}]}}]}]
 
         backup_config = get_wazuh_conf()
 
         # Configuration for testing
-        test_config = set_section_wazuh_conf(configuration_audit)
+        set_section_wazuh_conf(configuration_audit)
 
         control_service('restart')
 
@@ -80,8 +82,14 @@ def ensure_audit_plugin_installed():
         whodata_log_monitor.start(timeout=40, callback=fim.callback_end_audit_reload_rules)
 
         control_service('stop')
+
         truncate_file(LOG_FILE_PATH)
+
         os.system('/sbin/service auditd restart')
+
+        yield
+
+        write_wazuh_conf(backup_config)  
 
 
 @pytest.fixture(scope='module')
@@ -100,8 +108,10 @@ def set_audit_rules():
     fim.run_audit_command(directory=monitored_test_dir, params=param_list, cmd_type='delete')
 
 
-@pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir])
-def test_audit_multiple_keys(ensure_audit_plugin_installed, get_configuration, configure_environment, configure_local_internal_options_module,
+@pytest.mark.parametrize('directory', [monitored_test_dir, non_monitored_test_dir]) 
+def test_audit_multiple_keys(up_wazuh_after_module,truncate_log_file_before_module,
+                             ensure_audit_plugin_installed, get_configuration, configure_environment,
+                             configure_local_internal_options_module,
                              file_monitoring, set_audit_rules, daemons_handler,
                              wait_for_fim_start, directory):
     """Checks that FIM correctly handles audit rules with multiple keys.
