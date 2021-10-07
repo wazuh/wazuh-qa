@@ -7,6 +7,6 @@ then
   exit 1
 fi
 
-docker build -t qa-docs_base:0.1 -f dockerfiles/qa_docs_base.Dockerfile dockerfiles/
-docker build -t qa-docs/$branch_name:0.1 --build-arg BRANCH=$branch_name -f dockerfiles/qa_docs_tool.Dockerfile dockerfiles/
-docker run qa-docs/$branch_name:0.1
+docker build -t qa-docs_base:0.2 -f dockerfiles/qa_docs_base.Dockerfile dockerfiles/
+docker build -t qa-docs/$branch_name:0.2 --build-arg BRANCH=$branch_name -f dockerfiles/qa_docs_tool.Dockerfile dockerfiles/
+docker run qa-docs/$branch_name:0.2
