@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: A Wazuh cluster is a group of Wazuh managers that work together to enhance the availability
+       and scalability of the service. These tests will check the agent enrollment in a multi-server
+       environment and how the agent manages the connections to the servers depending on their status.
+
+tier: 0
+
+modules:
+    - agentd
+
+components:
+    - agent
+
+daemons:
+    - wazuh-agentd
+    - wazuh-authd
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/registering/index.html
+
+tags:
+    - enrollment
+'''
 import os
 import pytest
 from time import sleep
@@ -341,19 +398,67 @@ def wait_until(x, log_str):
 # @pytest.mark.parametrize('test_case', [case for case in tests])
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
-    """Check the agent's enrollment and connection to a manager in a multi-server environment.
+    '''
+    description: Check the agent's enrollment and connection to a manager in a multi-server environment.
+                 Initialize an environment with multiple simulated servers in which the agent is forced to enroll
+                 under different test conditions, verifying the agent's behavior through its log files.
 
-    Initialize an environment with multiple simulated servers in which the agent is forced to enroll
-    under different test conditions, verifying the agent's behavior through its log files.
+    wazuh_min_version: 4.2
 
-    Args:
-        add_hostnames (fixture): Adds to the OS hosts file the names and IP's of the test servers.
-        configure_authd_server (fixture): Initializes multiple simulated remoted connections.
-        set_authd_id (fixture): Sets the agent id to 101 in authd simulated connection.
-        clean_keys (fixture): Clears the client.key file used by the simulated remote connections.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
-    """
+    parameters:
+        - add_hostnames:
+            type: fixture
+            brief: Adds to the 'hosts' file the names and the IP addresses of the testing servers.
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated 'wazuh-authd' connection.
+        - set_authd_id:
+            type: fixture
+            brief: Sets the agent id to '101' in the 'wazuh-authd' simulated connection.
+        - clean_keys:
+            type: fixture
+            brief: Clears the 'client.keys' file used by the simulated remote connections.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+    assertions:
+        - Agent without keys. Verify that all servers will refuse the connection to the 'wazuh-remoted' daemon
+          but will accept enrollment. The agent should try to connect and enroll each of them.
+        - Agent without keys. Verify that the first server only has enrollment available, and the third server
+          only has the 'wazuh-remoted' daemon available. The agent should enroll in the first server and
+          connect to the third one.
+        - Agent without keys. Verify that the agent should enroll and connect to the first server, and then
+          the first server will disconnect. The agent should connect to the second server with the same key.
+        - Agent without keys. Verify that the agent should enroll and connect to the first server, and then
+          the first server will disconnect. The agent should try to enroll in the first server again,
+          and then after failure, move to the second server and connect.
+        - Agent with keys. Verify that the agent should enroll and connect to the last server.
+        - Agent with keys. Verify that the first server is available, but it disconnects, and the second and
+          third servers are not responding. The agent on disconnection should try the second and third servers
+          and go back finally to the first server.
+
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases are found in the test module and include parameters for
+                       the environment setup, the requests to be made, and the expected result.
+
+    expected_output:
+        - r'Requesting a key from server'
+        - r'Valid key received'
+        - r'Trying to connect to server'
+        - r'Connected to the server'
+        - r'Received message'
+        - r'Server responded. Releasing lock.'
+        - r'Unable to connect to'
+
+    tags:
+        - simulator
+        - ssl
+        - keys
+    '''
     log_monitor = FileMonitor(LOG_FILE_PATH)
 
     for stage in range(0, len(get_configuration['metadata']['LOG_MONITOR_STR'])):
