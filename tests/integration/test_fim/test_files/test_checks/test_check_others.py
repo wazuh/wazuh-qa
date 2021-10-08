@@ -114,6 +114,7 @@ else:
     ])
 
 
+@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others(path, checkers, get_configuration, configure_environment,
                       restart_syscheckd, wait_for_fim_start):
