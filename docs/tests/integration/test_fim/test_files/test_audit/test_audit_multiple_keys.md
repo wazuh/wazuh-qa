@@ -1,6 +1,6 @@
-# test audit multiple keys
+# Test audit multiple keys
 When an audit rule has more than one key, audit decodes the keys in hexadecimal. This test configures audit rules
-for monitored and non monitored directories with more than one key, checks that FIM decodes properly the hexadecimal keys and makes sure that
+for monitored and non-monitored directories with more than one key, checks that FIM decodes properly the hexadecimal keys and makes sure that
 if the directory is monitored, events are triggered.
 
 | Tier | Platforms | Time spent| Test file |
@@ -9,7 +9,7 @@ if the directory is monitored, events are triggered.
 
 ## Test logic
 
-- The test creates audit rules with multiple keys for monitored and non monitored directories
+- The test creates audit rules with multiple keys for monitored and non-monitored directories
 - Then it waits until FIM reloads the audit rules. This is to avoid false positives when `whodata healthcheck` events remain in the audit socket.
 - It creates files inside the specified folder and checks if FIM decodes the key of the audit event.
 - If the action was performed in a monitored directory, check that the event is triggered.

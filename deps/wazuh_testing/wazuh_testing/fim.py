@@ -2106,7 +2106,7 @@ def run_audit_command(directory, params, cmd_type):
     elif cmd_type == 'delete':
         audit_flag = '-W'
     else:
-        raise ValueError("Only add and delete values are allowed")
+        raise ValueError('Only add and delete values are allowed')
 
     command = f"auditctl {audit_flag} {directory} -p wa {params}"
     subprocess.run(command.split())

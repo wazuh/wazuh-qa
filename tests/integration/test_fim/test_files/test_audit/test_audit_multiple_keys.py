@@ -2,18 +2,16 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-
 import pytest
-import wazuh_testing.fim as fim
 
+import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, write_wazuh_conf
+from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, write_wazuh_conf, \
+                                              get_wazuh_conf, set_section_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf
 from wazuh_testing.tools.services import control_service, get_service
 import wazuh_testing.tools.monitoring as monitoring
-from wazuh_testing.tools import LOG_FILE_PATH
 
 # Marks
 
