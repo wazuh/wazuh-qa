@@ -4,7 +4,14 @@ All notable changes to this tool will be documented in this file.
 ## [v0.1]
 
 ### Added
-  - Added new tool for generating `YAML` configuration file automatically. ([#1828](https://github.com/wazuh/wazuh-qa/pull/1892))
+  - Added new folder level for temporary files ([#1993](https://github.com/wazuh/wazuh-qa/pull/1993))
+  - Added new implementation for generating `qa-ctl` configuration paths ([#1982](https://github.com/wazuh/wazuh-qa/pull/1982))
+  - Added skip execution stages options for `qa-ctl` tool ([#1976](https://github.com/wazuh/wazuh-qa/pull/1976))
+  - Added option `--qa-branch` for `qa-ctl` tool ([#1974](https://github.com/wazuh/wazuh-qa/pull/1974))
+  - Added `qa-ctl` native support for Windows ([#1961](https://github.com/wazuh/wazuh-qa/pull/1961))
+  - Added debug mode and unified logs of  every section. ([#1924](https://github.com/wazuh/wazuh-qa/pull/1924))
+  - Added new tool for generating `YAML` configuration file automatically. ([#1892](https://github.com/wazuh/wazuh-qa/pull/1892))
+  - Added new documentation for `qa-ctl` module ([#1837](https://github.com/wazuh/wazuh-qa/pull/1837))
   - Added new tool for generating S3 package links ([#1828](https://github.com/wazuh/wazuh-qa/pull/1828))
   - Added documentation for `qa-ctl` modules ([#1805](https://github.com/wazuh/wazuh-qa/pull/1805))
   - Added show test results in stdout with Logging module ([#1795](https://github.com/wazuh/wazuh-qa/pull/1795))
