@@ -147,7 +147,7 @@ class Sanity():
                 test_files = list(filter(regex.match, files))
 
                 for test_file in test_files:
-                    with open(os.path.join(root, test_file)) as fd:
+                    with open(os.path.join(root, test_file), encoding="utf8") as fd:
                         file_content = fd.read()
                     module = ast.parse(file_content)
                     functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
