@@ -225,7 +225,7 @@ cases = [
             'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['mojave'],
+            'agents_os': ['solaris11'],
             'agents_version': ['v3.11.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
@@ -349,7 +349,7 @@ cases = [
             'sha_list': ['VALIDSHA1'],
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
-            'status': ['Legacy upgrade:' + \
+            'status': ['Legacy upgrade: ' + \
                        'check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
@@ -577,16 +577,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -603,16 +603,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -629,16 +629,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -794,13 +794,13 @@ def wait_downloaded(line):
 
 
 def wait_chunk_size(line):
-    if ('Sending message to agent:' in line) and ('com write ' in line):
+    if ('Sending message to agent:' in line) and (('com write ' in line) or ('"command":"write"' in line)):
         return line
     return None
 
 
 def wait_wpk_custom(line):
-    if ('Sending message to agent:' in line) and ('com upgrade ' in line):
+    if ('Sending message to agent:' in line) and (('com upgrade ' in line) or ('"command":"upgrade"' in line)):
         return line
     return None
 
@@ -970,7 +970,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             raise AssertionError("Chunk size log tooks too much!")
         chunk = metadata.get('chunk_size')
         last_log = log_monitor.result()
-        assert f'com write {chunk}' in last_log, \
+        assert f'{chunk}' in last_log, \
             f'Chunk size did not match expected! Expected {chunk} obtained {last_log}'
 
     if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
@@ -981,9 +981,10 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             raise AssertionError("Custom wpk log tooks too much!")
 
         last_log = log_monitor.result()
-        assert f'com upgrade {file_name} {installer}' in last_log, \
+        assert f'{file_name}' in last_log and f'{installer}' in last_log, \
             f'Wpk custom package did not match expected! ' \
-            f'Expected {metadata.get("message_params").get("file_path")} obtained {last_log}'
+            f'Expected {metadata.get("message_params").get("file_path")} '\
+            f'{metadata.get("message_params").get("installer")} obtained {last_log}'
 
     if metadata.get('first_attempt'):
         # Chech that result of first attempt is Success

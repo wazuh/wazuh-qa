@@ -19,4 +19,5 @@ In this repository you will find the tests used in the CI environment to test Wa
 - `tests`: directory containing the test suite. These are tests developed using Pytest.
     - `integration`: integration tests of the different daemons/components.
     - `system`: system tests of Wazuh.
+    - `scans`: tests used to scan and verify Wazuh Python code and dependencies.
 - `docs`:  contains the technical documentation about the code and documentation about the tests.
