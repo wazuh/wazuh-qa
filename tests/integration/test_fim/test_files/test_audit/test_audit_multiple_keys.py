@@ -11,7 +11,7 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import control_service, get_service
 import wazuh_testing.tools.monitoring as monitoring
 from wazuh_testing.tools import LOG_FILE_PATH
 
@@ -21,9 +21,13 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 
 local_internal_options = {'syscheck.debug': '2', 'analysisd.debug': '2', 'monitord.rotate_log': '0'}
-daemons_handler_configuration = {'daemons': ['wazuh-syscheckd', 'wazuh-analysisd', 'wazuh-modulesd']}
 
-
+if get_service() == 'wazuh-manager':
+    local_internal_options = {'syscheck.debug': '2', 'analysisd.debug': '2', 'monitord.rotate_log': '0'}
+    daemons_handler_configuration = {'daemons': ['wazuh-syscheckd', 'wazuh-analysisd', 'wazuh-modulesd']}
+else:
+    local_internal_options = {'agent.debug': '2', 'syscheck.debug': '2', 'monitord.rotate_log': '0'}
+    daemons_handler_configuration = {'daemons': ['wazuh-syscheckd', 'wazuh-modulesd', 'wazuh-agentd']}
 
 # Variables
 
