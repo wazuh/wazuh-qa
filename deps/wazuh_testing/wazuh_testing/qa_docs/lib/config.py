@@ -75,7 +75,7 @@ class Config():
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
         self.__read_test_cases_field()
-        self.__set_documentation_path(output_path.replace('\\','/'))
+        self.__set_documentation_path(output_path.replace('\\', '/'))
         self.__read_predefined_values()
 
         if test_names is not None:
@@ -107,7 +107,7 @@ class Config():
 
     def __get_include_paths(self):
         """Get all the modules to include within all the specified types.
-        
+
         The paths to be included are generated using this info.
         """
         dir_regex = re.compile("test_.")

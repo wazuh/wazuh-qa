@@ -42,7 +42,7 @@ class IndexData:
 
     def test_connection(self):
         """Verify with an HTTP request that an OK response is received from ElasticSearch.
-        
+
         Returns:
             boolean: A boolean with True if the request response is OK.
         """
@@ -55,7 +55,7 @@ class IndexData:
 
     def get_files(self):
         """Find all the files inside the documentation path that matches with the JSON regex.
-        
+
         Returns:
             doc_files (list): A list with all the files inside the path.
         """
