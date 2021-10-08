@@ -1,6 +1,78 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM manages properly
+       the 'diff' folder created in the 'queue/diff/local' directory when removing a monitored
+       folder or the 'report_changes' option is disabled.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows server 2012
+    - Windows server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#diff
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_report_changes
+'''
 import os
 import re
 import shutil
@@ -136,13 +208,52 @@ def disable_report_changes(fim_mode):
 @pytest.mark.parametrize('path', [testdir_nodiff])
 def test_report_when_deleted_directories(path, get_configuration, configure_environment, restart_syscheckd,
                                          wait_for_fim_start):
-    """Check if the diff directory is empty when the monitored directory is deleted.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon deletes the 'diff' folder created in the 'queue/diff/local'
+                 directory when removing a monitored folder and the 'report_changes' option is enabled.
+                 For this purpose, the test will monitor a directory and add a testing file inside it. Then,
+                 it will check if a 'diff' file is created for the modified testing file. Finally, the test
+                 will remove the monitored folder, wait for the FIM 'deleted' event, and verify that
+                 the corresponding 'diff' folder is deleted.
 
-    Parameters
-    ----------
-    path : str
-        Path to the file to be deleted
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - path:
+            type: str
+            brief: Path to the testing file to be deleted.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM event is generated when removing the monitored folder.
+        - Verify that FIM adds the 'diff' file in the 'queue/diff/local' directory
+          when monitoring the corresponding testing file.
+        - Verify that FIM deletes the 'diff' folder in the 'queue/diff/local' directory
+          when removing the corresponding monitored folder.
+
+    input_description: Different test cases are contained in external YAML file (wazuh_conf.yaml) which
+                       includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directory to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('deleted' events)
+
+    tags:
+        - diff
+        - scheduled
+        - time_travel
+    '''
     fim_mode = get_configuration['metadata']['fim_mode']
     diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
 
@@ -160,14 +271,51 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
 @pytest.mark.parametrize('path', [testdir_reports])
 def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
-    """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
-    monitored directories.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon deletes the 'diff' folder created in the 'queue/diff/local'
+                 directory when disabling the 'report_changes' option. For this purpose, the test will monitor
+                 a directory and add a testing file inside it. Then, it will check if a 'diff' file is created
+                 for the modified testing file. Next, the test will backup the main configuration, disable
+                 the 'report_changes' option, and check if the diff folder has been deleted. Finally, the test
+                 will restore the backed configuration and verify that the initial scan of FIM scan is made.
 
-    Parameters
-    ----------
-    path : str
-        Path to the file
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - path:
+            type: str
+            brief: Path to the testing file to be created.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM adds the 'diff' file in the 'queue/diff/local' directory
+          when monitoring the corresponding testing file.
+        - Verify that FIM deletes the 'diff' folder in the 'queue/diff/local' directory
+          when disabling the 'report_changes' option.
+
+    input_description: Different test cases are contained in external YAML file (wazuh_conf.yaml) which
+                       includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directory to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' events)
+
+    tags:
+        - diff
+        - scheduled
+        - time_travel
+    '''
     fim_mode = get_configuration['metadata']['fim_mode']
     diff_file = create_and_check_diff(FILE_NAME, path, fim_mode)
     backup_conf = get_wazuh_conf()
@@ -183,12 +331,51 @@ def test_no_report_changes(path, get_configuration, configure_environment,
 
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
                                       wait_for_fim_start):
-    """Check if duplicated directories in diff are deleted when restarting syscheck.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon deletes the 'diff' folder created in the 'queue/diff/local'
+                 directory when restarting that daemon, and the 'report_changes' option is disabled. For this
+                 purpose, the test will monitor a directory and add a testing file inside it. Then, it will check
+                 if a 'diff' file is created for the modified testing file. The folders in the 'queue/diff/local'
+                 directory will be deleted after the 'wazuh-syscheckd' daemon restart but will be created again if
+                 the 'report_changes' option is still active. To avoid this, the test will disable the 'report_changes'
+                 option (backing the main configuration) before restarting the 'wazuh-syscheckd' daemon to ensure that
+                 the directories will not be created again. Finally, the test will restore the backed configuration and
+                 verify that the initial scan of FIM is made.
 
-    The duplicated directories in diff will be removed after Syscheck restarts but will be created again if the report
-    changes is still active. To avoid this we disable turn off report_changes option before restarting Syscheck to
-    ensure directories won't be created again.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM adds the 'diff' file in the 'queue/diff/local' directory
+          when monitoring the corresponding testing file.
+        - Verify that FIM deletes the 'diff' folder in the 'queue/diff/local' directory
+          when restarting the disabling the 'report_changes' option is disabled.
+
+    input_description: Different test cases are contained in external YAML file (wazuh_conf.yaml) which
+                       includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directory to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' events)
+
+    tags:
+        - diff
+        - scheduled
+        - time_travel
+    '''
     fim_mode = get_configuration['metadata']['fim_mode']
 
     # Create a file in the monitored path to force the creation of a report in diff

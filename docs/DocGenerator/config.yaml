@@ -63,6 +63,7 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_multiple_dirs/data"
   - "../../tests/integration/test_fim/test_files/test_nodiff/data"
   - "../../tests/integration/test_fim/test_files/test_prefilter_cmd/data"
+  - "../../tests/integration/test_fim/test_files/test_report_changes/data"
 
 Output fields:
   Module:
