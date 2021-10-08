@@ -1,4 +1,4 @@
-FROM qa-docs_base:0.1
+FROM qa-docs_base:0.2
 
 RUN mkdir tests
 
