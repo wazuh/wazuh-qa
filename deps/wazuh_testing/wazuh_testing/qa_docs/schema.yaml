@@ -21,10 +21,10 @@ output_fields:
       - wazuh_min_version
       - parameters
       - assertions
-      - inputs
       - input_description
-      - expected_behaviour
+      - expected_output
     optional:
+      - inputs
       - tags 
 
 test_cases_field: test_cases
