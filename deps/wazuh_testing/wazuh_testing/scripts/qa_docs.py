@@ -23,7 +23,7 @@ OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'search_ui')
 qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
-                        f"{datetime.today().strftime('%Y-%m-%d-%H:%M:%S')}-qa-docs.log"))
+                        f"{datetime.today().strftime('%Y-%m-%d_%H-%M')}-qa-docs.log"))
 
 
 def set_qadocs_logger_level(logging_level):
