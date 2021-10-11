@@ -1,5 +1,7 @@
 FROM ubuntu:focal
+
 ENV DEBIAN_FRONTEND=noninteractive
+ENV RUNNING_ON_DOCKER_CONTAINER=true
 
 # install packages
 RUN apt-get update && \
@@ -25,19 +27,11 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add - && \
     apt-get update && \
     apt-get install wazuh-manager
 
-# cloning and installing qa reqs
-WORKDIR /home
+ADD https://raw.githubusercontent.com/wazuh/wazuh-qa/master/requirements.txt /tmp/requirements.txt
+RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt --ignore-installed
 
-RUN git clone https://github.com/wazuh/wazuh-qa.git
+# copy entrypoint and grant permission
+COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+RUN chmod 755 /usr/bin/entrypoint.sh
 
-WORKDIR /home/wazuh-qa/deps/wazuh_testing/
-
-RUN git checkout 1864-qa-docs-fixes && \
-    pip install -r ../../requirements.txt && \
-    pip install -r wazuh_testing/qa_docs/requirements.txt && \
-    python3 setup.py install
-
-# install npm deps
-WORKDIR /home/wazuh-qa/deps/wazuh_testing/build/lib/wazuh_testing/qa_docs/search_ui
-
-RUN npm install
+ENTRYPOINT [ "/usr/bin/entrypoint.sh" ]
