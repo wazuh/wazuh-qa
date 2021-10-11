@@ -27,7 +27,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
 
-daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'all_daemons': True}
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 100}
@@ -48,9 +48,21 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
+@pytest.fixture(scope="module")
+def up_wazuh_after_module():
+
+    yield
+    control_service('restart')
+
+
+@pytest.fixture(scope="module")
+def get_connection_configuration():
+    """Get configurations from the module."""
+    return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATIO
+
 def test_macos_format_only_future_events(get_configuration, configure_environment, 
                                          configure_local_internal_options_module,
-                                         daemons_handler, file_monitoring):
+                                         daemons_handler, file_monitoring, up_wazuh_after_module):
     """Check if logcollector use correctly only-future-events option using macos log format.
 
     Raises:

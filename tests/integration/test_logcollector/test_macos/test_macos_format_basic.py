@@ -7,7 +7,8 @@ import pytest
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.remote import check_agent_received_message
+from wazuh_testing.tools.services import control_service
+
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
@@ -17,7 +18,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_basic.yam
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
-daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'all_daemons': True}
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
@@ -48,10 +49,17 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope="module")
+def up_wazuh_after_module():
+
+    yield
+    control_service('restart')
+
+
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
 def test_macos_format_basic(get_configuration, configure_environment, configure_local_internal_options_module,
-                            macos_message, file_monitoring, daemons_handler):
+                            macos_message, file_monitoring, daemons_handler, up_wazuh_after_module):
 
     """Check if logcollector gather correctly macOS unified logging system events.
 
