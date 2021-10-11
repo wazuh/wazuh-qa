@@ -20,7 +20,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'all_daemons': True}
 
 local_internal_options = {'logcollector.debug': 2,
-                          'logcollector.sample_log_length': 100}
+                          'logcollector.sample_log_length': 200}
 
 macos_log_messages = [
     {
@@ -38,6 +38,9 @@ macos_log_messages = [
     }
 ]
 
+macos_log_message_timeout = 40
+macos_monitoring_macos_log_timeout = 30
+
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
@@ -47,8 +50,8 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
-def test_macos_format_basic(get_configuration, configure_environment, macos_message, file_monitoring, daemons_handler,
-                            configure_local_internal_options_module):
+def test_macos_format_basic(get_configuration, configure_environment, configure_local_internal_options_module,
+                            macos_message, file_monitoring, daemons_handler):
 
     """Check if logcollector gather correctly macOS unified logging system events.
 
@@ -61,7 +64,7 @@ def test_macos_format_basic(get_configuration, configure_environment, macos_mess
     expected_macos_message = ""
     log_command = macos_message['command']
 
-    log_monitor.start(timeout=30, callback=logcollector.callback_monitoring_macos_logs,
+    log_monitor.start(timeout=macos_monitoring_macos_log_timeout, callback=logcollector.callback_monitoring_macos_logs,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     if log_command == 'logger':
@@ -77,5 +80,5 @@ def test_macos_format_basic(get_configuration, configure_environment, macos_mess
                                                 subsystem=macos_message['subsystem'],
                                                 category=macos_message['category'])
 
-    log_monitor.start(timeout=40, callback=logcollector.callback_macos_log(expected_macos_message),
+    log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
