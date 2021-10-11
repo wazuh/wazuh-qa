@@ -372,7 +372,7 @@
     stage: "global setting sync_status before disconnecting-agents command"
   -
     input: 'global disconnect-agents 0 175 syncreq'
-    output: 'ok [{"id":1},{"id":2}]'
+    output: 'ok [{"id":1}]'
     stage: "global disconnect-agents success"
   -
     input: 'global sql SELECT id,sync_status FROM agent WHERE id =1'
@@ -380,7 +380,7 @@
     stage: "global testing sync_status after disconnecting-agents command"
   -
     input: 'global get-agents-by-connection-status 0 disconnected'
-    output: 'ok [{"id":1},{"id":2}]'
+    output: 'ok [{"id":1}]'
     stage: "global get-agents-by-connection-status disconnected after disconnecting agents success"
 -
   name: "Delete commands"
