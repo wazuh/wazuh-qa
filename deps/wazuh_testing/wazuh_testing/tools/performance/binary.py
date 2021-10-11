@@ -114,7 +114,8 @@ class Monitor:
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
         # the CSV will set all its values to 0 to easily identify if there was a problem or not
-        info = {'Daemon': self.process_name, 'Version': self.version, 'Timestamp': datetime.now().strftime('%H:%M:%S'),
+        info = {'Daemon': self.process_name, 'Version': self.version,
+                'Timestamp': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
                 'PID': self.pid, 'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
