@@ -7,6 +7,7 @@ from functools import wraps
 from time import sleep
 from random import randint, SystemRandom, choice
 import string
+import json
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -109,3 +110,9 @@ def get_random_string(string_length, digits=True):
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+def get_version():
+    f = open('../../version.json')
+    data = json.load(f)
+    version = data['version']
+    return version
