@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
-import os
-import shutil
-
 import pytest
-import yaml
+import os
+
 from wazuh_testing.tools import WAZUH_PATH
+from yaml import safe_load
+from shutil import copy
+from json import loads
 
 # Marks
 
@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(test_data_path, 'invalid_rules_syntax.yaml')
 with open(messages_path) as f:
-    test_cases = yaml.safe_load(f)
+    test_cases = safe_load(f)
 
 # Variables
 
@@ -31,12 +31,12 @@ receiver_sockets_params = [(logtest_path, 'AF_UNIX', 'TCP')]
 
 @pytest.fixture(scope='function')
 def configure_local_rules(get_configuration, request):
-    """Configure a custom rule in local_rules.xml for testing"""
+    """Configure a custom rule in local_rules.xml for testing."""
 
     # configuration for testing
     file_test = os.path.join(test_data_path, get_configuration['rules'])
     target_file_test = os.path.join(WAZUH_PATH, 'etc', 'rules', get_configuration['rules'])
-    shutil.copy(file_test, target_file_test)
+    copy(file_test, target_file_test)
 
     yield
 
@@ -52,7 +52,10 @@ def get_configuration(request):
 
 # Tests
 
-def test_invalid_rule_syntax(get_configuration, configure_local_rules, connect_to_sockets_function):
+def test_invalid_rule_syntax(get_configuration, configure_local_rules,
+                             restart_required_logtest_daemons,
+                             wait_for_logtest_startup,
+                             connect_to_sockets_function):
     """Check that every input message in logtest socket generates the adequate output """
 
     # send the logtest request
@@ -60,7 +63,7 @@ def test_invalid_rule_syntax(get_configuration, configure_local_rules, connect_t
 
     # receive logtest reply and parse it
     response = receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode()
-    result = json.loads(response)
+    result = loads(response)
 
     # error list to enable multi-assert per test-case
     errors = []
