@@ -22,8 +22,12 @@ cd deps/wazuh_testing &> /dev/null
 python3 setup.py install &> /dev/null
 
 # Install search-ui deps
-cd /usr/local/lib/python3.8/dist-packages/wazuh_testing-4.3.0-py3.8.egg/wazuh_testing/qa_docs/search_ui
+cd /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/search_ui
 npm install
+
+# Limit ES RAM
+echo "-Xms1g" >> /etc/elasticsearch/jvm.options
+echo "-Xmx1g" >> /etc/elasticsearch/jvm.options
 
 # Start services
 service elasticsearch start && service wazuh-manager start
