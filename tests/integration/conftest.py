@@ -659,7 +659,7 @@ def configure_sockets_environment_function(request):
     # Delete all db
     delete_dbs()
 
-    control_service('start')
+    #control_service('start')
 
 
 @pytest.fixture(scope='module')
