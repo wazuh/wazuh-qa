@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if (($# < 1 || $# > 3))
+if (($# < 1))
 then
   printf "Expected call:\n\n$0 <BRANCH> (TYPE) (MODULES)\n\nTest type and modules are optionals.\n";
   exit 1;
@@ -10,7 +10,7 @@ branch_name=$1;
 test_type=$2;
 test_modules=${@:3};
 
-docker build -t qa-docs:0.2 -f dockerfiles/qa_docs.Dockerfile dockerfiles/
+docker build -t qa-docs:0.2 dockerfiles/
 
 printf "Using $branch_name branch as test(s) input.\n";
 if (($# == 1))
