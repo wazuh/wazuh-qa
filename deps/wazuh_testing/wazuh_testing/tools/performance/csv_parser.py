@@ -224,6 +224,6 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
         """Get max stats after grouping by phase, task, type of node and stat.
 
         Returns:
-            defaultdict: max stats obtained from cluster resources.
+            dict: max stats obtained from cluster resources.
         """
         return self.default_to_dict(self._group_stats(self.dataframes['binaries']))
