@@ -84,7 +84,8 @@ def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
         topic (str): Reason for running the qa-ctl docker.
     """
     debug_args = '' if debug_level == 0 else ('-d' if debug_level == 1 else '-dd')
-    docker_args = f"{qa_branch} {config_file} --no-validation-logging {debug_args}"
+    docker_args = f"{qa_branch} {config_file} --no-validation {debug_args}"
+
     docker_image_name = 'wazuh/qa-ctl'
     docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'deployment',
                                      'dockerfiles', 'qa_ctl')
@@ -93,4 +94,5 @@ def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
     run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     LOGGER.info(f"Running the Linux container for {topic}")
-    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_ctl')}:/qa_ctl {docker_image_name} {docker_args}")
+    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_ctl')}:/qa_ctl {docker_image_name} "
+                      f"{docker_args}")
