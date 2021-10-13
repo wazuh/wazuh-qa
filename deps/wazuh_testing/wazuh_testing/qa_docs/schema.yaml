@@ -111,8 +111,8 @@ predefined_values:
     - Windows 8
     - Windows 10
     - Windows Server 2003
-    - Windows server 2012
-    - Windows server 2016
+    - Windows Server 2012
+    - Windows Server 2016
   components:
     - agent
     - manager
