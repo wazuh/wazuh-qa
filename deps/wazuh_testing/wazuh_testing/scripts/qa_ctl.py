@@ -18,9 +18,9 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
-from wazuh_testing.tools.github_repository import version_is_released, branch_exist, WAZUH_QA_REPO
+from wazuh_testing.tools import github_checks
+from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning import local_actions
-from wazuh_testing.tools.github_repository import get_last_wazuh_version
 from wazuh_testing.tools.file import recursive_directory_creation
 
 
@@ -91,6 +91,10 @@ def set_qactl_logging(qactl_configuration):
 def set_parameters(parameters):
     """Update script parameters and add extra information.
 
+    Raises:
+        QAValueError: If could not find a valid wazuh tag in the first github tags page (It can happen if on the first
+                      page, all tags are rc tags.).
+
     Args:
         (argparse.Namespace): Object with the user parameters.
     """
@@ -101,7 +105,14 @@ def set_parameters(parameters):
         qactl_logger.set_level(level)
 
     parameters.user_version = parameters.version if parameters.version else None
-    parameters.version = parameters.version if parameters.version  else get_last_wazuh_version()
+
+    try:
+        parameters.version = parameters.version if parameters.version  else github_checks.get_last_wazuh_version()
+    except QAValueError:
+        raise QAValueError('The latest version of Wazuh could not be obtained. Maybe there is no valid (non-rc) one at '
+                           'https://github.com/wazuh/wazuh/tags. Try specifying the version manually using the '
+                           '--version <value> parameter in the qa-ctl parameters.', qactl_logger.error, QACTL_LOGGER)
+
     parameters.version = (parameters.version).replace('v', '')
 
     short_version =  f"{(parameters.version).split('.')[0]}.{(parameters.version).split('.')[1]}"
@@ -156,12 +167,12 @@ def validate_parameters(parameters):
                            qactl_logger.error, QACTL_LOGGER)
 
     # Check if Wazuh has the specified version
-    if not version_is_released(parameters.version):
+    if not github_checks.version_is_released(parameters.version):
         raise QAValueError(f"The wazuh {parameters.version} version has not been released. Enter a right version.",
                            qactl_logger.error, QACTL_LOGGER)
 
     # Check if QA branch exists
-    if not branch_exist(parameters.qa_branch, WAZUH_QA_REPO):
+    if not github_checks.branch_exists(parameters.qa_branch, repository=WAZUH_QA_REPO):
         raise QAValueError(f"{parameters.qa_branch} branch does not exist in Wazuh QA repository.",
                            qactl_logger.error, QACTL_LOGGER)
 

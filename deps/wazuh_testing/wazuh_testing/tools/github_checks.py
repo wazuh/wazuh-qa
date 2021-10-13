@@ -20,7 +20,7 @@ def _check_status_code(status_code, exception_message):
         status_code (int): Request status code.
         exception_message (str): Text to display in the exception message.
 
-    Raise:
+    Raises:
         Exception if status code is distinct from 200 and 400 (unexpected).
 
     """
