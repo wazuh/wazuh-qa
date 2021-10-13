@@ -183,32 +183,12 @@ def get_script_parameters():
     """
     description = \
         '''
-        qa-ctl current version = 0.1
+        Current version: v0.2
 
-        qa-ctl is a tool to launch local QA tests without having to worry about the environment and its provisioning.
+        Description: qa-ctl is a tool for launching tests locally, automating the deployment, provisioning and testing
+                     phase.
 
-        It has two modes:
-
-        - Automatic mode: A test name is specified, and it automatically builds the configuration file to perform
-                          the complete deployment, provisioning and testing process.
-
-                          Run this mode with "qa-ctl -r <test_name>"
-
-        - Manual mode:    A configuration file is specified and the indicated processes are carried out with the
-                          parameters set in that file.
-
-                          Run this mode with "qa-ctl -c <config_file_path>"
-
-        Tip: You can first run qa-ctl in automatic mode with the persistent environment (--persistent parameter) and
-             then use the same configuration file for the next run in manual mode, skipping the desired phases. Useful
-             when you want to relaunch tests in the same environment..
-
-             For example:
-                > qa-ctl -r test_general_settings_enabled --persistent
-                ......
-                INFO - Configuration file saved in /tmp/qa_ctl/config_1633608335.685262.yaml
-                ......
-                > qa-ctl -c /tmp/qa_ctl/config_1633608335.685262.yaml --skip-deployment --skip-provisioning
+                     You can find more information in https://github.com/wazuh/wazuh-qa/wiki/QACTL-tool
         '''
 
     parser = argparse.ArgumentParser(description=textwrap.dedent(description),
