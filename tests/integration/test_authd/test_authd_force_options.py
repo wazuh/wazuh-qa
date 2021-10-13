@@ -14,12 +14,19 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
 # Configurations
-#test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/force_options')
 configurations_path = os.path.join(test_data_path, 'force_options_configuration.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
 tests = read_yaml(os.path.join(test_data_path, 'key_mismatch.yaml'))
+tests2 = read_yaml(os.path.join(test_data_path, 'after_registration_time.yaml'))
+tests3 = read_yaml(os.path.join(test_data_path, 'disconnected_time.yaml'))
+
+for i in range(len(tests2)):
+    tests.append(tests2[i])
+
+for i in range(len(tests3)):
+    tests.append(tests3[i])
 
 # Variables
 log_monitor_paths = []
@@ -90,10 +97,9 @@ def override_wazuh_conf(get_current_test_case, request):
     write_wazuh_conf(test_config)
 
 
-
 # Tests
 
-def test_authd_force_options(configure_environment, override_wazuh_conf,
+def test_authd_force_options(configure_environment, override_wazuh_conf,clean_client_keys_file_function,
                        configure_sockets_environment_function, connect_to_sockets_function,
                        get_current_test_case, request):
 
@@ -103,5 +109,19 @@ def test_authd_force_options(configure_environment, override_wazuh_conf,
     for stage in get_current_test_case['test_case']:
         print(stage['input'])
         print(stage['output'])
+
+        # Reopen socket (socket is closed by manager after sending message with client key)
+        receiver_sockets[0].open()
+        expected = stage['output']
+        message = stage['input']
+        receiver_sockets[0].send(stage['input'], size=False)
+        timeout = time.time() + 10
+        response = ''
+        while response == '':
+            response = receiver_sockets[0].receive().decode()
+            if time.time() > timeout:
+                raise ConnectionResetError('Manager did not respond to sent message!')
+        assert response[:len(expected)] == expected, \
+            'Failed test case {}: Response was: {} instead of: {}'.format(get_current_test_case['name'], response, expected)
 
     assert True

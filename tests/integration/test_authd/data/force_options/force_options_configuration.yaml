@@ -16,18 +16,6 @@
             value: 'yes'
         - force_time:
             value: 0
-        - force:
-            elements:
-            - enabled:
-                value: 'no'
-            - key_mismatch:
-                value: 'no'
-            - after_registration_time:
-                value: 0
-            - disconnected_time:
-                attributes:
-                - enabled: 'no'
-                value: 0
         - purge:
             value: 'yes'
         - use_password:
