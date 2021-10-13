@@ -189,6 +189,68 @@ def run_searchui(index):
     os.system(f"ELASTICSEARCH_HOST=http://localhost:9200 INDEX={index} npm start")
 
 
+def parse_data(args):
+    """Parse the tests and collect the data."""
+    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+
+    if args.test_exist:
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
+
+        for test_name in args.test_exist:
+            if doc_check.locate_test(test_name) is not None:
+                print(f"{test_name} exists")
+
+    # Parse a list of tests
+    elif args.test_names:
+        qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
+
+        # When output path is specified by user, a json is generated within that path
+        if args.output_path:
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
+        # When no output is specified, it is printed
+        else:
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_names))
+
+    # Parse a list of test types
+    elif args.test_types:
+        qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
+
+        # Parse a list of test modules
+        if args.test_modules:
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                        args.test_modules))
+        else:
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
+
+    # Parse the whole path
+    else:
+        qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
+
+    if not args.test_exist:
+        qadocs_logger.info('Running QADOCS')
+        docs.run()
+
+
+def index_and_visualize_data(args):
+    """Index the data previously parsed and visualize it."""
+    # Index the previous parsed tests into Elasticsearch
+    if args.index_name:
+        index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+        index_data.run()
+
+    # Launch SearchUI with index_name as input
+    elif args.app_index_name:
+        # When SearchUI index is not hardcoded, it will be use args.app_index_name
+        run_searchui(args.app_index_name)
+
+    # Index the previous parsed tests into Elasticsearch and then launch SearchUI
+    elif args.launching_index_name:
+        qadocs_logger.debug(f"Indexing {args.launching_index_name}")
+        index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+        index_data.run()
+        # When SearchUI index is not hardcoded, it will be use args.launching_index_name
+        run_searchui(args.launching_index_name)
+
 def main():
     args, parser = get_parameters()
 
@@ -210,63 +272,10 @@ def main():
         qadocs_logger.debug('Running sanity check')
         sanity.run()
 
-    # Parse tests
-    else:
-        docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-
-        if args.test_exist:
-            doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
-
-        for test_name in args.test_exist:
-            if doc_check.locate_test(test_name) is not None:
-                print(f"{test_name} exists")
-
-        # Parse a list of tests
-        if args.test_names:
-            qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
-
-            # When output path is specified by user, a json is generated within that path
-            if args.output_path:
-                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
-            # When no output is specified, it is printed
-            else:
-                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_names))
-
-        # Parse a list of test types
-        elif args.test_types:
-            qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
-
-            # Parse a list of test modules
-            if args.test_modules:
-                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                           args.test_modules))
-            else:
-                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
-
-        # Parse the whole path
-        else:
-            qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
-
-        qadocs_logger.info('Running QADOCS')
-        docs.run()
-
-        # Index the previous parsed tests into Elasticsearch
-        if args.index_name:
-            index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-            index_data.run()
-
-        # Launch SearchUI with index_name as input
-        elif args.app_index_name:
-            # When SearchUI index is not hardcoded, it will be use args.app_index_name
-            run_searchui(args.app_index_name)
-
-        # Index the previous parsed tests into Elasticsearch and then launch SearchUI
-        elif args.launching_index_name:
-            qadocs_logger.debug(f"Indexing {args.launching_index_name}")
-            index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-            index_data.run()
-            # When SearchUI index is not hardcoded, it will be use args.launching_index_name
-            run_searchui(args.launching_index_name)
+    # Parse tests, index the data and visualize it
+    else:   
+        parse_data(args)
+        index_and_visualize_data(args)
 
     if __name__ == '__main__':
         main()
