@@ -151,6 +151,29 @@ systemctl start elasticsearch.service
 ```
 choco install elasticsearch
 ```
+
+
+##### ES RAM issue
+
+- Linux
+
+If you do not want to have ES consuming 70% of your available RAM, run this:
+```
+echo "-Xms1g" >> /etc/elasticsearch/jvm.options
+echo "-Xmx1g" >> /etc/elasticsearch/jvm.options
+```
+
+-  Windows
+
+Add the followings line to `config/jvm.options`:
+
+```
+-Xms1g
+-Xmx1g
+```
+
+`-XmsAg` defines the max allocation of RAM to ES JVM Heap, where A is the amount of GBs you want.
+
 ##### For more options check the official website:
 
 https://www.elastic.co/es/downloads/elasticsearch
