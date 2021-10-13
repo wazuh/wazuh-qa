@@ -24,7 +24,7 @@ class QAFramework():
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, ansible_output=False, workdir=join(gettempdir(), 'qa_ctl'), qa_branch='master',
+    def __init__(self, ansible_output=False, workdir=join(gettempdir(), 'wazuh_qa_ctl'), qa_branch='master',
                  qa_repository='https://github.com/wazuh/wazuh-qa.git'):
         self.qa_repository = qa_repository
         self.qa_branch = qa_branch

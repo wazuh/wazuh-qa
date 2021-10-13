@@ -31,7 +31,7 @@ class AnsibleRunner:
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=join(gettempdir(), 'qa_ctl'), output=False):
+    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir
