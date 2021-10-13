@@ -87,18 +87,18 @@ class ClusterCSVParser:
         """
         raise NotImplementedError
 
-    def _calculate_all_df_stats(self, dict_df):
+    def _calculate_all_df_stats(self, dfs_dict):
         """Iterate all dataframes and obtain statistics for each one.
 
         Args:
-            dict_df (dict): dict with dataframes to obtain stats from.
+            dfs_dict (dict): dict with dataframes to obtain stats from.
 
         Returns:
-            dict: dictionary with stats from each dataframe.
+            defaultdict: dictionary with stats from each dataframe.
         """
         result = defaultdict(lambda: defaultdict(dict))
 
-        for node, files in dict_df.items():
+        for node, files in dfs_dict.items():
             setup_datetime = self.get_setup_phase(node)
             for phase in [self.SETUP_PHASE, self.STABLE_PHASE]:
                 for file_name, file_df in files.items():
@@ -108,13 +108,48 @@ class ClusterCSVParser:
 
         return result
 
-    def get_max_stats(self):
-        """Group statistics by node, phase and file and get the maximum of each group.
+    def _group_stats(self, dfs_dict):
+        """Group statistics by type of node, phase and column and get the maximum of each group.
+
+        Args:
+            dfs_dict (dict): dict with dataframes to obtain stats from.
+
+        Returns:
+            defaultdict: Maximum value for each phase, task, type of node (worker/master) and stat.
+        """
+        nodes_stats = self._calculate_all_df_stats(dfs_dict)
+        grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(
+            tuple)))))
+
+        for phase, files in nodes_stats.items():
+            for file, nodes in files.items():
+                for node, columns in nodes.items():
+                    for column, stats in columns.items():
+                        for stat, value in stats.items():
+                            if node == 'master':
+                                grouped_data[phase][file][column][node][stat] = (node, value)
+                            else:
+                                if not grouped_data[phase][file][column]['workers'][stat] or \
+                                        grouped_data[phase][file][column]['workers'][stat][1] < value:
+                                    grouped_data[phase][file][column]['workers'][stat] = (node, value)
+
+        return grouped_data
+
+    def get_stats(self):
+        """Get max stats after grouping by phase, task, type of node and stat.
 
         Raises:
             NotImplementedError: should be implemented in child classes.
         """
         raise NotImplementedError
+
+    @staticmethod
+    def default_to_dict(default_dict):
+        """Convert defaultdict to dict."""
+        if isinstance(default_dict, defaultdict):
+            default_dict = {k: ClusterCSVParser.default_to_dict(v) for k, v in default_dict.items()}
+
+        return default_dict
 
 
 class ClusterCSVTasksParser(ClusterCSVParser):
@@ -137,29 +172,17 @@ class ClusterCSVTasksParser(ClusterCSVParser):
             df (dataframe): dataframe to obtain the mean value from.
 
         Returns:
-            float: mean value for 'time_spent(s)' column.
+            dict: mean value for 'time_spent(s)' column.
         """
-        return df['time_spent(s)'].mean()
+        return {'time_spent(s)': {'mean': df['time_spent(s)'].mean()}}
 
-    def get_max_stats(self):
-        """Group statistics by type of node, phase and cluster task and get the maximum of each group.
+    def get_stats(self):
+        """Get max stats after grouping by phase, task, type of node and stat.
 
         Returns:
-            dict: Maximum mean value for each phase, task and type of node.
+            dict: max stats obtained from cluster tasks.
         """
-        nodes_stats = self._calculate_all_df_stats(self.dataframes['logs'])
-        grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(tuple)))
-
-        for phase, tasks in nodes_stats.items():
-            for task, nodes in tasks.items():
-                for node, mean in nodes.items():
-                    if node == 'master':
-                        grouped_data[phase][task][node] = (node, mean)
-                    else:
-                        if not grouped_data[phase][task]['workers'] or grouped_data[phase][task]['workers'][1] < mean:
-                            grouped_data[phase][task]['workers'] = (node, mean)
-
-        return grouped_data
+        return self.default_to_dict(self._group_stats(self.dataframes['logs']))
 
 
 class ClusterCSVResourcesParser(ClusterCSVParser):
@@ -197,26 +220,10 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
 
         return result
 
-    def get_max_stats(self):
-        """Group statistics by type of node, phase and resource/column and get the maximum of each group.
+    def get_stats(self):
+        """Get max stats after grouping by phase, task, type of node and stat.
 
         Returns:
-            dict: Maximum value for each phase, task, type of node and stat.
+            defaultdict: max stats obtained from cluster resources.
         """
-        nodes_stats = self._calculate_all_df_stats(self.dataframes['binaries'])
-        grouped_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(
-            tuple)))))
-
-        for phase, files in nodes_stats.items():
-            for file, nodes in files.items():
-                for node, resources in nodes.items():
-                    for resource, stats in resources.items():
-                        for stat, value in stats.items():
-                            if node == 'master':
-                                grouped_data[phase][file][resource][node][stat] = (node, value)
-                            else:
-                                if not grouped_data[phase][file][resource]['workers'][stat] or \
-                                        grouped_data[phase][file][resource]['workers'][stat][1] < value:
-                                    grouped_data[phase][file][resource]['workers'][stat] = (node, value)
-
-        return grouped_data
+        return self.default_to_dict(self._group_stats(self.dataframes['binaries']))
