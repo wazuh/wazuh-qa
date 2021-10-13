@@ -61,7 +61,7 @@ def get_configuration(request):
 
 
 # Test
-
+@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
                                    file_monitoring, configure_local_internal_options_module, daemons_handler,
