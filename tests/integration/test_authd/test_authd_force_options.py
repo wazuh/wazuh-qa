@@ -27,6 +27,10 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
+
+configuration_ids = ['authd_force_options']
+test_case_ids = [f"{test_case['name']}" for test_case in tests]
+
 # Functions
 
 def get_temp_yaml(param):
@@ -53,7 +57,7 @@ def get_temp_yaml(param):
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """
     Get configurations from the module
@@ -61,7 +65,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function', params=tests)
+@pytest.fixture(scope='function', params=tests, ids=test_case_ids)
 def get_current_test_case(request):
     """
     Get current test case from the module
@@ -90,7 +94,7 @@ def override_wazuh_conf(get_current_test_case, request):
 # Tests
 
 def test_authd_force_options(configure_environment, override_wazuh_conf,
-                       configure_sockets_environment, connect_to_sockets_module,
+                       configure_sockets_environment_function, connect_to_sockets_function,
                        get_current_test_case, request):
 
     print(get_current_test_case['name'])
