@@ -15,4 +15,4 @@ cd wazuh-qa/deps/wazuh_testing &> /dev/null
 python3 setup.py install &> /dev/null
 
 # Run qa-ctl tool
-/usr/local/bin/qa-ctl -c /qa_ctl/${CONFIG_FILE_PATH} ${EXTRA_ARGS}
+/usr/local/bin/qa-ctl -c /wazuh_qa_ctl/${CONFIG_FILE_PATH} ${EXTRA_ARGS}

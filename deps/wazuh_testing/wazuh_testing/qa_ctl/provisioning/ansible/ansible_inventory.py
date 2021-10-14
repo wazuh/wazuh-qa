@@ -25,7 +25,7 @@ class AnsibleInventory():
         self.ansible_instances = ansible_instances
 
         self.inventory_file_path = inventory_file_path if inventory_file_path else \
-            f"{gettempdir()}/qa_ctl/{get_current_timestamp()}.yaml"
+            f"{gettempdir()}/wazuh_qa_ctl/{get_current_timestamp()}.yaml"
         self.ansible_groups = ansible_groups
         self.data = {}
         self.__setup_data__()

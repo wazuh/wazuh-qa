@@ -43,7 +43,7 @@ class AnsiblePlaybook():
         self.become = become
         self.playbook_vars = playbook_vars
         self.playbook_file_path = playbook_file_path if playbook_file_path else \
-            f"{gettempdir()}/qa_ctl/{get_current_timestamp()}.yaml"
+            f"{gettempdir()}/wazuh_qa_ctl/{get_current_timestamp()}.yaml"
         if generate_file:
             self.write_playbook_to_file()
 
