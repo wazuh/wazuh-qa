@@ -226,7 +226,7 @@ def parse_data(args):
     else:
         qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
 
-    if not args.test_exist:
+    if args.test_types or args.test_modules or args.test_names:
         qadocs_logger.info('Running QADOCS')
         docs.run()
 
@@ -274,10 +274,8 @@ def main():
 
     # Parse tests, index the data and visualize it
     else:
-        if args.test_types or args.test_modules or args.test_names or args.test_exist or args.sanity:
-            parse_data(args)
-        if args.index_name or args.app_index_name or args.launching_index_name:
-            index_and_visualize_data(args)
+        parse_data(args)
+        index_and_visualize_data(args)
 
     if __name__ == '__main__':
         main()
