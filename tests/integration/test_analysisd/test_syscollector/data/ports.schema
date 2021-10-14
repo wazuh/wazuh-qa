@@ -1,0 +1,472 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "required": [
+        "timestamp",
+        "rule",
+        "agent",
+        "manager",
+        "id",
+        "full_log",
+        "decoder",
+        "data",
+        "location"
+    ],
+    "properties": {
+        "timestamp": {
+            "$id": "#/properties/timestamp",
+            "type": "string",
+            "title": "The timestamp schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "2021-10-14T17:26:05.701+0000"
+            ]
+        },
+        "rule": {
+            "$id": "#/properties/rule",
+            "type": "object",
+            "title": "The rule schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "level": 3,
+                    "description": "Syscollector process deletion event.",
+                    "id": "100313",
+                    "firedtimes": 1,
+                    "mail": false,
+                    "groups": [
+                        "local",
+                        "syslog",
+                        "sshd"
+                    ]
+                }
+            ],
+            "required": [
+                "level",
+                "description",
+                "id",
+                "firedtimes",
+                "mail",
+                "groups"
+            ],
+            "properties": {
+                "level": {
+                    "$id": "#/properties/rule/properties/level",
+                    "type": "integer",
+                    "title": "The level schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        3
+                    ]
+                },
+                "description": {
+                    "$id": "#/properties/rule/properties/description",
+                    "type": "string",
+                    "title": "The description schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Syscollector process deletion event."
+                    ]
+                },
+                "id": {
+                    "$id": "#/properties/rule/properties/id",
+                    "type": "string",
+                    "title": "The id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "100313"
+                    ]
+                },
+                "firedtimes": {
+                    "$id": "#/properties/rule/properties/firedtimes",
+                    "type": "integer",
+                    "title": "The firedtimes schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "mail": {
+                    "$id": "#/properties/rule/properties/mail",
+                    "type": "boolean",
+                    "title": "The mail schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": false,
+                    "examples": [
+                        false
+                    ]
+                },
+                "groups": {
+                    "$id": "#/properties/rule/properties/groups",
+                    "type": "array",
+                    "title": "The groups schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            "local",
+                            "syslog"
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/rule/properties/groups/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/rule/properties/groups/items/anyOf/0",
+                                "type": "string",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "local",
+                                    "syslog"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "agent": {
+            "$id": "#/properties/agent",
+            "type": "object",
+            "title": "The agent schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "id": "000",
+                    "name": "wazuh-dev"
+                }
+            ],
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "$id": "#/properties/agent/properties/id",
+                    "type": "string",
+                    "title": "The id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "000"
+                    ]
+                },
+                "name": {
+                    "$id": "#/properties/agent/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "wazuh-dev"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "manager": {
+            "$id": "#/properties/manager",
+            "type": "object",
+            "title": "The manager schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "name": "wazuh-dev"
+                }
+            ],
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/manager/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "wazuh-dev"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "string",
+            "title": "The id schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "1634232365.2240172"
+            ]
+        },
+        "full_log": {
+            "$id": "#/properties/full_log",
+            "type": "string",
+            "title": "The full_log schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "{\"data\":{\"checksum\":\"beb79dcb487fd33d0153c95630328a75f83a77a9\",\"inode\":373621,\"item_id\":\"3c794991e208fa5c73fb9cbf9a6833145f837e2e\",\"local_ip\":\"172.28.128.3\",\"local_port\":68,\"pid\":0,\"process\":null,\"protocol\":\"udp\",\"remote_ip\":\"0.0.0.0\",\"remote_port\":0,\"rx_queue\":0,\"scan_time\":\"2021/10/14 17:26:04\",\"state\":null,\"tx_queue\":0},\"operation\":\"DELETED\",\"type\":\"dbsync_ports\"}"
+            ]
+        },
+        "decoder": {
+            "$id": "#/properties/decoder",
+            "type": "object",
+            "title": "The decoder schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "name": "syscollector"
+                }
+            ],
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/decoder/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "syscollector"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "data": {
+            "$id": "#/properties/data",
+            "type": "object",
+            "title": "The data schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "type": "dbsync_ports",
+                    "port": {
+                        "protocol": "udp",
+                        "local_ip": "172.28.128.3",
+                        "local_port": "68",
+                        "remote_ip": "0.0.0.0",
+                        "remote_port": "0",
+                        "tx_queue": "0",
+                        "rx_queue": "0",
+                        "inode": "373621",
+                        "state": "0",
+                        "pid": "beb79dcb487fd33d0153c95630328a75f83a77a9",
+                        "process": "3c794991e208fa5c73fb9cbf9a6833145f837e2e"
+                    },
+                    "operation_type": "DELETED"
+                }
+            ],
+            "required": [
+                "type",
+                "port",
+                "operation_type"
+            ],
+            "properties": {
+                "type": {
+                    "$id": "#/properties/data/properties/type",
+                    "type": "string",
+                    "title": "The type schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "dbsync_ports"
+                    ]
+                },
+                "port": {
+                    "$id": "#/properties/data/properties/port",
+                    "type": "object",
+                    "title": "The port schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": {},
+                    "examples": [
+                        {
+                            "protocol": "udp",
+                            "local_ip": "172.28.128.3",
+                            "local_port": "68",
+                            "remote_ip": "0.0.0.0",
+                            "remote_port": "0",
+                            "tx_queue": "0",
+                            "rx_queue": "0",
+                            "inode": "373621",
+                            "state": "0",
+                            "pid": "beb79dcb487fd33d0153c95630328a75f83a77a9",
+                            "process": "3c794991e208fa5c73fb9cbf9a6833145f837e2e"
+                        }
+                    ],
+                    "required": [
+                        "protocol",
+                        "local_ip",
+                        "local_port",
+                        "remote_ip",
+                        "remote_port",
+                        "tx_queue",
+                        "rx_queue",
+                        "inode",
+                        "state",
+                        "pid",
+                        "process"
+                    ],
+                    "properties": {
+                        "protocol": {
+                            "$id": "#/properties/data/properties/port/properties/protocol",
+                            "type": "string",
+                            "title": "The protocol schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "udp"
+                            ]
+                        },
+                        "local_ip": {
+                            "$id": "#/properties/data/properties/port/properties/local_ip",
+                            "type": "string",
+                            "title": "The local_ip schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "172.28.128.3"
+                            ]
+                        },
+                        "local_port": {
+                            "$id": "#/properties/data/properties/port/properties/local_port",
+                            "type": "string",
+                            "title": "The local_port schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "68"
+                            ]
+                        },
+                        "remote_ip": {
+                            "$id": "#/properties/data/properties/port/properties/remote_ip",
+                            "type": "string",
+                            "title": "The remote_ip schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "0.0.0.0"
+                            ]
+                        },
+                        "remote_port": {
+                            "$id": "#/properties/data/properties/port/properties/remote_port",
+                            "type": "string",
+                            "title": "The remote_port schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "0"
+                            ]
+                        },
+                        "tx_queue": {
+                            "$id": "#/properties/data/properties/port/properties/tx_queue",
+                            "type": "string",
+                            "title": "The tx_queue schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "0"
+                            ]
+                        },
+                        "rx_queue": {
+                            "$id": "#/properties/data/properties/port/properties/rx_queue",
+                            "type": "string",
+                            "title": "The rx_queue schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "0"
+                            ]
+                        },
+                        "inode": {
+                            "$id": "#/properties/data/properties/port/properties/inode",
+                            "type": "string",
+                            "title": "The inode schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "373621"
+                            ]
+                        },
+                        "state": {
+                            "$id": "#/properties/data/properties/port/properties/state",
+                            "type": "string",
+                            "title": "The state schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "0"
+                            ]
+                        },
+                        "pid": {
+                            "$id": "#/properties/data/properties/port/properties/pid",
+                            "type": "string",
+                            "title": "The pid schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "beb79dcb487fd33d0153c95630328a75f83a77a9"
+                            ]
+                        },
+                        "process": {
+                            "$id": "#/properties/data/properties/port/properties/process",
+                            "type": "string",
+                            "title": "The process schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "3c794991e208fa5c73fb9cbf9a6833145f837e2e"
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "operation_type": {
+                    "$id": "#/properties/data/properties/operation_type",
+                    "type": "string",
+                    "title": "The operation_type schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "DELETED"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "location": {
+            "$id": "#/properties/location",
+            "type": "string",
+            "title": "The location schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "syscollector"
+            ]
+        }
+    },
+    "additionalProperties": false
+}

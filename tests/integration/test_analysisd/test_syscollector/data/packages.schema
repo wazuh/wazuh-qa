@@ -1,0 +1,527 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "timestamp": "2021-10-14T20:30:58.106+0000",
+            "rule": {
+                "level": 3,
+                "description": "Syscollector packages creation event.",
+                "id": "100341",
+                "firedtimes": 1,
+                "mail": false,
+                "groups": [
+                    "syscollector"
+                ]
+            },
+            "agent": {
+                "id": "000",
+                "name": "wazuh-dev"
+            },
+            "manager": {
+                "name": "wazuh-dev"
+            },
+            "id": "1634243458.3042456",
+            "full_log": "{\"data\":{\"architecture\":\"amd64\",\"checksum\":\"5be7e728162a533bcc8c624a313df4b29ee70469\",\"description\":\"The Speex extended runtime library\",\"format\":\"deb\",\"groups\":\"libs\",\"item_id\":\"4cc2b00d4b893b347d4f05c73a6a002990f7a070\",\"multiarch\":\"same\",\"name\":\"libspeexdsp1\",\"priority\":\"optional\",\"scan_time\":\"2021/10/14 20:30:57\",\"size\":99,\"source\":\"speex\",\"vendor\":\"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>\",\"version\":\"1.2~rc1.2-1.1ubuntu1\"},\"operation\":\"INSERTED\",\"type\":\"dbsync_packages\"}",
+            "decoder": {
+                "name": "syscollector"
+            },
+            "data": {
+                "type": "dbsync_packages",
+                "program": {
+                    "format": "deb",
+                    "name": "libspeexdsp1",
+                    "priority": "optional",
+                    "size": "99",
+                    "vendor": "Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>",
+                    "install_time": "NULL",
+                    "version": "1.2~rc1.2-1.1ubuntu1",
+                    "architecture": "amd64",
+                    "multiarch": "same",
+                    "source": "speex",
+                    "description": "The Speex extended runtime library",
+                    "location": "NULL"
+                },
+                "operation_type": "INSERTED"
+            },
+            "location": "syscollector"
+        }
+    ],
+    "required": [
+        "timestamp",
+        "rule",
+        "agent",
+        "manager",
+        "id",
+        "full_log",
+        "decoder",
+        "data",
+        "location"
+    ],
+    "properties": {
+        "timestamp": {
+            "$id": "#/properties/timestamp",
+            "type": "string",
+            "title": "The timestamp schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "2021-10-14T20:30:58.106+0000"
+            ]
+        },
+        "rule": {
+            "$id": "#/properties/rule",
+            "type": "object",
+            "title": "The rule schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "level": 3,
+                    "description": "Syscollector packages creation event.",
+                    "id": "100341",
+                    "firedtimes": 1,
+                    "mail": false,
+                    "groups": [
+                        "syscollector"
+                    ]
+                }
+            ],
+            "required": [
+                "level",
+                "description",
+                "id",
+                "firedtimes",
+                "mail",
+                "groups"
+            ],
+            "properties": {
+                "level": {
+                    "$id": "#/properties/rule/properties/level",
+                    "type": "integer",
+                    "title": "The level schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        3
+                    ]
+                },
+                "description": {
+                    "$id": "#/properties/rule/properties/description",
+                    "type": "string",
+                    "title": "The description schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Syscollector packages creation event."
+                    ]
+                },
+                "id": {
+                    "$id": "#/properties/rule/properties/id",
+                    "type": "string",
+                    "title": "The id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "100341"
+                    ]
+                },
+                "firedtimes": {
+                    "$id": "#/properties/rule/properties/firedtimes",
+                    "type": "integer",
+                    "title": "The firedtimes schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "mail": {
+                    "$id": "#/properties/rule/properties/mail",
+                    "type": "boolean",
+                    "title": "The mail schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": false,
+                    "examples": [
+                        false
+                    ]
+                },
+                "groups": {
+                    "$id": "#/properties/rule/properties/groups",
+                    "type": "array",
+                    "title": "The groups schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            "syscollector"
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/rule/properties/groups/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/rule/properties/groups/items/anyOf/0",
+                                "type": "string",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": "",
+                                "examples": [
+                                    "syscollector"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "agent": {
+            "$id": "#/properties/agent",
+            "type": "object",
+            "title": "The agent schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "id": "000",
+                    "name": "wazuh-dev"
+                }
+            ],
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "$id": "#/properties/agent/properties/id",
+                    "type": "string",
+                    "title": "The id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "000"
+                    ]
+                },
+                "name": {
+                    "$id": "#/properties/agent/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "wazuh-dev"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "manager": {
+            "$id": "#/properties/manager",
+            "type": "object",
+            "title": "The manager schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "name": "wazuh-dev"
+                }
+            ],
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/manager/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "wazuh-dev"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "string",
+            "title": "The id schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "1634243458.3042456"
+            ]
+        },
+        "full_log": {
+            "$id": "#/properties/full_log",
+            "type": "string",
+            "title": "The full_log schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "{\"data\":{\"architecture\":\"amd64\",\"checksum\":\"5be7e728162a533bcc8c624a313df4b29ee70469\",\"description\":\"The Speex extended runtime library\",\"format\":\"deb\",\"groups\":\"libs\",\"item_id\":\"4cc2b00d4b893b347d4f05c73a6a002990f7a070\",\"multiarch\":\"same\",\"name\":\"libspeexdsp1\",\"priority\":\"optional\",\"scan_time\":\"2021/10/14 20:30:57\",\"size\":99,\"source\":\"speex\",\"vendor\":\"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>\",\"version\":\"1.2~rc1.2-1.1ubuntu1\"},\"operation\":\"INSERTED\",\"type\":\"dbsync_packages\"}"
+            ]
+        },
+        "decoder": {
+            "$id": "#/properties/decoder",
+            "type": "object",
+            "title": "The decoder schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "name": "syscollector"
+                }
+            ],
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/decoder/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "syscollector"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "data": {
+            "$id": "#/properties/data",
+            "type": "object",
+            "title": "The data schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "type": "dbsync_packages",
+                    "program": {
+                        "format": "deb",
+                        "name": "libspeexdsp1",
+                        "priority": "optional",
+                        "size": "99",
+                        "vendor": "Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>",
+                        "install_time": "NULL",
+                        "version": "1.2~rc1.2-1.1ubuntu1",
+                        "architecture": "amd64",
+                        "multiarch": "same",
+                        "source": "speex",
+                        "description": "The Speex extended runtime library",
+                        "location": "NULL"
+                    },
+                    "operation_type": "INSERTED"
+                }
+            ],
+            "required": [
+                "type",
+                "program",
+                "operation_type"
+            ],
+            "properties": {
+                "type": {
+                    "$id": "#/properties/data/properties/type",
+                    "type": "string",
+                    "title": "The type schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "dbsync_packages"
+                    ]
+                },
+                "program": {
+                    "$id": "#/properties/data/properties/program",
+                    "type": "object",
+                    "title": "The program schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": {},
+                    "examples": [
+                        {
+                            "format": "deb",
+                            "name": "libspeexdsp1",
+                            "priority": "optional",
+                            "size": "99",
+                            "vendor": "Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>",
+                            "install_time": "NULL",
+                            "version": "1.2~rc1.2-1.1ubuntu1",
+                            "architecture": "amd64",
+                            "multiarch": "same",
+                            "source": "speex",
+                            "description": "The Speex extended runtime library",
+                            "location": "NULL"
+                        }
+                    ],
+                    "required": [
+                        "format",
+                        "name",
+                        "priority",
+                        "size",
+                        "vendor",
+                        "install_time",
+                        "version",
+                        "architecture",
+                        "multiarch",
+                        "source",
+                        "description",
+                        "location"
+                    ],
+                    "properties": {
+                        "format": {
+                            "$id": "#/properties/data/properties/program/properties/format",
+                            "type": "string",
+                            "title": "The format schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "deb"
+                            ]
+                        },
+                        "name": {
+                            "$id": "#/properties/data/properties/program/properties/name",
+                            "type": "string",
+                            "title": "The name schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "libspeexdsp1"
+                            ]
+                        },
+                        "priority": {
+                            "$id": "#/properties/data/properties/program/properties/priority",
+                            "type": "string",
+                            "title": "The priority schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "optional"
+                            ]
+                        },
+                        "size": {
+                            "$id": "#/properties/data/properties/program/properties/size",
+                            "type": "string",
+                            "title": "The size schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "99"
+                            ]
+                        },
+                        "vendor": {
+                            "$id": "#/properties/data/properties/program/properties/vendor",
+                            "type": "string",
+                            "title": "The vendor schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>"
+                            ]
+                        },
+                        "install_time": {
+                            "$id": "#/properties/data/properties/program/properties/install_time",
+                            "type": "string",
+                            "title": "The install_time schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "NULL"
+                            ]
+                        },
+                        "version": {
+                            "$id": "#/properties/data/properties/program/properties/version",
+                            "type": "string",
+                            "title": "The version schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "1.2~rc1.2-1.1ubuntu1"
+                            ]
+                        },
+                        "architecture": {
+                            "$id": "#/properties/data/properties/program/properties/architecture",
+                            "type": "string",
+                            "title": "The architecture schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "amd64"
+                            ]
+                        },
+                        "multiarch": {
+                            "$id": "#/properties/data/properties/program/properties/multiarch",
+                            "type": "string",
+                            "title": "The multiarch schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "same"
+                            ]
+                        },
+                        "source": {
+                            "$id": "#/properties/data/properties/program/properties/source",
+                            "type": "string",
+                            "title": "The source schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "speex"
+                            ]
+                        },
+                        "description": {
+                            "$id": "#/properties/data/properties/program/properties/description",
+                            "type": "string",
+                            "title": "The description schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "The Speex extended runtime library"
+                            ]
+                        },
+                        "location": {
+                            "$id": "#/properties/data/properties/program/properties/location",
+                            "type": "string",
+                            "title": "The location schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "default": "",
+                            "examples": [
+                                "NULL"
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "operation_type": {
+                    "$id": "#/properties/data/properties/operation_type",
+                    "type": "string",
+                    "title": "The operation_type schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "INSERTED"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "location": {
+            "$id": "#/properties/location",
+            "type": "string",
+            "title": "The location schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "syscollector"
+            ]
+        }
+    },
+    "additionalProperties": false
+}
