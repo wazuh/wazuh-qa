@@ -120,7 +120,7 @@ def control_service(action, daemon=None, debug_mode=False):
 
                     for proc in alive:
                         proc.kill()
-                except psutil.NoSuchProcess:
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
 
                 delete_sockets(WAZUH_SOCKETS[daemon])
