@@ -21,7 +21,6 @@ time_to_sync = 60
 # Each file should exist in all hosts specified in 'hosts'.
 files = [{'path': join(WAZUH_PATH, 'queue', 'rids', '{id}'), 'hosts': managers_hosts},
          {'path': join(WAZUH_PATH, 'queue', 'agent-groups', '{id}'), 'hosts': managers_hosts},
-         {'path': join(WAZUH_PATH, 'var', 'db', 'agents', '{id}-{name}.db'), 'hosts': managers_hosts},
          {'path': join(WAZUH_PATH, 'queue', 'diff', '{name}'), 'hosts': [worker_host]},
          {'path': join(WAZUH_PATH, 'queue', 'db', '{id}.db'), 'hosts': [worker_host]}]
 db_queries = ["select * from agent where id={id}",
