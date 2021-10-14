@@ -26,8 +26,8 @@ cd /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/
 npm install
 
 # Limit ES RAM
-echo "-Xms1g" >> /etc/elasticsearch/jvm.options
-echo "-Xmx1g" >> /etc/elasticsearch/jvm.options
+echo "-Xms256m" >> /etc/elasticsearch/jvm.options
+echo "-Xmx256m" >> /etc/elasticsearch/jvm.options
 
 # Start services
 service elasticsearch start && service wazuh-manager start
