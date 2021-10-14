@@ -26,7 +26,7 @@ class IndexData:
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, index, config):
+    def __init__(self, index, path):
         """Class constructor
 
         Initialize every attribute.
@@ -34,7 +34,7 @@ class IndexData:
         Args:
             config (Config): A `Config` instance with the loaded configuration.
         """
-        self.path = config.documentation_path
+        self.path = path
         self.index = index
         self.regex = re.compile(".*json")
         self.es = Elasticsearch()

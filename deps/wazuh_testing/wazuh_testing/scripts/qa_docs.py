@@ -107,7 +107,7 @@ def check_incompatible_parameters(parameters):
         raise QAValueError('The -s, --sanity-check option must be run with -I, --tests-path option.',
                            qadocs_logger.error)
 
-    if parameters.tests_path is None and (default_run or test_run):
+    if parameters.tests_path is None and (default_run or test_run or parameters.sanity):
         raise QAValueError('The following options need the path where the tests are located: -t, --test, '
                            '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
                            '-I, --tests-path path_to_tests.',
@@ -235,7 +235,7 @@ def index_and_visualize_data(args):
     """Index the data previously parsed and visualize it."""
     # Index the previous parsed tests into Elasticsearch
     if args.index_name:
-        index_data = IndexData(args.index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+        index_data = IndexData(args.index_name, OUTPUT_PATH)
         index_data.run()
 
     # Launch SearchUI with index_name as input
@@ -246,7 +246,7 @@ def index_and_visualize_data(args):
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.launching_index_name:
         qadocs_logger.debug(f"Indexing {args.launching_index_name}")
-        index_data = IndexData(args.launching_index_name, Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+        index_data = IndexData(args.launching_index_name, OUTPUT_PATH)
         index_data.run()
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name
         run_searchui(args.launching_index_name)
@@ -273,9 +273,11 @@ def main():
         sanity.run()
 
     # Parse tests, index the data and visualize it
-    else:   
-        parse_data(args)
-        index_and_visualize_data(args)
+    else:
+        if args.test_types or args.test_modules or args.test_names or args.test_exist or args.sanity:
+            parse_data(args)
+        if args.index_name or args.app_index_name or args.launching_index_name:
+            index_and_visualize_data(args)
 
     if __name__ == '__main__':
         main()
