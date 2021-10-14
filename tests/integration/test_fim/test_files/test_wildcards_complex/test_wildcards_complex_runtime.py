@@ -1,7 +1,76 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, they will check if FIM monitors newly added directories
+       that match with complex wildcards used in the configuration.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#scan-day
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_tags
+'''
 import os
 import sys
 import pytest
@@ -81,22 +150,62 @@ def get_configuration(request):
 def test_wildcards_complex_runtime(subfolder_name, file_name, tags_to_apply,
                                    get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_initial_scan, create_test_folders, wait_for_wildcards_scan):
-    """Test the correct expansion of complex wildcards in runtime for monitored directories in syscheck.
-        The test will monitor an empty folder and once the baseline scan is completed, it will create folders that may
-        match one of the monitored expressions and will check that the events are triggered (in case that a folder
-        doesn't match the configured expresion, the test will check that no events are triggered in those folders.)
-    Params:
-        subfolder (str): Name of the subfolder under root folder.
-        file_name (str): Name of the file that will be created under subfolder.
-        tags_to_apply (str): Value holding the configuration used in the test.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_initial_scan (fixture): Waits until the first FIM scan is completed.
-        create_test_folders (fixture): Creates the folders that will match (or not) the configured glob expresion.
-        wait_for_wildcards_scan (fixture): Waits until the end of wildcards scan event is triggered.
-    """
+    '''
+    description: Check if the number of directories to monitor grows when using complex wildcards to specify them.
+                 For this purpose, the test will configure complex wildcards expressions and create an empty folder.
+                 Once the FIM module has started, and the 'baseline' scan is completed, the test will create
+                 folders that may match a configured expression, and it waits until the wildcards are expanded
+                 again (in the next scan). Once the wildcards are reloaded, the test will create, modify and
+                 delete files inside those folders. Finally, the test will wait for FIM events from a folder
+                 only if it matches a configured expression.
 
+    wazuh_min_version: 4.2
+
+    parameters:
+        - subfolder_name:
+            type: str
+            brief: Path to the subdirectory in the monitored folder.
+        - file_name:
+            type: str
+            brief: Name of the testing file that will be created in the subfolder.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_initial_scan:
+            type: fixture
+            brief: Wait until the first FIM scan is completed.
+        - create_test_folders:
+            type: fixture
+            brief: Create the testing folders that will match (or not) the configured glob expression.
+        - wait_for_wildcards_scan:
+            type: fixture
+            brief: Wait until the end of wildcards scan event is triggered.
+
+    assertions:
+        - Verify that FIM events are generated from newly added directories that
+          match a complex wildcard used in the configuration.
+
+    input_description: A test case (ossec_conf_wildcards_runtime) is contained in external YAML file
+                       (wazuh_conf_wildcards_runtime.yaml) which includes configuration settings for
+                       the 'wazuh-syscheckd' daemon and, it is combined with the testing directories
+                       to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+
+    tags:
+        - scheduled
+        - who-data
+    '''
     folder = os.path.join(test_folder, subfolder_name)
     if sys.platform == 'win32':
         if "?" in file_name or "*" in file_name:
