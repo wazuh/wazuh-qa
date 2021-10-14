@@ -1,10 +1,11 @@
 import os
 
 import pytest
+import json
 from wazuh_testing import global_parameters
 import wazuh_testing.fim as fim
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-
+from wazuh_testing.tools.utils import get_version
 
 # Helper functions
 
@@ -39,6 +40,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 
 monitoring_modes = ['scheduled']
 
+
 # Configurations
 
 conf_params = {'WINDOWS_DUPLICATED_REGISTRY_1': registry_1,
@@ -61,7 +63,7 @@ def get_configuration(request):
 
 
 # Test
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
+@pytest.mark.skipif(get_version() != 'v4.2.3', reason="This test fails by wazuh/wazuh#6797, It was fixed on v4.2.3")
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
                                    file_monitoring, configure_local_internal_options_module, daemons_handler,
