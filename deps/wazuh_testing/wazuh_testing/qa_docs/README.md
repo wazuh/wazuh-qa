@@ -67,7 +67,7 @@ Together with the Indexing functionality, the tool can locally lunch SearchUI to
 documentation content into the App UI.
 
 ### Diagram
-![DocGenerator](DocGenerator_diagram.png)
+![DocGenerator](qa_docs_diagram.png)
 
 ## Content
     ├── wazuh-testing
