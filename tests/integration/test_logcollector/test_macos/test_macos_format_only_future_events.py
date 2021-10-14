@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import fnmatch
 import os
+import time
 
 import pytest
 from wazuh_testing import logcollector
@@ -34,7 +35,7 @@ local_internal_options = {'logcollector.debug': 2,
 
 macos_log_message_timeout = 40
 macos_monitoring_macos_log_timeout = 30
-
+macos_monitoring_timout_after_logcollector_started = 3
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -60,7 +61,7 @@ def get_connection_configuration():
     """Get configurations from the module."""
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATIO
 
-def test_macos_format_only_future_events(get_configuration, configure_environment, 
+def test_macos_format_only_future_events(get_configuration, configure_environment,
                                          configure_local_internal_options_module,
                                          daemons_handler, file_monitoring, up_wazuh_after_module):
     """Check if logcollector use correctly only-future-events option using macos log format.
@@ -73,6 +74,8 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+    time.sleep(macos_monitoring_timout_after_logcollector_started)
 
     only_future_events = get_configuration['metadata']['only-future-events']
 
@@ -88,23 +91,20 @@ def test_macos_format_only_future_events(get_configuration, configure_environmen
 
     ## Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
 
-    control_service('stop', 'wazuh-logcollector')
+    control_service('stop')
 
     truncate_file(LOG_FILE_PATH)
     log_monitor = FileMonitor(LOG_FILE_PATH)
+    logcollector.generate_macos_logger_log(old_message)
 
-    control_service('start', 'wazuh-logcollector')
-
-
-    log_monitor.start(timeout=macos_monitoring_macos_log_timeout, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+    control_service('start')
 
     if only_future_events == 'yes':
         with pytest.raises(TimeoutError):
             log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_old_macos_message))
 
     else:
-            log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_old_macos_message))
+        log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_old_macos_message))
 
     logcollector.generate_macos_logger_log(new_message)
 
