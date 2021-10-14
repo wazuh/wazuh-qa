@@ -67,6 +67,9 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_recursion_level/data"
   - "../../tests/integration/test_fim/test_files/test_restrict/data"
   - "../../tests/integration/test_fim/test_files/test_report_changes/data"
+  - "../../tests/integration/test_fim/test_files/test_scan/data"
+  - "../../tests/integration/test_fim/test_files/test_skip/data"
+  - "../../tests/integration/test_fim/test_files/test_stats_integrity_sync/data"
 
 Output fields:
   Module:
