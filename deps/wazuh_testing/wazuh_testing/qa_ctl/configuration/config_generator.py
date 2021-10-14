@@ -10,7 +10,6 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
-from wazuh_testing.tools.github_repository import get_last_wazuh_version
 from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
 
 
@@ -68,7 +67,7 @@ class QACTLConfigGenerator:
 
     def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')):
         self.tests = tests
-        self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
+        self.wazuh_version = wazuh_version
         self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
         self.config_file_path = join(gettempdir(), 'wazuh_qa_ctl', f"config_{get_current_timestamp()}.yaml")
         self.config = {}
