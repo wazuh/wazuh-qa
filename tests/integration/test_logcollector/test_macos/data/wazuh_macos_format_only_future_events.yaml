@@ -11,5 +11,3 @@
           value: 'macos'
       - only-future-events:
           value: ONLY_FUTURE_EVENTS
-      - query:
-         value: 'process=="custom_log" OR process=="logger"'
