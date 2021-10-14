@@ -191,8 +191,6 @@ def run_searchui(index):
 
 def parse_data(args):
     """Parse the tests and collect the data."""
-    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
-
     if args.test_exist:
         doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
 
@@ -224,7 +222,10 @@ def parse_data(args):
 
     # Parse the whole path
     else:
-        qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
+        if not (args.index_name or args.app_index_name or args.launching_index_name):
+            qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+            docs.run()
 
     if args.test_types or args.test_modules or args.test_names:
         qadocs_logger.info('Running QADOCS')
