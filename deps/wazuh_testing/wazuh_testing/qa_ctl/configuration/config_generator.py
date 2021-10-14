@@ -65,7 +65,8 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')):
+    def __init__(self, tests, wazuh_version, qa_branch='master',
+                 qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')):
         self.tests = tests
         self.wazuh_version = wazuh_version
         self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
@@ -104,6 +105,19 @@ class QACTLConfigGenerator:
         file.delete_file(test_data_file_path)
 
         return info
+
+    def __join_path(self, path, system):
+        """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
+
+        Parameters:
+            path (list(str)): Path list (one item for level).
+            system (str): host system.
+
+        Returns:
+            str: Joined path.
+        """
+        return '\\'.join(path) if system == 'windows' else '/'.join(path)
+
 
     def __get_all_tests_info(self):
         """Get the info of the documentation of all the test that are going to be run.
@@ -318,11 +332,12 @@ class QACTLConfigGenerator:
             target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
                 else 'agent'
             s3_package_url = self.__get_package_url(instance)
+            installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
                 'target': target,
                 's3_package_url': s3_package_url,
-                'installation_files_path': QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path'],
+                'installation_files_path': installation_files_path,
                 'health_check': True
             }
             if target == 'agent':
@@ -332,9 +347,10 @@ class QACTLConfigGenerator:
                     self.config['deployment'][f"host_{manager_host_number}"]['provider']['vagrant']['vm_ip']
 
             # QA framework
+            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': self.qa_branch,
-                'qa_workdir': join(self.LINUX_TMP, 'wazuh_qa_ctl')
+                'qa_workdir': self.__join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
 
     def __process_test_data(self, tests_info):
@@ -348,15 +364,23 @@ class QACTLConfigGenerator:
 
         for test in tests_info:
             instance = f"host_{test_host_number}"
+            vm_box = self.config['deployment'][instance]['provider']['vagrant']['vagrant_box']
+            installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
+            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
+
             self.config['tests'][instance] = {'host_info': {}, 'test': {}}
             self.config['tests'][instance]['host_info'] = \
                 dict(self.config['provision']['hosts'][instance]['host_info'])
+
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': f"{self.LINUX_TMP}/wazuh_qa_ctl/wazuh-qa/{test['path']}",
-                    'run_tests_dir_path': f"{self.LINUX_TMP}/wazuh_qa_ctl/wazuh-qa/test/integration",
-                    'test_results_path': f"{gettempdir()}/wazuh_qa_ctl/{test['test_name']}_{get_current_timestamp()}/"
+                    'test_files_path': self.__join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                         test['path']], system),
+                    'run_tests_dir_path': self.__join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                            'tests', 'integration'], system),
+                    'test_results_path': join(gettempdir(), 'wazuh_qa_ctl',
+                                              f"{test['test_name']}_{get_current_timestamp()}")
                 }
             }
             test_host_number += 1
