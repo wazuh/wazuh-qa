@@ -21,6 +21,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
+local_internal_options = {'analysisd.debug': '2'}
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -43,7 +44,7 @@ def get_configuration(request):
 
 # Test
 def test_remove_old_session_for_inactivity(get_configuration, configure_environment,
-                                           restart_wazuh, connect_to_sockets_function):
+                                           configure_local_internal_options_module, restart_wazuh, connect_to_sockets_function):
     """
     Create more sessions than allowed and wait session_timeout seconds,
     then check Wazuh-logtest has removed session for inactivity.
