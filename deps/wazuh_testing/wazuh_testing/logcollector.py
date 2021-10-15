@@ -78,6 +78,10 @@ else:
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
 
+def callback_read_macos_message(msg):
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
+
+
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
     Args:

@@ -484,6 +484,7 @@ nav:
                 - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
                 - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
                 - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
+                - Test macos multiline values: tests/integration/test_logcollector/test_macos/test_macos_multiline_values.md
                 - Test macos log process stop: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop.md
                 - Test macos log process stop suddenly: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop_suddenly.md
                 - Test macos log process: tests/integration/test_logcollector/test_macos/test_macos_log_process.md
