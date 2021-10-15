@@ -54,6 +54,14 @@ def restart_authd_function():
     control_service("restart", daemon=DAEMON_NAME)
 
 
+@pytest.fixture(scope='function')
+def stop_authd_function():
+    """
+    Stop Authd.
+    """
+    control_service("stop", daemon=DAEMON_NAME)
+
+
 @pytest.fixture(scope='module')
 def wait_for_authd_startup_module(get_configuration):
     """Wait until authd has begun"""
