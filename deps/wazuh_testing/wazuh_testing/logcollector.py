@@ -17,9 +17,10 @@ GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventcha
 GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
-LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
+
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 30
 
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
@@ -714,6 +715,37 @@ def callback_invalid_state_interval(interval):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_logcollector_started():
+    """Check if logcollector started."""
+    return monitoring.make_callback(pattern='Started', prefix=prefix)
+
+
+def callback_log_bad_predicate():
+    """Check for the macOS ULS bad predicate message."""
+    return monitoring.make_callback(pattern="Execution error 'log:", prefix=prefix)
+
+
+def callback_macos_uls_log(expected_message):
+    """Callback function to wait for a macOS' ULS log, collected by logcollector."""
+    return monitoring.make_callback(pattern=expected_message, prefix=prefix, escape=False)
+
+
+def callback_logcollector_log_stream_log():
+    """Check for logcollector's macOS ULS module start message."""
+    return monitoring.make_callback(pattern='Monitoring macOS logs with:(.+?)log stream',
+                                    prefix=prefix, escape=False)
+
+
+def callback_file_status_macos_key():
+    """Check for 'macos' key."""
+    return monitoring.make_callback(pattern='"macos"', prefix='.*', escape=False)
+
+
+def callback_log_macos_stream_exit():
+    """Check for the macOS ULS log stream exit message."""
+    return monitoring.make_callback(pattern="macOS 'log stream' process exited, pid:", prefix=prefix)
+
+
 def wait_statistics_file(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT):
     """Wait until statistics file is available.
 
@@ -789,3 +821,38 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
     assert macos_message is not None, 'Wrong type or process name selected for macos message pattern format.'
 
     return macos_message
+
+
+def compose_macos_log_command(type='', level='', predicate='', is_sierra=False):
+    """
+    This function replicates how the command 'log' will be called from the Wazuh agent given the query parameters
+
+    Args:
+        type (str): < activity | log | trace > Limit streaming to a given event type.
+        level (str): < default | info | debug > Include events at, and below, the given level.
+        predicate (str): Filter events using the given predicate.
+        is_sierra (boolean): True if running on macOS Sierra, False otherwise.
+
+    Returns:
+        string: Full log command composed with the given parameters.
+    """
+
+    settings_str = ''
+
+    if (is_sierra):
+        settings_str = '/usr/bin/script -q /dev/null '
+
+    settings_str += '/usr/bin/log stream --style syslog '
+
+    if (type):
+        for t in type.split(','):
+            settings_str += '--type ' + t + ' '
+
+    if (level):
+        level = level.replace(' ', '')
+        settings_str += '--level ' + level + ' '
+
+    if(predicate):
+        settings_str += '--predicate ' + predicate
+
+    return settings_str

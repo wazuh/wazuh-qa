@@ -13,6 +13,7 @@ import pytest
 import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing import global_parameters, logger
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -620,10 +621,13 @@ def get_local_internal_options_dict():
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
         configuration_options = local_internal_option_file.readlines()
         for configuration_option in configuration_options:
-            if not configuration_option.startswith('#')  and not configuration_option=='\n':
-                option_name, option_value = configuration_option.split('=')
-                local_internal_option_dict[option_name] = option_value
-
+            if not configuration_option.startswith('#') and not configuration_option == '\n':
+                try:
+                    option_name, option_value = configuration_option.split('=')
+                    local_internal_option_dict[option_name] = option_value
+                except ValueError:
+                    logger.error(f"Invalid local_internal_options value: {configuration_option}")
+                    raise ValueError('Invalid local_internal_option')
     return local_internal_option_dict
 
 

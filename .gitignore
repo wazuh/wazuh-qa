@@ -1,6 +1,6 @@
 # Python cache
 __pycache__
-.pytest_cache/
+.pytest_cache
 
 venv
 wazuh_testing.egg-info

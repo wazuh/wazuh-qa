@@ -37,6 +37,9 @@ LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
 AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 
+DEFAULT_POLL_FILE_TIME = 1
+DEFAULT_WAIT_FILE_TIMEOUT = 30
+
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
 
@@ -1016,3 +1019,23 @@ def wait_mtime(path, time_step=5, timeout=-1):
         if last_mtime - tic >= timeout:
             logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
+
+
+def wait_file(path, timeout=DEFAULT_WAIT_FILE_TIMEOUT):
+    """Wait until a file, defined by its path, is available.
+
+    Args:
+        path (str): Absolute path to a file.
+        timeout (int): Maximum time to wait for a file to be available, in seconds.
+
+    Raises:
+        FileNotFoundError: If the file is not available within the timeout defined interval of time.
+    """
+    for _ in range(timeout):
+        if os.path.isfile(path):
+            break
+        else:
+            time.sleep(DEFAULT_POLL_FILE_TIME)
+
+    if not os.path.isfile(path):
+        raise FileNotFoundError
