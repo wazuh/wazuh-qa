@@ -106,19 +106,6 @@ class QACTLConfigGenerator:
 
         return info
 
-    def __join_path(self, path, system):
-        """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
-
-        Parameters:
-            path (list(str)): Path list (one item for level).
-            system (str): host system.
-
-        Returns:
-            str: Joined path.
-        """
-        return '\\'.join(path) if system == 'windows' else '/'.join(path)
-
-
     def __get_all_tests_info(self):
         """Get the info of the documentation of all the test that are going to be run.
 
@@ -350,7 +337,7 @@ class QACTLConfigGenerator:
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': self.qa_branch,
-                'qa_workdir': self.__join_path([installation_files_path, 'wazuh_qa_ctl'], system)
+                'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
 
     def __process_test_data(self, tests_info):
@@ -375,10 +362,10 @@ class QACTLConfigGenerator:
             self.config['tests'][instance]['test'] = {
                 'type': 'pytest',
                 'path': {
-                    'test_files_path': self.__join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
-                                                         test['path']], system),
-                    'run_tests_dir_path': self.__join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
-                                                            'tests', 'integration'], system),
+                    'test_files_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                       test['path']], system),
+                    'run_tests_dir_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                          'tests', 'integration'], system),
                     'test_results_path': join(gettempdir(), 'wazuh_qa_ctl',
                                               f"{test['test_name']}_{get_current_timestamp()}")
                 }
