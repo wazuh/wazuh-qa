@@ -27,9 +27,7 @@ parameters = [{'FILE_TO_MONITOR': dummy_file}]
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters)
 
-daemons_handler_configuration = {'daemons': ['wazuh-agentd',
-                                             'wazuh-modulesd',
-                                             'wazuh-logcollector'],
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector'],
                                  'ignore_errors': False}
 
 # Time in seconds to update the file_status.json
@@ -59,7 +57,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_macos_file_status_when_no_macos(truncate_log_file, handle_files,
+def test_macos_file_status_when_no_macos(restart_logcollector_required_daemons_package, truncate_log_file, handle_files,
                                          delete_file_status_json,
                                          configure_local_internal_options_module,
                                          get_configuration,
@@ -100,7 +98,7 @@ def test_macos_file_status_when_no_macos(truncate_log_file, handle_files,
 
     # Waits for file_status.json to be created, with a timeout about the time needed to update the file
     wait_file(LOGCOLLECTOR_FILE_STATUS_PATH, LOG_COLLECTOR_GLOBAL_TIMEOUT)
-
+    
     # Waits about the time needed to update the file status
     sleep(wait_file_status_update_time)
 

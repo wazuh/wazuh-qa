@@ -50,20 +50,13 @@ def get_connection_configuration():
 
 
 @pytest.fixture(scope="module")
-def up_wazuh_after_module():
-
-    yield
-    control_service('restart')
-
-
-@pytest.fixture(scope="module")
 def get_connection_configuration():
     """Get configurations from the module."""
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATIO
 
-def test_macos_format_only_future_events(get_configuration, configure_environment,
+def test_macos_format_only_future_events(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
                                          configure_local_internal_options_module,
-                                         daemons_handler, file_monitoring, up_wazuh_after_module):
+                                         daemons_handler, file_monitoring):
     """Check if logcollector use correctly only-future-events option using macos log format.
 
     Raises:

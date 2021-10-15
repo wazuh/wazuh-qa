@@ -138,7 +138,7 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
     control_service('start')
 
 
-def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_environment,restart_required_logcollector_function,file_monitoring, up_wazuh_after_module):
+def test_macos_log_process_stop_suddenly_warning(restart_logcollector_required_daemons_package, get_configuration, configure_environment,restart_required_logcollector_function,file_monitoring, up_wazuh_after_module):
     """Check if logcollector alerts when `log stream` process has stopped.
 
     In Sierra this tests also checks that, if log process ends, then script process also ends and the other way around.

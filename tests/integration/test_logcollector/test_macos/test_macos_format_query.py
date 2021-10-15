@@ -307,7 +307,7 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_format_query(get_configuration, configure_environment, get_connection_configuration,
+def test_macos_format_query(restart_logcollector_required_daemons_package, get_configuration, configure_environment, get_connection_configuration,
                                          init_authd_remote_simulator, restart_logcollector):
     """Check if logcollector use correctly query option using macos log format.
 

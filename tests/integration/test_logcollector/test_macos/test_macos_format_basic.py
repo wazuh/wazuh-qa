@@ -50,12 +50,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def up_wazuh_after_module():
-
-    yield
-    control_service('restart')
-
 @pytest.fixture(scope="function")
 def restart_logcollector_function():
     control_service('restart', 'wazuh-logcollector')
@@ -64,8 +58,9 @@ def restart_logcollector_function():
 
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
-def test_macos_format_basic(get_configuration, configure_environment, configure_local_internal_options_module,
-                            macos_message, file_monitoring, daemons_handler, up_wazuh_after_module,
+def test_macos_format_basic(restart_logcollector_required_daemons_package, get_configuration, configure_environment, 
+                            configure_local_internal_options_module,
+                            macos_message, file_monitoring, daemons_handler,
                             restart_logcollector_function):
 
     """Check if logcollector gather correctly macOS unified logging system events.

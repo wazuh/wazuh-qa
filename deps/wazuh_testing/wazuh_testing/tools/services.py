@@ -110,7 +110,7 @@ def control_service(action, daemon=None, debug_mode=False):
                                 processes.append(proc)
                         elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                             processes.append(proc)
-                    except psutil.NoSuchProcess:
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
                 try:
                     for proc in processes:
@@ -120,7 +120,7 @@ def control_service(action, daemon=None, debug_mode=False):
 
                     for proc in alive:
                         proc.kill()
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                except psutil.NoSuchProcess:
                     pass
 
                 delete_sockets(WAZUH_SOCKETS[daemon])

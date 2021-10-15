@@ -23,7 +23,7 @@ configurations_path = join(test_data_path, 'wazuh_macos_file_status_predicate.ya
 parameters = [{'ONLY_FUTURE_EVENTS': 'yes'}, {'ONLY_FUTURE_EVENTS': 'no'}]
 metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
-daemons_handler_configuration = {'daemons': ['wazuh-agentd', 'wazuh-logcollector'], 'ignore_errors': False}
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector'], 'ignore_errors': False}
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -42,7 +42,8 @@ def get_configuration(request):
     return request.param
 
 
-def test_macos_file_status_predicate(truncate_log_file, delete_file_status_json,
+def test_macos_file_status_predicate(restart_logcollector_required_daemons_package, truncate_log_file, 
+                                     delete_file_status_json,
                                      configure_local_internal_options_module,
                                      get_configuration, configure_environment,
                                      file_monitoring, daemons_handler):
