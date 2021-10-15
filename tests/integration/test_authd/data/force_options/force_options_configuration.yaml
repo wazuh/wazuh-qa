@@ -12,10 +12,6 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
         - purge:
             value: 'yes'
         - use_password:
