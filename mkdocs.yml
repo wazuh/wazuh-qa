@@ -484,10 +484,15 @@ nav:
                 - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
                 - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
                 - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
+                - Test macos multiline values: tests/integration/test_logcollector/test_macos/test_macos_multiline_values.md
+                - Test macos log process stop: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop.md
+                - Test macos log process stop suddenly: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop_suddenly.md
+                - Test macos log process: tests/integration/test_logcollector/test_macos/test_macos_log_process.md
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
                 - Test state interval no file: tests/integration/test_logcollector/test_options/test_options_state_interval_no_file.md
+            - Test statistics: tests/integration/test_logcollector/test_statistics/test_statistics.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
@@ -523,7 +528,6 @@ nav:
         - Test cluster:
           - tests/system/test_cluster/index.md
           - Test agent info sync: tests/system/test_cluster/test_agent_info_sync/test_agent_info_sync.md
-          - Test agent files deletion: tests/system/test_cluster/test_agent_files_deletion/test_agent_files_deletion.md
           - Test agent enrollment:  tests/system/test_cluster/test_agent_enrollment/test_agent_enrollment.md
           - Test agent key polling: tests/system/test_cluster/test_agent_key_polling/test_agent_key_polling.md
           - Test integrity sync: tests/system/test_cluster/test_integrity_sync/test_integrity_sync.md
