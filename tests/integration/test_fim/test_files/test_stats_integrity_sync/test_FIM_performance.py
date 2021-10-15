@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check the overall performance of FIM using
+       the 'realtime' monitoring mode.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 3
+
+modules:
+    - fim
+
+components:
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_stats_integrity_sync
+'''
 import os
 import re
 import shutil
@@ -558,7 +615,53 @@ def real_test(test_type, real_df, integrity_df, string_configuration, configurat
     'real-time'
 ])
 def test_performance(mode, file_size, eps, path_length, number_files, initial_clean, modify_local_internal_options):
-    """Execute and launch all the necessary processes to check all the cases with all the specified configurations."""
+    '''
+    description: Check the overall performance of the FIM module and generate the related metrics.
+                 For this purpose, the test will monitor a directory hierarchy of variable depth and
+                 create multiple testing files in it. Then, it will make different operations to bench
+                 the different subsystems, and finally, the test will collect the metrics generated
+                 to store them in CSV files.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - mode:
+            type: str
+            brief: FIM monitoring mode to be used.
+        - file_size:
+            type: str
+            brief: Size of the testing files to be created.
+        - eps:
+            type: str
+            brief: Number the events per second to generate.
+        - path_length:
+            type: str
+            brief: Level of depth of the directory hierarchy to be created.
+        - number_files:
+            type: str
+            brief: Number of testing files to be created.
+        - initial_clean:
+            type: fixture
+            brief: Clean the environment by removing the stats files and the testing dir.
+        - modify_local_internal_options:
+            type: fixture
+            brief: Replace the 'local_internal_options' file.
+
+    assertions:
+        - Benchmark the FIM module and collect the generated metrics to store them in CSV files.
+
+    input_description: A template is used for the main configuration of the manager. It is
+                       included in an external '.conf' file (template_wazuh_conf.conf).
+                       The test cases are defined in the module.
+
+    expected_output:
+        - A CSV file with the metrics collected for the 'wazuh-agentd' daemon stats.
+        - A CSV file with the metrics collected for the database integrity.
+        - A CSV file with the general metrics collected.
+
+    tags:
+        - realtime
+    '''
     replace_conf(eps['sync_eps'], eps['fim_eps'])
     branch = detect_syscheck_version()
     os.makedirs(performance_dir, exist_ok=True)
