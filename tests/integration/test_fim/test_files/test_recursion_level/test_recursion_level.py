@@ -158,6 +158,7 @@ def get_configuration(request):
     (dir_recursion_max, subdir, max_recursion),
     (dir_recursion_max_space, subdir_space, max_recursion)
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
     """

@@ -1,7 +1,6 @@
 import os
 
 import pytest
-import json
 from wazuh_testing import global_parameters
 import wazuh_testing.fim as fim
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -39,7 +38,6 @@ registry_1, registry_2 = os.path.join(key, sub_key_1), os.path.join(key, sub_key
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 monitoring_modes = ['scheduled']
-
 
 # Configurations
 
