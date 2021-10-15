@@ -192,11 +192,9 @@ def run_searchui(index):
 def parse_data(args):
     """Parse the tests and collect the data."""
     if args.test_exist:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_names=args.test_exist))
 
-        for test_name in args.test_exist:
-            if doc_check.locate_test(test_name) is not None:
-                print(f"{test_name} exists")
+        doc_check.check_documentation_block()
 
     # Parse a list of tests
     elif args.test_names:
@@ -207,7 +205,7 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
         # When no output is specified, it is printed
         else:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_names))
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names))
 
     # Parse a list of test types
     elif args.test_types:
@@ -216,7 +214,7 @@ def parse_data(args):
         # Parse a list of test modules
         if args.test_modules:
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                        args.test_modules))
+                                args.test_modules))
         else:
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
 
@@ -251,6 +249,7 @@ def index_and_visualize_data(args):
         index_data.run()
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name
         run_searchui(args.launching_index_name)
+
 
 def main():
     args, parser = get_parameters()

@@ -218,20 +218,18 @@ class DocGenerator:
             if self.conf.mode == Mode.DEFAULT:
                 doc_path = self.get_test_doc_path(path)
 
-            elif self.conf.mode == Mode.PARSE_TESTS:
-                doc_path = self.conf.documentation_path
+                self.dump_output(test, doc_path)
+                DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
+                                          "was created with ID:{self.__id_counter}")
+                return self.__id_counter
 
-                # If the user does not specify an output dir
-                if not doc_path:
-                    self.print_test_info(test)
-                    return
-                # If the user specifies an output dir
-                else:
+            elif self.conf.mode == Mode.PARSE_TESTS:
+                if self.conf.documentation_path:
+                    doc_path = self.conf.documentation_path
                     doc_path = os.path.join(doc_path, test_name)
 
-            self.dump_output(test, doc_path)
-            DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
-            return self.__id_counter
+                    self.dump_output(test, doc_path)
+                    DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created.")
         else:
             DocGenerator.LOGGER.error(f"Content for {path} is empty, ignoring it")
             raise QAValueError(f"Content for {path} is empty, ignoring it", DocGenerator.LOGGER.error)
@@ -292,6 +290,11 @@ class DocGenerator:
 
         print(f"{test_name} does not exist")
         return None
+
+    def check_documentation_block(self):
+        self.parse_test_list()
+
+        print("Documentation block ok")
 
     def print_test_info(self, test):
         """Print the test info to standard output.
