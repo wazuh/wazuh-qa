@@ -26,7 +26,7 @@ store "macos"-formatted localfile data in `file_status.json`, since its predicat
 - **[Test macOS file status when no macos](test_macos_file_status_when_no_macos.md)**: Checks that `wazuh-logcollector`
 does not store and removes, if exists, previous "macos"-formatted localfile data in the file_status.json
 
-- **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` gather corrrectly generated
+- **[Test macOS format basic](test_macos_format_basic.md)**: Check if `wazuh-logcollector` correctly gather generated 
 unified logging system events.
 
 - **[Test macos format query](test_macos_format_query.md)**: Check if `query` option for `wazuh-logcollector`
@@ -34,3 +34,8 @@ unified logging system events.
 
 - **[Test macOS format only future events](test_macos_format_only_future_events.md)**: Check if `only-future-events`
   works correctly for macOS log format.
+  
+- **[Test macOS multiline values](test_macos_multiline_values.md)**: Check if `wazuh-logcollector` correctly collects multiline events from the unified logging system.
+
+- **[Test macOS log process](test_macos_log_process.md)**: Check `log stream` process has been killed when
+Wazuh agent stops.

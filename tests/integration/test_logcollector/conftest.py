@@ -69,7 +69,7 @@ def init_authd_remote_simulator(get_connection_configuration, request):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
-
+    
 @pytest.fixture(scope="package", autouse=True)
 def configure_local_internal_options_logcollector():
     """Configure Wazuh with local internal options required for logcollector tests."""

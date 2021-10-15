@@ -79,6 +79,10 @@ else:
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
 
 
+def callback_read_macos_message(msg):
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
+
+
 def callback_analyzing_file(file):
     """Create a callback to detect if logcollector is monitoring a file.
     Args:
@@ -88,6 +92,16 @@ def callback_analyzing_file(file):
     """
     msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_macos_log(msg):
+    """Create a callback to detect macos log.
+    Args:
+        msg (str): macOS message.
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
 def callback_removed_file(file):
@@ -352,6 +366,16 @@ def callback_trying_to_reconnect(location, reconnect_time):
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
     return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_log_stream_exited_error():
+    """Create a callback to detect if `log stream` process exited.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    log_format_message = "ERROR: \(\d+\): macOS 'log stream' process exited"
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_reconnect_eventchannel(location):

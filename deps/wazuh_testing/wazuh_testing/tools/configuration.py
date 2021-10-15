@@ -628,7 +628,6 @@ def get_local_internal_options_dict():
                 except ValueError:
                     logger.error(f"Invalid local_internal_options value: {configuration_option}")
                     raise ValueError('Invalid local_internal_option')
-
     return local_internal_option_dict
 
 
