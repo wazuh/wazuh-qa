@@ -5,6 +5,7 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.file import join_path
 
 
 class QAFramework():
@@ -28,8 +29,9 @@ class QAFramework():
                  qa_repository='https://github.com/wazuh/wazuh-qa.git'):
         self.qa_repository = qa_repository
         self.qa_branch = qa_branch
-        self.workdir = f"{workdir}/wazuh-qa"
+        self.workdir = workdir
         self.ansible_output = ansible_output
+        self.system_path = 'windows' if '\\' in self.workdir else 'unix'
 
     def install_dependencies(self, inventory_file_path, hosts='all'):
         """Install all the necessary dependencies to allow the execution of the tests.
@@ -39,7 +41,7 @@ class QAFramework():
         """
         dependencies_task = AnsibleTask({'name': 'Install python dependencies',
                                          'shell': 'python3 -m pip install -r requirements.txt',
-                                         'args': {'chdir': self.workdir},
+                                         'args': {'chdir': join_path([self.workdir, 'wazuh-qa'], self.system_path)},
                                          'become': True})
         ansible_tasks = [dependencies_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
@@ -57,7 +59,8 @@ class QAFramework():
         """
         install_framework_task = AnsibleTask({'name': 'Install wazuh-qa framework',
                                               'shell': 'python3 setup.py install',
-                                              'args': {'chdir': f"{self.workdir}/deps/wazuh_testing"}})
+                                              'args': {'chdir': join_path([self.workdir, 'wazuh-qa', 'deps',
+                                                                           'wazuh_testing'], self.system_path)}})
         ansible_tasks = [install_framework_task]
         playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks, 'become': True}
         QAFramework.LOGGER.debug(f"Installing wazuh-qa framework in {hosts} hosts.")
@@ -75,11 +78,14 @@ class QAFramework():
         create_path_task = AnsibleTask({'name': f"Create {self.workdir} path",
                                         'file': {'path': self.workdir, 'state': 'directory', 'mode': '0755'}})
 
-        download_qa_repo_task = AnsibleTask({'name': f"Download {self.qa_repository} QA repository",
-                                             'git': {'repo': self.qa_repository, 'dest': self.workdir,
-                                                     'version': self.qa_branch}})
+        download_qa_repo_task = AnsibleTask({'name': f"Download {self.qa_branch} branch of wazuh-qa repository",
+                                             'shell': f"cd {self.workdir} && " +
+                                                      'curl -Ls https://github.com/wazuh/wazuh-qa/archive/' +
+                                                      f"{self.qa_branch}.tar.gz | tar zx && mv wazuh-* wazuh-qa",
+                                             'when': 'ansible_system != "Windows"'})
+
         ansible_tasks = [create_path_task, download_qa_repo_task]
-        playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
+        playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': ansible_tasks}
         QAFramework.LOGGER.debug(f"Downloading qa-repository in {hosts} hosts")
 
         AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters, output=self.ansible_output)
