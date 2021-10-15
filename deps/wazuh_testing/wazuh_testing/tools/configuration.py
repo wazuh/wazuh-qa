@@ -601,9 +601,12 @@ def local_internal_options_to_dict(local_internal_options):
     dict_local_internal_options = {}
     no_comments_options = [line.strip() for line in local_internal_options
                            if not (line.startswith('#') or line == '\n')]
-    for line in no_comments_options:
-        key, value = line.split('=')
-        dict_local_internal_options[key.rstrip("\n")] = value
+    try:
+        for line in no_comments_options:
+            key, value = line.split('=')
+            dict_local_internal_options[key.rstrip('\n')] = value
+    except ValueError:
+        raise ValueError('Invalid local_internal_options.conf file.')
 
     return dict_local_internal_options
 

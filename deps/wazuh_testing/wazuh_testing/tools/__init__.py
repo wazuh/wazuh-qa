@@ -27,6 +27,9 @@ else:
 
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
+
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
         PREFIX = os.path.join('/', 'private', 'var', 'root')
@@ -54,8 +57,8 @@ else:
         import grp
         import pwd
 
-        WAZUH_UID = pwd.getpwnam("wazuh").pw_uid
-        WAZUH_GID = grp.getgrnam("wazuh").gr_gid
+        WAZUH_UID = pwd.getpwnam(WAZUH_UNIX_USER).pw_uid
+        WAZUH_GID = grp.getgrnam(WAZUH_UNIX_GROUP).gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
@@ -87,6 +90,9 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
+LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
+LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
+
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
@@ -109,6 +115,7 @@ ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
+LOGTEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logtest')
 MONITORD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'monitor')
 REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'request')
 SYSCHECKD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'syscheck')
