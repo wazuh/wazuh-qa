@@ -93,6 +93,16 @@ def callback_analyzing_file(file):
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
+def callback_macos_log(msg):
+    """Create a callback to detect macos log.
+    Args:
+        msg (str): macOS message.
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
+
+
 def callback_removed_file(file):
     """Create a callback to detect if logcollector has detected that a monitored file has been deleted.
     Args:

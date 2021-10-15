@@ -620,7 +620,7 @@ def get_local_internal_options_dict():
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
         configuration_options = local_internal_option_file.readlines()
         for configuration_option in configuration_options:
-            if not configuration_option.startswith('#'):
+            if not configuration_option.startswith('#')  and not configuration_option=='\n':
                 option_name, option_value = configuration_option.split('=')
                 local_internal_option_dict[option_name] = option_value
 

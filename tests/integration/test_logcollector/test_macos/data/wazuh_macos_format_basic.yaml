@@ -13,4 +13,6 @@
           value: 'macos'
       - log_format:
           value: 'macos'
+      - query:
+         value: 'process=="custom_log" OR process=="logger"'
      
