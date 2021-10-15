@@ -102,7 +102,6 @@ class Monitor:
             - Write_Ops: write operations.
             - Disk_Read: Bytes read by the process.
             - Disk_Written: Bytes written by the process.
-            - Disk(%): percentage of the I/O operations ran by the process compared with the OS.
 
         Args:
             proc (psutil.proc): psutil object with the data of the process.
@@ -119,7 +118,7 @@ class Monitor:
                 'PID': self.pid, 'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
-                f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
+                f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0,
                 f'Disk_Read_Speed({self.value_unit}/s)': 0.0, f'Disk_Write_Speed({self.value_unit}/s)': 0.0,
                 }
 
@@ -136,14 +135,10 @@ class Monitor:
 
                 if self.platform == 'linux' or platform == "win32":
                     io_counters = proc.io_counters()
-                    disk_usage_process = io_counters.read_bytes + io_counters.write_bytes
-                    disk_io_counter = psutil.disk_io_counters()
-                    disk_total = disk_io_counter.read_bytes + disk_io_counter.write_bytes
                     info['Read_Ops'] = io_counters.read_count
                     info['Write_Ops'] = io_counters.write_count
                     info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
                     info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
-                    info['Disk(%)'] = disk_usage_process / disk_total * 100
                     if self.previous_read is not None and self.previous_write is not None:
                         read_speed = (info[f'Disk_Read({self.value_unit})'] - self.previous_read) / self.time_step
                         write_speed = (info[f'Disk_Written({self.value_unit})'] - self.previous_write) / self.time_step

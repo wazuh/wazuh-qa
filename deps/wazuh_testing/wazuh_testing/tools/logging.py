@@ -1,9 +1,10 @@
-
 import logging
 import os
 
+
 class Logging:
     """Class to handle modules logging. It is a wrapper class from logging standard python module.
+
     Args:
         logger_name (str): Logger name
         level (str): Logger level: DEBUG, INFO, WARNING, ERROR or CRITICAL
@@ -15,41 +16,25 @@ class Logging:
         stdout (boolean): True for add stodut stream handler False otherwise
         log_file (str): True for add file handler, False otherwise
     """
-    level_mapping = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-
     def __init__(self, logger_name, level='INFO', stdout=True, log_file=None):
         self.logger = logging.getLogger(logger_name)
         self.level = level
         self.stdout = stdout
         self.log_file = log_file
 
-        self.__validate_parameters()
-        self.__initialize_parameters()
-        self.__default_config()
+        self.update_configuration()
 
-    def __validate_parameters(self):
-        """Verify class parameters value"""
-        if self.level not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
-            raise ValueError('LOGGER level must be one of the following values: DEBUG, INFO, WARNING, ERROR, CRITICAL')
-
-    def __initialize_parameters(self):
-        """Set logger level, mapping the string into enum constant"""
-
-        self.level = Logging.level_mapping[self.level]
-
-    def __default_config(self):
+    def update_configuration(self):
         """Set default handler configuration"""
-        if self.level == logging.DEBUG:
+        if self.level == 'DEBUG':
             formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
         else:
             formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
-        self.logger.setLevel(self.level)
+
+        self.logger.setLevel(Logging.parse_level(self.level))
+
+        # Remove old hadlers if exist
+        self.logger.handlers = []
 
         if self.stdout:
             handler = logging.StreamHandler()
@@ -76,19 +61,49 @@ class Logging:
     @staticmethod
     def get_logger(logger_name):
         """Get the logger object if exists
+
         Returns:
             logging.Logger: Logger object
+
         Raises:
             ValueError: If logger not exists
+
         """
         return logging.getLogger(logger_name)
 
-    def set_level(self, logging_level):
-        try:
-            self.logger.level = Logging.level_mapping[logging_level]
-        except KeyError:
-            raise ValueError(f"{logging_level} is not allowed as logging level. "
-                             f"Allowed values: {list(Logging.level_mapping.keys())}")
+    @staticmethod
+    def parse_level(level):
+        """Get logger level, mapping the string into enum constant
+
+        Returns:
+            int: Logger level (10 DEBUG - 20 INFO - 30 WARNING - 40 ERROR - 50 CRITICAL)
+
+        Raises:
+            ValueError if level is not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+        """
+        if level not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+            raise ValueError('LOGGER level must be one of the following values: DEBUG, INFO, WARNING, ERROR, CRITICAL')
+
+        level_mapping = {
+            'DEBUG': logging.DEBUG,
+            'INFO': logging.INFO,
+            'WARNING': logging.WARNING,
+            'ERROR': logging.ERROR,
+            'CRITICAL': logging.CRITICAL
+        }
+
+        return level_mapping[level]
+
+    def update_default_handlers(self, level='INFO', stdout=True, log_file=None):
+        self.stdout = stdout
+        self.log_file = log_file
+        self.level = level
+
+        self.update_configuration()
+
+    def set_level(self, level):
+        self.level = level
+        self.logger.setLevel(Logging.parse_level(level))
 
     def enable(self):
         """Enable logger"""

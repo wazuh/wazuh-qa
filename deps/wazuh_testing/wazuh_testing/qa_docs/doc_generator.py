@@ -324,7 +324,6 @@ class DocGenerator:
         if self.conf.mode == Mode.DEFAULT:
             DocGenerator.LOGGER.debug(f"Cleaning doc folder located in {self.conf.documentation_path}")
             clean_folder(self.conf.documentation_path)
-
             for path in self.conf.include_paths:
                 self.scan_path = path
                 DocGenerator.LOGGER.debug(f"Going to parse files on '{path}'")
