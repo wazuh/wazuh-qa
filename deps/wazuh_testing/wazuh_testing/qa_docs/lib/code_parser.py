@@ -95,21 +95,22 @@ class CodeParser:
             if isinstance(doc_field, list):
                 for value in doc_field:
                     if value not in self.conf.predefined_values[field]:
-                        error = f"{field} field in {path} {doc_type} documentation block has an invalid value: {value}."
-                        f"Follow the predefined values: {self.conf.predefined_values[field]}. "
-                        "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
-                        " Documenting-tests-using-the-qadocs-schema#pre-defined-values."
-                        CodeParser.LOGGER.error(error)
-                        raise QAValueError(error, CodeParser.LOGGER.error)
+                        CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block has "
+                                                f"an invalid value: {value}."
+                                                f"Follow the predefined values: {self.conf.predefined_values[field]}. "
+                                                "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                                "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                        raise QAValueError(f"{field} field in {path} {doc_type} documentation block has "
+                                           f"an invalid value: {value}.", CodeParser.LOGGER.error)
             else:
                 if doc_field not in self.conf.predefined_values[field] and doc_field is not None:
-                    error = f"{field} field in {path} {doc_type} documentation block "
-                    f"has an invalid value: {doc_type}. "
-                    f"Follow the predefined values: {self.conf.predefined_values[field]} "
-                    "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
-                    " Documenting-tests-using-the-qadocs-schema#pre-defined-values."
-                    CodeParser.LOGGER.error(error)
-                    raise QAValueError(error, CodeParser.LOGGER.error)
+                    CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                                            f"has an invalid value: {doc_field}. "
+                                            f"Follow the predefined values: {self.conf.predefined_values[field]} "
+                                            "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                            "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                    raise QAValueError(f"{field} field in {path} {doc_type} documentation block "
+                                       f"has an invalid value: {doc_field}.", CodeParser.LOGGER.error)
 
     def parse_comment(self, function, doc_type, path):
         """Parse one self-contained documentation block.
