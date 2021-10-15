@@ -2,8 +2,6 @@
 
 ## [v0.1]
 
-First tool implementation.
-
 ### Added
   - Included dependencies installation details. ([#1693](https://github.com/wazuh/wazuh-qa/pull/1693))
   - Added DocGenerator documentation. ([#1686](https://github.com/wazuh/wazuh-qa/pull/1686))
@@ -14,12 +12,7 @@ First tool implementation.
   - Added Config to DocGenerator. ([#1619](https://github.com/wazuh/wazuh-qa/pull/1619))
   - Implemented a sanity check module for DocGenerator. ([#1649])(https://github.com/wazuh/wazuh-qa/pull/1649)
   - Added DocGenerator code to master branch. ([#1762](https://github.com/wazuh/wazuh-qa/pull/1762))
-
-## [v0.2]
-
-Tool added to wazuh-testing framework. Also, added new features and behaviours.
-
-### Added
+  - Tool added to wazuh-testing framework. ([#1854](https://github.com/wazuh/wazuh-qa/pull/1854))
   - Added single test parse. ([#1854](https://github.com/wazuh/wazuh-qa/pull/1854))
   - Integrate qa-docs into wazuh-qa framework. ([#1854](https://github.com/wazuh/wazuh-qa/pull/1854))
   - Added custom qa-docs logger. ([#1896])(https://github.com/wazuh/wazuh-qa/pull/1896)
