@@ -8,7 +8,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
-       files are modified. Specifically, they will check if FIM monitors newly added directories
+       files are modified. Specifically, these tests will check if FIM monitors newly added directories
        that match with complex wildcards used in the configuration.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
@@ -57,7 +57,7 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#scan-day
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
 
 pytest_args:
     - fim_mode:
@@ -69,7 +69,7 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim_tags
+    - fim_wildcards_complex
 '''
 import os
 import sys
@@ -159,7 +159,7 @@ def test_wildcards_complex_runtime(subfolder_name, file_name, tags_to_apply,
                  delete files inside those folders. Finally, the test will wait for FIM events from a folder
                  only if it matches a configured expression.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - subfolder_name:
@@ -204,6 +204,7 @@ def test_wildcards_complex_runtime(subfolder_name, file_name, tags_to_apply,
 
     tags:
         - scheduled
+        - time_travel
         - who-data
     '''
     folder = os.path.join(test_folder, subfolder_name)

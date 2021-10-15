@@ -70,6 +70,10 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_scan/data"
   - "../../tests/integration/test_fim/test_files/test_skip/data"
   - "../../tests/integration/test_fim/test_files/test_stats_integrity_sync/data"
+  - "../../tests/integration/test_fim/test_files/test_tags/data"
+  - "../../tests/integration/test_fim/test_files/test_timezone_changes/data"
+  - "../../tests/integration/test_fim/test_files/test_wildcards_complex/data"
+  - "../../tests/integration/test_fim/test_files/test_windows_audit_interval/data"
 
 Output fields:
   Module:
