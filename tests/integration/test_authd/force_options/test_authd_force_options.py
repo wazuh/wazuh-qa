@@ -2,15 +2,15 @@ import os
 import time
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
-from authd import validate_authd_response
+from authd import validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
 # Configurations
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/force_options')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'force_options_configuration.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
@@ -30,18 +30,14 @@ for i in range(len(tests3)):
 # Variables
 log_monitor_paths = []
 
-#TODO improve this
-wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (wdb_path, 'AF_UNIX', 'TCP')]
+receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (WAZUH_DB_SOCKET_PATH, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-authd', None, True), ('wazuh-db', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
 
 configuration_ids = ['authd_force_options']
 test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
 # Functions
-
 def get_temp_force_config(param):
     """
     Creates a temporal config file.
@@ -104,19 +100,18 @@ def override_authd_force_conf(get_current_test_case, request):
 def insert_pre_existent_agents(get_current_test_case, request):
     agents = get_current_test_case.get('pre_existent_agents', [])
     time_now = int(time.time())
-
+    wdb_sock = receiver_sockets[1]
     try:
         keys_file = open(CLIENT_KEYS_PATH, 'w')
     except IOError as exception:
         raise exception
 
     # Clean agents from DB
-    wdb_sock = getattr(request.module, 'receiver_sockets')[1]
     command = f'global sql DELETE FROM agent WHERE id != 0'
     wdb_sock.send(command, size=True)
     response = wdb_sock.receive(size=True).decode()
     data = response.split(" ", 1)
-    #assert data[0] == 'ok', f'Unable to clean agents'
+    assert data[0] == 'ok', f'Unable to clean agents'
 
     for agent in agents:
         if 'id' in agent:
@@ -158,12 +153,12 @@ def insert_pre_existent_agents(get_current_test_case, request):
         else:
             registration_time = time_now
 
-        # Write agents in client.keys
+        # Write agent in client.keys
         keys_file.write(f'{id} {name} {ip} {key}\n')
 
-        # Write agents in global.db
-        # TODO Clean previous agents
-        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},"connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+        # Write agent in global.db
+        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
+                  "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
         wdb_sock.send(command, size=True)
         response = wdb_sock.receive(size=True).decode()
         data = response.split(" ", 1)
@@ -177,26 +172,21 @@ def insert_pre_existent_agents(get_current_test_case, request):
 def test_authd_force_options(configure_environment, configure_sockets_environment, connect_to_sockets_module,
                              stop_authd_function, override_authd_force_conf, insert_pre_existent_agents,
                              restart_authd_function, wait_for_authd_startup_function,
-                             connect_to_sockets_function, get_current_test_case, request, tear_down):
+                             connect_to_sockets_function, get_current_test_case, tear_down):
+
+    authd_sock = receiver_sockets[0]
 
     print(get_current_test_case['name'])
     print(get_current_test_case['description'])
 
     for stage in get_current_test_case['test_case']:
-        print(stage['input'])
-        print(stage['output'])
-
         # Reopen socket (socket is closed by manager after sending message with client key)
-        receiver_sockets[0].open()
-        expected = stage['output']
-        message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=False)
-        timeout = time.time() + 10
+        authd_sock.open()
+        authd_sock.send(stage['input'], size=False)
+        timeout = time.time() + AUTHD_KEY_REQUEST_TIMEOUT
         response = ''
         while response == '':
-            response = receiver_sockets[0].receive().decode()
+            response = authd_sock.receive().decode()
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         validate_authd_response(response, stage['output'])
-
-    assert True

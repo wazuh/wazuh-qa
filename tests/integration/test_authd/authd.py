@@ -10,6 +10,7 @@ import re
 
 
 DAEMON_NAME = 'wazuh-authd'
+AUTHD_KEY_REQUEST_TIMEOUT = 10
 
 
 def validate_argument(received, expected, argument_name):
