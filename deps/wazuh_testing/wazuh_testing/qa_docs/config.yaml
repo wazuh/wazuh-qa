@@ -35,34 +35,39 @@ Ignore paths:
 Output fields:
   Module:
     Mandatory:
+      - copyright
+      - type
       - brief
-      - category
       - modules
       - daemons
-      - component
+      - components
+      - path
       - os_platform
-      - os_vendor
       - os_version
-      - tiers
+      - tier
     Optional:
+      - references
+      - pytest_args
       - tags
   Test:
     Mandatory:
       - description
       - wazuh_min_version
       - parameters
-      - behaviour
-      - expected_behaviour
+      - assertions
+      - inputs
+      - input_description
+      - expected_output
     Optional:
-      - status 
+      - tags 
 
-Test cases field: test_cases
+Test cases field: inputs
 
 Module info:
-  - test_system: os_platform
-  - test_vendor: os_vendor
-  - test_version: os_version
-  - test_target: component
+  - path
+  - os_platform
+  - os_version
+  - components
 
 Test info:
-  - test_wazuh_min_version: wazuh_min_version
+  - wazuh_min_version

@@ -49,6 +49,7 @@ def extra_configuration_after_yield():
     {'only_authd_enabled'},
     {'only_authd_disabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
                    restart_api, wait_for_start, get_api_details):
     """Check if use_only_authd forces the use of wazuh-authd when adding an agent.
@@ -94,6 +95,7 @@ def test_add_agent(tags_to_apply, get_configuration, configure_api_environment,
     {'only_authd_enabled'},
     {'only_authd_disabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_insert_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
     """Check if use_only_authd forces the use of wazuh-authd when inserting an agent.
@@ -139,6 +141,7 @@ def test_insert_agent(tags_to_apply, get_configuration, configure_api_environmen
     {'only_authd_enabled'},
     {'only_authd_disabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_environment,
                             restart_api, wait_for_start, get_api_details):
     """Check if use_only_authd forces the use of wazuh-authd when quick inserting an agent.
@@ -180,6 +183,7 @@ def test_insert_quick_agent(tags_to_apply, get_configuration, configure_api_envi
     {'only_authd_enabled'},
     {'only_authd_disabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_delete_agent(tags_to_apply, get_configuration, configure_api_environment,
                       restart_api, wait_for_start, get_api_details):
     """Check if use_only_authd forces the use of wazuh-authd when deleting an agent.

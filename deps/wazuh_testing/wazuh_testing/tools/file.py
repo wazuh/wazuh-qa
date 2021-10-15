@@ -4,6 +4,7 @@
 import bz2
 import gzip
 import json
+import yaml
 import os
 import random
 import shutil
@@ -12,10 +13,10 @@ import stat
 import string
 import xml.etree.ElementTree as ET
 import zipfile
-from os.path import exists
 
 import filetype
 import requests
+import yaml
 
 
 def read_json(file_path):
@@ -32,6 +33,19 @@ def read_json(file_path):
         output = json.loads(f.read())
 
     return output
+
+
+def read_yaml(file_path):
+    """Read a YAML file from a given path, return a dictionary with the YAML data
+
+    Args:
+        file_path (str): Path of the YAML file to be readed
+
+    Returns:
+       dict: Yaml structure.
+    """
+    with open(file_path) as f:
+        return yaml.safe_load(f)
 
 
 def truncate_file(file_path):
@@ -124,6 +138,20 @@ def write_json_file(file_path, data, ensure_ascii=False):
     write_file(file_path, json.dumps(data, indent=4, ensure_ascii=ensure_ascii))
 
 
+def write_yaml_file(file_path, data, allow_unicode=True, sort_keys=False):
+    write_file(file_path, yaml.dump(data, allow_unicode=allow_unicode, sort_keys=sort_keys))
+
+
+def delete_file(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
+def delete_path_recursively(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 def download_file(source_url, dest_path):
     request = requests.get(source_url, allow_redirects=True)
     with open(dest_path, 'wb') as dest_file:
@@ -131,7 +159,7 @@ def download_file(source_url, dest_path):
 
 
 def remove_file(file_path):
-    if exists(file_path):
+    if os.path.exists(file_path):
         os.remove(file_path)
 
 
@@ -153,7 +181,7 @@ def validate_xml_file(file_path):
 
 
 def get_file_info(file_path, info_type="extension"):
-    if exists(file_path) and filetype.guess(file_path) is not None:
+    if os.path.exists(file_path) and filetype.guess(file_path) is not None:
         file = filetype.guess(file_path)
         return file.extension if info_type == "extension" else file.mime
 
@@ -282,7 +310,8 @@ def set_file_owner_and_group(file_path, owner, group):
 
 def recursive_directory_creation(path):
     """Recursive function to create folders.
-       Args:
+
+    Args:
         path (str): Path to create. If a folder doesn't exists, it will create it.
     """
     parent, _ = os.path.split(path)
@@ -293,3 +322,38 @@ def recursive_directory_creation(path):
 
     if not os.path.exists(path):
         os.mkdir(path)
+
+
+def move_everything_from_one_directory_to_another(source_directory, destination_directory):
+    """Move all files and directories from one directory to another.
+
+    Important note: Copied files must not exist on destination directory.
+
+    Args:
+        source_directory (str): Source_directory path.
+        destination_directory (str): Destination_directory path.
+    Raises:
+        ValueError: If source_directory or destination_directory does not exist.
+    """
+    if not os.path.exists(source_directory):
+        raise ValueError(f"{source_directory} does not exist")
+
+    if not os.path.exists(destination_directory):
+        raise ValueError(f"{destination_directory} does not exist")
+
+    file_names = os.listdir(source_directory)
+
+    for file_name in file_names:
+        shutil.move(os.path.join(source_directory, file_name), destination_directory)
+        
+def count_file_lines(filepath):
+    """Count number of lines of a specified file.
+
+    Args:
+        filepath (str): Absolute path of the file.
+
+    Returns:
+        Integer: Number of lines of the file.
+    """
+    with open(filepath, "r") as file:
+        return sum(1 for line in file if line.strip())

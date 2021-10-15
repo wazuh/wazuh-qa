@@ -29,11 +29,11 @@ class DocGenerator:
         self.__id_counter = 0
         self.ignore_regex = []
         for ignore_regex in self.conf.ignore_paths:
-            self.ignore_regex.append(re.compile(ignore_regex))
+            self.ignore_regex.append(re.compile(ignore_regex.replace('\\','/')))
         self.include_regex = []
         if self.conf.mode == mode.DEFAULT:
             for include_regex in self.conf.include_regex:
-                self.include_regex.append(re.compile(include_regex))
+                self.include_regex.append(re.compile(include_regex.replace('\\','/')))
 
     def is_valid_folder(self, path):
         """
@@ -193,6 +193,8 @@ class DocGenerator:
             for filename in filenames:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
+
+        print('test does not exist')
         return None
 
     def print_test_info(self, test):
@@ -203,24 +205,27 @@ class DocGenerator:
         # dump into file
         if self.conf.documentation_path:
             test_info = {}
-            test_info['test_path'] = self.test_path[6:]
+            test_info['path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+            
             for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test[schema_field]
+                test_info[field] = test[field]
+            
             for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    test_info[name] = test['tests'][0][schema_field]
+                test_info[field] = test['tests'][0][field]
+
             with open(os.path.join(self.conf.documentation_path, f"{self.conf.test_name}.json"), 'w') as fp:
                 fp.write(json.dumps(test_info, indent=4))
                 fp.write('\n')
         else:
             # Use the key that QACTL needs
+            test['path'] = re.sub(r'.*wazuh-qa\/', '', self.test_path)
+
             for field in self.conf.module_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test[schema_field]))
+                print(str(field)+": "+str(test[field]))
+
             for field in self.conf.test_info:
-                for name, schema_field in field.items():
-                    print(str(name)+": "+str(test['tests'][0][schema_field]))
+                print(str(field)+": "+str(test['tests'][0][field]))
+                
             return None
 
     def run(self):
@@ -231,7 +236,6 @@ class DocGenerator:
         if self.conf.mode == mode.DEFAULT:
             logging.info("\nStarting documentation parsing")
             clean_folder(self.conf.documentation_path)
-
             for path in self.conf.include_paths:
                 self.scan_path = path
                 logging.debug(f"Going to parse files on '{path}'")
@@ -239,7 +243,6 @@ class DocGenerator:
         elif self.conf.mode == mode.SINGLE_TEST:
             logging.info("\nStarting test documentation parsing")
             self.test_path = self.locate_test()
-            
             if self.test_path:
                 logging.debug(f"Parsing '{self.conf.test_name}'")
                 self.create_test(self.test_path, 0)

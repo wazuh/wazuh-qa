@@ -137,6 +137,7 @@ nav:
             - Test https:  tests/integration/test_api/test_config/test_https/test_https.md
             - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
             - Test logs:  tests/integration/test_api/test_config/test_logs/test_logs.md
+            - Test max upload size: tests/integration/test_api/test_config/test_max_upload_size/test_max_upload_size.md
             - Test rbac: tests/integration/test_api/test_config/test_rbac/test_rbac.md
             - Test use only authd: tests/integration/test_api/test_config/test_use_only_authd/test_use_only_authd.md
           - Test RBAC:
@@ -156,12 +157,6 @@ nav:
           - Test authd local:  tests/integration/test_authd/test_authd_local.md
           - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
           - Test authd remote enrollment enabled:  tests/integration/test_authd/test_remote_enrollment.md
-        - Cluster:
-          - tests/integration/test_cluster/index.md
-          - Test key polling:
-            - tests/integration/test_cluster/test_key_polling/index.md
-            - Test key polling master: tests/integration/test_cluster/test_key_polling/test_key_polling_master.md
-            - Test key polling worker: tests/integration/test_cluster/test_key_polling/test_key_polling_worker.md
         - FIM:
           - tests/integration/test_fim/index.md
           - Test files:
@@ -212,7 +207,6 @@ nav:
               - Test check all: tests/integration/test_fim/test_files/test_checks/test_check_all.md
               - Test check other: tests/integration/test_fim/test_files/test_checks/test_check_others.md
               - Test checksums: tests/integration/test_fim/test_files/test_checks/test_checksums.md
-              - Test hard link: tests/integration/test_fim/test_files/test_checks/test_hard_link.md
             - Test env variables:
               - tests/integration/test_fim/test_files/test_env_variables/index.md
               - Test dir win32: tests/integration/test_fim/test_files/test_env_variables/test_dir_win32.md
@@ -343,6 +337,7 @@ nav:
               - Test basic usage registry changes: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_changes.md
               - Test basic new key: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_new_key.md
               - Test long registry path: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_long_registry_path.md
+              - Test duplicated registry entries: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_duplicated_entries.md
             - Test registry checks:
               - tests/integration/test_fim/test_registry/test_registry_checks/index.md
               - Test registry checks others: tests/integration/test_fim/test_registry/test_registry_checks/test_registry_check_others.md
@@ -524,6 +519,7 @@ nav:
         - Test cluster:
           - tests/system/test_cluster/index.md
           - Test agent info sync: tests/system/test_cluster/test_agent_info_sync/test_agent_info_sync.md
+          - Test agent files deletion: tests/system/test_cluster/test_agent_files_deletion/test_agent_files_deletion.md
           - Test agent enrollment:  tests/system/test_cluster/test_agent_enrollment/test_agent_enrollment.md
           - Test agent key polling: tests/system/test_cluster/test_agent_key_polling/test_agent_key_polling.md
           - Test integrity sync: tests/system/test_cluster/test_integrity_sync/test_integrity_sync.md
@@ -534,5 +530,11 @@ nav:
           - Test disconnected nodes: tests/system/test_jwt_invalidation/test_disconnected_nodes.md
           - Test revoke endpoint: tests/system/test_jwt_invalidation/test_revoke_endpoint.md
           - Test update password:  tests/system/test_jwt_invalidation/test_update_password.md
+      - Scans:
+        - tests/scans/index.md
+        - Dependencies:
+            - Test Python dependencies: tests/scans/dependencies/test_dependencies.md
+        - Code Analysis:
+            - Test Python flaws: tests/scans/code_analysis/test_python_flaws.md
       - Legacy:
         - tests/legacy/index.md
