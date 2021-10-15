@@ -186,7 +186,7 @@ class QAProvisioning():
 
             QAProvisioning.LOGGER.info(f"Provisioning the {current_host} host with the Wazuh QA framework using "
                                        f"{wazuh_qa_branch} branch.")
-            qa_instance = QAFramework(qa_branch=wazuh_qa_branch,
+            qa_instance = QAFramework(qa_branch=wazuh_qa_branch, workdir=qa_framework_info['qa_workdir'],
                                       ansible_output=self.qa_ctl_configuration.ansible_output)
             qa_instance.download_qa_repository(inventory_file_path=self.inventory_file_path, hosts=current_host)
             qa_instance.install_dependencies(inventory_file_path=self.inventory_file_path, hosts=current_host)
