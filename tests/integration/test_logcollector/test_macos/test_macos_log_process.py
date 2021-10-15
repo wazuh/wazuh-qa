@@ -50,18 +50,18 @@ def up_wazuh_after_module():
 
 @retry(AssertionError, attempts=5, delay=2, delay_multiplier=1)
 def check_process_status(process_list, running=True, stage=''):
-    """Assert that some process are running or not.
+    """Assert that some processes are running or not.
 
-        This will check a list of process and asserts that all of them are running or not based on the arguments.
+        This will check a list of processes and asserts that all of them are running or not based on the arguments.
 
         Args:
-            process_list (string list): the list of process to check
-            running (boolean): if the process are expected to be running or not
-            stage (string): in case of failure this string is append at the end of the error message and indicated
+            process_list (string list): the list of processes to check
+            running (boolean): if the processes are expected to be running or not
+            stage (string): in case of failure this string is appended at the end of the error message and indicated
                 in which moment was the error produced (for example: after agent restart)
 
         Raises:
-            AssertionError: if the condition is not meet
+            AssertionError: if the condition is not met
     """
     expected_process = 1 if running else 0
     is_running_msg = 'is not running' if running else 'is running'
