@@ -47,6 +47,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff_default'}
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
     Check that the diff_size_limit option is configured properly with the default value (50MB).

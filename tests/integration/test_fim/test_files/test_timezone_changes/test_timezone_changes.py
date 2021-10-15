@@ -78,7 +78,7 @@ def extra_configuration_after_yield():
     delete_file(testdir1, 'regular')
     set_local_timezone()
 
-
+@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_timezone_changes(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Check if events are appearing after the baseline

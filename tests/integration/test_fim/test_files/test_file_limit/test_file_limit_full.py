@@ -62,6 +62,7 @@ def extra_configuration_before_yield():
 @pytest.mark.parametrize('tags_to_apply', [
     {'file_limit_conf'}
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_file_limit_full(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
     Check that the full database alerts are being sent.
