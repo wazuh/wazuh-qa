@@ -69,6 +69,8 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
         fim.create_file(fim.REGULAR, test_directories[0], f'test_{i}', content='')
 
     extra_timeout = n_files_to_create / max_files_per_second
+    if inode_collision:
+        extra_timeout += global_parameters.default_timeout
 
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor,
                           timeout=global_parameters.default_timeout + extra_timeout)

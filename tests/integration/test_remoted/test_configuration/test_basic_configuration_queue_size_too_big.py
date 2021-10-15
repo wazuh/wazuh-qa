@@ -9,6 +9,8 @@ import wazuh_testing.remote as remote
 from wazuh_testing.api import compare_config_api_response
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from urllib3.exceptions import InsecureRequestWarning
+import requests
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -49,6 +51,7 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
         AssertionError: if `wazuh-remoted` does not show in `ossec.log` expected warning messages or if API answer is
         different of expected configuration.
     """
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_queue_size_too_big()

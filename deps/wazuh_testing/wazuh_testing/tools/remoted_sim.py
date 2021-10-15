@@ -12,6 +12,7 @@ import threading
 import time
 import zlib
 from struct import pack
+from wazuh_testing import logger
 
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
@@ -89,6 +90,7 @@ class RemotedSimulator:
         self.last_client = None
         self.rcv_msg_queue = Queue(rcv_msg_limit)
 
+        self.change_default_listener = False
         if start_on_init:
             self.start()
 
@@ -257,7 +259,8 @@ class RemotedSimulator:
         return message
 
     def send_com_message(self, client_address, connection, command, payload=None, interruption_time=None):
-        """Create a COM message.
+        """
+        Create a COM message
 
         Args:
             - client_address (str): Client of the connection.
@@ -520,7 +523,10 @@ class RemotedSimulator:
                 # Switch to common listener once the upgrade has ended
                 if simulate_connection_error:
                     # Sleep long enough to make the connection after upgrade fail and generate a rollback
-                    time.sleep(100)
+                    while not self.change_default_listener and upgrade_socket_closed_timeout > 0:
+                        time.sleep(1)
+                        upgrade_socket_closed_timeout -= 1
+
                     self.sock.close()
                     self._start_socket()
                 return self.listener()
@@ -582,6 +588,7 @@ class RemotedSimulator:
         keys = self.get_key()
         if keys is None:
             # No valid keys
+            logger.error("Not valid keys used.")
             return -1
         (id, name, ip, key) = keys
         self.create_encryption_key(id, name, key)

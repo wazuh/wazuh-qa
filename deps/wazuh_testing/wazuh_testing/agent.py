@@ -7,10 +7,13 @@ import platform
 import re
 import socket
 import ssl
+import json
 
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import monitoring
+from wazuh_testing import logger
+
 
 DEFAULT_VALUES = {
     'enabled': 'yes',
@@ -51,7 +54,7 @@ CONFIG_PATHS = {
 
 
 class AgentAuthParser:
-
+    """Creates the right invoke command to call agent-auth with all the different configurations"""
     def __init__(self, server_address=None, BINARY_PATH='/var/ossec/bin/agent-auth', sudo=False):
         self._command = []
         if sudo:
@@ -84,12 +87,8 @@ class AgentAuthParser:
     def use_source_ip(self):
         self._command += ['-i']
 
-    def add_password(self, password=None, isFile=False, path=None):
-        with open(path, 'w') as f:
-            if isFile and password:
-                f.write(password)
-            elif password:
-                self._command += ['-P', password]
+    def add_password(self, password):
+        self._command += ['-P', password]
 
     def add_groups(self, group_string):
         self._command += ['-G', group_string]
@@ -111,7 +110,7 @@ def check_client_keys_file():
             return line
         return None
 
-    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor = monitoring.FileMonitor(LOG_FILE_PATH)
     try:
         log_monitor.start(timeout=6, callback=wait_key_changes)
     except:
@@ -265,3 +264,47 @@ def set_state_interval(interval, internal_file_path):
 
         with open(internal_file_path, 'w') as opts:
             opts.write(new_content)
+
+
+def callback_detect_upgrade_ack_event(event_log):
+    """Detect sending upgrade ACK event returning upgrade process result.
+
+    Args:
+        event_log (str): Event line logs.
+
+    Returns:
+        String: Upgrade result.
+    """
+    match = re.match(".*Sending upgrade ACK event: '(.*)'", event_log)
+    if not match:
+        return None
+    else:
+        try:
+            json_event = json.loads(match.group(1))
+            return json_event
+        except (json.JSONDecodeError, AttributeError) as e:
+            logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_upgrade_module_up():
+    """Detect module agent upgrade started event.
+
+    Args:
+        event_log (str): Event line logs.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern='Module Agent Upgrade started', prefix=monitoring.MODULESD_DETECTOR_PREFIX)
+
+
+def callback_exit_cleaning():
+    """Detect exit cleaning message.
+
+    Args:
+        callable: callback to detect this event.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern='Exit Cleaning', prefix=monitoring.AGENT_DETECTOR_PREFIX)

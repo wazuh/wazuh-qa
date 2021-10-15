@@ -40,6 +40,7 @@ def get_configuration(request):
     (False, {'conf_1'}),
     (True, {'conf_2'}),
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_host_port(expected_exception, tags_to_apply,
                    get_configuration, configure_api_environment, restart_api, get_api_details):
     """Try different host and port configurations.
