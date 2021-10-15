@@ -5,7 +5,7 @@ ENV RUNNING_ON_DOCKER_CONTAINER=true
 
 RUN apt-get -q update && \
     apt-get install -y \
-        git \
+        curl \
         python \
         python3 \
         sshpass \

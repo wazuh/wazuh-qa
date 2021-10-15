@@ -4,8 +4,11 @@ import sys
 from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
+from wazuh_testing.tools.github_checks import branch_exists
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.tools.file import delete_path_recursively
 
 
 LOGGER = Logging.get_logger(QACTL_LOGGER)
@@ -61,17 +64,25 @@ def download_local_wazuh_qa_repository(branch, path):
         path (string): Local path where save the repository files.
     """
     wazuh_qa_path = os.path.join(path, 'wazuh-qa')
-
     mute_output = '&> /dev/null' if sys.platform != 'win32' else '>nul 2>&1'
+    command = ''
 
-    if os.path.exists(wazuh_qa_path):
-        LOGGER.info(f"Pulling remote repository changes in {wazuh_qa_path} local repository")
-        run_local_command_with_output(f"cd {wazuh_qa_path} && git pull {mute_output} && "
-                                      f"git checkout {branch} {mute_output}")
+    if not branch_exists(branch, repository=WAZUH_QA_REPO):
+        raise QAValueError(f"{branch} branch does not exist in Wazuh QA repository.", LOGGER.error, QACTL_LOGGER)
+
+    # Delete previous files if exist
+    delete_path_recursively(wazuh_qa_path)
+
+    if sys.platform == 'win32':
+        command = f"cd {path} && curl -OL https://github.com/wazuh/wazuh-qa/archive/{branch}.tar.gz {mute_output} && " \
+                  f"tar -xzf {branch}.tar.gz {mute_output} && move wazuh-qa-{branch} wazuh-qa {mute_output} && " \
+                  f"del {branch}.tar.gz {mute_output}"
     else:
-        LOGGER.info(f"Downloading wazuh-qa repository in {wazuh_qa_path}")
-        run_local_command_with_output(f"cd {path} && git clone https://github.com/wazuh/wazuh-qa {mute_output} && "
-                                      f"cd {wazuh_qa_path} && git checkout {branch} {mute_output}")
+        command = f"cd {path} && curl -Ls https://github.com/wazuh/wazuh-qa/archive/{branch}.tar.gz | tar zx " \
+                  f"{mute_output} && mv wazuh-* wazuh-qa {mute_output} && rm -rf *tar.gz {mute_output}"
+
+    LOGGER.debug(f"Downloading {branch} files of wazuh-qa repository in {wazuh_qa_path}")
+    run_local_command_with_output(command)
 
 
 def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):

@@ -331,3 +331,16 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
+
+
+def join_path(path, system):
+    """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
+
+    Parameters:
+        path (list(str)): Path list (one item for level).
+        system (str): host system.
+
+    Returns:
+        str: Joined path.
+    """
+    return '\\'.join(path) if system == 'windows' else '/'.join(path)
