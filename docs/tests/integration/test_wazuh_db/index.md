@@ -11,3 +11,4 @@ These tests check the Wazuh-db commands syntax, valid responses and error messag
 - **agent_messages.yaml**: tests for agents DB, general commands
 - **fim_messages.yaml**: tests for agents DB, FIM module commands
 - **global_messages.yaml**: tests for the Global DB, using `global` commands
+- **syscollector_deltas_messages.yaml**: tests for agents DB, Syscollector deltas (dbsync) commands

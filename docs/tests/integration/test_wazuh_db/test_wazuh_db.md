@@ -29,7 +29,7 @@ Confirm that `wazuh-db` is able to save, update and erase the necessary informat
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 30 | 45s |
+| 0 | 37 | 60s |
 
 ## Expected behavior
 
@@ -55,6 +55,17 @@ The **insert** and **clear** commands for `vuln_cves` table are tested:
 ### Checks FIM
 
 ### Checks global_messages
+
+### Checks Syscollector delta messages
+
+The tests cover different operations against agent's inventory tables product of incoming information deltas:
+
+- Operations against invalid db tables
+- Invalid syscollector operations against db
+- Valid INSERTED, CREATE, and MODIFIED operations to valid tables
+- Invalid MODIFIED operations: nonexistent data, wrong number or arguments, invalid type
+- Invalid INSERTED operations: duplicated entry, wrong number or arguments, invalid types
+- Invalid DELETED operations: nonexistent data, wrong number of arguments, invalid type
 
 ### Checks chunks
 
