@@ -380,7 +380,7 @@ def test_macos_format_query(restart_logcollector_required_daemons_package, get_c
                 category=macos_log['category'])
 
         if cfg['lambda_function'](*clauses_values) and same_level and same_type:
-            check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=60)
+            check_agent_received_message(remoted_simulator, expected_macos_message, timeout=60)
         else:
             with pytest.raises(TimeoutError):
-                check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=5)
+                check_agent_received_message(remoted_simulator, expected_macos_message, timeout=5)
