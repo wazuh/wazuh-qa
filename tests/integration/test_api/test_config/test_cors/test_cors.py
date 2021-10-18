@@ -1,50 +1,60 @@
 '''
-brief:
-    These tests will check if the CORS (Cross-origin resource sharing) feature
-    of the API handled by the `apid` daemon is working properly.
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the CORS (Cross-origin resource sharing) feature
+       of the API handled by the `wazuh-apid` daemon is working properly.
+
+tier: 0
+
 modules:
     - api
+
+components:
+    - manager
+
+path: tests/integration/test_api/test_config/test_cors/test_cors.py
+
 daemons:
     - wazuh-apid
     - wazuh-analysisd
     - wazuh-syscheckd
-    - wazuh-wazuh-db
-category:
-    integration
+    - wazuh-db
+
 os_platform:
     - linux
-os_vendor:
-    - redhat
-    - debian
-    - ubuntu
-    - alas
-    - arch-linux
-    - centos
+
 os_version:
-    - centos6
-    - centos7
-    - centos8
-    - rhel6
-    - rhel7
-    - rhel8
-    - buster
-    - stretch
-    - wheezy
-    - bionic
-    - xenial
-    - trusty
-    - amazon-linux-1
-    - amazon-linux-2
-tiers:
-    - 0
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html#cors
+    - https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+
 tags:
     - api
-component:
-    - manager
 '''
 import os
 
@@ -78,15 +88,21 @@ def get_configuration(request):
     ('https://test_url.com', {'cors'}),
     ('http://other_url.com', {'cors'}),
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_cors(origin, tags_to_apply, get_configuration, configure_api_environment,
               restart_api, wait_for_start, get_api_details):
     '''
-    description:
-        Check if expected headers are returned when CORS is enabled.
-        When CORS is enabled, special headers must be returned in case the
-        request origin matches the one established in the CORS configuration
-        of the API.
+    description: Check if expected headers are returned when CORS is enabled.
+                 When CORS is enabled, special headers must be returned in case the
+                 request origin matches the one established in the CORS configuration
+                 of the API.
+
+    wazuh_min_version: 4.2
+
     parameters:
+        - origin:
+            type: set
+            brief: Origin path to be appended as a header in the request.
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
@@ -105,15 +121,24 @@ def test_cors(origin, tags_to_apply, get_configuration, configure_api_environmen
         - get_api_details:
             type: fixture
             brief: Get API information.
-    wazuh_min_version:
-        3.13
-    behaviour:
-        - Perform different requests with CORS enabled and disabled, then check the responses for matching headers.
-    expected_behaviour:
-        - The `Access-Control-Allow-Origin` header is received when CORS is enabled.
-        - The `Access-Control-Expose-Headers` header is received when CORS is enabled.
-        - The `Access-Control-Allow-Credentials` header is received when CORS is enabled.
-        - the `Access-Control-Allow-Origin` header is not received when CORS is disabled.
+
+    assertions:
+        - Verify that when CORS is enabled, the `Access-Control-Allow-Origin` header is received.
+        - Verify that when CORS is enabled, the `Access-Control-Expose-Headers` header is received.
+        - Verify that when CORS is enabled, the `Access-Control-Allow-Credentials` header is received.
+        - Verify that when CORS is disabled, the `Access-Control-Allow-Origin` header is not received.
+
+    input_description: A test case is contained in an external `YAML` file (conf.yaml)
+                       which includes API configuration parameters.
+
+    expected_output:
+        - r'Access-Control-Allow-Origin'
+        - r'Access-Control-Expose-Headers'
+        - r'https://test_url.com'
+        - r'true'
+
+    tags:
+        - cors
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     api_details = get_api_details()

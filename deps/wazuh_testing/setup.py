@@ -20,7 +20,12 @@ package_data_list = [
     'data/sslmanager.key',
     'data/sslmanager.cert',
     'tools/macos_log/log_generator.m',
-    'qa_docs/config.yaml'
+    'qa_docs/config.yaml',
+    'qa_ctl/deployment/dockerfiles/*',
+    'qa_ctl/deployment/dockerfiles/qa_ctl/*',
+    'qa_ctl/deployment/vagrantfile_template.txt',
+    'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
+    'data/qactl_conf_validator_schema.json',
 ]
 
 scripts_list = [
@@ -30,7 +35,8 @@ scripts_list = [
     'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
     'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
     'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
-    'qa-docs=wazuh_testing.scripts.qa_docs:main'
+    'qa-docs=wazuh_testing.scripts.qa_docs:main',
+    'qa-ctl=wazuh_testing.scripts.qa_ctl:main'
 ]
 
 
