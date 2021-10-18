@@ -30,12 +30,14 @@
         delta: -10
   test_case:
   -
-    input: "OSSEC A:'user1'"
+    input:
+      name: 'user1'
     output:
       status: 'success'
       name: 'user1'
   -
-    input: "OSSEC A:'user2'"
+    input:
+      name: 'user2'
     output:
       status: 'error'
       message: 'Duplicate agent name: user2'
@@ -55,12 +57,14 @@
       name: user1
   test_case:
   -
-    input: "OSSEC A:'user1'"
+    input:
+      name: 'user1'
     output:
       status: 'error'
       message: 'Duplicate agent name: user1'
   -
-    input: "OSSEC A:'user2'"
+    input:
+      name: 'user2'
     output:
       status: 'success'
       name: 'user2'

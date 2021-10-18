@@ -5,7 +5,7 @@ import yaml
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
-from authd import validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
+from authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
@@ -176,13 +176,11 @@ def test_authd_force_options(configure_environment, configure_sockets_environmen
 
     authd_sock = receiver_sockets[0]
 
-    print(get_current_test_case['name'])
-    print(get_current_test_case['description'])
-
     for stage in get_current_test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
         authd_sock.open()
-        authd_sock.send(stage['input'], size=False)
+
+        authd_sock.send(create_authd_request(stage['input']), size=False)
         timeout = time.time() + AUTHD_KEY_REQUEST_TIMEOUT
         response = ''
         while response == '':
