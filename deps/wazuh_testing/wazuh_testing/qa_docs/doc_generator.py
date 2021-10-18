@@ -271,8 +271,8 @@ class DocGenerator:
             if self.test_path:
                 self.create_test(self.test_path, 0, test_name)
             else:
-                DocGenerator.LOGGER.error(f"'{self.conf.test_name}' could not be found")
-                raise QAValueError(f"'{self.conf.test_name}' could not be found", DocGenerator.LOGGER.error)
+                DocGenerator.LOGGER.error(f"'{test_name}' could not be found")
+                raise QAValueError(f"'{test_name}' could not be found", DocGenerator.LOGGER.error)
 
     def locate_test(self, test_name):
         """Get the test path when a test is specified by the user.
