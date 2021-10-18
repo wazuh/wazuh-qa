@@ -78,13 +78,13 @@ class CodeParser:
 
         # check that mandatory fields are documented
         for field in expected_fields.mandatory:
-            if not field in doc.keys():
+            if field not in doc.keys():
                 CodeParser.LOGGER.error(f"{field} mandatory field is missing.")
                 raise QAValueError(f"{field} mandatory field is missing.", CodeParser.LOGGER.error)
 
         # check that only schema fields are documented
         for field in doc.keys():
-            if not field in expected_fields.mandatory and not field in expected_fields.optional and field != 'name':
+            if field not in expected_fields.mandatory and field not in expected_fields.optional and field != 'name':
                 CodeParser.LOGGER.error(f"{field} is not specified in qa-docs schema.")
                 raise QAValueError(f"{field} is not specified in qa-docs schema.", CodeParser.LOGGER.error)
 
@@ -106,7 +106,6 @@ class CodeParser:
             try:
                 doc_field = doc[field]
             except KeyError:
-                CodeParser.LOGGER.warning(f"{field} field missing in {path} {doc_type}")
                 doc_field = None
 
             # If the field is a list, iterate thru predefined values
@@ -216,7 +215,7 @@ class CodeParser:
                                    CodeParser.LOGGER.error)
             else:
                 module_doc['tests'] = functions_doc
-            
+
             self.remove_ignored_fields(module_doc)
 
         return module_doc
