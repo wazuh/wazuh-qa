@@ -70,6 +70,24 @@ class CodeParser:
             for test in doc['tests']:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
+    def check_fields(self, doc, doc_type, path):
+        if doc_type == 'module':
+            expected_fields = self.conf.module_fields
+        elif doc_type == 'test':
+            expected_fields = self.conf.test_fields
+
+        # check that mandatory fields are documented
+        for field in expected_fields.mandatory:
+            if not field in doc.keys():
+                CodeParser.LOGGER.error(f"{field} mandatory field is missing.")
+                raise QAValueError(f"{field} mandatory field is missing.", CodeParser.LOGGER.error)
+
+        # check that only schema fields are documented
+        for field in doc.keys():
+            if not field in expected_fields.mandatory and not field in expected_fields.optional and field != 'name':
+                CodeParser.LOGGER.error(f"{field} is not specified in qa-docs schema.")
+                raise QAValueError(f"{field} is not specified in qa-docs schema.", CodeParser.LOGGER.error)
+
     def check_predefined_values(self, doc, doc_type, path):
         """Check if the documentation block follows the predefined values.
 
@@ -147,6 +165,7 @@ class CodeParser:
 
         CodeParser.LOGGER.debug(f"Checking that the documentation block within {path} follow the predefined values.")
         self.check_predefined_values(doc, doc_type, path)
+        self.check_fields(doc, doc_type, path)
 
         return doc
 
@@ -192,10 +211,12 @@ class CodeParser:
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                CodeParser.LOGGER.warning(f"Module '{module_doc['name']}' doesn´t contain any test function")
+                CodeParser.LOGGER.error(f"Module '{module_doc['name']}' doesn´t contain any test function")
+                raise QAValueError(f"Module '{module_doc['name']}' doesn´t contain any test function",
+                                   CodeParser.LOGGER.error)
             else:
                 module_doc['tests'] = functions_doc
-
+            
             self.remove_ignored_fields(module_doc)
 
         return module_doc
