@@ -291,10 +291,13 @@ class DocGenerator:
         print(f"{test_name} does not exist")
         return None
 
-    def check_documentation_block(self):
-        self.parse_test_list()
+    def do_exist(self):
+        for test_name in self.conf.test_names:
+            if not self.locate_test(test_name):
+                DocGenerator.LOGGER.error(f"'{test_name}' could not be found")
+                raise QAValueError(f"'{test_name}' could not be found", DocGenerator.LOGGER.error)
 
-        print("Documentation block ok")
+        print("Tests exist")
 
     def print_test_info(self, test):
         """Print the test info to standard output.
