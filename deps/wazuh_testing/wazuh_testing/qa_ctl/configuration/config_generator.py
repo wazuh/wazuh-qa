@@ -22,6 +22,7 @@ class QACTLConfigGenerator:
     Args:
         tests (list): list with all the test that the user desires to run.
         wazuh_version (string): version of the wazuh packages that the user desires to install.
+        systems (list(str)): Systems with which the tests will be launched
         This parameter is set to None by default. In case that version parameter is not given, the
         wazuh package version will be taken from the documetation test information
 
@@ -42,6 +43,17 @@ class QACTLConfigGenerator:
     BOX_MAPPING = {
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'CentOS 8': 'qactl/centos_8'
+    }
+
+    SYSTEMS = {
+        'centos': {
+            'os_version': 'CentOS 8',
+            'os_platform': 'linux'
+        },
+        'ubuntu': {
+            'os_version': 'Ubuntu Focal',
+            'os_platform': 'linux'
+        }
     }
 
     BOX_INFO = {
@@ -66,9 +78,10 @@ class QACTLConfigGenerator:
     }
 
     def __init__(self, tests, wazuh_version, qa_branch='master',
-                 qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')):
+                 qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
         self.tests = tests
         self.wazuh_version = wazuh_version
+        self.systems = systems
         self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
         self.config_file_path = join(gettempdir(), 'wazuh_qa_ctl', f"config_{get_current_timestamp()}.yaml")
         self.config = {}
@@ -264,43 +277,73 @@ class QACTLConfigGenerator:
 
         return package_url
 
+    def __add_deployment_config_block(self, test_name, os_version, components, os_platform):
+        """Add a configuration block to deploy a test environment in qa-ctl.
+
+        Args:
+            test_name (string): Test name.
+            os_version (string): Host vendor to deploy (e.g: CentOS 8).
+            components (string): Test target (manager or agent).
+            os_platform (string): host system (e.g: linux).
+        """
+        # Process deployment data
+        host_number = len(self.config['deployment'].keys()) + 1
+        vm_name = f"{test_name}_{get_current_timestamp()}"
+        self.config['deployment'][f"host_{host_number}"] = {
+            'provider': {
+                'vagrant': self.__add_instance(os_version, vm_name, components, os_platform)
+            }
+        }
+        # Add manager if the target is an agent
+        if components == 'agent':
+            host_number += 1
+            self.config['deployment'][f"host_{host_number}"] = {
+                'provider': {
+                    'vagrant': self.__add_instance(os_version, vm_name, 'manager', 'linux')
+                }
+            }
+
     def __process_deployment_data(self, tests_info):
         """Generate the data for the deployment module with the information of the tests given as parameter.
 
         Args:
             test_info(dict object): dict object containing information of all the tests that are going to be run.
+
+        Raises:
+            QAValueError: If the test system or specified systems are not valid.
         """
         self.config['deployment'] = {}
 
-        for test in tests_info:
-            if self.__validate_test_info(test):
-                # Choose items from the available list. To be improved in future versions
-                if 'Ubuntu Focal' in test['os_version']:
-                    test['os_version'] = 'Ubuntu Focal'
-                else:
-                    test['os_version'] = 'CentOS 8'
+        # If not system parameter was specified, then one is automatically selected
+        if not self.systems:
+            for test in tests_info:
+                if self.__validate_test_info(test):
+                    if 'Ubuntu Focal' in test['os_version']:
+                        test['os_version'] = 'Ubuntu Focal'
+                    elif 'CentOS 8' in test['os_version']:
+                        test['os_version'] = 'CentOS 8'
+                    else:
+                        raise QAValueError(f"No valid system was found for {test['name']} test",
+                                           QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
-                test['components'] = 'manager' if 'manager' in test['components'] else 'agent'
-                test['os_platform'] = 'linux'
+                    test['components'] = 'manager' if 'manager' in test['components'] else 'agent'
+                    test['os_platform'] = 'linux'
 
-                # Process deployment data
-                host_number = len(self.config['deployment'].keys()) + 1
-                vm_name = f"{test['test_name']}_{get_current_timestamp()}"
-                self.config['deployment'][f"host_{host_number}"] = {
-                    'provider': {
-                        'vagrant': self.__add_instance(test['os_version'], vm_name, test['components'],
+                    self.__add_deployment_config_block(test['test_name'], test['os_version'], test['components'],
                                                        test['os_platform'])
-                    }
-                }
-                # Add manager if the target is an agent
-                if test['components'] == 'agent':
-                    host_number += 1
-                    self.config['deployment'][f"host_{host_number}"] = {
-                        'provider': {
-                            'vagrant': self.__add_instance(test['os_version'], vm_name, 'manager',
-                                                           test['os_platform'])
-                        }
-                    }
+        # If system parameter is specified and have values
+        elif isinstance(self.systems, list) and len(self.systems) > 0:
+            for system in self.systems:
+                for test in tests_info:
+                    if self.__validate_test_info(test):
+                        version = self.SYSTEMS[system]['os_version']
+                        component = 'manager' if 'manager' in test['components'] else 'agent'
+                        platform = self.SYSTEMS[system]['os_platform']
+
+                        self.__add_deployment_config_block(test['test_name'], version, component, platform)
+        else:
+            raise QAValueError('Unable to process systems in the automatically generated configuration',
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
     def __process_provision_data(self):
         """Generate the data for the provision module using the fields from the already generated deployment module."""
@@ -340,13 +383,37 @@ class QACTLConfigGenerator:
                 'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
 
-    def __process_test_data(self, tests_info):
-        """Generate the data for the test module with the information of the tests given as parameter.
+    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name):
+        """Add a configuration block to launch a test in qa-ctl.
+
+        Args:
+            instance (str): block instance name (host_x).
+            installation_files_path (str): Path where locate wazuh qa-ctl files.
+            system (str): System where launch the test.
+            test_path (str): Path where are located the test files.
+            test_name (str): Test name.
+        """
+        self.config['tests'][instance] = {'host_info': {}, 'test': {}}
+        self.config['tests'][instance]['host_info'] = \
+            dict(self.config['provision']['hosts'][instance]['host_info'])
+
+        self.config['tests'][instance]['test'] = {
+            'type': 'pytest',
+            'path': {
+                'test_files_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                   test_path], system),
+                'run_tests_dir_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                      'tests', 'integration'], system),
+                'test_results_path': join(gettempdir(), 'wazuh_qa_ctl', f"{test_name}_{get_current_timestamp()}")
+            }
+        }
+
+    def __set_testing_config(self, tests_info):
+        """Add all blocks corresponding to the testing configuration for qa-ctl
 
         Args:
             test_info(dict object): dict object containing information of all the tests that are going to be run.
         """
-        self.config['tests'] = {}
         test_host_number = len(self.config['tests'].keys()) + 1
 
         for test in tests_info:
@@ -355,26 +422,36 @@ class QACTLConfigGenerator:
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
 
-            self.config['tests'][instance] = {'host_info': {}, 'test': {}}
-            self.config['tests'][instance]['host_info'] = \
-                dict(self.config['provision']['hosts'][instance]['host_info'])
-
-            self.config['tests'][instance]['test'] = {
-                'type': 'pytest',
-                'path': {
-                    'test_files_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
-                                                       test['path']], system),
-                    'run_tests_dir_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
-                                                          'tests', 'integration'], system),
-                    'test_results_path': join(gettempdir(), 'wazuh_qa_ctl',
-                                              f"{test['test_name']}_{get_current_timestamp()}")
-                }
-            }
+            self.__add_testing_config_block(instance, installation_files_path, system, test['path'],
+                                            test['test_name'])
             test_host_number += 1
             # If it is an agent test then we skip the next manager instance since no test will be launched in that
             # instance
             if test['components'] == 'agent':
                 test_host_number += 1
+
+    def __process_test_data(self, tests_info):
+        """Generate the data for the test module with the information of the tests given as parameter.
+
+        Args:
+            test_info(dict object): dict object containing information of all the tests that are going to be run.
+
+        Raises:
+            QAValueError: If the specified systems are not valid.
+        """
+        self.config['tests'] = {}
+
+        if not self.systems:
+            for _ in tests_info:
+                self.__set_testing_config(tests_info)
+
+        elif isinstance(self.systems, list) and len(self.systems) > 0:
+            for _ in self.systems:
+                for _ in tests_info:
+                    self.__set_testing_config(tests_info)
+        else:
+            raise QAValueError('Unable to process systems in the automatically generated configuration',
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
     def __process_test_info(self, tests_info):
         """Process all the info of the desired tests that are going to be run in order to generate the data

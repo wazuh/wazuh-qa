@@ -208,7 +208,7 @@ def get_script_parameters():
     parser.add_argument('--config', '-c', type=str, action='store', required=False, dest='config',
                         help='Path to the configuration file.')
 
-    parser.add_argument('-p', '--persistent', action='store_true',
+    parser.add_argument('--persistent', '-p', action='store_true',
                         help='Persistent instance mode. Do not destroy the instances once the process has finished.')
 
     parser.add_argument('--dry-run', action='store_true',
@@ -221,16 +221,19 @@ def get_script_parameters():
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
                         help='Wazuh installation and tests version.')
 
-    parser.add_argument('-d', '--debug', action='count', default=0, help='Run in debug mode. You can increase the debug'
+    parser.add_argument('--debug', '-d', action='count', default=0, help='Run in debug mode. You can increase the debug'
                                                                          ' level with more [-d+]')
     parser.add_argument('--no-validation-logging', action='store_true', help='Disable initial logging of parameter '
                                                                              'validations.')
 
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
+    parser.add_argument('--os', '-o', type=str, action='store', required=False, nargs='+', dest='operating_systems',
+                        choices=['centos', 'ubuntu'], help='System/s where the tests will be launched.')
+
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
-                                       help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
-                                            'has higher priority than the specified in the configuration file.')
+                        help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
+                             'has higher priority than the specified in the configuration file.')
 
     parser.add_argument('--skip-deployment', action='store_true',
                         help='Flag to skip the deployment phase. Set it only if -c or --config was specified.')
@@ -264,7 +267,7 @@ def main():
     if arguments.run_test:
         qactl_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, arguments.qa_branch,
-                                                WAZUH_QA_FILES)
+                                                WAZUH_QA_FILES, arguments.operating_systems)
         config_generator.run()
         launched['config_generator'] = True
         configuration_file = config_generator.config_file_path
@@ -327,7 +330,7 @@ def main():
             if arguments.run_test and launched['config_generator']:
                 config_generator.destroy()
         else:
-            if not RUNNING_ON_DOCKER_CONTAINER:
+            if not RUNNING_ON_DOCKER_CONTAINER and arguments.run_test:
                 qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
 
 if __name__ == '__main__':
