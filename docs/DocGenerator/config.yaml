@@ -74,6 +74,7 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_timezone_changes/data"
   - "../../tests/integration/test_fim/test_files/test_wildcards_complex/data"
   - "../../tests/integration/test_fim/test_files/test_windows_audit_interval/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/data"
 
 Output fields:
   Module:
