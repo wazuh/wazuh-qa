@@ -155,7 +155,7 @@ def validate_parameters(parameters, parser):
 
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
-                raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
+                raise QAValueError(f"{test_name} has not been not found in {parameters.tests_path}.", qadocs_logger.error)
 
     # Check that the index exists
     if parameters.app_index_name:
@@ -194,7 +194,7 @@ def parse_data(args):
     if args.test_exist:
         doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_names=args.test_exist))
 
-        doc_check.do_exist()
+        doc_check.do_exist(args.tests_path)
 
     # Parse a list of tests
     elif args.test_names:
