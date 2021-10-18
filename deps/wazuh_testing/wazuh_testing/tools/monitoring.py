@@ -34,8 +34,9 @@ from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
-AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
+MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
 
 DEFAULT_POLL_FILE_TIME = 1
 DEFAULT_WAIT_FILE_TIMEOUT = 30
@@ -1039,3 +1040,9 @@ def wait_file(path, timeout=DEFAULT_WAIT_FILE_TIMEOUT):
 
     if not os.path.isfile(path):
         raise FileNotFoundError
+
+
+def callback_authd_startup(line):
+    if 'Accepting connections on port 1515' in line:
+        return line
+    return None

@@ -15,16 +15,15 @@ matplotlib>=3.3.4; platform_system == "Linux" or platform_system == "MacOS" or p
 netifaces==0.10.9
 numpy>=1.19.5
 pandas>=1.1.5
-paramiko==2.7.1
 pillow>=6.2.0; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
-psutil
+psutil>=5.6.6
 py~=1.10.0
-pycryptodome==3.9.8
+pycryptodome>=3.9.8
 pyOpenSSL==19.1.0
-pytest-html==3.1.1
-pytest==6.2.3
+pytest-html==2.0.1
+pytest==6.2.2
 pyyaml==5.4
-requests>=2.25.0
+requests==2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
 seaborn>=0.11.1; platform_system == "Linux" or platform_system == "MacOS" or platform_system=='Windows'
 setuptools~=56.0.0

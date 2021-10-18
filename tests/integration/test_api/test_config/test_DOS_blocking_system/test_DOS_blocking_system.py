@@ -34,6 +34,7 @@ def get_configuration(request):
     {'config1'},
     {'config2'}
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_DOS_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                              wait_for_start, get_api_details):
     """Check the correct functionality of the DOS blocking system.
