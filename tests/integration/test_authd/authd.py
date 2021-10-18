@@ -13,6 +13,42 @@ DAEMON_NAME = 'wazuh-authd'
 AUTHD_KEY_REQUEST_TIMEOUT = 10
 
 
+def create_authd_request(input):
+    """
+    Creates a command to request keys to Authd.
+
+    Args:
+        input (dict): Dictionary with the content of the request command.
+    """
+    command = ""
+
+    if 'password' in input:
+        password = input['password']
+        command = command + f'OSSEC PASS: {password} '
+
+    command = command + 'OSSEC'
+
+    if 'name' in input:
+        name = input['name']
+        command = command + f" A:'{name}'"
+    else:
+        raise Exception("Error creating the Authd command: 'name' is required")
+
+    if 'group' in input:
+        group = input['group']
+        command = command + f" G:'{group}'"
+
+    if 'ip' in input:
+        ip = input['ip']
+        command = command + f" IP:'{ip}'"
+
+    if 'key_hash' in input:
+        key_hash = input['key_hash']
+        command = command + f" K:'{key_hash}'"
+
+    return command
+
+
 def validate_argument(received, expected, argument_name):
     if received != expected:
         return 'error', f"Invalid '{argument_name}': '{received}' received, '{expected}' expected."
