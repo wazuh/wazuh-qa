@@ -54,8 +54,8 @@ def get_configuration(request):
 
 
 # tests
-
-@pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
+@pytest.mark.skip(reason="It will be blocked by #1906 on 4.2, when it will solve on 4.3 we can enable again this test.")
+# @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 @pytest.mark.parametrize('publish_messages', [
     ['- DEBUG - GCP message' for _ in range(30)],
     ['- DEBUG - GCP message' for _ in range(100)],
