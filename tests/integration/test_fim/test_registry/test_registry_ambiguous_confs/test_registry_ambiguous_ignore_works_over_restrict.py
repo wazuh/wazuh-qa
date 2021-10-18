@@ -41,7 +41,7 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#registry-ignore
 
 pytest_args:
     - fim_mode:
@@ -120,9 +120,9 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same
-                 registry entry. For example, when a registry entry is ignored, and at the same time,
-                 monitoring is restricted on a key that is in that entry, no FIM events should be generated
-                 when that key is modified. For this purpose, the test will monitor a registry entry that
+                 registry key. For example, when a registry key is ignored, and at the same time,
+                 monitoring is restricted on other key that is in that key, no FIM events should be generated
+                 when that key is modified. For this purpose, the test will monitor a registry key that
                  is ignored in the configuration, and make key operations inside it. Finally, it will verify
                  that no FIM events are generated.
 
@@ -155,16 +155,16 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
-        - Verify that when a registry entry is ignored, the 'restrict' attribute
+        - Verify that when a registry key is ignored, the 'restrict' attribute
           is not taken into account to generate FIM events.
 
     input_description: A test case (ambiguous_ignore_restrict_key) is contained in an external YAML file
                        (wazuh_ignore_over_restrict.yaml) which includes configuration settings for
-                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry entries
+                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry keys
                        to be monitored defined in the module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+        - r'.*Sending FIM event: (.+)$' (at end of the initial FIM scan)
 
     tags:
         - scheduled
@@ -187,10 +187,10 @@ def test_ignore_over_restrict_values(key, subkey, value_name, arch,
                                      get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same
-                 registry entry. For example, when a registry entry is ignored, and at the same time,
-                 monitoring is restricted on a key that is in that entry, no FIM events should be generated
-                 when that key is modified. For this purpose, the test will monitor a registry entry that
-                 is ignored in the configuration, and make key operations inside it. Finally, it will verify
+                 registry key. For example, when a registry key is ignored, and at the same time,
+                 monitoring is restricted on a value that is in that key, no FIM events should be generated
+                 when that value is modified. For this purpose, the test will monitor a registry key that
+                 is ignored in the configuration, and make value operations inside it. Finally, it will verify
                  that no FIM events are generated.
 
     wazuh_min_version: 4.2.0
@@ -222,16 +222,16 @@ def test_ignore_over_restrict_values(key, subkey, value_name, arch,
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
-        - Verify that when a registry entry is ignored, the 'restrict' attribute
+        - Verify that when a registry key is ignored, the 'restrict' attribute
           is not taken into account to generate FIM events.
 
     input_description: A test case (ambiguous_ignore_restrict_values) is contained in an external YAML file
                        (wazuh_ignore_over_restrict.yaml) which includes configuration settings for
-                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry entries
+                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry keys
                        to be monitored defined in the module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+        - r'.*Sending FIM event: (.+)$' (at end of the initial FIM scan)
 
     tags:
         - scheduled

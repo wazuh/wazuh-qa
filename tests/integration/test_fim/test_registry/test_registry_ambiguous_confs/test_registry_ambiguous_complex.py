@@ -140,10 +140,10 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
     '''
     description: Check if the 'wazuh-syscheckd' daemon adds, in the generated events, the 'check_' fields
                  specified in the configuration. These checks are attributes indicating that a monitored key
-                 has been modified. For this purpose, the test will monitor several registry entries, and
-                 configure different 'checks' for them. Then, it will make operations using testing keys
-                 to generate events, and finally, the test will verify that the FIM events generated contain
-                 only the 'check_' fields specified for the monitored key.
+                 has been modified. For this purpose, the test will monitor several registry keys, and
+                 configure different 'checks' for them. Then, it will make operations using testing keys/values
+                 to generate events, and finally, the test will verify that the FIM events generated contain only
+                 the 'check_' fields specified for the monitored key/values.
 
     wazuh_min_version: 4.2.0
 
@@ -176,7 +176,7 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
     input_description: A test case (complex_checks) is contained in an external YAML file
                        (wazuh_complex_entries.yaml) which includes configuration settings
                        for the 'wazuh-syscheckd' daemon. That is combined with the
-                       testing registry entries to be monitored defined in the module.
+                       testing registry keys to be monitored defined in the module.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
@@ -209,9 +209,9 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates or not the 'content_changes' field for each event
                  depending on the value set in the 'report_changes' attribute. This attribute allows reporting the
-                 modifications made on a monitored key. For this purpose, the test will monitor a registry entry,
-                 and make operations using a testing key. Finally, it will verify that FIM events generated contain
-                 the changes made in the 'content_changes' field when required.
+                 modifications made in a monitored key. For this purpose, the test will monitor a registry key,
+                 and make operations using a testing value. Finally, it will verify that FIM events generated
+                 contain the changes made in the 'content_changes' field when required.
 
     wazuh_min_version: 4.2.0
 
@@ -243,12 +243,12 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
 
     assertions:
         - Verify that FIM events generated include in its 'content_changes' field the changes made
-          in the monitored key when 'report_changes == yes' and vice versa.
+          in the monitored value when 'report_changes == yes' and vice versa.
 
     input_description: A test case (complex_report_changes) is contained in an external YAML file
                        (wazuh_complex_entries.yaml) which includes configuration settings
                        for the 'wazuh-syscheckd' daemon. That is combined with the
-                       testing registry entries to be monitored defined in the module.
+                       testing registry keys to be monitored defined in the module.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
@@ -293,7 +293,7 @@ def test_ambiguous_report_tags(key, subkey, tag,
     description: Check if the 'wazuh-syscheckd' daemon generates or not the 'tags' field for each event
                  depending on the value(s) set in the 'tags' attribute. This attribute allows adding tags
                  to the FIM events for monitored keys. For this purpose, the test will monitor a registry
-                 entry, and make CUD (create, update, and delete) operations using testing keys. Finally,
+                 key, and make CUD (create, update, and delete) operations using testing keys/values. Finally,
                  it will verify that FIM events generated include in its 'tag' field the tags required.
 
     wazuh_min_version: 4.2.0
@@ -330,7 +330,7 @@ def test_ambiguous_report_tags(key, subkey, tag,
     input_description: A test case (complex_tags) is contained in an external YAML file
                        (wazuh_complex_entries.yaml) which includes configuration settings
                        for the 'wazuh-syscheckd' daemon. That is combined with the
-                       testing registry entries to be monitored defined in the module.
+                       testing registry keys to be monitored defined in the module.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)

@@ -12,7 +12,7 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        files and triggering alerts when these files are modified. All these tests will be performed
        using complex paths and ambiguous configurations, such as keys and subkeys with opposite
        monitoring settings. In particular, it will verify that duplicate events are not generated
-       when multiple configurations are used to monitor the same registry entry.
+       when multiple configurations are used to monitor the same registry key.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
@@ -144,10 +144,10 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
                            get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the last entry when setting multiple ones with
-                 the same key path in the configuration. For this purpose, the test will monitor a key path
-                 that is duplicated using diferent settings in the configuration, and make key operations
-                 inside it. Finally, the test will verify that FIM events are only generated from the last
-                 entry detected.
+                 the same key path in the configuration. For this purpose, the test will monitor a registry
+                 key that is duplicated using diferent settings in the configuration, and make key/value
+                 operations inside it. Finally, the test will verify that FIM events are only generated from
+                 the last entry detected.
 
     wazuh_min_version: 4.2.0
 
@@ -191,7 +191,7 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
 
     input_description: Diferent test cases are contained in an external YAML file (wazuh_duplicated_entries.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon. These are combined
-                       with the testing registry entries to be monitored defined in the module.
+                       with the testing registry keys to be monitored defined in the module.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
@@ -224,9 +224,9 @@ def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, repo
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the last entry when setting multiple ones
                  using the same key path and the 'report_changes' attribute in the configuration.
-                 For this purpose, the test will monitor a key path that is duplicated using a different
-                 value for the 'report_changes' attribute in the configuration, and make key operations
-                 inside it. Finally, the test will verify that FIM events generated include the key changes
+                 For this purpose, the test will monitor a registry key that is duplicated using a different
+                 value for the 'report_changes' attribute in the configuration, and make value operations
+                 inside it. Finally, the test will verify that FIM events generated include the value changes
                  when this option is enabled in the last entry of the configuration.
 
     wazuh_min_version: 4.2.0
@@ -267,11 +267,11 @@ def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, repo
         - Verify that FIM events generated include in its 'content_changes' field the changes made
           in the monitored key when 'report_changes == yes'.
         - Verify that a 'diff' file is created when 'report_changes == yes' and changes are made
-          on the monitored key.
+          on the monitored value.
 
     input_description: A test case (duplicate_report_entries) is contained in an external YAML file
                        (wazuh_duplicated_entries.yaml) which includes configuration settings for
-                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry entries
+                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry keys
                        to be monitored defined in the module.
 
     expected_output:
