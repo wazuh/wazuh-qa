@@ -2,30 +2,28 @@ import os
 import time
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
 from authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+# Data paths
+data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configurations_path = os.path.join(data_path, 'configuration.yaml')
+tests_path = os.path.join(data_path, 'test_cases')
 
 # Configurations
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'force_options_configuration.yaml')
-
 configurations = load_wazuh_configurations(configurations_path, __name__)
-tests = read_yaml(os.path.join(test_data_path, 'key_mismatch.yaml'))
+configuration_ids = ['authd_force_options']
 
-"""
-tests2 = read_yaml(os.path.join(test_data_path, 'after_registration_time.yaml'))
-tests3 = read_yaml(os.path.join(test_data_path, 'disconnected_time.yaml'))
-
-for i in range(len(tests2)):
-    tests.append(tests2[i])
-
-for i in range(len(tests3)):
-    tests.append(tests3[i])
-"""
+# Tests
+tests = []
+test_case_ids = []
+for file in os.listdir(tests_path):
+    group_name = file.split(".")[0]
+    file_tests = read_yaml(os.path.join(tests_path, file))
+    tests = tests + file_tests
+    test_case_ids = test_case_ids + [f"{group_name} {test_case['name']}" for test_case in file_tests]
 
 # Variables
 log_monitor_paths = []
@@ -34,15 +32,12 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (WAZ
 monitored_sockets_params = [('wazuh-authd', None, True), ('wazuh-db', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
-configuration_ids = ['authd_force_options']
-test_case_ids = [f"{test_case['name']}" for test_case in tests]
-
 # Functions
 def get_temp_force_config(param):
     """
     Creates a temporal config file.
     """
-    temp = os.path.join(test_data_path, 'temp.yaml')
+    temp = os.path.join(data_path, 'temp.yaml')
     with open(configurations_path, 'r') as conf_file:
         force_conf = {'force': {'elements': []}}
         for elem in param:
@@ -85,7 +80,6 @@ def override_authd_force_conf(get_current_test_case, request):
     """
     test_name = request.node.originalname
     configuration = get_current_test_case.get('configuration', {})
-    #parse_configuration_string(configuration)
     # Configuration for testing
     temp = get_temp_force_config(configuration)
     conf = load_wazuh_configurations(temp, test_name, )
@@ -97,7 +91,7 @@ def override_authd_force_conf(get_current_test_case, request):
 
 
 @pytest.fixture(scope='function')
-def insert_pre_existent_agents(get_current_test_case, request):
+def insert_pre_existent_agents(get_current_test_case):
     agents = get_current_test_case.get('pre_existent_agents', [])
     time_now = int(time.time())
     wdb_sock = receiver_sockets[1]
