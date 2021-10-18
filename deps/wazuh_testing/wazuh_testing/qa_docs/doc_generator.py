@@ -288,16 +288,14 @@ class DocGenerator:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
 
-        print(f"{test_name} does not exist")
         return None
 
-    def do_exist(self):
+    def do_exist(self, path):
         for test_name in self.conf.test_names:
-            if not self.locate_test(test_name):
-                DocGenerator.LOGGER.error(f"'{test_name}' could not be found")
-                raise QAValueError(f"'{test_name}' could not be found", DocGenerator.LOGGER.error)
-
-        print("Tests exist")
+            if self.locate_test(test_name):
+                print(f'{test_name} does exist in {path}')
+            else:
+                print(f'{test_name} does not exist in {path}')
 
     def print_test_info(self, test):
         """Print the test info to standard output.
