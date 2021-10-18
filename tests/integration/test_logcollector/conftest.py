@@ -69,26 +69,6 @@ def init_authd_remote_simulator(get_connection_configuration, request):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
-    
-@pytest.fixture(scope="package", autouse=True)
-def configure_local_internal_options_logcollector():
-    """Configure Wazuh with local internal options required for logcollector tests."""
-    backup_options_lines = conf.get_wazuh_local_internal_options()
-    backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
-
-    if backup_options_dict != LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS:
-        conf.add_wazuh_local_internal_options(LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS)
-
-        control_service('restart')
-
-        yield
-
-        conf.set_wazuh_local_internal_options(backup_options_lines)
-
-        control_service('restart')
-    else:
-        yield
-
 
 @pytest.fixture(scope='function')
 def delete_file_status_json():
