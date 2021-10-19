@@ -53,6 +53,12 @@ inactivity.
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+
+#### Test ruleset refresh
+
+- **[Test alert labels](test_ruleset_refresh/test_alert_labels.md)**:
+Check that after modifying the alert level it takes effect when opening a new
+logtest sessions, without having to reset the manager.
 #### Test ruleset refresh
 
 - **[Test cdb labels](test_ruleset_refresh/test_cdb_labels.md)**:
