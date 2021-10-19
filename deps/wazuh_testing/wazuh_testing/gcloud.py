@@ -124,7 +124,7 @@ def callback_detect_schedule_read_err(line):
     return None
 
 
-def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
+def publish(id_project, name_topic, credentials, messages=None):
     if WAZUH_PATH in credentials:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "{}".format(credentials)
     else:
@@ -132,10 +132,22 @@ def publish(id_project, name_topic, credentials, repetitions=1, msg=None):
 
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(id_project, name_topic)
+    publish_futures = []
 
-    for number in range(repetitions):
+    for msg in messages:
         data = u"{}".format(msg)
         # Data must be a bytestring
         data = data.encode("utf-8")
         # Add two attributes, origin and username, to the message
-        publisher.publish(topic_path, data, origin="python-sample", username="gcp")
+        publish_future = publisher.publish(topic_path, data, origin="python-sample", username="gcp")
+        publish_futures.append(publish_future)
+
+    return publish_futures
+
+
+def publish_sync(id_project, name_topic, credentials, messages=None):
+    publish_futures = publish(id_project, name_topic, credentials, messages)
+
+    # Wait for publications to finish... Layman's way
+    for p in publish_futures:
+        p.result()

@@ -14,7 +14,7 @@ group to reduce the time required by the test to make the checks.
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 1 | 126.41s |
+| 0 | 3 | 71.23s |
 
 ## Expected behavior
 
