@@ -56,6 +56,9 @@ Check if `wazuh-logtest` produce the correct rule/decoder matching.
 
 #### Test ruleset refresh
 
+- **[Test rule labels](test_ruleset_refresh/test_rule_labels.md)**:
+Checks if modifying the configuration of the rules, by using its labels, takes
+effect when opening new logtest sessions, without having to reset the manager.
 - **[Test decoder labels](test_ruleset_refresh/test_decoder_labels.md)**:
 Checks if modifying the configuration of the decoder, by using its labels, takes
 effect when opening new logtest sessions without having to reset the manager.
