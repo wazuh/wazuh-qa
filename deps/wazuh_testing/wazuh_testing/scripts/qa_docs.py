@@ -261,6 +261,11 @@ def main():
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
 
+    if args.test_exist:
+        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
+        if doc_check.locate_test() is not None:
+            print("test exists")
+
     if args.version:
         with open(VERSION_PATH, 'r') as version_file:
             version_data = version_file.read()

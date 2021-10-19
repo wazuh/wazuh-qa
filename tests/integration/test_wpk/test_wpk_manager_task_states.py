@@ -13,13 +13,14 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
+WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0]
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'

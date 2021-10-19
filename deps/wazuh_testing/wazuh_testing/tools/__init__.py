@@ -13,6 +13,7 @@ if sys.platform == 'win32':
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys')
     PREFIX = os.path.join('c:', os.sep)
     GEN_OSSEC = None
     WAZUH_API_CONF = None
@@ -22,10 +23,15 @@ if sys.platform == 'win32':
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
     ANALYSIS_STATISTICS_FILE = None
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
+    AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 else:
 
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
+
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
 
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
@@ -42,19 +48,23 @@ else:
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
+    AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
+
 
     try:
         import grp
         import pwd
 
-        WAZUH_UID = pwd.getpwnam("wazuh").pw_uid
-        WAZUH_GID = grp.getgrnam("wazuh").gr_gid
+        WAZUH_UID = pwd.getpwnam(WAZUH_UNIX_USER).pw_uid
+        WAZUH_GID = grp.getgrnam(WAZUH_UNIX_GROUP).gr_gid
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
@@ -86,6 +96,9 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
+LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
+LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
+
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
@@ -96,7 +109,6 @@ CLIENT_CUSTOM_CERT_PATH = os.path.join(_data_path, 'sslmanager.cert')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
-
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 QUEUE_ALERTS_PATH = os.path.join(WAZUH_PATH, 'queue', 'alerts')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
@@ -108,6 +120,7 @@ ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
+LOGTEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logtest')
 MONITORD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'monitor')
 REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'request')
 SYSCHECKD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'syscheck')
@@ -177,7 +190,6 @@ API_DAEMONS_REQUIREMENTS = [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_D
 
 
 DISABLE_MONITORD_ROTATE_LOG_OPTION = {'monitord.rotate_log': '0'}
-REMOTED_LOCAL_INTERNAL_OPTIONS = {'remoted.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 ANALYSISD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 AGENTD_LOCAL_INTERNAL_OPTIONS = {'agent.debug': '2', 'execd': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 FIM_LOCAL_INTERNAL_OPTIONS_MANAGER = {'syscheck.debug': '2',
