@@ -288,13 +288,19 @@ class DocGenerator:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
 
-        print(f"{test_name} does not exist")
         return None
 
-    def check_documentation_block(self):
-        self.parse_test_list()
-
-        print("Documentation block ok")
+    def check_test_exists(self, path):
+        """Check that a test exists within the tests path input.
+        
+        Args:
+            path (str): A string with the tests path.
+        """
+        for test_name in self.conf.test_names:
+            if self.locate_test(test_name):
+                print(f'{test_name} exists in {path}')
+            else:
+                print(f'{test_name} does not exist in {path}')
 
     def print_test_info(self, test):
         """Print the test info to standard output.
