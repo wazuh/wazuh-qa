@@ -6,8 +6,12 @@
   - section: remote
     elements:
     - connection:
-        value: secure
+         value: secure
     - port:
          value: PORT
     - protocol:
          value: PROTOCOL
+  - section: global
+    elements:
+    - logall:
+         value: "yes"

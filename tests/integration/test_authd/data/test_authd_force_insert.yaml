@@ -1,0 +1,24 @@
+---
+  -
+    name: 'Overwrite agent name'
+    description: 'Check for register an agent with repeated name. Rejected if force_insert = no'
+    previous_agent_name: 'user1'
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: 'any'
+  -
+    name: 'Valid and duplicate IP'
+    description: 'Try register an agent with existing IP. Rejected if force_insert = no'
+    previous_agent_name: 'user2'
+    previous_agent_ip: '10.10.10.10'
+    test_case:
+    -
+      input: "OSSEC A:'user_' IP:'10.10.10.10'"
+      output:
+        status: 'success'
+        name: 'user_'
+        ip: '10.10.10.10'

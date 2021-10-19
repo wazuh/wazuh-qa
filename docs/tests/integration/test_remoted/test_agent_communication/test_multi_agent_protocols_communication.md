@@ -14,7 +14,7 @@ protocols simultaneously.
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 2 | 6 | 24s |
+| 2 | 6 | 65.72s |
 
 ## Expected behavior
 Success if the events have been found in the manager's `queue` socket after sending it from the agents, using different

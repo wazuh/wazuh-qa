@@ -21,7 +21,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 
 SSL_AGENT_CA = '/var/ossec/etc/test_rootCA.pem'
 SSL_AGENT_CERT = '/tmp/test_sslagent.cert'
