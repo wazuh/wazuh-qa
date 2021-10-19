@@ -2,10 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import time
+from time import sleep
 
 import pytest
 
+import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
@@ -19,15 +20,11 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_request_agent_info.yaml')
 
 parameters = [
-    {'PROTOCOL': 'udp,tcp'},
-    {'PROTOCOL': 'tcp'},
-    {'PROTOCOL': 'udp'},
+    {'PROTOCOL': 'udp,tcp'}
 ]
 
 metadata = [
-    {'PROTOCOL': 'udp,tcp'},
-    {'PROTOCOL': 'tcp'},
-    {'PROTOCOL': 'udp'},
+    {'PROTOCOL': 'udp,tcp'}
 ]
 
 # test cases
@@ -69,8 +66,13 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
 
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
     for agent, protocol in zip(agents, protocols):
+        # Wait until remoted has loaded the new agent key
+        rd.wait_to_remoted_key_update(wazuh_log_monitor)
+
         if "disconnected" not in command_request:
             sender, injector = ag.connect(agent, manager_address, protocol)
+        else:
+            sleep(10) # Give time for the remoted socket to be ready.
 
         msg_request = f'{agent.id} {command_request}'
 

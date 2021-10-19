@@ -7,6 +7,9 @@ import string
 from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
+from random import randint, SystemRandom, choice
+import string
+import socket
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -42,7 +45,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator
-        
+
     return retry_function
 
 
@@ -66,7 +69,7 @@ def replace_regex(pattern, new_value, data, replace_group=False):
 
 
 def insert_xml_tag(pattern, tag, value, data):
-    """
+    r"""
     Function to insert a xml tag in a string data.
 
     Args:
@@ -135,3 +138,10 @@ def lower_case_key_dictionary_array(array_dict):
         List: List of dictionaries with lowercase keys.
     """
     return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]
+def get_host_name():
+    """
+    Gets the system host name.
+    Returns:
+        str: The host name.
+    """
+    return socket.gethostname()
