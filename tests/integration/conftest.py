@@ -821,7 +821,8 @@ def daemons_handler(get_configuration, request):
         for daemon in daemons:
             logger.debug(f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
-            
+
+
 @pytest.fixture(scope='function')
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
@@ -846,7 +847,7 @@ def file_monitoring(request):
     truncate_file(file_to_monitor)
     logger.debug(f"Trucanted {file_to_monitor}")
 
-    
+
 @pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.

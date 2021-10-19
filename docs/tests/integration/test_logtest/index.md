@@ -38,7 +38,47 @@ Check if `wazuh-logtest` correctly detects and handles errors when using a token
 Check if `wazuh-logtest` correctly detects and removes the sessions under
 pre-defined scenarios.
 
+#### Test remove old sessions
+
+- **[Test remove old sessions](test_remove_old_sessions/test_remove_old_sessions.md)**:
+Check that `wazuh-logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then the oldest session is released.
+
+- **[Test remove old session for inactivity](test_remove_old_sessions/test_remove_old_session_for_inactivity.md)**:
+Check that `wazuh-logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then old sessions are released due to
+inactivity.
+
 #### Test rules decoders load
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+
+#### Test ruleset refresh
+
+- **[Test alert labels](test_ruleset_refresh/test_alert_labels.md)**:
+Check that after modifying the alert level it takes effect when opening a new
+logtest sessions, without having to reset the manager.
+#### Test ruleset refresh
+
+- **[Test cdb labels](test_ruleset_refresh/test_cdb_labels.md)**:
+Check that `wazuh-logtest` works as expected with the operation of
+loading new cdb list files without the need to restart the manager.
+
+#### Test ruleset refresh
+
+- **[Test rule labels](test_ruleset_refresh/test_rule_labels.md)**:
+Checks if modifying the configuration of the rules, by using its labels, takes
+effect when opening new logtest sessions, without having to reset the manager.
+- **[Test decoder labels](test_ruleset_refresh/test_decoder_labels.md)**:
+Checks if modifying the configuration of the decoder, by using its labels, takes
+effect when opening new logtest sessions without having to reset the manager.
+#### Test invalid rule decoders syntax
+
+- **[Test invalid rules syntax](test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md)**:
+Check that `wazuh-logtest` correctly detects and handles errors when processing a
+rules file.
+
+- **[Test invalid decoder syntax](test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md)**:
+Check that `wazuh-logtest` correctly detects and handles errors when processing a
+decoders file.

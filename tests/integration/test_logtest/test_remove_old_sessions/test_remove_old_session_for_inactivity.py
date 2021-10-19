@@ -2,17 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import os
-import time
-
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.logtest import (callback_logtest_started,
-                                   callback_remove_session,
-                                   callback_session_initialized)
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+import os
+
+from wazuh_testing.logtest import callback_remove_session, callback_session_initialized
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import LOGTEST_SOCKET_PATH
+from wazuh_testing import global_parameters
+from time import sleep
+from json import dumps
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -24,18 +22,18 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 local_internal_options = {'analysisd.debug': '2'}
 
 # Variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'logtest'))
-receiver_sockets_params = [(logtest_sock, 'AF_UNIX', 'TCP')]
+receiver_sockets_params = [(LOGTEST_SOCKET_PATH, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
+local_internal_options = {'analysisd.debug': '1'}
+create_session_data = {'version':1, 'command':'log_processing',
+                       'parameters':{'event': 'Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928',
+                                     'log_format': 'syslog',
+                                     'location': 'master->/var/log/syslog'}}
+msg_create_session = dumps(create_session_data)
 
-msg_create_session = """{"version":1, "command":"log_processing", "parameters":{
-"event": "Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928",
-"log_format": "syslog", "location": "master->/var/log/syslog"}}"""
 
+# Fixtures
 
-# Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -43,16 +41,17 @@ def get_configuration(request):
 
 
 # Test
-def test_remove_old_session_for_inactivity(get_configuration, configure_environment,
-                                           configure_local_internal_options_module, restart_wazuh, connect_to_sockets_function):
-    """
-    Create more sessions than allowed and wait session_timeout seconds,
+
+def test_remove_old_session_for_inactivity(configure_local_internal_options_module,
+                                           get_configuration,
+                                           configure_environment,
+                                           restart_required_logtest_daemons,
+                                           file_monitoring,
+                                           wait_for_logtest_startup,
+                                           connect_to_sockets_function):
+    """Create more sessions than allowed and wait session_timeout seconds,
     then check Wazuh-logtest has removed session for inactivity.
     """
-
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_logtest_started,
-                            error_message="Event 'logtest started' not found")
 
     session_timeout = int(get_configuration['sections'][0]['elements'][3]['session_timeout']['value'])
 
@@ -60,12 +59,12 @@ def test_remove_old_session_for_inactivity(get_configuration, configure_environm
     msg_recived = receiver_sockets[0].receive()[4:]
     msg_recived = msg_recived.decode()
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_session_initialized,
-                            error_message="Event 'session initialized' not found")
+                            error_message="Session initialization event not found")
 
-    time.sleep(session_timeout)
+    sleep(session_timeout)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_remove_session,
-                            error_message="Event 'session removed' not found")
+                            error_message="Session removal event not found")
