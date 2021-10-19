@@ -36,5 +36,3 @@ def wait_for_logtest_startup(request):
     """Wait until logtest has begun."""
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_logtest_started)
-
-    yield
