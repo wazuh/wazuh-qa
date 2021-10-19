@@ -38,7 +38,28 @@ Check if `wazuh-logtest` correctly detects and handles errors when using a token
 Check if `wazuh-logtest` correctly detects and removes the sessions under
 pre-defined scenarios.
 
+#### Test remove old sessions
+
+- **[Test remove old sessions](test_remove_old_sessions/test_remove_old_sessions.md)**:
+Check that `wazuh-logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then the oldest session is released.
+
+- **[Test remove old session for inactivity](test_remove_old_sessions/test_remove_old_session_for_inactivity.md)**:
+Check that `wazuh-logtest` correctly detects and handles the situation where trying
+to use more sessions than allowed and then old sessions are released due to
+inactivity.
+
 #### Test rules decoders load
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+
+#### Test invalid rule decoders syntax
+
+- **[Test invalid rules syntax](test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md)**:
+Check that `wazuh-logtest` correctly detects and handles errors when processing a
+rules file.
+
+- **[Test invalid decoder syntax](test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md)**:
+Check that `wazuh-logtest` correctly detects and handles errors when processing a
+decoders file.
