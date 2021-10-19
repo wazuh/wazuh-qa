@@ -1,0 +1,26 @@
+requests:
+  -
+    endpoint: /agents
+    method: get
+    parameters: {}
+    body: {}
+  -
+    endpoint: /cluster/healthcheck
+    method: get
+    parameters: {}
+    body: {}
+  -
+    endpoint: /cluster/configuration/validation
+    method: get
+    parameters: {}
+    body: {}
+  -
+    endpoint: /groups/default/agents
+    method: get
+    parameters: {}
+    body: {}
+  -
+    endpoint: /syscheck
+    method: put
+    parameters: {}
+    body: {}

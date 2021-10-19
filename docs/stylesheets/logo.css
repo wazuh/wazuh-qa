@@ -1,0 +1,7 @@
+.md-header__button.md-logo img {
+    width: auto;
+}
+
+.md-nav__title .md-nav__button.md-logo img, .md-nav__title .md-nav__button.md-logo svg {
+    width: 85%
+}

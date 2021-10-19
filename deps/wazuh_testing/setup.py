@@ -1,31 +1,65 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-
 from setuptools import setup, find_packages
+import os
 
+package_data_list = [
+    'data/agent.conf',
+    'data/syscheck_event.json',
+    'data/syscheck_event_windows.json',
+    'data/mitre_event.json',
+    'data/analysis_alert.json',
+    'data/analysis_alert_windows.json',
+    'data/state_integrity_analysis_schema.json',
+    'data/gcp_event.json',
+    'data/keepalives.txt',
+    'data/rootcheck.txt',
+    'data/syscollector.py',
+    'data/winevt.py',
+    'data/sslmanager.key',
+    'data/sslmanager.cert',
+    'tools/macos_log/log_generator.m',
+    'qa_docs/config.yaml',
+    'qa_ctl/deployment/dockerfiles/*',
+    'qa_ctl/deployment/dockerfiles/qa_ctl/*',
+    'qa_ctl/deployment/vagrantfile_template.txt',
+    'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
+    'data/qactl_conf_validator_schema.json',
+]
+
+scripts_list = [
+    'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
+    'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+    'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
+    'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
+    'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
+    'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
+    'qa-docs=wazuh_testing.scripts.qa_docs:main',
+    'qa-ctl=wazuh_testing.scripts.qa_ctl:main'
+]
+
+
+def get_files_from_directory(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join(path, filename))
+    return paths
+
+
+package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui/'))
 
 setup(name='wazuh_testing',
-      version='3.11.0',
-      description='Wazuh testing utilites to help programmers automate tests',
+      version='4.3.0',
+      description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
       author_email='hello@wazuh.com',
       license='GPLv2',
       packages=find_packages(),
-      package_data={'wazuh_testing': ['data/syscheck_event.json',
-                                      'data/syscheck_event_windows.json',
-                                      'data/mitre_event.json',
-                                      'data/analysis_alert.json',
-                                      'data/analysis_alert_windows.json',
-                                      'data/state_integrity_analysis_schema.json'
-                                      ]
-                    },
+      package_data={'wazuh_testing': package_data_list},
+      entry_points={'console_scripts': scripts_list},
       include_package_data=True,
-      install_requires=[
-            'lockfile==0.12.2',
-            'testinfra==5.0.0'
-      ],
       zip_safe=False
       )

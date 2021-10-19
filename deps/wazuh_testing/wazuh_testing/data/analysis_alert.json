@@ -73,6 +73,63 @@
           ],
           "pattern": "^(.*)$"
         },
+        "mitre": {
+          "$id": "#/properties/rule/properties/mitre",
+          "type": "object",
+          "title": "The Mitre Schema",
+          "required": [
+            "id",
+            "tactic",
+            "technique"
+          ],
+          "properties": {
+            "id": {
+              "$id": "#/properties/rule/properties/mitre/properties/id",
+              "type": "array",
+              "title": "The Id Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/id/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "T1120"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "tactic": {
+              "$id": "#/properties/rule/properties/mitre/properties/tactic",
+              "type": "array",
+              "title": "The Tactic Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/tactic/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Discovery"
+                ],
+                "pattern": "^(.*)$"
+              }
+            },
+            "technique": {
+              "$id": "#/properties/rule/properties/mitre/properties/technique",
+              "type": "array",
+              "title": "The technique Schema",
+              "items": {
+                "$id": "#/properties/rule/properties/mitre/properties/technique/items",
+                "type": "string",
+                "title": "The Items Schema",
+                "default": "",
+                "examples": [
+                  "Stored Data Manipulation"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        },
         "firedtimes": {
           "$id": "#/properties/rule/properties/firedtimes",
           "type": "integer",
@@ -118,6 +175,22 @@
             "default": "",
             "examples": [
               "11.5"
+            ],
+            "pattern": "^(.*)$"
+          }
+        },
+        "tsc": {
+          "$id": "#/properties/rule/properties/tsc",
+          "type": "array",
+          "title": "The TSC Schema",
+          "items": {
+            "$id": "#/properties/rule/properties/tsc/items",
+            "type": "string",
+            "title": "The Items Schema",
+            "default": "",
+            "examples": [
+              "PI1.4",
+              "CC6.1"
             ],
             "pattern": "^(.*)$"
           }
@@ -284,7 +357,7 @@
       "title": "The Full_log Schema",
       "default": "",
       "examples": [
-        "File '/testdir0/example' modified\nMode: real-time\nChanged attributes: size,permission,uid,user_name,gid,group_name,mtime,inode,md5,sha1,sha256\nSize changed from '0' to '8'\nPermissions changed from 'rw-r--r--' to 'rw-rw-rw-'\nOwnership was '0', now it is '1'\nUser name was 'root', now it is 'bin'\nGroup ownership was '0', now it is '1'\nGroup name was 'root', now it is 'bin'\nOld modification time was: '1581438201', now it is '1581439247'\nOld inode was: '1185139', now it is '1184275'\nOld md5sum was: 'd41d8cd98f00b204e9800998ecf8427e'\nNew md5sum is : '35e0c8c0b180c95d4e122e55ed62cc64'\nOld sha1sum was: 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\nNew sha1sum is : '19a532c8bc61c311f583455c80ffe37067bbc9bb'\nOld sha256sum was: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'\nNew sha256sum is : 'e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37'\n"
+        "File '/testdir0/example' modified\nMode: realtime\nChanged attributes: size,permission,uid,user_name,gid,group_name,mtime,inode,md5,sha1,sha256\nSize changed from '0' to '8'\nPermissions changed from 'rw-r--r--' to 'rw-rw-rw-'\nOwnership was '0', now it is '1'\nUser name was 'root', now it is 'bin'\nGroup ownership was '0', now it is '1'\nGroup name was 'root', now it is 'bin'\nOld modification time was: '1581438201', now it is '1581439247'\nOld inode was: '1185139', now it is '1184275'\nOld md5sum was: 'd41d8cd98f00b204e9800998ecf8427e'\nNew md5sum is : '35e0c8c0b180c95d4e122e55ed62cc64'\nOld sha1sum was: 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\nNew sha1sum is : '19a532c8bc61c311f583455c80ffe37067bbc9bb'\nOld sha256sum was: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'\nNew sha256sum is : 'e8ce5dcaf408935ff76747226d2e8bee4319a2f593c1d7a838115e56183d1f37'\n"
       ],
       "pattern": "^[\\s\\S]*$"
     },
@@ -549,6 +622,17 @@
             ],
             "pattern": "^(.*)$"
           }
+        },
+        "mode": {
+          "$id": "#/properties/syscheck/properties/mode",
+          "type": "string",
+          "enum": ["realtime", "whodata", "scheduled"],
+          "title": "The Mode Schema",
+          "default": "",
+          "examples": [
+            "realtime"
+          ],
+          "pattern": "^(.*)$"
         },
         "changed_attributes": {
           "$id": "#/properties/syscheck/properties/changed_attributes",

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -6,7 +6,6 @@ import os
 
 import pytest
 import yaml
-
 from wazuh_testing import global_parameters
 from wazuh_testing.analysis import callback_analysisd_message, callback_wazuh_db_message
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
@@ -27,7 +26,7 @@ with open(messages_path) as f:
 
 log_monitor_paths = [LOG_FILE_PATH]
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
+analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue'))
 
 receiver_sockets_params = [(analysis_path, 'AF_UNIX', 'UDP')]
 
@@ -39,7 +38,7 @@ mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connect
 #                daemon_first: bool))
 # Example1 -> ('wazuh-clusterd', None)              Only start wazuh-clusterd with no MITM
 # Example2 -> ('wazuh-clusterd', (my_mitm, True))   Start MITM and then wazuh-clusterd
-monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('ossec-analysisd', mitm_analysisd, True)]
+monitored_sockets_params = [('wazuh-db', mitm_wdb, True), ('wazuh-analysisd', mitm_analysisd, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -50,7 +49,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_validate_socket_responses(configure_mitm_environment, connect_to_sockets_module, wait_for_analysisd_startup,
+def test_validate_socket_responses(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                                    test_case: list):
     """Validate every response from the analysisd socket to the wazuh-db socket.
 

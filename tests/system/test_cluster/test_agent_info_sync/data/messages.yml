@@ -1,0 +1,5 @@
+---
+wazuh-master:
+  - regex: '.*test_label.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60

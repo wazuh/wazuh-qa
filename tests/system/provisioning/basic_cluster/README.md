@@ -1,4 +1,5 @@
 # wazuh-qa
+
 Wazuh - Basic cluster provisioning
 
 ## Setting up the provisioning
@@ -40,7 +41,8 @@ basic_cluster
 
 #### ansible.cfg
 
-Ansible configuration file in the current directory. In this file, we setup the configuration of Ansible for this provisioning.
+Ansible configuration file in the current directory. In this file, we setup the configuration of Ansible for this
+provisioning.
 
 #### destroy.yml
 
@@ -48,7 +50,8 @@ In this file we will specify that we want to shut down the docker machines in ou
 
 ##### inventory.yml
 
-File containing the inventory of machines in our environment. In this file we will set the connection method and its python interpreter
+File containing the inventory of machines in our environment. In this file we will set the connection method and its
+python interpreter
 
 ##### playbook.yml
 
@@ -56,12 +59,14 @@ Here we will write the commands to be executed in order to use our environment
 
 ##### roles
 
-Folder with all the general roles that could be used for start our environment. Within each role we can find the following structure:
+Folder with all the general roles that could be used for start our environment. Within each role we can find the
+following structure:
 
 - **files**: Configuration files to be applied when the environment is setting up.
 - **tasks**: Main tasks to be performed for each role
 
 #### Vars
+
 This folder contains the variables used to configure our environment. Variables like the cluster key or the agent key.
 
 ## Environment
@@ -71,6 +76,12 @@ The base environment defined for Docker provisioning is
 - A master node
 - Two workers nodes
 - Three agents, each connected to a different manager.
+
+| Agent        | Reports to    |
+|--------------|---------------|
+| wazuh-agent1 | wazuh-master  |
+| wazuh-agent2 | wazuh-worker1 |
+| wazuh-agent3 | wazuh-worker2 |
 
 ## Environment management
 

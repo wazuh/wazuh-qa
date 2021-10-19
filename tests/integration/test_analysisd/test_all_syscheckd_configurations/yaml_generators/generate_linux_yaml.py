@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -11,7 +11,6 @@ import sys
 import time
 
 import yaml
-
 from wazuh_testing import logger
 from wazuh_testing.analysis import callback_analysisd_agent_id, callback_analysisd_event
 from wazuh_testing.fim import REGULAR, create_file, modify_file, delete_file, detect_initial_scan
@@ -22,7 +21,7 @@ from wazuh_testing.tools.monitoring import ManInTheMiddle, QueueMonitor, FileMon
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_sockets
 
 alerts_json = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
-analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'ossec', 'queue'))
+analysis_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue'))
 
 # Syscheck variables
 n_directories = 0
@@ -132,21 +131,21 @@ def generate_analysisd_yaml(n_events, modify_events):
     truncate_file(LOG_FILE_PATH)
     file_monitor = FileMonitor(LOG_FILE_PATH)
     control_service('stop')
-    check_daemon_status(running=False)
+    check_daemon_status(running_condition=False)
     remove_logs()
 
     control_service('start', daemon='wazuh-db', debug_mode=True)
-    check_daemon_status(running=True, daemon='wazuh-db')
+    check_daemon_status(running_condition=True, target_daemon='wazuh-db')
 
-    control_service('start', daemon='ossec-analysisd', debug_mode=True)
-    check_daemon_status(running=True, daemon='ossec-analysisd')
+    control_service('start', daemon='wazuh-analysisd', debug_mode=True)
+    check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
 
     mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
     analysis_queue = mitm_analysisd.queue
     mitm_analysisd.start()
 
-    control_service('start', daemon='ossec-syscheckd', debug_mode=True)
-    check_daemon_status(running=True, daemon='ossec-syscheckd')
+    control_service('start', daemon='wazuh-syscheckd', debug_mode=True)
+    check_daemon_status(running_condition=True, target_daemon='wazuh-syscheckd')
 
     # Wait for initial scan
     detect_initial_scan(file_monitor)
@@ -186,9 +185,9 @@ def generate_analysisd_yaml(n_events, modify_events):
 
 
 def kill_daemons():
-    for daemon in ['ossec-analysisd', 'wazuh-db', 'ossec-syscheckd']:
+    for daemon in ['wazuh-analysisd', 'wazuh-db', 'wazuh-syscheckd']:
         control_service('stop', daemon=daemon)
-        check_daemon_status(running=False, daemon=daemon)
+        check_daemon_status(running_condition=False, target_daemon=daemon)
 
 
 def get_script_arguments():

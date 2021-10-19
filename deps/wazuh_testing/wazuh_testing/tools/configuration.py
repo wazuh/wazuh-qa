@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import itertools
@@ -11,9 +11,8 @@ from typing import List, Any, Set
 
 import pytest
 import yaml
-
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX
+from wazuh_testing import global_parameters, logger
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -75,14 +74,12 @@ def set_wazuh_conf(wazuh_conf: List[str]):
     """
     Set up Wazuh configuration. Wazuh will be restarted to apply it.
 
-    Parameters
-    ----------
-    wazuh_conf : ET.ElementTree
-        ElementTree with a custom Wazuh configuration.
+    Args:
+        wazuh_conf (ET.ElementTree): ElementTree with a custom Wazuh configuration.
     """
     write_wazuh_conf(wazuh_conf)
     print("Restarting Wazuh...")
-    command = os.path.join(WAZUH_PATH, 'bin/ossec-control')
+    command = os.path.join(WAZUH_PATH, 'bin/wazuh-control')
     arguments = ['restart']
     check_call([command] + arguments, stdout=DEVNULL, stderr=DEVNULL)
 
@@ -91,15 +88,11 @@ def generate_wazuh_conf(args: List = None) -> ET.ElementTree:
     """
     Generate a configuration file for Wazuh.
 
-    Parameters
-    ----------
-    args : list, optional
-        Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
+    Args:
+        args (list, optional): Arguments to generate ossec.conf (install_type, distribuition, version). Default `None`
 
-    Returns
-    -------
-    ET.ElementTree
-        New Wazuh configuration generated from 'gen_ossec.sh'.
+    Returns:
+        (ET.ElementTree): New Wazuh configuration generated from 'gen_ossec.sh'.
     """
     gen_ossec_args = args if args else ['conf', 'manager', 'rhel', '7']
     wazuh_config = check_output([GEN_OSSEC] + gen_ossec_args).decode(encoding='utf-8', errors='ignore')
@@ -112,69 +105,106 @@ def get_wazuh_conf() -> List[str]:
     Get current `ossec.conf` file content.
 
     Returns
-    -------
-    List of str
-        A list containing all the lines of the `ossec.conf` file.
+        List of str: A list containing all the lines of the `ossec.conf` file.
     """
     with open(WAZUH_CONF) as f:
         lines = f.readlines()
     return lines
 
 
+def get_api_conf(path) -> dict:
+    """Get current `api.yaml` file content.
+
+    Args:
+        path (str): Path of config file.
+
+    Returns:
+        current_conf (dict): A dict containing all content of the `api.yaml` file.
+    """
+    current_conf = {}
+
+    if os.path.isfile(path):
+        with open(path) as f:
+            current_conf = yaml.full_load(f)
+
+    return current_conf
+
+
 def write_wazuh_conf(wazuh_conf: List[str]):
     """
     Write a new configuration in 'ossec.conf' file.
 
-    Parameters
-    ----------
-    wazuh_conf : List of str
-        Lines to be written in the ossec.conf file.
+    Args:
+        wazuh_conf (list or str): Lines to be written in the ossec.conf file.
     """
     with open(WAZUH_CONF, 'w') as f:
         f.writelines(wazuh_conf)
+
+
+def write_api_conf(path: str, api_conf: dict):
+    """
+    Write a new configuration in 'api.yaml' file.
+
+    Args:
+    ----------
+    path (str): Path of config file.
+    api_conf (dicst): Dictionary to be written in the api.yaml file.
+    """
+    with open(path, 'w+') as f:
+        yaml.dump(api_conf, f)
+
+
+def write_security_conf(path: str, security_conf: dict):
+    """
+    Write a new configuration in 'security.yaml' file.
+
+    Args:
+        path (str): Path of config file.
+        security_conf (dict): Dictionary to be written in the security.yaml file.
+    """
+    if not os.path.exists(path):
+        from wazuh_testing.tools import WAZUH_UID, WAZUH_GID
+
+        open(path, mode='w').close()
+        os.chown(uid=WAZUH_UID, gid=WAZUH_GID, path=path)
+    write_api_conf(path, security_conf)
 
 
 def set_section_wazuh_conf(sections, template=None):
     """
     Set a configuration in a section of Wazuh. It replaces the content if it exists.
 
-    Parameters
-    ----------
-    sections : list
-        list of dicts with section and new elements
-        section : str, optional
-            Section of Wazuh configuration to replace. Default `'syscheck'`
-        new_elements : list, optional
-            List with dictionaries for settings elements in the section. Default `None`
-    template : list of string, optional
-        File content template
+    Args:
+        sections (list): List of dicts with section and new elements
+        section (str, optional): Section of Wazuh configuration to replace. Default `'syscheck'`
+        new_elements (list, optional) : List with dictionaries for settings elements in the section. Default `None`
+        template (list of string, optional): File content template
 
-    Returns
-    -------
-    List of str
-        List of str with the custom Wazuh configuration.
+    Returns:
+        List of str: List of str with the custom Wazuh configuration.
     """
 
     def create_elements(section: ET.Element, elements: List):
         """
         Insert new elements in a Wazuh configuration section.
 
-        Parameters
-        ----------
-        section : ET.Element
-            Section where the element will be inserted.
-        elements : list
-            List with the new elements to be inserted.
-
-        Returns
-        -------
-        ET.ElementTree
-            Modified Wazuh configuration.
+        Args:
+            section (ET.Element): Section where the element will be inserted.
+            elements (list): List with the new elements to be inserted.
+        Returns:
+            ET.ElementTree: Modified Wazuh configuration.
         """
+        tag = None
         for element in elements:
             for tag_name, properties in element.items():
                 tag = ET.SubElement(section, tag_name)
                 new_elements = properties.get('elements')
+                attributes = properties.get('attributes')
+                if attributes is not None:
+                    for attribute in attributes:
+                        if isinstance(attribute, dict):  # noqa: E501
+                            for attr_name, attr_value in attribute.items():
+                                tag.attrib[attr_name] = str(attr_value)
                 if new_elements:
                     create_elements(tag, new_elements)
                 else:
@@ -185,6 +215,8 @@ def set_section_wazuh_conf(sections, template=None):
                             if attribute is not None and isinstance(attribute, dict):  # noqa: E501
                                 for attr_name, attr_value in attribute.items():
                                     tag.attrib[attr_name] = str(attr_value)
+                tag.tail = "\n    "
+        tag.tail = "\n  "
 
     def purge_multiple_root_elements(str_list: List[str], root_delimeter: str = "</ossec_config>") -> List[str]:
         """
@@ -193,18 +225,14 @@ def set_section_wazuh_conf(sections, template=None):
         This operation is needed before attempting to convert the list to ElementTree because if the ossec.conf had more
         than one `<ossec_config>` element as root the conversion would fail.
 
-        Parameters
-        ----------
-        str_list : list of str
-            The content of the ossec.conf file in a list of str.
-        root_delimeter : str, optional
-            The expected string to identify when the first root element ends, by default "</ossec_config>"
+        Args:
+            str_list (list or str): The content of the ossec.conf file in a list of str.
+            root_delimeter (str, optional: The expected string to identify when the first root element ends,
+            by default "</ossec_config>"
 
-        Returns
-        -------
-        list of str
-            The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be
-            ignored.
+        Returns:
+            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of
+            the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
@@ -221,15 +249,11 @@ def set_section_wazuh_conf(sections, template=None):
         As ElementTree does not support xml with more than one root element this function will parse the list first with
         `purge_multiple_root_elements` to ensure there is only one root element.
 
-        Parameters
-        ----------
-        str_list : list of str
-            A list of strings with every line of the ossec conf.
+        Args:
+            str_list (list of str): A list of strings with every line of the ossec conf.
 
-        Returns
-        -------
-        ElementTree
-            A ElementTree object with the data of the `str_list`
+        Returns:
+            ElementTree: A ElementTree object with the data of the `str_list`
         """
         str_list = purge_multiple_root_elements(str_list)
         return ET.ElementTree(ET.fromstringlist(str_list))
@@ -238,32 +262,60 @@ def set_section_wazuh_conf(sections, template=None):
         """
         Turn an ElementTree object into a list of str.
 
-        Parameters
-        ----------
-        elementTree : ElementTree
-            A ElementTree object with all the data of the ossec.conf.
+        Args:
+            elementTree (ElementTree): A ElementTree object with all the data of the ossec.conf.
 
-        Returns
-        -------
-        list of str
-            A list of str containing all the lines of the ossec.conf.
+        Returns:
+            (list of str): A list of str containing all the lines of the ossec.conf.
         """
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
+
+    def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
+        r"""
+        Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
+        (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
+        section but different attributes).
+
+        Args:
+            wazuh_conf (ElementTree): An ElementTree object with all the data of the ossec.conf
+            section (str): Name of the tag or configuration section to search for. For example: vulnerability_detector
+            attributes (list of dict): List with section attributes. Needed to check if the section exists with all the
+            searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
+        Returns:
+            ElementTree: An ElementTree object with the section data found in ossec.conf. None if nothing was found.
+        """
+        if attributes is None:
+            return wazuh_conf.find(section)
+        else:
+            attributes_query = ''.join([f"[@{attribute}='{value}']" for index, _ in enumerate(attributes)
+                                        for attribute, value in attributes[index].items()])
+            query = f"{section}{attributes_query}"
+
+            try:
+                return wazuh_conf.find(query)
+            except AttributeError:
+                return None
 
     # Get Wazuh configuration as a list of str
     raw_wazuh_conf = get_wazuh_conf() if template is None else template
     # Generate a ElementTree representation of the previous list to work with its sections
     wazuh_conf = to_elementTree(purge_multiple_root_elements(raw_wazuh_conf))
     for section in sections:
-        section_conf = wazuh_conf.find(section['section'])
+        attributes = section.get('attributes')
+        section_conf = find_module_config(wazuh_conf, section['section'], attributes)
         # Create section if it does not exist, clean otherwise
         if not section_conf:
-            section_conf = ET.SubElement(wazuh_conf.getroot(), section)
+            section_conf = ET.SubElement(wazuh_conf.getroot(), section['section'])
+            section_conf.text = '\n    '
+            section_conf.tail = '\n\n  '
         else:
+            prev_text = section_conf.text
+            prev_tail = section_conf.tail
             section_conf.clear()
+            section_conf.text = prev_text
+            section_conf.tail = prev_tail
 
         # Insert section attributes
-        attributes = section.get('attributes')
         if attributes:
             for attribute in attributes:
                 if attribute is not None and isinstance(attribute, dict):  # noqa: E501
@@ -284,17 +336,12 @@ def expand_placeholders(mutable_obj, placeholders=None):
     """
     Search for placeholders and replace them by a value inside mutable_obj.
 
-    Parameters
-    ----------
-    mutable_obj : mutable object
-        Target object where the replacements are performed.
-    placeholders : dict
-        Each key is a placeholder and its value is the replacement. Default `None`
+    Args:
+        mutable_obj (mutable object):  Target object where the replacements are performed.
+        placeholders (dict): Each key is a placeholder and its value is the replacement. Default `None`
 
-    Returns
-    -------
-    Reference
-        Reference to `mutable_obj`
+    Returns:
+        Reference: Reference to `mutable_obj`
     """
     placeholders = {} if placeholders is None else placeholders
     if isinstance(mutable_obj, list):
@@ -316,14 +363,11 @@ def expand_placeholders(mutable_obj, placeholders=None):
 
 def add_metadata(dikt, metadata=None):
     """
-    Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
+    Create a new key 'metadata' in dict if not already exists and updates it with metadata content.
 
-    Parameters
-    ----------
-    dikt : dict
-        Target dict to update metadata in.
-    metadata : dict, optional
-        Dict including the new properties to be saved in the metadata key.
+    Args:
+        dikt (dict):  Target dict to update metadata in.
+        metadata (dict, optional):  Dict including the new properties to be saved in the metadata key.
     """
     if metadata is not None:
         new_metadata = dikt['metadata'] if 'metadata' in dikt else {}
@@ -337,19 +381,13 @@ def process_configuration(config, placeholders=None, metadata=None):
 
     Both placeholders and metadata should have equal length.
 
-    Parameters
-    ----------
-    config : dict
-        Config to be enriched.
-    placeholders : dict, optional
-        Dict with the replacements.
-    metadata : list of dict, optional
-        List of dicts with the metadata keys to include in config.
+    Args:
+        config (dict): Config to be enriched.
+        placeholders (dict, optional): Dict with the replacements.
+        metadata (list of dict, optional): List of dicts with the metadata keys to include in config.
 
-    Returns
-    -------
-    dict
-        Dict with enriched configuration.
+    Returns:
+        dict: Dict with enriched configuration.
     """
     new_config = expand_placeholders(deepcopy(config), placeholders=placeholders)
     add_metadata(new_config, metadata=metadata)
@@ -358,28 +396,20 @@ def process_configuration(config, placeholders=None, metadata=None):
 
 
 def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
-    """
+    r"""
     Load different configurations of Wazuh from a YAML file.
 
-    Parameters
-    ----------
-    yaml_file_path : str
-        Full path of the YAML file to be loaded.
-    test_name : str
-        Name of the file which contains the test that will be executed.
-    params : list, optional
-        List of dicts where each dict represents a replacement MATCH -> REPLACEMENT. Default `None`
-    metadata : list, optional
-        Custom metadata to be inserted in the configuration. Default `None`
+    Args:
+        yaml_file_path (str): Full path of the YAML file to be loaded.
+        test_name (str): Name of the file which contains the test that will be executed.
+        params (list, optional) : List of dicts where each dict represents a replacement
+        MATCH/REPLACEMENT. Default `None`
+        metadata (list, optional): Custom metadata to be inserted in the configuration. Default `None`
 
-    Returns
-    -------
-    Python object with the YAML file content
-
-    Raises
-    ------
-    ValueError
-        If the length of `params` and `metadata` are not equal.
+    Returns:
+        Python object with the YAML file content
+    Raises:
+        ValueError: If the length of `params` and `metadata` are not equal.
     """
     params = [{}] if params is None else params
     metadata = [{}] if metadata is None else metadata
@@ -408,20 +438,15 @@ def set_correct_prefix(configurations, new_prefix):
     This function checks if the path inside directories, ignore, nodiff and restrict sections
     contains a certain prefix, and if it does not contain it, it inserts it.
 
-    Parameters
-    ----------
-    configurations : list
-        List of configurations loaded from the YAML.
-    new_prefix : str
-        Prefix to be inserted before every path.
+    Args:
+        configurations (list): List of configurations loaded from the YAML.
+        new_prefix (str): Prefix to be inserted before every path.
 
-    Returns
-    -------
-    configurations : list
-        List of configurations with the correct prefix
-        added in the directories and ignore sections.
-
+    Returns:
+        configurations (list): List of configurations with the correct prefix added in the directories and
+        ignore sections.
     """
+
     def inserter(path):
         """Insert new_prefix inside path, right before the first '/'."""
         result = path
@@ -434,42 +459,44 @@ def set_correct_prefix(configurations, new_prefix):
 
     for config in configurations:
         for section in config['sections']:
-            for element in section['elements']:
-                if isinstance(element, dict):
-                    # ADD HERE all fields with format sub_element: - value
-                    for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
-                        if sub_element:
-                            # Get restrict, directories, ignore and nodiff fields and split them into paths lists
-                            restrict_dict = {}
-                            attributes = sub_element.get('attributes', [])
-                            for attr in attributes:
-                                if isinstance(attr, dict):
-                                    if attr.get('restrict'):
-                                        restrict_dict = attr
-                            restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
-                            paths_list = sub_element['value'].split(',')
-                            modified_restricts = ''
-                            modified_paths = ''
+            if section['elements']:
+                for element in section['elements']:
+                    if isinstance(element, dict):
+                        # ADD HERE all fields with format sub_element: - value
+                        for sub_element in (element.get('directories'), element.get('ignore'), element.get('nodiff')):
+                            if sub_element:
+                                # Get restrict, directories, ignore and nodiff fields and split them into paths lists
+                                restrict_dict = {}
+                                attributes = sub_element.get('attributes', [])
+                                for attr in attributes:
+                                    if isinstance(attr, dict):
+                                        if attr.get('restrict'):
+                                            restrict_dict = attr
+                                restrict_list = restrict_dict['restrict'].split('|') if restrict_dict != {} else []
+                                paths_list = sub_element['value'].split(',')
+                                modified_restricts = ''
+                                modified_paths = ''
 
-                            # Insert the prefix in every path/regex and add a comma if directories.
-                            for path in paths_list:
-                                modified_paths += inserter(path)
-                                modified_paths += ',' if (element.get('directories') and modified_paths != '') else ''
-                            modified_paths = modified_paths.rstrip(',')
+                                # Insert the prefix in every path/regex and add a comma if directories.
+                                for path in paths_list:
+                                    modified_paths += inserter(path)
+                                    modified_paths += ',' if (
+                                            element.get('directories') and modified_paths != '') else ''
+                                modified_paths = modified_paths.rstrip(',')
 
-                            # Insert the prefix in every path inside restrict
-                            for restrict in restrict_list:
-                                modified_restricts += inserter(restrict)
-                                modified_restricts += '|'
-                            modified_restricts = modified_restricts.rstrip('|')
+                                # Insert the prefix in every path inside restrict
+                                for restrict in restrict_list:
+                                    modified_restricts += inserter(restrict)
+                                    modified_restricts += '|'
+                                modified_restricts = modified_restricts.rstrip('|')
 
-                            # Replace the previous values with the new ones.
-                            if modified_paths:
-                                sub_element['value'] = modified_paths
-                            if modified_restricts:
-                                for i, sub_sub_element in enumerate(sub_element['attributes']):
-                                    if sub_sub_element == restrict_dict:
-                                        sub_element['attributes'][i] = {'restrict': modified_restricts}
+                                # Replace the previous values with the new ones.
+                                if modified_paths:
+                                    sub_element['value'] = modified_paths
+                                if modified_restricts:
+                                    for i, sub_sub_element in enumerate(sub_element['attributes']):
+                                        if sub_sub_element == restrict_dict:
+                                            sub_element['attributes'][i] = {'restrict': modified_restricts}
 
     return configurations
 
@@ -478,12 +505,9 @@ def check_apply_test(apply_to_tags: Set, tags: List):
     """
     Skip test if intersection between the two parameters is empty.
 
-    Parameters
-    ----------
-    apply_to_tags : set
-        Tags that the tests will run.
-    tags : list
-        List with the tags that identifies a configuration.
+    Args:
+        apply_to_tags (set): Tags that the tests will run.
+        tags (list): List with the tags that identifies a configuration.
     """
     if not (apply_to_tags.intersection(tags) or
             'all' in apply_to_tags):
@@ -491,9 +515,9 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def generate_syscheck_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
-    Every configuration is ready to be applied in the tag <directories>.
+    Every configuration is ready to be applied in the tag directories.
     """
     check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
@@ -505,3 +529,112 @@ def generate_syscheck_config():
     for yn_values, tag_value in itertools.product(values_list, tags):
         yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
         yield ' '.join([yn_str, tag_value])
+
+
+def generate_syscheck_registry_config():
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
+
+    Every configuration is ready to be applied in the tag directories.
+    """
+    check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
+                   'check_group', 'check_perm', 'check_mtime', 'check_type', 'report_changes']
+
+    values_list = itertools.product(['yes', 'no'], repeat=len(check_names))
+    tags = ['tags="Sample"', '']
+
+    for yn_values, tag_value in itertools.product(values_list, tags):
+        yn_str = ' '.join([f'{name}="{value}"' for name, value in zip(check_names, yn_values)])
+        yield ' '.join([yn_str, tag_value])
+
+
+def get_wazuh_local_internal_options() -> List[str]:
+    """Get current `internal_options.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `ossec.conf` file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS) as f:
+        lines = f.readlines()
+    return lines
+
+
+def set_wazuh_local_internal_options(wazuh_local_internal_options: List[str]):
+    """Set up Wazuh `local_internal_options.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `local_interal_options.conf` file.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as f:
+        f.writelines(wazuh_local_internal_options)
+
+
+def add_wazuh_local_internal_options(wazuh_local_internal_options_dict):
+    """Add new local internal options to the current configuration.
+
+    Args:
+        wazuh_local_internal_options_dict (List of str): A list containing local internal options to add.
+    """
+    local_internal_options_str = create_local_internal_options(wazuh_local_internal_options_dict)
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'a') as f:
+        f.writelines(local_internal_options_str)
+
+
+def create_local_internal_options(dict_local_internal_options):
+    """Create local_internal_options using a dictionary.
+
+    Args:
+        dict_local_internal_options (dict) : Dictionary with the local internal options
+    """
+    wazuh_local_internal_options = ''
+    for key, value in dict_local_internal_options.items():
+        wazuh_local_internal_options += f"{str(key)}={str(value)}\n"
+    return wazuh_local_internal_options
+
+
+def local_internal_options_to_dict(local_internal_options):
+    """ Create a dictionary with current local internal options.
+
+    Args:
+        local_internal_options (List of str): A list containing local internal options.
+    """
+    dict_local_internal_options = {}
+    no_comments_options = [line.strip() for line in local_internal_options
+                           if not (line.startswith('#') or line == '\n')]
+    for line in no_comments_options:
+        key, value = line.split('=')
+        dict_local_internal_options[key.rstrip("\n")] = value
+
+    return dict_local_internal_options
+
+
+def get_local_internal_options_dict():
+    """Return the local internal options in a dictionary.
+
+    Returns:
+        dict: Local internal options.
+    """
+    local_internal_option_dict = {}
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
+        configuration_options = local_internal_option_file.readlines()
+        for configuration_option in configuration_options:
+            if not configuration_option.startswith('#') and not configuration_option == '\n':
+                try:
+                    option_name, option_value = configuration_option.split('=')
+                    local_internal_option_dict[option_name] = option_value
+                except ValueError:
+                    logger.error(f"Invalid local_internal_options value: {configuration_option}")
+                    raise ValueError('Invalid local_internal_option')
+
+    return local_internal_option_dict
+
+
+def set_local_internal_options_dict(dict_local_internal_options):
+    """Set the local internal options using a dictionary.
+
+    Args:
+        local_internal_options_dict (dict): A dictionary containing local internal options.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as local_internal_option_file:
+        for option_name, option_value in dict_local_internal_options.items():
+            local_internal_configuration_string = f"{str(option_name)}={str(option_value)}\n"
+            local_internal_option_file.write(local_internal_configuration_string)

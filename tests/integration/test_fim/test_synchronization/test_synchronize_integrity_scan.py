@@ -1,11 +1,10 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
     callback_detect_event, callback_real_time_whodata_started
@@ -15,7 +14,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 
@@ -80,21 +79,23 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        value_1 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+                                          callback=callback_integrity_or_whodata,
                                           error_message='Did not receive expected "File integrity monitoring '
                                                         'real-time Whodata engine started" or "Initializing '
                                                         'FIM Integrity Synchronization check"').result()
 
-        value_2 = wazuh_log_monitor.start(timeout=10, callback=callback_integrity_or_whodata,
+        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+                                          callback=callback_integrity_or_whodata,
                                           error_message='Did not receive expected "File integrity monitoring '
                                                         'real-time Whodata engine started" or "Initializing FIM '
                                                         'Integrity Synchronization check"').result()
         assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
 
     else:
-
         # Check the integrity scan has begun
-        wazuh_log_monitor.start(timeout=15, callback=callback_integrity_synchronization_check,
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+                                callback=callback_integrity_synchronization_check,
                                 error_message='Did not receive expected '
                                               '"Initializing FIM Integrity Synchronization check" event')
 

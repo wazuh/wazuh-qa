@@ -1,23 +1,29 @@
 # wazuh-qa
+
 Wazuh - Quality assurance automation templates
 
 ## Setting up a test environment
 
-You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have one already, go to the [integration tests section](#integration-tests)
+You will need a proper environment to run the integration tests. You can use any virtual machine you wish. If you have
+one already, go to the [integration tests section](#integration-tests)
 
-If you use [Vagrant](https://www.vagrantup.com/downloads.html) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads), it is important to install the `vbguest` plugin since some tests modify the system date and there could be some synchronization issues.
+If you use [Vagrant](https://www.vagrantup.com/downloads.html)
+or [VirtualBox](https://www.virtualbox.org/wiki/Downloads), it is important to install the `vbguest` plugin since some
+tests modify the system date and there could be some synchronization issues.
 
 This guide will cover the following platforms: [Linux](#linux), [Windows](#windows) and [MacOS](#macos).
 
-You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use the correct version (Wazuh branch).
+You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use
+the correct version (Wazuh branch).
 
-_We are skipping Wazuh installation steps. For further information, check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
+_We are skipping Wazuh installation steps. For further information,
+check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
 
 ### Linux
 
 _We are using **CentOS** for this example:_
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Disable firewall (only for **CentOS**)
 
@@ -39,7 +45,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -55,16 +61,17 @@ sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-
 echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 
 # Restart Wazuh
-/var/ossec/bin/ossec-control restart
+/var/ossec/bin/wazuh-control restart
 ```
 
 ### Windows
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
-- Download and install [chocolatey](https://chocolatey.org/docs/installation) to be able to install `jq` using the terminal.
+- Download and install [chocolatey](https://chocolatey.org/docs/installation) to be able to install `jq` using the
+  terminal.
 
 - Install `jq`:
 
@@ -75,7 +82,7 @@ choco install jq
 - Install Python dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml==5.3 psutil paramiko distro pywin32 pypiwin32 wmi pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip install pytest freezegun jsonschema pyyaml==5.4 psutil paramiko distro pywin32 pypiwin32 wmi pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
@@ -98,7 +105,7 @@ echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_intern
 
 ### MacOS
 
-- Install **Wazuh** 
+- Install **Wazuh**
 
 - Install Python and its dependencies
 
@@ -110,7 +117,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil paramiko distro pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.4 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -128,7 +135,7 @@ gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time
 echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 
 # Restart Wazuh
-/Library/Ossec/bin/ossec-control restart
+/Library/Ossec/bin/wazuh-control restart
 ```
 
 -----------
@@ -137,16 +144,26 @@ Finally, copy your `wazuh-qa` repository within your testing environment and you
 
 ## Integration tests
 
-**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check our [testing environment guide](#setting-up-a-test-environment).
+**DISCLAIMER:** this guide assumes you have a proper testing environment. If you do not, please check
+our [testing environment guide](#setting-up-a-test-environment).
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
+- _test_active_response_
+- _test_agentd_
 - _test_analysisd_
-- _test_cluster_
+- _test_api_
+- _test_authd_
+- _test_enrollment_
 - _test_fim_
-- _test_mitre_
+- _test_gcloud_
+- _test_logtest_
+- _test_remoted_
+- _test_rids_
+- _test_rootcheck_
+- _test_vulnerability_detector_
 - _test_wazuh_db_
-- _test_sca_
+- _test_wpk_
 
 Every group will have the following structure:
 
@@ -214,12 +231,13 @@ FIM test structure example:
 
 #### conftest
 
-Every group could have its own `conftest` if it needed some specific configurations. For reference, please check [pytest](#pytest) section below.
+Every group could have its own `conftest` if it needed some specific configurations. For reference, please
+check [pytest](#pytest) section below.
 
 #### data
 
-Folder with the configuration yaml's to create the testing environment. These yaml's have the `ossec.conf` that will be applied to each module.
-This is a sample yaml used for `FIM`:
+Folder with the configuration yaml's to create the testing environment. These yaml's have the `ossec.conf` that will be
+applied to each module. This is a sample yaml used for `FIM`:
 
 ```yaml
 ---
@@ -249,25 +267,29 @@ This is a sample yaml used for `FIM`:
     - directories: `<directories check_all="yes">/sample_directory</directories>`
     - nodiff: `<nodiff>/sample_directory/nodiff_file</nodiff>`
 
-We can use `wildcards` as well to parametrize values or attributes. For example, if we add a new attribute into the previous configuration called `FIM_MODE` and we set this wildcard to `''`, `realtime="yes"` and `whodata="yes"`, it will generate **three** different configurations. One for each _WILDCARD_ value.
+We can use `wildcards` as well to parametrize values or attributes. For example, if we add a new attribute into the
+previous configuration called `FIM_MODE` and we set this wildcard to `''`, `realtime="yes"` and `whodata="yes"`, it will
+generate **three** different configurations. One for each _WILDCARD_ value.
 
 #### test_module
 
-This will be our python module with all the needed code to test everything. 
+This will be our python module with all the needed code to test everything.
 
 ### Dependencies
 
 To run them, we need to install all these Python dependencies:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml==5.3 pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install distro freezegun jq jsonschema psutil pytest pyyaml==5.3 pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
 ### Wazuh-Testing package
 
-We have a Python package at `wazuh-qa/deps/` with all the tools needed to run these tests. From file monitoring classes to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It has the following structure:
+We have a Python package at `wazuh-qa/deps/` with all the tools needed to run these tests. From file monitoring classes
+to callbacks or functions to create the test environment. Without installing this package, we cannot run these tests. It
+has the following structure:
 
 ```bash
 wazuh_testing
@@ -275,7 +297,7 @@ wazuh_testing
     └── wazuh_testing
         ├── __init__.py
         ├── analysis.py
-        ├── cluster.py            
+        ├── cluster.py
         ├── data
         │   ├── event_analysis_schema.json
         │   ├── mitre_event.json
@@ -283,6 +305,7 @@ wazuh_testing
         │   ├── syscheck_event.json
         │   └── syscheck_event_windows.json
         ├── fim.py
+        ├── gcloud.py
         ├── mitre.py
         ├── tools
         │   ├── __init__.py
@@ -303,7 +326,8 @@ Python module with the needed code to install this package into our Python inter
 
 ##### Python modules
 
-These are _analysis.py_, _fim.py_, _mitre.py_ and _wazuh_db.py_. They have very specific tools needed for each capability.
+These are _analysis.py_, _fim.py_, _mitre.py_ and _wazuh_db.py_. They have very specific tools needed for each
+capability.
 
 ##### data
 
@@ -332,7 +356,8 @@ cd wazuh-qa/deps/wazuh_testing
 pip3 install .
 ```
 
-_**NOTE:** It is important to reinstall this package every time we modify anything from `wazuh-qa/packages/wazuh_testing`_
+_**NOTE:** It is important to reinstall this package every time we modify anything
+from `wazuh-qa/packages/wazuh_testing`_
 
 ```shell script
 cd wazuh-qa/deps/wazuh_testing
@@ -341,7 +366,10 @@ pip3 uninstall -y wazuh_testing && pip3 install .
 
 ### Pytest
 
-We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we need to run every test from the following path, where the general _conftest_ is:
+We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our integrity tests. Pytest will recursively
+look for the closest `conftest` to import all the variables and fixtures needed for every test. If something is lacking
+from the closest one, it will look for the next one (if possible) until reaching the current directory. This means we
+need to run every test from the following path, where the general _conftest_ is:
 
 ```shell script
 cd wazuh-qa/tests/integration
@@ -357,17 +385,29 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 
 - `v`: verbosity level (-v or -vv. Highly recommended to use -vv when tests are failing)
 - `s`: shortcut for --capture=no. This will show the output in real time
-- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed result
+- `x`: instantly exit after the first error. Very helpful when using a log truncate since it will keep the last failed
+  result
 - `m`: only run tests matching given expression (-m MARKEXPR)
-- `--tier`: only run tests with given tier (ex. --tier 2)
+- `--tier`: only run tests with given tier (ex. --tier=2)
 - `--html`: generates a HTML report for the test results. (ex. --html=report.html)
-- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a condition 
-is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout that cannot be 
-modified.
+- `--default-timeout`: overwrites the default timeout (in seconds). This value is used to make a test fail if a
+  condition is not met before the given time lapse. Some tests make use of this value and other has other fixed timeout
+  that cannot be modified.
+- `--fim_mode`: Specify the mode of execution of the FIM tests. (ex. --fim_mode="scheduled"). To run the test in
+  realtime and whodata the option must be specified twice: --fim_mode="realtime" --fim_mode="whodata". If the option is
+  not specified, the test will run using scheduled, whodata and realtime.
+- `--wpk_version`: Specify the WPK package version used to upgrade on WPK tests. (ex. --wpk_version=v4.2.0). Note: This
+  field is required to execute any WPK test and the WPK package must be previously created in
+  the [repository](packages-dev.wazuh.com/trash/wpk/).
+- `--wpk_package_path`: Specify the WPK package path used to upgrade on WPK tests. (ex. --wpk_package_path='packages-dev.wazuh.com/trash/wpk/'). 
+   This field is required to execute any WPK test.
+- `--save-file`: Specify the files of execution of the tests that you need to download. (ex. --save-file=archives.json). 
+   If the file does not exist while the test was executed,  the test will run without problems but not save this file in the report.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 
-Also, these integration tests are heavily based on [fixtures](https://docs.pytest.org/en/latest/fixture.html), so please check its documentation for further information.
+Also, these integration tests are heavily based on [fixtures](https://docs.pytest.org/en/latest/fixture.html), so please
+check its documentation for further information.
 
 #### FIM integration tests examples
 
@@ -378,7 +418,7 @@ python3 -m pytest -vvx test_fim/test_basic_usage/test_basic_usage_create_schedul
 platform linux -- Python 3.6.8, pytest-5.3.4, py-1.8.1, pluggy-0.13.1 -- /bin/python3
 cachedir: .pytest_cache
 rootdir: /vagrant/wazuh-qa/test_wazuh, inifile: pytest.ini
-collected 12 items                                                                                      
+collected 12 items
 
 test_fim/test_basic_usage/test_basic_usage_create_scheduled.py::test_create_file_scheduled[get_configuration0-file-regular-Sample content-checkers0-tags_to_apply0-/testdir1] PASSED [  8%]
 test_fim/test_basic_usage/test_basic_usage_create_scheduled.py::test_create_file_scheduled[get_configuration0-file-regular-Sample content-checkers0-tags_to_apply0-/testdir2] PASSED [ 16%]
@@ -403,7 +443,7 @@ python3 -m pytest test_fim/test_report_changes/
 =============================== test session starts ===============================
 platform linux -- Python 3.6.8, pytest-5.3.4, py-1.8.1, pluggy-0.13.1
 rootdir: /vagrant/wazuh-qa/test_wazuh, inifile: pytest.ini
-collected 12 items                                                                
+collected 12 items
 
 test_fim/test_report_changes/test_report_changes_and_diff.py ......         [ 50%]
 test_fim/test_report_changes/test_report_deleted_diff.py ......             [100%]

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
@@ -18,10 +18,8 @@ class TimeMachine:
         """
         Save time frame given by user.
 
-        Parameters
-        ----------
-        timedelta_ : timedelta
-            Time frame.
+        Args:
+            timedelta_ : Time frame.
         """
         self.time_delta = timedelta_
 
@@ -38,10 +36,8 @@ class TimeMachine:
         """
         Change date and time in a Linux system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
         import shlex
         subprocess.call(shlex.split("timedatectl set-ntp false"))
@@ -53,23 +49,18 @@ class TimeMachine:
         """
         Change date and time in a Windows system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
-        os.system('date ' + datetime_.strftime("%d-%m-%Y"))
-        os.system('time ' + datetime_.strftime("%H:%M:%S"))
+        subprocess.call(["powershell.exe", "Set-Date", "-Date", f'"{datetime_.strftime("%d/%m/%Y %H:%M:%S")}"'])
 
     @staticmethod
     def _solaris_set_time(datetime_):
         """
         Change date and time in a Linux system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
         solaris_time_format = "%m%d%H%M%Y.%S"
         os.system("date '%s'" % datetime_.strftime(solaris_time_format))
@@ -79,10 +70,8 @@ class TimeMachine:
         """
         Change date and time in a MacOS system.
 
-        Parameters
-        ----------
-        datetime_ : datetime
-            New date and time to set.
+        Args:
+            datetime_ : New date and time to set.
         """
         # {month}{day}{hour}{minute}{year}.{seconds}
         os.system('date ' + '-u ' + datetime_.strftime("%m%d%H%M%Y.%S"))
@@ -92,15 +81,12 @@ class TimeMachine:
         """
         Check which system are we running this code in and calls its proper function.
 
-        Parameters
-        ----------
-        time_delta : timedelta
-            Time frame we want to skip. It can have a negative value.
-        back_in_time : bool, optional
-            Go back in time the same time_delta interval. Default value is False.
+        Args:
+            time_delta : Time frame we want to skip. It can have a negative value.
+            back_in_time (bool, optional): Go back in time the same time_delta interval. Default value is False.
         """
         # Save timedelta to be able to  travel back in time after the tests
-        TimeMachine.total_time_spent += time_delta.seconds
+        TimeMachine.total_time_spent += time_delta.total_seconds()
         now = datetime.utcnow() if sys.platform == 'darwin' else datetime.now()
         future = now + time_delta if not back_in_time else now - time_delta
         if sys.platform == 'linux':
@@ -147,15 +133,11 @@ def reformat_time(scan_time):
     """
     Transform scan_time to readable time.
 
-    Parameters
-    ----------
-    scan_time : str
-        Time string.
+    Args:
+        scan_time (str): Time string.
 
-    Returns
-    -------
-    datetime
-        Datetime object with the string translated.
+    Returns:
+        datetime: Datetime object with the string translated.
     """
     hour_format = '%H'
     colon = ''
@@ -174,15 +156,10 @@ def time_to_timedelta(time_):
     """
     Convert a string with time in seconds with `smhdw` suffixes allowed to `datetime.timedelta`.
 
-    Parameters
-    ----------
-    time_ : str
-        String with time in seconds.
-
-    Returns
-    -------
-    timedelta
-        Timedelta object.
+    Args:
+        time_ (str): String with time in seconds.
+    Returns:
+        timedelta: Timedelta object.
     """
     time_unit = time_[len(time_) - 1:]
 
@@ -201,3 +178,81 @@ def time_to_timedelta(time_):
         return timedelta(days=time_value)
     elif time_unit == "w":
         return timedelta(weeks=time_value)
+
+
+def time_to_human_readable(time_):
+    """
+    Convert a time string like 5s or 2d into a human-readable string such as 5 seconds or 2 days
+
+    Args:
+
+    time_ (str): String with the time and the measurement unit
+
+    Returns:
+        human_readable_time (str): String in the new format, for example: 5 seconds
+    """
+
+    time_unit = time_[-1]
+
+    human_readable_string = {
+        's': ' seconds',
+        'm': ' minutes',
+        'h': ' houres',
+        'd': ' days'
+    }
+
+    human_readable_time = time_.replace(time_unit, human_readable_string[time_unit])
+
+    return human_readable_time
+
+
+def unit_to_seconds(time_):
+    """
+    Convert a time string like 9m or 2d into another similar string in seconds
+
+    Args:
+        time_ (str): String with the time and the measurement unit
+
+    Returns:
+        seconds_time: String in the same format with units converted to seconds
+    """
+
+    seconds_equivalent = {
+        's': 1,
+        'm': 60,
+        'h': 3600,
+        'd': 86400
+    }
+
+    time_unit = time_[-1]
+    time_value = time_[:-1]
+
+    new_value = int(time_value) * seconds_equivalent[time_unit]
+
+    seconds_time = f'{new_value}s'
+
+    return seconds_time
+
+
+def time_to_seconds(time_):
+    """
+    Convert a string with format (1s, 1m, 1h, 1d, 1w) in number of seconds.
+
+    Args:
+        time_ (str): String (1s, 1m, 1h, 1d, 1w).
+
+    Returns
+        time_value (int): Number of seconds.
+    """
+    time_unit = time_[len(time_) - 1:]
+
+    time_value = int(time_[:len(time_) - 1])
+
+    units = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
+
+    return time_value * units[time_unit]
+
+
+def get_current_timestamp():
+    """Get the current timestamp. For example: 1627028708.303002"""
+    return datetime.now().timestamp()

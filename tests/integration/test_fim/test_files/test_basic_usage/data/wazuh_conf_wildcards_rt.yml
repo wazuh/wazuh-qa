@@ -1,0 +1,15 @@
+# conf 1
+- tags:
+  - ossec_conf_wildcards_runtime
+  apply_to_modules:
+  - test_basic_usage_wildcards_runtime
+  sections:
+  - section: syscheck
+    elements:
+    - frequency:
+        value: FREQUENCY
+    - directories:
+        value: TEST_WILDCARDS
+        attributes:
+          - check_all: 'yes'
+          - FIM_MODE

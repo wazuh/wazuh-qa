@@ -1,0 +1,63 @@
+---
+# Configuration for registry_ignore
+- tags:
+  - ignore_registry_key
+  apply_to_modules:
+  - test_ignore_registry
+  sections:
+  - section: syscheck
+    elements:
+        - disabled:
+            value: 'no'
+        - registry_ignore:
+            value: REGISTRY_IGNORE_1
+            attributes:
+                - arch: 'both'
+        - registry_ignore:
+            value: REGISTRY_IGNORE_2
+            attributes:
+                - arch: '64bit'
+        - registry_ignore:
+            value: "REGISTRY_IGNORE_REGEX"
+            attributes:
+                - type: 'sregex'
+                - arch: 'both'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+                - arch: 'both'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_2
+            attributes:
+                - arch: '64bit'
+# Configuration for registry_ignore_value
+- tags:
+  - ignore_registry_value
+  apply_to_modules:
+  - test_ignore_registry
+  sections:
+  - section: syscheck
+    elements:
+        - disabled:
+            value: 'no'
+        - registry_ignore_value:
+            value: VALUE_IGNORE_1
+            attributes:
+                - arch: 'both'
+        - registry_ignore_value:
+            value: VALUE_IGNORE_2
+            attributes:
+                - arch: '64bit'
+        - registry_ignore_value:
+            value: "VALUE_IGNORE_REGEX"
+            attributes:
+                - type: 'sregex'
+                - arch: 'both'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_1
+            attributes:
+                - arch: 'both'
+        - windows_registry:
+            value: WINDOWS_REGISTRY_2
+            attributes:
+                - arch: '64bit'

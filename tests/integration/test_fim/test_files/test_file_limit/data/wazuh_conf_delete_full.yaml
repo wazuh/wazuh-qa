@@ -1,0 +1,21 @@
+---
+# conf 1
+- tags:
+  - tags_delete_full
+  apply_to_modules:
+  - test_file_limit_delete_full
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - file_limit:
+        elements:
+        - enabled:
+            value: 'yes'
+        - entries:
+            value: LIMIT

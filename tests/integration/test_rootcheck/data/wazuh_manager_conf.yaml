@@ -1,0 +1,10 @@
+---
+    - tags:
+      - all
+      apply_to_modules:
+      - test_rootcheck
+      sections:
+      - section: rootcheck
+        elements:
+        - disabled:
+            value: 'no'

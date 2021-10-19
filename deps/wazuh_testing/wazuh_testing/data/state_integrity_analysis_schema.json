@@ -166,6 +166,17 @@
           ],
           "pattern": "^(.*)$"
         },
+        "mode": {
+          "$id": "#/properties/syscheck/properties/mode",
+          "type": "string",
+          "enum": ["realtime", "whodata", "scheduled"],
+          "title": "The Mode Schema",
+          "default": "",
+          "examples": [
+            "realtime"
+          ],
+          "pattern": "^(.*)$"
+        },
         "checksum": {
           "$id": "#/properties/attributes/properties/checksum",
           "type": "string",

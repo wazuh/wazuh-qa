@@ -1,10 +1,9 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 
 import pytest
-
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_synchronization, generate_params
 from wazuh_testing.tools import PREFIX
@@ -13,7 +12,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -28,6 +27,7 @@ p, m = generate_params(extra_params={"TEST_DIRECTORIES": test_directories[0]})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+
 # fixtures
 
 
@@ -36,10 +36,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Tests
 
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_initial_scan):
+def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
     Verify that synchronization is disabled when enabled is set to no in the configuration.
     """

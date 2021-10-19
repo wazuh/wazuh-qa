@@ -1,0 +1,59 @@
+---
+# Restrict configuration for keys
+- tags:
+  - ambiguous_ignore_restrict_key
+  apply_to_modules:
+  - test_registry_ambiguous_ignore_works_over_restrict
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - restrict_key: RESTRICT_KEY_1
+        - arch: "64bit"
+    - registry_ignore:
+          value: REGISTRY_IGNORE
+          attributes:
+          - arch: '64bit'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - restrict_key: RESTRICT_KEY_2
+        - arch: "both"
+    - registry_ignore:
+          value: "REGISTRY_IGNORE_REGEX"
+          attributes:
+          - type: 'sregex'
+          - arch: 'both'
+# Restrict configuration for values
+- tags:
+  - ambiguous_ignore_restrict_values
+  apply_to_modules:
+  - test_registry_ambiguous_ignore_works_over_restrict
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - restrict_value: RESTRICT_VALUE_1
+        - arch: "64bit"
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - restrict_value: RESTRICT_VALUE_2
+        - arch: "both"
+    - registry_ignore_value:
+          value: REGISTRY_IGNORE_VALUE
+          attributes:
+          - arch: '64bit'
+    - registry_ignore_value:
+          value: "REGISTRY_IGNORE_VALUE_REGEX"
+          attributes:
+          - type: 'sregex'
+          - arch: 'both'

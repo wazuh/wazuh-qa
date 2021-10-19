@@ -1,5 +1,0 @@
----
-- hosts: all
-  tasks:
-  - name: Launch script
-    command: "{{ binary }} {{ script }}"

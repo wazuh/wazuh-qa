@@ -1,48 +1,38 @@
-# Copyright (C) 2015-2020, Wazuh Inc.
+# Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 import subprocess
 import sys
 import time
-from subprocess import check_call
 
 import psutil
-
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_SERVICE, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
+from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 
 
 def restart_wazuh_daemon(daemon):
-    """
-    Restarts a Wazuh daemon.
+    """Restarts a Wazuh daemon.
 
     Use this function to avoid restarting the whole service and all of its daemons.
 
-    Parameters
-    ----------
-    daemon : str
-        Name of the executable file of the daemon in /var/ossec/bin
+    Args:
+        daemon (str): Name of the executable file of the daemon in /var/ossec/bin
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == daemon:
             proc.terminate()
 
     daemon_path = os.path.join(WAZUH_PATH, 'bin')
-    check_call([f'{daemon_path}/{daemon}'])
+    subprocess.check_call([f'{daemon_path}/{daemon}'])
 
 
-def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
-    """
-    Restart Wazuh service applying a new ossec.conf
+def restart_wazuh_with_new_conf(new_conf, daemon='wazuh-syscheckd'):
+    """Restart Wazuh service applying a new ossec.conf.
 
-    Parameters
-    ----------
-    new_conf : ET.ElementTree
-        New config file.
-    daemon : str, optional
-        Daemon to restart when applying the configuration.
+    Args:
+        new_conf ( ET.ElementTree) : New config file.
+        daemon (str, optional): Daemon to restart when applying the configuration.
     """
     write_wazuh_conf(new_conf)
     control_service('restart', daemon=daemon)
@@ -51,14 +41,12 @@ def restart_wazuh_with_new_conf(new_conf, daemon='ossec-syscheckd'):
 def delete_sockets(path=None):
     """Delete a list of Wazuh socket files or all of them if None is specified.
 
-    Parameters
-    ----------
-    path : list, optional
-        Absolute socket path. Default `None`
+    Args:
+        path (list, optional): Absolute socket path. Default `None`.
     """
     try:
         if path is None:
-            path = os.path.join(WAZUH_PATH, 'queue', 'ossec')
+            path = os.path.join(WAZUH_PATH, 'queue', 'sockets')
             for file in os.listdir(path):
                 os.remove(os.path.join(path, file))
             if os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb')):
@@ -77,21 +65,13 @@ def control_service(action, daemon=None, debug_mode=False):
 
     It takes care of the current OS to interact with the service and the type of installation (agent or manager).
 
-    Parameters
-    ----------
-    action : {'stop', 'start', 'restart'}
-        Action to be done with the service/daemon.
-    daemon : str, optional
-        Name of the daemon to be controlled. None to control the whole Wazuh service. Default `None`
-    debug_mode : bool, optional
-        Run the specified daemon in debug mode. Default `False`
-
-    Raises
-    ------
-    ValueError
-        If `action` is not contained in {'start', 'stop', 'restart'}.
-    ValueError
-        If the result is not equal to 0.
+    Args:
+        action ({'stop', 'start', 'restart'}): Action to be done with the service/daemon.
+        daemon (str, optional): Name of the daemon to be controlled. None for the whole Wazuh service. Default `None`.
+        debug_mode (bool, optional) : Run the specified daemon in debug mode. Default `False`.
+    Raises:
+        ValueError: If `action` is not contained in {'start', 'stop', 'restart'}.
+        ValueError: If the result is not equal to 0.
     """
     valid_actions = ('start', 'stop', 'restart')
     if action not in valid_actions:
@@ -103,26 +83,50 @@ def control_service(action, daemon=None, debug_mode=False):
             control_service('start')
             result = 0
         else:
-            result = 0 if subprocess.run(["net", action, "OssecSvc"]).returncode in (0, 2) else \
-                subprocess.run(["net", action, "OssecSvc"]).returncode
+            command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
+            result = command.returncode
+            if command.returncode != 0:
+                if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
+                    result = 0
+                print(command.stderr.decode())
     else:  # Default Unix
         if daemon is None:
             if sys.platform == 'darwin' or sys.platform == 'sunos5':
-                result = subprocess.run([f'{WAZUH_PATH}/bin/ossec-control', action]).returncode
+                result = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', action]).returncode
             else:
-                result = subprocess.run(['service', WAZUH_SERVICE, action]).returncode
+                result = subprocess.run(['service', get_service(), action]).returncode
             action == 'stop' and delete_sockets()
         else:
             if action == 'restart':
                 control_service('stop', daemon=daemon)
                 control_service('start', daemon=daemon)
             elif action == 'stop':
+                processes = []
+
                 for proc in psutil.process_iter():
-                    any(daemon in cmd for cmd in proc.cmdline()) and proc.terminate()
+                    try:
+                        if daemon in ['wazuh-clusterd', 'wazuh-apid']:
+                            if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
+                                processes.append(proc)
+                        elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
+                            processes.append(proc)
+                    except psutil.NoSuchProcess:
+                        pass
+                try:
+                    for proc in processes:
+                        proc.terminate()
+
+                    _, alive = psutil.wait_procs(processes, timeout=5)
+
+                    for proc in alive:
+                        proc.kill()
+                except psutil.NoSuchProcess:
+                    pass
+
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
+                subprocess.check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
             result = 0
 
     if result != 0:
@@ -130,18 +134,14 @@ def control_service(action, daemon=None, debug_mode=False):
 
 
 def get_process(search_name):
-    """
-    Search process by its name.
+    """Search process by its name.
 
-    Parameters
-    ----------
-    search_name : str
-        Name of the process to be fetched.
+    Args:
+        search_name (str): Name of the process to be fetched.
 
-    Returns
-    -------
-    `psutil.Process` or None
-        First occurrence of the process object matching the `search_name` or None if no process has been found.
+    Returns:
+        `psutil.Process` or None: First occurrence of the process object matching the `search_name` or
+            None if no process has been found.
     """
     for proc in psutil.process_iter(attrs=['name']):
         if proc.name() == search_name:
@@ -150,55 +150,123 @@ def get_process(search_name):
     return None
 
 
-def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
-    """Check Wazuh daemon status.
+def get_process_cmd(search_cmd):
+    """Search process by its command line.
 
-    Parameters
-    ----------
-    daemon : str, optional
-        Wazuh daemon to check. Default `None`
-    running : bool, optional
-        True if the daemon is expected to be running False if it is expected to be stopped. Default `True`
-    timeout : int, optional
-        Timeout value for the check. Default `10`
-    extra_sockets: list, optional
-        Additional sockets to check. They may not be present in default configuration
+    Args:
+        search_cmd (str): Name of the command to be fetched.
 
-    Raises
-    ------
-    TimeoutError
-        If the daemon status is wrong after timeout seconds.
+    Returns:
+        `psutil.Process` or None: First occurrence of the process object matching the `search_cmd` or
+            None if no process has been found.
     """
-    if extra_sockets is None:
-        extra_sockets = []
-    for _ in range(3):
-        # Check specified daemon/s status
-        daemon_status = subprocess.run(['service', WAZUH_SERVICE, 'status'], stdout=subprocess.PIPE).stdout.decode()
-        if f"{daemon if daemon is not None else ''} {'not' if running is True else 'is'} running" not in daemon_status:
-            # Construct set of socket paths to check
-            if daemon is None:
-                socket_set = {path for array in WAZUH_SOCKETS.values() for path in array}
-            else:
-                socket_set = {path for path in WAZUH_SOCKETS[daemon]}
-            # We remove optional sockets and add extra sockets to the set to check
-            socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
-            socket_set.update(extra_sockets)
-            # Check specified socket/s status
-            for socket in socket_set:
-                if os.path.exists(socket) is not running:
-                    break
-            else:
-                # Finish main for loop if both daemon and socket checks are ok
-                break
+    for proc in psutil.process_iter(attrs=['pid', 'name', 'cmdline']):
+        command = next((command for command in proc.cmdline() if search_cmd in command), None)
+        if command:
+            return proc
 
-        time.sleep(timeout/3)
+
+def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, extra_sockets=[]):
+    """Wait until Wazuh daemon's status matches the expected one. If timeout is reached and the status didn't match,
+       it raises a TimeoutError.
+
+    Args:
+        target_daemon (str, optional):  Wazuh daemon to check. Default `None`. None means all.
+        running_condition (bool, optional): True if the daemon is expected to be running False
+            if it is expected to be stopped. Default `True`.
+        timeout (int, optional): Timeout value for the check. Default `10` seconds.
+        extra_sockets (list, optional): Additional sockets to check. They may not be present in default configuration.
+
+    Raises:
+        TimeoutError: If the daemon status is wrong after timeout seconds.
+    """
+    condition_met = False
+    if sys.platform == 'win32':
+        condition_met = check_if_process_is_running('wazuh-agent.exe') == running_condition
     else:
-        raise TimeoutError(f"{'wazuh-service' if daemon is None else daemon} "
-                           f"{'is not' if running is True else 'is'} running")
+        start_time = time.time()
+        elapsed_time = 0
+
+        while elapsed_time < timeout and not condition_met:
+            control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
+                                                   stdout=subprocess.PIPE).stdout.decode()
+            condition_met = True
+            for lines in control_status_output.splitlines():
+                daemon_status_tokens = lines.split()
+                current_daemon = daemon_status_tokens[0]
+                daemon_status = ' '.join(daemon_status_tokens[1:])
+                daemon_running = daemon_status == 'is running...'
+                if current_daemon == target_daemon or target_daemon is None:
+                    if current_daemon in WAZUH_SOCKETS.keys():
+                        socket_set = {path for path in WAZUH_SOCKETS[current_daemon]}
+                    else:
+                        socket_set = set()
+                    # We remove optional sockets and add extra sockets to the set to check
+                    socket_set.difference_update(WAZUH_OPTIONAL_SOCKETS)
+                    socket_set.update(extra_sockets)
+                    # Check specified socket/s status
+                    for socket in socket_set:
+                        if os.path.exists(socket) != running_condition:
+                            condition_met = False
+                    if daemon_running != running_condition:
+                        condition_met = False
+            if not condition_met:
+                time.sleep(1)
+            elapsed_time = time.time() - start_time
+    if not condition_met:
+        raise TimeoutError(f"{target_daemon} does not meet condition: running = {running_condition}")
+    return condition_met
 
 
 def delete_dbs():
-    """Delete all wazuh-db databases"""
+    """Delete all wazuh-db databases."""
     for root, dirs, files in os.walk(QUEUE_DB_PATH):
         for file in files:
             os.remove(os.path.join(root, file))
+
+
+def check_if_process_is_running(process_name):
+    """Check if process is running.
+
+    Args:
+        process_name (str): Name of process.
+
+    Returns
+        boolean: True if process is running, False otherwise.
+    """
+    is_running = False
+    try:
+        is_running = process_name in (p.name() for p in psutil.process_iter())
+    except psutil.NoSuchProcess:
+        pass
+
+    return is_running
+
+
+def control_event_log_service(control):
+    """Control Windows event log service.
+
+    Args:
+        control (str): Start or Stop.
+
+    Raises:
+        ValueError: If the event log channel does not start/stop correctly.
+    """
+    for _ in range(10):
+        control_sc = 'disabled' if control == 'stop' else 'auto'
+
+        command = subprocess.run(f'sc config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+        result = command.returncode
+        if result != 0:
+            raise ValueError(f'Event log service did not stop correctly')
+
+        command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+        result = command.returncode
+        if result == 0:
+            break
+        else:
+            time.sleep(1)
+    else:
+        raise ValueError(f"Event log service did not stop correctly")
+
+    time.sleep(1)
