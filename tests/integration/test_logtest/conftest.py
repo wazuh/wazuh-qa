@@ -15,7 +15,7 @@ from wazuh_testing.tools import LOG_FILE_PATH
 @pytest.fixture(scope='module')
 def restart_required_logtest_daemons():
     """Wazuh logtests daemons handler."""
-    required_logtest_daemons = ['wazuh-analysisd']
+    required_logtest_daemons = ['wazuh-analysisd', 'wazuh-db']
 
     for daemon in required_logtest_daemons:
         control_service('stop', daemon=daemon)

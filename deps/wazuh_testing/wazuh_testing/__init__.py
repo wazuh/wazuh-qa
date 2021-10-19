@@ -4,6 +4,8 @@
 
 import logging
 import sys
+import os
+import yaml
 from collections import defaultdict
 
 UDP = 'UDP'
@@ -38,6 +40,8 @@ class Parameters:
         self._gcp_subscription_name = None
         self._gcp_credentials_file = None
         self._gcp_topic_name = None
+        self._gcp_configuration_file = None
+        self._gcp_credentials = None
         self._fim_mode = []
 
     @property
@@ -165,6 +169,60 @@ class Parameters:
             value (string): New value for the `gcp_topic_name`.
         """
         self._gcp_topic_name = value
+
+    @property
+    def gcp_credentials(self):
+        """Getter method for the `gcp_credentials` property
+
+        Returns:
+            str: Google Cloud topic name `gcp_credentials`.
+        """
+        return self._gcp_credentials
+
+    @gcp_credentials.setter
+    def gcp_credentials(self, value):
+        """Setter method for the `gcp_credentials` property
+
+        Args:
+            value (string): New value for the `gcp_credentials`.
+        """
+        self._gcp_credentials = value
+
+    @property
+    def gcp_configuration_file(self):
+        """Getter method for the `gcp_configuration_file` property
+
+        Returns:
+            str: Google Cloud topic name `gcp_configuration_file`.
+        """
+        return self._gcp_configuration_file
+
+    @gcp_configuration_file.setter
+    def gcp_configuration_file(self, value):
+        """Setter method for the `gcp_configuration_file` property
+
+        Args:
+            value (string): New value for the `gcp_configuration_file`.
+        """
+        if not os.path.exists(value):
+            return
+
+        # Overwrite global parameters with the configuration file
+        with open(value) as stream:
+            gcp_conf = yaml.safe_load(stream)
+
+        if 'project_id' in gcp_conf:
+            self.gcp_project_id = gcp_conf['project_id']
+        if 'subscription' in gcp_conf:
+            self.gcp_subscription_name = gcp_conf['subscription']
+        if 'topic' in gcp_conf:
+            self.gcp_topic_name = gcp_conf['topic']
+        if 'credential_path' in gcp_conf:
+            self.gcp_credentials_file = gcp_conf['credential_path']
+        if 'credentials' in gcp_conf:
+            self.gcp_credentials = gcp_conf['credentials']
+
+        self._gcp_configuration_file = value
 
     @property
     def fim_mode(self):
