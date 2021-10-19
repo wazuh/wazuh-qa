@@ -500,6 +500,7 @@ nav:
             - Test invalid decoder syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md
             - Test invalid rules syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md
           - Test ruleset refresh:
+            - Test cdb labels: tests/integration/test_logtest/test_ruleset_refresh/test_cdb_labels.md
             - Test rule labels: tests/integration/test_logtest/test_ruleset_refresh/test_rule_labels.md
             - Test decoder labels: tests/integration/test_logtest/test_ruleset_refresh/test_decoder_labels.md
         - RIDS:

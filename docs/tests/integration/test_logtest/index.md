@@ -53,6 +53,11 @@ inactivity.
 
 - **[Test load rules decoders](test_rules_decoders_load/test_load_rules_decoders.md)**:
 Check if `wazuh-logtest` produce the correct rule/decoder matching.
+#### Test ruleset refresh
+
+- **[Test cdb labels](test_ruleset_refresh/test_cdb_labels.md)**:
+Check that `wazuh-logtest` works as expected with the operation of
+loading new cdb list files without the need to restart the manager.
 
 #### Test ruleset refresh
 
