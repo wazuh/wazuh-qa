@@ -12,7 +12,7 @@ from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, read_yaml
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
@@ -23,19 +23,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
+ssl_configuration_tests = read_yaml(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
 
 # Ossec.conf configurations
 DEFAULT_CIPHERS = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
@@ -66,6 +56,9 @@ test_index = 0
 
 
 def get_current_test():
+    """
+    Get the current test case.
+    """
     global test_index
     current = test_index
     test_index += 1
@@ -79,6 +72,9 @@ def get_configuration(request):
 
 
 def override_wazuh_conf(configuration):
+    """
+    Write a particular Wazuh configuration for the test case.
+    """
     # Stop Wazuh
     control_service('stop', daemon='wazuh-authd')
     time.sleep(1)
@@ -94,7 +90,7 @@ def override_wazuh_conf(configuration):
     # Start Wazuh
     control_service('start', daemon='wazuh-authd')
 
-    """Wait until agentd has begun"""
+    """Wait until authd has begun"""
 
     def callback_agentd_startup(line):
         if 'Accepting connections on port 1515' in line:

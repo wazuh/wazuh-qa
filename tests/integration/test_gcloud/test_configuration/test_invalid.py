@@ -15,26 +15,13 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
+
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
 
 # variables
 
-if global_parameters.gcp_project_id is not None:
-    project_id = global_parameters.gcp_project_id
-else:
-    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
-
-if global_parameters.gcp_subscription_name is not None:
-    subscription_name = global_parameters.gcp_subscription_name
-else:
-    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
-
-if global_parameters.gcp_credentials_file is not None:
-    credentials_file = global_parameters.gcp_credentials_file
-else:
-    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'invalid_conf.yaml')
@@ -43,8 +30,9 @@ force_restart_after_restoring = True
 # configurations
 
 monitoring_modes = ['scheduled']
-conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
-               'CREDENTIALS_FILE': credentials_file, 'MODULE_NAME': __name__}
+conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
+               'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
+               'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
@@ -69,11 +57,9 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     expect an error message and gcp-pubsub unable to start.
     """
     # Configuration error -> ValueError raised
-    try:
+    with pytest.raises(ValueError):
         control_service('restart')
-    except ValueError:
-        assert sys.platform != 'win32', 'Restarting ossec with invalid configuration should ' \
-                                        'not raise an exception in win32'
+
     tags_to_apply = get_configuration['tags'][0]
 
     if tags_to_apply == 'invalid_gcp_wmodule':
