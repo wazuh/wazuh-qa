@@ -1,8 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM watches selected
+       files and triggering alerts when these files are modified. All these tests will be performed
+       using complex paths and ambiguous configurations, such as keys and subkeys with opposite
+       monitoring settings.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_ambiguous_confs
+'''
 import os
 from hashlib import sha1
 
@@ -86,18 +137,54 @@ def get_configuration(request):
 ])
 def test_ambiguous_complex_checks(key, subkey, key_checkers,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if the events of every configured key has the proper check attributes.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds, in the generated events, the 'check_' fields
+                 specified in the configuration. These checks are attributes indicating that a monitored key
+                 has been modified. For this purpose, the test will monitor several registry keys, and
+                 configure different 'checks' for them. Then, it will make operations using testing keys/values
+                 to generate events, and finally, the test will verify that the FIM events generated contain only
+                 the 'check_' fields specified for the monitored key/values.
 
-    Parameters
-    ----------
-    key: str
-        Key of the registry (HKEY_* constants).
-    sub_key: str
-        Path of the configured key.
-    key_checkers: set
-        Set of checks that are expected.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - sub_key:
+            type: str
+            brief: Path of the key that will be created under the root key.
+        - key_checkers:
+            type: set
+            brief: Set of 'check_' fields that are expected.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: A test case (complex_checks) is contained in an external YAML file
+                       (wazuh_complex_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the
+                       testing registry keys to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({"complex_checks"}, get_configuration['tags'])
     # Test registry keys.
     registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
@@ -119,20 +206,57 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
 ])
 def test_ambiguous_report_changes(key, subkey, value_list, report,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if report changes works properly for every configured entry
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon generates or not the 'content_changes' field for each event
+                 depending on the value set in the 'report_changes' attribute. This attribute allows reporting the
+                 modifications made in a monitored key. For this purpose, the test will monitor a registry key,
+                 and make operations using a testing value. Finally, it will verify that FIM events generated
+                 contain the changes made in the 'content_changes' field when required.
 
-    Parameters
-    ----------
-    key: str
-        Key of the registry (HKEY_* constants).
-    sub_key: str
-        Path of the configured key.
-    value_list: list
-        List with the name of the values that will be used in the cud operation.
-    report: boolean
-        True if the key is configured with report changes.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - sub_key:
+            type: str
+            brief: Path of the key that will be created under the root key.
+        - value_list:
+            type: list
+            brief: List with the name of the values that will be used in the CUD operations.
+        - report:
+            type: bool
+            brief: True if the key is configured to report changes. False otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events generated include in its 'content_changes' field the changes made
+          in the monitored value when 'report_changes == yes' and vice versa.
+
+    input_description: A test case (complex_report_changes) is contained in an external YAML file
+                       (wazuh_complex_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the
+                       testing registry keys to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'complex_report_changes'}, get_configuration['tags'])
 
     validator_after_update = None
@@ -165,21 +289,56 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
 ])
 def test_ambiguous_report_tags(key, subkey, tag,
                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheck detects the event property 'tags' for each configured entry.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon generates or not the 'tags' field for each event
+                 depending on the value(s) set in the 'tags' attribute. This attribute allows adding tags
+                 to the FIM events for monitored keys. For this purpose, the test will monitor a registry
+                 key, and make CUD (create, update, and delete) operations using testing keys/values. Finally,
+                 it will verify that FIM events generated include in its 'tag' field the tags required.
 
-    This test validates both situations, making sure that if tags='no', there won't be a
-    tags event property.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    key: str
-        Key of the registry (HKEY_* constants).
-    sub_key: str
-        Path of the configured key.
-    tag: str
-        Tag that is configured for each entry. If None, the entry isn't configured with a tag.
-    """
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - sub_key:
+            type: str
+            brief: Path of the key that will be created under the root key.
+        - tag:
+            type: str
+            brief: Tag configured for each entry. If None, the entry is not configured with a tag.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the 'tags' field is not generated in FIM events
+          when the 'tags' attribute not exists or is empty.
+        - Verify that FIM events generated contain the proper content in the 'tags' field
+          when the 'tags' attribute has content.
+
+    input_description: A test case (complex_tags) is contained in an external YAML file
+                       (wazuh_complex_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the
+                       testing registry keys to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'complex_tags'}, get_configuration['tags'])
 
     def no_tag_validator(event):
