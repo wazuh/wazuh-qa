@@ -290,7 +290,6 @@ class DocGenerator:
 
         return None
 
-<<<<<<< HEAD
     def check_test_exists(self, path):
         """Check that a test exists within the tests path input.
         
@@ -300,12 +299,6 @@ class DocGenerator:
         for test_name in self.conf.test_names:
             if self.locate_test(test_name):
                 print(f'{test_name} exists in {path}')
-=======
-    def do_exist(self, path):
-        for test_name in self.conf.test_names:
-            if self.locate_test(test_name):
-                print(f'{test_name} does exist in {path}')
->>>>>>> fb0ee7c7d5bf6e536b0348fcba395b06b09b61ce
             else:
                 print(f'{test_name} does not exist in {path}')
 

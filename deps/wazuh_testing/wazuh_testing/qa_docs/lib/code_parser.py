@@ -71,6 +71,15 @@ class CodeParser:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
     def check_fields(self, doc, doc_type, path):
+        """Check if the fields that a documentation block has, are valids.
+        
+        You can check them in the `schema.yaml` file.
+
+        Args:
+            doc (dict): A dict with the documentation block parsed.
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
+        """
         if doc_type == 'module':
             expected_fields = self.conf.module_fields
         elif doc_type == 'test':

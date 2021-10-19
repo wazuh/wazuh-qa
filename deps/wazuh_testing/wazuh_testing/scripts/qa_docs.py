@@ -194,11 +194,7 @@ def parse_data(args):
     if args.test_exist:
         doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_names=args.test_exist))
 
-<<<<<<< HEAD
         doc_check.check_test_exists(args.tests_path)
-=======
-        doc_check.do_exist(args.tests_path)
->>>>>>> fb0ee7c7d5bf6e536b0348fcba395b06b09b61ce
 
     # Parse a list of tests
     elif args.test_names:
