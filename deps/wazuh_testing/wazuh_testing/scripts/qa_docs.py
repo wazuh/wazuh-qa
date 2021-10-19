@@ -155,7 +155,7 @@ def validate_parameters(parameters, parser):
 
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
-                raise QAValueError(f"{test_name} not found.", qadocs_logger.error)
+                raise QAValueError(f"{test_name} has not been not found in {parameters.tests_path}.", qadocs_logger.error)
 
     # Check that the index exists
     if parameters.app_index_name:
@@ -192,11 +192,9 @@ def run_searchui(index):
 def parse_data(args):
     """Parse the tests and collect the data."""
     if args.test_exist:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_exist))
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_names=args.test_exist))
 
-        for test_name in args.test_exist:
-            if doc_check.locate_test(test_name) is not None:
-                print(f"{test_name} exists")
+        doc_check.check_test_exists(args.tests_path)
 
     # Parse a list of tests
     elif args.test_names:
@@ -207,7 +205,7 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
         # When no output is specified, it is printed
         else:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, test_names=args.test_names))
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names))
 
     # Parse a list of test types
     elif args.test_types:
@@ -216,7 +214,7 @@ def parse_data(args):
         # Parse a list of test modules
         if args.test_modules:
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                        args.test_modules))
+                                args.test_modules))
         else:
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
 
@@ -252,6 +250,7 @@ def index_and_visualize_data(args):
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name
         run_searchui(args.launching_index_name)
 
+
 def main():
     args, parser = get_parameters()
 
@@ -260,11 +259,6 @@ def main():
     # Set the qa-docs logger level
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
-
-    if args.test_exist:
-        doc_check = DocGenerator(Config(CONFIG_PATH, args.test_dir, '', args.test_exist))
-        if doc_check.locate_test() is not None:
-            print("test exists")
 
     if args.version:
         with open(VERSION_PATH, 'r') as version_file:

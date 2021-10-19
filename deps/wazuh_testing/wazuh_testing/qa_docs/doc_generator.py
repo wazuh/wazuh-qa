@@ -188,8 +188,8 @@ class DocGenerator:
             DocGenerator.LOGGER.debug(f"New group file '{doc_path}' was created with ID:{self.__id_counter}")
             return self.__id_counter
         else:
-            DocGenerator.LOGGER.warning(f"Content for {path} is empty, ignoring it")
-            return None
+            DocGenerator.LOGGER.error(f"Content for {path} is empty, ignoring it")
+            raise QAValueError(f"Content for {path} is empty, ignoring it", DocGenerator.LOGGER.error)
 
     def create_test(self, path, group_id, test_name=None):
         """Parse the content of a test file and dumps the content into a file.
@@ -218,23 +218,21 @@ class DocGenerator:
             if self.conf.mode == Mode.DEFAULT:
                 doc_path = self.get_test_doc_path(path)
 
-            elif self.conf.mode == Mode.PARSE_TESTS:
-                doc_path = self.conf.documentation_path
+                self.dump_output(test, doc_path)
+                DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
+                                          "was created with ID:{self.__id_counter}")
+                return self.__id_counter
 
-                # If the user does not specify an output dir
-                if not doc_path:
-                    self.print_test_info(test)
-                    return
-                # If the user specifies an output dir
-                else:
+            elif self.conf.mode == Mode.PARSE_TESTS:
+                if self.conf.documentation_path:
+                    doc_path = self.conf.documentation_path
                     doc_path = os.path.join(doc_path, test_name)
 
-            self.dump_output(test, doc_path)
-            DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
-            return self.__id_counter
+                    self.dump_output(test, doc_path)
+                    DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created.")
         else:
-            DocGenerator.LOGGER.warning(f"Content for {path} is empty, ignoring it")
-            return None
+            DocGenerator.LOGGER.error(f"Content for {path} is empty, ignoring it")
+            raise QAValueError(f"Content for {path} is empty, ignoring it", DocGenerator.LOGGER.error)
 
     def parse_folder(self, path, group_id):
         """Search in a specific folder to parse possible group files and each test file.
@@ -244,8 +242,8 @@ class DocGenerator:
             group_id (str): A string with the id of the group where the new elements belong.
         """
         if not os.path.exists(path):
-            DocGenerator.LOGGER.warning(f"Include path '{path}' doesn´t exist")
-            return
+            DocGenerator.LOGGER.error(f"Include path '{path}' doesn´t exist")
+            raise QAValueError(f"Include path '{path}' doesn´t exist", DocGenerator.LOGGER.error)
 
         if not self.is_valid_folder(path):
             return
@@ -273,7 +271,8 @@ class DocGenerator:
             if self.test_path:
                 self.create_test(self.test_path, 0, test_name)
             else:
-                DocGenerator.LOGGER.error(f"'{self.conf.test_name}' could not be found")
+                DocGenerator.LOGGER.error(f"'{test_name}' could not be found")
+                raise QAValueError(f"'{test_name}' could not be found", DocGenerator.LOGGER.error)
 
     def locate_test(self, test_name):
         """Get the test path when a test is specified by the user.
@@ -289,8 +288,19 @@ class DocGenerator:
                 if filename == complete_test_name:
                     return os.path.join(root, complete_test_name)
 
-        print(f"{test_name} does not exist")
         return None
+
+    def check_test_exists(self, path):
+        """Check that a test exists within the tests path input.
+        
+        Args:
+            path (str): A string with the tests path.
+        """
+        for test_name in self.conf.test_names:
+            if self.locate_test(test_name):
+                print(f'{test_name} exists in {path}')
+            else:
+                print(f'{test_name} does not exist in {path}')
 
     def print_test_info(self, test):
         """Print the test info to standard output.
