@@ -5,7 +5,9 @@ import yaml
 from wazuh_testing.tools import CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
 from authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
+
 
 # Data paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -38,18 +40,24 @@ def get_temp_force_config(param):
     Creates a temporal config file.
     """
     temp = os.path.join(data_path, 'temp.yaml')
+    force_conf = {'force': {'elements': []}}
+    legacy_force_insert_conf = None
+    for elem in param:
+        if elem == 'force_insert':
+            legacy_force_insert_conf = {'force_insert': {'value': param[elem]}}
+        elif elem == 'disconnected_time':
+            disconnected_time_conf = {'disconnected_time':{'value': 0, 'attributes':[{'enabled':'no'}]}}
+            disconnected_time_conf['disconnected_time']['value'] = param[elem]['value']
+            disconnected_time_conf['disconnected_time']['attributes'][0]['enabled'] = param[elem]['attributes'][0]['enabled']
+            force_conf['force']['elements'].append(disconnected_time_conf)
+        else:
+            force_conf['force']['elements'].append({elem: {'value': param[elem]}})
+
     with open(configurations_path, 'r') as conf_file:
-        force_conf = {'force': {'elements': []}}
-        for elem in param:
-            if elem == 'disconnected_time':
-                disconnected_time_conf = {'disconnected_time':{'value': 0, 'attributes':[{'enabled':'no'}]}}
-                disconnected_time_conf['disconnected_time']['value'] = param[elem]['value']
-                disconnected_time_conf['disconnected_time']['attributes'][0]['enabled'] = param[elem]['attributes'][0]['enabled']
-                force_conf['force']['elements'].append(disconnected_time_conf)
-            else:
-                force_conf['force']['elements'].append({elem: {'value': param[elem]}})
         temp_conf_file = yaml.safe_load(conf_file)
         temp_conf_file[0]['sections'][0]['elements'].append(force_conf)
+        if legacy_force_insert_conf:
+            temp_conf_file[0]['sections'][0]['elements'].append(legacy_force_insert_conf)
     with open(temp, 'w') as temp_file:
         yaml.safe_dump(temp_conf_file, temp_file)
     return temp
@@ -161,14 +169,22 @@ def insert_pre_existent_agents(get_current_test_case):
     keys_file.close()
 
 
+def check_logs(logs):
+    for log in logs:
+        log_monitor.start(timeout=10,
+                          callback=make_callback(log, prefix=AUTHD_DETECTOR_PREFIX,
+                                                 escape=True),
+                          error_message='Expected error log does not occured.')
+
 # Tests
 
 def test_authd_force_options(configure_environment, configure_sockets_environment, connect_to_sockets_module,
                              stop_authd_function, override_authd_force_conf, insert_pre_existent_agents,
-                             restart_authd_function, wait_for_authd_startup_function,
+                             file_monitoring, restart_authd_function, wait_for_authd_startup_function,
                              connect_to_sockets_function, get_current_test_case, tear_down):
 
     authd_sock = receiver_sockets[0]
+    check_logs(get_current_test_case.get('log', []))
 
     for stage in get_current_test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
@@ -182,3 +198,4 @@ def test_authd_force_options(configure_environment, configure_sockets_environmen
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         validate_authd_response(response, stage['output'])
+        check_logs(stage.get('log', []))
