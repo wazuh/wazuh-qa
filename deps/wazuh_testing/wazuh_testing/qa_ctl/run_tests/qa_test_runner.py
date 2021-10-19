@@ -24,7 +24,7 @@ class QATestRunner():
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
             qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
-             test_parameters (dict): a dictionary containing all the required data to build the tests
+            test_parameters (dict): a dictionary containing all the required data to build the tests
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
@@ -114,6 +114,10 @@ class QATestRunner():
                 test_dict['tests_path'] = paths['test_files_path']
                 test_dict['tests_result_path'] = paths['test_results_path']
                 test_dict['tests_run_dir'] = paths['run_tests_dir_path']
+
+            test_dict['components'] = test_params['components'] if 'components' in test_params else None
+            test_dict['modules'] = test_params['modules'] if 'modules' in test_params else None
+            test_dict['system'] = test_params['system'] if 'system' in test_params else None
 
             if 'parameters' in test_params:
                 parameters = test_params['parameters']
