@@ -827,7 +827,7 @@ def daemons_handler(get_configuration, request):
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
 
-    It uses de variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
+    It uses the variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
 
     Args:
         request (fixture): Provide information on the executing test function.
