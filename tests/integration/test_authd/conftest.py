@@ -110,3 +110,11 @@ def override_authd_force_conf(format_configuration):
 
     # Restore previous configuration
     write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='function')
+def stop_authd_function():
+    """
+    Stop Authd.
+    """
+    control_service("stop", daemon=DAEMON_NAME)
