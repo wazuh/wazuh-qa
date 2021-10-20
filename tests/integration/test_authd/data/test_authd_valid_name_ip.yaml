@@ -1,0 +1,214 @@
+---
+  -
+    name: 'Agent name same as Manager'
+    description: 'Check for register an agent with name same as manager: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'{}'"
+      output:
+        status: 'error'
+        message: 'Invalid agent name: {}'
+      insert_hostname_in_query: 'yes'
+  -
+    name: 'Register with Default config'
+    description: 'Default manager configuration: registered'
+    test_case:
+    -
+      input: "OSSEC A:'user1'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: 'any'
+  -
+    name: 'Too short agent name'
+    description: 'Agent name too short < 2: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'n'"
+      output:
+        status: 'error'
+        message: 'Invalid agent name: n'
+  -
+    name: 'Min len agent name'
+    description: 'Agent name length = 2: registered'
+    test_case:
+    -
+      input: "OSSEC A:'nn'"
+      output:
+        status: 'success'
+        name: 'nn'
+        ip: 'any'
+  -
+    name: 'Max len agent name'
+    description: 'Agent name length = 128: registered'
+    test_case:
+    -
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output:
+        status: 'success'
+        name: 'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        ip: 'any'
+  -
+    name: 'Too long agent name'
+    description: 'Agent name length = 129: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'"
+      output:
+        status: 'error'
+        message: 'Invalid agent name: userxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  -
+    name: "Check non-alphanumeric '*'"
+    description: "Agent name with '*': rejected"
+    test_case:
+    -
+      input: "OSSEC A:'user*1'"
+      output:
+        status: 'error'
+        message: 'Invalid agent name: user\*1'
+  -
+    name: "Check non-alphanumeric '-'"
+    description: "Agent name with '-': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user-1'"
+      output:
+        status: 'success'
+        name: 'user-1'
+        ip: 'any'
+  -
+    name: "Check non-alphanumeric '_'"
+    description: "Agent name with '_': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user_1'"
+      output:
+        status: 'success'
+        name: 'user_1'
+        ip: 'any'
+  -
+    name: "Check non-alphanumeric '.'"
+    description: "Agent name with '.': registered"
+    test_case:
+    -
+      input: "OSSEC A:'user.1'"
+      output:
+        status: 'success'
+        name: 'user.1'
+        ip: 'any'
+  -
+    name: 'Valid IP'
+    description: 'Try register an agent with valid IP: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '10.10.10.10'
+  -
+    name: 'Invalid IP: incomplete'
+    description: 'Try register an agent with invalid IP: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10'
+  -
+    name: 'Invalid IP: alphabetic character'
+    description: 'Try register an agent with invalid IP: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.nn'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10.nn'
+  -
+    name: 'Invalid IP: greater than 255: 1'
+    description: 'Try register an agent with invalid IP'
+    # The manager should validate the IP https://github.com/wazuh/wazuh/issues/4965
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.257'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10.257'
+      expected_fail: 'yes'
+  -
+    name: 'Invalid IP: greater than 255: 2'
+    description: 'Try register an agent with invalid IP'
+    # The manager should validate the IP https://github.com/wazuh/wazuh/issues/4965
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'257.257.257.257'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 257.257.257.257'
+      expected_fail: 'yes'
+  -
+    name: 'Invalid IP: 4 digits'
+    description: 'Try register an agent with invalid IP: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'999.9999.999.999'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 999.9999.999.999'
+  -
+    name: 'Ip with mask/0'
+    description: 'Ip with mask: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.10/0'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '10.10.10.10/0'
+  -
+    name: 'Ip with mask /24 '
+    description: 'Ip with mask /24: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/24'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '10.10.10.1/24'
+  -
+    name: 'Ip with mask /32'
+    description: 'Ip with mask /32: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/32'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '10.10.10.1/32'
+  -
+    name: 'Invalid mask'
+    description: 'Invalid mask: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/55'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10.1'
+  -
+    name: 'Invalid mask, wrong character'
+    description: 'Invalid mask, wrong character: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/2{'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10.1'
+  -
+    name: 'Invalid mask, wrong character'
+    description: 'Invalid mask, wrong character: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'10.10.10.1/<'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 10.10.10.1'

@@ -38,6 +38,7 @@ def get_configuration(request):
     {'https_disabled'},
     {'https_enabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_https(tags_to_apply, get_configuration, configure_api_environment,
                restart_api, wait_for_start, get_api_details):
     """Check that the API works with http and https protocols.

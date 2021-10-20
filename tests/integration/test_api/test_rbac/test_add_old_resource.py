@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import requests
+import pytest
 from wazuh_testing.api import get_security_resource_information
 
 # Variables
@@ -9,6 +10,7 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 
 # Tests
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_user(set_security_resources, get_api_details):
     """Remove a user with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
@@ -30,6 +32,7 @@ def test_add_old_user(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_role(set_security_resources, get_api_details):
     """Remove a role with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
@@ -50,6 +53,7 @@ def test_add_old_role(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_policy(set_security_resources, get_api_details):
     """Remove a policy with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
@@ -73,6 +77,7 @@ def test_add_old_policy(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_rule(set_security_resources, get_api_details):
     """Remove a rule with defined relationships and create it with the same ID to see if said relationships remain."""
     api_details = get_api_details()
