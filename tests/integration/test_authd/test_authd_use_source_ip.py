@@ -90,52 +90,11 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module')
-def clean_client_keys_file_module():
-    """
-    Stops Wazuh and cleans any previus key in client.keys file at module scope.
-    """
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-@pytest.fixture(scope='module')
-def tear_down():
-    """
-    Roll back the daemon and client.keys state after the test ends.
-    """
-    yield
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-# Test
-
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
-                             test_case, tear_down):
+                             clean_client_keys_file_function, restart_authd_function, wait_for_authd_startup_function,
+                             connect_to_sockets_function, test_case, tear_down):
     """
         description:
            "Check that every input message in authd port generates the adequate output"

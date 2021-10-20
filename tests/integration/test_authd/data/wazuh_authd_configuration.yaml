@@ -14,10 +14,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'yes'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
@@ -80,10 +88,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
@@ -114,10 +130,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
@@ -162,10 +186,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
@@ -217,10 +249,18 @@
               value: 1515
           - use_source_ip:
               value: USE_SOURCE_IP
-          - force_insert:
-              value: 'yes'
-          - force_time:
-              value: 0
+          - force:
+              elements:
+              - enabled:
+                  value: 'yes'
+              - key_mismatch:
+                  value: 'no'
+              - after_registration_time:
+                  value: '0h'
+              - disconnected_time:
+                  attributes:
+                  - enabled: 'yes'
+                  value: '0h'
           - purge:
               value: 'yes'
           - limit_maxagents:
@@ -246,8 +286,18 @@
               value: 'no'
           - port:
               value: 1515
-          - force_time:
-              value: 0
+          - force:
+              elements:
+              - enabled:
+                  value: 'yes'
+              - key_mismatch:
+                  value: 'no'
+              - after_registration_time:
+                  value: '0h'
+              - disconnected_time:
+                  attributes:
+                  - enabled: 'yes'
+                  value: '0h'
           - purge:
               value: 'yes'
           - use_password:
@@ -277,10 +327,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
@@ -310,10 +368,18 @@
             value: 1515
         - use_source_ip:
             value: 'no'
-        - force_insert:
-            value: 'yes'
-        - force_time:
-            value: 0
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
         - purge:
             value: 'yes'
         - use_password:
