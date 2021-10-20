@@ -85,6 +85,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Fixtures
 
+
 @pytest.fixture(scope="module", params=configurations, ids=['authd_local_config'])
 def get_configuration(request):
     """Get configurations from the module"""
@@ -120,7 +121,7 @@ def set_up_groups(get_current_test_case, request):
 def insert_pre_existent_agents(get_current_test_case):
     agents = get_current_test_case.get('pre_existent_agents', [])
     time_now = int(time.time())
-    #wdb_sock = receiver_sockets[1]
+
     try:
         keys_file = open(CLIENT_KEYS_PATH, 'w')
     except IOError as exception:
@@ -129,10 +130,6 @@ def insert_pre_existent_agents(get_current_test_case):
     # Clean agents from DB
     command = f'global sql DELETE FROM agent WHERE id != 0'
     response = query_wdb(command)
-    #wdb_sock.send(command, size=True)
-    #response = wdb_sock.receive(size=True).decode()
-    #data = response.split(" ", 1)
-    #assert data[0] == 'ok', f'Unable to clean agents'
 
     for agent in agents:
         if 'id' in agent:
@@ -181,8 +178,6 @@ def insert_pre_existent_agents(get_current_test_case):
         command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
                   "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
         response = query_wdb(command)
-        #wdb_sock.send(command, size=True)
-        #response = wdb_sock.receive(size=True).decode()
         data = response.split(" ", 1)
         assert data[0] == 'ok', f'Unable to add agent {id}'
 
@@ -192,33 +187,45 @@ def insert_pre_existent_agents(get_current_test_case):
 # Tests
 
 
-def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function, set_up_groups,
-                              stop_authd_function, insert_pre_existent_agents, restart_authd_function, wait_for_authd_startup_function,
-                              get_current_test_case, tear_down):
+def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
+                              set_up_groups, stop_authd_function, insert_pre_existent_agents, restart_authd_function,
+                              wait_for_authd_startup_function, get_current_test_case, tear_down):
     """
         description:
             "Check that every input message in trough local authd port generates the adequate response to worker"
         wazuh_min_version:
             4.2
         parameters:
-            - set_up_groups_keys:
-                type: fixture
-                brief: Set pre-existent groups and keys.
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
             - configure_environment:
                 type: fixture
                 brief: Configure a custom environment for testing.
-            - configure_sockets_environment_function:
+            - configure_sockets_environment:
                 type: fixture
                 brief: Configure the socket listener to receive and send messages on the sockets at function scope.
             - connect_to_sockets_function:
                 type: fixture
                 brief: Bind to the configured sockets at function scope.
-            - wait_for_authd_startup_module:
+            - set_up_groups
+                type: fixture
+                brief: Set the pre-defined groups.
+            - stop_authd_function:
+                type: fixture
+                brief: stops the wazuh-authd daemon
+            - insert_pre_existent_agents:
+                type: fixture
+                brief: adds the required agents to the client.keys and global.db
+            - restart_authd_function:
+                type: fixture
+                brief: stops the wazuh-authd daemon
+            - wait_for_authd_startup_function:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
+            - get_current_test_case:
+                type: fixture
+                brief: gets the current test case from the tests' list
+            - tear_down:
+                type: fixture
+                brief: cleans the client.keys file
         assertions:
             - The received output must match with expected
             - The enrollment messages are parsed as expected
