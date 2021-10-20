@@ -20,7 +20,8 @@ package_data_list = [
     'data/sslmanager.key',
     'data/sslmanager.cert',
     'tools/macos_log/log_generator.m',
-    'qa_docs/config.yaml',
+    'qa_docs/schema.yaml',
+    'qa_docs/VERSION.json'
     'qa_ctl/deployment/dockerfiles/*',
     'qa_ctl/deployment/dockerfiles/qa_ctl/*',
     'qa_ctl/deployment/vagrantfile_template.txt',
@@ -44,11 +45,11 @@ def get_files_from_directory(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join(path, filename))
+            paths.append(os.path.join('..', path, filename))
     return paths
 
 
-package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui/'))
+package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(name='wazuh_testing',
       version='4.3.0',
@@ -63,3 +64,4 @@ setup(name='wazuh_testing',
       include_package_data=True,
       zip_safe=False
       )
+
