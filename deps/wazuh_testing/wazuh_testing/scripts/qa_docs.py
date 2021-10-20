@@ -37,6 +37,14 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
+def set_parameters(args):
+    # Set the qa-docs logger level
+    if args.debug_level:
+        set_qadocs_logger_level('DEBUG')
+
+    # Deactivate the qa-docs logger if necessary.
+    if args.no_logging:
+        set_qadocs_logger_level(None)
 
 def get_parameters():
     """Capture the script parameters
@@ -52,6 +60,9 @@ def get_parameters():
 
     parser.add_argument('-s', '--sanity-check', action='store_true', dest='sanity',
                         help="Run a sanity check.")
+
+    parser.add_argument('--no-logging', action='store_true', dest='no_logging',
+                        help="Do not perform logging when running the tool.")
 
     parser.add_argument('-v', '--version', action='store_true', dest="version",
                         help="Print qa-docs version.")
@@ -125,6 +136,10 @@ def check_incompatible_parameters(parameters):
     if (parameters.test_types or parameters.test_modules) and test_run:
         raise QAValueError('The --types, --modules parameters parse the data so you can index it and visualize it. '
                            '-t, --tests get specific tests information.',
+                           qadocs_logger.error)
+
+    if parameters.no_logging and parameters.debug_level:
+        raise QAValueError('You cannot specify debug level and no-logging at the same time.',
                            qadocs_logger.error)
 
 
@@ -254,11 +269,8 @@ def index_and_visualize_data(args):
 def main():
     args, parser = get_parameters()
 
+    set_parameters(args)
     validate_parameters(args, parser)
-
-    # Set the qa-docs logger level
-    if args.debug_level:
-        set_qadocs_logger_level('DEBUG')
 
     if args.version:
         with open(VERSION_PATH, 'r') as version_file:
