@@ -58,7 +58,7 @@ class ClusterCSVParser:
             tuple: start date, end date.
         """
         sync_df = self.dataframes['logs'][node_name]['integrity_sync']['Timestamp']
-        return sync_df[0], sync_df[len(sync_df)-1 if len(sync_df) > 1 else 1]
+        return sync_df[0], sync_df[len(sync_df) - 1 if len(sync_df) > 1 else 1]
 
     def _trim_dataframe(self, df, phase, setup_datetime):
         """Get the dataframe between two datetime.
@@ -174,7 +174,8 @@ class ClusterCSVTasksParser(ClusterCSVParser):
         Returns:
             dict: mean value for 'time_spent(s)' column.
         """
-        return {'time_spent(s)': {'mean': df['time_spent(s)'].mean()}}
+        return {'time_spent(s)': {'mean': df['time_spent(s)'].mean(),
+                                  'max': df['time_spent(s)'].max()}}
 
     def get_stats(self):
         """Get max stats after grouping by phase, task, type of node and stat.
@@ -216,6 +217,7 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
         result = {}
         for column in self.columns:
             result[column] = {'mean': df[column].mean(),
+                              'max': df[column].max(),
                               'reg_cof': np.polyfit(range(len(df)), list(df[column]), 1)[0]}
 
         return result
