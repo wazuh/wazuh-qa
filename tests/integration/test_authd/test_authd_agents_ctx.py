@@ -288,7 +288,9 @@ def register_agent_main_server(Name, Group=None, IP=None):
 
 
 def register_agent_local_server(Name, Group=None, IP=None):
-    message = '{{"arguments":{{"force":0,"name":"{}"'.format(Name)
+    message = ('{"arguments":{"force":{"enabled":true,"disconnected_time":{"enabled":true,"value":"0"},'
+              '"key_mismatch":true,"after_registration_time":"0"}')
+    message += ',"name":"{}"'.format(Name)
     if Group:
         message += ',"groups":"{}"'.format(Group)
     if IP:
