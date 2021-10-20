@@ -12,6 +12,13 @@ import re
 DAEMON_NAME = 'wazuh-authd'
 
 
+def validate_argument(received, expected, argument_name):
+    if received != expected:
+        return 'error', f"Invalid '{argument_name}': '{received}' received, '{expected}' expected."
+    else:
+        return 'success', ''
+
+
 def validate_authd_response(response, expected):
     """
     Validates if the different items of an Authd response are as expected. Any item inexistent in expected won't
@@ -23,27 +30,49 @@ def validate_authd_response(response, expected):
     """
     response = response.split(sep=" ", maxsplit=1)
     status = response[0]
+    result = 'success'
+    err_msg = ''
     if expected['status'] == 'success':
-        assert status == 'OSSEC', 'Invalid status response'
+        result, err_msg = validate_argument(status, 'OSSEC', 'status')
+        if result != 'success':
+            return result, err_msg
+
         agent_key = response[1].split('\'')[1::2][0].split()
         id = agent_key[0]
         name = agent_key[1]
         ip = agent_key[2]
         key = agent_key[3]
+
         if 'id' in expected:
-            assert id == expected['id'], f'Invalid id response \'{id}\' '
+            result, err_msg = validate_argument(id, expected['id'], 'id')
+            if result != 'success':
+                return result, err_msg
+
         if 'name' in expected:
-            assert name == expected['name'], f'Invalid name response \'{name}\''
+            result, err_msg = validate_argument(name, expected['name'], 'name')
+            if result != 'success':
+                return result, err_msg
+
         if 'ip' in expected:
-            assert ip == expected['ip'], f'Invalid ip response\'{ip}\''
+            result, err_msg = validate_argument(ip, expected['ip'], 'ip')
+            if result != 'success':
+                return result, err_msg
+
         if 'key' in expected:
-            assert key == expected['key'], f'Invalid key response \'{key}\' '
+            result, err_msg = validate_argument(key, expected['key'], 'key')
+            if result != 'success':
+                return result, err_msg
 
     elif expected['status'] == 'error':
-        assert status == "ERROR:"
+        result, err_msg = validate_argument(status, 'ERROR:', 'status')
+        if result != 'success':
+            return result, err_msg
+
         message = response[1]
         if 'message' in expected:
-            assert re.match(expected['message'], message), f'Invalid error message response \'{message}\''
-
+            if re.match(expected['message'], message) is None:
+                return 'error', f"Invalid 'message': '{message}' received, '{expected['message']}' expected"
     else:
         raise Exception('Invalid expected status')
+
+    return result, err_msg
