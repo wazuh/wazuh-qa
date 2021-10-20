@@ -20,8 +20,6 @@ modules:
 components:
     - agent
 
-path: tests/integration/test_active_response/test_execd/test_execd_restart.py
-
 daemons:
     - wazuh-analysisd
     - wazuh-authd
@@ -153,7 +151,7 @@ def start_agent(request, get_configuration):
 
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
-    """Remove the test IP from iptables if it exist.
+    """Remove the testing IP address from `iptables` if it exists.
 
     Args:
         get_configuration (fixture): Get configurations from the module.
@@ -246,7 +244,7 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
                  is sent to it. This response includes an IP address that must be added
                  and removed from iptables, the Linux firewall.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_debug_mode:

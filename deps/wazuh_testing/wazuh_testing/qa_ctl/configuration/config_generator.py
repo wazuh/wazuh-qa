@@ -98,7 +98,8 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        qa_docs_command = f"qa-docs -T {test_name} -o {join(gettempdir(), 'wazuh_qa_ctl')} -I {join(self.qa_files_path, 'tests')}"
+        qa_docs_command = f"qa-docs -t {test_name} -o {join(gettempdir(), 'wazuh_qa_ctl')} -I " \
+                          f"{join(self.qa_files_path, 'tests')} --no-logging"
         test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', test_name)}.json"
 
         run_local_command_with_output(qa_docs_command)
@@ -171,7 +172,7 @@ class QACTLConfigGenerator:
             _check_validate(check, test_info, allowed_values)
 
         # Validate version requirements
-        if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
+        if parse(str(test_info['tests'][0]['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
                             f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
             raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
