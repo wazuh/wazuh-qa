@@ -1,7 +1,7 @@
 ---
-- #ADD
-  name: 'Add agent without force options'
-  description: 'Add an agent with name, IP and ID'
+-
+  name: 'Add agent'
+  description: 'Add an agent with name, IP and ID.'
   test_case:
   -
     input: '{"arguments":{"name":"user1","ip":"any"},"function":"add"}'
@@ -15,6 +15,26 @@
   -
     input: '{"arguments":{"name":"user4","ip":"any","id":"101","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"},"function":"add"}'
     output: '{"error":0,"data":{"id":"101","name":"user4","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"'
+-
+  name: 'Add duplicate agent without force options in request'
+  description: 'Try to register an agent with duplicate name, IP and ID. Without the explicit block, the force settings have default values in the master.'
+  pre_existent_agents:
+  -
+    id: '001'
+    name: 'test_user'
+    ip: '192.0.1.1'
+    key: 'SecretKey'
+    connection_status: 'active'
+  test_case:
+  -
+    input: '{"arguments":{"name":"test_user","ip":"any"},"function":"add"}'
+    output: '{"error":9008,"message":"Duplicate name"}'
+  -
+    input: '{"arguments":{"name":"user_","ip":"192.0.1.1"},"function":"add"}'
+    output: '{"error":9007,"message":"Duplicate IP"}'
+  -
+    input: '{"arguments":{"id":"001","name":"new_user","ip":"any"},"function":"add"}'
+    output: '{"error":9012,"message":"Duplicate ID"}'
 -
   name: 'Failed duplicate registration'
   description: 'Try to add an agent with an existent name, IP and ID with disabled force'
@@ -83,7 +103,7 @@
     input: '{"arguments":{"name":"user_","ip":"any","groups":"Group1,Group2,Group3"},"function":"add"}'
     output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
 
-- #REMOVE
+-
   name: 'Remove agent'
   description: 'Remove an agent default (no save_removed, no purge)'
   pre_existent_agents:
@@ -113,7 +133,7 @@
     input: '{"arguments":{"id":"200"},"function":"remove"}'
     output: '{"error":9011,"message":"Agent ID not found"}'
 
-- # Add agent with key_hash
+-
   name: 'Agent with key hash simple'
   description: 'Simple request with key hash for new user'
   pre_existent_agents:

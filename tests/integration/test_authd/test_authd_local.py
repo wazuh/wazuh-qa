@@ -195,8 +195,8 @@ def insert_pre_existent_agents_db(get_current_test_case, request):
             registration_time = time_now
 
         # Write agent in global.db
-        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
-                  "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+        command = f"global sql INSERT or REPLACE INTO agent (id, name, ip, date_add, connection_status, disconnection_time)\
+                    VALUES ('{id}', '{name}', '{ip}', '{registration_time}', '{connection_status}', '{disconnection_time}')"
 
         query_wdb(command)
 
@@ -223,7 +223,7 @@ def clean_authd_function():
 
 # Tests
 
-def test_authd_local_messages(clean_authd_function, set_up_groups, insert_pre_existent_agents_db, insert_pre_existent_agents_client_keys, get_configuration,
+def test_authd_local_messages(clean_authd_function, set_up_groups, insert_pre_existent_agents_client_keys, insert_pre_existent_agents_db, get_configuration,
                               configure_environment, configure_sockets_environment_function, connect_to_sockets_function,
                               wait_for_authd_startup_module, get_current_test_case):
     """
