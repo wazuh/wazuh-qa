@@ -7,7 +7,6 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 - **[_test_agentd_](test_agentd#test_active_response)**
 - _test_analysisd_
 - _test_api_
-- _test_cluster_
 - _test_fim_
 - _test_gcloud_
 - _test_mitre_
