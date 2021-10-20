@@ -54,6 +54,9 @@
   -
     input: '{"arguments":{"id":"001","name":"user_","ip":"any","force":{"enabled":false, "key_mismatch":true, "disconnected_time":{"enabled":true, "value":"0"}, "after_registration_time":"0"}},"function":"add"}'
     output: '{"error":9012,"message":"Duplicate ID"}'
+  -
+    input: '{"arguments":{"id":"001","name":"user_","ip":"any","force":{"enabled":false}},"function":"add"}'
+    output: '{"error":9002,"message":"Parsing JSON input"}'
 -
   name: 'Force registration'
   description: 'Add duplicate agents with force option'
