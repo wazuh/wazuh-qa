@@ -8,7 +8,7 @@ import string
 
 import pytest
 
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel, detect_initial_scan
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -63,6 +63,12 @@ def create_and_restore_large_file(request):
         with open(file_path, "a") as f:
             while os.stat(file_path).st_size < file_size:
                 f.write(random.choice(string.printable) * chunksize)
+
+
+@pytest.fixture()
+def wait_for_initial_scan():
+    """Fixture that waits for the initial scan, independently of the configured mode."""
+    detect_initial_scan(wazuh_log_monitor)                
 
 # Tests
 
