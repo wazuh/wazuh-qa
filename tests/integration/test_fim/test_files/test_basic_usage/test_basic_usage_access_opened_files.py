@@ -12,6 +12,8 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel,
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.services import control_service
+
 
 # Marks
 
@@ -68,7 +70,16 @@ def create_and_restore_large_file(request):
 @pytest.fixture()
 def wait_for_initial_scan():
     """Fixture that waits for the initial scan, independently of the configured mode."""
-    detect_initial_scan(wazuh_log_monitor)                
+    detect_initial_scan(wazuh_log_monitor)       
+
+
+@pytest.fixture(scope='function')
+def restart_syscheckd_basic(get_configuration, request):
+    """
+    Reset ossec.log and start a new monitor.
+    """
+    control_service('stop', daemon='wazuh-syscheckd')
+    control_service('start', daemon='wazuh-syscheckd')             
 
 # Tests
 
@@ -78,7 +89,7 @@ def wait_for_initial_scan():
     ('rename', {'ossec_conf'})
 ])
 def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configuration, configure_environment,
-                                         create_and_restore_large_file, restart_syscheckd, wait_for_initial_scan):
+                                         create_and_restore_large_file, restart_syscheckd_basic, wait_for_initial_scan):
     """
     Check that, when FIM is scanning a file, it can be modified by other processes.
 
