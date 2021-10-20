@@ -171,14 +171,18 @@ class Config():
 
         module_fields = self._schema_data['output_fields']['module']
 
-        if 'mandatory' not in module_fields and 'optional' not in module_fields:
+        if 'mandatory' not in module_fields and 'optional' not in module_fields and 'auto' not in module_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'mandatory' in module_fields:
-            self.module_fields.mandatory = module_fields['mandatory']
+        if 'optional' not in module_fields:
+            raise QAValueError('optional module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'optional' in module_fields:
-            self.module_fields.optional = module_fields['optional']
+        if 'auto' not in module_fields:
+            raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
+
+        self.module_fields.mandatory = module_fields['mandatory']
+        self.module_fields.optional = module_fields['optional']
+        self.module_fields.auto = module_fields['auto'] 
 
     def __read_test_fields(self):
         """Read from the schema file the optional and mandatory fields for the test functions.
@@ -196,14 +200,14 @@ class Config():
 
         test_fields = self._schema_data['output_fields']['test']
 
-        if 'mandatory' not in test_fields and 'optional' not in test_fields:
+        if 'mandatory' not in test_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'mandatory' in test_fields:
-            self.test_fields.mandatory = test_fields['mandatory']
+        if 'optional' not in test_fields:
+            raise QAValueError('optional module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'optional' in test_fields:
-            self.test_fields.optional = test_fields['optional']
+        self.test_fields.mandatory = test_fields['mandatory']
+        self.test_fields.optional = test_fields['optional']
 
     def __read_output_fields(self):
         """Read all the mandatory and optional fields from schema file.
@@ -229,12 +233,14 @@ class _fields:
     """Struct for the documentation fields.
 
     Attributes:
-        mandatory: A list of strings that contains the mandatory block fields
-        optional: A list of strings that contains the optional block fields
+        mandatory (list): A list of strings that contains the mandatory block fields
+        optional (list): A list of strings that contains the optional block fields
+        auto (list): A lis tof strings that contains the fields autogeneratod
     """
     def __init__(self):
         self.mandatory = []
         self.optional = []
+        self.auto = []
 
 
 class Mode(Enum):

@@ -11,10 +11,11 @@ output_fields:
       - os_platform
       - os_version
     optional:
-      - path
       - references
       - pytest_args
       - tags
+    auto:
+      - path
   test:
     mandatory:
       - description
@@ -25,7 +26,7 @@ output_fields:
       - expected_output
     optional:
       - inputs
-      - tags 
+      - tags
 
 test_cases_field: test_cases
 
