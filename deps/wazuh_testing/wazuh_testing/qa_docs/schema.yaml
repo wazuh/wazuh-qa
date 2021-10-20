@@ -28,8 +28,6 @@ output_fields:
       - inputs
       - tags
 
-test_cases_field: test_cases
-
 predefined_values:
   module_fields:
     - type

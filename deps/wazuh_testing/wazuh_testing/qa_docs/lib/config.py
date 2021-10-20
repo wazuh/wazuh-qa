@@ -31,7 +31,6 @@ class Config():
         ignore_paths (str): A string that specifies which paths will be ignored.
         module_fields (_fields): A struct that contains the module documentation data.
         test_fields (_fields): A struct that contains the test documentation data.
-        test_cases_field (_fields): A string that contains the test_cases key.
         test_types (list): A list with the types to be parsed.
         test_modules (list): A list with the modules to be parsed.
         test_names (list): A list with the tests to be parsed.
@@ -67,14 +66,12 @@ class Config():
         self.ignore_paths = []
         self.module_fields = _fields()
         self.test_fields = _fields()
-        self.test_cases_field = None
         self.test_types = []
         self.test_modules = []
         self.predefined_values = {}
 
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
-        self.__read_test_cases_field()
         self.__set_documentation_path(output_path.replace('\\', '/'))
         self.__read_predefined_values()
 
@@ -182,7 +179,7 @@ class Config():
 
         self.module_fields.mandatory = module_fields['mandatory']
         self.module_fields.optional = module_fields['optional']
-        self.module_fields.auto = module_fields['auto'] 
+        self.module_fields.auto = module_fields['auto']
 
     def __read_test_fields(self):
         """Read from the schema file the optional and mandatory fields for the test functions.
@@ -220,13 +217,6 @@ class Config():
 
         self.__read_module_fields()
         self.__read_test_fields()
-
-    def __read_test_cases_field(self):
-        """Read from the schema file the key to identify a Test Case list."""
-        Config.LOGGER.debug('Reading Test Case key from the schema file')
-
-        if 'test_cases_field' in self._schema_data:
-            self.test_cases_field = self._schema_data['test_cases_field']
 
 
 class _fields:
