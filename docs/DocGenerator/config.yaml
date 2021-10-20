@@ -76,6 +76,9 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_files/test_windows_audit_interval/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_ambiguous_confs/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_basic_usage/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_checks/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_ignore/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_nodiff/data"  
 
 Output fields:
   Module:
