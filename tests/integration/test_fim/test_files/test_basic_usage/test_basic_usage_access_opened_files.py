@@ -114,9 +114,9 @@ def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configura
         try:
             os.rename(file_path, changed_path)
         except (OSError, IOError, PermissionError):
-            pytest.fail("Could not rename file")
+            pytest.fail('Could not rename file')
     elif operation == 'delete':
         try:
             os.remove(file_path)
         except (OSError, IOError, PermissionError):
-            pytest.fail("Could not delete file")
+            pytest.fail('Could not delete file')
