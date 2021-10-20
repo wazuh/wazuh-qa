@@ -12,6 +12,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel,
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import remove_file
 from wazuh_testing.tools.services import control_service
 
 
@@ -57,14 +58,13 @@ def create_and_restore_large_file(request):
     file_size = 1024 * 1024 * 768   # 805 MB
     chunksize = 1024 * 768
     file_path = os.path.join(testdir1, 'large_file')
-    changed_path = os.path.join(testdir1, 'changed_name')
 
-    if os.path.exists(changed_path):
-        os.rename(changed_path, file_path)
-    elif not os.path.exists(file_path):
-        with open(file_path, "a") as f:
-            while os.stat(file_path).st_size < file_size:
-                f.write(random.choice(string.printable) * chunksize)
+    with open(file_path, "a") as f:
+        while os.stat(file_path).st_size < file_size:
+            f.write(random.choice(string.printable) * chunksize)
+    yield
+
+    remove_file(file_path)
 
 
 @pytest.fixture()
