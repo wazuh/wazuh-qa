@@ -36,9 +36,9 @@ testdir1 = test_directories[0]
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 
-p, m = generate_params(extra_params=conf_params)
+parameters, metadata = generate_params(extra_params=conf_params)
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Fixtures
 
