@@ -106,7 +106,7 @@ monitored_sockets_params = [('wazuh-clusterd', mitm_master, True), ('wazuh-authd
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 
-# Tests
+# Fixtures
 
 @pytest.fixture(scope="function")
 def set_up_groups(request, get_current_test_case):
@@ -140,6 +140,8 @@ def get_current_test_case(request):
     return request.param
 
 
+# Tests
+
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_authd_startup_module, get_current_test_case):
     """
@@ -164,9 +166,12 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
             - connect_to_sockets_module:
                 type: fixture
                 brief: Bind to the configured sockets at module scope.
-            - wait_for_authd_startup:
+            - wait_for_authd_startup_module:
                 type: fixture
                 brief: Waits until Authd is accepting connections.
+            - get_current_test_case:
+                type: fixture
+                brief: gets the current test case from the tests' list
         assertions:
             - The 'port_input' from agent is formatted to 'cluster_input' for master
             - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
