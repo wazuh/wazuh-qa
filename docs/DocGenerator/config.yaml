@@ -78,7 +78,10 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_registry/test_registry_basic_usage/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_checks/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_ignore/data"
-  - "../../tests/integration/test_fim/test_registry/test_registry_nodiff/data"  
+  - "../../tests/integration/test_fim/test_registry/test_registry_nodiff/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_file_limit/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_multiple_registries/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_recursion_level/data"
 
 Output fields:
   Module:
