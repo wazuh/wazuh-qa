@@ -206,7 +206,7 @@ class FileMonitor:
 
 class SocketController:
 
-    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=3000, open_at_start=True):
+    def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', timeout=30, open_at_start=True):
         """Create a new unix socket or connect to a existing one.
 
         Args:

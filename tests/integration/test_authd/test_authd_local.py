@@ -47,6 +47,7 @@ import time
 from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.wazuh_db import query_wdb
+from conftest import truncate_client_keys_file
 # TODO Move to utils
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
@@ -71,7 +72,7 @@ receiver_sockets_params = [(ls_sock_path, 'AF_UNIX', 'TCP'), (WAZUH_DB_SOCKET_PA
 test_case_ids = [f"{test_case['name']}" for test_case in message_tests]
 
 # TODO Replace or delete
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
+monitored_sockets_params = [('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 # Fixtures
@@ -106,53 +107,24 @@ def set_up_groups(get_current_test_case, request):
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
-@pytest.fixture(scope='function')
-def insert_pre_existent_agents_client_keys(get_current_test_case, request):
-
-    control_service("stop", daemon='wazuh-authd')
-
-    agents = get_current_test_case.get('pre_existent_agents', [])
-
-    with open(CLIENT_KEYS_PATH, "w") as keys_file:
-
-        for agent in agents:
-
-            if 'id' in agent:
-                id = agent['id']
-            else:
-                id = '001'
-
-            if 'name' in agent:
-                name = agent['name']
-            else:
-                name = f'TestAgent{id}'
-
-            if 'ip' in agent:
-                ip = agent['ip']
-            else:
-                ip = 'any'
-
-            if 'key' in agent:
-                key = agent['key']
-            else:
-                key = 'TopSecret'
-
-            # Write agent in client.keys
-            keys_file.write(f'{id} {name} {ip} {key}\n')
-
-    keys_file.close()
-
-    control_service("start", daemon='wazuh-authd')
-
 
 @pytest.fixture(scope='function')
-def insert_pre_existent_agents_db(get_current_test_case, request):
+def insert_pre_existent_agents(get_current_test_case):
     agents = get_current_test_case.get('pre_existent_agents', [])
     time_now = int(time.time())
+    #wdb_sock = receiver_sockets[1]
+    try:
+        keys_file = open(CLIENT_KEYS_PATH, 'w')
+    except IOError as exception:
+        raise exception
 
     # Clean agents from DB
     command = f'global sql DELETE FROM agent WHERE id != 0'
-    query_wdb(command)
+    response = query_wdb(command)
+    #wdb_sock.send(command, size=True)
+    #response = wdb_sock.receive(size=True).decode()
+    #data = response.split(" ", 1)
+    #assert data[0] == 'ok', f'Unable to clean agents'
 
     for agent in agents:
         if 'id' in agent:
@@ -194,38 +166,27 @@ def insert_pre_existent_agents_db(get_current_test_case, request):
         else:
             registration_time = time_now
 
+        # Write agent in client.keys
+        keys_file.write(f'{id} {name} {ip} {key}\n')
+
         # Write agent in global.db
-        command = f"global sql INSERT or REPLACE INTO agent (id, name, ip, date_add, connection_status, disconnection_time)\
-                    VALUES ('{id}', '{name}', '{ip}', '{registration_time}', '{connection_status}', '{disconnection_time}')"
+        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
+                  "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+        response = query_wdb(command)
+        #wdb_sock.send(command, size=True)
+        #response = wdb_sock.receive(size=True).decode()
+        data = response.split(" ", 1)
+        assert data[0] == 'ok', f'Unable to add agent {id}'
 
-        query_wdb(command)
-
-    yield
-
-    command = f'global sql DELETE FROM agent WHERE id != 0'
-    query_wdb(command)
-
-@pytest.fixture(scope='function')
-def clean_authd_function():
-    """
-    Restart Authd.
-    """
-    control_service("stop", daemon='wazuh-authd')
-    truncate_file(CLIENT_KEYS_PATH)
-    control_service("start", daemon='wazuh-authd')
-
-    yield
-
-    control_service("stop", daemon='wazuh-authd')
-    truncate_file(CLIENT_KEYS_PATH)
-    control_service("start", daemon='wazuh-authd')
+    keys_file.close()
 
 
 # Tests
 
-def test_authd_local_messages(clean_authd_function, set_up_groups, insert_pre_existent_agents_client_keys, insert_pre_existent_agents_db, get_configuration,
-                              configure_environment, configure_sockets_environment_function, connect_to_sockets_function,
-                              wait_for_authd_startup_module, get_current_test_case):
+
+def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function, set_up_groups,
+                              stop_authd_function, insert_pre_existent_agents, restart_authd_function, wait_for_authd_startup_function,
+                              get_current_test_case, tear_down):
     """
         description:
             "Check that every input message in trough local authd port generates the adequate response to worker"
