@@ -98,30 +98,33 @@ log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
 ossec_authd_socket_path = ("localhost", 1515)
 receiver_sockets_params = [(ossec_authd_socket_path, 'AF_INET', 'SSL_TLSv1_2')]
+test_case_ids = [f"{test_case['name']}" for test_case in message_tests]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True),
-                            ('wazuh-clusterd', mitm_master, True), ('wazuh-authd', None, True)]
+monitored_sockets_params = [('wazuh-clusterd', mitm_master, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
 
 # Tests
 
-@pytest.fixture(scope="function", params=message_tests)
-def set_up_groups(request):
+@pytest.fixture(scope="function")
+def set_up_groups(request, get_current_test_case):
     """
     Set the pre-defined groups.
     """
-    groups = request.param.get('groups', [])
+    groups = get_current_test_case.get('groups', [])
+
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', f'{group}', '-q'])
-    yield request.param
+
+    yield
+
     for group in groups:
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=['authd_worker_config'])
 def get_configuration(request):
     """
     Get configurations from the module
@@ -129,8 +132,16 @@ def get_configuration(request):
     yield request.param
 
 
+@pytest.fixture(scope='function', params=message_tests, ids=test_case_ids)
+def get_current_test_case(request):
+    """
+    Get current test case from the module
+    """
+    return request.param
+
+
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
-                             connect_to_sockets_module, wait_for_authd_startup_module):
+                             connect_to_sockets_module, wait_for_authd_startup_module, get_current_test_case):
     """
         description:
            "Check that every message from the agent is correctly formatted for master, and every master
@@ -165,7 +176,8 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         expected_output:
             - Registration request responses on Authd socket
     """
-    test_case = set_up_groups['test_case']
+    test_case = get_current_test_case['test_case']
+
     for stage in test_case:
         # Push expected info to mitm queue
         mitm_master.set_cluster_messages(stage['cluster_input'], stage['cluster_output'])
