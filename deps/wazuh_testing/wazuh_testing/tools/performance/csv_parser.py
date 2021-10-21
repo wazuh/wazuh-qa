@@ -5,6 +5,7 @@
 from collections import defaultdict
 from glob import glob
 from os.path import join
+from pathlib import Path
 from re import compile
 
 import numpy as np
@@ -38,12 +39,12 @@ class ClusterCSVParser:
         """Recursively iterate CSV files inside 'data' folders and store data as pandas dataframes.
 
         Files will be loaded as pandas dataframes and stored inside a dictionary that
-        looks like this: self.dataframes[type of data (logs/binaries)][node name][file name].
+        looks like this: self.dataframes[type of data][node name][file name].
         When a file is found, it is only parsed if listed in self.files_to_load.
         """
         node_file_regex = compile(r'.*/(master|worker_[\d]+)/.*/(.*)/(.*).csv')
 
-        for csv in glob(join(self.artifacts_path, '*', 'data', '*', '*.csv')):
+        for csv in glob(join(self.artifacts_path, '*', '*', '*', '*.csv')):
             names = node_file_regex.search(csv)
             if names.group(3) in self.files_to_load:
                 self.dataframes[names.group(2)][names.group(1)].update({names.group(3): pd.read_csv(csv)})
@@ -229,3 +230,64 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
             dict: max stats obtained from cluster resources.
         """
         return self.default_to_dict(self._group_stats(self.dataframes['binaries']))
+
+
+class ClusterEnvInfo:
+    """Class to obtain information from cluster artifacts files.
+
+    Args:
+        artifacts_path (str): directory where the cluster data (nodes, logs, CSVs, etc.) can be found.
+
+    Attributes:
+        artifacts_path (str): directory where the cluster data (nodes, logs, CSVs, etc.) can be found.
+    """
+
+    def __init__(self, artifacts_path):
+        self.artifacts_path = artifacts_path
+
+    def get_file_timestamps(self, node='master', file='integrity_sync.csv'):
+        """Get first and last datetime of lines inside a specific file.
+
+        Args:
+            node (str): node folder from which the information should be retrieved.
+            file (str): filename in any nested level inside 'node' from which the information should be retrieved.
+
+        Returns:
+            list: first and last datetime found.
+        """
+        result = []
+        node_file_regex = compile(r'(\d\d\d\d/\d\d/\d\d \d\d:\d\d:\d\d).*')
+
+        with open(next(Path(join(self.artifacts_path, node)).rglob(file), '')) as f:
+            data = f.readlines()
+            result.extend(node_file_regex.findall(data[1]))
+            result.extend(node_file_regex.findall(data[-1]))
+
+        return result
+
+    def count_workers_nodes(self):
+        """Count how many worker folders there are in the artifacts.
+
+        Returns:
+            int: number of workers in the cluster artifacts.
+        """
+        return len(glob(join(self.artifacts_path, 'worker_*')))
+
+    def get_phases(self):
+        """Get start and end datetime for setup and stable phases.
+
+        Returns:
+            dict: start and end datetime for setup and stable phases.
+        """
+        setup_phase = self.get_file_timestamps()
+        stable_phase = [setup_phase[1], self.get_file_timestamps(file='integrity_check.csv')[1]]
+
+        return {'setup_phase': setup_phase, 'stable_phase': stable_phase}
+
+    def get_all_info(self):
+        """Get all info from cluster artifacts.
+
+        Returns:
+            dict: start and end datetime for each phase and number of workers.
+        """
+        return {'phases': self.get_phases(), 'worker_nodes': self.count_workers_nodes()}
