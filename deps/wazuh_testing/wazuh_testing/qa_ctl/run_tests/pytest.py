@@ -33,7 +33,7 @@ class Pytest(Test):
         markers(list(str), []): Set of markers to be added to the test execution command
         hosts(list(), ['all']): List of hosts aliases where the tests will be runned
         modules (list(str)): List of wazuh modules to which the test belongs.
-        components (list(str)): List of wazuh targets to which the test belongs (manager, agent).
+        component (str): Test target (manager, agent).
         system (str): System where the test will be launched.
 
     Attributes:
@@ -60,7 +60,7 @@ class Pytest(Test):
     def __init__(self, tests_result_path, tests_path, tests_run_dir, qa_ctl_configuration,
                  tiers=[], stop_after_first_failure=False, keyword_expression=None, traceback='auto', dry_run=False,
                  custom_args=[], verbose_level=False, log_level=None, markers=[], hosts=['all'], modules=None,
-                 components=None, system='linux'):
+                 component=None, system='linux'):
         self.qa_ctl_configuration = qa_ctl_configuration
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure
@@ -78,7 +78,7 @@ class Pytest(Test):
         if not os.path.exists(self.tests_result_path):
             os.makedirs(self.tests_result_path)
 
-        super().__init__(tests_path, tests_run_dir, tests_result_path, modules, components, system)
+        super().__init__(tests_path, tests_run_dir, tests_result_path, modules, component, system)
 
     def run(self, ansible_inventory_path):
         """Executes the current test with the specified options defined in attributes and bring back the reports

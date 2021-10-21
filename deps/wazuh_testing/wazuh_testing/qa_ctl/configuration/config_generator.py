@@ -385,7 +385,7 @@ class QACTLConfigGenerator:
                 'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
 
-    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name, module,
+    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name, modules,
                                    component):
         """Add a configuration block to launch a test in qa-ctl.
 
@@ -395,8 +395,8 @@ class QACTLConfigGenerator:
             system (str): System where launch the test.
             test_path (str): Path where are located the test files.
             test_name (str): Test name.
-            module (list(str)): List of modules.
-            component (list(str)) List of components (manager, agent).
+            modules (list(str)): List of modules.
+            component (str): Test component (manager, agent).
         """
         self.config['tests'][instance] = {'host_info': {}, 'test': {}}
         self.config['tests'][instance]['host_info'] = \
@@ -411,9 +411,9 @@ class QACTLConfigGenerator:
                                                       'tests', 'integration'], system),
                 'test_results_path': join(gettempdir(), 'wazuh_qa_ctl', f"{test_name}_{get_current_timestamp()}")
             },
-            'components': component,
-            'modules':  module,
-            'system': system
+            'system': system,
+            'component': component,
+            'modules':  modules
         }
 
     def __set_testing_config(self, tests_info):
@@ -430,16 +430,16 @@ class QACTLConfigGenerator:
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
 
-            system = 'linux' if 'linux' in test['os_platform'] else test['os_platform'][0]
-            module = [test['modules'][0]]
-            component = ['manager'] if 'manager' in test['components'] else [test['components'][0]]
+            system = 'linux' if system == 'deb' or system == 'rpm' else system
+            modules = test['modules']
+            component = 'manager' if 'manager' in test['components'] else test['components'][0]
 
             self.__add_testing_config_block(instance, installation_files_path, system, test['path'],
-                                            test['test_name'], module, component)
+                                            test['test_name'], modules, component)
             test_host_number += 1
             # If it is an agent test then we skip the next manager instance since no test will be launched in that
             # instance
-            if test['components'] == 'agent':
+            if component == 'agent':
                 test_host_number += 1
 
     def __process_test_data(self, tests_info):

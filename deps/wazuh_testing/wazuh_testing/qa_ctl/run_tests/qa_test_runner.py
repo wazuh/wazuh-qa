@@ -115,7 +115,7 @@ class QATestRunner():
                 test_dict['tests_result_path'] = paths['test_results_path']
                 test_dict['tests_run_dir'] = paths['run_tests_dir_path']
 
-            test_dict['components'] = test_params['components'] if 'components' in test_params else None
+            test_dict['component'] = test_params['component'] if 'component' in test_params else None
             test_dict['modules'] = test_params['modules'] if 'modules' in test_params else None
             test_dict['system'] = test_params['system'] if 'system' in test_params else None
 

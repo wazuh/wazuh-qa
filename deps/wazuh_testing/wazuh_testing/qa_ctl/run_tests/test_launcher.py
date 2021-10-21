@@ -88,27 +88,25 @@ class TestLauncher:
         self.qa_ctl_configuration = qa_ctl_configuration
         self.tests = tests
 
-    def __set_local_internal_options(self, hosts, modules, components, system):
+    def __set_local_internal_options(self, hosts, modules, component, system):
         """Private method that set the local internal options in the hosts passed by parameter
 
             Args:
                 hosts (list(str)): list of hosts aliases to index the dict attribute wazuh_dir_paths and extract the
                                    wazuh installation path.
                 modules (list(str)): List of wazuh modules to which the test belongs.
-                components (list(str)): List of wazuh targets to which the test belongs (manager, agent).
+                component (str): Test wazuh target (manager, agent).
                 system (str): System where the test will be launched.
         """
         local_internal_options_content = []
 
-        if isinstance(modules, list) and len(modules) > 0 and isinstance(components, list) and len(components) > 0 \
-                and system:
+        if isinstance(modules, list) and len(modules) > 0 and component and system:
             for module in modules:
-                for component in components:
-                    if component == 'agent':
-                        system = 'windows' if system == 'windows' else 'generic'
-                        local_internal_options_content.extend(self.DEBUG_OPTIONS[module][component][system])
-                    else:
-                        local_internal_options_content.extend(self.DEBUG_OPTIONS[module][component])
+                if component == 'agent':
+                    system = 'windows' if system == 'windows' else 'generic'
+                    local_internal_options_content.extend(self.DEBUG_OPTIONS[module][component][system])
+                else:
+                    local_internal_options_content.extend(self.DEBUG_OPTIONS[module][component])
 
             # Delete duplicated items
             local_internal_options_content = list(set(local_internal_options_content))
@@ -130,7 +128,7 @@ class TestLauncher:
                                playbook_file_path, 'hosts': hosts}
 
         TestLauncher.LOGGER.debug(f"Setting local_internal_options configuration in {hosts} hosts with "
-                                  f"{set_local_internal_configuration}")
+                                  f"{local_internal_options_content}")
 
         AnsibleRunner.run_ephemeral_tasks(self.ansible_inventory_path, playbook_parameters, raise_on_error=False,
                                           output=self.qa_ctl_configuration.ansible_output)
@@ -147,5 +145,5 @@ class TestLauncher:
     def run(self):
         """Function to iterate over a list of tests and run them one by one."""
         for test in self.tests:
-            self.__set_local_internal_options(test.hosts, test.modules, test.components, test.system)
+            self.__set_local_internal_options(test.hosts, test.modules, test.component, test.system)
             test.run(self.ansible_inventory_path)
