@@ -133,7 +133,6 @@ nav:
             - Test jwt token exp timeout:  tests/integration/test_api/test_config/test_jwt_token_exp_timeout/test_jwt_token_exp_timeout.md
             - Test logs:  tests/integration/test_api/test_config/test_logs/test_logs.md
             - Test rbac: tests/integration/test_api/test_config/test_rbac/test_rbac.md
-            - Test use only authd: tests/integration/test_api/test_config/test_use_only_authd/test_use_only_authd.md
           - Test RBAC:
             - tests/integration/test_api/test_rbac/index.md
             - Test add old resource: tests/integration/test_api/test_rbac/test_add_old_resource.md
