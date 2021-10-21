@@ -67,7 +67,7 @@ Together with the Indexing functionality, the tool can locally launch SearchUI t
 documentation content into the App UI.
 
 ### Diagram
-![DocGenerator](qa_docs_diagram.png)
+<center><img src="https://github.com/wazuh/wazuh-qa/wiki/images/qadocs_tool_imgs/qa_docs_diagram.png"></center>
 
 ## Content
     ├── wazuh-testing
