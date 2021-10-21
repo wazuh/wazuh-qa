@@ -319,19 +319,20 @@ class QACTLConfigGenerator:
         if not self.systems:
             for test in tests_info:
                 if self.__validate_test_info(test):
+                    os_version = ''
                     if 'Ubuntu Focal' in test['os_version']:
-                        test['os_version'] = 'Ubuntu Focal'
+                        os_version = 'Ubuntu Focal'
                     elif 'CentOS 8' in test['os_version']:
-                        test['os_version'] = 'CentOS 8'
+                        os_version = 'CentOS 8'
                     else:
                         raise QAValueError(f"No valid system was found for {test['name']} test",
                                            QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
-                    test['components'] = 'manager' if 'manager' in test['components'] else 'agent'
-                    test['os_platform'] = 'linux'
+                    components = 'manager' if 'manager' in test['components'] else 'agent'
+                    os_platform = 'linux'
 
-                    self.__add_deployment_config_block(test['test_name'], test['os_version'], test['components'],
-                                                       test['os_platform'])
+                    self.__add_deployment_config_block(test['test_name'], os_version, components, os_platform)
+
         # If system parameter is specified and have values
         elif isinstance(self.systems, list) and len(self.systems) > 0:
             for system in self.systems:
@@ -384,7 +385,8 @@ class QACTLConfigGenerator:
                 'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
 
-    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name):
+    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name, module,
+                                   component):
         """Add a configuration block to launch a test in qa-ctl.
 
         Args:
@@ -393,6 +395,8 @@ class QACTLConfigGenerator:
             system (str): System where launch the test.
             test_path (str): Path where are located the test files.
             test_name (str): Test name.
+            module (list(str)): List of modules.
+            component (list(str)) List of components (manager, agent).
         """
         self.config['tests'][instance] = {'host_info': {}, 'test': {}}
         self.config['tests'][instance]['host_info'] = \
@@ -406,7 +410,10 @@ class QACTLConfigGenerator:
                 'run_tests_dir_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
                                                       'tests', 'integration'], system),
                 'test_results_path': join(gettempdir(), 'wazuh_qa_ctl', f"{test_name}_{get_current_timestamp()}")
-            }
+            },
+            'components': component,
+            'modules':  module,
+            'system': system
         }
 
     def __set_testing_config(self, tests_info):
@@ -423,8 +430,12 @@ class QACTLConfigGenerator:
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
 
+            system = 'linux' if 'linux' in test['os_platform'] else test['os_platform'][0]
+            module = [test['modules'][0]]
+            component = ['manager'] if 'manager' in test['components'] else [test['components'][0]]
+
             self.__add_testing_config_block(instance, installation_files_path, system, test['path'],
-                                            test['test_name'])
+                                            test['test_name'], module, component)
             test_host_number += 1
             # If it is an agent test then we skip the next manager instance since no test will be launched in that
             # instance
