@@ -1,6 +1,67 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM ends the synchronization
+       with the manager at the expected time set in the 'interval' and the 'response_timeout' tags.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_synchronization
+'''
 import os
 import sys
 import time
@@ -54,18 +115,51 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('num_files', [1, 100])
 def test_response_timeout(num_files, get_configuration, configure_environment, restart_syscheckd):
-    """Verify that synchronization checks take place at the expected time given INTERVAL and RESPONSE_TIMEOUT
-    parameters, being INTERVAL greater than RESPONSE_TIMEOUT.
+    '''
+    description: Check if the agent synchronization ends at the expected time set in the 'interval'
+                 and the 'response_timeout' tags, being 'interval' greater than 'response_timeout'.
+                 To accomplish this, a connection with a Wazuh agent (Linux-based) must be established
+                 via SSH using Paramiko. All operations will take place on the Agent side. For this
+                 purpose, the test will monitor a testing directory and create multiple files inside it.
+                 Then, it will wait until the first synchronization ends and travel in time to a datetime
+                 when synchronization should not happen to ensure there is no synchronization at this time.
+                 Finally, the test will travel in time to a datetime when synchronization must occur, and
+                 wait until the next synchronization is detected.
 
-    To accomplish this a connection with a Wazuh Agent (Linux based) must be established via SSH using
-    Paramiko. All operations will take place on the Agent side.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    num_files : int
-        Number of files to create within the test
-    """
+    parameters:
+        - num_files:
+            type: int
+            brief: Number of files to create within the testing directory.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
 
+    assertions:
+        - Verify that FIM sync events are generated at the specified intervals.
+        - Verify that the synchronization ends before the response timeout.
+        - Verify that no FIM sync events are generated before the specified intervals.
+
+    input_description: A test case (response_timeout) is contained in external YAML file
+                       (wazuh_response_conf.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the
+                       testing directory to be monitored defined in this module.
+
+    expected_output:
+        - r'.*#!-fim_registry dbsync no_data (.+)'
+        - r'.*Sending integrity control message'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     def overwrite_agent_conf_file():
         cmd = "sudo sed -i ':a;N;$!ba;s|<synchronization>.*</synchronization>|<synchronization>\
             <enabled>yes</enabled>\
