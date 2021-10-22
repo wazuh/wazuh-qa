@@ -231,6 +231,8 @@ predefined_values:
     - fim_registry_file_limit
     - fim_registry_multiple_registries
     - fim_registry_recursion_level
+    - fim_registry_restrict
+    - fim_synchronization
     - gcloud
     - github
     - integrity
