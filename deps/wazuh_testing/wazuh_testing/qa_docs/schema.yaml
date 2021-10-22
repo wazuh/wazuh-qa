@@ -25,7 +25,7 @@ output_fields:
       - expected_output
     optional:
       - inputs
-      - tags 
+      - tags
 
 test_cases_field: test_cases
 
@@ -204,6 +204,36 @@ predefined_values:
     - fim_env_variables
     - fim_file_limit
     - fim_follow_symbolic_link
+    - fim_ignore
+    - fim_inotify
+    - fim_invalid
+    - fim_max_eps
+    - fim_max_files_per_second
+    - fim_moving_files
+    - fim_multiple_dirs
+    - fim_nodiff
+    - fim_prefilter_cmd
+    - fim_report_changes
+    - fim_process_priority
+    - fim_recursion_level
+    - fim_restrict
+    - fim_scan
+    - fim_skip
+    - fim_stats_integrity_sync
+    - fim_tags
+    - fim_timezone_changes
+    - fim_wildcards_complex
+    - fim_windows_audit_interval
+    - fim_registry_ambiguous_confs
+    - fim_registry_basic_usage
+    - fim_registry_checks
+    - fim_registry_ignore
+    - fim_registry_nodiff
+    - fim_registry_file_limit
+    - fim_registry_multiple_registries
+    - fim_registry_recursion_level
+    - fim_registry_restrict
+    - fim_synchronization
     - gcloud
     - github
     - integrity
