@@ -32,6 +32,9 @@ class Pytest(Test):
         log_level(str, None): Log level to be set
         markers(list(str), []): Set of markers to be added to the test execution command
         hosts(list(), ['all']): List of hosts aliases where the tests will be runned
+        modules (list(str)): List of wazuh modules to which the test belongs.
+        component (str): Test target (manager, agent).
+        system (str): System where the test will be launched.
 
     Attributes:
         tests_result_path(str): Path to the directory where the reports will be stored in the local machine
@@ -56,7 +59,8 @@ class Pytest(Test):
 
     def __init__(self, tests_result_path, tests_path, tests_run_dir, qa_ctl_configuration,
                  tiers=[], stop_after_first_failure=False, keyword_expression=None, traceback='auto', dry_run=False,
-                 custom_args=[], verbose_level=False, log_level=None, markers=[], hosts=['all']):
+                 custom_args=[], verbose_level=False, log_level=None, markers=[], hosts=['all'], modules=None,
+                 component=None, system='linux'):
         self.qa_ctl_configuration = qa_ctl_configuration
         self.tiers = tiers
         self.stop_after_first_failure = stop_after_first_failure
@@ -68,12 +72,13 @@ class Pytest(Test):
         self.log_level = log_level
         self.markers = markers
         self.hosts = hosts
-        self.tests_result_path = os.path.join(gettempdir(), 'wazuh_qa_ctl') if tests_result_path is None else tests_result_path
+        self.tests_result_path = os.path.join(gettempdir(), 'wazuh_qa_ctl') if tests_result_path is None \
+            else tests_result_path
 
         if not os.path.exists(self.tests_result_path):
             os.makedirs(self.tests_result_path)
 
-        super().__init__(tests_path, tests_run_dir, tests_result_path)
+        super().__init__(tests_path, tests_run_dir, tests_result_path, modules, component, system)
 
     def run(self, ansible_inventory_path):
         """Executes the current test with the specified options defined in attributes and bring back the reports
