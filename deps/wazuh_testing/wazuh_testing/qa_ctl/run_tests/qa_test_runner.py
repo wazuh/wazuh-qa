@@ -2,7 +2,8 @@ import os
 import sys
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
@@ -49,12 +50,27 @@ class QATestRunner():
         extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
         private_key_path = None if 'local_private_key_file_path' not in host_info \
                                    else host_info['local_private_key_file_path']
-        instance = AnsibleInstance(host=host_info['host'], host_vars=extra_vars,
-                                   connection_method=host_info['connection_method'],
-                                   connection_port=host_info['connection_port'], connection_user=host_info['user'],
-                                   connection_user_password=host_info['password'],
-                                   ssh_private_key_file_path=private_key_path,
-                                   ansible_python_interpreter=host_info['ansible_python_interpreter'])
+
+
+        if host_info['system'] == 'windows':
+            instance = WindowsAnsibleInstance(
+                host=host_info['host'], host_vars=extra_vars,
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port']
+            )
+        else:
+            instance = UnixAnsibleInstance(
+                host=host_info['host'], host_vars=extra_vars,
+                connection_method=host_info['connection_method'],
+                connection_port=host_info['connection_port'],
+                connection_user=host_info['user'],
+                connection_user_password=host_info['password'],
+                ssh_private_key_file_path=private_key_path,
+                ansible_python_interpreter=host_info['ansible_python_interpreter']
+            )
+
         return instance
 
     def __process_inventory_data(self, instances_info):
