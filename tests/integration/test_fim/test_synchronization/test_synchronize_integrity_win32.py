@@ -1,7 +1,57 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM generates events
+       while a database synchronization is being performed simultaneously on Windows systems.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_synchronization
+'''
 import os
 from datetime import timedelta
 
@@ -81,8 +131,48 @@ def callback_integrity_or_whodata(line):
     {'synchronize_events_conf'}
 ])
 def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
-    """Check that events are being generated while a synchronization is being performed simultaneously.
-    """
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events while the synchronization is performed
+                 simultaneously. For this purpose, the test will monitor a testing directory and registry key.
+                 Then, it will create a subkey inside the monitored key. After this, the test  will check if
+                 the FIM 'integrity' and 'wodata' (if needed) events are triggered. Finally, the test will
+                 create a testing file and registry value and verify that the FIM 'added' events are generated.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that FIM 'integrity' and 'wodata' (if needed) events are generated.
+        - Check that FIM 'added' events are generated both when adding test files and
+          registry values while synchronizing.
+
+    input_description: A test case (synchronize_events_conf) is contained in external YAML file
+                       (wazuh_conf_integrity_scan_win32.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the testing
+                       directories/keys to be monitored defined in this module.
+
+    expected_output:
+        - r'File integrity monitoring real-time Whodata engine started'
+        - r'Initializing FIM Integrity Synchronization check'
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - realtime
+        - who_data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2

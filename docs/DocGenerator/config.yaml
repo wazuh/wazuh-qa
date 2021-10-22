@@ -83,6 +83,9 @@ Ignore paths:
   - "../../tests/integration/test_fim/test_registry/test_registry_multiple_registries/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_recursion_level/data"
   - "../../tests/integration/test_fim/test_registry/test_registry_report_changes/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_restrict/data"
+  - "../../tests/integration/test_fim/test_registry/test_registry_tags/data"
+  - "../../tests/integration/test_fim/test_synchronization/data"
 
 Output fields:
   Module:
