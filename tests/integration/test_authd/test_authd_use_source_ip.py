@@ -176,7 +176,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
     metadata = get_configuration['metadata']
 
-    for stage in test_case['test_case']:
+    for index, stage in enumerate(test_case['test_case']):
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         message = stage['input']
@@ -193,4 +193,5 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         else:
             expected = stage['output']
 
-        validate_authd_response(response, expected)
+        result, err_msg = validate_authd_response(response, expected)
+        assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"

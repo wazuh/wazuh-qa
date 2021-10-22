@@ -126,7 +126,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
             - Registration request responses on Authd socket
     """
 
-    for stage in test_case['test_case']:
+    for index, stage in enumerate(test_case['test_case']):
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         # Checking 'hostname' test case
@@ -150,6 +150,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
         if stage.get('expected_fail') == 'yes':
             with pytest.raises(Exception):
-                validate_authd_response(response, stage['output'])
+                result, err_msg = validate_authd_response(response, stage['output'])
+                assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
         else:
-            validate_authd_response(response, stage['output'])
+            result, err_msg = validate_authd_response(response, stage['output'])
+            assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
