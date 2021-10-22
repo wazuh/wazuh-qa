@@ -71,12 +71,11 @@ def wait_for_initial_scan():
 
 
 @pytest.fixture(scope='function')
-def restart_syscheckd_basic(get_configuration, request):
+def restart_syscheckd_function():
     """
     Reset ossec.log and start a new monitor.
     """
-    control_service('stop', daemon='wazuh-syscheckd')
-    control_service('start', daemon='wazuh-syscheckd')             
+    control_service('restart', daemon='wazuh-syscheckd')             
 
 # Tests
 
@@ -86,7 +85,7 @@ def restart_syscheckd_basic(get_configuration, request):
     ('rename', {'ossec_conf'})
 ])
 def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configuration, configure_environment,
-                                         create_and_restore_large_file, restart_syscheckd_basic, wait_for_initial_scan):
+                                         create_and_restore_large_file, restart_syscheckd_function, wait_for_initial_scan):
     """
     Check that, when FIM is scanning a file, it can be modified by other processes.
 
