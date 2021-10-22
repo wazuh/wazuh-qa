@@ -657,7 +657,7 @@ def configure_sockets_environment_function(request):
         not daemon_first and mitm is not None and mitm.start()
         control_service('start', daemon=daemon, debug_mode=True)
         check_daemon_status(
-            running=True,
+            running_condition=True,
             daemon=daemon,
             extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
         )
@@ -676,7 +676,7 @@ def configure_sockets_environment_function(request):
         mitm is not None and mitm.shutdown()
         control_service('stop', daemon=daemon)
         check_daemon_status(
-            running=False,
+            running_condition=False,
             daemon=daemon,
             extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
         )
