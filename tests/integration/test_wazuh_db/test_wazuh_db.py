@@ -8,9 +8,9 @@ import time
 import pytest
 import yaml
 import json
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor, make_callback, WAZUH_DB_PREFIX
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.monitoring import make_callback, WAZUH_DB_PREFIX
+from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
@@ -89,7 +89,9 @@ def wait_range_checksum_calculated(line):
 
 @pytest.fixture(scope="function")
 def prepare_range_checksum_data():
-    command = 'agent 003 syscheck save2 '
+    AGENT_ID = 1
+    insert_agent(AGENT_ID)
+    command = f'agent {AGENT_ID} syscheck save2 '
     payload = {'path': "file",
                'timestamp': 1575421292,
                'attributes': {
@@ -108,9 +110,13 @@ def prepare_range_checksum_data():
                    'checksum': 'f65b9f66c5ef257a7566b98e862732640d502b6f'}}
 
     payload['path'] = '/home/test/file1'
-    receiver_sockets[0].send(command+json.dumps(payload), size=True)
+    execute_wazuh_db_query(command+json.dumps(payload))
     payload['path'] = '/home/test/file2'
-    receiver_sockets[0].send(command+json.dumps(payload), size=True)
+    execute_wazuh_db_query(command+json.dumps(payload))
+
+    yield
+
+    remove_agent(AGENT_ID)
 
 
 @pytest.fixture(scope="function")
@@ -195,13 +201,6 @@ def remove_agent(agent_id):
     assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
 
 
-@pytest.fixture(scope="module")
-def start_wazuh_db():
-    control_service('restart', daemon="wazuh-db")
-    yield
-    control_service('stop', daemon="wazuh-db")
-
-
 # Tests
 
 @pytest.mark.parametrize('test_case',
@@ -283,24 +282,21 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
 
 
-def test_wazuh_db_range_checksum(start_wazuh_db, configure_sockets_environment, connect_to_sockets_module,
+def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, connect_to_sockets_module,
                                  prepare_range_checksum_data, file_monitoring, request):
     """Check the checksum range during the synchroniation of the DBs"""
-
-    command = """agent 003 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
+    command = """agent 1 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
                  \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
-
     log_monitor = request.module.log_monitor
-
     # Checksum Range calculus expected the first time
-    receiver_sockets[0].send(command, size=True)
+    execute_wazuh_db_query(command)
     log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
                       callback=make_callback('range checksum: Time: ', prefix=WAZUH_DB_PREFIX,
                                              escape=True),
-                      error_message='Checksum Range wasn´t calculate the first time')
+                      error_message='Checksum Range wasn´t calculated the first time')
 
     # Checksum Range avoid expected the next times
-    receiver_sockets[0].send(command, size=True)
+    execute_wazuh_db_query(command)
     log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
                       callback=make_callback('range checksum avoided', prefix=WAZUH_DB_PREFIX,
                                              escape=True),
