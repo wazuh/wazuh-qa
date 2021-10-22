@@ -183,9 +183,11 @@ def validate_parameters(parameters):
             if f"{test} exists" not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path} "
                                                                                    ' --no-logging'):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
+            # Check if the tests mentioned above are documented
+            if local_actions.run_local_command_with_stderr_output(f"qa-docs -I {tests_path} -t {test} --no-logging") is not None:
+                raise QAValueError(f"The command qa-docs -I {tests_path} -t {test} --no-logging failed.", qactl_logger.error,
+                            QACTL_LOGGER)
 
-            local_actions.run_local_command(f"qa-docs -I {tests_path} -t {test} --no-logging")
-        
     qactl_logger.info('Input parameters validation has passed successfully')
 
 

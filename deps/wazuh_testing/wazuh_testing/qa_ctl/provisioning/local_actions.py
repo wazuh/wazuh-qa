@@ -53,6 +53,26 @@ def run_local_command_with_output(command):
 
     return run.stdout.read().decode()
 
+def run_local_command_with_stderr_output(command):
+    """Run local commands getting the output and the errors output.
+    Args:
+        command (string): Command to run.
+
+    Returns:
+        str: errors command output or none if the stderr_data valriable is empty
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        output,errors =  run.communicate()
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command],stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        output,errors =  run.communicate()
+
+    if errors == "":
+        return None
+    else:
+        return errors
+
 
 def download_local_wazuh_qa_repository(branch, path):
     """Download wazuh QA repository in local machine.
