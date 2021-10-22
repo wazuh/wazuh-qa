@@ -113,6 +113,7 @@ predefined_values:
     - Windows Server 2003
     - Windows Server 2012
     - Windows Server 2016
+    - Windows Server 2019
   components:
     - agent
     - manager
@@ -256,6 +257,7 @@ predefined_values:
     - rootcheck
     - rules
     - scan
+    - scheduled
     - settings
     - simulator
     - ssl
