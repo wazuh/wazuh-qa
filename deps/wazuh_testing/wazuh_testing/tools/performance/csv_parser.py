@@ -98,9 +98,9 @@ class ClusterCSVParser:
             defaultdict: dictionary with stats from each dataframe.
         """
         result = defaultdict(lambda: defaultdict(dict))
+        setup_datetime = self.get_setup_phase('master')
 
         for node, files in dfs_dict.items():
-            setup_datetime = self.get_setup_phase(node)
             for phase in [self.SETUP_PHASE, self.STABLE_PHASE]:
                 for file_name, file_df in files.items():
                     trimmed_df = self._trim_dataframe(file_df, phase, setup_datetime)
