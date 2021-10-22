@@ -184,6 +184,8 @@ def validate_parameters(parameters):
                                                                                    ' --no-logging'):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
+    ## --> Add os validation for each test
+
     qactl_logger.info('Input parameters validation has passed successfully')
 
 
@@ -230,7 +232,7 @@ def get_script_parameters():
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
     parser.add_argument('--os', '-o', type=str, action='store', required=False, nargs='+', dest='operating_systems',
-                        choices=['centos', 'ubuntu'], help='System/s where the tests will be launched.')
+                        choices=['centos', 'ubuntu', 'windows'], help='System/s where the tests will be launched.')
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                         help='Set a custom wazuh-qa branch to use in the run and provisioning. This '

@@ -39,10 +39,12 @@ class QACTLConfigGenerator:
 
     LOGGER = Logging.get_logger(QACTL_LOGGER)
     LINUX_TMP = '/tmp'
+    WINDOWS_TMP = 'C:\\Users\\vagrant\\AppData\\Local\\Temp'
 
     BOX_MAPPING = {
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
-        'CentOS 8': 'qactl/centos_8'
+        'CentOS 8': 'qactl/centos_8',
+        'Windows Server 2019': 'qactl/windows_2019'
     }
 
     SYSTEMS = {
@@ -53,6 +55,25 @@ class QACTLConfigGenerator:
         'ubuntu': {
             'os_version': 'Ubuntu Focal',
             'os_platform': 'linux'
+        },
+        'windows': {
+            'os_version': 'Windows Server 2019',
+            'os_platform': 'windows'
+        }
+    }
+
+    DEFAULT_BOX_RESOURCES = {
+        'qactl/ubuntu_20_04': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/centos_8': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/windows_2019': {
+            'cpu': 2,
+            'memory': 2048
         }
     }
 
@@ -74,6 +95,15 @@ class QACTLConfigGenerator:
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'rpm',
             'installation_files_path': LINUX_TMP
+        },
+        'qactl/windows_2019': {
+            'ansible_connection': 'winrm',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 5985,
+            'ansible_winrm_server_cert_validation': 'ignore',
+            'system': 'windows',
+            'installation_files_path': WINDOWS_TMP
         }
     }
 
@@ -163,7 +193,7 @@ class QACTLConfigGenerator:
             return True
 
         allowed_info = {
-            'os_platform': ['linux'],
+            'os_platform': ['linux', 'windows'],
             'os_version': list(QACTLConfigGenerator.BOX_MAPPING.keys())
         }
 
@@ -227,7 +257,7 @@ class QACTLConfigGenerator:
 
         file.write_file(self.qactl_used_ips_file, data)
 
-    def __add_instance(self, os_version, test_name, test_target, os_platform, vm_cpu=1, vm_memory=1024):
+    def __add_instance(self, os_version, test_name, test_target, os_platform):
         """Add a new provider instance for the deployment module. T
 
         Args:
@@ -243,6 +273,14 @@ class QACTLConfigGenerator:
             dict object: dict containing all the field required for generating a new vagrant box in the deployment
                          module.
         """
+        vm_cpu=1
+        vm_memory=1024
+
+        if os_version in self.BOX_MAPPING:
+            box = self.BOX_MAPPING[os_version]
+            vm_cpu = self.DEFAULT_BOX_RESOURCES[box]['cpu']
+            vm_memory = self.DEFAULT_BOX_RESOURCES[box]['memory']
+
         instance_ip = self.__get_host_IP()
         instance = {
             'enabled': True,
@@ -298,9 +336,10 @@ class QACTLConfigGenerator:
         # Add manager if the target is an agent
         if components == 'agent':
             host_number += 1
+            #manager_vm_name = f"manager_{test_name}_{get_current_timestamp()}"
             self.config['deployment'][f"host_{host_number}"] = {
                 'provider': {
-                    'vagrant': self.__add_instance(os_version, vm_name, 'manager', 'linux')
+                    'vagrant': self.__add_instance('CentOS 8', vm_name, 'manager', 'linux')
                 }
             }
 
@@ -324,12 +363,14 @@ class QACTLConfigGenerator:
                         os_version = 'Ubuntu Focal'
                     elif 'CentOS 8' in test['os_version']:
                         os_version = 'CentOS 8'
+                    elif 'Windows Server 2019' in test['os_version']:
+                        os_version = 'Windows Server 2019'
                     else:
                         raise QAValueError(f"No valid system was found for {test['name']} test",
                                            QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
                     components = 'manager' if 'manager' in test['components'] else 'agent'
-                    os_platform = 'linux'
+                    os_platform = 'windows' if 'Windows' in os_version else 'linux'
 
                     self.__add_deployment_config_block(test['test_name'], os_version, components, os_platform)
 
@@ -433,8 +474,10 @@ class QACTLConfigGenerator:
             system = 'linux' if system == 'deb' or system == 'rpm' else system
             modules = test['modules']
             component = 'manager' if 'manager' in test['components'] else test['components'][0]
+            # Convert test path string to the corresponding according to the system
+            test_path = file.join_path(test['path'].split('/'), system)
 
-            self.__add_testing_config_block(instance, installation_files_path, system, test['path'],
+            self.__add_testing_config_block(instance, installation_files_path, system, test_path,
                                             test['test_name'], modules, component)
             test_host_number += 1
             # If it is an agent test then we skip the next manager instance since no test will be launched in that
@@ -456,7 +499,7 @@ class QACTLConfigGenerator:
         if not self.systems:
             for _ in tests_info:
                 self.__set_testing_config(tests_info)
-
+        # If we want to launch the test in one or multiple systems specified in qa-ctl parameters
         elif isinstance(self.systems, list) and len(self.systems) > 0:
             for _ in self.systems:
                 for _ in tests_info:
