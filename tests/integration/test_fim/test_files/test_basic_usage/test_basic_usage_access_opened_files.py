@@ -5,7 +5,6 @@
 import os
 import random
 import string
-
 import pytest
 
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel, detect_initial_scan
@@ -18,11 +17,9 @@ from wazuh_testing.tools.services import control_service
 
 # Marks
 
-
 pytestmark = [pytest.mark.tier(level=0)]
 
 # Variables
-
 
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 
