@@ -605,7 +605,7 @@ def configure_sockets_environment(request):
         check_daemon_status(
             running_condition=True,
             target_daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
         )
         daemon_first and mitm is not None and mitm.start()
         if mitm is not None:
@@ -624,7 +624,7 @@ def configure_sockets_environment(request):
         check_daemon_status(
             running_condition=False,
             target_daemon=daemon,
-            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else None
         )
 
     # Delete all db
