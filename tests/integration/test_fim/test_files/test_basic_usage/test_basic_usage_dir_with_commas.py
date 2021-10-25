@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM events are generated
+       on a monitored folder whose name contains commas.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 
 import pytest
@@ -48,9 +118,49 @@ def get_configuration(request):
 ])
 def test_directories_with_commas(directory, get_configuration, put_env_variables, configure_environment,
                                  restart_syscheckd, wait_for_fim_start):
-    """
-    Test alerts are generated when monitor environment variables
-    """
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon generates FIM events from monitoring folders
+                 whose name contains commas. For this purpose, the test will monitor a testing folder
+                 using the 'scheduled' monitoring mode, and create the testing files inside it.
+                 Then, perform CUD (creation, update, and delete) operations and finally verify that
+                 the FIM events are generated correctly.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - directory:
+            type: str
+            brief: Path to the monitored testing directory.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - put_env_variables:
+            type: fixture
+            brief: Create environment variables.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events are generated on a monitored folder whose name contains commas.
+
+    input_description: A test case is contained in external YAML file (wazuh_conf.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and, it is combined with
+                       the testing directories to be monitored defined in this module.
+
+    expected_output:
+        - Multiple FIM events logs of the monitored directories.
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     regular_file_cud(directory, wazuh_log_monitor, file_list=["testing_env_variables"],
