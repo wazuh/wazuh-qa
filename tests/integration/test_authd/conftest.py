@@ -3,7 +3,7 @@ from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
-from authd import DAEMON_NAME
+from wazuh_testing.authd import DAEMON_NAME
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -52,6 +52,14 @@ def restart_authd_function():
     """
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=DAEMON_NAME)
+
+
+@pytest.fixture(scope='function')
+def stop_authd_function():
+    """
+    Stop Authd.
+    """
+    control_service("stop", daemon=DAEMON_NAME)
 
 
 @pytest.fixture(scope='module')

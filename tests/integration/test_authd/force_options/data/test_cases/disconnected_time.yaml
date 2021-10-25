@@ -1,0 +1,70 @@
+-
+  name: "disconnected_time_1"
+  description: "Key mismatch test 1"
+  configuration:
+    key_mismatch: 'no'
+    disconnected_time:
+      value: 0
+      attributes:
+      - enabled: 'no'
+    after_registration_time: 50
+    enabled: 'yes'
+  pre_existent_agents:
+    - id: 001
+      name: user1
+      ip: any
+      key: TopSecret
+      connection_status: disconnected
+      disconnection_time:
+        value: 10
+      registration_time:
+        delta: -100
+    - id: 002
+      name: user2
+      ip: any
+      key: TopSecret
+      connection_status: disconnected
+      disconnection_time:
+        value: 10
+      registration_time:
+        delta: -10
+  test_case:
+  -
+    input:
+      name: 'user1'
+    output:
+      status: 'success'
+      name: 'user1'
+  -
+    input:
+      name: 'user2'
+    output:
+      status: 'error'
+      message: 'Duplicate agent name: user2'
+-
+  name: "disconnected_time_2"
+  description: "Key mismatch test 2"
+  configuration:
+    key_mismatch: 'no'
+    disconnected_time:
+      value: 0
+      attributes:
+      - enabled: 'no'
+    after_registration_time: 0
+    enabled: 'no'
+  pre_existent_agents:
+    - id: 001
+      name: user1
+  test_case:
+  -
+    input:
+      name: 'user1'
+    output:
+      status: 'error'
+      message: 'Duplicate agent name: user1'
+  -
+    input:
+      name: 'user2'
+    output:
+      status: 'success'
+      name: 'user2'
