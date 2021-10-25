@@ -21,7 +21,7 @@ class Config():
     def __init__(self, *args):
         # If it is called using the config file
         self.mode = mode.DEFAULT
-        self.project_path = args[1]
+        self.project_path = args[1].replace('\\','/')
         self.include_paths = []
         self.include_regex = []
         self.group_files = ""
@@ -49,7 +49,7 @@ class Config():
         self._read_ignore_paths()
 
         if len(args) >= 3:
-            self.documentation_path = args[2]
+            self.documentation_path = args[2].replace('\\','/')
         if len(args) == 4:
             # It is called with a single test to parse
             self.mode = mode.SINGLE_TEST

@@ -157,12 +157,6 @@ nav:
           - Test authd local:  tests/integration/test_authd/test_authd_local.md
           - Test authd agents ctx:  tests/integration/test_authd/test_authd_agents_ctx.md
           - Test authd remote enrollment enabled:  tests/integration/test_authd/test_remote_enrollment.md
-        - Cluster:
-          - tests/integration/test_cluster/index.md
-          - Test key polling:
-            - tests/integration/test_cluster/test_key_polling/index.md
-            - Test key polling master: tests/integration/test_cluster/test_key_polling/test_key_polling_master.md
-            - Test key polling worker: tests/integration/test_cluster/test_key_polling/test_key_polling_worker.md
         - FIM:
           - tests/integration/test_fim/index.md
           - Test files:
@@ -203,6 +197,7 @@ nav:
               - Test basic usage starting agent: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_starting_agent.md
               - Test basic usage wildcards: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards.md
               - Test basic usage wildcards runtime: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_wildcards_runtime.md
+              - Test basic usage realtime unsupported: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_realtime_unsupported.md
             - Test benchmark:
               - tests/integration/test_fim/test_files/test_benchmark/index.md
               - Test benchmark:  tests/integration/test_fim/test_files/test_benchmark/test_benchmark.md
@@ -342,6 +337,7 @@ nav:
               - Test basic usage registry changes: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_changes.md
               - Test basic new key: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_new_key.md
               - Test long registry path: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_long_registry_path.md
+              - Test duplicated registry entries: tests/integration/test_fim/test_registry/test_registry_basic_usage/test_basic_usage_registry_duplicated_entries.md
             - Test registry checks:
               - tests/integration/test_fim/test_registry/test_registry_checks/index.md
               - Test registry checks others: tests/integration/test_fim/test_registry/test_registry_checks/test_registry_check_others.md
@@ -523,6 +519,7 @@ nav:
         - Test cluster:
           - tests/system/test_cluster/index.md
           - Test agent info sync: tests/system/test_cluster/test_agent_info_sync/test_agent_info_sync.md
+          - Test agent files deletion: tests/system/test_cluster/test_agent_files_deletion/test_agent_files_deletion.md
           - Test agent enrollment:  tests/system/test_cluster/test_agent_enrollment/test_agent_enrollment.md
           - Test agent key polling: tests/system/test_cluster/test_agent_key_polling/test_agent_key_polling.md
           - Test integrity sync: tests/system/test_cluster/test_integrity_sync/test_integrity_sync.md
@@ -533,5 +530,11 @@ nav:
           - Test disconnected nodes: tests/system/test_jwt_invalidation/test_disconnected_nodes.md
           - Test revoke endpoint: tests/system/test_jwt_invalidation/test_revoke_endpoint.md
           - Test update password:  tests/system/test_jwt_invalidation/test_update_password.md
+      - Scans:
+        - tests/scans/index.md
+        - Dependencies:
+            - Test Python dependencies: tests/scans/dependencies/test_dependencies.md
+        - Code Analysis:
+            - Test Python flaws: tests/scans/code_analysis/test_python_flaws.md
       - Legacy:
         - tests/legacy/index.md
