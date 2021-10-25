@@ -627,7 +627,8 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
     REMOTED_KEYS_SYNC_TIME = 10
 
     # Start Remoted mock
-    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], client_keys=CLIENT_KEYS_PATH)
+    remoted_server = RemotedSimulator(protocol=get_configuration['metadata']['PROTOCOL'], mode='CONTROLLED_ACK',
+                                      client_keys=CLIENT_KEYS_PATH)
     # Stop target Agent
     control_service('stop')
     # Clean logs
@@ -639,9 +640,6 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
     log_monitor = FileMonitor(LOG_FILE_PATH)
     # Start whole Agent service to check other daemons status after initialization
     control_service('start')
-    # Simulate time of Remoted to synchronize keys by waiting previous to start responding
-    remoted_server.set_mode('CONTROLLED_ACK')
-    sleep(REMOTED_KEYS_SYNC_TIME)
 
     # Check Agentd is finally communicating
     log_monitor.start(timeout=120, callback=wait_notify, error_message="Notify message from agent was never sent!")

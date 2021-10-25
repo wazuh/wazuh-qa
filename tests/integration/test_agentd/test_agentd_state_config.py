@@ -93,6 +93,8 @@ with open(test_data_file) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
+wait_daemon_control = 1
+
 if sys.platform == 'win32':
     state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
@@ -109,18 +111,25 @@ callbacks = {
 }
 
 
-# Functions
-def extra_configuration_before_yield():
-    change_internal_options('agent.debug', '2')
-
-
-def extra_configuration_after_yield():
-    # Set default values
-    change_internal_options('agent.debug', '0')
+# Fixture
+@pytest.fixture(scope='module')
+def set_local_internal_options():
+    """Set local internal options"""
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '2')
+    else:
+        change_internal_options('agent.debug', '2')
+        
+    yield
+    
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '0')
+    else:
+        change_internal_options('agent.debug', '0')
+        
     set_state_interval(5, internal_options)
 
 
-# Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -130,7 +139,8 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state_config(configure_environment, test_case: list):
+@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
+def test_agentd_state_config(test_case, set_local_internal_options):
     '''
     description: Check that the 'wazuh-agentd.state' statistics file is created
                  automatically and verify that it is updated at the set intervals.
@@ -170,9 +180,23 @@ def test_agentd_state_config(configure_environment, test_case: list):
     # Set state interval value according to test case specs
     set_state_interval(test_case['interval'], internal_options)
 
-    control_service('start', 'wazuh-agentd')
-
-    # Check if test require checking state file existance
+    if sys.platform == 'win32':
+        if test_case['agentd_ends']:
+            with pytest.raises(ValueError):
+                control_service('start')
+            assert (test_case['agentd_ends']
+                    is not check_if_process_is_running('wazuh-agentd'))
+        else:
+            control_service('start')
+    else:
+        control_service('start', 'wazuh-agentd')
+        # Sleep enough time to Wazuh load agent.state_interval configuration and
+        # boot wazuh-agentd
+        time.sleep(wait_daemon_control) 
+        assert (test_case['agentd_ends']
+                    is not check_if_process_is_running('wazuh-agentd'))
+    
+    # Check if the test requires checking state file existence
     if 'state_file_exist' in test_case:
         if test_case['state_file_exist']:
             # Wait until state file was dumped
@@ -185,8 +209,3 @@ def test_agentd_state_config(configure_environment, test_case: list):
                             callback=callbacks.get(test_case['log_expect']),
                             error_message='Event not found')
     assert wazuh_log_monitor.result()
-
-    # Check if test require checking agentd status
-    if 'agentd_ends' in test_case:
-        assert (test_case['agentd_ends']
-                is not check_if_process_is_running('wazuh-agentd'))

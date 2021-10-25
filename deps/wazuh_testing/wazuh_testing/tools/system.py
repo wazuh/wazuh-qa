@@ -59,7 +59,7 @@ class HostManager:
             check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
         """
         replace = f'{after}{replace}{before}'
-        self.get_host(host).ansible("replace", f"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
+        self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
     def modify_file_content(self, host: str, path: str = None, content: str = ''):
