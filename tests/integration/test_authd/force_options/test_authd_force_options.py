@@ -2,22 +2,19 @@ import os
 import time
 import pytest
 import yaml
-from wazuh_testing.tools import CLIENT_KEYS_PATH
 from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.wazuh_db import query_wdb
-from authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT
+from wazuh_testing.authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT, insert_pre_existent_agents
 
 
 # Data paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(data_path, 'configuration.yaml')
+configurations_path = os.path.join(data_path, 'template_configuration.yaml')
 tests_path = os.path.join(data_path, 'test_cases')
 
 # Configurations
 configurations = load_wazuh_configurations(configurations_path, __name__)
-configuration_ids = ['authd_force_options']
 
 # Tests
 tests = []
@@ -73,7 +70,7 @@ def get_temp_force_config(param):
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+@pytest.fixture(scope='module')
 def get_configuration(request):
     """
     Get configurations from the module
@@ -106,82 +103,11 @@ def override_authd_force_conf(get_current_test_case, request):
     write_wazuh_conf(test_config)
 
 
-@pytest.fixture(scope='function')
-def insert_pre_existent_agents(get_current_test_case):
-    agents = get_current_test_case.get('pre_existent_agents', [])
-    time_now = int(time.time())
-    try:
-        keys_file = open(CLIENT_KEYS_PATH, 'w')
-    except IOError as exception:
-        raise exception
-
-    # Clean agents from DB
-    command = 'global sql DELETE FROM agent WHERE id != 0'
-    try:
-        query_wdb(command)
-    except Exception:
-        raise Exception('Unable to clean agents')
-
-    for agent in agents:
-        if 'id' in agent:
-            id = agent['id']
-        else:
-            id = '001'
-
-        if 'name' in agent:
-            name = agent['name']
-        else:
-            name = f'TestAgent{id}'
-
-        if 'ip' in agent:
-            ip = agent['ip']
-        else:
-            ip = 'any'
-
-        if 'key' in agent:
-            key = agent['key']
-        else:
-            key = 'TopSecret'
-
-        if 'connection_status' in agent:
-            connection_status = agent['connection_status']
-        else:
-            connection_status = 'never_connected'
-
-        if 'disconnection_time' in agent and 'delta' in agent['disconnection_time']:
-            disconnection_time = time_now + agent['disconnection_time']['delta']
-        elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
-            disconnection_time = agent['disconnection_time']['value']
-        else:
-            disconnection_time = 0
-
-        if 'registration_time' in agent and 'delta' in agent['registration_time']:
-            registration_time = time_now + agent['registration_time']['delta']
-        elif 'registration_time' in agent and 'value' in agent['registration_time']:
-            registration_time = agent['registration_time']['value']
-        else:
-            registration_time = time_now
-
-        # Write agent in client.keys
-        keys_file.write(f'{id} {name} {ip} {key}\n')
-
-        # Write agent in global.db
-        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
-                  "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
-        try:
-            query_wdb(command)
-        except Exception:
-            raise Exception(f'Unable to add agent {id}')
-
-    keys_file.close()
-
-
 # Tests
 
-def test_authd_force_options(configure_environment, configure_sockets_environment,
-                             stop_authd_function, override_authd_force_conf, insert_pre_existent_agents,
+def test_authd_force_options(get_current_test_case, override_authd_force_conf, insert_pre_existent_agents,
                              file_monitoring, restart_authd_function, wait_for_authd_startup_function,
-                             connect_to_sockets_function, get_current_test_case, tear_down):
+                             connect_to_sockets_function, tear_down):
 
     authd_sock = receiver_sockets[0]
     validate_authd_logs(get_current_test_case.get('log', []))
