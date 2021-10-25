@@ -1,7 +1,69 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check for false positives due
+       to possible inconsistencies with 'inodes' in the FIM database.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+    - https://en.wikipedia.org/wiki/Inode
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 import shutil
 
@@ -73,23 +135,51 @@ def wait_for_fim_start_function(get_configuration, request):
 @pytest.mark.parametrize('test_cases', [0, 1, 2])
 def test_db_inode_check(test_cases, get_configuration, configure_environment, restart_syscheck_function,
                         wait_for_fim_start_function):
-    """Test to check for false positives due to possible inconsistencies with inodes in the database.
-        Cases:
-            - With check_mtime="no" and check_inode="no", no modification events should appear.
-            - With check_mtime="yes" and check_inode="yes", modification events should have:
-              "changed_attributes":["mtime","inode"]
+    '''
+    description: Check for false positives due to possible inconsistencies with inodes in the FIM database.
+                 For example, with 'check_mtime=no' and 'check_inode=no', no modification events should appear,
+                 and using 'check_mtime=yes' and 'check_inode=yes', since the 'mtime' and 'inode' attributes
+                 are modified, modification events should appear.
+                 For this purpose, the test will monitor a folder using the 'scheduled' monitoring mode,
+                 create ten files with some content and wait for the scan. Then, remove the files and
+                 create them again (adding one more at the beginning or deleting it) with different inodes.
+                 Finally, the test changes the system time until the next scheduled scan and check
+                 if there are any unexpected events in the log.
 
-    Args:
-        test_added (boolean): variable to set whether the test will add one more or one less file.
-        get_configuration (fixture): Function to access the configuration in use.
-        configure_environment (fixture): Fixture to prepare the environment to pass the test
-        restart_syscheck_function (fixture): Restart syscheck and truncate the log file with function scope.
-        wait_for_fim_start_function (fixture): Wait until the log 'scan end' appear, with function scope.
+    wazuh_min_version: 4.2.0
 
-    Raises:
-        AttributeError: If an wrong or unexpected modified event appear
-    """
+    parameters:
+        - test_cases:
+            type: int
+            brief: Test case number.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
+    assertions:
+        - Verify that the FIM database does not become inconsistent due to the change of inodes,
+          whether or not 'check_mtime' and 'check_inode' are enabled.
+
+    input_description: Two test cases defined in this module, and the configuration settings for
+                       the 'wazuh-syscheckd' daemon (tag ossec_conf) which are contained in external
+                       YAML file (wazuh_conf_check_inodes.yaml).
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     aux_file_list = file_list.copy()
