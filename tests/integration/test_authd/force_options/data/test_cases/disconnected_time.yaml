@@ -1,5 +1,5 @@
 -
-  name: "Key mismatch file 1 test 1"
+  name: "disconnected_time_1"
   description: "Key mismatch test 1"
   configuration:
     key_mismatch: 'no'
@@ -42,7 +42,7 @@
       status: 'error'
       message: 'Duplicate agent name: user2'
 -
-  name: "Key mismatch file 1 test 2"
+  name: "disconnected_time_2"
   description: "Key mismatch test 2"
   configuration:
     key_mismatch: 'no'

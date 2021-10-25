@@ -53,7 +53,7 @@ from wazuh_testing.tools import CLIENT_KEYS_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml, truncate_file
-from authd import DAEMON_NAME
+from wazuh_testing.authd import DAEMON_NAME
 
 # Marks
 

@@ -7,6 +7,10 @@ copyright:
 '''
 
 import re
+import pytest
+import time
+from wazuh_testing.tools import CLIENT_KEYS_PATH
+from wazuh_testing.wazuh_db import query_wdb
 
 
 DAEMON_NAME = 'wazuh-authd'
@@ -113,3 +117,66 @@ def validate_authd_response(response, expected):
         raise Exception('Invalid expected status')
 
     return result, err_msg
+
+def clean_agents_from_db():
+    """
+    Clean agents from DB
+    """
+    command = 'global sql DELETE FROM agent WHERE id != 0'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean agents')
+
+
+def insert_agent_in_db(id=1, name="TestAgent", ip="any", registration_time=0, connection_status=0,
+                       disconnection_time=0):
+    """
+    Write agent in global.db
+    """
+    command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
+                "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception(f'Unable to add agent {id}')
+
+
+@pytest.fixture(scope='function')
+def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
+    agents = get_current_test_case.get('pre_existent_agents', [])
+    time_now = int(time.time())
+    try:
+        keys_file = open(CLIENT_KEYS_PATH, 'w')
+    except IOError as exception:
+        raise exception
+
+    clean_agents_from_db()
+
+    for agent in agents:
+        id = agent['id'] if 'id' in agent else '001'
+        name = agent['name'] if 'name' in agent else f'TestAgent{id}'
+        ip = agent['ip'] if 'ip' in agent else 'any'
+        key = agent['key'] if 'key' in agent else 'TopSecret'
+        connection_status = agent['connection_status'] if 'connection_status' in agent else 'never_connected'
+        if 'disconnection_time' in agent and 'delta' in agent['disconnection_time']:
+            disconnection_time = time_now + agent['disconnection_time']['delta']
+        elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
+            disconnection_time = agent['disconnection_time']['value']
+        else:
+            disconnection_time = 0
+        if 'registration_time' in agent and 'delta' in agent['registration_time']:
+            registration_time = time_now + agent['registration_time']['delta']
+        elif 'registration_time' in agent and 'value' in agent['registration_time']:
+            registration_time = agent['registration_time']['value']
+        else:
+            registration_time = time_now
+
+        # Write agent in client.keys
+        keys_file.write(f'{id} {name} {ip} {key}\n')
+
+        #Write agent in global.db
+        insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
+
+
+    keys_file.close()

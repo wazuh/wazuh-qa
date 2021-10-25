@@ -51,7 +51,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.services import control_service
-from authd import validate_authd_response
+from wazuh_testing.authd import validate_authd_response
 
 # Marks
 
