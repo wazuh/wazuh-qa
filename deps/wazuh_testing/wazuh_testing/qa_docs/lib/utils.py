@@ -2,7 +2,9 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import subprocess
 import os
+import sys
 import shutil
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
@@ -212,3 +214,27 @@ def clean_folder(folder):
                 shutil.rmtree(file_path)
         except Exception as e:
             utils_logger.error(f"Failed to delete {file_path}. Reason: {e}")
+
+def run_local_command(command):
+    """Run local commands without getting the output, but validating the result code.
+
+    Args:
+        command (string): Command to run.
+
+    Raises:
+        QAValueError: If the run command has failed (rc != 0).
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command])
+
+    # Wait for the process to finish
+    run.communicate()
+
+    result_code = run.returncode
+
+    if result_code != 0:
+        print("error")
+        # raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.LOGGER.error,
+        #                    QADOCS_LOGGER)

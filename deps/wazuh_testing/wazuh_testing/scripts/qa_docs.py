@@ -12,6 +12,7 @@ from elasticsearch import Elasticsearch
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
 from wazuh_testing.qa_docs.lib.sanity import Sanity
+from wazuh_testing.qa_docs.lib.utils import run_local_command
 from wazuh_testing.qa_docs.doc_generator import DocGenerator
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -194,14 +195,15 @@ def install_searchui_deps():
     os.chdir(SEARCH_UI_PATH)
     if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_modules')):
         qadocs_logger.info('Installing SearchUI dependencies')
-        os.system("npm install")
+        run_local_command("npm install")
 
 
 def run_searchui(index):
     """Run SearchUI installing its dependencies if necessary"""
     install_searchui_deps()
     qadocs_logger.debug('Running SearchUI')
-    os.system(f"ELASTICSEARCH_HOST=http://localhost:9200 INDEX={index} npm start")
+
+    run_local_command(f"npm --ELASTICHOST=http://localhost:9200 --INDEX={index} start")
 
 
 def parse_data(args):
