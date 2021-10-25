@@ -2,14 +2,20 @@
   name: "Force insert enabled"
   description: "Chack that legacy force_insert overrides force.enabled"
   configuration:
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 0
-    enabled: 'yes'
-    force_insert : 'no'
+  - force:
+      elements:
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          attributes:
+          - enabled: 'no'
+          value: 0
+      - after_registration_time:
+          value: 0
+  - force_insert :
+      value: 'no'
   pre_existent_agents:
     - id: 001
       name: user1
