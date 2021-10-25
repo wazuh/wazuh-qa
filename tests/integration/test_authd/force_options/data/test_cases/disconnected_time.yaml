@@ -2,13 +2,18 @@
   name: "disconnected_time_1"
   description: "Key mismatch test 1"
   configuration:
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 50
-    enabled: 'yes'
+  - force:
+      elements:
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          attributes:
+          - enabled: 'no'
+          value: 0
+      - after_registration_time:
+          value: 50
   pre_existent_agents:
     - id: 001
       name: user1
@@ -45,13 +50,18 @@
   name: "disconnected_time_2"
   description: "Key mismatch test 2"
   configuration:
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 0
-    enabled: 'no'
+  - force:
+      elements:
+      - enabled:
+          value: 'no'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          attributes:
+          - enabled: 'no'
+          value: 0
+      - after_registration_time:
+          value: 0
   pre_existent_agents:
     - id: 001
       name: user1
