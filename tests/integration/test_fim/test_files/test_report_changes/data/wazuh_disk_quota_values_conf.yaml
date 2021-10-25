@@ -1,0 +1,30 @@
+- tags:
+  - disk_quota_values
+  apply_to_modules:
+  - test_disk_quota_values
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: 10
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - follow_symbolic_link: 'yes'
+        - check_all: 'yes'
+        - realtime: 'yes'
+        - report_changes: 'yes'
+    - diff:
+        elements:
+        - file_size:
+            elements:
+            - enabled:
+                value: 'no'
+        - disk_quota:
+            elements:
+            - enabled:
+                value: 'yes'
+            - limit:
+                value: DISK_QUOTA_LIMIT

@@ -16,6 +16,7 @@ import zipfile
 
 import filetype
 import requests
+import yaml
 
 
 def read_json(file_path):
@@ -32,6 +33,19 @@ def read_json(file_path):
         output = json.loads(f.read())
 
     return output
+
+
+def read_yaml(file_path):
+    """Read a YAML file from a given path, return a dictionary with the YAML data
+
+    Args:
+        file_path (str): Path of the YAML file to be readed
+
+    Returns:
+       dict: Yaml structure.
+    """
+    with open(file_path) as f:
+        return yaml.safe_load(f)
 
 
 def truncate_file(file_path):
@@ -331,3 +345,15 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
+        
+def count_file_lines(filepath):
+    """Count number of lines of a specified file.
+
+    Args:
+        filepath (str): Absolute path of the file.
+
+    Returns:
+        Integer: Number of lines of the file.
+    """
+    with open(filepath, "r") as file:
+        return sum(1 for line in file if line.strip())
