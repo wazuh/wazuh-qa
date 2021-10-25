@@ -49,9 +49,10 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
     - Windows XP
 
 references:
@@ -131,7 +132,7 @@ def test_agent_auth_enrollment(configure_authd_server, configure_environment, te
                  the agent with the manager. The enrollment is then started,
                  and the response received is compared with the expected one.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:

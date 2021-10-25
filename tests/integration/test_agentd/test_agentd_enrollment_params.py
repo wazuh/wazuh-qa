@@ -49,9 +49,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -274,7 +276,7 @@ def test_agent_agentd_enrollment(configure_authd_server, configure_environment, 
                  for the agent, initiate the agent enrollment with the manager, and finally,
                  verify that the response received matches the expected one.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:

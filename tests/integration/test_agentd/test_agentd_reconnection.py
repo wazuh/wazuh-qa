@@ -50,9 +50,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -245,7 +247,7 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
                  the 'wazuh-authd' daemon.
                  In this case, the agent starts with keys.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:
@@ -328,7 +330,7 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
                  the 'wazuh-authd' daemon.
                  In this case, the agent doesn't have the 'client.keys' file.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:
@@ -414,7 +416,7 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
                  the 'wazuh-authd' daemon.
                  In this case, the agent has its 'client.keys' file empty.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:
@@ -501,7 +503,7 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
                  performs multiple enrollment requests to the 'wazuh-authd' daemon before
                  getting the new key to communicate with the 'wazuh-remoted' daemon.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:
@@ -593,7 +595,7 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
                  with keys but the 'wazuh-remoted' daemon is not available for several seconds,
                  then the agent performs multiple connection retries before requesting a new enrollment.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:

@@ -48,9 +48,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-agentd-state.html
@@ -133,7 +135,7 @@ def test_agentd_state_config(configure_environment, test_case: list):
     description: Check that the 'wazuh-agentd.state' statistics file is created
                  automatically and verify that it is updated at the set intervals.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_environment:

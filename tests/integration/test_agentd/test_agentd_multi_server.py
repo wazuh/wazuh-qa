@@ -49,9 +49,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -403,7 +405,7 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                  Initialize an environment with multiple simulated servers in which the agent is forced to enroll
                  under different test conditions, verifying the agent's behavior through its log files.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - add_hostnames:
