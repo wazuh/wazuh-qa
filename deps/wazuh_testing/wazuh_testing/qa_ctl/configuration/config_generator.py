@@ -79,19 +79,19 @@ class QACTLConfigGenerator:
 
     BOX_INFO = {
         'qactl/ubuntu_20_04': {
-            'connection_method': 'ssh',
-            'user': 'vagrant',
-            'password': 'vagrant',
-            'connection_port': 22,
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
             'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
-            'connection_method': 'ssh',
-            'user': 'vagrant',
-            'password': 'vagrant',
-            'connection_port': 22,
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'rpm',
             'installation_files_path': LINUX_TMP
@@ -103,6 +103,7 @@ class QACTLConfigGenerator:
             'ansible_port': 5985,
             'ansible_winrm_server_cert_validation': 'ignore',
             'system': 'windows',
+            'ansible_python_interpreter': 'C:\\Users\\vagrant\\AppData\\Local\\Programs\\Python\\Python39\\python.exe',
             'installation_files_path': WINDOWS_TMP
         }
     }
@@ -327,7 +328,7 @@ class QACTLConfigGenerator:
         """
         # Process deployment data
         host_number = len(self.config['deployment'].keys()) + 1
-        vm_name = f"{test_name}_{get_current_timestamp()}"
+        vm_name = f"{test_name}_{get_current_timestamp()}".replace('.', '_')
         self.config['deployment'][f"host_{host_number}"] = {
             'provider': {
                 'vagrant': self.__add_instance(os_version, vm_name, components, os_platform)
@@ -336,7 +337,6 @@ class QACTLConfigGenerator:
         # Add manager if the target is an agent
         if components == 'agent':
             host_number += 1
-            #manager_vm_name = f"manager_{test_name}_{get_current_timestamp()}"
             self.config['deployment'][f"host_{host_number}"] = {
                 'provider': {
                     'vagrant': self.__add_instance('CentOS 8', vm_name, 'manager', 'linux')

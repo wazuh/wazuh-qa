@@ -68,20 +68,23 @@ class QAProvisioning():
 
         if host_info['system'] == 'windows':
             instance = WindowsAnsibleInstance(
-                host=host_info['host'], host_vars=extra_vars,
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
                 ansible_user=host_info['ansible_user'],
                 ansible_password=host_info['ansible_password'],
-                ansible_connection=host_info['ansible_connection'],
-                ansible_port=host_info['ansible_port']
+                ansible_python_interpreter=host_info['ansible_python_interpreter'],
+                host_vars=extra_vars
             )
         else:
             instance = UnixAnsibleInstance(
-                host=host_info['host'], host_vars=extra_vars,
-                connection_method=host_info['connection_method'],
-                connection_port=host_info['connection_port'],
-                connection_user=host_info['user'],
-                connection_user_password=host_info['password'],
-                ssh_private_key_file_path=private_key_path,
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                host_vars=extra_vars,
+                ansible_ssh_private_key_file=private_key_path,
                 ansible_python_interpreter=host_info['ansible_python_interpreter']
             )
 
@@ -214,11 +217,17 @@ class QAProvisioning():
             hosts (str): Hosts to check.
         """
         QAProvisioning.LOGGER.info('Checking hosts SSH connection')
-        wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
-                                           'wait_for_connection': {'delay': 5, 'timeout': 60}})
+        wait_for_connection_unix = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+                                                'wait_for_connection': {'delay': 5, 'timeout': 60},
+                                                'when': 'ansible_system != "Windows"'})
 
-        playbook_parameters = {'hosts': hosts, 'tasks_list': [wait_for_connection]}
+        wait_for_connection_windows = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+                                                   'win_wait_for': {'delay': 5, 'timeout': 60},
+                                                   'when': 'ansible_system == "Windows"'})
 
+        playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': [wait_for_connection_unix,
+                                                                                    wait_for_connection_windows]}
+        print(file.read_file(self.inventory_file_path))
         AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                           output=self.qa_ctl_configuration.ansible_output)
         QAProvisioning.LOGGER.info('Hosts connection OK. The instances are accessible via ssh')
@@ -251,7 +260,7 @@ class QAProvisioning():
             for runner_thread in provision_threads:
                 runner_thread.join()
 
-            QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
+            QAProvisioning.LOGGER.info('The instances have been provisioned sucessfully')
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object"""

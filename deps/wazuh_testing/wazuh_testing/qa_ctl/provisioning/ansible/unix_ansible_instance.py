@@ -8,44 +8,34 @@ class UnixAnsibleInstance(AnsibleInstance):
 
     Args:
         host (str): Ip or hostname.
-        connection_user (str): Host connection user
-        connection_user_password (str): Host connection user password
-        ssh_private_key_file_path (str): Path where is located the private key to authenticate the user.
+        ansible_connection (str): Connection method.
+        ansible_port (int): Remote connection port.
+        ansible_user (str): Host connection user
+        ansible_password (str): Host connection user password
         host_vars (dict): Set of custom variables to add to that host.
-        connection_method (str): Connection method: smart, ssh or paramiko.
-        connection_port (int): Remote ssh connection port.
         ansible_python_interpreter (str): Python interpreter path in the remote host.
+        ansible_ssh_private_key_file (str): Path where is located the private key to authenticate the user.
 
     Attributes:
-        connection_user (str): Host connection user
-        connection_user_password (str): Host connection user password
-        ssh_private_key_file_path (str): Path where is located the private key to authenticate the user.
-        connection_method (str): Connection method: smart, ssh or paramiko.
-        connection_port (int): Remote ssh connection port.
-        ansible_python_interpreter (str): Python interpreter path in the remote host.
+        ansible_ssh_private_key_file (str): Path where is located the private key to authenticate the user.
     """
-    def __init__(self, host, connection_user, connection_user_password=None, ssh_private_key_file_path=None,
-                 host_vars=None, connection_method='ssh', connection_port=22,
-                 ansible_python_interpreter='/usr/bin/python'):
-        self.connection_method = connection_method
-        self.connection_port = connection_port
-        self.connection_user = connection_user
-        self.connection_user_password = connection_user_password
-        self.ssh_private_key_file_path = ssh_private_key_file_path
-        self.ansible_python_interpreter = ansible_python_interpreter
+    def __init__(self, host, ansible_connection='ssh', ansible_port=22, ansible_user='vagrant',
+                 ansible_password='vagrant', host_vars=None, ansible_python_interpreter='/usr/bin/python',
+                 ansible_ssh_private_key_file=None):
+        self.ansible_ssh_private_key_file = ansible_ssh_private_key_file
 
-        super().__init__(host=host, host_vars=host_vars)
+        super().__init__(host, ansible_connection, ansible_port, ansible_user, ansible_password,
+                         ansible_python_interpreter, host_vars)
 
     def __str__(self):
         """Define how the class object is to be displayed."""
         data = {
             'host_information': {
-                'host': self.host, 'connection_method': self.connection_method,
-                'connection_port': self.connection_port, 'connection_user': self.connection_user,
-                'password': self.connection_user_password,
-                'connection_user_password': self.connection_user_password,
-                'ssh_private_key_file_path': self.ssh_private_key_file_path,
-                'ansible_python_interpreter': self.ansible_python_interpreter
+                'host': self.host, 'ansible_connection': self.ansible_connection,
+                'ansible_port': self.ansible_port, 'ansible_user': self.ansible_user,
+                'ansible_password': self.ansible_password, 'host_vars': self.host_vars,
+                'ansible_python_interpreter': self.ansible_python_interpreter,
+                'ansible_ssh_private_key_file': self.ansible_ssh_private_key_file
             }
         }
 
@@ -54,9 +44,9 @@ class UnixAnsibleInstance(AnsibleInstance):
     def __repr__(self):
         """Representation of the object of the class in string format"""
         return json.dumps({
-            'host': self.host, 'host_vars': self.host_vars, 'connection_method': self.connection_method,
-            'connection_port': self.connection_port, 'connection_user': self.connection_user,
-            'connection_user_password': self.connection_user_password,
-            'ssh_private_key_file_path': self.ssh_private_key_file_path,
-            'ansible_python_interpreter': self.ansible_python_interpreter
+            'host': self.host, 'ansible_connection': self.ansible_connection,
+            'ansible_port': self.ansible_port, 'ansible_user': self.ansible_user,
+            'ansible_password': self.ansible_password, 'host_vars': self.host_vars,
+            'ansible_python_interpreter': self.ansible_python_interpreter,
+            'ansible_ssh_private_key_file': self.ansible_ssh_private_key_file
         })
