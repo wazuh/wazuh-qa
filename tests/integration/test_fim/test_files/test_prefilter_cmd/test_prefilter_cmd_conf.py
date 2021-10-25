@@ -130,33 +130,27 @@ def test_prefilter_cmd_conf(get_configuration, configure_environment, install_pr
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - check_prelink:
+        - install_prelink:
             type: fixture
             brief: Call script to install 'prelink' if it is not installed.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
-            type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
         - Verify that the 'prelink' program is installed on the system.
 
-    input_description: A test case (prefilter_cmd) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these
-                       are combined with the testing directory to be monitored defined in the module.
-                       Also, a bash script (install_prelink.sh) is included to check if
-                       the 'prelink' program is installed and install it if necessary.
+    input_description: A test case (prefilter_cmd) is contained in external YAML file (wazuh_prefilter_cmd_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these are combined
+                       with the testing directory to be monitored defined in the module. Also, a bash script
+                       (install_prelink.sh) is included to check if the 'prelink' program is installed and install it
+                       if necessary.
 
     expected_output:
         - The path of the 'prelink' program.
