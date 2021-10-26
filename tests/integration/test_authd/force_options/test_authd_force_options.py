@@ -16,6 +16,7 @@ tests_path = os.path.join(data_path, 'test_cases')
 
 # Configurations
 configurations = load_wazuh_configurations(configurations_path, __name__)
+local_internal_options = {'authd.debug': '2'}
 
 # Tests
 tests = []
@@ -40,7 +41,7 @@ def validate_authd_logs(logs):
         log_monitor.start(timeout=AUTHD_KEY_REQUEST_TIMEOUT,
                           callback=make_callback(log, prefix=AUTHD_DETECTOR_PREFIX,
                                                  escape=True),
-                          error_message='Expected error log does not occured.')
+                          error_message=f"Expected error log does not occured: '{log}'")
 
 
 def create_force_config_block(param):
@@ -93,10 +94,9 @@ def format_configuration(get_current_test_case, request):
     return test_config
 
 
-# Tests
-def test_authd_force_options(get_current_test_case, override_authd_force_conf, insert_pre_existent_agents,
-                             file_monitoring, restart_authd_function, wait_for_authd_startup_function,
-                             connect_to_sockets_function, tear_down):
+def test_authd_force_options(get_current_test_case, configure_local_internal_options_module, override_authd_force_conf,
+                             insert_pre_existent_agents, file_monitoring, restart_authd_function,
+                             wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
 
     authd_sock = receiver_sockets[0]
     validate_authd_logs(get_current_test_case.get('log', []))

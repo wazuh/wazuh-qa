@@ -1,6 +1,6 @@
 -
-  name: "Force insert enabled"
-  description: "Chack that legacy force_insert overrides force.enabled"
+  name: "force_insert_disabled"
+  description: "Check that legacy force_insert overrides force.enabled"
   configuration:
   - force:
       elements:
@@ -17,18 +17,12 @@
   - force_insert :
       value: 'no'
   pre_existent_agents:
-    - id: 001
+    -
+      id: '001'
       name: user1
-      ip: any
-      key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
-      registration_time:
-        delta: -100
   log:
     - The <force_insert> tag is deprecated since version 4.3.0.
-    - Setting <force><enabled> tag to no to comply with the legacy <force_insert> option found.
+    - Setting <force><enabled> tag to 'no' to comply with the legacy <force_insert> option found.
   test_case:
   -
     input:
@@ -36,4 +30,32 @@
     output:
       status: 'error'
     log:
-      - Duplicate name 'user1', rejecting enrollment. Agent '1' won't be removed because the force option is disabled.
+      - Duplicate name 'user1', rejecting enrollment. Agent '001' won't be removed because the force option is disabled.
+
+-
+  name: "force_insert_enabled"
+  description: "Check that legacy force_insert overrides force.enabled"
+  configuration:
+    enabled: 'no'
+    after_registration_time: 0
+    force_insert : 'yes'
+  pre_existent_agents:
+    -
+      name: user1
+      id: '001'
+      connection_status: disconnected
+      disconnection_time:
+        delta: -100
+      registration_time:
+        delta: -100
+  log:
+    - The <force_insert> tag is deprecated since version 4.3.0.
+    - Setting <force><enabled> tag to 'yes' to comply with the legacy <force_insert> option found.
+  test_case:
+  -
+    input:
+      name: 'user1'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'user1' (id '001')
