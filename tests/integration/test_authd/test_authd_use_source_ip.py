@@ -1,22 +1,28 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
-brief: This module verifies the correct behavior of the setting use_source_ip
-tier:
-    0
+
+brief: This module verifies the correct behavior of the setting 'use_source_ip'.
+
+tier: 0
+
 modules:
-    - Authd
+    - authd
+
 components:
     - manager
+
 daemons:
-    - Authd
-path:
-    /tests/integration/test_authd/test_authd_use_source_ip.py
+    - wazuh-authd
+
 os_platform
     - linux
+
 os_version:
     - Amazon Linux 1
     - Amazon Linux 2
@@ -34,10 +40,10 @@ os_version:
     - Ubuntu Bionic
     - Ubuntu Trusty
     - Ubuntu Xenial
-tags:
-    - Enrollment
-'''
 
+tags:
+    - enrollment
+'''
 import os
 import ssl
 import time
@@ -136,44 +142,46 @@ def tear_down():
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
                              restart_authd, wait_for_authd_startup_module, connect_to_sockets_configuration,
                              test_case, tear_down):
-    """
-        description:
-           "Check that every input message in authd port generates the adequate output"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - configure_sockets_environment:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets.
-            - wait_for_authd_startup_function:
-                type: fixture
-                brief: Waits until Authd is accepting connections.
-            - connect_to_sockets_configuration:
-                type: fixture
-                brief: Bind to the configured sockets at configuration scope.
-            - test_case:
-                type: list
-                brief: List with all the test cases for the test.
-            - tear_down:
-                type: fixture
-                brief: Roll back the daemon and client.keys state after the test ends.
-        assertions:
-            - The manager uses the agent's IP as requested
-            - Setting an IP overrides the configuration
-            - If the IP is not defined an the setting is disabled, use 'any'
-        input_description:
-            Different test cases are contained in an external YAML file (test_authd_use_source_ip.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description: Check that every input message in 'authd' port generates the adequate output.
 
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get the configuration of the test.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets.
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - connect_to_sockets_configuration:
+            type: fixture
+            brief: Bind to the configured sockets at configuration scope.
+        - test_case:
+            type: list
+            brief: List with all the test cases for the test.
+        - tear_down:
+            type: fixture
+            brief: Roll back the daemon and client.keys state after the test ends.
+
+    assertions:
+        - The manager uses the agent's IP as requested.
+        - Setting an IP overrides the configuration.
+        - If the IP is not defined an the setting is disabled, use 'any'.
+
+    input_description:
+        Different test cases are contained in an external YAML file (test_authd_use_source_ip.yaml) which
+        includes the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on 'authd' socket.
+    '''
     metadata = get_configuration['metadata']
 
     for stage in test_case['test_case']:

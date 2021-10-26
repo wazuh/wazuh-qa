@@ -1,22 +1,28 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
-brief: This module verifies the correct behavior of the setting force_insert
-tier:
-    0
+
+brief: This module verifies the correct behavior of the setting 'force_insert'.
+
+tier: 0
+
 modules:
-    - Authd
+    - authd
+
 components:
     - manager
+
 daemons:
-    - Authd
-path:
-    /tests/integration/test_authd/test_authd_force_insert.py
+    - wazuh-authd
+
 os_platform
     - linux
+
 os_version:
     - Amazon Linux 1
     - Amazon Linux 2
@@ -34,10 +40,10 @@ os_version:
     - Ubuntu Bionic
     - Ubuntu Trusty
     - Ubuntu Xenial
-tags:
-    - Enrollment
-'''
 
+tags:
+    - enrollment
+'''
 import os
 import time
 import pytest
@@ -116,52 +122,54 @@ def test_authd_force_options(configure_sockets_environment, configure_environmen
                              file_monitoring, restart_authd, wait_for_authd_startup_module,
                              connect_to_sockets_configuration, register_previous_agent, tear_down, test_case,
                              get_configuration):
-    """
-        description:
-           "Check that every input message in authd port generates the adequate output"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - configure_sockets_environment:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets.
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - restart_authd:
-                type: fixture
-                brief: Restart Authd daemon to force new configurations.
-            - wait_for_authd_startup_module:
-                type: fixcture
-                brief: Wait until Authd is accepting connections.
-            - connect_to_sockets_configuration:
-                type: fixture
-                brief: Bind to the configured sockets at configuration scope.
-            - register_previous_agent:
-                type: fixture
-                brief: Register agents to simulate a scenario with pre existent keys.
-            - tear_down:
-                type: fixture
-                brief: Roll back the daemon and client.keys state after the test ends.
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
-            - test_case:
-                type: list
-                brief: List with all the test cases for the test.
-        assertions:
-            - The received output must match with expected when the setting is used
-            - The agent can't have a duplicate IP or name when the setting is disabled
-        input_description:
-            Different test cases are contained in an external YAML file (test_authd_force_insert.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description: Check that every input message in authd port generates the adequate output.
 
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - clean_client_keys_file_module:
+            type: fixture
+            brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
+        - restart_authd:
+            type: fixture
+            brief: Restart Authd daemon to force new configurations.
+        - wait_for_authd_startup_module:
+            type: fixcture
+            brief: Wait until Authd is accepting connections.
+        - connect_to_sockets_configuration:
+            type: fixture
+            brief: Bind to the configured sockets at configuration scope.
+        - register_previous_agent:
+            type: fixture
+            brief: Register agents to simulate a scenario with pre existent keys.
+        - tear_down:
+            type: fixture
+            brief: Roll back the daemon and client.keys state after the test ends.
+        - get_configuration:
+            type: fixture
+            brief: Get the configuration of the test.
+        - test_case:
+            type: list
+            brief: List with all the test cases for the test.
+
+    assertions:
+        - The received output must match with expected when the setting is used.
+        - The agent can't have a duplicate IP or name when the setting is disabled.
+
+    input_description:
+        Different test cases are contained in an external YAML file (test_authd_force_insert.yaml) which
+        includes the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on 'authd' socket.
+    '''
     metadata = get_configuration['metadata']
 
     for stage in test_case['test_case']:
