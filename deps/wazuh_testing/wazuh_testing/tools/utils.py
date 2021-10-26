@@ -7,6 +7,7 @@ from functools import wraps
 from time import sleep
 from random import randint, SystemRandom, choice
 import string
+import json
 import socket
 
 
@@ -111,6 +112,11 @@ def get_random_string(string_length, digits=True):
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
+def get_version():
+    f = open('../../version.json')
+    data = json.load(f)
+    version = data['version']
+    return version
 
 def get_host_name():
     """

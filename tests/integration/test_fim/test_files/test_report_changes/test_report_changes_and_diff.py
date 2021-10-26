@@ -59,6 +59,7 @@ def get_configuration(request):
     (testdir_reports, options),
     (testdir_nodiff, options)
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                                  get_configuration, configure_environment,
                                  restart_syscheckd, wait_for_fim_start):
