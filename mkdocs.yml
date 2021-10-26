@@ -514,6 +514,9 @@ nav:
           - Test wpk manager:  tests/integration/test_wpk/test_wpk_manager.md
           - Test wpk manager task states:  tests/integration/test_wpk/test_wpk_manager_task_states.md
           - Test wpk agent: tests/integration/test_wpk/test_wpk_agent.md
+      - Performance:
+          - tests/performance/index.md
+          - Test cluster performance: tests/performance/test_cluster_performance/test_cluster_performance.md
       - System:
         - tests/system/index.md
         - Test cluster:
