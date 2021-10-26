@@ -5,7 +5,8 @@ import yaml
 from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT, insert_pre_existent_agents
+from wazuh_testing.authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT, \
+                                insert_pre_existent_agents
 
 
 # Data paths
