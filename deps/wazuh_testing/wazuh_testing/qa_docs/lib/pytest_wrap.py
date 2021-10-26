@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
+import os
+import sys
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -48,7 +50,13 @@ class PytestWrap:
             outpout (dict): A dictionary that contains the pytest parsed output.
         """
         PytestWrap.LOGGER.debug(f"Running pytest to collect test cases for '{path}'")
+
+        # Redirect the stdout to 'null' so --collect-only does not log anything
+        default_stdout = sys.stdout
+        no_stdout = open(os.devnull, 'w')
+        sys.stdout = no_stdout
         pytest.main(['--collect-only', "-qq", path], plugins=[self.plugin])
+        sys.stdout = default_stdout
         output = {}
 
         for item in self.plugin.collected:
