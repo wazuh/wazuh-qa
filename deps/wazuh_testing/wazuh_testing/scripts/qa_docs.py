@@ -38,6 +38,7 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
+
 def set_parameters(args):
     # Set the qa-docs logger level
     if args.debug_level:
@@ -46,6 +47,7 @@ def set_parameters(args):
     # Deactivate the qa-docs logger if necessary.
     if args.no_logging:
         set_qadocs_logger_level(None)
+
 
 def get_parameters():
     """Capture the script parameters
@@ -112,32 +114,93 @@ def check_incompatible_parameters(parameters):
     test_run = parameters.test_names or parameters.test_exist
 
     if parameters.version and (default_run or api_run or parameters.tests_path or test_run):
-        raise QAValueError('The -v, --version option must be run in isolation.',
+        raise QAValueError('The -v(--version) option must be run in isolation.',
                            qadocs_logger.error)
 
-    if parameters.sanity and (default_run or api_run or test_run):
-        raise QAValueError('The -s, --sanity-check option must be run with -I, --tests-path option.',
-                           qadocs_logger.error)
+    if parameters.sanity:
+        if default_run or api_run or test_run:
+            raise QAValueError('The -s, --sanity-check option must be run only with the -I(--tests-path) option.',
+                               qadocs_logger.error)
 
-    if parameters.tests_path is None and (default_run or test_run or parameters.sanity):
-        raise QAValueError('The following options need the path where the tests are located: -t, --test, '
-                           '  -e, --exist, --types, --modules, -s, --sanity-check. You must specify it by using '
-                           '-I, --tests-path path_to_tests.',
-                           qadocs_logger.error)
+        if parameters.tests_path is None:
+            raise QAValueError('The -s(--sanity-check) option needs the path to the tests to be parsed. You must '
+                               'specify it by using -I, --tests-path',
+                               qadocs_logger.error)
 
-    if api_run and (test_run):
-        raise QAValueError('The -e, -t options do not support API usage.',
-                           qadocs_logger.error)
+    if parameters.test_types:
+        if parameters.tests_path is None:
+            raise QAValueError('The --types option needs the path to the tests to be parsed. You must specify it by '
+                               'using -I, --tests-path',
+                               qadocs_logger.error)
 
-    if parameters.output_path and default_run:
-        raise QAValueError('The -o parameter only works with -t, --tests option. The default output '
-                           'path is generated within the qa-docs tool to index it and visualize it.',
-                           qadocs_logger.error)
+        if parameters.test_names:
+            raise QAValueError('The --types option is not compatible with -t(--test)',
+                               qadocs_logger.error)
 
-    if (parameters.test_types or parameters.test_modules) and test_run:
-        raise QAValueError('The --types, --modules parameters parse the data so you can index it and visualize it. '
-                           '-t, --tests, -e and --exist are not compatible with them.',
-                           qadocs_logger.error)
+        if parameters.test_exist:
+            raise QAValueError('The --types option is not compatible with -e(--exist)',
+                               qadocs_logger.error)
+
+    if parameters.test_modules:
+        if parameters.tests_path is None:
+            raise QAValueError('The --modules option needs the path to the tests to be parsed. You must specify it by '
+                               'using -I, --tests-path',
+                               qadocs_logger.error)
+
+        if parameters.test_names:
+            raise QAValueError('The --modules option is not compatible with -t(--test)',
+                               qadocs_logger.error)
+
+        if parameters.test_exist:
+            raise QAValueError('The --modules option is not compatible with -e(--exist)',
+                               qadocs_logger.error)
+
+    if parameters.test_names:
+        if parameters.tests_path is None:
+            raise QAValueError('The -t(--test) option needs the path to the tests to be parsed. You must specify it by'
+                               ' using -I, --tests-path',
+                               qadocs_logger.error)
+
+        if parameters.index_name:
+            raise QAValueError('The -t(--test) option is not compatible with -i option',
+                               qadocs_logger.error)
+
+        if parameters.app_index_name:
+            raise QAValueError('The -t(--test) option is not compatible with -l option',
+                               qadocs_logger.error)
+
+        if parameters.launching_index_name:
+            raise QAValueError('The -t(--test) option is not compatible with -il option',
+                               qadocs_logger.error)
+
+    if parameters.test_exist:
+        if parameters.tests_path is None:
+            raise QAValueError('The -e(--exist) option needs the path to the tests to be parsed. You must specify it by'
+                               ' using -I, --tests-path',
+                               qadocs_logger.error)
+
+        if parameters.index_name:
+            raise QAValueError('The -e(--exist) option is not compatible with -i option',
+                               qadocs_logger.error)
+
+        if parameters.app_index_name:
+            raise QAValueError('The -e(--exist) option is not compatible with -l option',
+                               qadocs_logger.error)
+
+        if parameters.launching_index_name:
+            raise QAValueError('The -e(--exist) option is not compatible with -il option',
+                               qadocs_logger.error)
+
+    if parameters.output_path:
+        if parameters.test_types:
+            raise QAValueError('The -o option is not compatible with --types. The default output path is generated '
+                               'within the qa-docs tool to index it and visualize it.',
+                               qadocs_logger.error)
+
+        if parameters.test_modules:
+            raise QAValueError('The -o option is not compatible with --modules. The default output path is generated '
+                               'within the qa-docs tool to index it and visualize it.',
+                               qadocs_logger.error)
 
     if parameters.no_logging and parameters.debug_level:
         raise QAValueError('You cannot specify debug level and no-logging at the same time.',
@@ -171,7 +234,8 @@ def validate_parameters(parameters, parser):
 
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
-                raise QAValueError(f"{test_name} has not been not found in {parameters.tests_path}.", qadocs_logger.error)
+                raise QAValueError(f"{test_name} has not been not found in "
+                                   "{parameters.tests_path}.", qadocs_logger.error)
 
     # Check that the index exists
     if parameters.app_index_name:
@@ -191,7 +255,7 @@ def validate_parameters(parameters, parser):
         for type in parameters.test_types:
             if type not in os.listdir(parameters.tests_path):
                 raise QAValueError(f"The given types, {parameters.test_types}, not found in {parameters.tests_path}",
-                                qadocs_logger.error)
+                                   qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
