@@ -202,6 +202,26 @@ def check_incompatible_parameters(parameters):
                                'within the qa-docs tool to index it and visualize it.',
                                qadocs_logger.error)
 
+        if parameters.index_name:
+            raise QAValueError('The -o option is not compatible with -i option',
+                               qadocs_logger.error)
+
+        if parameters.app_index_name:
+            raise QAValueError('The -o option is not compatible with -l option',
+                               qadocs_logger.error)
+
+        if parameters.launching_index_name:
+            raise QAValueError('The -o option is not compatible with -il option',
+                               qadocs_logger.error)
+
+        if parameters.test_exist:
+            raise QAValueError('The -o option is not compatible with -e option',
+                               qadocs_logger.error)
+
+        if not parameters.test_names:
+            raise QAValueError('The -o option needs a list of tests to parse. You can use -t or --tests.',
+                               qadocs_logger.error)
+
     if parameters.no_logging and parameters.debug_level:
         raise QAValueError('You cannot specify debug level and no-logging at the same time.',
                            qadocs_logger.error)
