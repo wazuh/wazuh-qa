@@ -12,6 +12,7 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 - _test_sca_
 - _test_vulnerability_detector_
 - _test_wazuh_db_
+- _test_logtest_
 
 Every group will have the following structure:
 
