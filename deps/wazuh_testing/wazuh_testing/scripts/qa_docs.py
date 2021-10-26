@@ -130,13 +130,13 @@ def check_incompatible_parameters(parameters):
                            qadocs_logger.error)
 
     if parameters.output_path and default_run:
-        raise QAValueError('The -o parameter only works with -t, --tests options in isolation. The default output '
+        raise QAValueError('The -o parameter only works with -t, --tests option. The default output '
                            'path is generated within the qa-docs tool to index it and visualize it.',
                            qadocs_logger.error)
 
     if (parameters.test_types or parameters.test_modules) and test_run:
         raise QAValueError('The --types, --modules parameters parse the data so you can index it and visualize it. '
-                           '-t, --tests get specific tests information.',
+                           '-t, --tests, -e and --exist are not compatible with them.',
                            qadocs_logger.error)
 
     if parameters.no_logging and parameters.debug_level:
@@ -186,6 +186,12 @@ def validate_parameters(parameters, parser):
         raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just '
                            'one type if you want to parse some modules within a test type.',
                            qadocs_logger.error)
+
+    if parameters.test_types:
+        for type in parameters.test_types:
+            if type not in os.listdir(parameters.tests_path):
+                raise QAValueError(f"The given types, {parameters.test_types}, not found in {parameters.tests_path}",
+                                qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
