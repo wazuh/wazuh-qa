@@ -147,7 +147,7 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         - get_configuration:
             type: fixture
             brief: Get the configuration of the test.
-        - set_up_groups
+        - set_up_groups:
             type: fixture
             brief: Set the pre-defined groups.
         - configure_environment:
