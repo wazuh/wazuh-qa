@@ -292,7 +292,7 @@ class DocGenerator:
 
     def check_test_exists(self, path):
         """Check that a test exists within the tests path input.
-        
+
         Args:
             path (str): A string with the tests path.
         """

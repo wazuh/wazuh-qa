@@ -215,6 +215,7 @@ def clean_folder(folder):
         except Exception as e:
             utils_logger.error(f"Failed to delete {file_path}. Reason: {e}")
 
+
 def run_local_command(command):
     """Run local commands without getting the output, but validating the result code.
 
