@@ -92,6 +92,7 @@ def tear_down():
     # Stop Wazuh
     control_service('stop')
     truncate_file(CLIENT_KEYS_PATH)
+    control_service('start')
 
 
 @pytest.fixture(scope='function')
