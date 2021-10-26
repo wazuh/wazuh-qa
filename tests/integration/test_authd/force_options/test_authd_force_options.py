@@ -104,7 +104,6 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
     for stage in get_current_test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
         authd_sock.open()
-
         authd_sock.send(create_authd_request(stage['input']), size=False)
         timeout = time.time() + AUTHD_KEY_REQUEST_TIMEOUT
         response = ''
@@ -114,3 +113,5 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
                 raise ConnectionResetError('Manager did not respond to sent message!')
         validate_authd_response(response, stage['output'])
         validate_authd_logs(stage.get('log', []))
+        result, err_msg = validate_authd_response(response, stage['output'])
+        assert result == 'success', f"Failed stage '{stage['description']}': {err_msg} Complete response: '{response}'"

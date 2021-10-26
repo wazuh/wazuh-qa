@@ -1,6 +1,63 @@
 -
-  name: "key_mismatch_1"
-  description: "Key mismatch test 1"
+  name: "key_mismatch_enabled"
+  description: "Test scenarios with key_hash enabled"
+  configuration:
+  - force:
+      elements:
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'yes'
+      - disconnected_time:
+          attributes:
+          - enabled: 'no'
+          value: 0
+      - after_registration_time:
+          value: 0
+  pre_existent_agents:
+    -
+      id: '001'
+      name: user1
+      ip: any
+      key: TopSecret
+    -
+      id: '002'
+      name: user2
+      ip: any
+      key: TopSecret
+  test_case:
+  -
+    description: Don´t replace an agent with duplicated key
+    input:
+      name: 'user1'
+      # SHA1(001 user1 any TopSecret) == 5ecdf43ebdfbbd7221ca14271080a8a84d247498
+      key_hash: '5ecdf43ebdfbbd7221ca14271080a8a84d247498'
+    output:
+      status: 'error'
+      message: 'Duplicate agent name: user1'
+    log:
+      - Duplicate name 'user1', rejecting enrollment. Agent '001' key already exists on the manager.
+  -
+    description: Replace a duplicated agent without duplicated key
+    input:
+      name: 'user1'
+      key_hash: 'dummy_key_hash'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'user1' (id '001').
+  -
+    description: Replace a duplicated agent if the key_hash isn´t specified
+    input:
+      name: 'user2'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'user2' (id '002').
+
+-
+  name: "key_mismatch_disabled"
+  description: "Test scenarios with key_hash disabled"
   configuration:
   - force:
       elements:
@@ -13,68 +70,21 @@
           - enabled: 'no'
           value: 0
       - after_registration_time:
-          value: 50
+          value: 0
   pre_existent_agents:
-    - id: 001
+    -
+      id: '001'
       name: user1
       ip: any
       key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
-      registration_time:
-        delta: -100
-    - id: 002
-      name: user2
-      ip: any
-      key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
-      registration_time:
-        delta: -10
   test_case:
   -
+    description: Replace an agent even with duplicated key
     input:
       name: 'user1'
+      # SHA1(001 user1 any TopSecret) == 5ecdf43ebdfbbd7221ca14271080a8a84d247498
+      key_hash: '5ecdf43ebdfbbd7221ca14271080a8a84d247498'
     output:
       status: 'success'
-      name: 'user1'
-  -
-    input:
-      name: 'user2'
-    output:
-      status: 'error'
-      message: 'Duplicate agent name: user2'
--
-  name: "key_mismatch_2"
-  description: "Key mismatch test 2"
-  configuration:
-  - force:
-      elements:
-      - enabled:
-          value: 'no'
-      - key_mismatch:
-          value: 'no'
-      - disconnected_time:
-          attributes:
-          - enabled: 'no'
-          value: 0
-      - after_registration_time:
-          value: 0
-  pre_existent_agents:
-    - id: 001
-      name: user1
-  test_case:
-  -
-    input:
-      name: 'user1'
-    output:
-      status: 'error'
-      message: 'Duplicate agent name: user1'
-  -
-    input:
-      name: 'user2'
-    output:
-      status: 'success'
-      name: 'user2'
+    log:
+      - Duplicate name. Removing old agent 'user1' (id '001').
