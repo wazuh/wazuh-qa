@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM detects all registry modification
+       events when monitoring the maximum number of keys (64) set in the 'windows_registry' tag.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_multiple_registries
+'''
 import os
 import time
 
@@ -57,21 +108,53 @@ def get_configuration(request):
     ({'multiple_keys'})
 ])
 def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
-    """
-    Check if FIM can detect every event when adding, modifying and deleting a subkey/value within multiple registry
-    keys monitored in the same line.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects every event when adding, modifying, and deleting
+                 a subkey/value within multiple registry keys monitored in the same line. Also, it verifies that
+                 it limits the monitoring to the maximum allowed number of keys (64) set in the 'windows_registry'
+                 tag. For this purpose, the test will try to monitor an upper number of keys allowed and verify
+                 that FIM discards the excess of keys to monitor. Then, it will make key/value operations inside
+                 of the monitored keys, and finally, the test will verify that all FIM events are generated for
+                 the operations made.
 
-    Only the first 64 registry keys should be monitored.
+    wazuh_min_version: 4.2.0
 
-    These registry keys will be added in one single entry like this one:
-        &lt;windows_registry&gt;testkey0, testkey1, ..., testkeyn&lt;/windows_registry&gt;
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that FIM 'discard' event is generated with the number of discarded keys to monitor.
+
+    input_description: A test case (multiple_keys) is contained in external YAML file (wazuh_conf_multiple_keys.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
+                       with the testing registry key to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Maximum number of registries to be monitored in the same tag reached .* Excess are discarded'
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     discarded = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_max_registry_monitored,
                                         error_message='Did not receive expected '
-                                                      '"Maximum number of registries to be monitored..." event.').result()
+                                                      '"Maximum number of registries to be monitored..." event.'
+                                        ).result()
 
     assert discarded == expected_discarded, f'Discarded registry keys are not the expected ones.'
 

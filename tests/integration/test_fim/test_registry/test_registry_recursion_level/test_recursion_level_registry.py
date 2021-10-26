@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will verify that FIM generates events
+       for value operations in a monitored key hierarchy using multiple deep levels set in
+       the 'recursion_level' attribute.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_recursion_level
+'''
 import os
 
 import pytest
@@ -84,45 +136,83 @@ def extra_configuration_before_yield():
 ])
 def test_recursion_level(root_key, registry, arch, edge_limit, ignored_levels,
                          get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check that events are generated in the first and last `edge_limit` directory levels in the hierarchy
-    It also checks that no events are generated for levels higher than the configured recursion level.
+    # Example:
+    #     recursion_level = 10
+    #     edge_limit = 2
+    #     ignored_levels = 1
+    #     key = "HKEY_LOCAL_MACHINE"
+    #     registry = "SOFTWARE\\test_key"
+    #     subkey = "subkey"
 
-    Example:
-        recursion_level = 10
-        edge_limit = 2
-        ignored_levels = 1
-        key = "HKEY_LOCAL_MACHINE"
-        registry = "SOFTWARE\\test_key"
-        subkey = "subkey"
+    #     With those parameters this function will create values and expect to detect 'added', 'modified' and 'deleted'
+    #     events for the following registry only, as they are the first and last 2 subkeys within recursion
+    #     level 10:
 
-        With those parameters this function will create values and expect to detect 'added', 'modified' and 'deleted'
-        events for the following registry only, as they are the first and last 2 subkeys within recursion
-        level 10:
+    #     HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1
+    #     HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2
+    #     HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9
+    #     HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9\\10
 
-        HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1
-        HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2
-        HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9
-        HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9\\10
+    #     As ignored_levels value is 1, this function will also create files on the following subkeys and ensure that
+    #     no events are raised as they are outside the recursion level specified:
 
-        As ignored_levels value is 1, this function will also create files on the following subkeys and ensure that
-        no events are raised as they are outside the recursion level specified:
+    #     HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9\\10\\11
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events in the first and last 'edge_limit' levels
+                 in a key hierarchy. It also checks that no FIM events are generated for levels higher than
+                 the configured in the 'recursion_level' attribute. For this purpose, the test will monitor
+                 a testing key and create a hierarchy inside it. Once FIM starts, it will make value operations
+                 in each level of that hierarchy. Finally, the test will verify that the FIM events are generated
+                 in the edge level limits, and no FIM events are generated in the ignored levels.
 
-        HKEY_LOCAL_MACHINE\\SOFTWARE\\test_key\\1\\2\\3\\4\\5\\6\\7\\8\\9\\10\\11
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    root_key : str
-        Registry key **STRING** (HKEY_* constants)
-    registry : str
-        The registry key being monitored by syscheck (indicated in the .conf file without the HKEY_* constant).
-    arch : int
-        Architecture of the registry key
-    edge_limit : int
-        Number of subkeys where the test will monitor events.
-    ignored_levels : int
-        Number of subkeys exceeding the specified recursion_level to verify events are not raised.
-    """
+    parameters:
+        - root_key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - registry:
+            type: str
+            brief: The registry key being monitored by syscheck.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - edge_limit:
+            type: int
+            brief: Number of subkeys where the test will monitor events.
+        - ignored_levels:
+            type: int
+            brief: Number of subkeys exceeding the 'recursion_level' limit to verify events are not raised.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events are generated for the value operations in a monitored key hierarchy up to
+          the level set in the 'recursion_level' attribute.
+        - Verify that no FIM events are generated in the ignored keys within a monitored key hierarchy.
+
+    input_description: A test case (test_recursion_level_registry) is contained in external YAML file
+                       (wazuh_recursion_windows_registry.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the testing registry
+                       keys to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     recursion_level = int(rl_dict[registry])
     path = registry
 
