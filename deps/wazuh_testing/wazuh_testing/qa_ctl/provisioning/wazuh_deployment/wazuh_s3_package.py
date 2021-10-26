@@ -7,6 +7,7 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.tools.s3_package import get_s3_package_url
+from wazuh_testing.tools.file import join_path
 
 
 class WazuhS3Package(WazuhPackage):
@@ -105,13 +106,28 @@ class WazuhS3Package(WazuhPackage):
         package_name = Path(self.s3_package_url).name
         WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from {self.s3_package_url} in {hosts} hosts")
 
-        download_s3_package = AnsibleTask({'name': 'Download S3 package',
-                                           'get_url': {'url': self.s3_package_url,
-                                                       'dest': self.installation_files_path},
-                                           'register': 'download_state', 'retries': 6, 'delay': 10,
-                                           'until': 'download_state is success'})
+        download_unix_s3_package = AnsibleTask({'name': 'Download S3 package (Unix)',
+                                                'get_url': {'url': self.s3_package_url,
+                                                            'dest': self.installation_files_path},
+                                                'register': 'download_state', 'retries': 6, 'delay': 10,
+                                                'until': 'download_state is success',
+                                                'when': 'ansible_system != "Win32NT"'})
+
+        download_windows_s3_package = AnsibleTask({'name': 'Download S3 package (Windows)',
+                                                   'win_get_url': {'url': self.s3_package_url,
+                                                                   'dest': self.installation_files_path},
+                                                   'register': 'download_state', 'retries': 6, 'delay': 10,
+                                                   'until': 'download_state is success',
+                                                   'when': 'ansible_system == "Win32NT"'})
+
         WazuhS3Package.LOGGER.debug(f"Wazuh S3 package was successfully downloaded in {hosts} hosts")
 
-        super().download_installation_files(inventory_file_path, [download_s3_package], hosts)
+        super().download_installation_files(inventory_file_path, [download_unix_s3_package,
+                                                                  download_windows_s3_package], hosts)
 
-        return os.path.join(self.installation_files_path, package_name)
+        package_system = 'windows' if '.msi' in package_name else 'generic'
+        path_list = self.installation_files_path.split('\\') if package_system == 'windows' else \
+            self.installation_files_path.split('/')
+        path_list.append(package_name)
+
+        return join_path(path_list, package_system)

@@ -72,7 +72,7 @@ class ManagerDeployment(WazuhDeployment):
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Extract service status',
                                        'command': f'{self.install_dir_path}/bin/wazuh-control status',
-                                       'when': 'ansible_system != "Windows"',
+                                       'when': 'ansible_system != "Win32NT"',
                                        'register': 'status',
                                        'failed_when': ['"wazuh-analysisd is running" not in status.stdout or' +
                                                        '"wazuh-db is running" not in status.stdout or' +

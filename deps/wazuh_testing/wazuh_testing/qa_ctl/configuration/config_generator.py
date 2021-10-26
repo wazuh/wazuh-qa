@@ -406,12 +406,16 @@ class QACTLConfigGenerator:
                 else 'agent'
             s3_package_url = self.__get_package_url(instance)
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
+            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
+            wazuh_install_path = 'C:\\Program Files (x86)\\ossec-agent' if system == 'windows' else '/var/ossec'
+
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
                 'target': target,
                 's3_package_url': s3_package_url,
                 'installation_files_path': installation_files_path,
-                'health_check': True
+                'health_check': True,
+                'wazuh_install_path': wazuh_install_path
             }
             if target == 'agent':
                 # Add manager IP to the agent. The manager's host will always be the one after the agent's host.
@@ -420,7 +424,6 @@ class QACTLConfigGenerator:
                     self.config['deployment'][f"host_{manager_host_number}"]['provider']['vagrant']['vm_ip']
 
             # QA framework
-            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': self.qa_branch,
                 'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)

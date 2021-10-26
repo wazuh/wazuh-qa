@@ -69,21 +69,25 @@ class AgentDeployment(WazuhDeployment):
         """
         tasks_list = []
 
-        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment agent',
+        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment Unix agent',
                                        'lineinfile': {'path': f'{self.install_dir_path}/etc/ossec.conf',
                                                       'regexp': '<address>(.*)</address>',
                                                       'line': f'<address>{self.server_ip}</address>',
                                                       'backrefs': 'yes'},
-                                       'when': 'ansible_system != "Windows"'}))
+                                       'become': True,
+                                       'when': 'ansible_system != "Win32NT"'}))
 
-        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment agent',
-                                       'lineinfile': {'path': f'{self.install_dir_path}\\ossec.conf',
-                                                      'regexp': '<address>(.*)</address>',
-                                                      'line': f'<address>{self.server_ip}</address>',
-                                                      'backrefs': 'yes'},
-                                       'when': 'ansible_system == "Windows"'}))\
+        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment Windows agent',
+                                       'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.conf',
+                                                          'regexp': '<address>(.*)</address>',
+                                                          'line': f'<address>{self.server_ip}</address>',
+                                                          'backrefs': 'yes'},
+                                       'become': True,
+                                       'become_method': 'runas',
+                                       'become_user': 'vagrant',
+                                       'when': 'ansible_system == "Win32NT"'}))\
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
         self.stop_service()
 
@@ -105,12 +109,13 @@ class AgentDeployment(WazuhDeployment):
         tasks_list = []
         tasks_list.append(AnsibleTask({'name': 'Extract service status',
                                        'command': f"{self.install_dir_path}/bin/wazuh-control status",
-                                       'when': 'ansible_system != "Windows"',
+                                       'when': 'ansible_system != "Win32NT"',
                                        'register': 'status',
+                                       'become': True,
                                        'failed_when': ['"wazuh-agentd" not in status.stdout',
                                                        '"wazuh-execd" not in status.stdout']}))
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
         return AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                                  output=self.qa_ctl_configuration.ansible_output)

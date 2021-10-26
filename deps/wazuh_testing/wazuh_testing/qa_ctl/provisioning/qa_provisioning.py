@@ -126,34 +126,27 @@ class QAProvisioning():
             install_type = None if 'type' not in deploy_info else deploy_info['type']
             installation_files_path = None if 'installation_files_path' not in deploy_info \
                 else deploy_info['installation_files_path']
-            wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
-                else deploy_info['wazuh_install_path']
+            wazuh_install_path = '/var/ossec' if 'wazuh_install_path' not in deploy_info else \
+                deploy_info['wazuh_install_path']
             wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
-            s3_package_url = None if 's3_package_url' not in deploy_info \
-                else deploy_info['s3_package_url']
-            system = None if 'version' not in deploy_info \
-                else deploy_info['system']
-            version = None if 'version' not in deploy_info \
-                else deploy_info['version']
-            repository = None if 'repository' not in deploy_info \
-                else deploy_info['repository']
-            revision = None if 'revision' not in deploy_info \
-                else deploy_info['revision']
-            local_package_path = None if 'local_package_path' not in deploy_info \
-                else deploy_info['local_package_path']
+            s3_package_url = None if 's3_package_url' not in deploy_info else deploy_info['s3_package_url']
+            system = None if 'version' not in deploy_info else deploy_info['system']
+            version = None if 'version' not in deploy_info else deploy_info['version']
+            repository = None if 'repository' not in deploy_info else deploy_info['repository']
+            revision = None if 'revision' not in deploy_info else deploy_info['revision']
+            local_package_path = None if 'local_package_path' not in deploy_info else deploy_info['local_package_path']
             manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
 
             installation_files_parameters = {'wazuh_target': install_target}
 
             if installation_files_path:
                 installation_files_parameters['installation_files_path'] = installation_files_path
-            if wazuh_install_path:
-                installation_files_parameters['wazuh_install_path'] = wazuh_install_path
 
             installation_files_parameters['qa_ctl_configuration'] = self.qa_ctl_configuration
 
             if install_type == 'sources':
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
+                installation_files_parameters['wazuh_install_path'] = wazuh_install_path
                 installation_instance = WazuhSources(**installation_files_parameters)
 
             if install_type == 'package':
@@ -164,27 +157,31 @@ class QAProvisioning():
                     installation_files_parameters['repository'] = repository
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
                 elif s3_package_url is None and local_package_path is not None:
                     installation_files_parameters['local_package_path'] = local_package_path
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
-                                                    inventory_file_path=self.inventory_file_path,
-                                                    install_mode=install_type, hosts=current_host,
-                                                    server_ip=manager_ip,
-                                                    qa_ctl_configuration=self.qa_ctl_configuration)
+                                                      inventory_file_path=self.inventory_file_path,
+                                                      install_mode=install_type,
+                                                      hosts=current_host,
+                                                      server_ip=manager_ip,
+                                                      install_dir_path=wazuh_install_path,
+                                                      qa_ctl_configuration=self.qa_ctl_configuration)
             if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
-                                                        install_mode=install_type, hosts=current_host,
+                                                        install_mode=install_type,
+                                                        hosts=current_host,
+                                                        install_dir_path=wazuh_install_path,
                                                         qa_ctl_configuration=self.qa_ctl_configuration)
             deployment_instance.install()
 
@@ -217,17 +214,16 @@ class QAProvisioning():
             hosts (str): Hosts to check.
         """
         QAProvisioning.LOGGER.info('Checking hosts SSH connection')
-        wait_for_connection_unix = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+        wait_for_connection_unix = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable (Unix)',
                                                 'wait_for_connection': {'delay': 5, 'timeout': 60},
-                                                'when': 'ansible_system != "Windows"'})
+                                                'when': 'ansible_system != "Win32NT"'})
 
-        wait_for_connection_windows = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
+        wait_for_connection_windows = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable (Windows)',
                                                    'win_wait_for': {'delay': 5, 'timeout': 60},
-                                                   'when': 'ansible_system == "Windows"'})
+                                                   'when': 'ansible_system == "Win32NT"'})
 
         playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': [wait_for_connection_unix,
                                                                                     wait_for_connection_windows]}
-        print(file.read_file(self.inventory_file_path))
         AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                           output=self.qa_ctl_configuration.ansible_output)
         QAProvisioning.LOGGER.info('Hosts connection OK. The instances are accessible via ssh')

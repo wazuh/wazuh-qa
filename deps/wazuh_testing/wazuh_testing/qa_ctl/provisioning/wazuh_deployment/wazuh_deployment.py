@@ -71,22 +71,26 @@ class WazuhDeployment(ABC):
                          'server_ip': f'{self.server_ip}',
                          'ca_store': f'{self.installation_files_path}/wpk_root.pem',
                          'make_cert': 'y' if install_type == 'server' else 'n'},
+                'become': True,
                 'when': 'ansible_system == "Linux"'}))
 
             tasks_list.append(AnsibleTask({
                 'name': 'Executing "install.sh" script to build and install Wazuh',
                 'shell': f"./install.sh > {gettempdir()}/wazuh_qa_ctl/wazuh_install_log.txt",
                 'args': {'chdir': f'{self.installation_files_path}'},
+                'become': True,
                 'when': 'ansible_system == "Linux"'}))
 
         elif self.install_mode == 'package':
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .deb packages',
                                            'apt': {'deb': f'{self.installation_files_path}'},
+                                           'become': True,
                                            'when': 'ansible_os_family|lower == "debian"'}))
 
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | yum',
                                            'yum': {'name': f'{self.installation_files_path}',
                                                    'disable_gpg_check': 'yes'},
+                                           'become': True,
                                            'when': ['ansible_os_family|lower == "redhat"',
                                                     'not (ansible_distribution|lower == "centos" and ' +
                                                     'ansible_distribution_major_version >= "8")',
@@ -96,6 +100,7 @@ class WazuhDeployment(ABC):
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | dnf',
                                            'dnf': {'name': f'{self.installation_files_path}',
                                                    'disable_gpg_check': 'yes'},
+                                           'become': True,
                                            'when': ['ansible_os_family|lower == "redhat"',
                                                     '(ansible_distribution|lower == "centos" and ' +
                                                     'ansible_distribution_major_version >= "8") or' +
@@ -104,14 +109,18 @@ class WazuhDeployment(ABC):
 
             tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from Windows packages',
                                            'win_package': {'path': f'{self.installation_files_path}'},
-                                           'when': 'ansible_system == "Windows"'}))
+                                           'become': True,
+                                           'become_method': 'runas',
+                                           'become_user': 'vagrant',
+                                           'when': 'ansible_system == "Win32NT"'}))
 
             tasks_list.append(AnsibleTask({'name': 'Install macOS wazuh package',
                                            'shell': 'installer -pkg wazuh-* -target /',
                                            'args': {'chdir': f'{self.installation_files_path}'},
+                                           'become': True,
                                            'when': 'ansible_system == "Darwin"'}))
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
         tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                                          output=self.qa_ctl_configuration.ansible_output)
@@ -141,16 +150,18 @@ class WazuhDeployment(ABC):
         tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service from wazuh-control',
                                        'become': True,
                                        'command': f'{self.install_dir_path}/bin/wazuh-control {command}',
-                                       'when': 'ansible_system == "Darwin" or ansible_system == "SunOS" or ' +
-                                               'output_command.failed == true'}))
+                                       'when': 'ansible_system == "Darwin" or ansible_system == "SunOS"'}))
 
         tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service from Windows',
                                        'win_shell': 'Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue |' +
                                                     f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
                                        'args': {'executable': 'powershell.exe'},
-                                       'when': 'ansible_system == "Windows"'}))
+                                       'become': True,
+                                       'become_method': 'runas',
+                                       'become_user': 'vagrant',
+                                       'when': 'ansible_system == "Win32NT"'}))
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
         tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                                          output=self.qa_ctl_configuration.ansible_output)
@@ -194,23 +205,27 @@ class WazuhDeployment(ABC):
         """
         WazuhDeployment.LOGGER.debug(f"Starting wazuh deployment healthcheck in {self.hosts} hosts")
         tasks_list = []
-        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors',
+        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors (Unix)',
                                        'lineinfile': {'path': f'{self.install_dir_path}/logs/ossec.log',
                                                       'line': 'ERROR|CRITICAL'},
-                                       'when': 'ansible_system != "Windows"',
                                        'register': 'exists',
                                        'check_mode': 'yes',
-                                       'failed_when': 'exists is not changed'}))
+                                       'become': True,
+                                       'failed_when': 'exists is not changed',
+                                       'when': 'ansible_system != "Win32NT"'}))
 
-        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors',
-                                       'lineinfile': {'path': f'{self.install_dir_path}/ossec.log',
-                                                      'line': 'ERROR'},
-                                       'when': 'ansible_system == "Windows"',
+        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors (Windows)',
+                                       'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.log',
+                                                          'line': 'ERROR|CRITICAL'},
                                        'register': 'exists',
                                        'check_mode': 'yes',
-                                       'failed_when': 'exists is not changed'}))
+                                       'become': True,
+                                       'become_method': 'runas',
+                                       'become_user': 'vagrant',
+                                       'failed_when': 'exists is not changed',
+                                       'when': 'ansible_system == "Win32NT"'}))
 
-        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
+        playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
         tasks_result = AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                                          output=self.qa_ctl_configuration.ansible_output)
