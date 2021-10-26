@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM limits the size of
+       the 'queue/diff/local' folder, where Wazuh stores the compressed files used to perform
+       the 'diff' operation, to the default value when the 'report_changes' option is enabled.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#disk-quota
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_report_changes
+'''
 import os
 
 import pytest
@@ -66,31 +118,69 @@ def get_configuration(request):
 ])
 def test_disk_quota_default(key, subkey, arch, value_name, tags_to_apply,
                             get_configuration, configure_environment, restart_syscheckd_each_time):
-    """
-    Check that no events are sent when the disk_quota exceeded
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used to perform
+                 the 'diff' operations is stored to the default value. For this purpose, the test will monitor a key
+                 and, once the FIM is started, it will wait for the FIM event related to the maximum disk quota to
+                 store 'diff' information, and create and modify a testing value. Finally, the test will verify that
+                 the value gotten from that FIM event corresponds with the default value of the 'disk_quota' tag (1GB),
+                 and the FIM 'added' y 'modified' events from the testing value have been generated properly.
 
-    Parameters
-    ----------
-    key : str
-        Root key (HKEY_*)
-    subkey : str
-        path of the registry.
-    arch : str
-        Architecture of the registry.
-    value_name : str
-        Name of the value that will be created
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    size : int
-        Size of the content to write in value
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - subkey:
+            type: str
+            brief: The registry key being monitored by syscheck.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - value_name:
+            type: str
+            brief: Name of the testing value that will be created
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd_each_time:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor on each test case.
+
+    assertions:
+        - Verify that an FIM event is generated indicating the size limit of the folder
+          to store 'diff' information to the default limit of the 'disk_quota' tag (1GB).
+        - Verify that FIM events are generated when adding and modifying a testing value.
+
+
+    input_description: A test case (test_report_changes) is contained in external YAML file
+                       (wazuh_registry_report_changes.yaml) which includes configuration
+                       settings for the 'wazuh-syscheckd' daemon. That is combined with
+                       the testing registry keys to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Maximum disk quota size limit configured to .*'
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     mode = get_configuration['metadata']['fim_mode']
 
-    disk_quota_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_disk_quota_default,
-                                               error_message='Did not receive expected '
-                                                             '"Maximum disk quota size limit configured to \'... KB\'." event'
+    disk_quota_value = wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=callback_disk_quota_default,
+        error_message='Did not receive expected '
+                      '"Maximum disk quota size limit configured to \'... KB\'." event'
                                                ).result()
     if disk_quota_value:
         assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
