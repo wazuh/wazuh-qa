@@ -23,6 +23,7 @@ class WazuhDeployment(ABC):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
 
     Attributes:
         installation_files_path (string): Path where is located the Wazuh instalation files.
@@ -33,11 +34,13 @@ class WazuhDeployment(ABC):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to let agent get autoenrollment.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, installation_files_path, inventory_file_path, qa_ctl_configuration, configuration=None,
-                 install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None):
+                 install_mode='package', install_dir_path='/var/ossec', hosts='all', server_ip=None,
+                 ansible_admin_user='vagrant'):
 
         self.installation_files_path = installation_files_path
         self.configuration = configuration
@@ -47,6 +50,7 @@ class WazuhDeployment(ABC):
         self.hosts = hosts
         self.server_ip = server_ip
         self.qa_ctl_configuration = qa_ctl_configuration
+        self.ansible_admin_user = ansible_admin_user
 
     @abstractmethod
     def install(self, install_type):
@@ -111,7 +115,7 @@ class WazuhDeployment(ABC):
                                            'win_package': {'path': f'{self.installation_files_path}'},
                                            'become': True,
                                            'become_method': 'runas',
-                                           'become_user': 'vagrant',
+                                           'become_user': self.ansible_admin_user,
                                            'when': 'ansible_system == "Win32NT"'}))
 
             tasks_list.append(AnsibleTask({'name': 'Install macOS wazuh package',
@@ -158,7 +162,7 @@ class WazuhDeployment(ABC):
                                        'args': {'executable': 'powershell.exe'},
                                        'become': True,
                                        'become_method': 'runas',
-                                       'become_user': 'vagrant',
+                                       'become_user': self.ansible_admin_user,
                                        'when': 'ansible_system == "Win32NT"'}))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
@@ -221,7 +225,7 @@ class WazuhDeployment(ABC):
                                        'check_mode': 'yes',
                                        'become': True,
                                        'become_method': 'runas',
-                                       'become_user': 'vagrant',
+                                       'become_user': self.ansible_admin_user,
                                        'failed_when': 'exists is not changed',
                                        'when': 'ansible_system == "Win32NT"'}))
 

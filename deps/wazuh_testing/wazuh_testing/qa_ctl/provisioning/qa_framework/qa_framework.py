@@ -16,22 +16,25 @@ class QAFramework():
         qa_repository (str): Url to the QA repository.
         qa_branch (str): QA branch of the qa repository.
         ansible_output (boolean): True if show ansible tasks output False otherwise.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
 
     Attributes:
         workdir (str): Directory where the qa repository files are stored
         qa_repository (str): Url to the QA repository.
         qa_branch (str): QA branch of the qa repository.
         ansible_output (boolean): True if show ansible tasks output False otherwise.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, ansible_output=False, workdir=join(gettempdir(), 'wazuh_qa_ctl'), qa_branch='master',
-                 qa_repository='https://github.com/wazuh/wazuh-qa.git'):
+                 qa_repository='https://github.com/wazuh/wazuh-qa.git', ansible_admin_user='vagrant'):
         self.qa_repository = qa_repository
         self.qa_branch = qa_branch
         self.workdir = workdir
         self.ansible_output = ansible_output
         self.system_path = 'windows' if '\\' in self.workdir else 'unix'
+        self.ansible_admin_user = ansible_admin_user
 
     def install_dependencies(self, inventory_file_path, hosts='all'):
         """Install all the necessary dependencies to allow the execution of the tests.
@@ -52,7 +55,7 @@ class QAFramework():
                                                                              self.system_path)},
                                                  'become': True,
                                                  'become_method': 'runas',
-                                                 'become_user': 'vagrant',
+                                                 'become_user': self.ansible_admin_user,
                                                  'when': 'ansible_system == "Win32NT"'})
 
         ansible_tasks = [dependencies_unix_task, dependencies_windows_task]
@@ -82,7 +85,7 @@ class QAFramework():
                                                                                   'wazuh_testing'], self.system_path)},
                                                       'become': True,
                                                       'become_method': 'runas',
-                                                      'become_user': 'vagrant',
+                                                      'become_user': self.ansible_admin_user,
                                                       'when': 'ansible_system == "Win32NT"'})
 
         ansible_tasks = [install_framework_unix_task, install_framework_windows_task]

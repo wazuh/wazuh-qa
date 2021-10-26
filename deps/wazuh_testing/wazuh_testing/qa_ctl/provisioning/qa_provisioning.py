@@ -136,6 +136,8 @@ class QAProvisioning():
             revision = None if 'revision' not in deploy_info else deploy_info['revision']
             local_package_path = None if 'local_package_path' not in deploy_info else deploy_info['local_package_path']
             manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
+            ansible_admin_user = 'vagrant' if 'ansible_admin_user' not in host_provision_info['host_info'] else \
+                host_provision_info['host_info']['ansible_admin_user']
 
             installation_files_parameters = {'wazuh_target': install_target}
 
@@ -168,6 +170,7 @@ class QAProvisioning():
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
                                                                                           hosts=current_host)
+
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
                                                       inventory_file_path=self.inventory_file_path,
@@ -175,14 +178,16 @@ class QAProvisioning():
                                                       hosts=current_host,
                                                       server_ip=manager_ip,
                                                       install_dir_path=wazuh_install_path,
-                                                      qa_ctl_configuration=self.qa_ctl_configuration)
+                                                      qa_ctl_configuration=self.qa_ctl_configuration,
+                                                      ansible_admin_user=ansible_admin_user)
             if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
                                                         install_mode=install_type,
                                                         hosts=current_host,
                                                         install_dir_path=wazuh_install_path,
-                                                        qa_ctl_configuration=self.qa_ctl_configuration)
+                                                        qa_ctl_configuration=self.qa_ctl_configuration,
+                                                        ansible_admin_user=ansible_admin_user)
             deployment_instance.install()
 
             if health_check:

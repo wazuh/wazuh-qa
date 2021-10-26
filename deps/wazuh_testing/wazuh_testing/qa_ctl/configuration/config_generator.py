@@ -103,6 +103,7 @@ class QACTLConfigGenerator:
             'ansible_port': 5985,
             'ansible_winrm_server_cert_validation': 'ignore',
             'system': 'windows',
+            'ansible_admin_user': 'vagrant',
             'ansible_python_interpreter': 'C:\\Users\\vagrant\\AppData\\Local\\Programs\\Python\\Python39\\python.exe',
             'installation_files_path': WINDOWS_TMP
         }
@@ -417,6 +418,7 @@ class QACTLConfigGenerator:
                 'health_check': True,
                 'wazuh_install_path': wazuh_install_path
             }
+
             if target == 'agent':
                 # Add manager IP to the agent. The manager's host will always be the one after the agent's host.
                 manager_host_number = int(instance.replace('host_', '')) + 1

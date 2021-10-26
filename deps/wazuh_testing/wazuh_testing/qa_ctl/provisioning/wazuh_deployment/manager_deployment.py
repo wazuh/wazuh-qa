@@ -16,6 +16,7 @@ class ManagerDeployment(WazuhDeployment):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
 
     Attributes:
         installation_files (string): Path where is located the Wazuh instalation files.
@@ -26,6 +27,7 @@ class ManagerDeployment(WazuhDeployment):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
     """
 
     def install(self):
