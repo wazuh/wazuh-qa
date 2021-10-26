@@ -21,7 +21,7 @@ components:
 daemons:
     - wazuh-authd
 
-os_platform
+os_platform:
     - linux
 
 os_version:
