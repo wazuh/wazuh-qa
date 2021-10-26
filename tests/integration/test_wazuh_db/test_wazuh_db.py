@@ -1,10 +1,16 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import re
 import time
-import json
 import pytest
 import yaml
+import json
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.monitoring import make_callback, WAZUH_DB_PREFIX
+from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
@@ -30,12 +36,10 @@ for file in os.listdir(global_message_files):
         global_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
 # Variables
-
 log_monitor_paths = []
-
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
+WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT = 20
 
 # mitm_analysisd = ManInTheMiddle(address=analysis_path, family='AF_UNIX', connection_protocol='UDP')
 # monitored_sockets_params is a List of daemons to start with optional ManInTheMiddle to monitor
@@ -69,6 +73,53 @@ def clean_registered_agents():
 
 
 @pytest.fixture(scope='module')
+def wait_range_checksum_avoided(line):
+    """Callback function to wait until the manager avoided the checksum calculus by using the last saved one."""
+    if 'range checksum avoided' in line:
+        return line
+    return None
+
+
+def wait_range_checksum_calculated(line):
+    """Callback function to wait until the manager calculates the new checksum."""
+    if 'range checksum: Time: ' in line:
+        return line
+    return None
+
+
+@pytest.fixture(scope="function")
+def prepare_range_checksum_data():
+    AGENT_ID = 1
+    insert_agent(AGENT_ID)
+    command = f'agent {AGENT_ID} syscheck save2 '
+    payload = {'path': "file",
+               'timestamp': 1575421292,
+               'attributes': {
+                   'type': 'file',
+                   'size': 0,
+                   'perm': 'rw-r--r--',
+                   'uid': '0',
+                   'gid': '0',
+                   'user_name': 'root',
+                   'group_name': 'root',
+                   'inode': 16879,
+                   'mtime': 1575421292,
+                   'hash_md5': 'd41d8cd98f00b204e9800998ecf8427e',
+                   'hash_sha1': 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
+                   'hash_sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                   'checksum': 'f65b9f66c5ef257a7566b98e862732640d502b6f'}}
+
+    payload['path'] = '/home/test/file1'
+    execute_wazuh_db_query(command+json.dumps(payload))
+    payload['path'] = '/home/test/file2'
+    execute_wazuh_db_query(command+json.dumps(payload))
+
+    yield
+
+    remove_agent(AGENT_ID)
+
+
+@pytest.fixture(scope="function")
 def pre_insert_agents():
     """Insert agents. Only used for the global queries"""
     AGENTS_CANT = 14000
@@ -229,3 +280,24 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     send_chunk_command('global get-agents-by-connection-status 0 active')
     # Check disconnect-agents chunk limit
     send_chunk_command('global disconnect-agents 0 {} syncreq'.format(str(int(time.time()) + 1)))
+
+
+def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, connect_to_sockets_module,
+                                 prepare_range_checksum_data, file_monitoring, request):
+    """Check the checksum range during the synchroniation of the DBs"""
+    command = """agent 1 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
+                 \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
+    log_monitor = request.module.log_monitor
+    # Checksum Range calculus expected the first time
+    execute_wazuh_db_query(command)
+    log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
+                      callback=make_callback('range checksum: Time: ', prefix=WAZUH_DB_PREFIX,
+                                             escape=True),
+                      error_message='Checksum Range wasn´t calculated the first time')
+
+    # Checksum Range avoid expected the next times
+    execute_wazuh_db_query(command)
+    log_monitor.start(timeout=WAZUH_DB_CHECKSUM_CALCULUS_TIMEOUT,
+                      callback=make_callback('range checksum avoided', prefix=WAZUH_DB_PREFIX,
+                                             escape=True),
+                      error_message='Checksum Range wasn´t avoided the second time')
