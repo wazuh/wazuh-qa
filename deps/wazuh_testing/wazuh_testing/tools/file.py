@@ -34,6 +34,19 @@ def read_json(file_path):
     return output
 
 
+def read_yaml(file_path):
+    """Read a YAML file from a given path, return a dictionary with the YAML data
+
+    Args:
+        file_path (str): Path of the YAML file to be readed
+
+    Returns:
+       dict: Yaml structure.
+    """
+    with open(file_path) as f:
+        return yaml.safe_load(f)
+
+
 def truncate_file(file_path):
     """
     Truncate a file to reset its content.
@@ -275,19 +288,6 @@ def set_file_owner_and_group(file_path, owner, group):
         gid = getgrnam(group).gr_gid
 
         os.chown(file_path, uid, gid)
-
-
-def load_tests(path):
-    """Loads a yaml file from a path.
-
-    Args:
-        path (string): Yaml full path.
-
-    Returns:
-       dict: Yaml structure.
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
 
 
 def count_file_lines(filepath):

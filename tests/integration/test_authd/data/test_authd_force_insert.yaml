@@ -6,7 +6,10 @@
     test_case:
     -
       input: "OSSEC A:'user1'"
-      output: "OSSEC K:'002 user1 any "
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: 'any'
   -
     name: 'Valid and duplicate IP'
     description: 'Try register an agent with existing IP. Rejected if force_insert = no'
@@ -15,4 +18,7 @@
     test_case:
     -
       input: "OSSEC A:'user_' IP:'10.10.10.10'"
-      output: "OSSEC K:'002 user_ 10.10.10.10 "
+      output:
+        status: 'success'
+        name: 'user_'
+        ip: '10.10.10.10'

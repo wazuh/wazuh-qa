@@ -218,7 +218,7 @@
           - use_source_ip:
               value: USE_SOURCE_IP
           - force_insert:
-              value: 'no'
+              value: 'yes'
           - force_time:
               value: 0
           - purge:

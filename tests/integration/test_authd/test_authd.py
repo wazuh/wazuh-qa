@@ -7,11 +7,10 @@ import subprocess
 import time
 
 import pytest
-import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import load_tests
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 
@@ -21,7 +20,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-message_tests = load_tests(os.path.join(test_data_path, 'enroll_messages.yaml'))
+message_tests = read_yaml(os.path.join(test_data_path, 'enroll_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
@@ -53,25 +52,9 @@ def get_configuration(request):
     yield request.param
 
 
-@pytest.fixture(scope="module")
-def clean_client_keys_file():
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
+def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
+                             connect_to_sockets_module):
     """Check that every input message in authd port generates the adequate output
 
     Raises:

@@ -13,6 +13,7 @@ if sys.platform == 'win32':
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys')
     PREFIX = os.path.join('c:', os.sep)
     GEN_OSSEC = None
     WAZUH_API_CONF = None
@@ -23,6 +24,7 @@ if sys.platform == 'win32':
     REMOTE_STATISTICS_FILE = None
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
+    AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
 
 else:
 
@@ -43,6 +45,7 @@ else:
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
@@ -50,6 +53,8 @@ else:
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
+    AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
+
 
     try:
         import grp
@@ -164,6 +169,7 @@ REMOTED_LOCAL_INTERNAL_OPTIONS = {'remoted.debug': '2', 'wazuh_database.interval
                                     'wazuh_db.commit_time_max': '3' }.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 VD_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 WPK_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}
+AUTHD_LOCAL_INTERNAL_OPTIONS = {'authd.debug': '2'}
 
 
 # Wazuh daemons
