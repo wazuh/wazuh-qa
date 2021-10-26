@@ -186,6 +186,8 @@ predefined_values:
     - cluster
     - cors
     - cpe
+    - diff
+    - disk_quota
     - dos_attack
     - download
     - enrollment
@@ -231,7 +233,9 @@ predefined_values:
     - fim_registry_file_limit
     - fim_registry_multiple_registries
     - fim_registry_recursion_level
+    - fim_registry_report_changes
     - fim_registry_restrict
+    - fim_registry_tags
     - fim_synchronization
     - gcloud
     - github
@@ -248,6 +252,7 @@ predefined_values:
     - nvd
     - office365
     - oval
+    - prelink
     - rbac
     - realtime
     - remoted
