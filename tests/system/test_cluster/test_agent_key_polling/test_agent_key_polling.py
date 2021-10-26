@@ -31,8 +31,9 @@ def configure_environment(host_manager):
     host_manager.add_block_to_file(host='wazuh-master', path='/var/ossec/etc/client.keys', replace='NOTVALIDKEY',
                                    after='wazuh-agent2 any ', before='2\n')
     host_manager.clear_file(host='wazuh-agent2', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    agent2_id = host_manager.run_shell(host='wazuh-master',cmd=f'/var/ossec/bin/manage_agents -l | grep "wazuh-agent2" | grep -o "[0-9][0-9][0-9]"')
-    host_manager.run_shell(host='wazuh-master',cmd=f'/var/ossec/bin/manage_agents -r {agent2_id}')
+    agent2_id = host_manager.run_shell(host='wazuh-master',
+                cmd=f'/var/ossec/bin/manage_agents -l | grep "wazuh-agent2" | grep -o "[0-9][0-9][0-9]"')
+    host_manager.run_shell(host='wazuh-master', cmd=f'/var/ossec/bin/manage_agents -r {agent2_id}')
 
 
 def test_agent_key_polling(inventory_path):
