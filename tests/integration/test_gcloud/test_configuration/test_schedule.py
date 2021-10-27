@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
+       (Data access, Admin activity, System events, DNS queries, etc.) from the
+       Google Cloud infrastructure. Once events are collected, Wazuh processes
+       them using its threat detection rules. Specifically, these tests
+       will check if the 'gcp-pubsub' module executes at the periods
+       set in the 'interval' tag.
+
+tier: 1
+
+modules:
+    - gcloud
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#interval
+
+tags:
+    - gcloud_configuration
+'''
 import os
 import sys
 
@@ -49,11 +103,40 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_schedule(get_configuration, configure_environment, restart_wazuh):
-    """
-    When day option is used, interval has to be a multiple of one month.
-    When wday option is used, interval has to be a multiple of one week.
-    When time option is used, interval has to be a multiple of one week or day.
-    """
+    '''
+    description: Check if the 'gcp-pubsub' module is executed in the periods specified in the 'interval' tag.
+                 For this purpose, the test will use different values for the 'interval' tag (a positive number
+                 with a suffix character indicating a time unit, such as d (days), w (weeks), M (months)).
+                 Finally, it will verify that the module starts by detecting the events that indicate
+                 the validation of the parameters and vice versa.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that the 'gcp-pubsub' module executes at the periods set in the 'interval' tag.
+
+    input_description: Different test cases are contained in an external YAML file (schedule_conf.yaml)
+                       which includes configuration settings for the 'gcp-pubsub' module. Those are
+                       combined with the scheduling values defined in the module. The GCP access
+                       credentials can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - r'.*at _sched_scan_validate_parameters.*: WARNING:.*'
+
+    tags:
+        - scheduled
+    '''
     str_interval = get_configuration['sections'][0]['elements'][3]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     tags_to_apply = get_configuration['tags'][0]
