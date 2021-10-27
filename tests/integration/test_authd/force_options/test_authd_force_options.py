@@ -111,6 +111,6 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
             response = authd_sock.receive().decode()
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
-        validate_authd_logs(stage.get('log', []))
         result, err_msg = validate_authd_response(response, stage['output'])
         assert result == 'success', f"Failed stage '{stage['description']}': {err_msg} Complete response: '{response}'"
+        validate_authd_logs(stage.get('log', []))

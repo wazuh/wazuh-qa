@@ -1,80 +1,88 @@
 -
-  name: "registration_time_1"
-  description: "Key mismatch test 1"
+  name: "registration_time_0"
+  description: "Check that an agent can be replaced no matter the registration time, if registration_time is 0"
   configuration:
   - force:
-      elements:
-      - enabled:
-          value: 'yes'
-      - key_mismatch:
-          value: 'no'
-      - disconnected_time:
-          attributes:
-          - enabled: 'no'
-          value: 0
-      - after_registration_time:
-          value: 50
+    after_registration_time:
+      value: 0
+    enabled:
+      value: 'yes'
+    key_mismatch:
+      value: 'no'
+    disconnected_time:
+      value: 0
+      attributes:
+      - enabled: 'no'
   pre_existent_agents:
-    - id: 001
-      name: user1
-      ip: any
-      key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
-      registration_time:
-        delta: -100
-    - id: 002
-      name: user2
-      ip: any
-      key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
+  -
+    id: '001'
+    name: agent_recently_added
+    ip: any
+    key: TopSecret
+    registration_time:
+      delta: 0
+  -
+    id: '002'
+    name: agent_registered_long_ago
+    ip: any
+    key: TopSecret
+    registration_time:
+      value: 0
+  test_case:
+  -
+    input:
+      name: 'agent_recently_added'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_recently_added' (id '001').
+  -
+    input:
+      name: 'agent_registered_long_ago'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_registered_long_ago' (id '002').
+-
+  name: "registration_time_valid_time"
+  description: "Check that authd only replace agents that match the registration time from the configuration"
+  configuration:
+  - force:
+    after_registration_time:
+      value: 100
+    enabled:
+      value: 'yes'
+    key_mismatch:
+      value: 'no'
+    disconnected_time:
+      value: 0
+      attributes:
+      - enabled: 'no'
+  pre_existent_agents:
+    -
+      id: '001'
+      name: agent_registered_not_long_enough
       registration_time:
         delta: -10
+    -
+      id: '002'
+      name: agent_registered_long_enough
+      registration_time:
+        delta: -1000
   test_case:
   -
     input:
-      name: 'user1'
-    output:
-      status: 'success'
-      name: 'user1'
-  -
-    input:
-      name: 'user2'
+      name: 'agent_registered_not_long_enough'
     output:
       status: 'error'
-      message: 'Duplicate agent name: user2'
--
-  name: "registration_time_2"
-  description: "Key mismatch test 2"
-  configuration:
-  - force:
-      elements:
-      - enabled:
-          value: 'no'
-      - key_mismatch:
-          value: 'no'
-      - disconnected_time:
-          attributes:
-          - enabled: 'no'
-          value: 0
-      - after_registration_time:
-          value: 0
-  pre_existent_agents:
-    - id: 001
-      name: user1
-  test_case:
+    log:
+      - >
+        Duplicate name 'agent_registered_not_long_enough', rejecting enrollment.
+        Agent '001' doesn't comply with the registration time to be removed.
   -
     input:
-      name: 'user1'
-    output:
-      status: 'error'
-      message: 'Duplicate agent name: user1'
-  -
-    input:
-      name: 'user2'
+      name: 'agent_registered_long_enough'
     output:
       status: 'success'
-      name: 'user2'
+    log:
+      - Duplicate name. Removing old agent 'agent_registered_long_enough' (id '002').
