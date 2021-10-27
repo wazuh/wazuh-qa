@@ -18,7 +18,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = pytest.mark.tier(level=2)
 
 # variables
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_win32.yaml' if sys.platform == 'win32' else 'wazuh_conf.yaml')
@@ -79,6 +78,7 @@ def get_configuration(request):
     (testdir1_ignore_folder, 'file2', "test", False, {'incomplete_regex'}),
     (testdir1, 'file1', "test", False, {'ignore_disk'})
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_ignore_subdirectory(folder, filename, content, triggers_event,
                              tags_to_apply, get_configuration,
                              configure_environment, restart_syscheckd,

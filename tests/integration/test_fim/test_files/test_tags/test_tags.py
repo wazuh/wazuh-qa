@@ -26,6 +26,7 @@ test_directories = [os.path.join(PREFIX, 'testdir_tags'),
 
 directory_str = ','.join([test_directories[0], test_directories[2]])
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+timeout = 20
 
 # configurations
 
@@ -56,6 +57,7 @@ def get_configuration(request):
     ('file1', 'Sample content'),
     ('file2', b'Sample content')
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_tags(folder, name, content,
               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """
@@ -80,5 +82,5 @@ def test_tags(folder, name, content,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=files,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, validators_after_cud=[tag_validator]
+                     min_timeout=timeout, validators_after_cud=[tag_validator]
                      )

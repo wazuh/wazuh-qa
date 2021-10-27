@@ -22,6 +22,20 @@
         - FIM_MODE
     - ignore:
         value: "c:\\testdir1\\testfile"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Conf 2
 - tags:
   - valid_regex
@@ -48,3 +62,18 @@
         value: "testfile2$"
         attributes:
         - type: sregex
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+

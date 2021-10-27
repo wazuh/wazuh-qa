@@ -134,6 +134,7 @@ def disable_report_changes(fim_mode):
 # tests
 
 @pytest.mark.parametrize('path', [testdir_nodiff])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_report_when_deleted_directories(path, get_configuration, configure_environment, restart_syscheckd,
                                          wait_for_fim_start):
     """Check if the diff directory is empty when the monitored directory is deleted.
@@ -158,6 +159,7 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
 
 
 @pytest.mark.parametrize('path', [testdir_reports])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """Check if duplicated directories in diff are deleted when changing `report_changes` to 'no' or deleting the
@@ -180,7 +182,7 @@ def test_no_report_changes(path, get_configuration, configure_environment,
         restart_wazuh_with_new_conf(backup_conf)
         detect_fim_scan(wazuh_log_monitor, fim_mode)
 
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
                                       wait_for_fim_start):
     """Check if duplicated directories in diff are deleted when restarting syscheck.
