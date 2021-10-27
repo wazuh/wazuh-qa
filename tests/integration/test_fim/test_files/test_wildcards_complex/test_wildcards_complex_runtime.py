@@ -74,7 +74,7 @@ def get_configuration(request):
 
 
 # Test
-
+@pytest.mark.skip(reason="It will be blocked by #1602, as soon as #1602 it fixed we can enable again this test")
 @pytest.mark.parametrize('subfolder_name', test_folders)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards_runtime'}])
