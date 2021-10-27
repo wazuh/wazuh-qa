@@ -11,7 +11,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import remove_file
+from wazuh_testing.tools.file import delete_path_recursively
 from wazuh_testing.tools.services import control_service
 
 
@@ -47,8 +47,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function')
 def create_and_restore_large_file(request):
-    if not os.path.exists(directory_str):
-        os.mkdir(directory_str)
+    os.mkdir(directory_str)
 
     file_size = 1024 * 1024 * 768   # 805 MB
     chunksize = 1024 * 768
@@ -59,7 +58,7 @@ def create_and_restore_large_file(request):
             f.write(random.choice(string.printable) * chunksize)
     yield
 
-    remove_file(file_path)
+    delete_path_recursively(directory_str)
    
 
 @pytest.fixture(scope='function')
