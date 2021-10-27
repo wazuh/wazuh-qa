@@ -151,7 +151,7 @@ class Pytest(Test):
         run_test_task_unix = {
             'name': f"Launch pytest in {self.tests_run_dir} (Unix)",
             'shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
-            'register': 'test_output',
+            'register': 'test_output_unix',
             'ignore_errors': 'yes',
             'become':True,
             'when': 'ansible_system != "Win32NT"'
@@ -160,7 +160,7 @@ class Pytest(Test):
         run_test_task_windows = {
             'name': f"Launch pytest in {self.tests_run_dir} (Windows)",
             'win_shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
-            'register': 'test_output',
+            'register': 'test_output_windows',
             'ignore_errors': 'yes',
             'become': True,
             'become_method': 'runas',
@@ -170,14 +170,14 @@ class Pytest(Test):
 
         create_plain_report_unix = {
             'name': f"Create plain report file in {plain_report_file_path} (Unix)",
-            'copy': {'dest': plain_report_file_path, 'content': "{{test_output.stdout}}"},
+            'copy': {'dest': plain_report_file_path, 'content': "{{test_output_unix.stdout}}"},
             'become': True,
             'when': 'ansible_system != "Win32NT"'
         }
 
         create_plain_report_windows = {
             'name': f"Create plain report file in {plain_report_file_path} (Windows)",
-            'win_copy': {'dest': plain_report_file_path, 'content': "{{test_output.stdout}}"},
+            'win_copy': {'dest': plain_report_file_path, 'content': "{{test_output_windows.stdout}}"},
             'become': True,
             'become_method': 'runas',
             'become_user': self.ansible_admin_user,
@@ -245,6 +245,12 @@ class Pytest(Test):
 
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
-            Pytest.LOGGER.info(self.result)
+            if os.path.exists(self.result.plain_report_file_path):
+                Pytest.LOGGER.info(self.result)
+            else:
+                Pytest.LOGGER.error(f"Test results could not be saved in {self.result.plain_report_file_path} file")
         else:
-            print(self.result)
+            if os.path.exists(self.result.plain_report_file_path):
+                print(self.result)
+            else:
+                print(f"Test results could not be saved in {self.result.plain_report_file_path} file")

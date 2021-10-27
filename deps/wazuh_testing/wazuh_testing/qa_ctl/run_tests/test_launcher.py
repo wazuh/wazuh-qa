@@ -150,7 +150,7 @@ class TestLauncher:
             'name': 'Set custom local internal configuration (Windows)',
             'win_lineinfile': {'path': local_internal_options_path,
             'line': "{{ item }}"},
-            'with_items': local_internal_options_content,
+            'with_items': local_internal_options_content.copy(),
             'become': True,
             'become_method': 'runas',
             'become_user': ansible_admin_user,
