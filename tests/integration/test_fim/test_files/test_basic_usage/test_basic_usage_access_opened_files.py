@@ -59,14 +59,14 @@ def create_and_restore_large_file(request):
     yield
 
     delete_path_recursively(directory_str)
-   
+
 
 @pytest.fixture(scope='function')
 def restart_syscheckd_function():
     """
     Restart syscheckd daemon.
     """
-    control_service('restart', daemon='wazuh-syscheckd')             
+    control_service('restart', daemon='wazuh-syscheckd')
 
 # Tests
 
@@ -76,7 +76,8 @@ def restart_syscheckd_function():
     ('rename', {'ossec_conf'})
 ])
 def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configuration, configure_environment,
-                                         create_and_restore_large_file, restart_syscheckd_function, wait_for_fim_start_function):
+                                         create_and_restore_large_file, restart_syscheckd_function,
+                                         wait_for_fim_start_function):
     """
     Check that, when FIM is scanning a file, it can be modified by other processes.
 
