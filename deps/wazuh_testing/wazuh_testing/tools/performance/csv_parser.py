@@ -200,10 +200,7 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
     """
 
     def __init__(self, artifacts_path, columns=None):
-        if columns is None:
-            columns = ['USS(KB)', 'CPU(%)', 'FD']
-
-        self.columns = columns
+        self.columns = ['USS(KB)', 'CPU(%)', 'FD'] if columns is None else columns
         super().__init__(artifacts_path, files_to_load=['wazuh-clusterd', 'integrity_sync'])
 
     def _calculate_stats(self, df):
