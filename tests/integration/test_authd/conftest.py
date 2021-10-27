@@ -2,6 +2,7 @@ import pytest
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
+from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.authd import DAEMON_NAME
 
@@ -91,3 +92,21 @@ def tear_down():
     # Stop Wazuh
     control_service('stop')
     truncate_file(CLIENT_KEYS_PATH)
+    control_service('start')
+
+
+@pytest.fixture(scope='function')
+def override_authd_force_conf(format_configuration):
+    """
+    Re-writes Wazuh configuration file with new configurations from the test case.
+    """
+    # Save current configuration
+    backup_config = get_wazuh_conf()
+
+    # Set new configuration
+    write_wazuh_conf(format_configuration)
+
+    yield
+
+    # Restore previous configuration
+    write_wazuh_conf(backup_config)
