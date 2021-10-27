@@ -58,3 +58,4 @@ def wait_for_fim_start_function(get_configuration, request):
             detect_initial_scan(file_monitor)
     except KeyError:
         detect_initial_scan(file_monitor)
+        
