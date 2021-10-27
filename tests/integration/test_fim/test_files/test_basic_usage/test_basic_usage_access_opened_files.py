@@ -64,7 +64,7 @@ def create_and_restore_large_file(request):
 @pytest.fixture(scope='function')
 def restart_syscheckd_function():
     """
-    Reset ossec.log and start a new monitor.
+    Restart syscheckd daemon.
     """
     control_service('restart', daemon='wazuh-syscheckd')             
 
