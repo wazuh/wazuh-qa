@@ -6,6 +6,7 @@ from time import sleep
 
 import pytest
 
+import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
@@ -65,6 +66,9 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
 
     agents = [ag.Agent(manager_address, "aes", os="debian8", version="4.2.0") for _ in range(len(protocols))]
     for agent, protocol in zip(agents, protocols):
+        # Wait until remoted has loaded the new agent key
+        rd.wait_to_remoted_key_update(wazuh_log_monitor)
+
         if "disconnected" not in command_request:
             sender, injector = ag.connect(agent, manager_address, protocol)
         else:

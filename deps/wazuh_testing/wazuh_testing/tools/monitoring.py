@@ -1017,3 +1017,9 @@ def wait_mtime(path, time_step=5, timeout=-1):
         if last_mtime - tic >= timeout:
             logger.error(f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
+
+
+def callback_authd_startup(line):
+    if 'Accepting connections on port 1515' in line:
+        return line
+    return None

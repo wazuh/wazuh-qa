@@ -17,6 +17,7 @@ from os.path import exists
 
 import filetype
 import requests
+import yaml
 
 
 def read_json(file_path):
@@ -276,12 +277,25 @@ def set_file_owner_and_group(file_path, owner, group):
         os.chown(file_path, uid, gid)
 
 
+def load_tests(path):
+    """Loads a yaml file from a path.
+
+    Args:
+        path (string): Yaml full path.
+
+    Returns:
+       dict: Yaml structure.
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+
 def count_file_lines(filepath):
     """Count number of lines of a specified file.
 
     Args:
         filepath (str): Absolute path of the file.
-    
+
     Returns:
         Integer: Number of lines of the file.
     """
