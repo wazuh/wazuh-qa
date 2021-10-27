@@ -78,6 +78,7 @@ def extra_configuration_after_yield():
     ('regular_5', testdir, 20000, 10),
     ('regular_6', testdir, 70000, 10),
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check content_changes shows the tag 'More changes' when it exceeds the maximum size.

@@ -100,7 +100,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
 
 # tests
 
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries.
        For instance:
@@ -135,7 +135,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     event2 = check_event(previous_mode=mode, previous_event=event1, file=file)
     assert event2 is None, "Multiple events created"
 
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, sregex patterns of restrict.
@@ -173,7 +173,7 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
                                         callback=callback_detect_event).result()
         raise AttributeError(f'Unexpected event {event}')
 
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, report changes.
        For instance:
@@ -208,7 +208,7 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
     assert not os.path.exists(os.path.join(WAZUH_PATH, 'queue', 'diff', 'local', testdir1[1:], file)), \
         'Error: Diff file created'
 
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
     """Check if syscheckd ignores duplicate entries, complex entries.

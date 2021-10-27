@@ -199,6 +199,7 @@ def get_checkers(check_list):
 @pytest.mark.parametrize('tags_to_apply', [
     ({'complex'})
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_ambiguous_complex(tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):

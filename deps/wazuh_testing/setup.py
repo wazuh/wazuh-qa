@@ -2,6 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
+import sys
+
+if sys.platform == 'win32':
+  import subprocess
+  subprocess.run(["choco", "install", "jq", "--acceptlicense", "-y"])
+
+
 setup(name='wazuh_testing',
       version='4.2.0',
       description='Wazuh testing utilities to help programmers automate tests',

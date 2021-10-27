@@ -121,6 +121,7 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_fim_start):
     """Check restrict configuration events.
@@ -157,6 +158,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_fim_start):
     """Check content_changes field for each event
@@ -219,6 +221,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_tags'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                         wait_for_fim_start):
     """Check if syscheck detects the event property 'tags' for each event.
@@ -251,6 +254,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
     (testdir_recursion, 1, {'ambiguous_recursion_over'}),
     (testdir_recursion, 4, {'ambiguous_recursion'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_configuration, configure_environment,
                              restart_syscheckd, wait_for_fim_start):
     """Check alerts for each level defined in recursion_level
@@ -294,6 +298,7 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_config
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, True, {'ambiguous_recursion_tag'}),
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, False, {'ambiguous_no_recursion_tag'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags_to_apply, get_configuration,
                                  configure_environment, restart_syscheckd, wait_for_fim_start):
     """Check alerts for each level defined in recursion_level with tags
@@ -334,6 +339,7 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
     {'ambiguous_check'}
 ])
 @pytest.mark.parametrize('dirname, checkers', parametrize_list)
+@pytest.mark.skip(reason="It will be blocked by #1602, once solved we can enable this test again")
 def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                          wait_for_fim_start):
     """Check if syscheck detects every check set in the configuration.

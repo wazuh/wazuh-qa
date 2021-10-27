@@ -7,6 +7,8 @@ from functools import wraps
 from time import sleep
 from random import randint, SystemRandom, choice
 import string
+import json
+import socket
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -42,7 +44,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator
-        
+
     return retry_function
 
 
@@ -109,3 +111,17 @@ def get_random_string(string_length, digits=True):
     character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
+
+def get_version():
+    f = open('../../version.json')
+    data = json.load(f)
+    version = data['version']
+    return version
+
+def get_host_name():
+    """
+    Gets the system host name.
+    Returns:
+        str: The host name.
+    """
+    return socket.gethostname()
