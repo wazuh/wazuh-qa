@@ -106,19 +106,21 @@ class WazuhS3Package(WazuhPackage):
         package_name = Path(self.s3_package_url).name
         WazuhS3Package.LOGGER.debug(f"Downloading Wazuh S3 package from {self.s3_package_url} in {hosts} hosts")
 
-        download_unix_s3_package = AnsibleTask({'name': 'Download S3 package (Unix)',
-                                                'get_url': {'url': self.s3_package_url,
-                                                            'dest': self.installation_files_path},
-                                                'register': 'download_state', 'retries': 6, 'delay': 10,
-                                                'until': 'download_state is success',
-                                                'when': 'ansible_system != "Win32NT"'})
+        download_unix_s3_package = AnsibleTask({
+            'name': 'Download S3 package (Unix)',
+            'get_url': {'url': self.s3_package_url, 'dest': self.installation_files_path},
+            'register': 'download_state', 'retries': 6, 'delay': 10,
+            'until': 'download_state is success',
+            'when': 'ansible_system != "Win32NT"'
+        })
 
-        download_windows_s3_package = AnsibleTask({'name': 'Download S3 package (Windows)',
-                                                   'win_get_url': {'url': self.s3_package_url,
-                                                                   'dest': self.installation_files_path},
-                                                   'register': 'download_state', 'retries': 6, 'delay': 10,
-                                                   'until': 'download_state is success',
-                                                   'when': 'ansible_system == "Win32NT"'})
+        download_windows_s3_package = AnsibleTask({
+            'name': 'Download S3 package (Windows)',
+            'win_get_url': {'url': self.s3_package_url, 'dest': self.installation_files_path},
+            'register': 'download_state', 'retries': 6, 'delay': 10,
+            'until': 'download_state is success',
+            'when': 'ansible_system == "Win32NT"'
+        })
 
         WazuhS3Package.LOGGER.debug(f"Wazuh S3 package was successfully downloaded in {hosts} hosts")
 

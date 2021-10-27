@@ -121,39 +121,48 @@ class TestLauncher:
         else:
             local_internal_options_path = f"{wazuh_install_path}/etc/local_internal_options.conf"
 
-        clean_local_internal_configuration_unix = {'name': 'Clean local internal configuration (Unix)',
-                                                   'copy': {'dest': local_internal_options_path, 'content': ''},
-                                                   'become': True,
-                                                   'when': 'ansible_system != "Win32NT"'}
+        clean_local_internal_configuration_unix = {
+            'name': 'Clean local internal configuration (Unix)',
+            'copy': {'dest': local_internal_options_path, 'content': ''},
+            'become': True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
-        clean_local_internal_configuration_windows = {'name': 'Clean local internal configuration (Windows)',
-                                                      'win_copy': {'dest': local_internal_options_path, 'content': ''},
-                                                      'become': True,
-                                                      'become_method': 'runas',
-                                                      'become_user': ansible_admin_user,
-                                                      'when': 'ansible_system == "Win32NT"'}
+        clean_local_internal_configuration_windows = {
+            'name': 'Clean local internal configuration (Windows)',
+            'win_copy': {'dest': local_internal_options_path, 'content': ''},
+            'become': True,
+            'become_method': 'runas',
+            'become_user': ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        set_local_internal_configuration_unix = {'name': 'Set custom local internal configuration (Unix)',
-                                                 'lineinfile': {'path': local_internal_options_path,
-                                                 'line': "{{ item }}"},
-                                                 'with_items': local_internal_options_content,
-                                                 'become': True,
-                                                 'when': 'ansible_system != "Win32NT"'}
+        set_local_internal_configuration_unix = {
+            'name': 'Set custom local internal configuration (Unix)',
+            'lineinfile': {'path': local_internal_options_path,
+            'line': "{{ item }}"},
+            'with_items': local_internal_options_content,
+            'become': True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
-        set_local_internal_configuration_windows = {'name': 'Set custom local internal configuration (Windows)',
-                                                    'win_lineinfile': {'path': local_internal_options_path,
-                                                    'line': "{{ item }}"},
-                                                    'with_items': local_internal_options_content,
-                                                    'become': True,
-                                                    'become_method': 'runas',
-                                                    'become_user': ansible_admin_user,
-                                                    'when': 'ansible_system == "Win32NT"'}
+        set_local_internal_configuration_windows = {
+            'name': 'Set custom local internal configuration (Windows)',
+            'win_lineinfile': {'path': local_internal_options_path,
+            'line': "{{ item }}"},
+            'with_items': local_internal_options_content,
+            'become': True,
+            'become_method': 'runas',
+            'become_user': ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        ansible_tasks = [AnsibleTask(clean_local_internal_configuration_unix),
-                         AnsibleTask(clean_local_internal_configuration_windows),
-                         AnsibleTask(set_local_internal_configuration_unix),
-                         AnsibleTask(set_local_internal_configuration_windows)
-                        ]
+        ansible_tasks = [
+            AnsibleTask(clean_local_internal_configuration_unix),
+            AnsibleTask(clean_local_internal_configuration_windows),
+            AnsibleTask(set_local_internal_configuration_unix),
+            AnsibleTask(set_local_internal_configuration_windows)
+        ]
 
         playbook_parameters = {'become': False, 'gather_facts': True, 'tasks_list': ansible_tasks,
                                'playbook_file_path': playbook_file_path, 'hosts': hosts}

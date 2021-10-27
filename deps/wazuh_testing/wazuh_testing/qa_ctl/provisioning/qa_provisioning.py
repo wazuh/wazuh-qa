@@ -219,13 +219,17 @@ class QAProvisioning():
             hosts (str): Hosts to check.
         """
         QAProvisioning.LOGGER.info('Checking hosts SSH connection')
-        wait_for_connection_unix = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable (Unix)',
-                                                'wait_for_connection': {'delay': 5, 'timeout': 60},
-                                                'when': 'ansible_system != "Win32NT"'})
+        wait_for_connection_unix = AnsibleTask({
+            'name': 'Waiting for SSH hosts connection are reachable (Unix)',
+            'wait_for_connection': {'delay': 5, 'timeout': 60},
+            'when': 'ansible_system != "Win32NT"'
+        })
 
-        wait_for_connection_windows = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable (Windows)',
-                                                   'win_wait_for': {'delay': 5, 'timeout': 60},
-                                                   'when': 'ansible_system == "Win32NT"'})
+        wait_for_connection_windows = AnsibleTask({
+            'name': 'Waiting for SSH hosts connection are reachable (Windows)',
+            'win_wait_for': {'delay': 5, 'timeout': 60},
+            'when': 'ansible_system == "Win32NT"'
+        })
 
         playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': [wait_for_connection_unix,
                                                                                     wait_for_connection_windows]}

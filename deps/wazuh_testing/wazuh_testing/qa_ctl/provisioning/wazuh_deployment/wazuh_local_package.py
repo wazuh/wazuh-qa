@@ -48,10 +48,11 @@ class WazuhLocalPackage(WazuhPackage):
         WazuhLocalPackage.LOGGER.debug(f"Copying local package {self.local_package_path} to "
                                        f"{self.installation_files_path} in {hosts} hosts")
 
-        copy_ansible_task = AnsibleTask({'name': f"Copy {self.local_package_path} package to \
-                                                   {self.installation_files_path}",
-                                                 'copy': {'src': self.local_package_path,
-                                                          'dest': self.installation_files_path}})
+        copy_ansible_task = AnsibleTask({
+            'name': f"Copy {self.local_package_path} package to {self.installation_files_path}",
+            'copy': {'src': self.local_package_path, 'dest': self.installation_files_path}
+        })
+
         WazuhLocalPackage.LOGGER.debug(f"{self.local_package_path} has been successfully copied in {hosts} hosts")
 
         super().download_installation_files(inventory_file_path, [copy_ansible_task], hosts)

@@ -132,93 +132,106 @@ class Pytest(Test):
 
         pytest_command += f"--html='{os.path.join(reports_directory, html_report_file_name)}'"
 
-        create_path_task_unix = {'name': f"Create {reports_directory} path (Unix)",
-                                 'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'},
-                                 'become':True,
-                                 'when': 'ansible_system != "Win32NT"'}
+        create_path_task_unix = {
+            'name': f"Create {reports_directory} path (Unix)",
+            'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'},
+            'become':True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
+        create_path_task_windows = {
+            'name': f"Create {reports_directory} path (Windows)",
+            'win_file': {'path': reports_directory, 'state': 'directory'},
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        create_path_task_unix_windows = {'name': f"Create {reports_directory} path (Windows)",
-                                         'win_file': {'path': reports_directory, 'state': 'directory'},
-                                         'become': True,
-                                         'become_method': 'runas',
-                                         'become_user': self.ansible_admin_user,
-                                         'when': 'ansible_system == "Win32NT"'}
+        run_test_task_unix = {
+            'name': f"Launch pytest in {self.tests_run_dir} (Unix)",
+            'shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
+            'register': 'test_output',
+            'ignore_errors': 'yes',
+            'become':True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
-        execute_test_task_unix = {'name': f"Launch pytest in {self.tests_run_dir} (Unix)",
-                                  'shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
-                                  'register': 'test_output',
-                                  'ignore_errors': 'yes',
-                                  'become':True,
-                                  'when': 'ansible_system != "Win32NT"'}
+        run_test_task_windows = {
+            'name': f"Launch pytest in {self.tests_run_dir} (Windows)",
+            'win_shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
+            'register': 'test_output',
+            'ignore_errors': 'yes',
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        execute_test_task_windows = {'name': f"Launch pytest in {self.tests_run_dir} (Windows)",
-                                     'win_shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
-                                     'register': 'test_output',
-                                     'ignore_errors': 'yes',
-                                     'become': True,
-                                     'become_method': 'runas',
-                                     'become_user': self.ansible_admin_user,
-                                     'when': 'ansible_system == "Win32NT"'}
+        create_plain_report_unix = {
+            'name': f"Create plain report file in {plain_report_file_path} (Unix)",
+            'copy': {'dest': plain_report_file_path, 'content': "{{test_output.stdout}}"},
+            'become': True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
-        create_plain_report_unix = {'name': f"Create plain report file in {plain_report_file_path} (Unix)",
-                                    'copy': {'dest': plain_report_file_path, 'content': "{{test_output.stdout}}"},
-                                    'become': True,
-                                    'when': 'ansible_system != "Win32NT"'}
+        create_plain_report_windows = {
+            'name': f"Create plain report file in {plain_report_file_path} (Windows)",
+            'win_copy': {'dest': plain_report_file_path, 'content': "{{test_output.stdout}}"},
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        create_plain_report_windows = {'name': f"Create plain report file in {plain_report_file_path} (Windows)",
-                                       'win_copy': {'dest': plain_report_file_path,
-                                                    'content': "{{test_output.stdout}}"},
-                                       'become': True,
-                                       'become_method': 'runas',
-                                       'become_user': self.ansible_admin_user,
-                                       'when': 'ansible_system == "Win32NT"'}
+        fetch_plain_report = {
+            'name': f"Move {plain_report_file_name} from {plain_report_file_path} to {self.tests_result_path}",
+            'fetch': {'src': plain_report_file_path, 'dest': f"{self.tests_result_path}/", 'flat': 'yes'}
+        }
 
-        # Fetch works in Unix and windows
-        fetch_plain_report = {'name': f"Move {plain_report_file_name} from " \
-                                      f"{plain_report_file_path} to {self.tests_result_path}",
-                              'fetch': {'src': plain_report_file_path,
-                                        'dest': f"{self.tests_result_path}/", 'flat': 'yes'}}
+        fetch_html_report = {
+            'name': f"Move {html_report_file_name} from {html_report_file_path} to {self.tests_result_path}",
+            'fetch': {'src': html_report_file_path, 'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+            'ignore_errors': 'yes'
+        }
 
-        # Fetch works in Unix and windows
-        fetch_html_report = {'name': f"Move {html_report_file_name} from {html_report_file_path}"
-                             f" to {self.tests_result_path}",
-                             'fetch': {'src': html_report_file_path,
-                                       'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
-                             'ignore_errors': 'yes'}
+        compress_assets_folder_unix = {
+            'name': "Compress assets folder (Unix)",
+            'community.general.archive': {'path': assets_src_directory, 'dest': zip_src_path, 'format': 'zip'},
+            'ignore_errors': 'yes',
+            'become': True,
+            'when': 'ansible_system != "Win32NT"'
+        }
 
-        compress_assets_folder_unix = {'name': "Compress assets folder (Unix)",
-                                       'community.general.archive': {'path': assets_src_directory, 'dest': zip_src_path,
-                                                                     'format': 'zip'},
-                                       'ignore_errors': 'yes',
-                                       'become': True,
-                                       'when': 'ansible_system != "Win32NT"'}
+        compress_assets_folder_windows = {
+            'name': "Compress assets folder (Windows)",
+            'win_shell': f"powershell.exe Compress-Archive {assets_src_directory} {zip_src_path}",
+            'ignore_errors': 'yes',
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }
 
-        compress_assets_folder_windows = {'name': "Compress assets folder (Windows)",
-                                          'win_shell': f"powershell.exe Compress-Archive {assets_src_directory} " \
-                                                       f"{zip_src_path}",
-                                          'ignore_errors': 'yes',
-                                          'become': True,
-                                          'become_method': 'runas',
-                                          'become_user': self.ansible_admin_user,
-                                          'when': 'ansible_system == "Win32NT"'}
+        fetch_compressed_assets = {
+            'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
+            'fetch': {'src': zip_src_path,
+            'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+            'ignore_errors': 'yes'
+        }
 
-        fetch_compressed_assets = {'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
-                                   'fetch': {'src': zip_src_path,
-                                             'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
-                                   'ignore_errors': 'yes'}
+        ansible_tasks = [
+            AnsibleTask(create_path_task_unix), AnsibleTask(create_path_task_windows),
+            AnsibleTask(run_test_task_unix), AnsibleTask(run_test_task_windows),
+            AnsibleTask(create_plain_report_unix), AnsibleTask(create_plain_report_windows),
+            AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),  AnsibleTask(compress_assets_folder_unix),
+            AnsibleTask(compress_assets_folder_windows),AnsibleTask(fetch_compressed_assets)
+        ]
 
-
-        ansible_tasks = [AnsibleTask(create_path_task_unix), AnsibleTask(create_path_task_unix_windows),
-                         AnsibleTask(execute_test_task_unix), AnsibleTask(execute_test_task_windows),
-                         AnsibleTask(create_plain_report_unix), AnsibleTask(create_plain_report_windows),
-                         AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),
-                         AnsibleTask(compress_assets_folder_unix),
-                         AnsibleTask(compress_assets_folder_windows),
-                         AnsibleTask(fetch_compressed_assets)]
-
-        playbook_parameters = {'become': False, 'tasks_list': ansible_tasks, 'playbook_file_path':
-                               playbook_file_path, "hosts": self.hosts, 'gather_facts': True}
+        playbook_parameters = {
+            'become': False, 'tasks_list': ansible_tasks, 'playbook_file_path': playbook_file_path, "hosts": self.hosts,
+            'gather_facts': True
+        }
 
         Pytest.LOGGER.info(f"Running {self.tests_path} test on {self.hosts} hosts")
         Pytest.LOGGER.debug(f"Running {pytest_command} on {self.hosts} hosts")

@@ -67,62 +67,70 @@ class WazuhDeployment(ABC):
                 'name': 'Render the "preloaded-vars.conf" file',
                 'template': {'src': os.path.join(parent_path, 'templates', 'preloaded_vars.conf.j2'),
                              'dest': f'{self.installation_files_path}/etc/preloaded-vars.conf',
-                             'owner': 'root',
-                             'group': 'root',
-                             'mode': '0644'},
+                             'owner': 'root', 'group': 'root', 'mode': '0644'},
                 'vars': {'install_type': install_type,
                          'install_dir_path': f'{self.install_dir_path}',
                          'server_ip': f'{self.server_ip}',
                          'ca_store': f'{self.installation_files_path}/wpk_root.pem',
                          'make_cert': 'y' if install_type == 'server' else 'n'},
                 'become': True,
-                'when': 'ansible_system == "Linux"'}))
+                'when': 'ansible_system == "Linux"'
+            }))
 
             tasks_list.append(AnsibleTask({
                 'name': 'Executing "install.sh" script to build and install Wazuh',
                 'shell': f"./install.sh > {gettempdir()}/wazuh_qa_ctl/wazuh_install_log.txt",
                 'args': {'chdir': f'{self.installation_files_path}'},
                 'become': True,
-                'when': 'ansible_system == "Linux"'}))
+                'when': 'ansible_system == "Linux"'
+            }))
 
         elif self.install_mode == 'package':
-            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .deb packages',
-                                           'apt': {'deb': f'{self.installation_files_path}'},
-                                           'become': True,
-                                           'when': 'ansible_os_family|lower == "debian"'}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Install Wazuh Agent from .deb packages',
+                'apt': {'deb': f'{self.installation_files_path}'},
+                'become': True,
+                'when': 'ansible_os_family|lower == "debian"'
+            }))
 
-            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | yum',
-                                           'yum': {'name': f'{self.installation_files_path}',
-                                                   'disable_gpg_check': 'yes'},
-                                           'become': True,
-                                           'when': ['ansible_os_family|lower == "redhat"',
-                                                    'not (ansible_distribution|lower == "centos" and ' +
-                                                    'ansible_distribution_major_version >= "8")',
-                                                    'not (ansible_distribution|lower == "redhat" and ' +
-                                                    'ansible_distribution_major_version >= "8")']}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Install Wazuh Agent from .rpm packages | yum',
+                'yum': {'name': f'{self.installation_files_path}', 'disable_gpg_check': 'yes'},
+                'become': True,
+                'when': ['ansible_os_family|lower == "redhat"',
+                        'not (ansible_distribution|lower == "centos" and ' +
+                        'ansible_distribution_major_version >= "8")',
+                        'not (ansible_distribution|lower == "redhat" and ' +
+                        'ansible_distribution_major_version >= "8")']
+            }))
 
-            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from .rpm packages | dnf',
-                                           'dnf': {'name': f'{self.installation_files_path}',
-                                                   'disable_gpg_check': 'yes'},
-                                           'become': True,
-                                           'when': ['ansible_os_family|lower == "redhat"',
-                                                    '(ansible_distribution|lower == "centos" and ' +
-                                                    'ansible_distribution_major_version >= "8") or' +
-                                                    '(ansible_distribution|lower == "redhat" and ' +
-                                                    'ansible_distribution_major_version >= "8")']}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Install Wazuh Agent from .rpm packages | dnf',
+                'dnf': {'name': f'{self.installation_files_path}', 'disable_gpg_check': 'yes'},
+                'become': True,
+                'when': ['ansible_os_family|lower == "redhat"',
+                        '(ansible_distribution|lower == "centos" and ' +
+                        'ansible_distribution_major_version >= "8") or' +
+                        '(ansible_distribution|lower == "redhat" and ' +
+                        'ansible_distribution_major_version >= "8")']
+            }))
 
-            tasks_list.append(AnsibleTask({'name': 'Install Wazuh Agent from Windows packages',
-                                           'win_package': {'path': f'{self.installation_files_path}'},
-                                           'become': True,
-                                           'become_method': 'runas',
-                                           'become_user': self.ansible_admin_user,
-                                           'when': 'ansible_system == "Win32NT"'}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Install Wazuh Agent from Windows packages',
+                'win_package': {'path': f'{self.installation_files_path}'},
+                'become': True,
+                'become_method': 'runas',
+                'become_user': self.ansible_admin_user,
+                'when': 'ansible_system == "Win32NT"'
+            }))
 
-            tasks_list.append(AnsibleTask({'name': 'Install macOS wazuh package',
-                                           'shell': 'installer -pkg wazuh-* -target /',
-                                           'args': {'chdir': f'{self.installation_files_path}'},
-                                           'become': True,
-                                           'when': 'ansible_system == "Darwin"'}))
+            tasks_list.append(AnsibleTask({
+                'name': 'Install macOS wazuh package',
+                'shell': 'installer -pkg wazuh-* -target /',
+                'args': {'chdir': f'{self.installation_files_path}'},
+                'become': True,
+                'when': 'ansible_system == "Darwin"'
+            }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
@@ -143,27 +151,32 @@ class WazuhDeployment(ABC):
         service_name = install_type if install_type == 'agent' else 'manager'
         service_command = f'{command}ed' if command != 'stop' else 'stopped'
 
-        tasks_list.append(AnsibleTask({'name': f'Wazuh manager {command} service from systemd',
-                                       'become': True,
-                                       'systemd': {'name': f'wazuh-{service_name}',
-                                                   'state': f'{service_command}'},
-                                       'register': 'output_command',
-                                       'ignore_errors': 'true',
-                                       'when': 'ansible_system == "Linux"'}))
+        tasks_list.append(AnsibleTask({
+            'name': f'Wazuh manager {command} service from systemd',
+            'become': True,
+            'systemd': {'name': f'wazuh-{service_name}', 'state': f'{service_command}'},
+            'register': 'output_command',
+            'ignore_errors': 'true',
+            'when': 'ansible_system == "Linux"'
+        }))
 
-        tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service from wazuh-control',
-                                       'become': True,
-                                       'command': f'{self.install_dir_path}/bin/wazuh-control {command}',
-                                       'when': 'ansible_system == "Darwin" or ansible_system == "SunOS"'}))
+        tasks_list.append(AnsibleTask({
+            'name': f'Wazuh agent {command} service from wazuh-control',
+            'become': True,
+            'command': f'{self.install_dir_path}/bin/wazuh-control {command}',
+            'when': 'ansible_system == "Darwin" or ansible_system == "SunOS"'
+        }))
 
-        tasks_list.append(AnsibleTask({'name': f'Wazuh agent {command} service from Windows',
-                                       'win_shell': 'Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue |' +
-                                                    f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
-                                       'args': {'executable': 'powershell.exe'},
-                                       'become': True,
-                                       'become_method': 'runas',
-                                       'become_user': self.ansible_admin_user,
-                                       'when': 'ansible_system == "Win32NT"'}))
+        tasks_list.append(AnsibleTask({
+            'name': f'Wazuh agent {command} service from Windows',
+            'win_shell': 'Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue |' +
+                        f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
+            'args': {'executable': 'powershell.exe'},
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
@@ -209,25 +222,27 @@ class WazuhDeployment(ABC):
         """
         WazuhDeployment.LOGGER.debug(f"Starting wazuh deployment healthcheck in {self.hosts} hosts")
         tasks_list = []
-        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors (Unix)',
-                                       'lineinfile': {'path': f'{self.install_dir_path}/logs/ossec.log',
-                                                      'line': 'ERROR|CRITICAL'},
-                                       'register': 'exists',
-                                       'check_mode': 'yes',
-                                       'become': True,
-                                       'failed_when': 'exists is not changed',
-                                       'when': 'ansible_system != "Win32NT"'}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Read ossec.log searching errors (Unix)',
+            'lineinfile': {'path': f'{self.install_dir_path}/logs/ossec.log', 'line': 'ERROR|CRITICAL'},
+            'register': 'exists',
+            'check_mode': 'yes',
+            'become': True,
+            'failed_when': 'exists is not changed',
+            'when': 'ansible_system != "Win32NT"'
+        }))
 
-        tasks_list.append(AnsibleTask({'name': 'Read ossec.log searching errors (Windows)',
-                                       'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.log',
-                                                          'line': 'ERROR|CRITICAL'},
-                                       'register': 'exists',
-                                       'check_mode': 'yes',
-                                       'become': True,
-                                       'become_method': 'runas',
-                                       'become_user': self.ansible_admin_user,
-                                       'failed_when': 'exists is not changed',
-                                       'when': 'ansible_system == "Win32NT"'}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Read ossec.log searching errors (Windows)',
+            'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.log', 'line': 'ERROR|CRITICAL'},
+            'register': 'exists',
+            'check_mode': 'yes',
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'failed_when': 'exists is not changed',
+            'when': 'ansible_system == "Win32NT"'
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
@@ -244,10 +259,12 @@ class WazuhDeployment(ABC):
             bool: True if wazuh is already installed, False if not
         """
         tasks_list = []
-        tasks_list.append(AnsibleTask({'name': 'Check Wazuh directory exist',
-                                       'stat': {'path': f'{self.install_dir_path}'},
-                                       'register': 'dir_exist',
-                                       'failed_when': 'dir_exist.stat.exists and dir_exist.stat.isdir'}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Check Wazuh directory exist',
+            'stat': {'path': f'{self.install_dir_path}'},
+            'register': 'dir_exist',
+            'failed_when': 'dir_exist.stat.exists and dir_exist.stat.isdir'
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 

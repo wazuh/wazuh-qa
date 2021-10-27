@@ -71,23 +71,27 @@ class AgentDeployment(WazuhDeployment):
         """
         tasks_list = []
 
-        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment Unix agent',
-                                       'lineinfile': {'path': f'{self.install_dir_path}/etc/ossec.conf',
-                                                      'regexp': '<address>(.*)</address>',
-                                                      'line': f'<address>{self.server_ip}</address>',
-                                                      'backrefs': 'yes'},
-                                       'become': True,
-                                       'when': 'ansible_system != "Win32NT"'}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Configuring server ip to autoenrollment Unix agent',
+            'lineinfile': {'path': f'{self.install_dir_path}/etc/ossec.conf',
+                           'regexp': '<address>(.*)</address>',
+                           'line': f'<address>{self.server_ip}</address>',
+                           'backrefs': 'yes'},
+            'become': True,
+            'when': 'ansible_system != "Win32NT"'
+        }))
 
-        tasks_list.append(AnsibleTask({'name': 'Configuring server ip to autoenrollment Windows agent',
-                                       'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.conf',
-                                                          'regexp': '<address>(.*)</address>',
-                                                          'line': f'<address>{self.server_ip}</address>',
-                                                          'backrefs': 'yes'},
-                                       'become': True,
-                                       'become_method': 'runas',
-                                       'become_user': self.ansible_admin_user,
-                                       'when': 'ansible_system == "Win32NT"'}))\
+        tasks_list.append(AnsibleTask({
+            'name': 'Configuring server ip to autoenrollment Windows agent',
+            'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.conf',
+                                'regexp': '<address>(.*)</address>',
+                                'line': f'<address>{self.server_ip}</address>',
+                                'backrefs': 'yes'},
+            'become': True,
+            'become_method': 'runas',
+            'become_user': self.ansible_admin_user,
+            'when': 'ansible_system == "Win32NT"'
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 
@@ -109,13 +113,15 @@ class AgentDeployment(WazuhDeployment):
         super().health_check()
 
         tasks_list = []
-        tasks_list.append(AnsibleTask({'name': 'Extract service status',
-                                       'command': f"{self.install_dir_path}/bin/wazuh-control status",
-                                       'when': 'ansible_system != "Win32NT"',
-                                       'register': 'status',
-                                       'become': True,
-                                       'failed_when': ['"wazuh-agentd" not in status.stdout',
-                                                       '"wazuh-execd" not in status.stdout']}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Extract service status',
+            'command': f"{self.install_dir_path}/bin/wazuh-control status",
+            'when': 'ansible_system != "Win32NT"',
+            'register': 'status',
+            'become': True,
+            'failed_when': ['"wazuh-agentd" not in status.stdout',
+                            '"wazuh-execd" not in status.stdout']
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': False}
 

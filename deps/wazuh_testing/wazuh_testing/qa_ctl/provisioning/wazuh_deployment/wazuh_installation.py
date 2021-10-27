@@ -32,14 +32,17 @@ class WazuhInstallation(ABC):
             ansible_tasks (ansible object): ansible instance with already provided tasks to run
             hosts (string): Parameter set to `all` by default
         """
-        create_path_task_unix = AnsibleTask({'name': f"Create {self.installation_files_path} path (Unix)",
-                                             'file': {'path': self.installation_files_path, 'state': 'directory'},
-                                             'when': 'ansible_system != "Win32NT"'})
+        create_path_task_unix = AnsibleTask({
+            'name': f"Create {self.installation_files_path} path (Unix)",
+            'file': {'path': self.installation_files_path, 'state': 'directory'},
+            'when': 'ansible_system != "Win32NT"'
+        })
 
-        create_path_task_windows = AnsibleTask({'name': f"Create {self.installation_files_path} path (Windows)",
-                                                'win_file': {'path': self.installation_files_path,
-                                                             'state': 'directory'},
-                                                'when': 'ansible_system == "Win32NT"'})
+        create_path_task_windows = AnsibleTask({
+            'name': f"Create {self.installation_files_path} path (Windows)",
+            'win_file': {'path': self.installation_files_path, 'state': 'directory'},
+            'when': 'ansible_system == "Win32NT"'
+        })
 
         # Add path creation task at the beggining of the playbook
         ansible_tasks.insert(0, create_path_task_unix)
