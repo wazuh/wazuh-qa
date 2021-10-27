@@ -41,6 +41,15 @@ produced while the agent was stopped.
 
 For each location and exclude option specified in the configuration file, check if `logcollector` is analyzing or excluding the required files.
 
+#### Test macos
+
+For the macos log format, test the basic operation:
+- Collect logs from `log stream`
+- Collect logs from `log show` (only future events)
+- Correctly filters/generates the predicate of `log`.
+- Updates and correctly generates `file_status.json` file
+- Detects invalid configurations in the localfile
+
 ### Tier 1
 #### Test location custom sockets
 
