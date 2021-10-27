@@ -37,6 +37,7 @@ LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
 AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
+WAZUH_DB_PREFIX = r'.*wazuh-db.*'
 
 DEFAULT_POLL_FILE_TIME = 1
 DEFAULT_WAIT_FILE_TIMEOUT = 30

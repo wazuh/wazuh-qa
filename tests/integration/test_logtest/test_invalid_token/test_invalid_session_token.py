@@ -43,7 +43,7 @@ def close_connection(connection):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_invalid_session_token(test_case):
+def test_invalid_session_token(restart_required_logtest_daemons, wait_for_logtest_startup, test_case):
     """Check that every input message in logtest socket generates the adequate output
 
     Parameters
