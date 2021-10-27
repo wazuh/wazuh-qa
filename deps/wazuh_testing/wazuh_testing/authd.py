@@ -134,10 +134,12 @@ def insert_agent_in_db(id=1, name="TestAgent", ip="any", registration_time=0, co
     """
     Write agent in global.db
     """
-    command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
-                "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+    insert_command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time}}}'
+    update_command = f'global sql UPDATE agent SET connection_status = "{connection_status}",\
+                       disconnection_time = "{disconnection_time}" WHERE id = {id};'
     try:
-        query_wdb(command)
+        query_wdb(insert_command)
+        query_wdb(update_command)
     except Exception:
         raise Exception(f'Unable to add agent {id}')
 
@@ -164,7 +166,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
             disconnection_time = agent['disconnection_time']['value']
         else:
-            disconnection_time = 0
+            disconnection_time = time_now
         if 'registration_time' in agent and 'delta' in agent['registration_time']:
             registration_time = time_now + agent['registration_time']['delta']
         elif 'registration_time' in agent and 'value' in agent['registration_time']:

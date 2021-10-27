@@ -1,6 +1,6 @@
 -
-  name: "disconnected_time_1"
-  description: "Key mismatch test 1"
+  name: "disconnected_time_disabled"
+  description: "Check that an agent can be replaced when disconnected_time is disabled, no mather the connection status"
   configuration:
   - force:
       elements:
@@ -11,70 +11,140 @@
       - disconnected_time:
           attributes:
           - enabled: 'no'
-          value: 0
+          value: 100
       - after_registration_time:
-          value: 50
+          value: 0
   pre_existent_agents:
-    - id: 001
-      name: user1
-      ip: any
-      key: TopSecret
+    - id: '001'
+      name: agent_disconnected
       connection_status: disconnected
       disconnection_time:
-        value: 10
-      registration_time:
         delta: -100
-    - id: 002
-      name: user2
-      ip: any
-      key: TopSecret
-      connection_status: disconnected
-      disconnection_time:
-        value: 10
-      registration_time:
-        delta: -10
+    - id: '002'
+      name: agent_never_connected
+      connection_status: never_connected
+    - id: '003'
+      name: agent_pending
+      connection_status: pending
+    - id: '004'
+      name: agent_active
+      connection_status: active
   test_case:
   -
+    description: Disconnected_time disabled with agent disconnected
     input:
-      name: 'user1'
+      name: 'agent_disconnected'
     output:
       status: 'success'
-      name: 'user1'
+    log:
+      - Duplicate name. Removing old agent 'agent_disconnected' (id '001').
   -
+    description: Disconnected_time disabled with agent never connected
     input:
-      name: 'user2'
+      name: 'agent_never_connected'
     output:
-      status: 'error'
-      message: 'Duplicate agent name: user2'
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_never_connected' (id '002').
+  -
+    description: Disconnected_time disabled with agent pending
+    input:
+      name: 'agent_pending'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_pending' (id '003').
+  -
+    description: Disconnected_time disabled with agent active
+    input:
+      name: 'agent_active'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_active' (id '004').
 -
-  name: "disconnected_time_2"
-  description: "Key mismatch test 2"
+  name: "disconnected_time_0"
+  description: "Check that a disconnected agent can be always replaced when disconnected_time is 0"
   configuration:
   - force:
       elements:
       - enabled:
-          value: 'no'
+          value: 'yes'
       - key_mismatch:
           value: 'no'
       - disconnected_time:
           attributes:
           - enabled: 'no'
-          value: 0
+          value: 100
       - after_registration_time:
           value: 0
   pre_existent_agents:
-    - id: 001
-      name: user1
+    - id: '001'
+      name: agent_recently_disconnected
+      connection_status: disconnected
   test_case:
   -
+    description: Disconnected_time in 0 with agent recently disconnected
     input:
-      name: 'user1'
-    output:
-      status: 'error'
-      message: 'Duplicate agent name: user1'
-  -
-    input:
-      name: 'user2'
+      name: 'agent_recently_disconnected'
     output:
       status: 'success'
-      name: 'user2'
+    log:
+      - Duplicate name. Removing old agent 'agent_recently_disconnected' (id '001').
+-
+  name: "disconnected_time_valid_time"
+  description: "Check that authd only replace agents that match the disconnected time from the configuration"
+  configuration:
+    - force:
+      elements:
+      - disconnected_time:
+        value: 100
+        attributes:
+        - enabled: 'yes'
+    enabled:
+      value: 'yes'
+    key_mismatch:
+      value: 'no'
+    after_registration_time:
+      value: 0
+  pre_existent_agents:
+    - id: '001'
+      name: agent_disconnected_enough
+      connection_status: disconnected
+      disconnection_time:
+        delta: -1000
+    - id: '002'
+      name: agent_disconnected_not_enough
+      connection_status: disconnected
+      disconnection_time:
+        delta: -10
+    - id: '003'
+      name: agent_never_connected
+      connection_status: never_connected
+  test_case:
+  -
+    description: Disconnected_time with agent disconnected enough time
+    input:
+      name: 'agent_disconnected_enough'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_disconnected_enough' (id '001').
+  -
+    description: Disconnected_time with agent disconnected not enough time
+    input:
+      name: 'agent_disconnected_not_enough'
+    output:
+      status: 'error'
+    log:
+      - >
+        Duplicate name 'agent_disconnected_not_enough', rejecting enrollment.
+        Agent '002' has not been disconnected long enough to be replaced.
+  -
+    description: Disconnected_time with agent never connected
+    input:
+      name: 'agent_never_connected'
+    output:
+      status: 'success'
+    log:
+      - Duplicate name. Removing old agent 'agent_never_connected' (id '003').
