@@ -21,13 +21,11 @@ pytestmark = [pytest.mark.tier(level=0)]
 
 # Variables
 
-test_directories = [os.path.join(PREFIX, 'testdir1')]
 
-directory_str = ','.join(test_directories)
+directory_str = os.path.join(PREFIX, 'testdir1')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = test_directories[0]
 
 # configurations
 
@@ -49,12 +47,12 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function')
 def create_and_restore_large_file(request):
-    if not os.path.exists(testdir1):
-        os.mkdir(testdir1)
+    if not os.path.exists(directory_str):
+        os.mkdir(directory_str)
 
     file_size = 1024 * 1024 * 768   # 805 MB
     chunksize = 1024 * 768
-    file_path = os.path.join(testdir1, 'large_file')
+    file_path = os.path.join(directory_str, 'large_file')
 
     with open(file_path, "a") as f:
         while os.stat(file_path).st_size < file_size:
@@ -91,7 +89,7 @@ def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configura
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    file_path = os.path.join(testdir1, 'large_file')
+    file_path = os.path.join(directory_str, 'large_file')
 
     with open(file_path, "a") as f:
         f.write('a')
@@ -99,7 +97,7 @@ def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configura
     check_time_travel(scheduled)
 
     if operation == 'rename':
-        changed_path = os.path.join(testdir1, 'changed_name')
+        changed_path = os.path.join(directory_str, 'changed_name')
 
         try:
             os.rename(file_path, changed_path)
