@@ -89,7 +89,7 @@ def test_basic_usage_access_opened_files(operation, tags_to_apply, get_configura
 
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
-    with open(file_path, "a") as f:
+    with open(file_path, 'a') as f:
         f.write('a')
 
     check_time_travel(scheduled)
