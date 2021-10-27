@@ -40,6 +40,8 @@ class QACTLConfigGenerator:
     LOGGER = Logging.get_logger(QACTL_LOGGER)
     LINUX_TMP = '/tmp'
     WINDOWS_TMP = 'C:\\Users\\vagrant\\AppData\\Local\\Temp'
+    WINDOWS_DEFAULT_WAZUH_INSTALL_PATH = 'C:\\Program Files (x86)\\ossec-agent'
+    LINUX_DEFAULT_WAZUH_INSTALL_PATH = '/var/ossec'
 
     BOX_MAPPING = {
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
@@ -408,7 +410,8 @@ class QACTLConfigGenerator:
             s3_package_url = self.__get_package_url(instance)
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
-            wazuh_install_path = 'C:\\Program Files (x86)\\ossec-agent' if system == 'windows' else '/var/ossec'
+            wazuh_install_path =  self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+                self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
 
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
@@ -447,6 +450,8 @@ class QACTLConfigGenerator:
         self.config['tests'][instance] = {'host_info': {}, 'test': {}}
         self.config['tests'][instance]['host_info'] = \
             dict(self.config['provision']['hosts'][instance]['host_info'])
+        wazuh_install_path =  self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+            self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
 
         self.config['tests'][instance]['test'] = {
             'type': 'pytest',
@@ -457,6 +462,7 @@ class QACTLConfigGenerator:
                                                       'tests', 'integration'], system),
                 'test_results_path': join(gettempdir(), 'wazuh_qa_ctl', f"{test_name}_{get_current_timestamp()}")
             },
+            'wazuh_install_path': wazuh_install_path,
             'system': system,
             'component': component,
             'modules':  modules
