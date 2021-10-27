@@ -119,7 +119,7 @@
     use_regex: "yes"
   -
     input: 'global update-connection-status {"id":1,"connection_status":"dummy_status","sync_status":"synced"}'
-    output: "err Cannot execute Global database query; CHECK constraint failed: agent"
+    output: "err Cannot execute Global database query; CHECK constraint failed: connection_status IN ('pending', 'never_connected', 'active', 'disconnected')"
     stage: "global update-connection-status dummy_status error"
   -
     input: 'global get-agent-info 1'
