@@ -12,7 +12,7 @@ from wazuh_testing.authd import create_authd_request, validate_authd_response, A
 # Data paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(data_path, 'template_configuration.yaml')
-tests_path = os.path.join(data_path, 'test_cases')
+tests_path = os.path.join(data_path, 'test_cases', 'valid_config')
 
 # Configurations
 configurations = load_wazuh_configurations(configurations_path, __name__)
