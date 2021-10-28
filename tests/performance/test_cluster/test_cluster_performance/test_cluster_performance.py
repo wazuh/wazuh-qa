@@ -71,8 +71,8 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
         pytest.fail(f'Path "{artifacts_path}" could not be found or it may not follow the proper structure.')
 
     if cluster_info.get('worker_nodes', 0) != int(n_workers):
-        pytest.fail(f'Information of {n_workers} workers was expected, but {cluster_info.get("worker_nodes", 0)} '
-                    f'were found.')
+        pytest.fail(f'Information of {n_workers} workers was expected inside the artifacts folder, but '
+                    f'{cluster_info.get("worker_nodes", 0)} were found.')
 
     # Calculate stats from data inside artifacts path.
     data = {'tasks': ClusterCSVTasksParser(artifacts_path).get_stats(),
@@ -96,9 +96,9 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
                                                             'phase': phase})
 
     try:
-        output = '\n - '.join('{stat} {column} {value} >= {threshold} ({node}, {file}, '
-                              '{phase})'.format(**item) for item in exceeded_thresholds)
-        assert not exceeded_thresholds, f"Some thresholds were exceeded:\n - {output}"
+        assert not exceeded_thresholds, f"Some thresholds were exceeded:\n- " + '\n- '.join(
+            '{stat} {column} {value} >= {threshold} ({node}, {file}, {phase})'.format(**item) for item in
+            exceeded_thresholds)
     finally:
         # Add useful information to report as stdout
         try:
