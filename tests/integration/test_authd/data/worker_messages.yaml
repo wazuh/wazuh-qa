@@ -8,7 +8,7 @@
     cluster_output: '{"error":0,"data":{"id":"001","name":"user1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
     port_output: "OSSEC K:'"
 -
-  name: 'Single Group - Valid group'
+  name: 'Single Group'
   description: 'Check single group enrollment'
   test_case:
   -
@@ -17,7 +17,7 @@
     cluster_output: '{"error":0,"data":{"id":"002","name":"user2","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
     port_output: "OSSEC K:'"
 -
-  name: 'Multi Group - Valid groups'
+  name: 'Multi Group'
   description: 'Check multi group enrollment'
   test_case:
   -
@@ -35,7 +35,7 @@
     cluster_output: '{"error":0,"data":{"id":"003","name":"user4","ip":"192.0.0.0","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c915"}}'
     port_output: "OSSEC K:'"
 -
-  name: 'Error Agent Name - Duplicate name'
+  name: 'Error Duplicate name'
   description: 'Try to add an agent with duplicate name'
   test_case:
   -
@@ -44,7 +44,7 @@
     cluster_output: '{"error":9008,"message":"Duplicate name"}'
     port_output: "ERROR: Duplicate name"
 -
-  name: 'Error Group - Invalid group'
+  name: 'Error Invalid group'
   description: 'Try to add an agent with inexistent group'
   test_case:
   -
@@ -53,7 +53,7 @@
     cluster_output: '{"error":9014,"message":"Invalid Group(s) Name(s)"}'
     port_output: 'ERROR: Invalid Group(s) Name(s)'
 -
-  name: 'Error IP - Duplicate IP'
+  name: 'Error Duplicate IP'
   description: 'Try to add an agent with duplicate IP'
   test_case:
   -
