@@ -44,14 +44,13 @@ import subprocess
 import pytest
 import yaml
 import time
+
 from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.wazuh_db import query_wdb
-from conftest import truncate_client_keys_file
-# TODO Move to utils
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import read_yaml, truncate_file
+
 
 # Marks
 
@@ -69,7 +68,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 log_monitor_paths = []
 ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'auth'))
 receiver_sockets_params = [(ls_sock_path, 'AF_UNIX', 'TCP'), (WAZUH_DB_SOCKET_PATH, 'AF_UNIX', 'TCP')]
-test_case_ids = [f"{test_case['name']}" for test_case in message_tests]
+test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case in message_tests]
 
 # TODO Replace or delete
 monitored_sockets_params = [('wazuh-db', None, True), ('wazuh-authd', None, True)]
@@ -78,7 +77,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # Fixtures
 
 
-@pytest.fixture(scope="module", params=configurations, ids=['authd_local_config'])
+@pytest.fixture(scope='module', params=configurations, ids=['authd_local_config'])
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
@@ -92,7 +91,7 @@ def get_current_test_case(request):
     return request.param
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def set_up_groups(get_current_test_case, request):
     """
     Set pre-existent groups.
@@ -110,7 +109,7 @@ def set_up_groups(get_current_test_case, request):
 
 
 @pytest.fixture(scope='function')
-def insert_pre_existent_agents(get_current_test_case):
+def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
     agents = get_current_test_case.get('pre_existent_agents', [])
     time_now = int(time.time())
 
@@ -178,9 +177,8 @@ def insert_pre_existent_agents(get_current_test_case):
 
 # Tests
 
-
 def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
-                              set_up_groups, stop_authd_function, insert_pre_existent_agents, restart_authd_function,
+                              set_up_groups, insert_pre_existent_agents, restart_authd_function,
                               wait_for_authd_startup_function, get_current_test_case, tear_down):
     """
         description:
@@ -200,9 +198,6 @@ def test_authd_local_messages(configure_environment, configure_sockets_environme
             - set_up_groups
                 type: fixture
                 brief: Set the pre-defined groups.
-            - stop_authd_function:
-                type: fixture
-                brief: stops the wazuh-authd daemon
             - insert_pre_existent_agents:
                 type: fixture
                 brief: adds the required agents to the client.keys and global.db
