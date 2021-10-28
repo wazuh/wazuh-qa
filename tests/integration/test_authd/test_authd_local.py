@@ -58,7 +58,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml, truncate_file
-
+from wazuh_testing.authd import insert_pre_existent_agents
 
 # Marks
 
