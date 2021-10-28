@@ -223,6 +223,17 @@ class CodeParser:
                             test_cases = self.pytest.collect_test_cases(path)
                             if test_cases and test_cases[function.name]:
                                 function_doc['inputs'] = test_cases[function.name]
+                        # ES throwing error because of its format in some cases
+                        # -> Inserting it between double quotes fixs it
+                        new_expected_output = []
+                        for string in function_doc['expected_output']:
+                            if isinstance(string, dict):
+                                for key, value in string.items():
+                                    # example: r'.*Sending: FIM event (.+)$' ('added', 'modified' events) 
+                                    new_expected_output.append(f"{key}: {value}")
+                            else:
+                                new_expected_output.append(f"{string}")
+                        function_doc['expected_output'] = new_expected_output
 
                         functions_doc.append(function_doc)
 
