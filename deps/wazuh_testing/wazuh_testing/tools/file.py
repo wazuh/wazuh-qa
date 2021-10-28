@@ -364,7 +364,7 @@ def join_path(path, system):
     result_path = []
 
     for item in path:
-        if system == 'windows' and '\\' in item:
+        if '\\' in item:
             result_path.extend([path_item for path_item in item.split('\\')])
         elif '/' in item:
             result_path.extend([path_item for path_item in item.split('/')])

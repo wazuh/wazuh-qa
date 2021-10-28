@@ -1,4 +1,5 @@
 import sys
+import re
 from os.path import join, exists
 
 from tempfile import gettempdir
@@ -486,8 +487,11 @@ class QACTLConfigGenerator:
             system = 'linux' if system == 'deb' or system == 'rpm' else system
             modules = test['modules']
             component = 'manager' if 'manager' in test['components'] else test['components'][0]
+
+            # Cut out the full path, and convert it to relative path (tests/integration....)
+            test_path = re.sub(r".*wazuh-qa.*(tests.*)", r"\1", test['path'])
             # Convert test path string to the corresponding according to the system
-            test_path = file.join_path(test['path'].split('/'), system)
+            test_path = file.join_path([test_path], system)
 
             self.__add_testing_config_block(instance, installation_files_path, system, test_path,
                                             test['test_name'], modules, component)

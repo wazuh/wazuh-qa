@@ -75,17 +75,18 @@ def validate_configuration_data(configuration_data, qa_ctl_mode):
     # Validate schema constraints
     validate(instance=configuration_data, schema=schema)
 
-    # Check that qa_ctl_launcher_branch parameter has been specified for Windows manual mode
-    if sys.platform == 'win32' and qa_ctl_mode == MANUAL_MODE and ('config' not in configuration_data or \
-            'qa_ctl_launcher_branch' not in configuration_data['config']):
-        raise QAValueError('qa_ctl_launcher_branch was not found in the configuration file. It is required if you ' \
-                           'are running qa-ctl in a Windows host', qactl_logger.error, QACTL_LOGGER)
-    # Check that qa_ctl_launcher_branch exists
-    elif not github_checks.branch_exists(configuration_data['config']['qa_ctl_launcher_branch'],
-                                         repository=WAZUH_QA_REPO):
-        raise QAValueError(f"{configuration_data['config']['qa_ctl_launcher_branch']} branch specified as "
-                           'qa_ctl_launcher_branch  does not exist in Wazuh QA repository.', qactl_logger.error,
-                           QACTL_LOGGER)
+    # Check that qa_ctl_launcher_branch parameter has been specified and its valid for Windows manual mode
+    if sys.platform == 'win32' and qa_ctl_mode == MANUAL_MODE:
+        if 'config' not in configuration_data or 'qa_ctl_launcher_branch' not in configuration_data['config']:
+            raise QAValueError('qa_ctl_launcher_branch was not found in the configuration file. It is required if ' \
+                               'you are running qa-ctl in a Windows host', qactl_logger.error, QACTL_LOGGER)
+
+        # Check that qa_ctl_launcher_branch exists
+        if not github_checks.branch_exists(configuration_data['config']['qa_ctl_launcher_branch'],
+                                           repository=WAZUH_QA_REPO):
+            raise QAValueError(f"{configuration_data['config']['qa_ctl_launcher_branch']} branch specified as "
+                               'qa_ctl_launcher_branch  does not exist in Wazuh QA repository.', qactl_logger.error,
+                                QACTL_LOGGER)
 
     qactl_logger.debug('Schema validation has passed successfully')
 
@@ -287,7 +288,7 @@ def main():
     qa_ctl_mode = AUTOMATIC_MODE if arguments.run_test else MANUAL_MODE
 
     # Generate or get the qactl configuration file
-    if AUTOMATIC_MODE:
+    if qa_ctl_mode == AUTOMATIC_MODE:
         qactl_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, arguments.qa_branch,
                                                 WAZUH_QA_FILES, arguments.operating_systems)
