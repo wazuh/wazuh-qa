@@ -1,3 +1,5 @@
+import sys
+import re
 from os.path import join, exists
 
 from tempfile import gettempdir
@@ -362,9 +364,9 @@ class QACTLConfigGenerator:
             for test in tests_info:
                 if self.__validate_test_info(test):
                     os_version = ''
-                    if 'Ubuntu Focal' in test['os_version']:
+                    if 'CentOS 8' in test['os_version']:
                         os_version = 'Ubuntu Focal'
-                    elif 'CentOS 8' in test['os_version']:
+                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'CentOS 8'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
@@ -485,8 +487,11 @@ class QACTLConfigGenerator:
             system = 'linux' if system == 'deb' or system == 'rpm' else system
             modules = test['modules']
             component = 'manager' if 'manager' in test['components'] else test['components'][0]
+
+            # Cut out the full path, and convert it to relative path (tests/integration....)
+            test_path = re.sub(r".*wazuh-qa.*(tests.*)", r"\1", test['path'])
             # Convert test path string to the corresponding according to the system
-            test_path = file.join_path(test['path'].split('/'), system)
+            test_path = file.join_path([test_path], system)
 
             self.__add_testing_config_block(instance, installation_files_path, system, test_path,
                                             test['test_name'], modules, component)
@@ -530,10 +535,20 @@ class QACTLConfigGenerator:
         self.__process_provision_data()
         self.__process_test_data(tests_info)
 
+    def __proces_config_info(self):
+        """Write the config section info in the qa-ctl configuration file"""
+        # It is only necessary to specify the qa_ctl_launcher_branch when using qa-ctl on Windows, as this branch will
+        # be used to launch qa-ctl in the docker container used for provisioning and testing.
+        if sys.platform == 'win32':
+            self.config['config'] = {}
+            self.config['config']['qa_ctl_launcher_branch'] = self.qa_branch
+
+
     def run(self):
         """Run an instance with the parameters created. This generates the YAML configuration file automatically."""
         info = self.__get_all_tests_info()
         self.__process_test_info(info)
+        self.__proces_config_info()
         file.write_yaml_file(self.config_file_path, self.config)
 
     def destroy(self):
