@@ -223,8 +223,8 @@ class CodeParser:
                             test_cases = self.pytest.collect_test_cases(path)
                             if test_cases and test_cases[function.name]:
                                 function_doc['inputs'] = test_cases[function.name]
-                        # ES throwing error because of its format in some cases
-                        # -> Inserting it between double quotes fixs it
+                        # ES throwing errors because of the expected_output format in some cases
+                        # -> Inserting the raw string and its comment between double quotes fixes it
                         new_expected_output = []
                         for string in function_doc['expected_output']:
                             if isinstance(string, dict):
