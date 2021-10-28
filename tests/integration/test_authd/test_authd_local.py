@@ -116,75 +116,7 @@ def set_up_groups(get_current_test_case, request):
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
-@pytest.fixture(scope='function')
-def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
-    agents = get_current_test_case.get('pre_existent_agents', [])
-    time_now = int(time.time())
-
-    try:
-        keys_file = open(CLIENT_KEYS_PATH, 'w')
-    except IOError as exception:
-        raise exception
-
-    # Clean agents from DB
-    command = f'global sql DELETE FROM agent WHERE id != 0'
-    response = query_wdb(command)
-
-    for agent in agents:
-        if 'id' in agent:
-            id = agent['id']
-        else:
-            id = '001'
-
-        if 'name' in agent:
-            name = agent['name']
-        else:
-            name = f'TestAgent{id}'
-
-        if 'ip' in agent:
-            ip = agent['ip']
-        else:
-            ip = 'any'
-
-        if 'key' in agent:
-            key = agent['key']
-        else:
-            key = 'TopSecret'
-
-        if 'connection_status' in agent:
-            connection_status = agent['connection_status']
-        else:
-            connection_status = 'never_connected'
-
-        if 'disconnection_time' in agent and 'delta' in agent['disconnection_time']:
-            disconnection_time = time_now + agent['disconnection_time']['delta']
-        elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
-            disconnection_time = agent['disconnection_time']['value']
-        else:
-            disconnection_time = 0
-
-        if 'registration_time' in agent and 'delta' in agent['registration_time']:
-            registration_time = time_now + agent['registration_time']['delta']
-        elif 'registration_time' in agent and 'value' in agent['registration_time']:
-            registration_time = agent['registration_time']['value']
-        else:
-            registration_time = time_now
-
-        # Write agent in client.keys
-        keys_file.write(f'{id} {name} {ip} {key}\n')
-
-        # Write agent in global.db
-        command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
-                  "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
-        response = query_wdb(command)
-        data = response.split(" ", 1)
-        assert data[0] == 'ok', f'Unable to add agent {id}'
-
-    keys_file.close()
-
-
 # Tests
-
 def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
                               set_up_groups, insert_pre_existent_agents, restart_authd_function,
                               wait_for_authd_startup_function, get_current_test_case, tear_down):
