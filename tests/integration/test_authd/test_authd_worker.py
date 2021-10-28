@@ -104,7 +104,7 @@ log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
 ossec_authd_socket_path = ("localhost", 1515)
 receiver_sockets_params = [(ossec_authd_socket_path, 'AF_INET', 'SSL_TLSv1_2')]
-test_case_ids = [f"{test_case['name']}" for test_case in message_tests]
+test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case in message_tests]
 
 mitm_master = WorkerMID(address=cluster_socket_path, family='AF_UNIX', connection_protocol='TCP')
 
@@ -114,7 +114,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Fixtures
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def set_up_groups(request, get_current_test_case):
     """
     Set the pre-defined groups.
@@ -130,7 +130,7 @@ def set_up_groups(request, get_current_test_case):
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
-@pytest.fixture(scope="module", params=configurations, ids=['authd_worker_config'])
+@pytest.fixture(scope='module', params=configurations, ids=['authd_worker_config'])
 def get_configuration(request):
     """
     Get configurations from the module
@@ -147,7 +147,6 @@ def get_current_test_case(request):
 
 
 # Tests
-
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_authd_startup_module, get_current_test_case):
     """
