@@ -167,8 +167,8 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'.*wm_gcp_main.*: DEBUG: Sleeping until: .*'
-        - r'wm_gcp_main(): DEBUG: Starting fetching of logs.'
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*'
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
 
     tags:
         - logs
@@ -246,7 +246,7 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'.*wm_gcp_main.*: DEBUG: Sleeping until: .*'
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*'
 
     tags:
         - logs

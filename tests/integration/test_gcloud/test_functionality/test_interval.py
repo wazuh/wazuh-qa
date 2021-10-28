@@ -144,8 +144,8 @@ def test_interval(get_configuration, configure_environment,
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'.*wm_gcp_main.*: DEBUG: Sleeping until: .*'
-        - r'wm_gcp_main(): DEBUG: Starting fetching of logs.'
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*'
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
 
     tags:
         - logs

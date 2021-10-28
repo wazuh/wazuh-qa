@@ -145,8 +145,8 @@ def test_pull_on_start(get_configuration, configure_environment,
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'wm_gcp_main(): DEBUG: Starting fetching of logs.'
-        - r'.*wm_gcp_main.*: DEBUG: Sleeping until: .*' (when 'pull_on_start=no')
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*' (when 'pull_on_start=no')
 
     tags:
         - logs

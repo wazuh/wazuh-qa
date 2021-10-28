@@ -159,8 +159,8 @@ def test_max_messages(get_configuration, configure_environment, publish_messages
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'wm_gcp_main(): DEBUG: Starting fetching of logs.'
-        - r'.*wm_gcp_run.*: INFO: - INFO - Received and acknowledged .* messages'
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
+        - r'.*wm_gcp_run.*: INFO.* - INFO - Received and acknowledged .* messages'
 
     tags:
         - logs

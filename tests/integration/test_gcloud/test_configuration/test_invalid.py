@@ -130,10 +130,10 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
                        can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'.*read_main_elements.*: ERROR: .*: Invalid element in the configuration.*'
-        - r'.*at _sched_scan_validate_parameters.*: ERROR:.*'
-        - r'.*at sched_scan_read.*: ERROR:.*'
-        - r'.*at sched_scan_read.*: ERROR:.*'
+        - r'.*read_main_elements.*: ERROR.* Invalid element in the configuration.*'
+        - r'.*at _sched_scan_validate_parameters.*: ERROR.*'
+        - r'.*at sched_scan_read.*: ERROR.*'
+        - r'.*at sched_scan_read.*: ERROR.*'
 
     tags:
         - invalid_settings

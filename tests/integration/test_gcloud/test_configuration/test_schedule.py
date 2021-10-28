@@ -132,7 +132,7 @@ def test_schedule(get_configuration, configure_environment, restart_wazuh):
                        credentials can be found in the 'configuration_template.yaml' file.
 
     expected_output:
-        - r'.*at _sched_scan_validate_parameters.*: WARNING:.*'
+        - r'.*at _sched_scan_validate_parameters.*: WARNING.*'
 
     tags:
         - scheduled
