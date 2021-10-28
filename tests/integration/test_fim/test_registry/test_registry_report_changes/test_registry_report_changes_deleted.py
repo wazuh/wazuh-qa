@@ -90,7 +90,6 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", False, {'test_duplicate_report'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", True, {'test_duplicate_report'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to_apply,
                                  get_configuration, configure_environment, restart_syscheckd,
                                  wait_for_fim_start):

@@ -65,7 +65,6 @@ def get_configuration(request):
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
     (testdir9, REQUIRED_ATTRIBUTES[CHECK_ALL] - {CHECK_MD5SUM} - {CHECK_SHA256SUM} - REQUIRED_ATTRIBUTES[CHECK_SUM]),
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_fim_start):
     """
@@ -104,7 +103,6 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_MD5SUM} - {CHECK_SHA256SUM}),
     (testdir8, REQUIRED_ATTRIBUTES[CHECK_SUM] - {CHECK_SHA256SUM} - {CHECK_MD5SUM})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_fim_start):
     """

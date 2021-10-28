@@ -56,7 +56,6 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     ({'multiple_keys'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     """
     Check if FIM can detect every event when adding, modifying and deleting a subkey/value within multiple registry

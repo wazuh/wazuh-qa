@@ -50,7 +50,6 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 @pytest.mark.benchmark
 @pytest.mark.parametrize('files, folder, tags_to_apply', [
     (file_list[0:10], testdir1, {'ossec_conf'}),

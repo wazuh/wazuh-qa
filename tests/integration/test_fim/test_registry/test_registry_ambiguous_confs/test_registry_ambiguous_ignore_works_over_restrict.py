@@ -91,7 +91,6 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
     (key, subkey_2, KEY_WOW64_64KEY, 'value_restrict'),
     (key, subkey_2, KEY_WOW64_32KEY, 'value_restrict')
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_ignore_over_restrict_values(key, subkey, value_name, arch,
                                      get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     """

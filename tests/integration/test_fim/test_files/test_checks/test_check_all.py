@@ -70,7 +70,6 @@ else:
 
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_fim_start):
     """
@@ -116,7 +115,6 @@ else:
 
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_fim_start):
     """

@@ -78,7 +78,6 @@ def get_configuration(request):
     (True, False),
     (False, True)
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_readded_watches(removed, renamed, get_configuration, configure_environment, restart_syscheckd_each_time):
     """
     Check if Wazuh delete watches when directory is removed or renamed, and add watches when directory is readded.
