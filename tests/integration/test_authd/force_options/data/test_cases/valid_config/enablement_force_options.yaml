@@ -17,16 +17,29 @@
   pre_existent_agents:
     -
       id: '001'
-      name: user1
+      name: agent_dup_name
+    -
+      id: '002'
+      name: agent_dup_ip
+      ip: '2.2.2.2'
   test_case:
   -
-    description: Replace an agent with a fully permissive force option
+    description: Insert an agent with duplicated name
     input:
-      name: 'user1'
+      name: 'agent_dup_name'
     output:
       status: 'success'
     log:
-      - Duplicate name. Removing old agent 'user1' (id '001').
+      - Duplicate name. Removing old agent 'agent_dup_name' (id '001').
+  -
+    description: Insert an agent with duplicated ip
+    input:
+      name: 'agent_dup_ip_new'
+      ip: '2.2.2.2'
+    output:
+      status: 'success'
+    log:
+      - Duplicate IP '2.2.2.2'. Removing old agent 'agent_dup_ip' (id '002').
 -
   name: "force_options_disabled"
   description: "Check that an agent can´t be replaced when force is disabled"
@@ -41,16 +54,29 @@
   pre_existent_agents:
     -
       id: '001'
-      name: user1
+      name: agent_dup_name
+    -
+      id: '002'
+      name: agent_dup_ip
+      ip: '2.2.2.2'
   test_case:
   -
-    description: Don´t replace an agent if force option is disabled
+    description: Try to replace an agent with duplicated name
     input:
-      name: 'user1'
+      name: 'agent_dup_name'
     output:
       status: 'error'
     log:
-      - Duplicate name 'user1', rejecting enrollment. Agent '001' won't be removed because the force option is disabled.
+      - Duplicate name 'agent_dup_name', rejecting enrollment. Agent '001' won't be removed because the force option is disabled.
+  -
+    description: Try to replace an agent with duplicated ip
+    input:
+      name: 'agent_dup_name_new'
+      ip: '2.2.2.2'
+    output:
+      status: 'error'
+    log:
+      - Duplicate IP '2.2.2.2', rejecting enrollment. Agent '002' won't be removed because the force option is disabled.
 -
   name: "force_insert_disabled"
   description: "Check that legacy force_insert overrides force.enabled"
@@ -66,7 +92,7 @@
   pre_existent_agents:
     -
       id: '001'
-      name: user1
+      name: agent_1
   log:
     - The <force_insert> tag is deprecated since version 4.3.0.
     - Setting <force><enabled> tag to 'no' to comply with the legacy <force_insert> option found.
@@ -74,11 +100,11 @@
   -
     description: Don´t replace an agent if force_insert disabled force options
     input:
-      name: 'user1'
+      name: 'agent_1'
     output:
       status: 'error'
     log:
-      - Duplicate name 'user1', rejecting enrollment. Agent '001' won't be removed because the force option is disabled.
+      - Duplicate name 'agent_1', rejecting enrollment. Agent '001' won't be removed because the force option is disabled.
 -
   name: "force_insert_enabled"
   description: "Check that legacy force_insert overrides force.enabled"
@@ -93,7 +119,7 @@
     force_insert : 'yes'
   pre_existent_agents:
     -
-      name: user1
+      name: agent_1
       id: '001'
   log:
     - The <force_insert> tag is deprecated since version 4.3.0.
@@ -102,8 +128,8 @@
   -
     description: Replace an agent if force_insert enabled force options
     input:
-      name: 'user1'
+      name: 'agent_1'
     output:
       status: 'success'
     log:
-      - Duplicate name. Removing old agent 'user1' (id '001')
+      - Duplicate name. Removing old agent 'agent_1' (id '001')
