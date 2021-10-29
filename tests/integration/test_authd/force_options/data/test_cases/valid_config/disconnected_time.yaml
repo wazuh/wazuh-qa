@@ -4,14 +4,14 @@
   configuration:
   - force:
       elements:
-      - enabled:
-          value: 'yes'
-      - key_mismatch:
-          value: 'no'
       - disconnected_time:
           attributes:
           - enabled: 'no'
           value: 100
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
       - after_registration_time:
           value: 0
   pre_existent_agents:
@@ -122,14 +122,14 @@
   configuration:
   - force:
       elements:
-      - enabled:
-          value: 'yes'
-      - key_mismatch:
-          value: 'no'
       - disconnected_time:
           attributes:
           - enabled: 'no'
           value: 100
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
       - after_registration_time:
           value: 0
   pre_existent_agents:
@@ -163,17 +163,17 @@
   description: "Check that authd only replace agents that match the disconnected time from the configuration"
   configuration:
     - force:
-      elements:
-      - disconnected_time:
-        value: 100
-        attributes:
-        - enabled: 'yes'
-    enabled:
-      value: 'yes'
-    key_mismatch:
-      value: 'no'
-    after_registration_time:
-      value: 0
+        elements:
+        - disconnected_time:
+            value: 100
+            attributes:
+            - enabled: 'yes'
+        - enabled:
+            value: 'yes'
+        - key_mismatch:
+            value: 'no'
+        - after_registration_time:
+            value: 0
   pre_existent_agents:
     - id: '001'
       name: agent_disconnected_enough_dup_name

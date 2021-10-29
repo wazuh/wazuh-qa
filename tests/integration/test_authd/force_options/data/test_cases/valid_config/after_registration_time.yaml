@@ -3,16 +3,17 @@
   description: "Check that an agent can be replaced no matter the registration time, if registration_time is 0"
   configuration:
   - force:
-    after_registration_time:
-      value: 0
-    enabled:
-      value: 'yes'
-    key_mismatch:
-      value: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
+      elements:
+      - after_registration_time:
+          value: 0
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          value: 0
+          attributes:
+          - enabled: 'no'
   pre_existent_agents:
   -
     id: '001'
@@ -76,16 +77,17 @@
   description: "Check that authd only replace agents that match the registration time from the configuration"
   configuration:
   - force:
-    after_registration_time:
-      value: 100
-    enabled:
-      value: 'yes'
-    key_mismatch:
-      value: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
+      elements:
+      - after_registration_time:
+          value: 100
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          value: 0
+          attributes:
+          - enabled: 'no'
   pre_existent_agents:
     -
       id: '001'

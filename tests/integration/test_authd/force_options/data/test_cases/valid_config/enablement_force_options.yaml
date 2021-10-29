@@ -3,17 +3,17 @@
   description: "Check that an agent can be replaced when force is enabled"
   configuration:
     - force:
-      elements:
-      - enabled:
-          value: 'yes'
-      - key_mismatch:
-          value: 'no'
-      - disconnected_time:
-          attributes:
-          - enabled: 'no'
-          value: 0
-      - after_registration_time:
-          value: 0
+        elements:
+        - enabled:
+            value: 'yes'
+        - key_mismatch:
+            value: 'no'
+        - disconnected_time:
+            attributes:
+            - enabled: 'no'
+            value: 0
+        - after_registration_time:
+            value: 0
   pre_existent_agents:
     -
       id: '001'
@@ -44,13 +44,18 @@
   name: "force_options_disabled"
   description: "Check that an agent can´t be replaced when force is disabled"
   configuration:
-    enabled: 'no'
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 0
+    - force:
+        elements:
+        - enabled:
+            value: 'no'
+        - key_mismatch:
+            value: 'no'
+        - disconnected_time:
+            value: 0
+            attributes:
+            - enabled: 'no'
+        - after_registration_time:
+            value: 0
   pre_existent_agents:
     -
       id: '001'
@@ -81,14 +86,20 @@
   name: "force_insert_disabled"
   description: "Check that legacy force_insert overrides force.enabled"
   configuration:
-    enabled: 'yes'
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 0
-    force_insert : 'no'
+  - force:
+      elements:
+      - enabled:
+          value: 'yes'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          value: 0
+          attributes:
+          - enabled: 'no'
+      - after_registration_time:
+          value: 0
+  - force_insert :
+      value: 'no'
   pre_existent_agents:
     -
       id: '001'
@@ -109,14 +120,20 @@
   name: "force_insert_enabled"
   description: "Check that legacy force_insert overrides force.enabled"
   configuration:
-    enabled: 'no'
-    key_mismatch: 'no'
-    disconnected_time:
-      value: 0
-      attributes:
-      - enabled: 'no'
-    after_registration_time: 0
-    force_insert : 'yes'
+  - force:
+      elements:
+      - enabled:
+          value: 'no'
+      - key_mismatch:
+          value: 'no'
+      - disconnected_time:
+          value: 0
+          attributes:
+          - enabled: 'no'
+      - after_registration_time:
+          value:  0
+  - force_insert :
+      value: 'yes'
   pre_existent_agents:
     -
       name: agent_1
