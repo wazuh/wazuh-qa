@@ -1,8 +1,5 @@
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
-from wazuh_testing.tools.exceptions import AnsibleException
 
 
 def _ansible_runner(inventory_file_path, playbook_parameters, ansible_output=False, log_ansible_error=True):
@@ -147,40 +144,3 @@ def launch_remote_commands(inventory_file_path, hosts, commands, become=False, a
 
     return _ansible_runner(inventory_file_path, {'tasks_list': tasks_list, 'hosts': hosts, 'gather_facts': True,
                                                  'become': become}, ansible_output)
-
-
-def check_windows_ansible_credentials(user, password, log_ansible_error=False):
-    """Check if the windows ansible credentials are correct.
-
-    This method must be run in a Windows WSL.
-
-    Args:
-        user (str): Windows user.
-        password (str): Windows user password.
-        log_ansible_error (boolean): True for logging the error exception message if any.
-
-    Returns:
-        boolean: True if credentials are correct, False otherwise.
-    """
-    inventory = AnsibleInventory([AnsibleInstance('127.0.0.1',  connection_user=user,
-                                                  connection_user_password=password,
-                                                  connection_method='winrm',
-                                                  connection_port='5986')
-                                ])
-    inventory_file_path = inventory.inventory_file_path
-    tasks_list = [
-         AnsibleTask({
-            'debug': {
-                'msg': 'Hello world'
-            }
-        }),
-
-    ]
-
-    try:
-        _ansible_runner(inventory_file_path, {'tasks_list': tasks_list, 'hosts': '127.0.0.1', 'gather_facts': True,
-                                              'become': False}, ansible_output=False,
-                                              log_ansible_error=log_ansible_error)
-        return True
-    except AnsibleException:
-        return False

@@ -4,6 +4,7 @@
 import json
 import argparse
 import os
+import sys
 import yaml
 import textwrap
 
@@ -29,6 +30,9 @@ PROVISION_KEY = 'provision'
 TEST_KEY = 'tests'
 WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')
 RUNNING_ON_DOCKER_CONTAINER = True if 'RUNNING_ON_DOCKER_CONTAINER' in os.environ else False
+AUTOMATIC_MODE = 'manual_mode'
+MANUAL_MODE = 'automatic_mode'
+
 
 qactl_logger = Logging(QACTL_LOGGER)
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -54,11 +58,12 @@ def read_configuration_data(configuration_file_path):
     return configuration_data
 
 
-def validate_configuration_data(configuration_data):
+def validate_configuration_data(configuration_data, qa_ctl_mode):
     """Validate the configuration data schema.
 
     Args:
         configuration_data (dict): Configuration data info.
+        qa_ctl_mode (str): qa-ctl run mode (AUTOMATIC_MODE or MANUAL_MODE)
     """
     qactl_logger.debug('Validating configuration schema')
     data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
@@ -67,7 +72,21 @@ def validate_configuration_data(configuration_data):
     with open(os.path.join(_data_path, schema_file), 'r') as config_data:
         schema = json.load(config_data)
 
+    # Validate schema constraints
     validate(instance=configuration_data, schema=schema)
+
+    # Check that qa_ctl_launcher_branch parameter has been specified and its valid for Windows manual mode
+    if sys.platform == 'win32' and qa_ctl_mode == MANUAL_MODE:
+        if 'config' not in configuration_data or 'qa_ctl_launcher_branch' not in configuration_data['config']:
+            raise QAValueError('qa_ctl_launcher_branch was not found in the configuration file. It is required if ' \
+                               'you are running qa-ctl in a Windows host', qactl_logger.error, QACTL_LOGGER)
+
+        # Check that qa_ctl_launcher_branch exists
+        if not github_checks.branch_exists(configuration_data['config']['qa_ctl_launcher_branch'],
+                                           repository=WAZUH_QA_REPO):
+            raise QAValueError(f"{configuration_data['config']['qa_ctl_launcher_branch']} branch specified as "
+                               'qa_ctl_launcher_branch  does not exist in Wazuh QA repository.', qactl_logger.error,
+                                QACTL_LOGGER)
 
     qactl_logger.debug('Schema validation has passed successfully')
 
@@ -184,6 +203,8 @@ def validate_parameters(parameters):
                                                                                    ' --no-logging'):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
+    ## --> Add os validation for each test
+
     qactl_logger.info('Input parameters validation has passed successfully')
 
 
@@ -230,7 +251,7 @@ def get_script_parameters():
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
     parser.add_argument('--os', '-o', type=str, action='store', required=False, nargs='+', dest='operating_systems',
-                        choices=['centos', 'ubuntu'], help='System/s where the tests will be launched.')
+                        choices=['centos', 'ubuntu', 'windows'], help='System/s where the tests will be launched.')
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                         help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
@@ -264,8 +285,10 @@ def main():
     if not arguments.no_validation:
         validate_parameters(arguments)
 
+    qa_ctl_mode = AUTOMATIC_MODE if arguments.run_test else MANUAL_MODE
+
     # Generate or get the qactl configuration file
-    if arguments.run_test:
+    if qa_ctl_mode == AUTOMATIC_MODE:
         qactl_logger.debug('Generating configuration file')
         config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, arguments.qa_branch,
                                                 WAZUH_QA_FILES, arguments.operating_systems)
@@ -290,7 +313,7 @@ def main():
     configuration_data = read_configuration_data(configuration_file)
 
     # Validate configuration schema
-    validate_configuration_data(configuration_data)
+    validate_configuration_data(configuration_data, qa_ctl_mode)
 
     # Set QACTL configuration
     qactl_configuration = QACTLConfiguration(configuration_data, arguments)

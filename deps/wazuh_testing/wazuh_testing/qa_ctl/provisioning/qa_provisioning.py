@@ -4,7 +4,8 @@ from tempfile import gettempdir
 
 
 from time import sleep
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import WazuhLocalPackage
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
@@ -64,12 +65,29 @@ class QAProvisioning():
         extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
         private_key_path = None if 'local_private_key_file_path' not in host_info \
                                    else host_info['local_private_key_file_path']
-        instance = AnsibleInstance(host=host_info['host'], host_vars=extra_vars,
-                                   connection_method=host_info['connection_method'],
-                                   connection_port=host_info['connection_port'], connection_user=host_info['user'],
-                                   connection_user_password=host_info['password'],
-                                   ssh_private_key_file_path=private_key_path,
-                                   ansible_python_interpreter=host_info['ansible_python_interpreter'])
+
+        if host_info['system'] == 'windows':
+            instance = WindowsAnsibleInstance(
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                ansible_python_interpreter=host_info['ansible_python_interpreter'],
+                host_vars=extra_vars
+            )
+        else:
+            instance = UnixAnsibleInstance(
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                host_vars=extra_vars,
+                ansible_ssh_private_key_file=private_key_path,
+                ansible_python_interpreter=host_info['ansible_python_interpreter']
+            )
+
         return instance
 
     def __process_inventory_data(self):
@@ -108,34 +126,29 @@ class QAProvisioning():
             install_type = None if 'type' not in deploy_info else deploy_info['type']
             installation_files_path = None if 'installation_files_path' not in deploy_info \
                 else deploy_info['installation_files_path']
-            wazuh_install_path = None if 'wazuh_install_path' not in deploy_info \
-                else deploy_info['wazuh_install_path']
+            wazuh_install_path = '/var/ossec' if 'wazuh_install_path' not in deploy_info else \
+                deploy_info['wazuh_install_path']
             wazuh_branch = 'master' if 'wazuh_branch' not in deploy_info else deploy_info['wazuh_branch']
-            s3_package_url = None if 's3_package_url' not in deploy_info \
-                else deploy_info['s3_package_url']
-            system = None if 'version' not in deploy_info \
-                else deploy_info['system']
-            version = None if 'version' not in deploy_info \
-                else deploy_info['version']
-            repository = None if 'repository' not in deploy_info \
-                else deploy_info['repository']
-            revision = None if 'revision' not in deploy_info \
-                else deploy_info['revision']
-            local_package_path = None if 'local_package_path' not in deploy_info \
-                else deploy_info['local_package_path']
+            s3_package_url = None if 's3_package_url' not in deploy_info else deploy_info['s3_package_url']
+            system = None if 'version' not in deploy_info else deploy_info['system']
+            version = None if 'version' not in deploy_info else deploy_info['version']
+            repository = None if 'repository' not in deploy_info else deploy_info['repository']
+            revision = None if 'revision' not in deploy_info else deploy_info['revision']
+            local_package_path = None if 'local_package_path' not in deploy_info else deploy_info['local_package_path']
             manager_ip = None if 'manager_ip' not in deploy_info else deploy_info['manager_ip']
+            ansible_admin_user = 'vagrant' if 'ansible_admin_user' not in host_provision_info['host_info'] else \
+                host_provision_info['host_info']['ansible_admin_user']
 
             installation_files_parameters = {'wazuh_target': install_target}
 
             if installation_files_path:
                 installation_files_parameters['installation_files_path'] = installation_files_path
-            if wazuh_install_path:
-                installation_files_parameters['wazuh_install_path'] = wazuh_install_path
 
             installation_files_parameters['qa_ctl_configuration'] = self.qa_ctl_configuration
 
             if install_type == 'sources':
                 installation_files_parameters['wazuh_branch'] = wazuh_branch
+                installation_files_parameters['wazuh_install_path'] = wazuh_install_path
                 installation_instance = WazuhSources(**installation_files_parameters)
 
             if install_type == 'package':
@@ -146,28 +159,35 @@ class QAProvisioning():
                     installation_files_parameters['repository'] = repository
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
                 elif s3_package_url is None and local_package_path is not None:
                     installation_files_parameters['local_package_path'] = local_package_path
                     installation_instance = WazuhLocalPackage(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
                 else:
                     installation_files_parameters['s3_package_url'] = s3_package_url
                     installation_instance = WazuhS3Package(**installation_files_parameters)
                     remote_files_path = installation_instance.download_installation_files(self.inventory_file_path,
-                                                                                        hosts=current_host)
+                                                                                          hosts=current_host)
+
             if install_target == 'agent':
                 deployment_instance = AgentDeployment(remote_files_path,
-                                                    inventory_file_path=self.inventory_file_path,
-                                                    install_mode=install_type, hosts=current_host,
-                                                    server_ip=manager_ip,
-                                                    qa_ctl_configuration=self.qa_ctl_configuration)
+                                                      inventory_file_path=self.inventory_file_path,
+                                                      install_mode=install_type,
+                                                      hosts=current_host,
+                                                      server_ip=manager_ip,
+                                                      install_dir_path=wazuh_install_path,
+                                                      qa_ctl_configuration=self.qa_ctl_configuration,
+                                                      ansible_admin_user=ansible_admin_user)
             if install_target == 'manager':
                 deployment_instance = ManagerDeployment(remote_files_path,
                                                         inventory_file_path=self.inventory_file_path,
-                                                        install_mode=install_type, hosts=current_host,
-                                                        qa_ctl_configuration=self.qa_ctl_configuration)
+                                                        install_mode=install_type,
+                                                        hosts=current_host,
+                                                        install_dir_path=wazuh_install_path,
+                                                        qa_ctl_configuration=self.qa_ctl_configuration,
+                                                        ansible_admin_user=ansible_admin_user)
             deployment_instance.install()
 
             if health_check:
@@ -199,11 +219,20 @@ class QAProvisioning():
             hosts (str): Hosts to check.
         """
         QAProvisioning.LOGGER.info('Checking hosts SSH connection')
-        wait_for_connection = AnsibleTask({'name': 'Waiting for SSH hosts connection are reachable',
-                                           'wait_for_connection': {'delay': 5, 'timeout': 60}})
+        wait_for_connection_unix = AnsibleTask({
+            'name': 'Waiting for SSH hosts connection are reachable (Unix)',
+            'wait_for_connection': {'delay': 5, 'timeout': 60},
+            'when': 'ansible_system != "Win32NT"'
+        })
 
-        playbook_parameters = {'hosts': hosts, 'tasks_list': [wait_for_connection]}
+        wait_for_connection_windows = AnsibleTask({
+            'name': 'Waiting for SSH hosts connection are reachable (Windows)',
+            'win_wait_for': {'delay': 5, 'timeout': 60},
+            'when': 'ansible_system == "Win32NT"'
+        })
 
+        playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': [wait_for_connection_unix,
+                                                                                    wait_for_connection_windows]}
         AnsibleRunner.run_ephemeral_tasks(self.inventory_file_path, playbook_parameters,
                                           output=self.qa_ctl_configuration.ansible_output)
         QAProvisioning.LOGGER.info('Hosts connection OK. The instances are accessible via ssh')
@@ -219,7 +248,7 @@ class QAProvisioning():
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
             try:
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.script_parameters.qa_branch,
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.qa_ctl_launcher_branch,
                                   self.qa_ctl_configuration.debug_level, topic='provisioning the instances')
             finally:
                 file.remove_file(tmp_config_file)
@@ -236,7 +265,7 @@ class QAProvisioning():
             for runner_thread in provision_threads:
                 runner_thread.join()
 
-            QAProvisioning.LOGGER.info(f"The instances have been provisioned sucessfully")
+            QAProvisioning.LOGGER.info('The instances have been provisioned sucessfully')
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object"""

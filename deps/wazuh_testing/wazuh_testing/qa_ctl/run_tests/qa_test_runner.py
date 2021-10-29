@@ -2,7 +2,8 @@ import os
 import sys
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
@@ -49,12 +50,29 @@ class QATestRunner():
         extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
         private_key_path = None if 'local_private_key_file_path' not in host_info \
                                    else host_info['local_private_key_file_path']
-        instance = AnsibleInstance(host=host_info['host'], host_vars=extra_vars,
-                                   connection_method=host_info['connection_method'],
-                                   connection_port=host_info['connection_port'], connection_user=host_info['user'],
-                                   connection_user_password=host_info['password'],
-                                   ssh_private_key_file_path=private_key_path,
-                                   ansible_python_interpreter=host_info['ansible_python_interpreter'])
+
+        if host_info['system'] == 'windows':
+            instance = WindowsAnsibleInstance(
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                ansible_python_interpreter=host_info['ansible_python_interpreter'],
+                host_vars=extra_vars
+            )
+        else:
+            instance = UnixAnsibleInstance(
+                host=host_info['host'],
+                ansible_connection=host_info['ansible_connection'],
+                ansible_port=host_info['ansible_port'],
+                ansible_user=host_info['ansible_user'],
+                ansible_password=host_info['ansible_password'],
+                ansible_ssh_private_key_file=private_key_path,
+                ansible_python_interpreter=host_info['ansible_python_interpreter'],
+                host_vars=extra_vars
+            )
+
         return instance
 
     def __process_inventory_data(self, instances_info):
@@ -89,12 +107,14 @@ class QATestRunner():
             test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
             for module_key, module_value in host_value.items():
                 hosts = host_value['host_info']['host']
+                ansible_admin_user = host_value['host_info']['ansible_admin_user'] if 'ansible_admin_user' \
+                    in host_value['host_info'] else None
                 if module_key == 'test':
-                    test_launcher.add(self.__build_test(module_value, hosts))
+                    test_launcher.add(self.__build_test(module_value, hosts, ansible_admin_user))
             self.test_launchers.append(test_launcher)
         QATestRunner.LOGGER.debug('Testing data from hosts info was processed successfully')
 
-    def __build_test(self, test_params, host=['all']):
+    def __build_test(self, test_params, host=['all'], ansible_admin_user=None):
         """Private method in charge of reading all the required fields to build one test of type Pytest
 
             Args:
@@ -118,6 +138,9 @@ class QATestRunner():
             test_dict['component'] = test_params['component'] if 'component' in test_params else None
             test_dict['modules'] = test_params['modules'] if 'modules' in test_params else None
             test_dict['system'] = test_params['system'] if 'system' in test_params else None
+            test_dict['wazuh_install_path'] = test_params['wazuh_install_path'] if 'wazuh_install_path' in test_params \
+                else None
+            test_dict['ansible_admin_user'] = ansible_admin_user
 
             if 'parameters' in test_params:
                 parameters = test_params['parameters']
@@ -165,7 +188,7 @@ class QATestRunner():
             file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
             try:
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.script_parameters.qa_branch,
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.qa_ctl_launcher_branch,
                                   self.qa_ctl_configuration.debug_level, topic='launching the tests')
                 # Move all test results to their original paths specified in Windows qa-ctl configuration
                 index = 0
