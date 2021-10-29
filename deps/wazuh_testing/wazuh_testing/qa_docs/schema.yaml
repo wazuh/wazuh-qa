@@ -238,11 +238,18 @@ predefined_values:
     - fim_registry_tags
     - fim_synchronization
     - gcloud
+    - gcloud_configuration
+    - gcloud_functionality
     - github
+    - github_configuration
     - integrity
+    - invalid_settings
     - keys
     - key_polling
     - logcollector
+    - logcollector_age
+    - logcollector_cmd_exec
+    - logcollector_configuration
     - logs
     - logtest
     - man_in_the_middle
@@ -260,6 +267,7 @@ predefined_values:
     - rootcheck
     - rules
     - scan
+    - scheduled
     - settings
     - simulator
     - ssl
