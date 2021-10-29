@@ -55,7 +55,7 @@ def create_authd_request(input):
 
 
 # Functions
-def validate_authd_logs(expected_logs, log_monitor = None):
+def validate_authd_logs(expected_logs, log_monitor=None):
     if not log_monitor:
         log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -131,6 +131,7 @@ def validate_authd_response(response, expected):
 
     return result, err_msg
 
+
 def clean_agents_from_db():
     """
     Clean agents from DB
@@ -190,8 +191,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         # Write agent in client.keys
         keys_file.write(f'{id} {name} {ip} {key}\n')
 
-        #Write agent in global.db
+        # Write agent in global.db
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
-
 
     keys_file.close()

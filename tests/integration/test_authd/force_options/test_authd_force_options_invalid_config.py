@@ -48,4 +48,4 @@ def test_authd_force_options_invalid_config(get_current_test_case, configure_loc
                                             override_authd_force_conf, file_monitoring, restart_authd_function,
                                             tear_down):
 
-   validate_authd_logs(get_current_test_case.get('log', []), log_monitor)
+    validate_authd_logs(get_current_test_case.get('log', []), log_monitor)

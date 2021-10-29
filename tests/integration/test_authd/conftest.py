@@ -50,9 +50,10 @@ def restart_authd(get_configuration):
     """
     truncate_file(LOG_FILE_PATH)
     try:
-      control_service("restart", daemon=DAEMON_NAME)
+        control_service("restart", daemon=DAEMON_NAME)
     except Exception:
         pass
+
 
 @pytest.fixture(scope='function')
 def restart_authd_function():

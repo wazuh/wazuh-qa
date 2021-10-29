@@ -8,7 +8,6 @@ from wazuh_testing.authd import create_authd_request, validate_authd_response, v
                                 insert_pre_existent_agents, AUTHD_KEY_REQUEST_TIMEOUT
 
 
-
 # Data paths
 data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(data_path, 'template_configuration.yaml')
