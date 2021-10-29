@@ -9,8 +9,9 @@ copyright:
 import re
 import pytest
 import time
-from wazuh_testing.tools import CLIENT_KEYS_PATH
+from wazuh_testing.tools import CLIENT_KEYS_PATH, LOG_FILE_PATH
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 
 
 DAEMON_NAME = 'wazuh-authd'
@@ -51,6 +52,18 @@ def create_authd_request(input):
         command = command + f" K:'{key_hash}'"
 
     return command
+
+
+# Functions
+def validate_authd_logs(expected_logs, log_monitor = None):
+    if not log_monitor:
+        log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    for log in expected_logs:
+        log_monitor.start(timeout=AUTHD_KEY_REQUEST_TIMEOUT,
+                          callback=make_callback(log, prefix=AUTHD_DETECTOR_PREFIX,
+                                                 escape=True),
+                          error_message=f"Expected error log does not occured: '{log}'")
 
 
 def validate_argument(received, expected, argument_name):
