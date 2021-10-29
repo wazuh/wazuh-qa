@@ -2,9 +2,9 @@ import os
 import pytest
 import yaml
 from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, set_section_wazuh_conf, write_wazuh_conf, get_wazuh_conf
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.authd import create_authd_request, validate_authd_response, AUTHD_KEY_REQUEST_TIMEOUT, insert_pre_existent_agents
+from wazuh_testing.authd import AUTHD_KEY_REQUEST_TIMEOUT
 
 
 # Data paths
@@ -34,33 +34,6 @@ def validate_authd_logs(logs):
                                                  escape=True),
                           error_message=f"Expected error log does not occured: '{log}'")
 
-def get_temp_force_config(param):
-    """
-    Creates a temporal config file.
-    """
-    temp = os.path.join(data_path, 'temp.yaml')
-    force_conf = {'force': {'elements': []}}
-    legacy_force_insert_conf = None
-    for elem in param:
-        if elem == 'force_insert':
-            legacy_force_insert_conf = {'force_insert': {'value': param[elem]}}
-        elif elem == 'disconnected_time':
-            disconnected_time_conf = {'disconnected_time':{'value': 0, 'attributes':[{'enabled':'no'}]}}
-            disconnected_time_conf['disconnected_time']['value'] = param[elem]['value']
-            disconnected_time_conf['disconnected_time']['attributes'][0]['enabled'] = param[elem]['attributes'][0]['enabled']
-            force_conf['force']['elements'].append(disconnected_time_conf)
-        else:
-            force_conf['force']['elements'].append({elem: {'value': param[elem]}})
-
-    with open(configurations_path, 'r') as conf_file:
-        temp_conf_file = yaml.safe_load(conf_file)
-        temp_conf_file[0]['sections'][0]['elements'].append(force_conf)
-        if legacy_force_insert_conf:
-            temp_conf_file[0]['sections'][0]['elements'].append(legacy_force_insert_conf)
-    with open(temp, 'w') as temp_file:
-        yaml.safe_dump(temp_conf_file, temp_file)
-    return temp
-
 
 # Fixtures
 
@@ -78,31 +51,6 @@ def get_current_test_case(request):
     Get current test case from the module
     """
     return request.param
-
-
-@pytest.fixture(scope='function')
-def override_authd_force_conf(get_current_test_case, request):
-    """
-    Re-writes Wazuh configuration file with new configurations from the test case.
-    """
-    # Save current configuration
-    backup_config = get_wazuh_conf()
-
-    test_name = request.node.originalname
-    configuration = get_current_test_case.get('configuration', {})
-    # Configuration for testing
-    temp = get_temp_force_config(configuration)
-    conf = load_wazuh_configurations(temp, test_name, )
-    os.remove(temp)
-
-    test_config = set_section_wazuh_conf(conf[0]['sections'])
-    # Set new configuration
-    write_wazuh_conf(test_config)
-
-    yield
-
-    # Restore previous configuration
-    write_wazuh_conf(backup_config)
 
 
 # Tests
