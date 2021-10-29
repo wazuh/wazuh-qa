@@ -7,6 +7,8 @@ import os
 import sys
 import shutil
 
+from tempfile import gettempdir
+
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 
@@ -239,3 +241,41 @@ def run_local_command(command):
         print("error")
         # raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.LOGGER.error,
         #                    QADOCS_LOGGER)
+
+
+def run_local_command_with_output(command):
+    """Run local commands getting the command output.
+    Args:
+        command (string): Command to run.
+
+    Returns:
+        str: Command output
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command], stdout=subprocess.PIPE)
+
+    return run.stdout.read().decode()
+
+
+def qa_docs_docker_run(qa_branch, parameters, command):
+    """Run qa-docs in a Linux docker container.
+
+    Having this functionality helps the people that does not have ElasticSearch and/or wazuh framework to generate
+    the documentation of the tests.
+
+    Args:
+        qa_branch (str): Wazuh qa branch that will be used as tests input.
+        parameters (str): 
+        command (str): 
+    """
+    docker_args = f"{qa_branch} {command}"
+    docker_image_name = 'wazuh/qa-docs'
+    docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dockerfiles')
+
+    utils_logger.info(f"Building qa-docs docker image")
+    run_local_command(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
+
+    utils_logger.info(f"Running the Linux container")
+    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
