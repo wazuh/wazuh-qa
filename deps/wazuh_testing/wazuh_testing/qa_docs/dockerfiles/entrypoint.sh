@@ -10,6 +10,14 @@ git clone https://github.com/wazuh/wazuh-qa --depth=1 -b ${BRANCH} &> /dev/null
 
 /usr/local/bin/qa-docs -d -I /tests/wazuh-qa/tests --validate-parameters ${CMD}
 
+# get run status
+status=$?
+# If not returned 0, exit
+if [ $status -ne 0 ]
+then
+  exit 1
+fi
+
 # Start services
 # If qa-docs will index the data, start ES
 if [[ "$CMD" =~ .*"-i".* ]] || [[ "$CMD" =~ .*"-il".* ]];

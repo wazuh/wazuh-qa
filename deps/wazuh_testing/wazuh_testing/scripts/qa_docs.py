@@ -381,8 +381,9 @@ def index_and_visualize_data(args):
 def main():
     args, parser = get_parameters()
 
-    set_parameters(args)
-    validate_parameters(args, parser)
+    if not args.run_with_docker:
+        set_parameters(args)
+        validate_parameters(args, parser)
     if args.validate_parameters: return 0
 
     if args.run_with_docker:
