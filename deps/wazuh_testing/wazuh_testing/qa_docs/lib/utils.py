@@ -279,3 +279,35 @@ def qa_docs_docker_run(qa_branch, parameters, command):
 
     utils_logger.info(f"Running the Linux container")
     run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
+
+
+def get_qa_docs_run_options(args):
+    """Get the parameters to run qa-docs.
+    
+    Args:
+        args (argparse.Namespace): arguments that are passed to the tool.
+    Returns:
+        command (str): A string with the options to run qa-docs.
+    """
+    command = ''
+    if args.index_name:
+        command += f" -i {args.index_name}"
+    if args.app_index_name:
+        command += f" -l {args.app_index_name}"
+    if args.launching_index_name:
+        command += f" -il {args.launching_index_name}"
+
+    if args.test_types:
+        command += ' --types'
+        for type in args.test_types:
+            command += f" {type}"
+            if args.test_modules:
+                command += ' --modules'
+                for modules in args.test_modules:
+                    command += f" {modules} "
+    elif args.test_names:
+        command += ' -t'
+        for test_name in args.test_names:
+            command += f" {test_name} "
+
+    return command

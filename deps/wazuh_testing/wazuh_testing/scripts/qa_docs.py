@@ -12,7 +12,7 @@ from elasticsearch import Elasticsearch
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
 from wazuh_testing.qa_docs.lib.sanity import Sanity
-from wazuh_testing.qa_docs.lib.utils import run_local_command, qa_docs_docker_run
+from wazuh_testing.qa_docs.lib.utils import run_local_command, qa_docs_docker_run, get_qa_docs_run_options
 from wazuh_testing.qa_docs.doc_generator import DocGenerator
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -278,11 +278,24 @@ def validate_parameters(parameters, parser):
         except Exception as index_exception:
             raise QAValueError(f"Index exception: {index_exception}", qadocs_logger.error)
 
+    if parameters.test_types:
+        for type in parameters.test_types:
+            if type not in os.listdir(parameters.tests_path):
+                raise QAValueError(f"The given type: {type}, not found in {parameters.tests_path}",
+                                   qadocs_logger.error)
+
     # Check that modules selection is done within a test type
-    if parameters.test_modules and len(parameters.test_types) != 1:
-        raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just '
-                           'one type if you want to parse some modules within a test type.',
-                           qadocs_logger.error)
+    if parameters.test_modules:
+        if len(parameters.test_types) != 1:
+            raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with '
+                            'just one type if you want to parse some modules within a test type.',
+                            qadocs_logger.error)
+
+        for module in parameters.test_modules:
+            type_path = os.path.join(parameters.tests_path,parameters.test_types[0])
+            if module not in os.listdir(type_path):
+                raise QAValueError(f"The given module: {module}, not found in {type_path}",
+                                   qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
@@ -364,40 +377,16 @@ def index_and_visualize_data(args):
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name
         run_searchui(args.launching_index_name)
 
-def get_qa_docs_run(args):
-    command = ''
-    if args.index_name:
-        command += f" -i {args.index_name}"
-    if args.app_index_name:
-        command += f" -l {args.app_index_name}"
-    if args.launching_index_name:
-        command += f" -il {args.launching_index_name}"
-
-    if args.test_types:
-        command += ' --types'
-        for type in args.test_types:
-            command += f" {type}"
-            if args.test_modules:
-                command += ' --modules'
-                for modules in args.test_modules:
-                    command += f" {modules} "
-    elif args.test_names:
-        command += ' -t'
-        for test_name in args.test_names:
-            command += f" {test_name} "
-
-    return command
 
 def main():
     args, parser = get_parameters()
 
-    if args.validate_parameters:
-        set_parameters(args)
-        validate_parameters(args, parser)
-        return 0
+    set_parameters(args)
+    validate_parameters(args, parser)
+    if args.validate_parameters: return 0
 
     if args.run_with_docker:
-        command = get_qa_docs_run(args)
+        command = get_qa_docs_run_options(args)
         qa_docs_docker_run(args.qa_branch, qadocs_logger.get_logger('qadocs_logger'), command)
     elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
