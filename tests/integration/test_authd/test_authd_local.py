@@ -109,7 +109,7 @@ def set_up_groups(get_current_test_case, request):
 
 
 # Tests
-def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
+def test_authd_local_messages(configure_environment, configure_sockets_environment_wazuh_control, connect_to_sockets_function,
                               set_up_groups, insert_pre_existent_agents, restart_authd_function,
                               wait_for_authd_startup_function, get_current_test_case, tear_down):
     """

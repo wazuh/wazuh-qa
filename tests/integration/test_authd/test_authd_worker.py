@@ -141,7 +141,7 @@ def get_current_test_case(request):
 
 
 # Tests
-def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
+def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment_wazuh_control,
                              connect_to_sockets_module, wait_for_authd_startup_module, get_current_test_case):
     """
         description:

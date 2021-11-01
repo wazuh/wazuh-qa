@@ -174,7 +174,7 @@ def get_process_cmd(search_cmd):
             return proc
 
 
-def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None):
+def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=None, use_wazuh_control=False):
     """Check Wazuh daemon status.
 
     Args:
@@ -191,7 +191,10 @@ def check_daemon_status(daemon=None, running=True, timeout=10, extra_sockets=Non
         extra_sockets = []
     for _ in range(3):
         # Check specified daemon/s status
-        daemon_status = subprocess.run(['/var/ossec/bin/wazuh-control', 'status'], stdout=subprocess.PIPE).stdout.decode()
+        if use_wazuh_control == True:
+            daemon_status = subprocess.run([f"{WAZUH_PATH}/bin/wazuh-control", 'status'], stdout=subprocess.PIPE).stdout.decode()
+        else:
+            daemon_status = subprocess.run(['service', get_service(), 'status'], stdout=subprocess.PIPE).stdout.decode()
         if f"{daemon if daemon is not None else ''} {'not' if running else 'is'} running" not in daemon_status:
             # Construct set of socket paths to check
             if daemon is None:
