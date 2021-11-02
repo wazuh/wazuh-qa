@@ -1,5 +1,5 @@
 import os
-
+import re
 from datetime import datetime
 from tempfile import gettempdir
 from wazuh_testing.qa_ctl.run_tests.test_result import TestResult
@@ -85,6 +85,36 @@ class Pytest(Test):
             os.makedirs(self.tests_result_path)
 
         super().__init__(tests_path, tests_run_dir, tests_result_path, modules, component, system)
+
+    def __output_trimmer(self, result):
+        """This function trims the obtained results in order to get a more readable output information
+            when executing qa-ctl
+
+        Args:
+            result (Test resutl object): object containing all the results obtained from the test
+
+        Return:
+            output_result (string): String containing the trimmed output 
+        """
+        output_result = str(result)
+        error_fail_pattern =  re.compile('^=*.(ERRORS|FAILURES).*=$', re.M)
+        test_summary_pattern = re.compile('^=*.(short test summary info).*=$', re.M)
+
+        # Check for any error or failure message case in the test result output
+        error_case = re.search(error_fail_pattern, output_result)
+        if error_case is not None:
+            # Checks if there is any test summary info at the end of the result output
+            test_summary_case = re.search(test_summary_pattern, output_result)
+            test_summary_output = ''
+            if test_summary_case is not None:
+                test_result_message = test_summary_case.group(0)
+                test_summary_output = output_result[output_result.index(test_result_message):]
+            
+            error_case_message = error_case.group(0)
+            output_result = output_result[:output_result.index(error_case_message)]
+            output_result += test_summary_output
+
+        return output_result
 
     def run(self, ansible_inventory_path):
         """Executes the current test with the specified options defined in attributes and bring back the reports
@@ -243,14 +273,20 @@ class Pytest(Test):
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name),
                                  test_name=self.tests_path)
 
+        # Trim the result report for a more simple and readable output
+        if Pytest.LOGGER.level != 10: 
+            output_result = self.__output_trimmer(self.result)
+        else:
+            output_result = str(self.result)
+        
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
             if os.path.exists(self.result.plain_report_file_path):
-                Pytest.LOGGER.info(self.result)
+                Pytest.LOGGER.info(output_result)
             else:
                 Pytest.LOGGER.error(f"Test results could not be saved in {self.result.plain_report_file_path} file")
         else:
             if os.path.exists(self.result.plain_report_file_path):
-                print(self.result)
+                print(output_result)
             else:
                 print(f"Test results could not be saved in {self.result.plain_report_file_path} file")
