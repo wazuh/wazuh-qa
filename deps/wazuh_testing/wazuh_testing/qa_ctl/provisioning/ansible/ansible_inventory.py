@@ -38,24 +38,8 @@ class AnsibleInventory():
         hosts = {}
 
         for instance in self.ansible_instances:
-            host_info = {
-                        'ansible_host': instance.host,
-                        'ansible_user': instance.connection_user,
-                        'ansible_password': instance.connection_user_password,
-                        'ansible_connection': instance.connection_method,
-                        'ansible_port': instance.connection_port,
-                        'ansible_ssh_private_key_file': instance.ssh_private_key_file_path,
-
-                        'vars': instance.host_vars,
-                        'ansible_ssh_common_args': "-o UserKnownHostsFile=/dev/null"
-
-                        }
-
-            if instance.connection_method == 'winrm':
-                host_info.update({
-                    'ansible_winrm_transport': 'basic',
-                    'ansible_winrm_server_cert_validation': 'ignore'
-                })
+            # Create dict from instance attributes
+            host_info = vars(instance)
 
             # Remove ansible vars with None value
             host_info = {key: value for key, value in host_info.items() if value is not None}
@@ -88,6 +72,5 @@ class AnsibleInventory():
 
     def delete_playbook_file(self):
         """Delete all created playbook files"""
-        # if os.path.exists(self.inventory_file_path):
-        #     os.remove(self.inventory_file_path)
-        pass
+        if os.path.exists(self.inventory_file_path):
+            os.remove(self.inventory_file_path)
