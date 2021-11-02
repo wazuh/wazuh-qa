@@ -278,7 +278,7 @@ def qa_docs_docker_run(qa_branch, parameters, command):
     run_local_command(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     utils_logger.info(f"Running the Linux container")
-    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
+    run_local_command(f"docker run --name qa_docs_container --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
 
 
 def get_qa_docs_run_options(args):
