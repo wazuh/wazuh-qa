@@ -1,5 +1,5 @@
 import os
-
+import re
 from datetime import datetime
 from tempfile import gettempdir
 from wazuh_testing.qa_ctl.run_tests.test_result import TestResult
@@ -194,8 +194,28 @@ class Pytest(Test):
                                  plain_report_file_path=os.path.join(self.tests_result_path, plain_report_file_name),
                                  test_name=self.tests_path)
 
+        # Trim the result report for a more simple and readable output
+        output_result = str(self.result)
+        error_fail_pattern =  re.compile('^=*.(ERRORS|FAILURES|short test summary info).*=$', re.M)
+        test_summary_pattern = re.compile('^=*.(short test summary info).*=$', re.M)
+
+        error_case = re.search(error_fail_pattern, output_result)
+        if error_case is not None:
+            test_summary_case = re.search(test_summary_pattern, output_result)
+            if test_summary_case is not None:
+                test_result_message = test_summary_case.group(0)
+                result_output = output_result[output_result.index(test_result_message):]
+            
+            error_case_message = error_case.group(0)
+            trimmed_output = output_result[:output_result.index(error_case_message)]
+            trimmed_output += result_output
         # Print test result in stdout
-        if self.qa_ctl_configuration.logging_enable:
-            Pytest.LOGGER.info(self.result)
+            if self.qa_ctl_configuration.logging_enable:
+                Pytest.LOGGER.info(trimmed_output)
+            else:
+                print(trimmed_output)
         else:
-            print(self.result)
+            if self.qa_ctl_configuration.logging_enable:
+                Pytest.LOGGER.info(self.result)
+            else:
+                print(self.result)
