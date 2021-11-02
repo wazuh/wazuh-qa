@@ -71,8 +71,8 @@ tags:
 '''
 import os
 import pytest
-import wazuh_testing.fim as fim
 
+import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations

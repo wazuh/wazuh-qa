@@ -62,6 +62,20 @@
           - check_size: 'yes'
           - check_owner: 'yes'
           - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
  #conf 2
 - tags:
   - complex
@@ -117,6 +131,20 @@
           - check_perm: 'yes'
           - check_sha256sum: 'yes'
           - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 #conf 3
 - tags:
   - complex
@@ -171,3 +199,18 @@
           - restrict: ".txt$"
           - FIM_MODE
           - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+

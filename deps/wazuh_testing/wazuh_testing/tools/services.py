@@ -110,7 +110,7 @@ def control_service(action, daemon=None, debug_mode=False):
                                 processes.append(proc)
                         elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                             processes.append(proc)
-                    except psutil.NoSuchProcess:
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
                         pass
                 try:
                     for proc in processes:
@@ -148,6 +148,23 @@ def get_process(search_name):
             return proc
 
     return None
+
+
+def search_process(search_pattern):
+    """Search process by its name.
+
+    Args:
+        search_pattern (str): Pattern of the process to be fetched.
+
+    Returns:
+        List: List of dictionaries with name and pid values of founded processes.
+    """
+    processes = []
+    for proc in psutil.process_iter(attrs=['pid', 'name', 'username']):
+        if search_pattern == proc.name():
+            pinfo = proc.as_dict(attrs=['pid', 'name'])
+            processes += [pinfo]
+    return processes
 
 
 def get_process_cmd(search_cmd):
