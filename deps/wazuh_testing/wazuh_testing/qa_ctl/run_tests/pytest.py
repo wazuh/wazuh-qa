@@ -86,6 +86,36 @@ class Pytest(Test):
 
         super().__init__(tests_path, tests_run_dir, tests_result_path, modules, component, system)
 
+    def __output_trimmer(self, result):
+        """This function trims the obtained results in order to get a more readable output information
+            when executing qa-ctl
+
+        Args:
+            result (Test resutl object): object containing all the results obtained from the test
+
+        Return:
+            output_result (string): String containing the trimmed output 
+        """
+        output_result = str(result)
+        error_fail_pattern =  re.compile('^=*.(ERRORS|FAILURES).*=$', re.M)
+        test_summary_pattern = re.compile('^=*.(short test summary info).*=$', re.M)
+
+        # Check for any error or failure message case in the test result output
+        error_case = re.search(error_fail_pattern, output_result)
+        if error_case is not None:
+            # Checks if there is any test summary info at the end of the result output
+            test_summary_case = re.search(test_summary_pattern, output_result)
+            test_summary_output = ''
+            if test_summary_case is not None:
+                test_result_message = test_summary_case.group(0)
+                test_summary_output = output_result[output_result.index(test_result_message):]
+            
+            error_case_message = error_case.group(0)
+            output_result = output_result[:output_result.index(error_case_message)]
+            output_result += test_summary_output
+
+        return output_result
+
     def run(self, ansible_inventory_path):
         """Executes the current test with the specified options defined in attributes and bring back the reports
             to the host machine.
@@ -244,24 +274,11 @@ class Pytest(Test):
                                  test_name=self.tests_path)
 
         # Trim the result report for a more simple and readable output
-        output_result = str(self.result)
-        error_fail_pattern =  re.compile('^=*.(ERRORS|FAILURES|short test summary info).*=$', re.M)
-        test_summary_pattern = re.compile('^=*.(short test summary info).*=$', re.M)
-
-        # Checks for any error or failure message case in the test result output
-        error_case = re.search(error_fail_pattern, output_result)
-        if error_case is not None:
-            # Checks if there is any test summary info at the end of the result output
-            test_summary_case = re.search(test_summary_pattern, output_result)
-            test_summary_output = ""
-            if test_summary_case is not None:
-                test_result_message = test_summary_case.group(0)
-                test_summary_output = output_result[output_result.index(test_result_message):]
-            
-            error_case_message = error_case.group(0)
-            output_result = output_result[:output_result.index(error_case_message)]
-            output_result += test_summary_output
-
+        if Pytest.LOGGER.level != 10: 
+            output_result = self.__output_trimmer(self.result)
+        else:
+            output_result = str(self.result)
+        
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
             if os.path.exists(self.result.plain_report_file_path):
