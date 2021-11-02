@@ -388,7 +388,7 @@ def main():
 
     if args.run_with_docker:
         command = get_qa_docs_run_options(args)
-        qa_docs_docker_run(args.qa_branch, qadocs_logger.get_logger('qadocs_logger'), command)
+        qa_docs_docker_run(args.qa_branch, command)
     elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
             version_data = version_file.read()

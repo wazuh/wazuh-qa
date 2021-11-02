@@ -259,16 +259,15 @@ def run_local_command_with_output(command):
     return run.stdout.read().decode()
 
 
-def qa_docs_docker_run(qa_branch, parameters, command):
+def qa_docs_docker_run(qa_branch, command):
     """Run qa-docs in a Linux docker container.
 
-    Having this functionality helps the people that does not have ElasticSearch and/or wazuh framework to generate
+    Having this functionality helps the people that do not have ElasticSearch and(or) wazuh framework to generate
     the documentation of the tests.
 
     Args:
         qa_branch (str): Wazuh qa branch that will be used as tests input.
-        parameters (str): 
-        command (str): 
+        command (str): A string with the arguments to pass qa-docs when running within the docker container.
     """
     docker_args = f"{qa_branch} {command}"
     docker_image_name = 'wazuh/qa-docs'
