@@ -309,12 +309,14 @@ class DocGenerator:
     def check_documentation(self):
         for test_name in self.conf.test_names:
             test_path = self.locate_test(test_name)
-            test = self.parser.parse_test(test_path, self.__id_counter, 0)
+            try:
+                test = self.parser.parse_test(test_path, self.__id_counter, 0)
+            except Exception as qaerror:
+                test = None
+                print(f"{test_name} is not documented using qa-docs current schema")
 
             if test:
                 print(f"{test_name} is documented using qa-docs current schema")
-            else:
-                print(f"{test_name} is not documented using qa-docs current schema")
 
     def print_test_info(self, test):
         """Print the test info to standard output.
