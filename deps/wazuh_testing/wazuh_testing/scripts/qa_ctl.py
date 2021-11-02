@@ -199,11 +199,17 @@ def validate_parameters(parameters):
     if parameters.run_test:
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
+            # Validate if the specified tests exist
             if f"{test} exists" not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path} "
                                                                                    ' --no-logging'):
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
-    ## --> Add os validation for each test
+            # Validate if the selected tests are documented
+            test_documentation_check = local_actions.run_local_command_with_output(f"qa-docs -t {test} -I {tests_path} "
+                                                                                   '--check-documentation --no-logging')
+            if f'{test} is not documented' in test_documentation_check:
+                raise QAValueError(f"{test} is not documented using qa-docs current schema", qactl_logger.error,
+                                   QACTL_LOGGER)
 
     qactl_logger.info('Input parameters validation has passed successfully')
 
