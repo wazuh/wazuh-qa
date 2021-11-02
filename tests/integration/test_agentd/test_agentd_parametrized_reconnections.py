@@ -1,7 +1,67 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-agentd' program is the client-side daemon that communicates with the server.
+       The objective is to check how the 'wazuh-agentd' daemon behaves when there are delays
+       between connection attempts to the 'wazuh-remoted' daemon using TCP and UDP protocols.
+       The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+
+tier: 0
+
+modules:
+    - agentd
+
+components:
+    - agent
+
+daemons:
+    - wazuh-agentd
+    - wazuh-authd
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/registering/index.html
+
+tags:
+    - enrollment
+'''
 from datetime import datetime, timedelta
 import os
 import platform
@@ -256,18 +316,53 @@ This test covers different options of delays between server connection attempts:
 
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration):
-    """Check how the agent behaves when there are delays between connection attempts to the server.
+    '''
+    description: Check how the agent behaves when there are delays between connection
+                 attempts to the server. For this purpose, different values for
+                 'max_retries' and 'retry_interval' parameters are tested.
 
-    For this purpose, different values for max_retries and retry_interval parameters are tested.
+    wazuh_min_version: 4.2.0
 
-    Args:
-        configure_authd_server (fixture): Initialize a simulated authd connection.
-        start_authd (fixture): Enable authd to accept connections and perform enrollments.
-        stop_agent (fixture): Stop Wazuh's agent.
-        set_keys (fixture): Write to client.keys file the agent's enrollment details.
-        configure_environment (fixture): Configure a custom environment for testing.
-        get_configuration (fixture): Get configurations from the module.
-    """
+    parameters:
+        - configure_authd_server:
+            type: fixture
+            brief: Initializes a simulated 'wazuh-authd' connection.
+        - start_authd:
+            type: fixture
+            brief: Enable the 'wazuh-authd' daemon to accept connections and perform enrollments.
+        - stop_agent:
+            type: fixture
+            brief: Stop Wazuh's agent.
+        - set_keys:
+            type: fixture
+            brief: Write to 'client.keys' file the agent's enrollment details.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+
+    assertions:
+        - Verify that when the 'wazuh-agentd' daemon initializes, it connects to
+          the 'wazuh-remoted' daemon of the manager before reaching the maximum number of attempts.
+        - Verify the successful enrollment of the agent if the auto-enrollment option is enabled.
+        - Verify that the rollback feature of the server works correctly.
+
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases are found in the test module and include parameters
+                       for the environment setup using the TCP and UDP protocols.
+
+    expected_output:
+        - r'Valid key received'
+        - r'Trying to connect to server'
+        - r'Unable to connect to any server'
+
+    tags:
+        - simulator
+        - ssl
+        - keys
+    '''
     DELTA = 1
     RECV_TIMEOUT = 5
     ENROLLMENT_SLEEP = 20

@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM synchronizes the
+       registry DB when a modification is performed while the agent is down and decodes
+       the synchronization events properly.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_synchronization
+'''
 import os
 import pytest
 import wazuh_testing.fim as fim
@@ -135,21 +187,53 @@ def remove_key_and_restart(request):
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_configuration, configure_environment,
                                      remove_key_and_restart):
-    """
-    Test to check that FIM synchronizes the registry DB when a modification is performed while the agent is down.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon synchronizes the registry DB when a modification
+                 is performed while the agent is down. For this purpose, the test will monitor a key and
+                 wait for the synchronization. Then it will stop the agent, make key/value operations inside
+                 the monitored key, and start the agent again. Finally, it will wait for the synchronization
+                 and verify that FIM sync events generated include the key and value paths for
+                 the modifications made.
 
-    Params:
-        key_name (str): Name of the subkey that will be created in the test.
-        value_name (str): Name of the value that will be created in the test. If
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If a path or value are not in the sync event.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key_name:
+            type: str
+            brief: Name of the subkey that will be created in the test.
+        - value_name:
+            type: str
+            brief: Name of the value that will be created in the test.
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - remove_key_and_restart:
+            type: fixture
+            brief: Remove the test key and restart the agent.
+
+    assertions:
+        - Verify that FIM sync events generated include the monitored value path and
+          its parent key path of the changes made while the agent was stopped.
+
+    input_description: A test case (registry_sync_responses) is contained in external YAML file
+                       (wazuh_conf_registry_responses_win32.yaml) which includes configuration
+                       settings for the 'wazuh-syscheckd' daemon. That is combined with the
+                       testing registry key to be monitored defined in this module.
+
+    expected_output:
+        - r'.*#!-fim_registry dbsync no_data (.+)'
+        - r'.*Sending integrity control message'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     key_path = os.path.join(monitored_key, key_name)
     value_path = os.path.join(key, key_path, value_name)

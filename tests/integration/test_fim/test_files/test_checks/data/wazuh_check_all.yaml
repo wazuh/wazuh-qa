@@ -68,6 +68,25 @@
         - FIM_MODE
         - check_all: "yes"
         - check_inode: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 - tags:
   - test_check_all
   apply_to_modules:
@@ -130,6 +149,24 @@
         attributes:
         - FIM_MODE
         - check_all: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 
 - tags:
   - test_check_all_no
@@ -145,3 +182,21 @@
         attributes:
         - FIM_MODE
         - check_all: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

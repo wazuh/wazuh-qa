@@ -1,7 +1,57 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-analysisd' daemon receives the log messages and compares them to the rules.
+       It then creates an alert when a log message matches an applicable rule.
+       Specifically, these tests will check if the 'wazuh-analysisd' daemon correctly handles
+       incoming events related to file scanning.
+
+tier: 0
+
+modules:
+    - analysisd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+
+tags:
+    - events
+'''
 import os
 
 import pytest
@@ -50,13 +100,41 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
                          ids=[test_case['name'] for test_case in test_cases])
 def test_scan_messages(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                        test_case: list):
-    """Check that every input message in analysisd socket generates the adequate output to wazuh-db socket
+    '''
+    description: Check if when the 'wazuh-analysisd' daemon socket receives a message with
+                 a file scanning-related event, it generates the corresponding alert
+                 that sends to the 'wazuh-db' daemon socket.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys)
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - wait_for_analysisd_startup:
+            type: fixture
+            brief: Wait until the 'wazuh-analysisd' has begun and the 'alerts.json' file is created.
+        - test_case:
+            type: list
+            brief: List of tests to be performed.
+
+    assertions:
+        - Verify that the messages generated are consistent with the events received.
+
+    input_description: Different test cases that are contained in an external YAML file (scan_messages.yaml)
+                       that includes 'syscheck' events data and the expected output.
+
+    expected_output:
+        - Multiple messages (scan status logs) corresponding to each test case,
+          located in the external input data file.
+
+    tags:
+        - man_in_the_middle
+        - wdb_socket
+    '''
     for stage in test_case:
         expected = callback_analysisd_message(stage['output'])
         receiver_sockets[0].send(stage['input'])

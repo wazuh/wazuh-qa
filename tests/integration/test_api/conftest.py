@@ -88,7 +88,6 @@ def restart_api(get_configuration, request):
         control_service('start', daemon=process_name)
 
 
-
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
     # Wait for API to start

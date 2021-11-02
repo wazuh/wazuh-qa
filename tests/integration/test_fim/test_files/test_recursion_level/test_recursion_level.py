@@ -98,17 +98,19 @@ pytestmark = pytest.mark.tier(level=2)
 dir_no_recursion = os.path.join(PREFIX, 'test_no_recursion')
 dir_recursion_1 = os.path.join(PREFIX, 'test_recursion_1')
 dir_recursion_5 = os.path.join(PREFIX, 'test_recursion_5')
-dir_recursion_320 = os.path.join(PREFIX, 'test_recursion_320')
+dir_recursion_max = os.path.join(PREFIX, 'test_recursion_32') if sys.platform == "win32" else os.path.join(PREFIX, 'test_recursion_320')
 subdir = "dir"
 
 dir_no_recursion_space = os.path.join(PREFIX, 'test no recursion')
 dir_recursion_1_space = os.path.join(PREFIX, 'test recursion 1')
 dir_recursion_5_space = os.path.join(PREFIX, 'test recursion 5')
-dir_recursion_320_space = os.path.join(PREFIX, 'test recursion 320')
+dir_recursion_max_space = os.path.join(PREFIX, 'test recursion 32') if sys.platform == "win32" else os.path.join(PREFIX, 'test recursion 320')
 subdir_space = "dir "
 
-test_directories = [dir_no_recursion, dir_recursion_1, dir_recursion_5, dir_recursion_320, dir_no_recursion_space,
-                    dir_recursion_1_space, dir_recursion_5_space, dir_recursion_320_space]
+max_recursion = 32 if sys.platform == "win32" else 320
+
+test_directories = [dir_no_recursion, dir_recursion_1, dir_recursion_5, dir_recursion_max, dir_no_recursion_space,
+                    dir_recursion_1_space, dir_recursion_5_space, dir_recursion_max_space]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 conf_name = "wazuh_recursion_windows.yaml" if sys.platform == "win32" else "wazuh_recursion.yaml"
@@ -230,9 +232,10 @@ def get_configuration(request):
     (dir_recursion_1_space, subdir_space, 1),
     (dir_recursion_5, subdir, 5),
     (dir_recursion_5_space, subdir_space, 5),
-    (dir_recursion_320, subdir, 320),
-    (dir_recursion_320_space, subdir_space, 320)
+    (dir_recursion_max, subdir, max_recursion),
+    (dir_recursion_max_space, subdir_space, max_recursion)
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
     '''

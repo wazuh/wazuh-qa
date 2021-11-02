@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
+       when these files are modified. Specifically, these tests will verify that FIM limits
+       the maximum events per second that it generates, set in the 'max_eps' tag.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_max_eps
+'''
 import os
 from collections import Counter
 
@@ -46,12 +116,45 @@ def get_configuration(request):
 
 
 def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check that max_eps is respected when a big quantity of syscheck events are generated.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
+                 a lot of 'syscheck' events are generated. For this purpose, the test will monitor a folder,
+                 and once FIM is started, it will create multiple testing files in it. Then, the test
+                 will collect FIM 'added' events generated and check if the number of events matches
+                 the testing files created. Finally, it will verify the limit of events per second (eps)
+                 is not exceeded by checking the creation time of the testing files.
 
-    During the test, a big quantity of files are created and the max number of event occurrences per second is measured
-    to ensure it never exceeds max_eps
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events are generated for each testing file created.
+        - Verify that the eps limit set in the 'max_eps' tag has not been exceeded at generating FIM events.
+
+    input_description: A test case (max_eps) is contained in external YAML file (wazuh_conf.yaml) which
+                       includes configuration settings for the 'wazuh-syscheckd' daemon and, these are
+                       combined with the testing directory to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' events)
+
+    tags:
+        - realtime
+        - scheduled
+    '''
     check_apply_test({'max_eps'}, get_configuration['tags'])
 
     max_eps = int(get_configuration['metadata']['max_eps'])
