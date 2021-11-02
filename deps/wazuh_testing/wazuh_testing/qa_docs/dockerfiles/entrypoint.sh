@@ -32,4 +32,5 @@ echo "Running /usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}"
 
 # Move the documentation parsed to the shared dir
 echo "Moving qa-docs output to shared directory /tmp/qa_docs"
+rm -rf /qa_docs/output &> /dev/null
 mv -f /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/output/ /qa_docs
