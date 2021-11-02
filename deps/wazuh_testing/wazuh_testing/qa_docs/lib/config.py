@@ -39,7 +39,8 @@ class Config():
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, schema_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None):
+    def __init__(self, schema_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None,
+                 check_doc=False):
         """Constructor that loads the schema file and set the `qa-docs` configuration.
 
         If a test name is passed, it would be run in `single test mode`.
@@ -57,6 +58,7 @@ class Config():
             test_types (list): A list that contains the test type(s) that the user specifies.
             test_modules (list): A list that contains the test module(s) that the user specifies.
             test_names (list): A list that contains the test name(s) that the user specifies.
+            check_dock (boolean): Flag to indicate if the test specified (with -t parameter) is documented.
         """
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
@@ -71,6 +73,7 @@ class Config():
         self.test_types = []
         self.test_modules = []
         self.predefined_values = {}
+        self.check_doc = check_doc
 
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
