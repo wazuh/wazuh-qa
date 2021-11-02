@@ -108,6 +108,8 @@ def get_parameters():
                         
     parser.add_argument('--qa-branch', dest='qa_branch',
                         help='Specifies the qa branch that will be used as input for the tests to be parsed.')
+    parser.add_argument('--check-documentation', action='store_true', dest='check_doc',
+                        help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
 
     return parser.parse_args(), parser
 
@@ -268,7 +270,7 @@ def validate_parameters(parameters, parser):
         for test_name in parameters.test_names:
             if doc_check.locate_test(test_name) is None:
                 raise QAValueError(f"{test_name} has not been not found in "
-                                   "{parameters.tests_path}.", qadocs_logger.error)
+                                   f"{parameters.tests_path}.", qadocs_logger.error)
 
     # Check that the index exists
     if parameters.app_index_name:
@@ -329,10 +331,12 @@ def parse_data(args):
 
         # When output path is specified by user, a json is generated within that path
         if args.output_path:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names))
-        # When no output is specified, it is printed
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names,
+                                       check_doc=args.check_doc))
+        # When no output is specified, it is generated within the default qa-docs output folder
         else:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names))
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
+                                       check_doc=args.check_doc))
 
     # Parse a list of test types
     elif args.test_types:
@@ -352,9 +356,11 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
             docs.run()
 
-    if args.test_types or args.test_modules or args.test_names:
+    if args.test_types or args.test_modules or args.test_names and not args.check_doc:
         qadocs_logger.info('Running QADOCS')
         docs.run()
+    elif args.test_names and args.check_doc:
+        docs.check_documentation()
 
 
 def index_and_visualize_data(args):

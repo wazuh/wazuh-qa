@@ -220,10 +220,14 @@ class DocGenerator:
 
                 self.dump_output(test, doc_path)
                 DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
-                                          "was created with ID:{self.__id_counter}")
+                                          f"was created with ID:{self.__id_counter}")
                 return self.__id_counter
 
             elif self.conf.mode == Mode.PARSE_TESTS:
+                # If qa-docs is run with --check-doc flag then the output files wont be generated
+                if self.conf.check_doc:
+                    return
+
                 if self.conf.documentation_path:
                     doc_path = self.conf.documentation_path
                     doc_path = os.path.join(doc_path, test_name)
@@ -302,6 +306,18 @@ class DocGenerator:
             else:
                 print(f'{test_name} does not exist in {path}')
 
+    def check_documentation(self):
+        for test_name in self.conf.test_names:
+            test_path = self.locate_test(test_name)
+            try:
+                test = self.parser.parse_test(test_path, self.__id_counter, 0)
+            except Exception as qaerror:
+                test = None
+                print(f"{test_name} is not documented using qa-docs current schema")
+
+            if test:
+                print(f"{test_name} is documented using qa-docs current schema")
+
     def print_test_info(self, test):
         """Print the test info to standard output.
 
@@ -341,4 +357,5 @@ class DocGenerator:
         elif self.conf.mode == Mode.PARSE_TESTS:
             self.parse_test_list()
 
-        DocGenerator.LOGGER.info(f"Run completed, documentation location: {self.conf.documentation_path}")
+        if not self.conf.check_doc:
+            DocGenerator.LOGGER.info(f"Run completed, documentation location: {self.conf.documentation_path}")
