@@ -63,7 +63,7 @@ def validate_authd_logs(expected_logs, log_monitor=None):
         log_monitor.start(timeout=AUTHD_KEY_REQUEST_TIMEOUT,
                           callback=make_callback(log, prefix=AUTHD_DETECTOR_PREFIX,
                                                  escape=True),
-                          error_message=f"Expected error log does not occured: '{log}'")
+                          error_message=f"Expected log does not occured: '{log}'")
 
 
 def validate_argument(received, expected, argument_name):
