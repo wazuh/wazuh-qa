@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM events generated contain only
+       the 'check_' fields specified in the configuration when using the 'check_all' attribute along
+       with other 'check_' attributes.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_checks
+'''
 import os
 
 import pytest
@@ -113,30 +165,68 @@ def get_configuration(request):
 @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checkers(key, subkey, arch, key_attrs, value_attrs, tags_to_apply, triggers_modification,
                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Test the functionality of `check_all` option is activated/desactivated alone and together with other
-    `check_*` options.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the 'check_' specified in
+                 the configuration. These checks are attributes indicating that a monitored registry entry has
+                 been modified. For example, if 'check_all=yes' and 'check_sum=no' are set for the same entry,
+                 'syscheck' must send an event containing every possible 'check_' except the checksums.
+                 For this purpose, the test will monitor a registry key using the 'check_all' attribute in
+                 conjunction with one or more 'check_' on the same key, having 'check_all' to 'yes' and the other
+                 one to 'no'. Then it will make key/value operations inside it, and finally, finally, the test
+                 will verify that the FIM events generated contain only the fields of the 'checks' specified for
+                 the monitored keys/values.
 
-    Example:
-        <windows_registry check_all="yes">HKEY_SOME_KEY</windows_registry>.
-    Parameters
-    ----------
-    key: str
-        Root key (HKEY_* constants).
-    subkey: str
-        Path of the key.
-    arch: int
-        Architecture of the key.
-    key_attrs: set
-        Attributes for the key events.
-    value_attrs: set
-        Attributes for the value events.
-    tags_to_apply: set
-        Configuration that will be applied for every case.
-    triggers_modification: boolean
-        True if the given attributes trigger modification events.
-    """
+    wazuh_min_version: 4.2.0
 
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - subkey:
+            type: str
+            brief: Path of the key that will be created under the root key.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - key_attr:
+            type: set
+            brief: Set of options that are expected for key events.
+        - value_attr:
+            type: set
+            brief: Set of options that are expected for value events.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - triggers_modification:
+            type: bool
+            brief: Specify if the given options generate registry events.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in an external YAML file (wazuh_check_all.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon. Those are
+                       combined with the testing registry keys to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Test registry keys.
