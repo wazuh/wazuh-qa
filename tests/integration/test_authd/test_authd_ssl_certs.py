@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the 'wazuh-authd' daemon is able to handle secure connections using
+       the 'SSL' (Secure Socket Layer) protocol. The 'wazuh-authd' daemon can automatically add
+       a Wazuh agent to a Wazuh manager and provide the key to the agent.
+       It is used along with the 'agent-auth' application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+    - https://documentation.wazuh.com/current/user-manual/registering/host-verification-registration.html
+
+tags:
+    - enrollment
+'''
 import os
 import ssl
 import time
@@ -113,8 +165,37 @@ def override_wazuh_conf(configuration):
 
 
 def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
-    """
-    """
+    '''
+    description: Check if the 'wazuh-authd' daemon can manage 'SSL' connections with agents
+                 and the 'host verification' feature is working properly. For this purpose,
+                 it generates and signs the necessary certificates and builds the
+                 enrollment requests using them.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - generate_ca_certificate:
+            type: fixture
+            brief: Build the 'CA' (Certificate of Authority) and sign the certificate used by the testing agent.
+
+    assertions:
+        - Verify that the agent can only connect to the 'wazuh-authd' daemon socket using a valid certificate.
+        - Verify that using a valid certificate the agent can only enroll using the IP address linked to it.
+
+    input_description: Different test cases are found in the test module and include
+                       parameters for the environment setup, the requests
+                       to be made, and the expected result.
+
+    expected_output:
+        - r'OSSEC K:' (When the agent has enrolled in the manager)
+
+    tags:
+        - keys
+        - ssl
+    '''
     verify_host = (get_configuration['metadata']['verify_host'] == 'yes')
     option = get_configuration['metadata']['sim_option']
     override_wazuh_conf(get_configuration)

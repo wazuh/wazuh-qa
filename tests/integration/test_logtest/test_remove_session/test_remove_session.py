@@ -49,7 +49,7 @@ def create_session():
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_remove_session(connect_to_sockets_function, test_case: list):
+def test_remove_session(restart_required_logtest_daemons, wait_for_logtest_startup, connect_to_sockets_function, test_case: list):
     """Check that every input message in logtest socket generates the adequate output
 
     Parameters

@@ -16,3 +16,21 @@
         - check_all: 'yes'
     - max_files_per_second:
         value: MAX_FILES_PER_SEC
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

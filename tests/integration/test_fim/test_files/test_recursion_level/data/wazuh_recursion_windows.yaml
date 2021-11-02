@@ -2,6 +2,24 @@
 - apply_to_modules:
   - test_recursion_level
   sections:
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
   - section: syscheck
     elements:
     - disabled:
@@ -43,14 +61,14 @@
         - recursion_level: "5"
         - FIM_MODE
     - directories:
-        value: "c:\\test_recursion_320"
+        value: "c:\\test_recursion_32"
         attributes:
         - CHECK
-        - recursion_level: "320"
+        - recursion_level: "32"
         - FIM_MODE
     - directories:
-        value: "c:\\test recursion 320"
+        value: "c:\\test recursion 32"
         attributes:
         - CHECK
-        - recursion_level: "320"
+        - recursion_level: "32"
         - FIM_MODE

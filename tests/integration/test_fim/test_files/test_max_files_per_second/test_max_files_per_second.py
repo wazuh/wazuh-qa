@@ -1,11 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright:
+    Copyright (C) 2015-2021, Wazuh Inc.
+
+    Created by Wazuh, Inc. <info@wazuh.com>.
+
+    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type:
+    integration
+
+brief:
+    Check that FIM sleeps for one second when the option max_files_per_second is enabled
+
+tier:
+    1
+
+modules:
+    - syscheck
+
+components:
+    - manager
+
+path:
+    tests/integration/test_fim/test_files/test_max_files_per_second/test_max_files_per_second.py
+
+daemons:
+    - wazuh-modulesd
+    - wazuh-db
+
+os_platform:
+    - linux
+    - windows
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#max-files-per-second
+
+pytest_args:
+    - fim_mode:
+        value: "realtime"
+        brief: Uses real-time file monitoring.
+    - fim_mode:
+        value: "scheduled"
+        brief: Uses scheduled file monitoring.
+    - fim_mode:
+        value: "whodata"
+        brief: Uses whodata file monitoring option.
+'''
+
+
+
 
 import os
 import pytest
-import wazuh_testing.fim as fim
 
+import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -48,16 +96,32 @@ def get_configuration(request):
                          ])
 def test_max_files_per_second(inode_collision, get_configuration, configure_environment, restart_syscheckd,
                               wait_for_fim_start):
-    """ Check that FIM sleeps for one second when the option max_files_per_second is enabled
+    """ 
+    description: 
+        Check that FIM sleeps for one second when the option max_files_per_second is enabled
 
-    Args:
-        inode_collision (boolean): Signals if the test should check the limit while running inode collisions.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
+    parameters:
+        - inode_collision:
+            type: boolean
+            brief: Signals if the test should check the limit while running inode collisions.
+        - get_configuration:
+            type: fixture
+            brief: Gets the current configuration of the test.
+        - configure_enviroment:
+            type: fixture
+            brief: Configure the environment for the execution of the test.
+        - restart_syscheckd:
+            type: fixture
+            brief: Reset ossec.log and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start or end of initial FIM scan.
+    input_description:
+        Several files are created, to check if the ammount of files scanned per second is equal to the limit sent on option "max_files_per_second"
+    expected_output
+        - No output if max_files_per_second=0
+        - In case not events are found it Raises:
+            TimeoutError: If an expected event couldn't be captured.
     """
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
@@ -110,3 +174,4 @@ def test_max_files_per_second(inode_collision, get_configuration, configure_envi
                 pass
             else:
                 raise e
+                

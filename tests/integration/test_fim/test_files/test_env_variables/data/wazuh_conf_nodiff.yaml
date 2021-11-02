@@ -15,3 +15,17 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the 'max_upload_size' setting of the API is working properly.
+       This setting allows specifying the size limit of the request body for the API to process.
+       The Wazuh API is an open source 'RESTful' API that allows for interaction with
+       the Wazuh manager from a web browser, command line tool like 'cURL' or any script
+       or program that can make web requests.
+
+tier: 2
+
+modules:
+    - api
+
+components:
+    - manager
+
+daemons:
+    - wazuh-apid
+    - wazuh-analysisd
+    - wazuh-syscheckd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
+    - https://documentation.wazuh.com/current/user-manual/api/configuration.html
+
+tags:
+    - api
+'''
 import string
 from os.path import join, dirname, realpath
 from random import choices
@@ -110,16 +164,53 @@ def create_cdb_list(min_length):
 ])
 def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_required_api_wazuh,
                          file_monitoring, daemons_handler, wait_for_start, get_api_details):
-    """Verify that a 413 status code is returned if the body is bigger than 'max_upload_size'.
+    '''
+    description: Check if a '413' HTTP status code ('Payload Too Large') is returned if the response body is
+                 bigger than the value of the 'max_upload_size' tag. For this purpose, the test will call to
+                 a PUT and a POST endpoint specifying a body. If the 'max_upload_size' is 0 (limitless),
+                 a '200' HTTP status code ('OK') should be returned. If 'max_upload_size' is not limitless,
+                 both PUT and POST endpoints should fail when trying to send a bigger body.
 
-    Calls to a PUT and a POST endpoint specifying a body. If the 'max_upload_size'
-    is 0 (limitless), a 200 status code should be returned. If 'max_upload_size' is
-    not limitless, both PUT and POST endpoints should fail when trying to send a
-    bigger body.
+    wazuh_min_version: 4.3.0
 
-    Args:
-        tags_to_apply (set): Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_required_api_wazuh:
+            type: fixture
+            brief: Restart API-required services and stop them all at the end of the test.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - daemons_handler:
+            type: fixture
+            brief: Handler of Wazuh daemons.
+        - wait_for_start:
+            type: fixture
+            brief: Wait until the API starts.
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+
+    assertions:
+        - Verify that the 'wazuh-apid' daemon returns a proper HTTP status code depending on the value
+          of the 'max_upload_size' tag and the size of the response body received.
+
+    input_description: A test case is (test_upload_size) contained in an external YAML file
+                       (wazuh_max_upload_size.yaml) which includes API configuration
+                       parameters ('max_upload_size' option).
+
+    expected_output:
+        - r'413' ('Payload Too Large' HTTP status code)
+        - r'200' ('OK' HTTP status code)
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     api_details = get_api_details()
     content_size = get_configuration['metadata']['content_size']
