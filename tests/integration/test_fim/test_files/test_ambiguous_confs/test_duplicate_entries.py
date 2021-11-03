@@ -1,7 +1,78 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. All these tests will be performed using ambiguous directory configurations,
+       such as directories and subdirectories with opposite monitoring settings. In particular, it
+       will check that duplicate events are not generated when multiple configurations are used
+       to monitor the same directory.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_ambiguous_confs
+'''
 import codecs
 import os
 from pathlib import Path
@@ -102,15 +173,44 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
 
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """Check if syscheckd ignores duplicate entries.
-       For instance:
-           - The second entry should prevail over the first one.
-            <directories realtime="yes">/home/user</directories> (IGNORED)
-            <directories whodata="yes">/home/user</directories>
-        OR
-           - Just generate one event.
-            <directories realtime="yes">/home/user,/home/user</directories>
-    """
+    '''
+    description: Check if when using multiple configurations on the same directory that can generate the same event,
+                 only one is finally generated. For example, when monitoring the same directory using the 'whodata'
+                 and 'realtime' attributes and modifying a file, two FIM events should not be generated.
+                 For this purpose, it applies the test case configuration, adds a test file in the directory,
+                 and finally checks that only one FIM event has been generated.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that only one FIM event is generated when the testing file is created.
+
+    input_description: One test cases (ossec_conf_duplicate_simple) is contained in external YAML file
+                       (wazuh_conf_dup_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon and testing directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - realtime
+        - time_travel
+    '''
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_simple'}, get_configuration['tags'])
     file = 'hello'
@@ -138,13 +238,46 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_sregex(get_configuration, configure_environment,
                                   restart_syscheckd, wait_for_fim_start):
-    """Check if syscheckd ignores duplicate entries, sregex patterns of restrict.
-       For instance:
-           - The second entry should prevail over the first one.
-            <directories restrict="^good.*$">/home/user</directories> (IGNORED)
-            <directories restrict="^he.*$">/home/user</directories>
-       In this case, only the filenames that match with this regex '^he.*$'
-    """
+    '''
+    description: Check if when using multiple 'sregex' patterns of the 'restrict' attribute in the same directory,
+                 and that these can match the same file, only one FIM event is generated. For example, when
+                 monitoring the same directory using 'restrict="^good.*$"' and 'restrict="^he.*$"', only
+                 the filenames that match with this regex '^he.*$' should generate FIM events.
+                 For this purpose, it applies the test case configuration, adds and modifies a test file in
+                 the directory, checks that only one FIM event has been generated for each operation, and finally
+                 verifies that only one FIM event has been generated for each operation.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that only one FIM event is generated when the testing file is created.
+        - Verify that only one FIM event is generated when the testing file is modified.
+
+    input_description: One test case (ossec_conf_duplicate_sregex) is contained in external YAML file
+                       (wazuh_conf_dup_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon and testing directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_sregex'}, get_configuration['tags'])
     file = 'hello'
@@ -175,12 +308,47 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
 
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_report(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """Check if syscheckd ignores duplicate entries, report changes.
-       For instance:
-           - The second entry should prevail over the first one.
-            <directories report_changes="yes">/home/user</directories> (IGNORED)
-            <directories report_changes="no">/home/user</directories>
-    """
+    '''
+    description: Check if when using multiple configurations using the 'report_changes' attribute
+                 in the same directory, only the last configuration is taken into account. For example,
+                 when monitoring the same directory using 'report_changes="yes"' and 'report_changes="no"',
+                 no 'diff' files should be generated when modifying a file since 'report_changes="no"' is
+                 the last detected configuration.
+                 For this purpose, it applies the test case configuration, adds and modifies a test file
+                 in the directory, checks that FIM event has been generated for each operation,
+                 and finally verifies that a 'diff' file has not been created.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events are generated when the testing file is created and modified.
+        - Verify that a 'diff' file has not been created when modifying the test file.
+
+    input_description: One test case (ossec_conf_duplicate_report) is contained in external YAML file
+                       (wazuh_conf_dup_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon and testing directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     logger.info('Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_report'}, get_configuration['tags'])
     file = 'hello'
@@ -211,14 +379,52 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_duplicate_entries_complex(get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
-    """Check if syscheckd ignores duplicate entries, complex entries.
-       For instance:
-           - The second entry should prevail over the first one.
-            <directories check_all="no" check_owner="yes" check_inode="yes">/home/user</directories> (IGNORED)
-            <directories check_all="no" check_size="yes" check_perm="yes">/home/user</directories>
-       In this case, it only check if the permissions or the size of the file changes
-    """
+    '''
+    description: Check if when using multiple configurations using diferent 'check_' attributes in
+                 the same directory, only the last configuration is taken into account. For example,
+                 when monitoring the same directory using 'check_owner="yes" check_inode="yes"' and
+                 'check_size="yes" check_perm="yes"', only 'size' and 'permissions' fields files
+                 should be generated in the FIM events since 'check_size="yes" check_perm="yes"'
+                 is the last detected configuration.
+                 For this purpose, it applies the test case configuration, adds and modifies
+                 a testing file in the directory, checks that one FIM event is generated when
+                 modifying the size or permissions of the test file, and finally verify that
+                 the 'size' and 'permissions' fields have been generated in that event.
 
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM event is generated when the testing file is added.
+        - Verify that modifications not related to the size or permissions
+          of the testing file do not generate FIM events.
+        - Verify that FIM events are generated that include the 'size' and 'permissions' fields
+          when these are modified in the test file.
+
+    input_description: One test case (ossec_conf_duplicate_complex) is contained in external YAML file
+                       (wazuh_conf_dup_entries.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon and testing directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     def replace_character(old, new, path):
         f = codecs.open(path, encoding='utf-8')
         content = f.read()

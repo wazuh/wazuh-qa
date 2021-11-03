@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if the modifications made on registry
+       entries during the initial scan ('baseline') generate FIM events before the scan is finished.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_basic_usage
+'''
 import os
 
 import pytest
@@ -80,12 +131,57 @@ def callback_detect_event_before_end_scan(line):
 ])
 def test_wait_until_baseline(key, subkey, arch, value_type, content, get_configuration,
                              configure_environment, restart_syscheckd_each_time):
-    """
-    Check if events are appearing after the baseline
-    The message 'File integrity monitoring scan ended' informs about the end of the first scan,
-    which generates the baseline
-    """
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects registry events generated after the 'baseline'.
+                 The log message 'File integrity monitoring scan ended' informs about the end of the first scan,
+                 which generates that 'baseline'. For this purpose, the test will make key/value operations while
+                 the initial scan is being performed. When the 'baseline' has been generated, it will verify that
+                 the FIM events have been triggered.
 
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - subkey:
+            type: str
+            brief: Path of the key that will be created under the root key.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - value_type:
+            type: srt
+            brief: Type of the registry value to be created.
+        - content:
+            type: srt
+            brief: Content of the registry value.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd_each_time:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor in each test case.
+
+    assertions:
+        - Verify that FIM events are generated during the initial scan for the changes detected
+          on the monitored registry entries.
+
+    input_description: A test case (ossec_conf_2) is contained in an external YAML file
+                       (wazuh_conf_registry_both.yaml) which includes configuration settings for
+                       the 'wazuh-syscheckd' daemon. That is combined with the testing registry
+                       keys to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$'
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     key_handle = create_registry(registry_parser[key], subkey, arch)
 
     modify_registry_value(key_handle, "value_name", value_type, content)

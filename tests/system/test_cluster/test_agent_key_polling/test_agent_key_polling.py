@@ -31,9 +31,11 @@ def configure_environment(host_manager):
     host_manager.add_block_to_file(host='wazuh-master', path='/var/ossec/etc/client.keys', replace='NOTVALIDKEY',
                                    after='wazuh-agent2 any ', before='2\n')
     host_manager.clear_file(host='wazuh-agent2', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+    agent2_id = host_manager.run_shell(host='wazuh-master',
+                cmd=f'/var/ossec/bin/manage_agents -l | grep "wazuh-agent2" | grep -o "[0-9][0-9][0-9]"')
+    host_manager.run_shell(host='wazuh-master', cmd=f'/var/ossec/bin/manage_agents -r {agent2_id}')
 
 
-@pytest.mark.skip(reason='Development in progress: https://github.com/wazuh/wazuh/issues/4387')
 def test_agent_key_polling(inventory_path):
     """Check that the agent key polling cycle works correctly. To do this, we use the messages and the hosts defined
     in data/messages.yml and the hosts inventory.

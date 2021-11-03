@@ -35,6 +35,11 @@ nav:
           - tests/integration/test_vulnerability_detector/index.md
           - Tests feeds:
             - tests/integration/test_vulnerability_detector/test_feeds/index.md
+            - Amazon Linux:
+                - Test extra tags alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_extra_tags_alas_feed.md
+                - Test invalid syntax alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_invalid_syntax_alas_feed.md
+                - Test invalid values alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_invalid_values_alas_feed.md
+                - Test missing tags alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_missing_tags_alas_feed.md
             - Debian:
               - Test extra tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_extra_tags_debian_feed.md
               - Test invalid syntax debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_syntax_debian_feed.md
@@ -60,7 +65,7 @@ nav:
               - Test invalid values canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_values_canonical_feed.md
               - Test invalid syntax canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_syntax_canonical_feed.md
               - Test extra tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_extra_tags_canonical_feed.md
-            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feed.md
+            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feeds.md
             - Test invalid type custom feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_custom_feeds.md
             - Test invalid type url feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_url_feeds.md
             - Test validate feed content: tests/integration/test_vulnerability_detector/test_feeds/test_validate_feed_content.md
@@ -80,6 +85,7 @@ nav:
             - Test providers multiple providers: tests/integration/test_vulnerability_detector/test_providers/test_providers_multiple_providers.md
           - Tests SCAN results:
             - tests/integration/test_vulnerability_detector/test_scan_results/index.md
+            - Test alas inventory with alas feed: tests/integration/test_vulnerability_detector/test_scan_results/test_alas_inventory_alas_feed.md
             - Test debian inventory with debian feed: tests/integration/test_vulnerability_detector/test_scan_results/test_debian_inventory_debian_feed.md
             - Test macos inventory: tests/integration/test_vulnerability_detector/test_scan_results/test_macos_inventory.md
             - Test msu inventory with msu feed: tests/integration/test_vulnerability_detector/test_scan_results/test_msu_inventory_msu_feed.md
