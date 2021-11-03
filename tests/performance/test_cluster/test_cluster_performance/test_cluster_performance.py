@@ -20,11 +20,6 @@ exceeded_thresholds = []
 
 # Fixtures
 @pytest.fixture()
-def artifacts_path(pytestconfig):
-    return pytestconfig.getoption("artifacts_path")
-
-
-@pytest.fixture()
 def n_workers(pytestconfig):
     return pytestconfig.getoption("n_workers")
 
