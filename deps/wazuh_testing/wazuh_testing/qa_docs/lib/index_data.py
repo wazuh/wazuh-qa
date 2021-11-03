@@ -58,7 +58,7 @@ class IndexData:
                 return True
         except (ConnectionRefusedError, urllib3.exceptions.NewConnectionError, urllib3.exceptions.MaxRetryError,
                 requests.exceptions.ConnectionError):
-            raise QAValueError(f"Connection error", IndexData.LOGGER.error) from None
+            raise QAValueError(f"Could not connect with ElasticSearch.", IndexData.LOGGER.error) from None
 
     def get_files(self):
         """Find all the files inside the documentation path that matches with the JSON regex.
