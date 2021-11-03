@@ -28,7 +28,7 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add - && \
     apt-get install wazuh-manager
 
 WORKDIR /
-RUN git clone https://github.com/wazuh/wazuh-qa -b 2145-docker-shared-dir
+RUN git clone https://github.com/wazuh/wazuh-qa -b 1864-qa-docs-fixes
 WORKDIR /wazuh-qa/
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt --ignore-installed && \
@@ -44,7 +44,9 @@ RUN npm install
 
 # Limit ES RAM
 RUN echo "-Xms1g" >> /etc/elasticsearch/jvm.options && \
-    echo "-Xmx1g" >> /etc/elasticsearch/jvm.options
+    echo "-Xmx1g" >> /etc/elasticsearch/jvm.options && \
+    # Disable xpack to prevent ES showing security warning
+    echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml
 
 # copy entrypoint and grant permission
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
