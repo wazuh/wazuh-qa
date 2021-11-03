@@ -183,7 +183,7 @@ def get_process_cmd(search_cmd):
             return proc
 
 
-def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, extra_sockets=[], use_wazuh_control=False):
+def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, extra_sockets=[]):
     """Wait until Wazuh daemon's status matches the expected one. If timeout is reached and the status didn't match,
        it raises a TimeoutError.
 
@@ -205,11 +205,8 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
         elapsed_time = 0
 
         while elapsed_time < timeout and not condition_met:
-            if use_wazuh_control == True:
-                control_status_output = subprocess.run([f"{WAZUH_PATH}/bin/wazuh-control", 'status'],
-                                                    stdout=subprocess.PIPE).stdout.decode()
-            else:
-                control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
+
+            control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
                                                     stdout=subprocess.PIPE).stdout.decode()
 
             condition_met = True
