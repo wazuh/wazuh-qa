@@ -22,10 +22,13 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
+local_internal_options = {'logcollector.debug': '2'}
+
 if sys.platform == 'win32':
     prefix = AGENT_DETECTOR_PREFIX
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
@@ -151,7 +154,8 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_out_format(get_configuration, configure_environment, restart_logcollector):
+def test_configuration_out_format(get_configuration, configure_environment, configure_local_internal_options_module,
+                                  restart_logcollector):
     """Check if the Wazuh out format field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid out format values.
