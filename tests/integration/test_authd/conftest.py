@@ -49,10 +49,7 @@ def restart_authd(get_configuration):
     Restart Authd.
     """
     truncate_file(LOG_FILE_PATH)
-    try:
-        control_service("restart", daemon=DAEMON_NAME)
-    except Exception:
-        pass
+    control_service("restart", daemon=DAEMON_NAME)
 
 
 @pytest.fixture(scope='function')
@@ -61,10 +58,7 @@ def restart_authd_function():
     Restart Authd.
     """
     truncate_file(LOG_FILE_PATH)
-    try:
-        control_service("restart", daemon=DAEMON_NAME)
-    except Exception:
-        pass
+    control_service("restart", daemon=DAEMON_NAME)
 
 
 @pytest.fixture(scope='function')

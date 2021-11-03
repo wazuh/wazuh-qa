@@ -1,8 +1,10 @@
 import os
 import pytest
+from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.authd import validate_authd_logs
+from wazuh_testing.tools.file import read_yaml, truncate_file
+from wazuh_testing.authd import DAEMON_NAME, validate_authd_logs
+from wazuh_testing.tools.services import control_service
 
 
 # Data paths
@@ -45,7 +47,13 @@ def get_current_test_case(request):
 # Tests
 
 def test_authd_force_options_invalid_config(get_current_test_case, configure_local_internal_options_module,
-                                            override_authd_force_conf, file_monitoring, restart_authd_function,
-                                            tear_down):
+                                            override_authd_force_conf, file_monitoring, tear_down):
 
+    truncate_file(LOG_FILE_PATH)
+    try:
+        control_service("restart", daemon=DAEMON_NAME)
+    except Exception:
+        pass
+    else:
+        raise Exception("Authd started when it was expected to fail")
     validate_authd_logs(get_current_test_case.get('log', []), log_monitor)
