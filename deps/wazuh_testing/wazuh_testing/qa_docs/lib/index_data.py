@@ -8,6 +8,7 @@ import re
 import json
 import yaml
 import requests
+import urllib3
 from elasticsearch import Elasticsearch, helpers
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
@@ -55,8 +56,9 @@ class IndexData:
             res = requests.get("http://localhost:9200/_cluster/health")
             if res.status_code == 200:
                 return True
-        except Exception as exception:
-            raise QAValueError(f"Connection error: {exception}", IndexData.LOGGER.error)
+        except (ConnectionRefusedError, urllib3.exceptions.NewConnectionError, urllib3.exceptions.MaxRetryError,
+                requests.exceptions.ConnectionError):
+            raise QAValueError(f"Connection error", IndexData.LOGGER.error) from None
 
     def get_files(self):
         """Find all the files inside the documentation path that matches with the JSON regex.
@@ -99,11 +101,10 @@ class IndexData:
 
     def run(self):
         """Collect all the documentation files and makes a request to the BULK API to index the new data."""
-        self.test_connection()
-        files = self.get_files()
-        self.read_files_content(files)
-
         if self.test_connection():
+            files = self.get_files()
+            self.read_files_content(files)
+
             try:
                 if self.es.count(index=self.index):
                     self.remove_index()
