@@ -20,6 +20,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
 from wazuh_testing.tools import github_checks
+from wazuh_testing.tools import file
 from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 from wazuh_testing.qa_ctl.provisioning import local_actions
 from wazuh_testing.tools.file import recursive_directory_creation
@@ -123,6 +124,10 @@ def set_parameters(parameters):
         level = 'DEBUG' if parameters.debug >= 1 else 'INFO'
         qactl_logger.set_level(level)
 
+        # Disable traceback if it is not run in DEBUG mode
+        if level != 'DEBUG':
+            sys.tracebacklimit = 0
+
     parameters.user_version = parameters.version if parameters.version else None
 
     try:
@@ -162,6 +167,29 @@ def validate_parameters(parameters):
         QAValueError: If parameters are incompatible, or version has not a valid format, or the specified wazuh version
                       has not been released, or wazuh QA branch does not exist (calculated from wazuh_version).
     """
+    def _validate_tests_os(parameters):
+        for test in parameters.run_test:
+            tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
+            test_documentation_command = f"qa-docs -I {tests_path} -t {test} -o {gettempdir()} --no-logging"
+            test_documentation_file_path = os.path.join(gettempdir(), f"{test}.json")
+            local_actions.run_local_command_with_output(test_documentation_command)
+
+            test_data = json.loads(file.read_file(test_documentation_file_path))
+
+            for op_system in parameters.operating_systems:
+                # Check platform
+                platform = 'linux' if op_system == 'ubuntu' or op_system == 'centos' else op_system
+                if not platform in test_data['os_platform']:
+                    raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed platforms: "
+                                       f"{test_data['os_platform']} (ubuntu and centos are from linux platform)")
+                # Check os version
+                if len([os_version.lower() for os_version in test_data['os_version'] if op_system in os_version]) > 0:
+                    raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed operating "
+                                       f"system versions: {test_data['os_version']}")
+            # Clean the temporary files
+            for extension in ['.json', '.yaml']:
+                file.remove_file(os.path.join(gettempdir(), f"{test}{extension}"))
+
     qactl_logger.info('Validating input parameters')
 
     # Check incompatible parameters
@@ -210,6 +238,9 @@ def validate_parameters(parameters):
             if f'{test} is not documented' in test_documentation_check:
                 raise QAValueError(f"{test} is not documented using qa-docs current schema", qactl_logger.error,
                                    QACTL_LOGGER)
+    # Validate the tests operating system compatibility if specified
+    if parameters.operating_systems:
+        _validate_tests_os(parameters)
 
     qactl_logger.info('Input parameters validation has passed successfully')
 
