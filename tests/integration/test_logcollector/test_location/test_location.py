@@ -21,6 +21,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
 configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 
+local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
 date = datetime.date.today().strftime("%Y-%m-%d")
@@ -153,7 +154,7 @@ def get_files_list():
 
 
 def test_location(get_files_list, create_file_structure_module, get_configuration, configure_environment,
-                  restart_logcollector):
+                  configure_local_internal_options_module, file_monitoring, restart_logcollector):
     """Check if logcollector is running properly with the specified configuration.
 
     Raises:
@@ -165,25 +166,25 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
     for file_location in sorted(files):
         if file_type == 'single_file':
             log_callback = logcollector.callback_analyzing_file(file_location)
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message="The expected 'Analyzing file' message has not been produced")
+            log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                              error_message="The expected 'Analyzing file' message has not been produced")
         elif file_type == 'wildcard_file':
             pattern = get_configuration['metadata']['location']
             log_callback = logcollector.callback_match_pattern_file(pattern, file_location)
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'New file that matches the '{pattern}' "
-                                                  f"pattern: '{file_location}' message has not been produced")
+            log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                              error_message=f"The expected 'New file that matches the '{pattern}' "
+                              f"pattern: '{file_location}' message has not been produced")
         elif file_type == 'non_existent_file':
             log_callback = logcollector.callback_non_existent_file(file_location)
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message="The expected 'Could not open file' message has not been produced")
+            log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                              error_message="The expected 'Could not open file' message has not been produced")
         elif file_type == 'duplicated_file':
             log_callback = logcollector.callback_duplicated_file(file_location)
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'Log file '{file_location}' is duplicated' "
-                                                  f"message has not been produced")
+            log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                              error_message=f"The expected 'Log file '{file_location}' is duplicated' "
+                              f"message has not been produced")
         elif file_type == 'multiple_logs':
             log_callback = logcollector.callback_file_limit()
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' "
-                                                  f"message has not been produced")
+            log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                              error_message=f"The expected 'File limit has been reached' "
+                              f"message has not been produced")
