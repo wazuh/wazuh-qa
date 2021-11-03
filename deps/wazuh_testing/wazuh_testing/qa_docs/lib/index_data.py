@@ -92,12 +92,10 @@ class IndexData:
                     lines = yaml.load(test_file, Loader=yaml.FullLoader)
                     self.output.append(lines)
 
-
     def remove_index(self):
         """Delete an index."""
         delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
         IndexData.LOGGER.info(f'Deleting the already existing index: {self.index}')
-
 
     def run(self):
         """Collect all the documentation files and makes a request to the BULK API to index the new data."""
