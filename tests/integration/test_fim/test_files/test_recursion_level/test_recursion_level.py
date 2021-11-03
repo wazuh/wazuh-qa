@@ -1,6 +1,83 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will verify that FIM generates events
+       for file operations in a monitored directory hierarchy using multiple deep levels set in
+       the 'recursion_level' attribute.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 2
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+    - macos
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_recursion_level
+'''
 import os
 import sys
 
@@ -161,19 +238,57 @@ def get_configuration(request):
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_recursion_level(dirname, subdirname, recursion_level, get_configuration, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
-    """
-    Check if files are correctly detected by syscheck with recursion level using scheduled, realtime and whodata
-    monitoring.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events in a monitored directories hierarchy with
+                 deep limited by the 'recursion_level' attribute using 'scheduled', 'realtime', and 'whodata'
+                 monitoring modes. For this purpose, the test will monitor a testing folder and create a directory
+                 hierarchy inside it. Once FIM starts, it will make file operations in each level of that hierarchy.
+                 Finally, the test will verify that the FIM events are generated up to the deep level limit, and no
+                 FIM events are generated in the ignored levels.
 
-    Parameters
-    ----------
-    dirname : str
-        The path being monitored by syscheck (indicated in the .conf file).
-    subdirname : str
-        The name of the subdirectories that will be created during the execution for testing purposes.
-    recursion_level : int
-        Recursion level. Also used as the number of subdirectories to be created and checked for the current test. 
-        Max recursion level for Windows is 32. When testing on windows the last case tests 32 folders deep instead of 320.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - dirname:
+            type: str
+            brief: Path to the monitored directory (set in the 'ossec.conf' file).
+        - subdirname:
+            type: str
+            brief: Name of the subdirectory to be created.
+        - recursion_level:
+            type: int
+            brief: Number of subdirectories to be created and checked for the current test case.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events are generated for the file operations in a monitored directory hierarchy up to
+          the level set in the 'recursion_level' attribute.
+        - Verify that no FIM events are generated in the ignored directories within a monitored directory hierarchy.
+
+    input_description: A test case (test_recursion_level) is contained in external YAML files
+                       (wazuh_recursion.yaml or wazuh_recursion_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and the directories
+                       to be monitored. These are combined with the recursion levels defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+        - r'Caching Audit message: event too long' (if the test case fails)
+
+    tags:
+        - realtime
+        - scheduled
+        - who_data
+    '''
     recursion_test(dirname, subdirname, recursion_level, timeout=global_parameters.default_timeout,
                    is_scheduled=get_configuration['metadata']['fim_mode'] == 'scheduled')

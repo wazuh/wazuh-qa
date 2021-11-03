@@ -1,6 +1,73 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files
+       are modified. Specifically, these tests will check if FIM updates the target of 'symbolic links'
+       when it is changed.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files for
+       changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - macos
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_follow_symbolic_link
+'''
 import os
 
 import pytest
@@ -44,26 +111,58 @@ def get_configuration(request):
 ])
 def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_configuration, configure_environment,
                                 restart_syscheckd, wait_for_fim_start):
-    """Check if syscheck updates the symlink target properly
+    '''
+    description: Check if the 'wazuh-syscheckd' updates the symlink target properly. For this purpose,
+                 the test will monitor a 'symbolic link' pointing to a file/directory. Once FIM starts,
+                 it will create and expect events inside the pointed folder. Then, it will create files
+                 inside the new target, making sure that it will not generate any events. After
+                 the FIM events are processed, the test will change the target of the link to another
+                 folder and wait until the thread that checks the symbolic links updates the target.
+                 Finally, the test will check if the new file is being monitored and the old one is not.
 
-    Having a symbolic link pointing to a file/folder, change the target of the link to another file/folder.
-    Ensure that the old file is being monitored and the new one is not before symlink_checker runs.
-    Wait until symlink_checker runs and ensure that the new file is being monitored and the old one is not.
+    wazuh_min_version: 4.2.0
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        main_folder (str): Directory that is being pointed at or contains the pointed file.
-        aux_folder (str): Directory that will be pointed at or will contain the future pointed file.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - main_folder:
+            type: str
+            brief: Directory that is being pointed at or contains the pointed file.
+        - aux_folder:
+            type: str
+            brief: Directory that will be pointed at or will contain the future pointed file.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
-    Raises:
-        TimeoutError: If a expected event wasn't triggered.
-        AttributeError: If a unexpected event was captured.
-    """
+    assertions:
+        - Verify that FIM events are generated at the initial target of the 'symbolic link'.
+        - Verify that no FIM events are generated in the final target before changing it in the 'symbolic link'.
+        - Verify that no FIM events are generated in the initial target of the 'symbolic link'
+          when it has already been changed to the final target.
 
+    input_description: Two test cases (monitored_file and monitored_dir) are contained in external YAML file
+                       (wazuh_conf.yaml) which includes configuration settings for the 'wazuh-syscheckd' daemon
+                       and, these are combined with the testing directories to be monitored defined in
+                       the 'common.py' module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     def modify_and_check_events(f1, f2, text):
         """
         Modify the content of 2 given files. We assume the first one is being monitored and the other one is not.

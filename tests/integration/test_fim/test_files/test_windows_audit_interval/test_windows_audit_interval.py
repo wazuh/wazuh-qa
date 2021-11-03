@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will verify that FIM checks at the specified frequency
+       in the 'windows_audit_interval' tag, that the SACLs of the directories monitored using the 'whodata'
+       monitoring mode are correct, detecting the changes and restoring the SACL rules when required.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#whodata
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-audit-interval
+    - https://en.wikipedia.org/wiki/Access-control_list
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_windows_audit_interval
+'''
 import os
 import platform
 import re
@@ -84,7 +138,48 @@ def callback_sacl_restored(line):
 ])
 def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
-    """Check that Wazuh detects a SACL change every 'windows_audit_interval' and sets monitoring to real-time if so."""
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects a SACL change every 'windows_audit_interval'
+                 and sets monitoring to 'realtime' mode if so. For this purpose, the test will monitor a
+                 folder and verify that the SACL rules are applied to it. Then, the test will remove one rule,
+                 and finally, it will verify that an FIM event is generated indicating the rule modification
+                 and change the monitoring mode to 'realtime'.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that an FIM event is generated when a SACL modification is detected.
+
+    input_description: A test case (audit_interval) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
+                       is combined with the testing directory to be monitored defined in this module.
+                       For managing the SACL rules, a module 'manage_acl.py' is used.
+
+    expected_output:
+        - r'.*The SACL of .* has been modified and it is not valid for the real-time Whodata mode. ' \
+           'Whodata will not be available for this file.'
+
+    tags:
+        - realtime
+        - who_data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with Privilege('SeSecurityPrivilege'):
@@ -112,7 +207,47 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
 ])
 def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                     wait_for_fim_start):
-    """Check that Wazuh restores previous SACL rules when the service is stopped."""
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon restores previous SACL rules when the Wazuh service is stopped.
+                 For this purpose, the test will monitor a folder and verify that the Wazuh SACL rules are applied
+                 to it. Then, the test will stop the agent service, and finally, it will verify that an FIM event
+                 is generated, indicating the restoration of the previous SACL rules.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the `ossec.log` file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that an FIM event is generated indicating that previous SACL rules are restored
+          when the Wazuh agent is stopped.
+
+    input_description: A test case (audit_interval) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
+                       is combined with the testing directory to be monitored defined in this module.
+                       For managing the SACL rules, a module 'manage_acl.py' is used.
+
+    expected_output:
+        - r'.*The SACL of .* has been restored correctly.'
+
+    tags:
+        - realtime
+        - who_data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     with Privilege('SeSecurityPrivilege'):
