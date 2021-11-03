@@ -7,6 +7,8 @@ import os
 import sys
 import shutil
 
+from tempfile import gettempdir
+
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 
@@ -239,3 +241,72 @@ def run_local_command(command):
         print("error")
         # raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.LOGGER.error,
         #                    QADOCS_LOGGER)
+
+
+def run_local_command_with_output(command):
+    """Run local commands getting the command output.
+    Args:
+        command (string): Command to run.
+
+    Returns:
+        str: Command output
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command], stdout=subprocess.PIPE)
+
+    return run.stdout.read().decode()
+
+
+def qa_docs_docker_run(qa_branch, command):
+    """Run qa-docs in a Linux docker container.
+
+    Having this functionality helps the people that do not have ElasticSearch and(or) wazuh framework to generate
+    the documentation of the tests.
+
+    Args:
+        qa_branch (str): Wazuh qa branch that will be used as tests input.
+        command (str): A string with the arguments to pass qa-docs when running within the docker container.
+    """
+    docker_args = f"{qa_branch} {command}"
+    docker_image_name = 'wazuh/qa-docs'
+    docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dockerfiles')
+
+    utils_logger.info(f"Building qa-docs docker image")
+    run_local_command(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
+
+    utils_logger.info(f"Running the Linux container")
+    run_local_command(f"docker run --name qa_docs_container --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
+
+
+def get_qa_docs_run_options(args):
+    """Get the parameters to run qa-docs.
+    
+    Args:
+        args (argparse.Namespace): arguments that are passed to the tool.
+    Returns:
+        command (str): A string with the options to run qa-docs.
+    """
+    command = ''
+    if args.index_name:
+        command += f" -i {args.index_name}"
+    if args.app_index_name:
+        command += f" -l {args.app_index_name}"
+    if args.launching_index_name:
+        command += f" -il {args.launching_index_name}"
+
+    if args.test_types:
+        command += ' --types'
+        for type in args.test_types:
+            command += f" {type}"
+            if args.test_modules:
+                command += ' --modules'
+                for modules in args.test_modules:
+                    command += f" {modules} "
+    elif args.test_names:
+        command += ' -t'
+        for test_name in args.test_names:
+            command += f" {test_name} "
+
+    return command

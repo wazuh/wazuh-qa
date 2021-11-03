@@ -1,44 +1,36 @@
 #!/bin/bash
 
 BRANCH="$1";
-TYPE="$2";
-MODULES="${@:3}";
+CMD="${@:2}";
 
 # Clone tests to be parsed as qa-docs input
-mkdir ~/tests && cd ~/tests
+mkdir /tests && cd /tests
+echo "Cloning tests to parse from ${BRANCH} branch"
 git clone https://github.com/wazuh/wazuh-qa --depth=1 -b ${BRANCH} &> /dev/null
 
-# Clone qa-docs
-cd ~ && git clone https://github.com/wazuh/wazuh-qa
+/usr/local/bin/qa-docs -d -I /tests/wazuh-qa/tests --validate-parameters ${CMD}
 
-cd wazuh-qa/
-git checkout 1864-qa-docs-fixes
-
-# Install python dependencies not installed from
-python3 -m pip install -r requirements.txt &> /dev/null
-
-# Install Wazuh QA framework
-cd deps/wazuh_testing &> /dev/null
-python3 setup.py install &> /dev/null
-
-# Install search-ui deps
-cd /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/search_ui
-npm install
-
-# Limit ES RAM
-echo "-Xms1g" >> /etc/elasticsearch/jvm.options
-echo "-Xmx1g" >> /etc/elasticsearch/jvm.options
+# get run status
+status=$?
+# If not returned 0, exit
+if [ $status -ne 0 ]
+then
+  exit 1
+fi
 
 # Start services
-service elasticsearch start && service wazuh-manager start
-
-# Run qa-docs tool
-if (($# == 1))
+# If qa-docs will index the data, start ES
+if [[ "$CMD" =~ .*"-i".* ]] || [[ "$CMD" =~ .*"-il".* ]];
 then
-  /usr/local/bin/qa-docs -I ~/tests/wazuh-qa/tests -il qa-docs
-elif (($# == 2))
-then
-  /usr/local/bin/qa-docs -I ~/tests/wazuh-qa/tests --types ${TYPE} -il qa-docs
-else
-  /usr/local/bin/qa-docs -I ~/tests/wazuh-qa/tests --types ${TYPE} --modules ${MODULES} -il qa-docs
+   service elasticsearch start
 fi
+service wazuh-manager start
+
+# Run qa-docs with the given args
+echo "Running /usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}"
+/usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}
+
+# Move the documentation parsed to the shared dir
+echo "Moving qa-docs output to shared directory /tmp/qa_docs"
+rm -rf /qa_docs/output &> /dev/null
+mv -f /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/output/ /qa_docs

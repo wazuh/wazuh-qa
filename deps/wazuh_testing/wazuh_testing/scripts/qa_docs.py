@@ -14,7 +14,7 @@ from tempfile import gettempdir
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
 from wazuh_testing.qa_docs.lib.sanity import Sanity
-from wazuh_testing.qa_docs.lib.utils import run_local_command
+from wazuh_testing.qa_docs.lib.utils import run_local_command, qa_docs_docker_run, get_qa_docs_run_options
 from wazuh_testing.qa_docs.doc_generator import DocGenerator
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -114,6 +114,14 @@ def get_parameters():
     parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
                         help="Checks if test(s) exist or not.",)
 
+    parser.add_argument('--validate-parameters', action='store_true', dest='validate_parameters',
+                        help='Validate the parameters passed to the qa-docs tool.')
+
+    parser.add_argument('--docker-run', action='store_true', dest='run_with_docker',
+                        help='Run qa-docs using within a docker container')
+                        
+    parser.add_argument('--qa-branch', dest='qa_branch',
+                        help='Specifies the qa branch that will be used as input for the tests to be parsed.')
     parser.add_argument('--check-documentation', action='store_true', dest='check_doc',
                         help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
 
@@ -130,6 +138,8 @@ def check_incompatible_parameters(parameters):
     api_run = parameters.index_name or parameters.app_index_name or parameters.launching_index_name
     test_run = parameters.test_names or parameters.test_exist
 
+    qadocs_logger.debug('Checking parameters incompatibilities.')
+
     if parameters.version and (default_run or api_run or parameters.tests_path or test_run):
         raise QAValueError('The -v(--version) option must be run in isolation.',
                            qadocs_logger.error)
@@ -145,7 +155,7 @@ def check_incompatible_parameters(parameters):
                                qadocs_logger.error)
 
     if parameters.test_types:
-        if parameters.tests_path is None:
+        if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The --types option needs the path to the tests to be parsed. You must specify it by '
                                'using -I, --tests-path',
                                qadocs_logger.error)
@@ -159,7 +169,7 @@ def check_incompatible_parameters(parameters):
                                qadocs_logger.error)
 
     if parameters.test_modules:
-        if parameters.tests_path is None:
+        if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The --modules option needs the path to the tests to be parsed. You must specify it by '
                                'using -I, --tests-path',
                                qadocs_logger.error)
@@ -173,7 +183,7 @@ def check_incompatible_parameters(parameters):
                                qadocs_logger.error)
 
     if parameters.test_names:
-        if parameters.tests_path is None:
+        if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The -t(--test) option needs the path to the tests to be parsed. You must specify it by'
                                ' using -I, --tests-path',
                                qadocs_logger.error)
@@ -221,6 +231,8 @@ def check_incompatible_parameters(parameters):
         raise QAValueError('You cannot specify debug level and no-logging at the same time.',
                            qadocs_logger.error)
 
+    qadocs_logger.debug('Parameters incompatibilities checked.')
+
 
 def validate_parameters(parameters, parser):
     """Validate the parameters that qa-docs receives.
@@ -260,16 +272,23 @@ def validate_parameters(parameters, parser):
         except Exception as index_exception:
             raise QAValueError(f"Index exception: {index_exception}", qadocs_logger.error)
 
-    # Check that modules selection is done within a test type
-    if parameters.test_modules and len(parameters.test_types) != 1:
-        raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with just '
-                           'one type if you want to parse some modules within a test type.',
-                           qadocs_logger.error)
-
     if parameters.test_types:
         for type in parameters.test_types:
             if type not in os.listdir(parameters.tests_path):
-                raise QAValueError(f"The given types, {parameters.test_types}, not found in {parameters.tests_path}",
+                raise QAValueError(f"The given type: {type}, not found in {parameters.tests_path}",
+                                   qadocs_logger.error)
+
+    # Check that modules selection is done within a test type
+    if parameters.test_modules:
+        if len(parameters.test_types) != 1:
+            raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with '
+                            'just one type if you want to parse some modules within a test type.',
+                            qadocs_logger.error)
+
+        for module in parameters.test_modules:
+            type_path = os.path.join(parameters.tests_path,parameters.test_types[0])
+            if module not in os.listdir(type_path):
+                raise QAValueError(f"The given module: {module}, not found in {type_path}",
                                    qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
@@ -355,10 +374,15 @@ def index_and_visualize_data(args):
 def main():
     args, parser = get_parameters()
 
-    set_parameters(args)
-    validate_parameters(args, parser)
+    if not args.run_with_docker:
+        set_parameters(args)
+        validate_parameters(args, parser)
+    if args.validate_parameters: return 0
 
-    if args.version:
+    if args.run_with_docker:
+        command = get_qa_docs_run_options(args)
+        qa_docs_docker_run(args.qa_branch, command)
+    elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
             version_data = version_file.read()
             version = json.loads(version_data)

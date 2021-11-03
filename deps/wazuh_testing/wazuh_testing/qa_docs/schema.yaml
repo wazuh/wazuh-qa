@@ -112,6 +112,7 @@ predefined_values:
     - Windows Server 2003
     - Windows Server 2012
     - Windows Server 2016
+    - Windows Server 2019
   components:
     - agent
     - manager
