@@ -30,16 +30,18 @@ class DocGenerator:
         __id_counter (int): An integer that counts the test/group ID when it is created.
         ignore_regex (list): A list with compiled paths to be ignored.
         include_regex (list): A list with regular expressions used to parse a file or not.
+        file_format (str): Generated documentation format.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, config):
+    def __init__(self, config, file_format='json'):
         """Class constructor
 
         Initialize every attribute.
 
         Args:
             config (Config): A `Config` instance with the loaded configuration.
+            file_format (str): Generated documentation format.
         """
         self.conf = config
         self.parser = CodeParser(self.conf)
@@ -51,6 +53,7 @@ class DocGenerator:
         if self.conf.mode == Mode.DEFAULT:
             for include_regex in self.conf.include_regex:
                 self.include_regex.append(re.compile(include_regex.replace('\\', '/')))
+        self.file_format = file_format
 
     def is_valid_folder(self, path):
         """Check if a folder is included so it would be parsed.
@@ -152,21 +155,23 @@ class DocGenerator:
             DocGenerator.LOGGER.debug('Creating documentation folder')
             os.makedirs(os.path.dirname(doc_path))
 
-        DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
+        if self.file_format == 'json':
+            DocGenerator.LOGGER.debug(f"Writing {doc_path}.json")
 
-        try:
-            with open(f"{doc_path}.json", 'w+') as out_file:
-                out_file.write(f"{json.dumps(content, indent=4)}\n")
-        except IOError:
-            raise QAValueError(f"Cannot write in {doc_path}.json", DocGenerator.LOGGER.error)
+            try:
+                with open(f"{doc_path}.json", 'w+') as out_file:
+                    out_file.write(f"{json.dumps(content, indent=4)}\n")
+            except IOError:
+                raise QAValueError(f"Cannot write in {doc_path}.json", DocGenerator.LOGGER.error)
 
-        DocGenerator.LOGGER.debug(f"Writing {doc_path}.yaml")
+        if self.file_format == 'yaml':
+            DocGenerator.LOGGER.debug(f"Writing {doc_path}.yaml")
 
-        try:
-            with open(doc_path + ".yaml", "w+") as out_file:
-                out_file.write(yaml.dump(content))
-        except IOError:
-            raise QAValueError(f"Cannot write in {doc_path}.yaml", DocGenerator.LOGGER.error)
+            try:
+                with open(doc_path + ".yaml", "w+") as out_file:
+                    out_file.write(yaml.dump(content))
+            except IOError:
+                raise QAValueError(f"Cannot write in {doc_path}.yaml", DocGenerator.LOGGER.error)
 
     def create_group(self, path, group_id):
         """Parse the content of a group file and dump the content into a file.

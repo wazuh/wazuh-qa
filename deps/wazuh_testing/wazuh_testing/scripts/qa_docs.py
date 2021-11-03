@@ -23,6 +23,7 @@ from wazuh_testing.tools.exceptions import QAValueError
 VERSION_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'VERSION.json')
 SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'schema.yaml')
 OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs', 'output')
+OUTPUT_FORMAT = 'json'
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'search_ui')
 qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
@@ -53,6 +54,10 @@ def set_parameters(args):
     if args.output_path:
         global OUTPUT_PATH
         OUTPUT_PATH = args.output_path
+
+    if args.output_format:
+        global OUTPUT_FORMAT
+        OUTPUT_FORMAT = args.output_format
 
 
 def get_parameters():
@@ -102,6 +107,9 @@ def get_parameters():
 
     parser.add_argument('-o', dest='output_path',
                         help="Specifies the output directory for test parsed when `-t, --tests` is used.")
+                        
+    parser.add_argument('--format', dest='output_format', choices=['json', 'yaml'],
+                        help="Specifies the generated files format.")
 
     parser.add_argument('-e', '--exist', nargs='+', default=[], dest='test_exist',
                         help="Checks if test(s) exist or not.",)
@@ -295,7 +303,7 @@ def parse_data(args):
         qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
 
         docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
-                                       check_doc=args.check_doc))
+                                       check_doc=args.check_doc), OUTPUT_FORMAT)
 
     # Parse a list of test types
     elif args.test_types:
@@ -304,15 +312,15 @@ def parse_data(args):
         # Parse a list of test modules
         if args.test_modules:
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                args.test_modules))
+                                args.test_modules), OUTPUT_FORMAT)
         else:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types))
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types), OUTPUT_FORMAT)
 
     # Parse the whole path
     else:
         if not (args.index_name or args.app_index_name or args.launching_index_name):
             qadocs_logger.info(f"Parsing all tests located in {args.tests_path}")
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH))
+            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH), OUTPUT_FORMAT)
             docs.run()
 
     if args.test_types or args.test_modules or args.test_names and not args.check_doc:
@@ -326,7 +334,7 @@ def index_and_visualize_data(args):
     """Index the data previously parsed and visualize it."""
     # Index the previous parsed tests into Elasticsearch
     if args.index_name:
-        index_data = IndexData(args.index_name, OUTPUT_PATH)
+        index_data = IndexData(args.index_name, OUTPUT_PATH, OUTPUT_FORMAT)
         index_data.run()
 
     # Launch SearchUI with index_name as input
@@ -337,7 +345,7 @@ def index_and_visualize_data(args):
     # Index the previous parsed tests into Elasticsearch and then launch SearchUI
     elif args.launching_index_name:
         qadocs_logger.debug(f"Indexing {args.launching_index_name}")
-        index_data = IndexData(args.launching_index_name, OUTPUT_PATH)
+        index_data = IndexData(args.launching_index_name, OUTPUT_PATH, OUTPUT_FORMAT)
         index_data.run()
         # When SearchUI index is not hardcoded, it will be use args.launching_index_name
         run_searchui(args.launching_index_name)
