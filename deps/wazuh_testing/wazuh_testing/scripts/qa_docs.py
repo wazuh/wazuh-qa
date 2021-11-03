@@ -6,8 +6,10 @@ import argparse
 import os
 import sys
 import json
+
 from datetime import datetime
 from elasticsearch import Elasticsearch
+from tempfile import gettempdir
 
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
@@ -20,7 +22,7 @@ from wazuh_testing.tools.exceptions import QAValueError
 
 VERSION_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'VERSION.json')
 SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'schema.yaml')
-OUTPUT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'output')
+OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs', 'output')
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'log')
 SEARCH_UI_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'qa_docs', 'search_ui')
 qadocs_logger = Logging(QADOCS_LOGGER, 'INFO', True, os.path.join(LOG_PATH,
@@ -47,6 +49,10 @@ def set_parameters(args):
     # Deactivate the qa-docs logger if necessary.
     if args.no_logging:
         set_qadocs_logger_level(None)
+
+    if args.output_path:
+        global OUTPUT_PATH
+        OUTPUT_PATH = args.output_path
 
 
 def get_parameters():
@@ -195,34 +201,12 @@ def check_incompatible_parameters(parameters):
                                qadocs_logger.error)
 
     if parameters.output_path:
-        if parameters.test_types:
-            raise QAValueError('The -o option is not compatible with --types. The default output path is generated '
-                               'within the qa-docs tool to index it and visualize it.',
-                               qadocs_logger.error)
-
-        if parameters.test_modules:
-            raise QAValueError('The -o option is not compatible with --modules. The default output path is generated '
-                               'within the qa-docs tool to index it and visualize it.',
-                               qadocs_logger.error)
-
-        if parameters.index_name:
-            raise QAValueError('The -o option is not compatible with -i option',
-                               qadocs_logger.error)
-
         if parameters.app_index_name:
             raise QAValueError('The -o option is not compatible with -l option',
                                qadocs_logger.error)
 
-        if parameters.launching_index_name:
-            raise QAValueError('The -o option is not compatible with -il option',
-                               qadocs_logger.error)
-
         if parameters.test_exist:
             raise QAValueError('The -o option is not compatible with -e option',
-                               qadocs_logger.error)
-
-        if not parameters.test_names:
-            raise QAValueError('The -o option needs a list of tests to parse. You can use -t or --tests.',
                                qadocs_logger.error)
 
     if parameters.no_logging and parameters.debug_level:
@@ -310,13 +294,7 @@ def parse_data(args):
     elif args.test_names:
         qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
 
-        # When output path is specified by user, a json is generated within that path
-        if args.output_path:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, args.output_path, test_names=args.test_names,
-                                       check_doc=args.check_doc))
-        # When no output is specified, it is generated within the default qa-docs output folder
-        else:
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
+        docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
                                        check_doc=args.check_doc))
 
     # Parse a list of test types
