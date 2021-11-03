@@ -349,8 +349,6 @@ class DocGenerator:
             qa-docs -I ../../tests/ -T test_cache -o /tmp -> It would be running as `single test mode`
             creating `/tmp/test_cache.json`
         """
-        DocGenerator.LOGGER.info('Starting test documentation parsing')
-
         if self.conf.mode == Mode.DEFAULT:
             DocGenerator.LOGGER.debug(f"Cleaning doc folder located in {self.conf.documentation_path}")
             clean_folder(self.conf.documentation_path)

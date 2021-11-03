@@ -94,7 +94,7 @@ class IndexData:
     def remove_index(self):
         """Delete an index."""
         delete = self.es.indices.delete(index=self.index, ignore=[400, 404])
-        IndexData.LOGGER.info(f'Delete index {self.index}\n {delete}\n')
+        IndexData.LOGGER.info(f'Deleting the already existing index: {self.index}')
 
 
     def run(self):
@@ -110,7 +110,8 @@ class IndexData:
             except Exception:
                 pass
 
-            IndexData.LOGGER.info("Indexing data...\n")
+            IndexData.LOGGER.info("Indexing data")
             helpers.bulk(self.es, self.output, index=self.index)
             out = json.dumps(self.es.cluster.health(wait_for_status='yellow', request_timeout=1), indent=4)
-            IndexData.LOGGER.info(out)
+            IndexData.LOGGER.debug(out)
+            IndexData.LOGGER.info("The data have been successfully indexed")

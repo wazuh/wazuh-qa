@@ -311,6 +311,7 @@ def parse_data(args):
 
         # Parse a list of test modules
         if args.test_modules:
+            qadocs_logger.info(f"Parsing the following test(s) modules(s): {args.test_modules}")
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
                                 args.test_modules), OUTPUT_FORMAT)
         else:
