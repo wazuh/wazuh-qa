@@ -259,7 +259,7 @@ def run_local_command_with_output(command):
     return run.stdout.read().decode()
 
 
-def qa_docs_docker_run(qa_branch, command):
+def qa_docs_docker_run(qa_branch, command, output_path):
     """Run qa-docs in a Linux docker container.
 
     Having this functionality helps the people that do not have ElasticSearch and(or) wazuh framework to generate
@@ -269,20 +269,21 @@ def qa_docs_docker_run(qa_branch, command):
         qa_branch (str): Wazuh qa branch that will be used as tests input.
         command (str): A string with the arguments to pass qa-docs when running within the docker container.
     """
-    docker_args = f"{qa_branch} {command}"
+    docker_args = f"{qa_branch} {output_path} {command}"
     docker_image_name = 'wazuh/qa-docs'
     docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dockerfiles')
 
     utils_logger.info(f"Building qa-docs docker image")
-    run_local_command(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
+    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     utils_logger.info(f"Running the Linux container")
-    run_local_command(f"docker run --name qa_docs_container --rm -v {os.path.join(gettempdir(), 'qa_docs')}:/qa_docs {docker_image_name} {docker_args}")
+    run_local_command(f"docker run --name qa_docs_container --rm -v {output_path}:/qa_docs {docker_image_name} "
+                      f"{docker_args}")
 
 
 def get_qa_docs_run_options(args):
     """Get the parameters to run qa-docs.
-    
+
     Args:
         args (argparse.Namespace): arguments that are passed to the tool.
     Returns:

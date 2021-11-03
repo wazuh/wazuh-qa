@@ -51,8 +51,11 @@ def set_parameters(args):
     if args.no_logging:
         set_qadocs_logger_level(None)
 
-    if args.output_path:
+    if args.run_with_docker:
         global OUTPUT_PATH
+        OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs')
+
+    if args.output_path: 
         OUTPUT_PATH = args.output_path
 
     if args.output_format:
@@ -374,14 +377,13 @@ def index_and_visualize_data(args):
 def main():
     args, parser = get_parameters()
 
-    if not args.run_with_docker:
-        set_parameters(args)
-        validate_parameters(args, parser)
+    set_parameters(args)
+    if not args.run_with_docker: validate_parameters(args, parser)
     if args.validate_parameters: return 0
 
     if args.run_with_docker:
         command = get_qa_docs_run_options(args)
-        qa_docs_docker_run(args.qa_branch, command)
+        qa_docs_docker_run(args.qa_branch, command, OUTPUT_PATH)
     elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
             version_data = version_file.read()

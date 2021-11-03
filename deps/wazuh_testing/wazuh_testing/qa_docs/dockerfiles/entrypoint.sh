@@ -1,12 +1,22 @@
 #!/bin/bash
 
 BRANCH="$1";
-CMD="${@:2}";
+SHARED_VOL="$2"
+CMD="${@:3}";
 
 # Clone tests to be parsed as qa-docs input
 mkdir /tests && cd /tests
 echo "Cloning tests to parse from ${BRANCH} branch"
 git clone https://github.com/wazuh/wazuh-qa --depth=1 -b ${BRANCH} &> /dev/null
+
+# get run status
+status=$?
+# If not returned 0, exit
+if [ $status -ne 0 ]
+then
+  echo "Could not download tests input from ${BRANCH} branch"
+  exit 1
+fi
 
 /usr/local/bin/qa-docs -d -I /tests/wazuh-qa/tests --validate-parameters ${CMD}
 
@@ -31,6 +41,6 @@ echo "Running /usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}"
 /usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}
 
 # Move the documentation parsed to the shared dir
-echo "Moving qa-docs output to shared directory /tmp/qa_docs"
+echo "Moving qa-docs output to shared directory: ${SHARED_VOL}/output"
 rm -rf /qa_docs/output &> /dev/null
-mv -f /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/output/ /qa_docs
+mv -f /tmp/qa_docs/output /qa_docs
