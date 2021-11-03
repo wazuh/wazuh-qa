@@ -165,7 +165,7 @@ def override_wazuh_conf(configuration):
     time.sleep(1)
 
 
-def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
+def test_authd_ssl_certs(get_configuration, generate_ca_certificate, tear_down):
     '''
     description: Check if the 'wazuh-authd' daemon can manage 'SSL' connections with agents
                  and the 'host verification' feature is working properly. For this purpose,
