@@ -3,6 +3,7 @@
       - all
       apply_to_modules:
       - test_authd_force_options
+      - test_authd_force_options_invalid_config
       sections:
       - section: auth
         elements:

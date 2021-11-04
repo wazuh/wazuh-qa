@@ -1,8 +1,11 @@
 import pytest
+import os
+import yaml
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
-from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf
+from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, set_section_wazuh_conf,\
+                                              load_wazuh_configurations
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.monitoring import QueueMonitor
 
@@ -96,6 +99,39 @@ def tear_down():
     control_service('stop')
     truncate_file(CLIENT_KEYS_PATH)
     control_service('start')
+
+
+def create_force_config_block(param, config_path):
+    """
+    Creates a temporal config file.
+    """
+    temp = os.path.join(os.path.dirname(config_path), 'temp.yaml')
+
+    with open(config_path, 'r') as conf_file:
+        temp_conf_file = yaml.safe_load(conf_file)
+        for elem in param:
+            temp_conf_file[0]['sections'][0]['elements'].append(elem)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+
+
+@pytest.fixture(scope='function')
+def format_configuration(get_current_test_case, request):
+    """
+    Get configuration block from current test case
+    """
+    test_name = request.node.originalname
+    configuration = get_current_test_case.get('configuration', {})
+
+    # Configuration for testing
+    temp = create_force_config_block(configuration, request.module.configurations_path)
+    conf = load_wazuh_configurations(temp, test_name)
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+
+    return test_config
 
 
 @pytest.fixture(scope='function')

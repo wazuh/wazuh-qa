@@ -81,10 +81,11 @@ SSL_AGENT_PRIVATE_KEY = '/tmp/test_sslagent.key'
 SSL_VERIFY_HOSTS = ['no', 'yes']
 SIM_OPTIONS = ['NO CERT', 'VALID CERT', 'INCORRECT CERT', 'INCORRECT HOST']
 
+AGENT_ID = 0
 AGENT_NAME = 'test_agent'
 AGENT_IP = '127.0.0.1'
 WRONG_IP = '10.0.0.240'
-INPUT_MESSAGE = f"OSSEC A:'{AGENT_NAME}'"
+INPUT_MESSAGE = "OSSEC A:'{}_{}'"
 OUPUT_MESSAGE = "OSSEC K:'"
 # Ossec.conf configurations
 params = [{
@@ -164,7 +165,7 @@ def override_wazuh_conf(configuration):
     time.sleep(1)
 
 
-def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
+def test_authd_ssl_certs(get_configuration, generate_ca_certificate, tear_down):
     '''
     description: Check if the 'wazuh-authd' daemon can manage 'SSL' connections with agents
                  and the 'host verification' feature is working properly. For this purpose,
@@ -213,7 +214,9 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
             return
         else:
             raise AssertionError(f'Option {option} expected successful socket connection but it failed')
-    SSL_socket.send(INPUT_MESSAGE, size=False)
+    global AGENT_ID
+    SSL_socket.send(INPUT_MESSAGE.format(AGENT_NAME, AGENT_ID), size=False)
+    AGENT_ID = AGENT_ID + 1
     try:
         response = ''
         timeout = time.time() + 10

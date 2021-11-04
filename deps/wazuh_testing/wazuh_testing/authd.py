@@ -9,8 +9,9 @@ copyright:
 import re
 import pytest
 import time
-from wazuh_testing.tools import CLIENT_KEYS_PATH
+from wazuh_testing.tools import CLIENT_KEYS_PATH, LOG_FILE_PATH
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 
 
 DAEMON_NAME = 'wazuh-authd'
@@ -51,6 +52,18 @@ def create_authd_request(input):
         command = command + f" K:'{key_hash}'"
 
     return command
+
+
+# Functions
+def validate_authd_logs(expected_logs, log_monitor=None):
+    if not log_monitor:
+        log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    for log in expected_logs:
+        log_monitor.start(timeout=AUTHD_KEY_REQUEST_TIMEOUT,
+                          callback=make_callback(log, prefix=AUTHD_DETECTOR_PREFIX,
+                                                 escape=True),
+                          error_message=f"Expected log does not occured: '{log}'")
 
 
 def validate_argument(received, expected, argument_name):
@@ -118,6 +131,7 @@ def validate_authd_response(response, expected):
 
     return result, err_msg
 
+
 def clean_agents_from_db():
     """
     Clean agents from DB
@@ -134,10 +148,12 @@ def insert_agent_in_db(id=1, name="TestAgent", ip="any", registration_time=0, co
     """
     Write agent in global.db
     """
-    command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time},\
-                "connection_status":"{connection_status}", "disconnection_time":"{disconnection_time}"}}'
+    insert_command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time}}}'
+    update_command = f'global sql UPDATE agent SET connection_status = "{connection_status}",\
+                       disconnection_time = "{disconnection_time}" WHERE id = {id};'
     try:
-        query_wdb(command)
+        query_wdb(insert_command)
+        query_wdb(update_command)
     except Exception:
         raise Exception(f'Unable to add agent {id}')
 
@@ -164,7 +180,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
             disconnection_time = agent['disconnection_time']['value']
         else:
-            disconnection_time = 0
+            disconnection_time = time_now
         if 'registration_time' in agent and 'delta' in agent['registration_time']:
             registration_time = time_now + agent['registration_time']['delta']
         elif 'registration_time' in agent and 'value' in agent['registration_time']:
@@ -175,8 +191,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         # Write agent in client.keys
         keys_file.write(f'{id} {name} {ip} {key}\n')
 
-        #Write agent in global.db
+        # Write agent in global.db
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
-
 
     keys_file.close()
