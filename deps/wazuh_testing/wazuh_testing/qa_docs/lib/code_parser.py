@@ -229,7 +229,7 @@ class CodeParser:
                         for string in function_doc['expected_output']:
                             if isinstance(string, dict):
                                 for key, value in string.items():
-                                    # example: r'.*Sending: FIM event (.+)$' ('added', 'modified' events) 
+                                    # example: r'.*Sending: FIM event (.+)$' ('added', 'modified' events)
                                     new_expected_output.append(f"{key}: {value}")
                             else:
                                 new_expected_output.append(f"{string}")

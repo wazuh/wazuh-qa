@@ -56,7 +56,7 @@ def set_parameters(args):
         global OUTPUT_PATH
         OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs')
 
-    if args.output_path: 
+    if args.output_path:
         OUTPUT_PATH = args.output_path
 
     if args.output_format:
@@ -111,7 +111,7 @@ def get_parameters():
 
     parser.add_argument('-o', dest='output_path',
                         help="Specifies the output directory for test parsed when `-t, --tests` is used.")
-                        
+
     parser.add_argument('--format', dest='output_format', choices=['json', 'yaml'],
                         help="Specifies the generated files format.")
 
@@ -123,7 +123,7 @@ def get_parameters():
 
     parser.add_argument('--docker-run', action='store_true', dest='run_with_docker',
                         help='Run qa-docs using within a docker container')
-                        
+
     parser.add_argument('--qa-branch', dest='qa_branch',
                         help='Specifies the qa branch that will be used as input for the tests to be parsed.')
     parser.add_argument('--check-documentation', action='store_true', dest='check_doc',
@@ -238,14 +238,14 @@ def check_incompatible_parameters(parameters):
     if parameters.run_with_docker:
         if not parameters.qa_branch:
             raise QAValueError('The docker container run needs a QA branch with the tests input.',
-                           qadocs_logger.error)
+                               qadocs_logger.error)
 
     if parameters.qa_branch:
         if not parameters.run_with_docker:
             raise QAValueError('If you want to use a QA branch as input you need to specify the --docker-run option. '
                                'In the future, with --qa-branch It will also use the tests within the branch in local '
                                'as input',
-                           qadocs_logger.error)
+                               qadocs_logger.error)
 
     qadocs_logger.debug('Parameters incompatibilities checked.')
 
@@ -269,13 +269,13 @@ def validate_parameters(parameters, parser):
         branches = git.Git().branch("--all").split()
         if f"remotes/origin/{parameters.qa_branch}" not in branches:
             raise QAValueError(f"{parameters.qa_branch} not found in Wazuh-QA repo.",
-                                qadocs_logger.error)
+                               qadocs_logger.error)
     else:
         # Check if the directory where the tests are located exist
         if parameters.tests_path:
             if not os.path.exists(parameters.tests_path):
                 raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.",
-                                qadocs_logger.error)
+                                   qadocs_logger.error)
 
         # Check that test_input name exists
         if parameters.test_names:
@@ -284,7 +284,7 @@ def validate_parameters(parameters, parser):
             for test_name in parameters.test_names:
                 if doc_check.locate_test(test_name) is None:
                     raise QAValueError(f"{test_name} has not been not found in "
-                                    f"{parameters.tests_path}.", qadocs_logger.error)
+                                       f"{parameters.tests_path}.", qadocs_logger.error)
 
         # Check that the index exists
         if parameters.app_index_name:
@@ -298,20 +298,20 @@ def validate_parameters(parameters, parser):
             for type in parameters.test_types:
                 if type not in os.listdir(parameters.tests_path):
                     raise QAValueError(f"The given type: {type}, not found in {parameters.tests_path}",
-                                    qadocs_logger.error)
+                                       qadocs_logger.error)
 
         # Check that modules selection is done within a test type
         if parameters.test_modules:
             if len(parameters.test_types) != 1:
-                raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with '
-                                'just one type if you want to parse some modules within a test type.',
-                                qadocs_logger.error)
+                raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with'
+                                   ' just one type if you want to parse some modules within a test type.',
+                                   qadocs_logger.error)
 
             for module in parameters.test_modules:
-                type_path = os.path.join(parameters.tests_path,parameters.test_types[0])
+                type_path = os.path.join(parameters.tests_path, parameters.test_types[0])
                 if module not in os.listdir(type_path):
                     raise QAValueError(f"The given module: {module}, not found in {type_path}",
-                                    qadocs_logger.error)
+                                       qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
@@ -344,7 +344,7 @@ def parse_data(args):
         qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
 
         docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
-                                       check_doc=args.check_doc), OUTPUT_FORMAT)
+                            check_doc=args.check_doc), OUTPUT_FORMAT)
 
     # Parse a list of test types
     elif args.test_types:
@@ -398,7 +398,8 @@ def main():
 
     set_parameters(args)
     validate_parameters(args, parser)
-    if args.validate_parameters: return 0
+    if args.validate_parameters:
+        return 0
 
     if args.run_with_docker:
         command = get_qa_docs_run_options(args)
