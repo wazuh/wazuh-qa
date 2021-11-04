@@ -3,7 +3,7 @@
   - test_command_execution_dbg
   apply_to_modules:
   - test_command_execution
-  - test_command_executin_dbg
+  - test_command_execution_dbg
   sections:
   - section: localfile
     elements:
