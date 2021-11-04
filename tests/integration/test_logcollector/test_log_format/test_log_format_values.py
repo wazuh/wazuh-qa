@@ -21,7 +21,7 @@ no_restart_windows_after_configuration_set = True
 force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-local_internal_options = {'windows.debug': '0', 'agent.debug': '0'}
+local_internal_options = {'windows.debug': '0', 'agent.debug': '0', 'logcollector.debug': '2'}
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
@@ -423,4 +423,3 @@ def test_log_format(get_configuration, configure_environment, get_local_internal
         create_file_location(conf['location'], conf['log_format'])
         control_service('start')
         check_log_format_values(conf)
-
