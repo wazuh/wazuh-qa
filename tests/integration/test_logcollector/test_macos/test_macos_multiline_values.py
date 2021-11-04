@@ -126,7 +126,7 @@ def test_macos_multiline_values(restart_logcollector_required_daemons_package, g
 
     expected_output:
         - r'Monitoring macOS logs with.*'
-        - r'Here is a multiline log. Line 0 \nLine 1. \nLast line.'
+        - r'Here is a multiline log.*'
 
     tags:
         - logs
