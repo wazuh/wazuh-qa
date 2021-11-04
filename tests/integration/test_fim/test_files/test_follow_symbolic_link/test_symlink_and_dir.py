@@ -1,7 +1,73 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will verify that FIM does not trigger
+       events for existing files when a 'symbolic link' is changed to a non-empty directory.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - macos
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_follow_symbolic_link
+'''
 import os
 
 import pytest
@@ -66,21 +132,47 @@ def extra_configuration_after_yield():
 ])
 def test_symlink_dir_inside_monitored_dir(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                                           wait_for_fim_start):
-    """Monitor a directory and a symbolic link to it, change the target of the symbolic link.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects events from existing files in a new target
+                 of a monitored symlink. For this purpose, the test will create a 'symbolic link' to a
+                 file/directory. Then, it will change the target to a non-empty directory, checking that
+                 no FIM events are triggered for the files already in the directory. Finally, the test
+                 will make file operatons and verify that FIM events are generated.
 
-    The directory must be scanned silently, preventing events from triggering until it has finished.
+    wazuh_min_version: 4.2.0
 
-    Args:
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
-    Raises:
-        TimeoutError: If a expected event wasn't triggered.
-        AttributeError: If a unexpected event was captured.
-    """
+    assertions:
+        - Verify that no FIM events are generated for existing files when a 'symbolic link'
+          is changed to a non-empty directory.
+
+    input_description: A test case (symlink_and_dir) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directories to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     whodata = get_configuration['metadata']['fim_mode'] == 'whodata'

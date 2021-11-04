@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
+       when these files are modified. Specifically, these tests will verify that FIM manages
+       the 'inotify watches' (adds, deletes) when a monitored directory is modified.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#directories
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_inotify
+'''
 import os
 import shutil as sh
 import sys
@@ -80,17 +150,49 @@ def get_configuration(request):
 ])
 @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_readded_watches(removed, renamed, get_configuration, configure_environment, restart_syscheckd_each_time):
-    """
-    Check if Wazuh delete watches when directory is removed or renamed, and add watches when directory is readded.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon deletes an 'inotify watch' when renaming or deleting
+                 a monitored directory, and add an 'inotify watch' when the directory is restored. For this
+                 purpose, the test will create and monitor a testing directory. Once FIM is started, it will
+                 verify that a watch has been added. Then, the test will make file operations (rename, delete)
+                 on the monitored directory and check if the watch has been removed. Finally, it will restore
+                 the directory and verify that the 'inotify watch' has been added by checking the FIM events.
 
-    Parameters
-    ----------
-    removed : Boolean
-        Tells if the directory must be removed
-    renamed : Boolean
-        Tells if the directory must be renamed
-    """
+    wazuh_min_version: 4.2.0
 
+    parameters:
+        - removed:
+            type: bool
+            brief: True if the directory must be removed. False otherwise.
+        - renamed:
+            type: bool
+            brief: True if the directory must be renamed. False otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd_each_time:
+            type: fixture
+            brief: Clear the 'ossec.log' file, add a testing directory, and start a new monitor in each test case.
+
+    assertions:
+        - Verify that FIM removes 'inotify watches' when deleting or renaming a monitored folder.
+        - Verify that FIM adds 'inotify watches' when a deleted monitored folder is restored.
+
+    input_description: A test case is contained in external YAML file (wazuh_conf_num_watches.yaml) which
+                       includes configuration settings for the 'wazuh-syscheckd' daemon and, these are
+                       combined with the testing directories to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Folders monitored with real-time engine'
+        - r'.*Directory added for real time monitoring' (On Windows systems)
+        - r'.*Realtime watch deleted for'
+
+    tags:
+        - realtime
+    '''
     # Check Wazuh add directory to realtime mode
     if sys.platform == 'win32':
         directory = wazuh_log_monitor.start(timeout=40, callback=callback_realtime_added_directory,

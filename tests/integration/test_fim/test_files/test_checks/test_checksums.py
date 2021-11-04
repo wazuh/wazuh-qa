@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files
+       are modified. Specifically, these tests will check if FIM events generated contain only the 'check_' fields
+       specified in the configuration when using the 'check_' attributes related to file checksum.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_checks
+'''
 import os
 import sys
 
@@ -68,22 +138,53 @@ def get_configuration(request):
 @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checksums_checkall(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                             wait_for_fim_start):
-    """
-    Test the behavior of check_all="yes" when using it with one or more check_sum options (checksum, sha1sum,
-    sha256sum and md5sum) set to "no".
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the checks related to
+                 file checksum specified in the configuration. These checks are attributes indicating that
+                 a monitored file has been modified. For example, if 'check_all=yes' and 'check_sum=no' are
+                 set for the same directory, 'syscheck' must send an event containing every possible 'check_'
+                 except the checksums. For this purpose, the test will monitor a testing folder using
+                 the 'check_all' attribute in conjunction with checksum-related 'checks' on the same directory,
+                 having 'check_all' to 'yes' and the other ones to 'no'. Finally, the test will verify that
+                 the FIM events generated contain only the fields of the 'checks' specified for the monitored folder.
 
-    Example:
-        check_all="yes" check_sum="no"
-        check_all="yes" check_sum="no" check_md5sum="no"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_checksums.yaml or wazuh_checksums_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_checksums_checkall'}, get_configuration['tags'])
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
@@ -107,23 +208,55 @@ def test_checksums_checkall(path, checkers, get_configuration, configure_environ
 @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checksums(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_fim_start):
-    """
-    Test the checksum options (checksum, sha1sum, sha256sum and md5sum)
-    behavior when is used alone or in conjunction.
-    Check_all option will be set to "no" in order to avoid using the default check_all configuration.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the checks related to
+                 file checksum (checksum, sha1sum, sha256sum and md5sum) specified in the configuration.
+                 These checks are attributes indicating that a monitored file has been modified. For example,
+                 if 'check_all=no' and 'check_sum=yes' are set for the same directory, 'syscheck' must send
+                 an event only containing the file checksums.
+                 For this purpose, the test will monitor a testing folder using the 'check_all=no' attribute
+                 (in order to avoid using the default 'check_all' configuration) in conjunction with
+                 checksum-related 'checks' on the same directory. Finally, the test will verify that
+                 the FIM events generated contain only the fields of the checksum-related 'checks'
+                 specified for the monitored folder.
 
-    Example:
-        check_all: "no" check_sum: "yes"
-        check_all: "no" check_sum: "yes" check_md5sum: "no"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_checksums.yaml or wazuh_checksums_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_checksums'}, get_configuration['tags'])
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout, options=checkers,
