@@ -196,6 +196,7 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
 @pytest.mark.parametrize('directory,  tags_to_apply', [
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
+@pytest.mark.skip(reason="Test blocked by issue #2093. Once solved we can enable it again.")
 @patch('wazuh_testing.fim.modify_file_inode')
 def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, get_configuration, configure_environment,
                   restart_syscheckd, wait_for_fim_start):
