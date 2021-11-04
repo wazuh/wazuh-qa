@@ -4,7 +4,7 @@ Wazuh - Quality Assurance automation self-contained documentation parsing tool.
 ## Rational
 Wazuh QA documentation is designed to be self-contained into the source code of each test.
 
-`qa-docs` is the tool in charge of parsing the documentation block from each source code and generate data capable
+`qa-docs` is the tool in charge of parsing the documentation block from each source code and generating data, able
 to be indexed and displayed. It has two modules well defined: `DocGenerator` and `SearchUI`.
 
 ### DocGenerator
@@ -41,7 +41,7 @@ within the `qa-docs` wiki.
 
 ### Parsing
 Running `qa-docs` as specified in the [Usage section](#usage) will scan every test and group file found into the
-include paths of the documentation, it will extract the module and tests blocks from each test file and discard any
+included paths of the documentation, it will extract the module and tests blocks from each test file and discard any
 non-documentable field. Also, complementary test-cases information will be extracted from a dry-run of Pytest if there
 isn´t a description for them.
 
@@ -186,43 +186,43 @@ Windows installer: https://nodejs.org/en/download/ and follow the setup wizard s
 
 ## Usage
 
-You can parse the tests and run the API with just one command, e.g. `qa-docs -I /path-to-tests/ --type integration --modules test_active_response -il active-response-index`
+You can parse the tests and run the API with just one command, e.g. `qa-docs --tests-path /path-to-tests/ --type integration --modules test_active_response -il active-response-index`
 
 Also, you can visit the `qa-docs` tool [use guide](https://github.com/wazuh/wazuh-qa/wiki/QADOCS-tool-use-guide)
 
 ### Parsing
 
 #### Complete run
-    qa-docs -I /path-to-tests-to-parse/
+    qa-docs --tests-path /path-to-tests-to-parse/
 
-Using just the `-I` flag, the tool will load the schema file and run a complete parse of the paths in the
-configuration to dump the content into the output folder located in the `qa-docs` build directory. e.g: `qa-docs -I /wazuh-qa/tests/`
+Using just the `--tests-path` flag, the tool will load the schema file and run a complete parse of the paths in the
+configuration to dump the content into the output folder located in the `qa-docs` build directory. e.g: `qa-docs --tests-path /wazuh-qa/tests/`
 
 #### Parse specific type(s)
-    qa-docs -I /path-to-tests-to-parse/ --types <TYPE1> <TYPE2>
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE1> <TYPE2>
 
 Using `--type` flag you can parse only the tests inside the type(s) folder(s) you want.
 
 #### Parse specific module(s)
-    qa-docs -I /path-to-tests-to-parse/ --types <TYPE1> <TYPE2> --modules <MODULE1> <MODULE2>
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE1> <TYPE2> --modules <MODULE1> <MODULE2>
 
 Using `--modules` flag you can parse only the tests inside the modules(s) folder(s) you want. It also needs the type of tests where the tests are located.
 
 #### Parse specific test(s)
-    qa-docs -I /path-to-tests-to-parse/ -t(--test) TEST_NAME1 TEST_NAME2
+    qa-docs --tests-path /path-to-tests-to-parse/ -t(--test) TEST_NAME1 TEST_NAME2
 
 Using `-t, --test` flag you can parse only the tests that you want. The documentation parsed will be printed, if you want to save it you have to use the `-o`
-flag and specify the output directory. e.g: `qa-docs -I /wazuh-qa/tests/ -t test_cache test_cors -o /tmp`.
+flag and specify the output directory. e.g: `qa-docs --tests-path /wazuh-qa/tests/ -t test_cache test_cors -o /tmp`.
 
 This option is not compatible with API-related options, because the output is printed or saved with `-o` in a custom directory.
 
 #### Check if test(s) exist
-    qa-docs -I /path-to-tests-to-parse/ -e(--exist) TEST_NAME1 TEST_NAME2
+    qa-docs --tests-path /path-to-tests-to-parse/ -e(--exist) TEST_NAME1 TEST_NAME2
 
 With this option the tool prints if test(s) do(es) exist.
 
 #### Sanity Check
-    qa-docs -I /path-to-tests-to-parse/ -s
+    qa-docs --tests-path /path-to-tests-to-parse/ -s
 
 Using `-s`, the tool will run a sanity check of the content in the output folder.
 
@@ -233,7 +233,7 @@ Also, it will validate that the output files have every Mandatory field and chec
 wrong values following the `qa-docs` [predefined values](https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#pre-defined-values).
 
 #### Debug
-    qa-docs -I /path-to-tests-to-parse/ -d
+    qa-docs --tests-path /path-to-tests-to-parse/ -d
 
 Using `-d`, the tool runs in DEBUG mode, logging extra information in the log file(created within the `qa-docs` build directory) or console output.
 
@@ -284,12 +284,12 @@ Using `-il` option, the tool indexes the content of each file output as a docume
 
 - Complete tests directory parse
 ```
-qa-docs -I /path-to-tests/
+qa-docs --tests-path /path-to-tests/
 ```
 
 - Parse `fim` module
 ```
-qa-docs -I /path-to-tests/ --type integration --modules test_fim
+qa-docs --tests-path /path-to-tests/ --type integration --modules test_fim
 ```
 
 - Index the parsed data
@@ -304,23 +304,21 @@ qa-docs -l my_index
 
 - Parse `vulnerability_detector` module, index the output data, and launch `search-ui`
 ```
-qa-docs -I /path-to-tests/ --type integration --modules test_vulnerability_detector -il vd-index
+qa-docs --tests-path /path-to-tests/ --type integration --modules test_vulnerability_detector -il vd-index
 ```
 
 ## Docker deployment
 
-If you prefer, you can run the script inside the `qa-docs/` directory, which will parse the tests of a branch you pass as an argument:
+If you prefer, you can run `qa-docs` using a docker container, that allows you to use `qa-docs` without installing ElasticSearch and npm. You need to run `qa-docs` as if you would do in local but need to specify the branch you want to use as tests input with `--qa-branch` and the flag `--docker-run`.
 
-```
-./deploy_qa_docs.sh 1796-migrate-doc-schema-2
-```
+Few examples:
 
-You can also parse a specific test type or modules:
-
-```
-./deploy_qa_docs.sh 1796-migrate-doc-schema-2 integration
+- Parse `test_active_response` tests and generate the documentation in `/tmp/qa_docs`:
+```bash
+qa-docs --docker-run --types integration --modules test_active_response  --qa-branch 1796-migrate-doc-active-response
 ```
 
-```
-./deploy_qa_docs.sh 1796-migrate-doc-schema-2 integration test_active_response test_agentd
+- Parse `test_active_response` and `test_agentd` tests and launch search-ui to visualize the documentation:
+```bash
+qa-docs --docker-run --types integration --modules test_active_response test_agentd -il qa-index --qa-branch 1796-migrate-doc-schema-2
 ```

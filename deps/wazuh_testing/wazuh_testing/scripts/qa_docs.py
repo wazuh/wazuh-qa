@@ -88,7 +88,7 @@ def get_parameters():
     parser.add_argument('-d', '--debug', action='count', dest='debug_level',
                         help="Enable debug messages.")
 
-    parser.add_argument('-I', '--tests-path', dest='tests_path',
+    parser.add_argument('--tests-path', dest='tests_path',
                         help="Path where tests are located.")
 
     parser.add_argument('-t', '--tests', nargs='+', default=[], dest='test_names',
