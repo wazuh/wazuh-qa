@@ -105,7 +105,7 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
                              wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
     '''
     description:
-        Check that every input message in authd port generates the adequate output.
+        Checks that every input message in authd port generates the adequate output.
 
     wazuh_min_version:
         4.3.0

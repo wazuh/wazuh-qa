@@ -98,7 +98,7 @@ def test_authd_force_options_invalid_config(get_current_test_case, configure_loc
                                             override_authd_force_conf, file_monitoring, tear_down):
     '''
     description:
-        Check that every input with a wrong configuration option value
+        Checks that every input with a wrong configuration option value
         matches the adequate output log. None force registration
         or response message is made.
 

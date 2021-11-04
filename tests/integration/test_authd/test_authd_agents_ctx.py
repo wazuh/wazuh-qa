@@ -455,12 +455,14 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
                                       configure_sockets_environment, connect_to_sockets_module):
     '''
-    description: Check if when the 'wazuh-authd' daemon receives an enrollment request from an agent
-                 that has an IP address or name that is already registered, 'authd' creates a record
-                 for the new agent and deletes the old one. In this case, the enrollment requests
-                 are sent to a local 'UNIX' socket.
+    description:
+        Checks if when the 'wazuh-authd' daemon receives an enrollment request from an agent
+        that has an IP address or name that is already registered, 'authd' creates a record
+        for the new agent and deletes the old one. In this case, the enrollment requests
+        are sent to a local 'UNIX' socket.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:

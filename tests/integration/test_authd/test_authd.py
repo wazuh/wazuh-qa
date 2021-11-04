@@ -109,9 +109,9 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
                              connect_to_sockets_module):
     '''
     description:
-        Checks if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
-        it responds appropriately to them. In this case, the enrollment requests
-        are sent to an IP v4 network socket.
+        Checks if when the `wazuh-authd` daemon receives different types of enrollment requests,
+        it responds appropriately to them. In this case, the enrollment requests are sent to
+        an IP v4 network socket.
 
     wazuh_min_version:
         4.2.0
