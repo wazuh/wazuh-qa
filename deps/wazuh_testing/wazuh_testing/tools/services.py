@@ -208,7 +208,6 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
 
             control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
                                                     stdout=subprocess.PIPE).stdout.decode()
-
             condition_met = True
             for lines in control_status_output.splitlines():
                 daemon_status_tokens = lines.split()
