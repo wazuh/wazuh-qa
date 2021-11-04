@@ -19,6 +19,8 @@ components:
 
 daemons:
     - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
 
 os_platform:
     - linux
@@ -168,20 +170,13 @@ def test_authd_force_options(get_configuration, configure_environment, configure
                              wait_for_authd_startup_function, connect_to_sockets_function,
                              test_case, tear_down):
     '''
-    description: Check that every input message in authd port generates the adequate output.
+    description:
+        Checks that every input message in authd port generates the adequate output.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
-        - clean_client_keys_file_module:
-            type: fixture
-            brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-        - clean_client_keys_file_function:
-            type: fixture
-            brief: Cleans any previus key in client.keys file at function scope.
-        - reset_password:
-            type: fixture
-            brief: Write the password file.
         - get_configuration:
             type: fixture
             brief: Get the configuration of the test.
@@ -191,15 +186,24 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         - configure_sockets_environment:
             type: fixture
             brief: Configure the socket listener to receive and send messages on the sockets.
-        - connect_to_sockets_module:
+        - clean_client_keys_file_function:
             type: fixture
-            brief: Bind to the configured sockets at module scope.
+            brief: Cleans any previous key in client.keys file at function scope.
+        - reset_password:
+            type: fixture
+            brief: Write the password file.
+        - restart_authd_function:
+            type: fixture
+            brief: stops the wazuh-authd daemon.
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Bind to the configured sockets at function scope.
         - test_case:
             type: list
             brief: List with all the test cases for the test.
-        - register_previous_agent:
-            type: fixture
-            brief: Register agents to simulate a scenario with pre existent keys.
         - tear_down:
             type: fixture
             brief: Roll back the daemon and client.keys state after the test ends.

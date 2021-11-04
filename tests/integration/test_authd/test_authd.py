@@ -108,16 +108,15 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
                              clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
                              connect_to_sockets_module):
     '''
-    description: Check if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
-                 it responds appropriately to them. In this case, the enrollment requests
-                 are sent to an IP v4 network socket.
+    description:
+        Checks if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
+        it responds appropriately to them. In this case, the enrollment requests
+        are sent to an IP v4 network socket.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version:
+        4.2.0
 
     parameters:
-        - clean_client_keys_file:
-            type: fixture
-            brief: Delete the agent keys stored in the `client.keys` file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -130,18 +129,26 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
+        - clean_client_keys_file_module:
+            type: fixture
+            brief: Stops Wazuh and cleans any previous key in client.keys file at module scope.
+        - restart_authd:
+            type: fixture
+            brief: Restart the 'wazuh-authd' daemon, clear the 'ossec.log' file and start a new file monitor.
+        - wait_for_authd_startup_module:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
-        - wait_for_agentd_startup:
-            type: fixture
-            brief: Wait until the `wazuh-agentd` has begun.
+            brief: Module scope version of 'connect_to_sockets' fixture.
+
 
     assertions:
         - Verify that the response messages are consistent with the enrollment requests received.
 
-    input_description: Different test cases are contained in an external `YAML` file (enroll_messages.yaml)
-                       that includes enrollment events and the expected output.
+    input_description:
+        Different test cases are contained in an external `YAML` file (enroll_messages.yaml)
+        that includes enrollment events and the expected output.
 
     expected_output:
         - Multiple values located in the `enroll_messages.yaml` file.
@@ -156,7 +163,7 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=False)
+        receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':

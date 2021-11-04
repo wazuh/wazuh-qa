@@ -124,12 +124,14 @@ def not_raises(exception):
 
 def test_remote_enrollment(get_configuration, configure_environment, restart_authd, tear_down):
     '''
-    description: Check if the 'wazuh-authd' daemon remote enrollment is enabled/disabled according
-                 to the configuration. By default, remote enrollment is enabled. When disabled,
-                 the 'authd' 'TLS' port (1515 by default) won't be listening to new connections,
-                 but requests to the local socket will still be attended.
+    description:
+        Checks if the 'wazuh-authd' daemon remote enrollment is enabled/disabled according
+        to the configuration. By default, remote enrollment is enabled. When disabled,
+        the 'authd' 'TLS' port (1515 by default) won't be listening to new connections,
+        but requests to the local socket will still be attended.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -149,15 +151,16 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
         - Verify that the port '1515' opens or closes depending on the value of the 'remote_enrollment' option.
         - Verify that when a 'worker' node receives an enrollment request, it tries to connect to the 'master' node.
 
-    input_description: Different test cases are found in the test module and include
-                       parameters for the environment setup, the requests
-                       to be made, and the expected result.
+    input_description:
+        Different test cases are found in the test module and include
+        parameters for the environment setup, the requests
+        to be made, and the expected result.
 
     expected_output:
         - r'Accepting connections on port 1515. No password required.' (When the 'wazuh-authd' daemon)
         - r'OSSEC K:' (When the agent has enrolled in the manager)
         - r'.*Port 1515 was set as disabled.*' (When remote enrollment is disabled)
-        - r'ERROR: Cannot comunicate with master'
+        - r'ERROR: Cannot communicate with the master'
 
     tags:
         - keys

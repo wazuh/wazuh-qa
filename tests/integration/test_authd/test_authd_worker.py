@@ -19,6 +19,7 @@ components:
 
 daemons:
     - wazuh-authd
+    - wazuh-clusterd
 
 os_platform:
     - linux
@@ -149,43 +150,48 @@ def get_current_test_case(request):
 # Tests
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              connect_to_sockets_module, wait_for_authd_startup_module, get_current_test_case):
-    """
-        description:
-           "Check that every message from the agent is correctly formatted for master, and every master
-            response is correctly parsed for agent"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
-            - set_up_groups
-                type: fixture
-                brief: Set the pre-defined groups.
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - configure_sockets_environment:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets.
-            - connect_to_sockets_module:
-                type: fixture
-                brief: Bind to the configured sockets at module scope.
-            - wait_for_authd_startup_module:
-                type: fixture
-                brief: Waits until Authd is accepting connections.
-            - get_current_test_case:
-                type: fixture
-                brief: gets the current test case from the tests' list
-        assertions:
-            - The 'port_input' from agent is formatted to 'cluster_input' for master
-            - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
-        input_description:
-            Different test cases are contained in an external YAML file (worker_messages.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description:
+        Checks that every message from the agent is correctly formatted for master,
+        and every master response is correctly parsed for agent.
+
+    wazuh_min_version:
+        4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get the configuration of the test.
+        - set_up_groups:
+            type: fixture
+            brief: Set the pre-defined groups.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Bind to the configured sockets at module scope.
+        - wait_for_authd_startup_module:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - get_current_test_case:
+            type: fixture
+            brief: gets the current test case from the tests' list
+
+    assertions:
+        - The 'port_input' from agent is formatted to 'cluster_input' for master
+        - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
+
+    input_description:
+        Different test cases are contained in an external YAML file (worker_messages.yaml) which includes
+        the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on Authd socket
+    '''
     test_case = get_current_test_case['test_case']
 
     for stage in test_case:
@@ -196,7 +202,7 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         receiver_sockets[0].open()
         expected = stage['port_output']
         message = stage['port_input']
-        receiver_sockets[0].send(stage['port_input'], size=False)
+        receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':

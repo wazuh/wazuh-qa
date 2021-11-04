@@ -20,6 +20,7 @@ components:
 
 daemons:
     - wazuh-authd
+    - wazuh-db
 
 os_platform:
     - linux
@@ -120,56 +121,61 @@ def set_up_groups(get_current_test_case, request):
 def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
                               set_up_groups, insert_pre_existent_agents, restart_authd_function,
                               wait_for_authd_startup_function, get_current_test_case, tear_down):
-    """
-        description:
-            "Check that every input message in trough local authd port generates the adequate response to worker"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - configure_sockets_environment:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets at function scope.
-            - connect_to_sockets_function:
-                type: fixture
-                brief: Bind to the configured sockets at function scope.
-            - set_up_groups
-                type: fixture
-                brief: Set the pre-defined groups.
-            - insert_pre_existent_agents:
-                type: fixture
-                brief: adds the required agents to the client.keys and global.db
-            - restart_authd_function:
-                type: fixture
-                brief: stops the wazuh-authd daemon
-            - wait_for_authd_startup_function:
-                type: fixture
-                brief: Waits until Authd is accepting connections.
-            - get_current_test_case:
-                type: fixture
-                brief: gets the current test case from the tests' list
-            - tear_down:
-                type: fixture
-                brief: cleans the client.keys file
-        assertions:
-            - The received output must match with expected
-            - The enrollment messages are parsed as expected
-            - The agent keys are denied if the hash is the same than the manager's
-        input_description:
-            Different test cases are contained in an external YAML file (local_enroll_messages.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description:
+        Checks that every input message in trough local authd port generates the adequate response to worker.
+
+    wazuh_min_version:
+        4.2.0
+
+    parameters:
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets at function scope.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Bind to the configured sockets at function scope.
+        - set_up_groups:
+            type: fixture
+            brief: Set the pre-defined groups.
+        - insert_pre_existent_agents:
+            type: fixture
+            brief: adds the required agents to the client.keys and global.db
+        - restart_authd_function:
+            type: fixture
+            brief: stops the wazuh-authd daemon
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - get_current_test_case:
+            type: fixture
+            brief: gets the current test case from the tests' list
+        - tear_down:
+            type: fixture
+            brief: cleans the client.keys file
+
+    assertions:
+        - The received output must match with expected
+        - The enrollment messages are parsed as expected
+        - The agent keys are denied if the hash is the same as the manager's
+
+    input_description:
+        Different test cases are contained in an external YAML file (local_enroll_messages.yaml) which includes
+        the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on Authd socket
+    '''
     case = get_current_test_case['test_case']
     for index, stage in enumerate(case):
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=True)
+        receiver_sockets[0].send(message, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         assert response[:len(expected)] == expected, \
             'Failed stage "{}". Response was: {} instead of: {}' \
