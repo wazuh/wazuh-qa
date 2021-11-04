@@ -49,7 +49,7 @@ ________________________________________________________________________________
 artifacts_path = '/home/selu/Descargas/cluster_performance/59'
 
     def test_cluster_sync(artifacts_path):
-        """Check that the number of files synced is not the identical multiple times in a row.
+        """Check that the number of files synced is not identical multiple times in a row.
     
         Args:
             artifacts_path (str): Path where folders with cluster information can be found.
