@@ -1,3 +1,52 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the 'wazuh-authd' daemon correctly responds to the enrollment requests
+       messages respecting the valid option values used in the force configuration block.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+tags:
+    - enrollment
+'''
 import os
 import time
 import pytest
@@ -54,9 +103,56 @@ def get_current_test_case(request):
 def test_authd_force_options(get_current_test_case, configure_local_internal_options_module, override_authd_force_conf,
                              insert_pre_existent_agents, file_monitoring, restart_authd_function,
                              wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
+    '''
+    description:
+        Checks that every input message in authd port generates the adequate output.
+
+    wazuh_min_version:
+        4.3.0
+
+    parameters:
+        - get_current_test_case:
+            type: fixture
+            brief: gets the current test case from the tests' list
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
+        - override_authd_force_conf:
+            type: fixture
+            brief: Modified the authd configuration options.
+        - insert_pre_existent_agents:
+            type: fixture
+            brief: adds the required agents to the client.keys and global.db
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - restart_authd_function:
+            type: fixture
+            brief: stops the wazuh-authd daemon.
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Bind to the configured sockets at function scope.
+        - tear_down:
+            type: fixture
+            brief: Roll back the daemon and client.keys state after the test ends.
+
+    assertions:
+        - The received output must match with expected.
+        - Verifies the registration responses.
+
+    input_description:
+        Different test cases are contained in external YAML files (valid_config folder) which includes
+        different possible values for the current authd settings.
+
+    expected_output:
+        - Registration request responses on Authd socket.
+    '''
 
     authd_sock = receiver_sockets[0]
-    validate_authd_logs(get_current_test_case.get('log', []), log_monitor)
+    validate_authd_logs(get_current_test_case.get('log', []))
 
     for stage in get_current_test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
@@ -70,4 +166,4 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
                 raise ConnectionResetError('Manager did not respond to sent message!')
         result, err_msg = validate_authd_response(response, stage['output'])
         assert result == 'success', f"Failed stage '{stage['description']}': {err_msg} Complete response: '{response}'"
-        validate_authd_logs(stage.get('log', []), log_monitor)
+        validate_authd_logs(stage.get('log', []))

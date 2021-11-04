@@ -19,6 +19,8 @@ components:
 
 daemons:
     - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
 
 os_platform:
     - linux
@@ -114,40 +116,54 @@ def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sock
                                            connect_to_sockets_function, set_up_groups, insert_pre_existent_agents,
                                            restart_authd_function, wait_for_authd_startup_function,
                                            get_current_test_case, tear_down):
-    """
-        description:
-           "Check that every input message in authd port generates the adequate output"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - configure_sockets_environment:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets.
-            - clean_client_keys_file_module:
-                type: fixture
-                brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-            - set_up_groups:
-                type: fixture
-                brief: Set pre-existent groups.
-            - wait_for_authd_startup_function:
-                type: fixture
-                brief: Waits until Authd is accepting connections.
-            - connect_to_sockets_function:
-                type: fixture
-                brief: Bind to the configured sockets at function scope.
-        assertions:
-            - The received output must match with expected
-            - The enrollment messages are parsed as expected
-            - The agent keys are denied if the hash is the same than the manager's
-        input_description:
-            Different test cases are contained in an external YAML file (authd_key_hash.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description:
+        Checks that every input message in authd port generates the adequate output.
+
+    wazuh_min_version:
+        4.2.0
+
+    parameters:
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Bind to the configured sockets at function scope.
+        - set_up_groups:
+            type: fixture
+            brief: Set pre-existent groups.
+        - insert_pre_existent_agents:
+            type: fixture
+            brief: adds the required agents to the client.keys and global.db
+        - restart_authd_function:
+            type: fixture
+            brief: stops the wazuh-authd daemon.
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+        - get_current_test_case:
+            type: fixture
+            brief: gets the current test case from the tests' list
+        - tear_down:
+            type: fixture
+            brief: cleans the client.keys file
+
+    assertions:
+        - The received output must match with expected
+        - The enrollment messages are parsed as expected
+        - The agent keys are denied if the hash is the same than the manager's
+
+    input_description:
+        Different test cases are contained in an external YAML file (authd_key_hash.yaml) which includes
+        the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on Authd socket
+    '''
     case = get_current_test_case['test_case']
 
     for index, stage in enumerate(case):

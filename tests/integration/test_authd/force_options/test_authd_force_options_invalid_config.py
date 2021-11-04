@@ -1,3 +1,51 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if a set of wrong configuration option values in the block force
+       are warned in the logs file.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+tags:
+    - enrollment
+'''
 import os
 import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
@@ -48,6 +96,42 @@ def get_current_test_case(request):
 
 def test_authd_force_options_invalid_config(get_current_test_case, configure_local_internal_options_module,
                                             override_authd_force_conf, file_monitoring, tear_down):
+    '''
+    description:
+        Checks that every input with a wrong configuration option value
+        matches the adequate output log. None force registration
+        or response message is made.
+
+    wazuh_min_version:
+        4.3.0
+
+    parameters:
+        - get_current_test_case:
+            type: fixture
+            brief: gets the current test case from the tests' list
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
+        - override_authd_force_conf:
+            type: fixture
+            brief: Modified the authd configuration options.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - tear_down:
+            type: fixture
+            brief: Roll back the daemon and client.keys state after the test ends.
+
+    assertions:
+        - The received output must match with expected due to wrong configuration options.
+
+    input_description:
+        Different test cases are contained in an external YAML file (invalid_config folder) which includes
+        different possible wrong settings.
+
+    expected_output:
+        - Invalid configuration values error.
+    '''
 
     truncate_file(LOG_FILE_PATH)
     try:
@@ -56,4 +140,4 @@ def test_authd_force_options_invalid_config(get_current_test_case, configure_loc
         pass
     else:
         raise Exception("Authd started when it was expected to fail")
-    validate_authd_logs(get_current_test_case.get('log', []), log_monitor)
+    validate_authd_logs(get_current_test_case.get('log', []))
