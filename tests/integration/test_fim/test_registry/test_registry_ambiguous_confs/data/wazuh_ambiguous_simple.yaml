@@ -27,6 +27,20 @@
         value: SUBKEY_2
         attributes:
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Tag configuration
 - tags:
   - ambiguous_tag
@@ -55,6 +69,20 @@
         value: SUBKEY_2
         attributes:
         - arch: "both"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Recursion configuration
 - tags:
   - ambiguous_recursion
@@ -85,6 +113,20 @@
         value: RECURSION_SUBKEY_2
         attributes:
         - arch: "both"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Checks configuration
 - tags:
   - ambiguous_checks
@@ -120,3 +162,17 @@
         attributes:
         - check_all: "yes"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

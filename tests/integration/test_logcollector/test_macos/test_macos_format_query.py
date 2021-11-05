@@ -307,7 +307,7 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_format_query(get_configuration, configure_environment, get_connection_configuration,
+def test_macos_format_query(restart_logcollector_required_daemons_package, get_configuration, configure_environment, get_connection_configuration,
                                          init_authd_remote_simulator, restart_logcollector):
     """Check if logcollector use correctly query option using macos log format.
 
@@ -380,7 +380,7 @@ def test_macos_format_query(get_configuration, configure_environment, get_connec
                 category=macos_log['category'])
 
         if cfg['lambda_function'](*clauses_values) and same_level and same_type:
-            check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=60)
+            check_agent_received_message(remoted_simulator, expected_macos_message, timeout=60)
         else:
             with pytest.raises(TimeoutError):
-                check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=5)
+                check_agent_received_message(remoted_simulator, expected_macos_message, timeout=5)

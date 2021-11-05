@@ -116,6 +116,7 @@ def get_configuration(request):
     dir1,
     dir2,
 ])
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_directories_with_commas(directory, get_configuration, put_env_variables, configure_environment,
                                  restart_syscheckd, wait_for_fim_start):
     '''

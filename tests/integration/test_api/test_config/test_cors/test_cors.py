@@ -8,10 +8,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief:
-    These tests will check if the `CORS` (Cross-origin resource sharing) feature of the API handled
-    by the `wazuh-apid` daemon is working properly. The Wazuh API is an open source `RESTful` API
+    These tests will check if the 'CORS' (Cross-origin resource sharing) feature of the API handled
+    by the 'wazuh-apid' daemon is working properly. The Wazuh API is an open source 'RESTful' API
     that allows for interaction with the Wazuh manager from a web browser, command line tool
-    like `cURL` or any script or program that can make web requests.
+    like 'cURL' or any script or program that can make web requests.
 
 tier: 0
 
@@ -93,9 +93,9 @@ def get_configuration(request):
 def test_cors(origin, tags_to_apply, get_configuration, configure_api_environment,
               restart_api, wait_for_start, get_api_details):
     '''
-    description: Check if expected headers are returned when `CORS` is enabled.
-                 When `CORS` is enabled, special headers must be returned in case the
-                 request origin matches the one established in the `CORS` configuration
+    description: Check if expected headers are returned when 'CORS' is enabled.
+                 When 'CORS' is enabled, special headers must be returned in case the
+                 request origin matches the one established in the 'CORS' configuration
                  of the API.
 
     wazuh_min_version: 4.2.0
@@ -115,7 +115,7 @@ def test_cors(origin, tags_to_apply, get_configuration, configure_api_environmen
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -124,12 +124,12 @@ def test_cors(origin, tags_to_apply, get_configuration, configure_api_environmen
             brief: Get API information.
 
     assertions:
-        - Verify that when CORS is enabled, the `Access-Control-Allow-Origin` header is received.
-        - Verify that when CORS is enabled, the `Access-Control-Expose-Headers` header is received.
-        - Verify that when CORS is enabled, the `Access-Control-Allow-Credentials` header is received.
-        - Verify that when CORS is disabled, the `Access-Control-Allow-Origin` header is not received.
+        - Verify that when CORS is enabled, the 'Access-Control-Allow-Origin' header is received.
+        - Verify that when CORS is enabled, the 'Access-Control-Expose-Headers' header is received.
+        - Verify that when CORS is enabled, the 'Access-Control-Allow-Credentials' header is received.
+        - Verify that when CORS is disabled, the 'Access-Control-Allow-Origin' header is not received.
 
-    input_description: A test case is contained in an external `YAML` file (conf.yaml)
+    input_description: A test case is contained in an external YAML file (conf.yaml)
                        which includes API configuration parameters.
 
     expected_output:

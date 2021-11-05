@@ -1,7 +1,54 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
+       when these files are modified. In particular, these tests will check if FIM changes
+       the monitoring mode from 'realtime' to 'scheduled' when it is not supported.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - macos
+    - solaris
+
+os_version:
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 
 import pytest
@@ -49,23 +96,53 @@ def get_configuration(request):
 
 def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
                               configure_local_internal_options_module, daemons_handler):
-    """ Check if the current OS platform falls to the scheduled mode when realtime isn't avaible.
+    '''
+    description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
+                 For this purpose, the test performs a CUD set of operations to a file with 'realtime' mode set as
+                 the monitoring option in the 'ossec.conf' file. Firstly it checks for the initial 'realtime' event
+                 appearing in the logs, and if the current OS does not support it, wait for the initial FIM scan
+                 mode. After this, the set of operations takes place and the expected behavior is the events will be
+                 generated with 'scheduled' mode and not 'realtime' as it is set in the configuration.
 
-    Params:
-        folder (str): Name of the folder under PREFIX.
-        file (str): Name of the file that will be created under folder.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        check_realtime_mode_failure (fixture): Try to catch the initial realtime warning about ignoring the realtime  \
-            flag event and then waits for the initial FIM scan event.
-    """
+    wazuh_min_version: 4.2.0
 
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
+        - daemons_handler:
+            type: fixture
+            brief: Handle the Wazuh daemons.
+
+    assertions:
+        - Verify that FIM changes the monitoring mode from 'realtime' to 'scheduled' when it is not supported.
+
+    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf_check_realtime.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it is combined
+                       with the testing directory to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+
+    tags:
+        - realtime
+        - scheduled
+    '''
     log_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
-                            error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
-                            directory: ...' event", update_position=False)
+                      error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
+                                     directory: ...' event", update_position=False)
 
     detect_initial_scan(log_monitor)
 
     regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=True, triggers_event=True,
                      event_mode="scheduled")
+

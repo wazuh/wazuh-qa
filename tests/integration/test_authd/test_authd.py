@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check if the 'wazuh-authd' daemon correctly handles the enrollment requests,
+       generating consistent responses to the requests received on its IP v4 network socket.
+       The 'wazuh-authd' daemon can automatically add a Wazuh agent to a Wazuh manager and provide
+       the key to the agent. It is used along with the 'agent-auth' application.
+
+tier: 0
+
+modules:
+    - authd
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
+    - https://documentation.wazuh.com/current/user-manual/reference/tools/agent_groups.html
+
+tags:
+    - enrollment
+'''
 import os
 import subprocess
 import time
@@ -55,12 +107,49 @@ def get_configuration(request):
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
                              clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
                              connect_to_sockets_module):
-    """Check that every input message in authd port generates the adequate output
+    '''
+    description: Check if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
+                 it responds appropriately to them. In this case, the enrollment requests
+                 are sent to an IP v4 network socket.
 
-    Raises:
-        ConnectionResetError: if wazuh-authd does not send the response to the agent through the socket.
-        AssertionError: if the response does not match the expected message.
-    """
+    wazuh_min_version: 4.2
+
+    parameters:
+        - clean_client_keys_file:
+            type: fixture
+            brief: Delete the agent keys stored in the `client.keys` file.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - set_up_groups:
+            type: fixture
+            brief: Create a testing group for agents and provide the test case list.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of `connect_to_sockets` fixture.
+        - wait_for_agentd_startup:
+            type: fixture
+            brief: Wait until the `wazuh-agentd` has begun.
+
+    assertions:
+        - Verify that the response messages are consistent with the enrollment requests received.
+
+    input_description: Different test cases are contained in an external `YAML` file (enroll_messages.yaml)
+                       that includes enrollment events and the expected output.
+
+    expected_output:
+        - Multiple values located in the `enroll_messages.yaml` file.
+
+    tags:
+        - keys
+        - ssl
+    '''
     test_case = set_up_groups['test_case']
     for stage in test_case:
         # Reopen socket (socket is closed by manager after sending message with client key)

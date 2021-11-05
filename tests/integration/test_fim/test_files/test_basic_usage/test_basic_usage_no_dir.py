@@ -73,7 +73,6 @@ tags:
     - fim_basic_usage
 '''
 import os
-
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_empty_directories
@@ -161,15 +160,16 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
 
     # Check that the warning is displayed when there is no directory.
     for section in get_configuration['sections']:
-        if not section['elements'][1]['directories']['value']:
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_empty_directories,
-                                    error_message='Did not receive expected '
-                                                  '"DEBUG: (6338): Empty directories tag found in the configuration" '
-                                                  'event').result()
-        # Check that the message is not displayed when the directory is specified.
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_empty_directories).result()
-                raise AttributeError(f'Unexpected event {event}')
+        if section['section'] == 'syscheck':
+            if not section['elements'][1]['directories']['value']:
+                wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=callback_empty_directories,
+                                        error_message='Did not receive expected '
+                                                      '"DEBUG: (6338): Empty directories tag found in the configuration" '
+                                                      'event').result()
+            # Check that the message is not displayed when the directory is specified.
+            else:
+                with pytest.raises(TimeoutError):
+                    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                                    callback=callback_empty_directories).result()
+                    raise AttributeError(f'Unexpected event {event}')

@@ -1,7 +1,78 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM events generated contain only
+       the 'check_' fields specified in the configuration when using the 'check_' attributes individually
+       without using the 'check_all=yes' attribute.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_checks
+'''
 import os
 import sys
 
@@ -67,26 +138,56 @@ else:
         (testdir0, {CHECK_INODE})
     ])
 
-
+@pytest.mark.skip(reason="Unstable tests - Fail erraticaly on Windows and Linux - Needs refactor/rework. Will be fixed in the future.")
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others_individually(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
-    """
-    Test the behavior of every Check option individually without using the Check_all option. Check_all option will
-    be set to "no" in order to avoid using the default check_all configuration.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generate events the checks specified in
+                 the configuration. These checks are attributes indicating that a monitored file has been modified.
+                 For example, if 'check_all=no' and 'check_sum=yes' are set for the same directory, 'syscheck' must
+                 send an event containing only the checksums. For this purpose, the test will monitor a testing folder
+                 using the 'check_all=no' attribute (in order to avoid using the default 'check_all' configuration)
+                 in conjunction with one 'check_' on the same directory. Finally, the test will verify that
+                 the FIM events generated contain only the fields of the 'checks' specified for the monitored folder.
 
-    Example:
-        check_all="no" check_sum="yes"
-        check_all="no" check_mtime="yes"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_check_others.yaml or wazuh_check_others_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_check_others_individually'}, get_configuration['tags'])
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
@@ -114,27 +215,59 @@ else:
     ])
 
 
+@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 @pytest.mark.parametrize('path, checkers', parametrize_list)
 def test_check_others(path, checkers, get_configuration, configure_environment,
                       restart_syscheckd, wait_for_fim_start):
-    """
-    Test the behavior of several combinations of Check options over the same directory with Check_all disabled to
-    avoid using the default check_all configuration. The order of the checks (including check_all="no") will be
-    different on each case to test the behavior of check_all="no".
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generate events the checks specified in
+                 the configuration. These checks are attributes indicating that a monitored file has been modified.
+                 For example, if 'check_md5sum=yes', 'check_all=no' and 'check_mtime=yes' are set for
+                 the same directory, 'syscheck' must send an event containing only the file modification time.
+                 For this purpose, the test will monitor a testing folder using the 'check_all=no' attribute
+                 (in order to avoid using the default 'check_all' configuration) in conjunction with more than
+                 one 'check_' on the same directory. Finally, the test will verify that the FIM events generated
+                 contain only the fields of the 'checks' specified for the monitored folder.
+                 In adittion, the order of the 'checks' (including 'check_all=no') will be different on each
+                 test case to check the behavior of the 'check_all=no' attribute.
 
-    Example:
-        check_all: "no" check_size: "yes" check_sum: "yes"
-        check_all: "no" check_md5sum: "yes" check_mtime: "yes" check_group: "yes"
-        check_md5sum: "yes" check_all: "no" check_mtime: "yes" check_group: "yes"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_check_others.yaml or wazuh_check_others_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_check_others'}, get_configuration['tags'])
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,

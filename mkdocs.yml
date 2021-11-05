@@ -35,6 +35,11 @@ nav:
           - tests/integration/test_vulnerability_detector/index.md
           - Tests feeds:
             - tests/integration/test_vulnerability_detector/test_feeds/index.md
+            - Amazon Linux:
+                - Test extra tags alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_extra_tags_alas_feed.md
+                - Test invalid syntax alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_invalid_syntax_alas_feed.md
+                - Test invalid values alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_invalid_values_alas_feed.md
+                - Test missing tags alas feed: tests/integration/test_vulnerability_detector/test_feeds/alas/test_missing_tags_alas_feed.md
             - Debian:
               - Test extra tags debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_extra_tags_debian_feed.md
               - Test invalid syntax debian feed: tests/integration/test_vulnerability_detector/test_feeds/debian/test_invalid_syntax_debian_feed.md
@@ -60,7 +65,7 @@ nav:
               - Test invalid values canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_values_canonical_feed.md
               - Test invalid syntax canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_invalid_syntax_canonical_feed.md
               - Test extra tags canonical feed: tests/integration/test_vulnerability_detector/test_feeds/canonical/test_extra_tags_canonical_feed.md
-            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feed.md
+            - Test download feeds: tests/integration/test_vulnerability_detector/test_feeds/test_download_feeds.md
             - Test invalid type custom feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_custom_feeds.md
             - Test invalid type url feeds: tests/integration/test_vulnerability_detector/test_feeds/test_invalid_type_url_feeds.md
             - Test validate feed content: tests/integration/test_vulnerability_detector/test_feeds/test_validate_feed_content.md
@@ -80,6 +85,7 @@ nav:
             - Test providers multiple providers: tests/integration/test_vulnerability_detector/test_providers/test_providers_multiple_providers.md
           - Tests SCAN results:
             - tests/integration/test_vulnerability_detector/test_scan_results/index.md
+            - Test alas inventory with alas feed: tests/integration/test_vulnerability_detector/test_scan_results/test_alas_inventory_alas_feed.md
             - Test debian inventory with debian feed: tests/integration/test_vulnerability_detector/test_scan_results/test_debian_inventory_debian_feed.md
             - Test macos inventory: tests/integration/test_vulnerability_detector/test_scan_results/test_macos_inventory.md
             - Test msu inventory with msu feed: tests/integration/test_vulnerability_detector/test_scan_results/test_msu_inventory_msu_feed.md
@@ -477,13 +483,21 @@ nav:
             - Test location custom sockets: tests/integration/test_logcollector/test_location_custom_sockets/test_location_custom_sockets.md
             - Test macos:
                 - Overview: tests/integration/test_logcollector/test_macos/index.md
+                - Test macos file status basic: tests/integration/test_logcollector/test_macos/test_macos_file_status_basic.md
+                - Test macos file status predicate: tests/integration/test_logcollector/test_macos/test_macos_file_status_predicate.md
+                - Test macos file when no macos: tests/integration/test_logcollector/test_macos/test_macos_file_status_when_no_macos.md
                 - Test macos format basic: tests/integration/test_logcollector/test_macos/test_macos_format_basic.md
                 - Test only future events macos format: tests/integration/test_logcollector/test_macos/test_macos_format_only_future_events.md
                 - Test query macos format: tests/integration/test_logcollector/test_macos/test_macos_format_query.md
+                - Test macos multiline values: tests/integration/test_logcollector/test_macos/test_macos_multiline_values.md
+                - Test macos log process stop: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop.md
+                - Test macos log process stop suddenly: tests/integration/test_logcollector/test_macos/test_macos_log_process_stop_suddenly.md
+                - Test macos log process: tests/integration/test_logcollector/test_macos/test_macos_log_process.md
             - Test options:
                 - Overview: tests/integration/test_logcollector/test_options/index.md
                 - Test state interval: tests/integration/test_logcollector/test_options/test_options_state_interval.md
                 - Test state interval no file: tests/integration/test_logcollector/test_options/test_options_state_interval_no_file.md
+            - Test statistics: tests/integration/test_logcollector/test_statistics/test_statistics.md
         - Logtest:
           - tests/integration/test_logtest/index.md
           - Test invalid token: tests/integration/test_logtest/test_invalid_token/test_invalid_session_token.md
@@ -499,6 +513,11 @@ nav:
           - Test invalid rule decoders syntax:
             - Test invalid decoder syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_decoder_syntax.md
             - Test invalid rules syntax: tests/integration/test_logtest/test_invalid_rule_decoders_syntax/test_invalid_rules_syntax.md
+          - Test ruleset refresh:
+            - Test alert labels: tests/integration/test_logtest/test_ruleset_refresh/test_alert_labels.md
+            - Test cdb labels: tests/integration/test_logtest/test_ruleset_refresh/test_cdb_labels.md
+            - Test rule labels: tests/integration/test_logtest/test_ruleset_refresh/test_rule_labels.md
+            - Test decoder labels: tests/integration/test_logtest/test_ruleset_refresh/test_decoder_labels.md
         - RIDS:
           - tests/integration/test_rids/index.md
           - Test rids conf:  tests/integration/test_rids/test_rids.md

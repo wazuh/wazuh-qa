@@ -2,20 +2,20 @@
 wazuh-master:
   - regex: ".*Agent key generated for agent 'wazuh-agent2'.*"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 60
+    timeout: 90
 
 wazuh-worker1:
-  - regex: ".*Authentication error. Wrong key or corrupt payload. Message received from agent '002'.*"
+  - regex: ".*Agent key generated for 'wazuh-agent2'.*"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 60
+    timeout: 90
 
 wazuh-agent2:
   - regex: '.*Lost connection with manager. Setting lock.*'
     path: '/var/ossec/logs/ossec.log'
-    timeout: 60
+    timeout: 90
   - regex: '.*Trying to connect to server \(wazuh-worker1.*'
     path: '/var/ossec/logs/ossec.log'
-    timeout: 60
+    timeout: 90
   - regex: '.*Connected to the server \(wazuh-worker1.*'
     path: '/var/ossec/logs/ossec.log'
-    timeout: 60
+    timeout: 90

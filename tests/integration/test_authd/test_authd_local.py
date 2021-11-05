@@ -1,22 +1,29 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
-brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Master)
-tier:
-    0
+
+brief: This module verifies the correct behavior of 'wazuh-authd' under different messages
+       in a Cluster scenario (for Master).
+
+tier: 0
+
 modules:
-    - Authd
+    - authd
+
 components:
     - manager
+
 daemons:
-    - Authd
-path:
-    /tests/integration/test_authd/test_authd_local.py
-os_platform
+    - wazuh-authd
+
+os_platform:
     - linux
+
 os_version:
     - Amazon Linux 1
     - Amazon Linux 2
@@ -34,8 +41,9 @@ os_version:
     - Ubuntu Bionic
     - Ubuntu Trusty
     - Ubuntu Xenial
+
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import os
@@ -117,40 +125,43 @@ def set_up_groups_keys(request):
 def test_ossec_auth_messages(set_up_groups_keys, get_configuration, configure_environment,
                              configure_sockets_environment_function, connect_to_sockets_function,
                              wait_for_authd_startup_module):
-    """
-        description:
-            "Check that every input message in trough local authd port generates the adequate response to worker"
-        wazuh_min_version:
-            4.2
-        parameters:
-            - set_up_groups_keys:
-                type: fixture
-                brief: Set pre-existent groups and keys.
-            - get_configuration:
-                type: fixture
-                brief: Get the configuration of the test.
-            - configure_environment:
-                type: fixture
-                brief: Configure a custom environment for testing.
-            - configure_sockets_environment_function:
-                type: fixture
-                brief: Configure the socket listener to receive and send messages on the sockets at function scope.
-            - connect_to_sockets_function:
-                type: fixture
-                brief: Bind to the configured sockets at function scope.
-            - wait_for_authd_startup_module:
-                type: fixture
-                brief: Waits until Authd is accepting connections.
-        assertions:
-            - The received output must match with expected
-            - The enrollment messages are parsed as expected
-            - The agent keys are denied if the hash is the same than the manager's
-        input_description:
-            Different test cases are contained in an external YAML file (local_enroll_messages.yaml) which includes
-            the different possible registration requests and the expected responses.
-        expected_output:
-            - Registration request responses on Authd socket
-    """
+    '''
+    description: Check that every input message in trough local 'authd' port generates the adequate response to worker.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - set_up_groups_keys:
+            type: fixture
+            brief: Set pre-existent groups and keys.
+        - get_configuration:
+            type: fixture
+            brief: Get the configuration of the test.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_sockets_environment_function:
+            type: fixture
+            brief: Configure the socket listener to receive and send messages on the sockets at function scope.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Bind to the configured sockets at function scope.
+        - wait_for_authd_startup_module:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
+
+    assertions:
+        - The received output must match with expected.
+        - The enrollment messages are parsed as expected.
+        - The agent keys are denied if the hash is the same than the manager's.
+
+    input_description:
+        Different test cases are contained in an external YAML file (local_enroll_messages.yaml) which
+        includes the different possible registration requests and the expected responses.
+
+    expected_output:
+        - Registration request responses on 'authd' socket.
+    '''
     test_case = set_up_groups_keys['test_case']
     for stage in test_case:
         # Reopen socket (socket is closed by manager after sending message with client key)

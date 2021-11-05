@@ -16,3 +16,17 @@
         - check_all: 'yes'
         - check_mtime: CHECK_TYPE
         - check_inode: CHECK_TYPE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

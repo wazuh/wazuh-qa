@@ -33,6 +33,20 @@
                   value: DISK_QUOTA_ENABLED
               - limit:
                   value: DISK_QUOTA_LIMIT
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 
 - tags:
   - test_diff_size_limit
@@ -55,3 +69,17 @@
             - arch: '64bit'
             - report_changes: 'yes'
             - DIFF_SIZE_LIMIT
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
