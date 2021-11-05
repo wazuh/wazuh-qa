@@ -1,6 +1,29 @@
 # Change Log
 All notable changes to this tool will be documented in this file.
 
+## [v0.2] - 2021-11-05
+### Added
+- Added operating systems validation for specified OS in tests ([#2168](https://github.com/wazuh/wazuh-qa/pull/2168))
+- Added Windows testing support in `qa-ctl` ([#2152](https://github.com/wazuh/wazuh-qa/pull/2152))
+- Updated `qa-docs` usage in `qa-ctl` ([#2081](https://github.com/wazuh/wazuh-qa/pull/2081))
+- Added `--os` parameter to specify the systems where to launch the tests ([#2064](https://github.com/wazuh/wazuh-qa/pull/2064))
+- Added no-validation flag for `qa-ctl` docker run on windows ([#2028](https://github.com/wazuh/wazuh-qa/pull/2028))
+- Added documentation tests validation precondition for automatic mode ([#2023](https://github.com/wazuh/wazuh-qa/issues/2023)) 
+
+### Changed
+- Updated `JSON Schema validator` ([#2164](https://github.com/wazuh/wazuh-qa/issues/2164))
+- Removed `pytest` error traceback test results ([#2156](https://github.com/wazuh/wazuh-qa/pull/2156))
+- Updated `local internal options` configutation of Wazuh ([#2102](https://github.com/wazuh/wazuh-qa/pull/2102))
+- Replaced `git clone` usage for direct downloads ([#2046](https://github.com/wazuh/wazuh-qa/pull/2046))
+- Changed `GitHub API requests` with `checks on resource URLs` for qa-ctl parameter validations ([#2033](https://github.com/wazuh/wazuh-qa/pull/2033))
+- Renamed `qa-ctl` temporary files directory ([#2029](https://github.com/wazuh/wazuh-qa/pull/2029))
+- Updated `qa-ctl` help menu information ([#2026](https://github.com/wazuh/wazuh-qa/pull/2026))
+
+### Fixed
+- Fixed `Docker` issues for `qa-ctl` (manual mode) in `Windows` ([#2147](https://github.com/wazuh/wazuh-qa/pull/2147))
+- Fixed `qa-ctl` configuration path separators for `windows` ([#2036](https://github.com/wazuh/wazuh-qa/pull/2036))
+
+
 ## [v0.1]
 
 ### Added
