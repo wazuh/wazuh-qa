@@ -1,5 +1,6 @@
 import sys
 import re
+import copy
 from os.path import join, exists
 from tempfile import gettempdir
 from packaging.version import parse
@@ -484,7 +485,7 @@ class QACTLConfigGenerator:
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
 
             system = 'linux' if system == 'deb' or system == 'rpm' else system
-            modules = test['modules']
+            modules = copy.deepcopy(test['modules'])
             component = 'manager' if 'manager' in test['components'] else test['components'][0]
 
             # Cut out the full path, and convert it to relative path (tests/integration....)
@@ -512,13 +513,11 @@ class QACTLConfigGenerator:
         self.config['tests'] = {}
 
         if not self.systems:
-            for _ in tests_info:
-                self.__set_testing_config(tests_info)
+            self.__set_testing_config(tests_info)
         # If we want to launch the test in one or multiple systems specified in qa-ctl parameters
         elif isinstance(self.systems, list) and len(self.systems) > 0:
             for _ in self.systems:
-                for _ in tests_info:
-                    self.__set_testing_config(tests_info)
+                self.__set_testing_config(tests_info)
         else:
             raise QAValueError('Unable to process systems in the automatically generated configuration',
                                QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
