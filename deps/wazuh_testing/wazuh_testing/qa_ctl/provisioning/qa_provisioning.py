@@ -1,9 +1,8 @@
 import os
 import sys
 from tempfile import gettempdir
-
-
 from time import sleep
+
 from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory

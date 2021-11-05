@@ -3,6 +3,7 @@ import yaml
 import copy
 import json
 from tempfile import gettempdir
+
 from wazuh_testing.tools.time import get_current_timestamp
 
 

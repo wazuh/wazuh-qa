@@ -1,6 +1,6 @@
 import os
-
 from pathlib import Path
+
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_package import WazuhPackage
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.qa_ctl import QACTL_LOGGER

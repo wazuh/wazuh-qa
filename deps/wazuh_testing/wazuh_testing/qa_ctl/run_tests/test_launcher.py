@@ -1,5 +1,4 @@
 import os
-
 from tempfile import gettempdir
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner

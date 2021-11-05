@@ -1,7 +1,6 @@
 import sys
 import re
 from os.path import join, exists
-
 from tempfile import gettempdir
 from packaging.version import parse
 

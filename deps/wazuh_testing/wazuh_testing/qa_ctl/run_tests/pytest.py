@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime
 from tempfile import gettempdir
+
 from wazuh_testing.qa_ctl.run_tests.test_result import TestResult
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
