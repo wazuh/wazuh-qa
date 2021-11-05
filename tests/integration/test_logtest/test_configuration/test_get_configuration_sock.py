@@ -88,7 +88,8 @@ def test_get_configuration_sock(get_configuration, configure_environment, restar
     description: Check analysis Unix socket returns the correct Logtest configuration under different sets of
                  configurations, `wazuh-analisysd` returns the right information from the `rule_test` configuration
                  block. To do this, it overwrites wrong field values and checks that the values within the received
-                 message are the same that the loaded fields from the 'wazuh_conf.yaml' file.
+                 message after establish connection using the logtest AF_UNIX socket that uses TCP are the same that the
+                 loaded fields from the 'wazuh_conf.yaml' file.
 
     wazuh_min_version: 4.2.0
 
