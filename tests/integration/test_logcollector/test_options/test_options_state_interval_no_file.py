@@ -49,6 +49,7 @@ configuration_ids = [f"{x['LOCATION']}_{x['LOG_FORMAT']}" for x in parameters]
 local_options = [{'state_interval': '1', 'open_attempts': '1'},
                  {'state_interval': '4', 'open_attempts': '4'},
                  {'state_interval': '5', 'open_attempts': '10'}]
+local_internal_options = {'logcollector.debug': '2'}
 
 
 # Fixtures
@@ -76,8 +77,8 @@ def get_local_internal_options_function(request):
     conf.set_wazuh_local_internal_options(backup_options_lines)
 
 
-def test_options_state_interval_no_file(get_local_internal_options_function, get_files_list,
-                                        create_file_structure_function,
+def test_options_state_interval_no_file(configure_local_internal_options_module, get_local_internal_options_function,
+                                        get_files_list, create_file_structure_function,
                                         get_configuration, configure_environment):
     """Check if the monitorized file does not appear in logcollector.state when it is removed.
 
