@@ -1,0 +1,68 @@
+---
+-
+  name: 'Key request - ID'
+  description: 'Obtain agent key with specific ID'
+  pre_existent_keys:
+    - '100 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:100"
+    output: '{"error":0,"data":{"id":"100","name":"user100","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c911"'
+-
+  name: 'Key request - IP'
+  description: 'Obtain agent key with specific IP'
+  pre_existent_keys:
+    - '100 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "ip:192.0.0.0"
+    output: '{"error":0,"data":{"id":"101","name":"user101","ip":"192.0.0.0","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c912"'
+-
+  name: 'Error 1 Key request'
+  description: 'Can not obtain agent key'
+  pre_existent_keys:
+    - '101 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:101"
+    output: '{"error": 1, "message": "Too few arguments"}'
+
+-
+  name: 'Error 2 Key request'
+  description: 'Can not obtain agent key'
+  pre_existent_keys:
+    - '101 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:101"
+    output: '{"error": 2, "message": "ERROR"}'
+
+-
+  name: 'Error 3 Key request'
+  description: 'Can not obtain agent key'
+  pre_existent_keys:
+    - '101 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:101"
+    output: '{"error": 3, "message": "Bad arguments given"}'
+
+-
+  name: 'Error 4 Key request'
+  description: 'Can not obtain agent key'
+  pre_existent_keys:
+    - '101 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:101"
+    output: '{"error": 4, "message": "No agent key found"}'
+
+-
+  name: 'Error 5 Key request'
+  description: 'Can not obtain agent key'
+  pre_existent_keys:
+    - '101 user100 any CorruptedKey'
+  test_case:
+  -
+    input: "id:101"
+    output: '{"error": 5, "message": f"Found more than one match for required id?"}'

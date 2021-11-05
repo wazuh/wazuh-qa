@@ -1,0 +1,46 @@
+---
+  -
+    name: 'Disable force insert'
+    description: ''
+    test_case:
+    -
+      input: ""
+      output:
+        status: 'success'
+        message: ''
+  -
+    name: 'Timeout 1s'
+    description: ''
+    test_case:
+    -
+      input: ""
+      output:
+        status: 'success'
+        message: ''
+  -
+    name: 'Invalid timeout'
+    description: ''
+    test_case:
+    -
+      input: ""
+      output:
+        status: 'error'
+        message: ''
+  -
+    name: "Minimal queue size"
+    description: ""
+    test_case:
+    -
+      input: ""
+      output:
+        status: 'success'
+        message: ''
+  -
+    name: "Invalid queue size"
+    description: ""
+    test_case:
+    -
+      input: ""
+      output:
+        status: 'error'
+        message: ''
