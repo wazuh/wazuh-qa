@@ -73,6 +73,7 @@ tags:
     - fim_wildcards_complex
 '''
 import os
+import platform
 import sys
 import pytest
 from wazuh_testing import global_parameters
@@ -81,10 +82,12 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import recursive_directory_creation
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH, get_service
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.tier(level=1), pytest.mark.win32]
+sys_platform = platform.system()
 
 # Variables
 frequency_scan = 10
@@ -105,6 +108,8 @@ wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards_runtime.yml')
 test_folders = matched_dirs + no_match_dirs
+mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
+                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
@@ -144,7 +149,7 @@ def get_configuration(request):
 
 
 # Test
-@pytest.mark.skip(reason="It will be blocked by #1602, as soon as #1602 it fixed we can enable again this test.")
+@mark_skip_agentWindows
 @pytest.mark.parametrize('subfolder_name', test_folders)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards_runtime'}])

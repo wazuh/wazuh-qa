@@ -73,6 +73,7 @@ tags:
     - fim_file_limit
 '''
 import os
+import platform
 
 import pytest
 from wazuh_testing import global_parameters
@@ -80,10 +81,12 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_zero, generate_
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH, get_service
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.tier(level=1), pytest.mark.win32]
+sys_platform = platform.system()
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
@@ -93,6 +96,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
+                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
@@ -116,6 +121,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'no_file_limit'}
 ])
+@mark_skip_agentWindows
 def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the 'file_limit' feature of FIM is disabled.

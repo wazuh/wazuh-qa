@@ -73,6 +73,7 @@ tags:
     - fim_basic_usage
 '''
 import os
+import platform
 import shutil
 import sys
 import time
@@ -84,10 +85,13 @@ from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_ex
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import WAZUH_PATH, get_service
+
 
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
+sys_platform = platform.system()
 
 # Variables
 
@@ -98,6 +102,8 @@ configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_new_dirs.yaml' if sys.platform != 'win32'
                                    else 'wazuh_conf_new_dirs_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
+                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 windows_audit_interval = 1
@@ -128,7 +134,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-
+@mark_skip_agentWindows
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
