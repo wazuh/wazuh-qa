@@ -7,7 +7,7 @@ import sys
 import wazuh_testing.api as api
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -31,7 +31,7 @@ wazuh_component = get_service()
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
     no_restart_windows_after_configuration_set = True
     force_restart_after_restoring = True
 

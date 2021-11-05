@@ -8,7 +8,7 @@ import sys
 import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor
 import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -37,7 +37,7 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     command = 'tasklist'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
     command = 'ps -aux'
