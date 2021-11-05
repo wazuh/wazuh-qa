@@ -30,6 +30,8 @@ if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
 elif sys.platform == 'darwin':
     command = 'ps aux'
+elif sys.platform == 'sunos5':
+    command = 'ps aux -xww'    
 else:
     command = 'ps -aux'
 

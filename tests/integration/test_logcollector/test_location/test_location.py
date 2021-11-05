@@ -184,6 +184,11 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
                                                   f"message has not been produced")
         elif file_type == 'multiple_logs':
             log_callback = logcollector.callback_file_limit()
-            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+
+            try:
+                wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                     error_message=f"The expected 'File limit has been reached' "
                                                   f"message has not been produced")
+            except:                                      
+                if sys.platform == 'sunos5':
+                    pytest.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/10751')
