@@ -94,10 +94,10 @@ class Pytest(Test):
             result (Test resutl object): object containing all the results obtained from the test
 
         Return:
-            output_result (string): String containing the trimmed output 
+            output_result (string): String containing the trimmed output
         """
         output_result = str(result)
-        error_fail_pattern =  re.compile('^=*.(ERRORS|FAILURES).*=$', re.M)
+        error_fail_pattern = re.compile('^=*.(ERRORS|FAILURES).*=$', re.M)
         test_summary_pattern = re.compile('^=*.(short test summary info).*=$', re.M)
 
         # Check for any error or failure message case in the test result output
@@ -109,7 +109,7 @@ class Pytest(Test):
             if test_summary_case is not None:
                 test_result_message = test_summary_case.group(0)
                 test_summary_output = output_result[output_result.index(test_result_message):]
-            
+
             error_case_message = error_case.group(0)
             output_result = output_result[:output_result.index(error_case_message)]
             output_result += test_summary_output
@@ -165,7 +165,7 @@ class Pytest(Test):
         create_path_task_unix = {
             'name': f"Create {reports_directory} path (Unix)",
             'file': {'path': reports_directory, 'state': 'directory', 'mode': '0755'},
-            'become':True,
+            'become': True,
             'when': 'ansible_system != "Win32NT"'
         }
 
@@ -183,7 +183,7 @@ class Pytest(Test):
             'shell': pytest_command, 'args': {'chdir': self.tests_run_dir},
             'register': 'test_output_unix',
             'ignore_errors': 'yes',
-            'become':True,
+            'become': True,
             'when': 'ansible_system != "Win32NT"'
         }
 
@@ -245,8 +245,7 @@ class Pytest(Test):
 
         fetch_compressed_assets = {
             'name': f"Copy compressed assets from {zip_src_path} to {self.tests_result_path}",
-            'fetch': {'src': zip_src_path,
-            'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
+            'fetch': {'src': zip_src_path, 'dest': f"{self.tests_result_path}/", 'flat': 'yes'},
             'ignore_errors': 'yes'
         }
 
@@ -255,7 +254,7 @@ class Pytest(Test):
             AnsibleTask(run_test_task_unix), AnsibleTask(run_test_task_windows),
             AnsibleTask(create_plain_report_unix), AnsibleTask(create_plain_report_windows),
             AnsibleTask(fetch_plain_report), AnsibleTask(fetch_html_report),  AnsibleTask(compress_assets_folder_unix),
-            AnsibleTask(compress_assets_folder_windows),AnsibleTask(fetch_compressed_assets)
+            AnsibleTask(compress_assets_folder_windows), AnsibleTask(fetch_compressed_assets)
         ]
 
         playbook_parameters = {
@@ -274,11 +273,11 @@ class Pytest(Test):
                                  test_name=self.tests_path)
 
         # Trim the result report for a more simple and readable output
-        if Pytest.LOGGER.level != 10: 
+        if Pytest.LOGGER.level != 10:
             output_result = self.__output_trimmer(self.result)
         else:
             output_result = str(self.result)
-        
+
         # Print test result in stdout
         if self.qa_ctl_configuration.logging_enable:
             if os.path.exists(self.result.plain_report_file_path):

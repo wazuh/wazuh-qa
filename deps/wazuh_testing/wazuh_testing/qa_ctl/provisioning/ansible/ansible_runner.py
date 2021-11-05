@@ -4,7 +4,6 @@ import shutil
 from tempfile import gettempdir
 from os.path import join
 
-
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_output import AnsibleOutput
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePlaybook
 from wazuh_testing.qa_ctl import QACTL_LOGGER
@@ -13,6 +12,7 @@ from wazuh_testing.tools.exceptions import AnsibleException
 
 if sys.platform != 'win32':
     import ansible_runner
+
 
 class AnsibleRunner:
     """Allow to run ansible playbooks in the indicated hosts.
@@ -31,7 +31,8 @@ class AnsibleRunner:
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False):
+    def __init__(self, ansible_inventory_path, ansible_playbook_path,
+                 private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir

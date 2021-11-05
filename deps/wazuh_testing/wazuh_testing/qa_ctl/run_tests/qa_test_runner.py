@@ -14,6 +14,7 @@ from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.tools import file
 from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
 
+
 class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
 
@@ -170,8 +171,8 @@ class QATestRunner():
             tmp_config_file = os.path.join(gettempdir(), 'wazuh_qa_ctl', tmp_config_file_name)
 
             # Save original directory where to store the results in Windows host
-            original_result_paths = [ self.test_parameters[host_key]['test']['path']['test_results_path'] \
-                for host_key, _ in self.test_parameters.items()]
+            original_result_paths = [self.test_parameters[host_key]['test']['path']['test_results_path']
+                                     for host_key, _ in self.test_parameters.items()]
 
             # Change the destination directory, as the results will initially be stored in the shared volume between
             # the Windows host and the docker container (Windows tmp as /wazuh_qa_ctl).

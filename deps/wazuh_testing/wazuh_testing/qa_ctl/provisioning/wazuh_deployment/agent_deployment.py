@@ -84,9 +84,9 @@ class AgentDeployment(WazuhDeployment):
         tasks_list.append(AnsibleTask({
             'name': 'Configuring server ip to autoenrollment Windows agent',
             'win_lineinfile': {'path': f'{self.install_dir_path}\\ossec.conf',
-                                'regexp': '<address>(.*)</address>',
-                                'line': f'<address>{self.server_ip}</address>',
-                                'backrefs': 'yes'},
+                               'regexp': '<address>(.*)</address>',
+                               'line': f'<address>{self.server_ip}</address>',
+                               'backrefs': 'yes'},
             'become': True,
             'become_method': 'runas',
             'become_user': self.ansible_admin_user,

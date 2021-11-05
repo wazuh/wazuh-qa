@@ -3,6 +3,7 @@ import json
 
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
 
+
 class WindowsAnsibleInstance(AnsibleInstance):
     """Represent the necessary attributes of an instance to be specified in an ansible inventory.
 

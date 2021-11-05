@@ -98,10 +98,10 @@ class WazuhDeployment(ABC):
                 'yum': {'name': f'{self.installation_files_path}', 'disable_gpg_check': 'yes'},
                 'become': True,
                 'when': ['ansible_os_family|lower == "redhat"',
-                        'not (ansible_distribution|lower == "centos" and ' +
-                        'ansible_distribution_major_version >= "8")',
-                        'not (ansible_distribution|lower == "redhat" and ' +
-                        'ansible_distribution_major_version >= "8")']
+                         'not (ansible_distribution|lower == "centos" and ' +
+                         'ansible_distribution_major_version >= "8")',
+                         'not (ansible_distribution|lower == "redhat" and ' +
+                         'ansible_distribution_major_version >= "8")']
             }))
 
             tasks_list.append(AnsibleTask({
@@ -109,10 +109,10 @@ class WazuhDeployment(ABC):
                 'dnf': {'name': f'{self.installation_files_path}', 'disable_gpg_check': 'yes'},
                 'become': True,
                 'when': ['ansible_os_family|lower == "redhat"',
-                        '(ansible_distribution|lower == "centos" and ' +
-                        'ansible_distribution_major_version >= "8") or' +
-                        '(ansible_distribution|lower == "redhat" and ' +
-                        'ansible_distribution_major_version >= "8")']
+                         '(ansible_distribution|lower == "centos" and ' +
+                         'ansible_distribution_major_version >= "8") or' +
+                         '(ansible_distribution|lower == "redhat" and ' +
+                         'ansible_distribution_major_version >= "8")']
             }))
 
             tasks_list.append(AnsibleTask({
@@ -170,7 +170,7 @@ class WazuhDeployment(ABC):
         tasks_list.append(AnsibleTask({
             'name': f'Wazuh agent {command} service from Windows',
             'win_shell': 'Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue |' +
-                        f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
+                         f' {command.capitalize()}-Service -ErrorAction SilentlyContinue',
             'args': {'executable': 'powershell.exe'},
             'become': True,
             'become_method': 'runas',

@@ -124,7 +124,7 @@ class QAFramework():
 
         download_qa_repo_unix_task = AnsibleTask({
             'name': f"Download {self.qa_branch} branch of wazuh-qa repository (Unix)",
-            'shell': f"cd {self.workdir} && curl -Ls https://github.com/wazuh/wazuh-qa/archive/" \
+            'shell': f"cd {self.workdir} && curl -Ls https://github.com/wazuh/wazuh-qa/archive/"
                      f"{self.qa_branch}.tar.gz | tar zx && mv wazuh-* wazuh-qa",
             'when': 'ansible_system != "Win32NT"'
         })
@@ -133,7 +133,7 @@ class QAFramework():
             'name': f"Download {self.qa_branch} branch of wazuh-qa repository (Windows)",
             'win_shell': "powershell.exe {{ item }}",
             'with_items': [
-                f"curl.exe -L https://github.com/wazuh/wazuh-qa/archive/{self.qa_branch}.tar.gz -o " \
+                f"curl.exe -L https://github.com/wazuh/wazuh-qa/archive/{self.qa_branch}.tar.gz -o "
                 f"{self.workdir}\\{self.qa_branch}.tar.gz",
                 f"tar -xzf {self.workdir}\\{self.qa_branch}.tar.gz -C {self.workdir}",
                 f"move {self.workdir}\\wazuh-qa-{self.qa_branch} {self.workdir}\\wazuh-qa",

@@ -244,7 +244,7 @@ class QAProvisioning():
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
             tmp_config_file = os.path.join(gettempdir(), 'wazuh_qa_ctl', tmp_config_file_name)
 
-             # Write a custom configuration file with only provision section
+            # Write a custom configuration file with only provision section
             file.write_yaml_file(tmp_config_file, {'provision': self.provision_info})
 
             try:
@@ -256,7 +256,7 @@ class QAProvisioning():
             self.__check_hosts_connection()
             provision_threads = [ThreadExecutor(self.__process_config_data,
                                                 parameters={'host_provision_info': host_value})
-                                for _, host_value in self.provision_info['hosts'].items()]
+                                 for _, host_value in self.provision_info['hosts'].items()]
             QAProvisioning.LOGGER.info(f"Provisioning {len(provision_threads)} instances")
 
             for runner_thread in provision_threads:

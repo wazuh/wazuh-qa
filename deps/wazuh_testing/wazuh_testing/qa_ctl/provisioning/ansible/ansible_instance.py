@@ -2,6 +2,7 @@ import yaml
 import json
 from abc import ABC
 
+
 class AnsibleInstance(ABC):
     """Represent the necessary attributes of an instance to be specified in an ansible inventory.
 

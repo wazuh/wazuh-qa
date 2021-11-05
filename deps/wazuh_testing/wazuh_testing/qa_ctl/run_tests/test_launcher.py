@@ -139,8 +139,7 @@ class TestLauncher:
 
         set_local_internal_configuration_unix = {
             'name': 'Set custom local internal configuration (Unix)',
-            'lineinfile': {'path': local_internal_options_path,
-            'line': "{{ item }}"},
+            'lineinfile': {'path': local_internal_options_path, 'line': "{{ item }}"},
             'with_items': local_internal_options_content,
             'become': True,
             'when': 'ansible_system != "Win32NT"'
@@ -148,8 +147,7 @@ class TestLauncher:
 
         set_local_internal_configuration_windows = {
             'name': 'Set custom local internal configuration (Windows)',
-            'win_lineinfile': {'path': local_internal_options_path,
-            'line': "{{ item }}"},
+            'win_lineinfile': {'path': local_internal_options_path, 'line': "{{ item }}"},
             'with_items': local_internal_options_content.copy(),
             'become': True,
             'become_method': 'runas',

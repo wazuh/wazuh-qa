@@ -49,7 +49,7 @@ class WazuhSources(WazuhInstallation):
 
         download_wazuh_sources_task = AnsibleTask({
             'name': f"Download Wazuh branch in {self.installation_files_path}",
-            'shell': f"cd {self.installation_files_path} && curl -Ls https://github.com/wazuh/wazuh/archive/" \
+            'shell': f"cd {self.installation_files_path} && curl -Ls https://github.com/wazuh/wazuh/archive/"
                      f"{self.wazuh_branch}.tar.gz | tar zx && mv wazuh-*/* ."
         })
         WazuhSources.LOGGER.debug(f"Wazuh sources from {self.wazuh_branch} branch were successfully downloaded in "

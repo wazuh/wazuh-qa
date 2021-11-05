@@ -5,14 +5,14 @@ import os
 import sys
 from shutil import rmtree
 
-if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
-    import vagrant
-
 import wazuh_testing.qa_ctl.deployment.vagrantfile as vfile
 from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
+
+if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
+    import vagrant
 
 
 class VagrantWrapper(Instance):

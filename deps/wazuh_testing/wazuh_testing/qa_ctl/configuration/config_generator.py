@@ -279,8 +279,8 @@ class QACTLConfigGenerator:
             dict object: dict containing all the field required for generating a new vagrant box in the deployment
                          module.
         """
-        vm_cpu=1
-        vm_memory=1024
+        vm_cpu = 1
+        vm_memory = 1024
 
         if os_version in self.BOX_MAPPING:
             box = self.BOX_MAPPING[os_version]
@@ -412,7 +412,7 @@ class QACTLConfigGenerator:
             s3_package_url = self.__get_package_url(instance)
             installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
-            wazuh_install_path =  self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+            wazuh_install_path = self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
                 self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
 
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
@@ -452,7 +452,7 @@ class QACTLConfigGenerator:
         self.config['tests'][instance] = {'host_info': {}, 'test': {}}
         self.config['tests'][instance]['host_info'] = \
             dict(self.config['provision']['hosts'][instance]['host_info'])
-        wazuh_install_path =  self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+        wazuh_install_path = self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
             self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
 
         self.config['tests'][instance]['test'] = {
@@ -542,7 +542,6 @@ class QACTLConfigGenerator:
         if sys.platform == 'win32':
             self.config['config'] = {}
             self.config['config']['qa_ctl_launcher_branch'] = self.qa_branch
-
 
     def run(self):
         """Run an instance with the parameters created. This generates the YAML configuration file automatically."""
