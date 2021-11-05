@@ -11,7 +11,7 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_returning_output
 
 
 class QACTLConfigGenerator:
@@ -137,7 +137,7 @@ class QACTLConfigGenerator:
                           f"{join(self.qa_files_path, 'tests')} --no-logging"
         test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', test_name)}.json"
 
-        run_local_command_with_output(qa_docs_command)
+        run_local_command_returning_output(qa_docs_command)
 
         # Read test data file
         try:

@@ -9,7 +9,7 @@ import wazuh_testing.qa_ctl.deployment.vagrantfile as vfile
 from wazuh_testing.qa_ctl.deployment.instance import Instance
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_returning_output
 
 if 'RUNNING_ON_DOCKER_CONTAINER' not in os.environ:
     import vagrant
@@ -56,7 +56,7 @@ class VagrantWrapper(Instance):
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant up")
 
         filter_command = 'findstr' if sys.platform == 'win32' else 'grep'
-        if len(run_local_command_with_output(f"vagrant box list | {filter_command} {self.vm_box}")) == 0:
+        if len(run_local_command_returning_output(f"vagrant box list | {filter_command} {self.vm_box}")) == 0:
             VagrantWrapper.LOGGER.info(f"{self.vm_box} vagrant box not found in local repository. Downloading and "
                                        'running')
         self.vagrant.up()

@@ -14,8 +14,8 @@ from wazuh_testing.tools.file import delete_path_recursively
 LOGGER = Logging.get_logger(QACTL_LOGGER)
 
 
-def run_local_command(command):
-    """Run local commands without getting the output, but validating the result code.
+def run_local_command_printing_output(command):
+    """Run local commands printing the output in the stdout. In addition, it is validate the result code.
 
     Args:
         command (string): Command to run.
@@ -38,13 +38,14 @@ def run_local_command(command):
                            QACTL_LOGGER)
 
 
-def run_local_command_with_output(command):
-    """Run local commands getting the command output.
+def run_local_command_returning_output(command):
+    """Run local commands catching and returning the stdout in a variable. Nothing is displayed on the stdout.
+
     Args:
         command (string): Command to run.
 
     Returns:
-        str: Command output
+        str: Command output.
     """
     if sys.platform == 'win32':
         run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -82,7 +83,7 @@ def download_local_wazuh_qa_repository(branch, path):
                   f"{mute_output} && mv wazuh-* wazuh-qa {mute_output} && rm -rf *tar.gz {mute_output}"
 
     LOGGER.debug(f"Downloading {branch} files of wazuh-qa repository in {wazuh_qa_path}")
-    run_local_command_with_output(command)
+    run_local_command_returning_output(command)
 
 
 def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
@@ -102,8 +103,8 @@ def qa_ctl_docker_run(config_file, qa_branch, debug_level, topic):
                                      'dockerfiles', 'qa_ctl')
 
     LOGGER.info(f"Building docker image for {topic}")
-    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
+    run_local_command_returning_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
 
     LOGGER.info(f"Running the Linux container for {topic}")
-    run_local_command(f"docker run --rm -v {os.path.join(gettempdir(), 'wazuh_qa_ctl')}:/wazuh_qa_ctl "
-                      f"{docker_image_name} {docker_args}")
+    run_local_command_printing_output(f"docker run --rm -v {os.path.join(gettempdir(), 'wazuh_qa_ctl')}:/wazuh_qa_ctl "
+                                      f"{docker_image_name} {docker_args}")

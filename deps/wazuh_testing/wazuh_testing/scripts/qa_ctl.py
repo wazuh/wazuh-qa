@@ -79,7 +79,7 @@ def validate_configuration_data(configuration_data, qa_ctl_mode):
     # Check that qa_ctl_launcher_branch parameter has been specified and its valid for Windows manual mode
     if sys.platform == 'win32' and qa_ctl_mode == MANUAL_MODE:
         if 'config' not in configuration_data or 'qa_ctl_launcher_branch' not in configuration_data['config']:
-            raise QAValueError('qa_ctl_launcher_branch was not found in the configuration file. It is required if ' \
+            raise QAValueError('qa_ctl_launcher_branch was not found in the configuration file. It is required if '
                                'you are running qa-ctl in a Windows host', qactl_logger.error, QACTL_LOGGER)
 
         # Check that qa_ctl_launcher_branch exists
@@ -87,7 +87,7 @@ def validate_configuration_data(configuration_data, qa_ctl_mode):
                                            repository=WAZUH_QA_REPO):
             raise QAValueError(f"{configuration_data['config']['qa_ctl_launcher_branch']} branch specified as "
                                'qa_ctl_launcher_branch  does not exist in Wazuh QA repository.', qactl_logger.error,
-                                QACTL_LOGGER)
+                               QACTL_LOGGER)
 
     qactl_logger.debug('Schema validation has passed successfully')
 
@@ -131,7 +131,7 @@ def set_parameters(parameters):
     parameters.user_version = parameters.version if parameters.version else None
 
     try:
-        parameters.version = parameters.version if parameters.version  else github_checks.get_last_wazuh_version()
+        parameters.version = parameters.version if parameters.version else github_checks.get_last_wazuh_version()
     except QAValueError:
         raise QAValueError('The latest version of Wazuh could not be obtained. Maybe there is no valid (non-rc) one at '
                            'https://github.com/wazuh/wazuh/tags. Try specifying the version manually using the '
@@ -139,7 +139,7 @@ def set_parameters(parameters):
 
     parameters.version = (parameters.version).replace('v', '')
 
-    short_version =  f"{(parameters.version).split('.')[0]}.{(parameters.version).split('.')[1]}"
+    short_version = f"{(parameters.version).split('.')[0]}.{(parameters.version).split('.')[1]}"
     parameters.qa_branch = parameters.qa_branch if parameters.qa_branch else short_version
 
 
@@ -154,7 +154,8 @@ def set_environment(parameters):
 
     if parameters.run_test:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
-        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=os.path.join(gettempdir(), 'wazuh_qa_ctl'))
+        local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch,
+                                                         path=os.path.join(gettempdir(), 'wazuh_qa_ctl'))
 
 
 def validate_parameters(parameters):
@@ -172,14 +173,14 @@ def validate_parameters(parameters):
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             test_documentation_command = f"qa-docs -I {tests_path} -t {test} -o {gettempdir()} --no-logging"
             test_documentation_file_path = os.path.join(gettempdir(), f"{test}.json")
-            local_actions.run_local_command_with_output(test_documentation_command)
+            local_actions.run_local_command_returning_output(test_documentation_command)
 
             test_data = json.loads(file.read_file(test_documentation_file_path))
 
             for op_system in parameters.operating_systems:
                 # Check platform
                 platform = 'linux' if op_system == 'ubuntu' or op_system == 'centos' else op_system
-                if not platform in test_data['os_platform']:
+                if platform not in test_data['os_platform']:
                     raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed platforms: "
                                        f"{test_data['os_platform']} (ubuntu and centos are from linux platform)")
                 # Check os version
@@ -204,7 +205,7 @@ def validate_parameters(parameters):
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
 
     if (parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing) \
-        and not parameters.config:
+       and not parameters.config:
         raise QAValueError('The --skip parameter can only be used when a custom configuration file has been '
                            'specified with the option -c or --config', qactl_logger.error, QACTL_LOGGER)
 
@@ -228,13 +229,16 @@ def validate_parameters(parameters):
         for test in parameters.run_test:
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             # Validate if the specified tests exist
-            if f"{test} exists" not in local_actions.run_local_command_with_output(f"qa-docs -e {test} -I {tests_path} "
-                                                                                   ' --no-logging'):
+            check_test_exist = local_actions.run_local_command_returning_output(f"qa-docs -e {test} -I {tests_path} "
+                                                                                '--no-logging')
+            if f"{test} exists" not in check_test_exist:
                 raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
             # Validate if the selected tests are documented
-            test_documentation_check = local_actions.run_local_command_with_output(f"qa-docs -t {test} -I {tests_path} "
-                                                                                   '--check-documentation --no-logging')
+            test_documentation_check = local_actions.run_local_command_returning_output(f"qa-docs -t {test} -I "
+                                                                                        f"{tests_path} "
+                                                                                        '--check-documentation '
+                                                                                        '--no-logging')
             if f'{test} is not documented' in test_documentation_check:
                 raise QAValueError(f"{test} is not documented using qa-docs current schema", qactl_logger.error,
                                    QACTL_LOGGER)
@@ -393,6 +397,7 @@ def main():
         else:
             if not RUNNING_ON_DOCKER_CONTAINER and arguments.run_test:
                 qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
+
 
 if __name__ == '__main__':
     main()
