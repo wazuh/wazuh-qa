@@ -26,7 +26,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': 0}
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2'}
 
 
 now_date = datetime.now()
@@ -71,14 +71,8 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get local internal options from the module."""
-    return local_internal_options
-
-
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
-def test_configuration_age_datetime(get_local_internal_options, configure_local_internal_options, new_datetime,
+def test_configuration_age_datetime(configure_local_internal_options_module, new_datetime,
                                     get_files_list, get_configuration, create_file_structure_function,
                                     configure_environment):
     """Check if logcollector age option works correctly when date time of the system changes.
