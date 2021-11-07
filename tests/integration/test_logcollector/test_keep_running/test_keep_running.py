@@ -21,7 +21,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_keep_running_conf.yaml
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test_log.log')
 
-local_internal_options = {'logcollector.vcheck_files': 5}
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2'}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path},
@@ -59,18 +59,12 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get internal configuration."""
-    return local_internal_options
-
-
-@pytest.fixture(scope="module")
 def get_files_list():
     """Get file list to create from the module."""
     return file_structure
 
 
-def test_keep_running(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_keep_running(configure_local_internal_options_module, get_configuration,
                       configure_environment, create_file_structure_module, restart_logcollector):
     """Check if logcollector keeps running once a log is rotated.
 
@@ -78,8 +72,7 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
     Finally, write data back to the rotated log and check that logcollector continues to monitor it.
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
-        configure_local_internal_options (fixture): Set internal configuration for testing.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
         generate_log_file (fixture): Generate a log file for testing.
