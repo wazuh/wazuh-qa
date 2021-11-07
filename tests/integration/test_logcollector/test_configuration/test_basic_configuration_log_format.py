@@ -35,7 +35,7 @@ configurations_path_default = os.path.join(test_data_path, default_log_format_co
 configurations_path_multiple_logcollector = os.path.join(test_data_path, multiple_logcollector_configuration)
 configurations_path_no_location = os.path.join(test_data_path, no_location_defined_configuration)
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
@@ -145,12 +145,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
 
@@ -237,7 +231,7 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
-def test_log_format(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_log_format(configure_local_internal_options_module, get_configuration,
                     configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
 
