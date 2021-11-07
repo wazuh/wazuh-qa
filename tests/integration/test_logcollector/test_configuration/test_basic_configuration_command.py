@@ -19,7 +19,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
 
-local_internal_options = {'logcollector.remote_commands': 1}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo Testing'},
@@ -65,7 +65,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
-def test_configuration_command(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_configuration_command(configure_local_internal_options_module, get_configuration,
                                configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring configuration.
 
