@@ -24,6 +24,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+local_internal_options = {'logcollector.debug': '2'}
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
@@ -98,7 +99,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_target(get_configuration, configure_environment):
+def test_configuration_target(get_configuration, configure_environment, configure_local_internal_options_module):
     """Check if Wazuh target field of logcollector works properly.
 
     Ensure Wazuh component fails in the case of invalid values and works properly in the case of valid target values.
