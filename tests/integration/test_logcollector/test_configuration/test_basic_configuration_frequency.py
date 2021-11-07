@@ -27,7 +27,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 wazuh_component = get_service()
 
@@ -157,13 +157,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
-def test_configuration_frequency(get_local_internal_options, configure_local_internal_options,
+def test_configuration_frequency(configure_local_internal_options_module,
                                  get_configuration, configure_environment):
     """Check if the Wazuh frequency field of logcollector works properly.
 

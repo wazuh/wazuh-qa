@@ -59,12 +59,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
 def test_configuration_command(configure_local_internal_options_module, get_configuration,
                                configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring configuration.
