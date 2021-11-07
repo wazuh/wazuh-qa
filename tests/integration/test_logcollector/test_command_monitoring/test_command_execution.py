@@ -21,8 +21,9 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
 local_internal_options = {
-    'logcollector.remote_commands': 1,
-    'logcollector.max_lines': 100
+    'logcollector.remote_commands': '1',
+    'logcollector.max_lines': '100',
+    'logcollector.debug': '2'
 }
 
 parameters = [
@@ -95,12 +96,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get internal configuration."""
-    return local_internal_options
-
-
 def dbg_reading_command(command, alias, log_format):
     """Check if the (previously known) output of a command ("echo") is displayed correctly.
 
@@ -128,13 +123,12 @@ def dbg_reading_command(command, alias, log_format):
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-def test_command_execution(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_command_execution(configure_local_internal_options_module, get_configuration,
                            configure_environment, restart_logcollector):
     """Check if the Wazuh runs correctly by executing different commands with special characteristics.
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
-        configure_local_internal_options (fixture): Set internal configuration.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.
@@ -152,7 +146,7 @@ def test_command_execution(get_local_internal_options, configure_local_internal_
                                                               escape=True))
 
 
-def test_command_execution_dbg(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_command_execution_dbg(configure_local_internal_options_module, get_configuration,
                                configure_environment, restart_logcollector):
     """Check if the debug logs are displayed correctly when the test commands are executed.
 
@@ -160,8 +154,7 @@ def test_command_execution_dbg(get_local_internal_options, configure_local_inter
     "DEBUG: Reading command message..." and, finally "Read ... lines from command...".
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
-        configure_local_internal_options (fixture): Set internal configuration.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.
