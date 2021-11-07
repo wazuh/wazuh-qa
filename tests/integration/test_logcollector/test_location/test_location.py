@@ -20,7 +20,7 @@ pytestmark = pytest.mark.tier(level=0)
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
 configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
-
+local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
 date = datetime.date.today().strftime("%Y-%m-%d")
@@ -153,7 +153,7 @@ def get_files_list():
 
 
 def test_location(get_files_list, create_file_structure_module, get_configuration, configure_environment,
-                  restart_logcollector):
+                  configure_local_internal_options_module, restart_logcollector):
     """Check if logcollector is running properly with the specified configuration.
 
     Raises:
