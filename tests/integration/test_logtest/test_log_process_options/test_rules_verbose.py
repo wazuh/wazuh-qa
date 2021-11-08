@@ -149,7 +149,7 @@ def test_rules_verbose(get_configuration, restart_required_logtest_daemons,
     '''
     description: Check if 'wazuh-logtest' works correctly in 'verbose' mode for rules debugging. To do this, it sends
                  the inputs through a socket, receives and decodes the message. Then, it checks
-                 if any invalid token or session token is not catched.
+                 if any invalid token or session token is not caught.
 
     wazuh_min_version: 4.2.0
 
@@ -177,7 +177,7 @@ def test_rules_verbose(get_configuration, restart_required_logtest_daemons,
         - Verify that logtest is running in verbose mode.
         - Verify that when running in verbose mode the local rule debug messages has been written
         - Verify that when running in verbose mode the local rule debug messages written are the expected count.
-        - Verify that if a warning message is catched it matches with any test case message.
+        - Verify that if a warning message is caught it matches with any test case message.
 
     input_description: Some test cases are defined in the module. These include some input configurations stored in
                        the 'rules_verbose.yaml'.

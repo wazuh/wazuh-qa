@@ -117,8 +117,8 @@ def test_rule_list(restart_required_logtest_daemons, get_configuration,
                    configure_environment, configure_rules_list,
                    wait_for_logtest_startup, connect_to_sockets_function):
     '''
-    description: Check that after modifying the alert level it takes effect when opening a new logtest sessions, without
-                 having to reset the manager. To do this, it sends a request to logtest socket and get its response.
+    description: Check that after modifying the alert level it takes effect when opening new logtest sessions, without
+                 having to reset the manager. To do this, it sends a request to logtest socket and gets its response.
                  Then, it checks that the expected alert matches.
 
     wazuh_min_version: 4.2.0

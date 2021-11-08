@@ -106,7 +106,7 @@ def test_invalid_socket_input(restart_required_logtest_daemons, wait_for_logtest
             brief: List of test_case stages. (dicts with input, output and stage keys)
 
     assertions:
-        - Verify that the comunication through the sockets works well by verifying that all the test cases produce
+        - Verify that the communication through the sockets works well by verifying that all the test cases produce
           the right output.
         - Verify that oversized messages log an error.
 

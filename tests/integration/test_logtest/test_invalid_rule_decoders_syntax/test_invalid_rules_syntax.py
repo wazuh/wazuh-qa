@@ -110,7 +110,7 @@ def test_invalid_rule_syntax(get_configuration, configure_local_rules,
                              connect_to_sockets_function):
     '''
     description: Check if `wazuh-logtest` correctly detects and handles errors when processing a rules file.
-                 To do this, it send a logtest request(via AF_UNIX socket) using the input configurations and parse
+                 To do this, it sends a logtest request(via AF_UNIX socket) using the input configurations and parses
                  the logtest reply received looking for errors.
 
     wazuh_min_version: 4.2.0

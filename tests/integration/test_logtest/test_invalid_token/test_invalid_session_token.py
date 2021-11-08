@@ -99,7 +99,7 @@ def test_invalid_session_token(restart_required_logtest_daemons, wait_for_logtes
     '''
     description: Check if `wazuh-logtest` correctly detects and handles errors when using a session token.
                  To do this, it sends the inputs through a socket, receives and decodes the message. Then, it checks
-                 if any invalid token or session token is not catched.
+                 if any invalid token or session token is not caught.
 
     wazuh_min_version: 4.2.0
 

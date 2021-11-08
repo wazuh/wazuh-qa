@@ -113,9 +113,9 @@ def create_dummy_session():
 def test_load_rules_decoders(restart_required_logtest_daemons, wait_for_logtest_startup, test_case):
     '''
     description: Check if 'wazuh-logtest' does produce the right decoder/rule matching when processing a log under
-                 different sets of configurations. To do this, creates backup rules and decoders and copy the test case
-                 rules and decoders to restore after the checks. It sends the requests to the logtest socket and checks
-                 if the outputs match with the expected test cases.
+                 different sets of configurations. To do this, it creates backup rules and decoders and copies the test
+                 case rules and decoders to restore after the checks. It sends the requests to the logtest socket and
+                 checks if the outputs match with the expected test cases.
 
     wazuh_min_version: 4.2.0
 
