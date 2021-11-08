@@ -85,7 +85,7 @@ from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_ex
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH, get_service
+from wazuh_testing.tools import WAZUH_PATH
 
 
 # Marks
@@ -102,8 +102,7 @@ configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_new_dirs.yaml' if sys.platform != 'win32'
                                    else 'wazuh_conf_new_dirs_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
-                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 windows_audit_interval = 1
@@ -134,10 +133,11 @@ def extra_configuration_after_yield():
 
 
 # Tests
-@mark_skip_agentWindows
+
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
+@mark_skip_agentWindows
 def test_new_directory(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects 'CUD' (creation, update, and delete) events after

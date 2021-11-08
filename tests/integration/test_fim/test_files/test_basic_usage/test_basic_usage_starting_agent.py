@@ -86,7 +86,7 @@ from wazuh_testing.tools import WAZUH_PATH, get_service
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1), pytest.mark.win32]
+pytestmark = pytest.mark.tier(level=1)
 sys_platform = platform.system()
 
 # Variables
@@ -100,8 +100,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 timeout = global_parameters.default_timeout
-mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
-                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 
 # Extra functions
@@ -130,7 +129,6 @@ def get_configuration(request):
 
 # Tests
 
-@mark_skip_agentWindows
 @pytest.mark.parametrize('filename', [
     'regular0',
     'regular1',
@@ -139,6 +137,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
+@mark_skip_agentWindows
 def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_fim_start):
     '''

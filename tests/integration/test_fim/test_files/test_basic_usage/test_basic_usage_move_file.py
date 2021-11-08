@@ -82,7 +82,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH, get_service
+from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
 
@@ -98,8 +98,7 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2, testdir1_subdir = test_directories
-mark_skip_agentWindows = pytest.mark.skipif(get_service() == 'wazuh-agent' and
-                                          sys_platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -119,7 +118,6 @@ def get_configuration(request):
 # tests
 
 
-@mark_skip_agentWindows
 @pytest.mark.parametrize('file, file_content, tags_to_apply', [
     ('regular1', '', {'ossec_conf'})
 ])
@@ -130,6 +128,7 @@ def get_configuration(request):
     (PREFIX, testdir1, False, True),
     (PREFIX, testdir1_subdir, False, True)
 ])
+@mark_skip_agentWindows
 def test_move_file(file, file_content, tags_to_apply, source_folder, target_folder,
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
