@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-logtest' tool allows the testing and verification of rules and decoders against provided log examples
+       remotely inside a sandbox in 'wazuh-analysisd'. This functionality is provided by the manager, whose work
+       parameters are configured in the ossec.conf file in the XML rule_test section. Test logs can be evaluated through
+       the 'wazuh-logtest' tool or by making requests via RESTful API. These tests will check if the logtest
+       configuration is valid. Also checks rules, decoders, decoders, alerts matching logs correctly.
+
+tier: 0
+
+modules:
+    - logtest
+
+components:
+    - manager
+
+daemons:
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/tools/wazuh-logtest.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/wazuh-logtest/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+
+tags:
+    - logtest_configuration
+'''
 import json
 import os
 import shutil
@@ -42,7 +94,8 @@ local_rules_debug_messages = ['Trying rule: 880000 - Parent rules verbose', '*Ru
 @pytest.fixture(scope='function')
 def configure_rules_list(get_configuration, request):
     """Configure a custom rules for testing.
-    Restart Wazuh is not needed for applying the configuration is optional.
+
+    Restart Wazuh is not needed for applying the configuration, is optional.
     """
 
     # save current rules
@@ -93,11 +146,50 @@ def restart_required_logtest_daemons():
 def test_rules_verbose(get_configuration, restart_required_logtest_daemons,
                        configure_rules_list, wait_for_logtest_startup,
                        connect_to_sockets_function):
-    """Check the correct behaviour of logtest `rules_debug` field.
+    '''
+    description: Check if 'wazuh-logtest' works correctly in 'verbose' mode for rules debugging. To do this, it sends
+                 the inputs through a socket, receives and decodes the message. Then, it checks
+                 if any invalid token or session token is not catched.
 
-    This test writes different inputs at the logtest socket and checks the responses to be the expected.
-    """
+    wazuh_min_version: 4.2.0
 
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configuration from the module.
+        - restart_required_logtest_daemons:
+            type: fixture
+            brief: Wazuh logtests daemons handler.
+        - configure_rules_list:
+            type: fixture
+            brief: Configure a custom rules for testing. Restart Wazuh is not needed for applying the configuration
+                   is optional.
+        - wait_for_logtest_startup:
+            type: fixture
+            brief: Wait until logtest has begun.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Function scope version of 'connect_to_sockets' which connects to the specified sockets for the test.
+
+    assertions:
+        - Verify that the logtest reply message has no run error.
+        - Verify that the 'rule_id' within the reply message is correct.
+        - Verify that logtest is running in verbose mode.
+        - Verify that when running in verbose mode the local rule debug messages has been written
+        - Verify that when running in verbose mode the local rule debug messages written are the expected count.
+        - Verify that if a warning message is catched it matches with any test case message.
+
+    input_description: Some test cases are defined in the module. These include some input configurations stored in
+                       the 'rules_verbose.yaml'.
+
+    expected_output:
+        - 'The rules_debug field was not found in the response data'
+        - 'The warning message was not found in the response data'
+        - 'Error when executing .* in daemon .*. Exit status: .*'
+
+    tags:
+        - logtest_log_process_options
+    '''
     # send the logtest request
     receiver_sockets[0].send(get_configuration['input'], size=True)
 

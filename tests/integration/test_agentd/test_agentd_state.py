@@ -149,7 +149,7 @@ def test_agentd_state(configure_environment, test_case: list):
             brief: Configure a custom environment for testing.
         - test_case:
             type: list
-            brief: List of tests to be performed.
+            brief: List of test_case stages.
 
     assertions:
         - Verify that the 'wazuh-agentd.state' statistics file has been created.

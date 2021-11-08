@@ -8,9 +8,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-logtest' tool allows the testing and verification of rules and decoders against provided log examples
-        remotely inside a sandbox in 'wazuh-analysisd'. This functionality is provided by the manager, whose work
-        parameters are configured in the ossec.conf file in the XML rule_test section. Test logs can be evaluate through
-        'wazuh-logtest' tool or making requests via RESTful API.
+       remotely inside a sandbox in 'wazuh-analysisd'. This functionality is provided by the manager, whose work
+       parameters are configured in the ossec.conf file in the XML rule_test section. Test logs can be evaluated through
+       the 'wazuh-logtest' tool or by making requests via RESTful API. These tests will check if the logtest
+       configuration is valid. Also checks rules, decoders, decoders, alerts matching logs correctly.
 
 tier: 0
 
@@ -123,7 +124,7 @@ def test_get_configuration_sock(get_configuration, configure_environment, restar
         - 'Expected value in session_timeout tag: .*.  Value received: .*'
 
     tags:
-        - logtest_configuration_sock
+        - logtest_configuration
     '''
     configuration = get_configuration['sections'][0]['elements']
 
