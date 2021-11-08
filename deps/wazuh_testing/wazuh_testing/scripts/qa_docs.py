@@ -245,11 +245,11 @@ def check_incompatible_parameters(parameters):
     if parameters.logging_level:
         if parameters.no_logging:
             raise QAValueError('You cannot run qa-docs in no-logging mode and set a logging level.',
-                           qadocs_logger.error)
+                               qadocs_logger.error)
 
         if parameters.debug_level:
             raise QAValueError('You cannot run qa-docs in debug mode and set a logging level.',
-                           qadocs_logger.error)
+                               qadocs_logger.error)
 
     if parameters.run_with_docker:
         if not parameters.qa_branch:

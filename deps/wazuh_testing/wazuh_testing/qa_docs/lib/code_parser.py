@@ -167,9 +167,9 @@ class CodeParser:
         except Exception as inst:
             if hasattr(function, 'name'):
                 CodeParser.LOGGER.error(f"Failed to parse test documentation in {function.name} "
-                                        "from module {self.scan_file}. Error: {inst}")
+                                        f"from module {self.scan_file}. Error: {inst}")
                 raise QAValueError(f"Failed to parse test documentation in {function.name} "
-                                   "from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
+                                   f"from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
             else:
                 CodeParser.LOGGER.error(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
                 raise QAValueError(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}",
