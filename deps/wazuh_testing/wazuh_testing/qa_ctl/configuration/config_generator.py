@@ -385,8 +385,8 @@ class QACTLConfigGenerator:
                 for test in tests_info:
                     if self.__validate_test_info(test):
                         version = self.SYSTEMS[system]['os_version']
-                        component = 'manager' if 'manager' in test['components'] else 'agent'
                         platform = self.SYSTEMS[system]['os_platform']
+                        component = 'manager' if 'manager' in test['components'] and platform == 'linux' else 'agent'
 
                         self.__add_deployment_config_block(test['test_name'], version, component, platform)
         else:
@@ -476,7 +476,20 @@ class QACTLConfigGenerator:
         Args:
             test_info(dict object): dict object containing information of all the tests that are going to be run.
         """
-        test_host_number = len(self.config['tests'].keys()) + 1
+        # Calculate the host that will run the test
+
+        # If there is no test config block, then start in host_+1
+        if len(self.config['tests'].keys()) == 0:
+            test_host_number = len(self.config['tests'].keys()) + 1
+        else:
+            last_config_test_item = len(self.config['tests'].keys())
+            instance = f"host_{last_config_test_item}"
+            # If the last test was for manager, then move on to the next one.
+            if self.config['tests'][instance]['test']['component'] == 'manager':
+                test_host_number = len(self.config['tests'].keys()) + 1
+            # If the last test was for agent, then 1 host must be skipped, since it is the manager for an agent test.
+            else:
+                test_host_number = len(self.config['tests'].keys()) + 2
 
         for test in tests_info:
             instance = f"host_{test_host_number}"
@@ -486,7 +499,7 @@ class QACTLConfigGenerator:
 
             system = 'linux' if system == 'deb' or system == 'rpm' else system
             modules = copy.deepcopy(test['modules'])
-            component = 'manager' if 'manager' in test['components'] else test['components'][0]
+            component = self.config['provision']['hosts'][instance]['wazuh_deployment']['target']
 
             # Cut out the full path, and convert it to relative path (tests/integration....)
             test_path = re.sub(r".*wazuh-qa.*(tests.*)", r"\1", test['path'])
