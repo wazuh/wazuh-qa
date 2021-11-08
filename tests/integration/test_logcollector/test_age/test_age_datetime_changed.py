@@ -24,7 +24,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2'}
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
 
 
 now_date = datetime.now()
@@ -69,17 +69,22 @@ def get_files_list():
     return file_structure
 
 
+@pytest.fixture(scope='module')
+def restart_monitord():
+    """Reset log file and start a new monitor."""
+    control_service('restart', daemon='wazuh-monitord')
+
+
 @pytest.fixture(scope='function')
 def restart_logcollector_function():
     """Reset log file and start a new monitor."""
-    control_service('stop', daemon=DAEMON_NAME)
-    control_service('start', daemon=DAEMON_NAME)
+    control_service('restart', daemon=DAEMON_NAME)
 
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
 def test_configuration_age_datetime(get_configuration, configure_environment, configure_local_internal_options_module,
-                                    restart_logcollector_function, file_monitoring, new_datetime,
-                                    get_files_list, create_file_structure_function):
+                                    restart_monitord, restart_logcollector_function, file_monitoring,
+                                    new_datetime, get_files_list, create_file_structure_function):
     """Check if logcollector age option works correctly when date time of the system changes.
 
     Ensure that when date of the system change logcollector use properly age value, ignoring files that have not been
