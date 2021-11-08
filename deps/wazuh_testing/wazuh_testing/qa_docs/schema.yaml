@@ -184,9 +184,11 @@ predefined_values:
     - aws
     - brute_force_attack
     - cache
+    - cdb
     - cluster
     - cors
     - cpe
+    - decoder
     - diff
     - disk_quota
     - dos_attack
@@ -243,6 +245,7 @@ predefined_values:
     - gcloud_functionality
     - github
     - github_configuration
+    - inactivity
     - integrity
     - invalid_settings
     - keys
@@ -253,6 +256,15 @@ predefined_values:
     - logcollector_configuration
     - logs
     - logtest
+    - logtest_configuration
+    - logtest_invalid_rule_decoder_syntax
+    - logtest_invalid_socket_input
+    - logtest_invalid_token
+    - logtest_log_process_options
+    - logtest_remove_old_sessions
+    - logtest_remove_session
+    - logtest_rules_decoders_load
+    - logtest_ruleset_refresh
     - man_in_the_middle
     - master
     - mitre
@@ -269,6 +281,8 @@ predefined_values:
     - rules
     - scan
     - scheduled
+    - session_error
+    - session_limit
     - settings
     - simulator
     - ssl
