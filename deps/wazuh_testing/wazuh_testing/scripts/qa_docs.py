@@ -48,6 +48,9 @@ def set_parameters(args):
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
 
+    if args.logging_level:
+        set_qadocs_logger_level(args.logging_level)
+
     # Deactivate the qa-docs logger if necessary.
     if args.no_logging:
         set_qadocs_logger_level(None)
@@ -126,7 +129,11 @@ def get_parameters():
 
     parser.add_argument('--qa-branch', dest='qa_branch',
                         help='Specifies the qa branch that will be used as input for the tests to be parsed.')
+
     parser.add_argument('--check-documentation', action='store_true', dest='check_doc',
+                        help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
+
+    parser.add_argument('--logging-level', dest='logging_level',
                         help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
 
     return parser.parse_args(), parser
@@ -233,6 +240,15 @@ def check_incompatible_parameters(parameters):
 
     if parameters.no_logging and parameters.debug_level:
         raise QAValueError('You cannot specify debug level and no-logging at the same time.',
+                           qadocs_logger.error)
+
+    if parameters.logging_level:
+        if parameters.no_logging:
+            raise QAValueError('You cannot run qa-docs in no-logging mode and set a logging level.',
+                           qadocs_logger.error)
+
+        if parameters.debug_level:
+            raise QAValueError('You cannot run qa-docs in debug mode and set a logging level.',
                            qadocs_logger.error)
 
     if parameters.run_with_docker:
