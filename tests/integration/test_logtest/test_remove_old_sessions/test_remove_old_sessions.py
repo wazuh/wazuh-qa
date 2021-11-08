@@ -153,7 +153,7 @@ def test_remove_old_session(configure_local_internal_options_module,
         - r'Error when executing .* in daemon .*. Exit status: .*'
 
     tags:
-        - logtest_remove_old_sessions
+        - session_limit
         - analysisd
     '''
     max_sessions = int(get_configuration['sections'][0]['elements'][2]['max_sessions']['value'])

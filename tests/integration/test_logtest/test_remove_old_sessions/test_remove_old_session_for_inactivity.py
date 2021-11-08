@@ -146,7 +146,7 @@ def test_remove_old_session_for_inactivity(configure_local_internal_options_modu
         - r'Error when executing .* in daemon .*. Exit status: .*'
 
     tags:
-        - logtest_remove_old_sessions
+        - inactivity
         - analysisd
     '''
     session_timeout = int(get_configuration['sections'][0]['elements'][3]['session_timeout']['value'])

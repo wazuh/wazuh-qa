@@ -136,7 +136,6 @@ def test_remove_session(restart_required_logtest_daemons, wait_for_logtest_start
         - r'Failed test case stage <test_case_index>: .*'
 
     tags:
-        - logtest_remove_session
         - analysisd
     '''
     stage = test_case[0]

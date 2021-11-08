@@ -188,7 +188,8 @@ def test_rules_verbose(get_configuration, restart_required_logtest_daemons,
         - 'Error when executing .* in daemon .*. Exit status: .*'
 
     tags:
-        - logtest_log_process_options
+        - settings
+        - analysisd
     '''
     # send the logtest request
     receiver_sockets[0].send(get_configuration['input'], size=True)

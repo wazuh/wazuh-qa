@@ -117,7 +117,8 @@ def test_invalid_socket_input(restart_required_logtest_daemons, wait_for_logtest
         - r'Failed test case stage <test_case_index>: .*'
 
     tags:
-        - logtest_invalid_socket_input
+        - errors
+        - analysisd
     '''
     stage = test_case[0]
 

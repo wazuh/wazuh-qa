@@ -52,6 +52,7 @@ references:
     - https://documentation.wazuh.com/current/user-manual/ruleset/testing.html?highlight=logtest
     - https://documentation.wazuh.com/current/user-manual/capabilities/wazuh-logtest/logtest-configuration.html
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+    - https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html
 
 tags:
     - logtest_configuration
@@ -169,7 +170,8 @@ def test_cdb_list(restart_required_logtest_daemons, get_configuration,
         - result.data.output.rule.id == test_case.rule_id
 
     tags:
-        - logtest_ruleset_refresh
+        - cdb
+        - rules
         - analysisd
     '''
     # send the logtest request

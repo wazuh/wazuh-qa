@@ -157,7 +157,7 @@ def test_rules_verbose(restart_required_logtest_daemons, get_configuration,
         - result.data.output.decoder.name == test_case.decoder_name
 
     tags:
-        - logtest_ruleset_refresh
+        - decoder
         - analysisd
     '''
     # send the logtest request

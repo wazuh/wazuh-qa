@@ -156,7 +156,7 @@ def test_rule_list(restart_required_logtest_daemons, get_configuration,
         - result.data.output.rule.id == test_case.rule_id
 
     tags:
-        - logtest_ruleset_refresh
+        - rules
         - analysisd
     '''
     # send the logtest request

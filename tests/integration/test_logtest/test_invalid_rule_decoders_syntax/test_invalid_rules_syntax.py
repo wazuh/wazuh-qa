@@ -144,7 +144,10 @@ def test_invalid_rule_syntax(get_configuration, configure_local_rules,
         - 'Error when executing {action} in daemon {daemon}. Exit status: {result}'
 
     tags:
-        - logtest_invalid_rule_decoder_syntax
+        - errors
+        - invalid_settings
+        - rules
+        - analysisd
     '''
     # send the logtest request
     receiver_sockets[0].send(get_configuration['input'], size=True)

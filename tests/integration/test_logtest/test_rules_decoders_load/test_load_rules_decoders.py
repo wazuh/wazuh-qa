@@ -146,7 +146,8 @@ def test_load_rules_decoders(restart_required_logtest_daemons, wait_for_logtest_
         - r'Failed stage(s) :.*'
 
     tags:
-        - logtest_rules_decoders_load
+        - decoder
+        - rules
         - analysisd
     '''
     # List to store assert messages

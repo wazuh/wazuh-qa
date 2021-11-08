@@ -124,7 +124,8 @@ def test_get_configuration_sock(get_configuration, configure_environment, restar
         - 'Expected value in session_timeout tag: .*.  Value received: .*'
 
     tags:
-        - logtest_configuration
+        - settings
+        - analysisd
     '''
     configuration = get_configuration['sections'][0]['elements']
 

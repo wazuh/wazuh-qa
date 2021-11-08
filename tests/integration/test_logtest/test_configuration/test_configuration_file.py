@@ -116,7 +116,8 @@ def test_configuration_file(get_configuration, configure_environment, restart_wa
         - 'Event not found'
 
     tags:
-        - logtest_configuration
+        - settings
+        - analysisd
     '''
     callback = None
     if 'valid_conf' in get_configuration['tags']:

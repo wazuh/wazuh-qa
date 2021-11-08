@@ -129,7 +129,8 @@ def test_invalid_session_token(restart_required_logtest_daemons, wait_for_logtes
         - 'Error when executing .* in daemon .*. Exit status: .*'
 
     tags:
-        - logtest_invalid_token
+        - session_error
+        - analysisd
     '''
     errors = []
     stage = test_case[0]
