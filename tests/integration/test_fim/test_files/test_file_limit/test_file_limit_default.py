@@ -82,11 +82,11 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH, get_service
 
 # Marks
+
+pytestmark = [pytest.mark.tier(level=1)]
 sys_platform = platform.system()
-pytestmark = pytest.mark.tier(level=1)
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]

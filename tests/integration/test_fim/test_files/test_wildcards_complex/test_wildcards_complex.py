@@ -82,11 +82,10 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.file import recursive_directory_creation
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1), pytest.mark.win32]
+pytestmark = pytest.mark.tier(level=1)
 sys_platform = platform.system()
 
 # Variables

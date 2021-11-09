@@ -84,11 +84,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = pytest.mark.tier(level=0)
 sys_platform = platform.system()
 
 # variables

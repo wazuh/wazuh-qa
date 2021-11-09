@@ -85,7 +85,6 @@ from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_ex
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH
 
 
 # Marks

@@ -82,12 +82,11 @@ from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, cr
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import WAZUH_PATH
 
 # Marks
 
-sys_platform = platform.system()
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
+sys_platform = platform.system()
 
 # Variables
 
