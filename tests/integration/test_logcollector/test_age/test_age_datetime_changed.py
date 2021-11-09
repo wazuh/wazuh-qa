@@ -9,6 +9,7 @@ from datetime import datetime
 import pytest
 
 import wazuh_testing.logcollector as logcollector
+from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.time import TimeMachine, time_to_timedelta, time_to_seconds
@@ -22,6 +23,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
+wazuh_component = get_service()
 DAEMON_NAME = "wazuh-logcollector"
 
 local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
@@ -72,7 +74,10 @@ def get_files_list():
 @pytest.fixture(scope='module')
 def restart_monitord():
     """Reset log file and start a new monitor."""
-    control_service('restart', daemon='wazuh-monitord')
+    if wazuh_component == 'wazuh-manager':
+        control_service('restart', daemon='wazuh-monitord')
+    else:
+        control_service('restart', daemon='wazuh-agentd')
 
 
 @pytest.fixture(scope='function')
