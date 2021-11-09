@@ -1,6 +1,8 @@
 # Wazuh `qa-docs`
 Wazuh - Quality Assurance automation self-contained documentation parsing tool.
 
+You can visit the `qa-docs` wiki entry for a complete guide.
+
 ## Rational
 Wazuh QA documentation is designed to be self-contained into the source code of each test.
 
@@ -29,12 +31,6 @@ documentation output files.
 Each test file has a header docstring that details information related to the whole test file.
 And each test method inside the file will have a test documentation block with the specific information of
 this test.
-
-Additional group information is parsed from the README files found in the repository. Each README file represents
-a group and every test file at the same or lower folder level is considered as belonging to it.
-
-Also, groups could be nested, so a README file found under the level of a group will generate a new group that belongs
-to the first one.
 
 The specific content of each block is defined in the [Documentation schema section](https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema)
 within the `qa-docs` wiki.
