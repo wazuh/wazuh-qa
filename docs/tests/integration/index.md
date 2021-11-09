@@ -3,8 +3,8 @@
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
-- **[_test_active_response_](test_active_response#test_active_response)**
-- **[_test_agentd_](test_agentd#test_active_response)**
+- **[_test_active_response_](test_active_response/#test-active-response)**
+- **[_test_agentd_](test_agentd/#test-active-response)**
 - _test_analysisd_
 - _test_api_
 - _test_fim_
@@ -21,7 +21,7 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 
 To run the tests you need to have `python3 >= 3.6` installed along with a set of additional dependencies.
 
-You can see all the information about it **[here](set_up_environment.md#setting-up-a-test-environment)**
+You can see all the information about it **[here](setting_up_test_environment.md#setting-up-a-test-environment)**
 
 ## About test structure
 

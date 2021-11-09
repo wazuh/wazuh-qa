@@ -1,7 +1,78 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will verify that FIM events include
+       the 'content_changes' field with the tag 'More changes' when it exceeds the maximum size
+       allowed, and the 'report_changes' option is enabled.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#diff
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_report_changes
+'''
 import gzip
 import os
 import re
@@ -81,26 +152,68 @@ def extra_configuration_after_yield():
 @pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
                        configure_environment, restart_syscheckd, wait_for_fim_start):
-    """Check content_changes shows the tag 'More changes' when it exceeds the maximum size.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects the character limit in the file changes is reached
+                 showing the 'More changes' tag in the 'content_changes' field of the generated events. For this
+                 purpose, the test will monitor a directory, add a testing file and modify it, adding more characters
+                 than the allowed limit. Then, it will unzip the 'diff' and get the size of the changes. Finally,
+                 the test will verify that the generated FIM event contains in its 'content_changes' field the proper
+                 value depending on the test case.
 
-    Every change in the content of the file shall produce an alert including
-    the difference. But, if the difference is greater or equal than 59391 bytes, 'More changes'
-    appears instead.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    filename : str
-        Name of the file to be created.
-    folder : str
-        Directory where the files are being created.
-    original_size : int
-        Size of each file in bytes before being modified.
-    modified_size : int
-        Size of each file in bytes after being modified.
-    tags_to_apply : set
-        Run test if matches with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - filename:
+            type: str
+            brief: Name of the testing file to be created.
+        - folder:
+            type: str
+            brief: Path to the directory where the testing files will be created.
+        - original_size:
+            type: int
+            brief: Size of the testing file in bytes before being modified.
+        - modified_size:
+            type: int
+            brief: Size of the testing file in bytes after being modified.
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
+    assertions:
+        - Verify that FIM events are generated when adding and modifying the testing file.
+        - Verify that FIM events include the 'content_changes' field with the 'More changes' tag when
+          the changes made on the testing file have more characters than the allowed limit.
+        - Verify that FIM events include the 'content_changes' field with the old content
+          of the monitored file.
+        - Verify that FIM events include the 'content_changes' field with the new content
+          of the monitored file when the old content is lower than the allowed limit or
+          the testing platform is Windows.
+
+    input_description: A test case (ossec_conf_report) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these
+                       are combined with the testing directory and files to be monitored defined in the module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+        - The length of the testing file content by running the diff/fc command.
+
+    tags:
+        - diff
+        - scheduled
+        - time_travel
+    '''
     limit = 59391
     has_more_changes = False
     original_file = os.path.join(folder, filename)
