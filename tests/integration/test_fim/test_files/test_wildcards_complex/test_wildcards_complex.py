@@ -73,7 +73,6 @@ tags:
     - fim_wildcards_complex
 '''
 import os
-import platform
 import sys
 import pytest
 from wazuh_testing import global_parameters
@@ -86,7 +85,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
-sys_platform = platform.system()
 
 # Variables
 
@@ -108,7 +106,7 @@ test_subdirectories = matched_dirs + no_match_dirs
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards.yml')
-mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 

@@ -74,7 +74,7 @@ tags:
     - fim_moving_files
 '''
 import os
-import platform
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -86,7 +86,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
-sys_platform = platform.system()
 
 # Variables
 
@@ -104,7 +103,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__)

@@ -73,7 +73,6 @@ tags:
     - fim_basic_usage
 '''
 import os
-import platform
 import shutil
 import sys
 import time
@@ -90,7 +89,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
-sys_platform = platform.system()
 
 # Variables
 
@@ -101,7 +99,7 @@ configurations_path = os.path.join(test_data_path,
                                    'wazuh_conf_new_dirs.yaml' if sys.platform != 'win32'
                                    else 'wazuh_conf_new_dirs_win32.yaml')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 windows_audit_interval = 1

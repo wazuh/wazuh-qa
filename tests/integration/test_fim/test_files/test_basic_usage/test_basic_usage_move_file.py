@@ -73,7 +73,7 @@ tags:
     - fim_basic_usage
 '''
 import os
-import platform
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -86,7 +86,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Marks
 
 pytestmark = pytest.mark.tier(level=0)
-sys_platform = platform.system()
 
 # variables
 
@@ -97,7 +96,7 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2, testdir1_subdir = test_directories
-mark_skip_agentWindows = pytest.mark.skipif(sys_platform != 'Linux', reason="It will be blocked by wazuh/wazuh-qa#2174")
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
