@@ -204,6 +204,14 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package version"
     )
     parser.addoption(
+        "--wpk_revision",
+        action="append",
+        metavar="wpk_revision",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package revision"
+    )
+    parser.addoption(
         "--save-file",
         action="append",
         metavar="file",
@@ -275,6 +283,9 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
+
+    # Set WPK package revision
+    global_parameters.wpk_revision = config.getoption("--wpk_revision")
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
