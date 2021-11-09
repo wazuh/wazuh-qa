@@ -53,7 +53,7 @@ if global_parameters.wpk_package_path is None:
 version_to_upgrade = global_parameters.wpk_version[0]
 wpk_revision = '' 
 if global_parameters.wpk_revision is not None:
-    wpk_revision = global_parameters.wpk_revision   
+    wpk_revision = global_parameters.wpk_revision[0]   
 package_path = global_parameters.wpk_package_path[0]
 
 _agent_version = get_version()
@@ -265,7 +265,7 @@ def download_wpk(get_configuration):
     wpk_file_path = ''
     # Generating file name
     if current_plaform == "windows":
-        wpk_file = "wazuh_agent_{0}{1}_{2}.wpk".format(agent_version,wpk_revision
+        wpk_file = "wazuh_agent_{0}{1}_{2}.wpk".format(agent_version,wpk_revision,
                                                     current_plaform)
         wpk_url = protocol + wpk_repo + "windows/" + wpk_file
         wpk_file_path = os.path.join(WAZUH_PATH, 'tmp', wpk_file)

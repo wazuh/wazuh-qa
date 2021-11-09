@@ -42,6 +42,10 @@ if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
 if global_parameters.wpk_package_path is None:
     raise ValueError("The WPK package path must be defined by parameter. See README.md")
+
+wpk_revision = '' 
+if global_parameters.wpk_revision is not None:
+    wpk_revision = global_parameters.wpk_revision[0]   
 version_to_upgrade = global_parameters.wpk_version[0]
 
 MANAGER_VERSION = get_version()
@@ -824,7 +828,7 @@ def get_sha_list(metadata):
         protocol = 'http://' if metadata.get('message_params').get('use_http') else 'https://'
 
     # Generating file name
-    wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
+    wpk_file = "wazuh_agent_{0}{1}_linux_{2}.wpk".format(agent_version, wpk_revision, architecture)
     wpk_url = protocol + wpk_repo + "linux/" + architecture + "/" + wpk_file
 
     wpk_file_path = os.path.join(UPGRADE_PATH, wpk_file)
