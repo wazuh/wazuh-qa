@@ -52,7 +52,8 @@ class AnsibleRunner:
                                    f"{self.ansible_inventory_path} inventory")
 
         runner = ansible_runner.run(private_data_dir=self.private_data_dir, playbook=self.ansible_playbook_path,
-                                    inventory=self.ansible_inventory_path, quiet=quiet)
+                                    inventory=self.ansible_inventory_path, quiet=quiet,
+                                    envvars={'ANSIBLE_GATHER_TIMEOUT': 30, 'ANSIBLE_TIMEOUT': 20})
         ansible_output = AnsibleOutput(runner)
 
         if ansible_output.rc != 0:
@@ -85,7 +86,7 @@ class AnsibleRunner:
             AnsibleRunner.LOGGER.debug(f"Running {ansible_playbook.playbook_file_path} ansible-playbook with "
                                        f"{ansible_inventory_path} inventory")
             runner = ansible_runner.run(playbook=ansible_playbook.playbook_file_path, inventory=ansible_inventory_path,
-                                        quiet=quiet)
+                                        quiet=quiet, envvars={'ANSIBLE_GATHER_TIMEOUT': 30, 'ANSIBLE_TIMEOUT': 20})
             ansible_output = AnsibleOutput(runner)
 
             if ansible_output.rc != 0 and raise_on_error:
