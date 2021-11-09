@@ -69,6 +69,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_exclude(get_configuration, configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified exclude field value.
 

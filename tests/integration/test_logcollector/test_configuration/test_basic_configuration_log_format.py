@@ -237,6 +237,7 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_log_format(get_local_internal_options, configure_local_internal_options, get_configuration,
                     configure_environment):
     """Check if Wazuh log format field of logcollector works properly.

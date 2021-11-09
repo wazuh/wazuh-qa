@@ -61,6 +61,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_location(get_configuration, configure_environment, restart_logcollector):
     """Check if Wazuh runs correctly with the specified location field value.
 

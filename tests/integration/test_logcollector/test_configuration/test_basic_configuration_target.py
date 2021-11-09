@@ -100,6 +100,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_target(get_configuration, configure_environment, configure_local_internal_options_module):
     """Check if Wazuh target field of logcollector works properly.
 

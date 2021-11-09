@@ -163,6 +163,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_frequency(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment):
     """Check if the Wazuh frequency field of logcollector works properly.

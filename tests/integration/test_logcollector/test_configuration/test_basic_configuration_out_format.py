@@ -154,6 +154,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_out_format(get_configuration, configure_environment, configure_local_internal_options_module,
                                   restart_logcollector):
     """Check if the Wazuh out format field of logcollector works properly.

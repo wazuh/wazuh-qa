@@ -131,6 +131,7 @@ def check_ignore_binaries_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_ignore_binaries(get_configuration, configure_environment):
     """Check if the Wazuh ignore_binaries field of logcollector works properly.
 

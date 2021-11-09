@@ -65,6 +65,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_command(get_local_internal_options, configure_local_internal_options, get_configuration,
                                configure_environment, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring configuration.

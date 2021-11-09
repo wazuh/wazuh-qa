@@ -54,6 +54,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_alias(configure_local_internal_options_module, file_monitoring,
                              get_configuration, configure_environment, restart_logcollector):
     """Check if the module runs correctly with the specified command monitoring configuration and that it uses an alias value.

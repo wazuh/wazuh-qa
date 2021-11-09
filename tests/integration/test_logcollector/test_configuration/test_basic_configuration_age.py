@@ -135,6 +135,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_age(get_configuration, configure_environment):
     """Check if the Wazuh age field of logcollector works properly.
 
