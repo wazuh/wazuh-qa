@@ -40,12 +40,12 @@ max_upgrade_result_status_retries = 30
 
 if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
+if global_parameters.wpk_revision is None:
+    raise ValueError("The WPK revision path must be defined by parameter. See README.md")
 if global_parameters.wpk_package_path is None:
     raise ValueError("The WPK package path must be defined by parameter. See README.md")
 
-wpk_revision = '' 
-if global_parameters.wpk_revision is not None:
-    wpk_revision = global_parameters.wpk_revision[0]   
+wpk_revision = global_parameters.wpk_revision[0]   
 version_to_upgrade = global_parameters.wpk_version[0]
 
 MANAGER_VERSION = get_version()
