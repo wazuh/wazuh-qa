@@ -137,12 +137,17 @@ def test_options_state_interval_no_file(configure_local_internal_options_module,
                 with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as next_json_file:
                     data = load(next_json_file)
 
-                global_files = data['global']['files']
-                interval_files = data['interval']['files']
-                if not list(filter(lambda global_file: global_file['location'] == log_path, global_files)) and \
-                        not list(filter(lambda interval_file: interval_file['location'] == log_path, interval_files)):
+                try:
+                    global_files = data['global']['files']
+                    interval_files = data['interval']['files']
+                    if not list(filter(lambda global_file: global_file['location'] == log_path, global_files)) and \
+                            not list(filter(lambda interval_file: interval_file['location'] == log_path, interval_files)):
+                        logcollector_state_file_updated = True
+                        break
+                    else:
+                        sleep(1)
+                except KeyError:
+                    assert len(data) == 0
                     logcollector_state_file_updated = True
-                    break
-                else:
-                    sleep(1)
+
             assert logcollector_state_file_updated
