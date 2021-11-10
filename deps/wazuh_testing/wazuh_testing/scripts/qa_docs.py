@@ -134,7 +134,7 @@ def get_parameters():
                         help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
 
     parser.add_argument('--logging-level', dest='logging_level',
-                        help="Checks if test(s) are correctly documentated according to qa-docs current schema.",)
+                        help="Set the logging level.",)
 
     return parser.parse_args(), parser
 

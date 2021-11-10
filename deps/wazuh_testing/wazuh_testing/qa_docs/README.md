@@ -1,7 +1,7 @@
 # Wazuh `qa-docs`
 Wazuh - Quality Assurance automation self-contained documentation parsing tool.
 
-You can visit the `qa-docs` wiki entry for a complete guide.
+You can visit the `qa-docs` [wiki entry](https://github.com/wazuh/wazuh-qa/wiki/QADOCS-tool) for a complete guide.
 
 ## Rational
 Wazuh QA documentation is designed to be self-contained into the source code of each test.
