@@ -4,10 +4,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
 brief: The 'rootcheck' tool allows to define policies in order to check if the agents
-       meet the requirement specified. The rootcheck engine can perform the following checks:
-       - check if a process is running
-       - check if a file is present
-       - check if the content of a file contains a pattern, or if a Windows registry key contains a string or is simply present.
+       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is 
+       present and if the content of a file contains a pattern, 
+       or if a Windows registry key contains a string or is simply present.
 tier: 0
 modules:
     - rootcheck
