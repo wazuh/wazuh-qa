@@ -31,8 +31,7 @@ WORKDIR /
 RUN git clone https://github.com/wazuh/wazuh-qa -b 1864-qa-docs-fixes
 WORKDIR /wazuh-qa/
 RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install -r requirements.txt --ignore-installed && \
-    python3 -m pip install -r deps/wazuh_testing/wazuh_testing/qa_docs/requirements.txt --ignore-installed
+    python3 -m pip install -r requirements.txt --ignore-installed
 
 # Install the QA framework
 WORKDIR /wazuh-qa/deps/wazuh_testing
