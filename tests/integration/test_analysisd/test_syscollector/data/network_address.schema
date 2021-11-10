@@ -368,9 +368,7 @@
                             "required": [
                                 "iface",
                                 "proto",
-                                "address",
-                                "netmask",
-                                "broadcast"
+                                "address"
                             ],
                             "properties": {
                                 "iface": {

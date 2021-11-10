@@ -362,18 +362,9 @@
                         }
                     ],
                     "required": [
-                        "format",
                         "name",
-                        "priority",
-                        "size",
-                        "vendor",
-                        "install_time",
                         "version",
-                        "architecture",
-                        "multiarch",
-                        "source",
-                        "description",
-                        "location"
+                        "architecture"
                     ],
                     "properties": {
                         "format": {
