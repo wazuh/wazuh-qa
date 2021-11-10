@@ -74,6 +74,7 @@ tags:
     - fim_moving_files
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -102,6 +103,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
@@ -162,6 +164,7 @@ def get_configuration(request):
     (testdir1, testdir2, testfile1, whodata, realtime),
     (testdir2, testdir1, testfile2, realtime, whodata)
 ])
+@mark_skip_agentWindows
 def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add_event, get_configuration,
                                 configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
