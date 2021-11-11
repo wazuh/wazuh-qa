@@ -35,7 +35,8 @@ ANALYSISD_CSV_HEADERS = {
 }
 REMOTED_CSV_HEADERS = {
     'events_info': {'title': 'Events sent and count',
-                    'columns': ["evt_count", "ctrl_msg_count", "discarded_count", "msg_sent", 'dequeued_after_close']
+                    'columns': ["evt_count", "ctrl_msg_count", "discarded_count", "queued_msgs",
+                                'sent_bytes', 'dequeued_after_close']
                     },
     'queue_size': {'title': 'Queue status',
                    'columns': ['queue_size', 'total_queue_size']
