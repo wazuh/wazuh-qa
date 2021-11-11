@@ -73,6 +73,7 @@ tags:
     - fim_basic_usage
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -97,6 +98,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
 timeout = global_parameters.default_timeout
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 
 # Extra functions
@@ -133,6 +135,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
+@mark_skip_agentWindows
 def test_events_from_existing_files(filename, tags_to_apply, get_configuration,
                                     configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
