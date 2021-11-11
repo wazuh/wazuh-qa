@@ -3,10 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
 from shutil import copyfile
-import pytest
+import sys
+
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
+
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools import LOG_FILE_PATH, LOGCOLLECTOR_FILE_STATUS_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service

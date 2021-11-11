@@ -9,7 +9,7 @@ import sys
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from tempfile import gettempdir
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
@@ -38,7 +38,7 @@ tcases = []
 
 
 if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
     log_format_list += ['eventchannel']
 elif sys.platform == 'darwin':
     log_format_list += ['macos']

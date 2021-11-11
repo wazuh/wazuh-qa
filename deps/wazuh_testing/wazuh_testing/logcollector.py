@@ -69,7 +69,7 @@ if sys.platform == 'win32':
         'windows.debug': '2',
         'agent.debug': '2'
     }
-    prefix = monitoring.AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'logcollector.debug': '2',
@@ -353,7 +353,7 @@ def callback_event_log_service_down(location, severity='WARNING'):
         callable: callback to detect this event.
     """
     log_format_message = f"{severity}: The eventlog service is down. Unable to collect logs from '{location}' channel."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_trying_to_reconnect(location, reconnect_time):
@@ -365,7 +365,7 @@ def callback_trying_to_reconnect(location, reconnect_time):
         callable: callback to detect this event.
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_log_stream_exited_error():
@@ -386,7 +386,7 @@ def callback_reconnect_eventchannel(location):
         callable: callback to detect this event.
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_match_pattern_file(file_pattern, file):

@@ -13,7 +13,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor
 
 import subprocess as sb
 
@@ -32,7 +32,7 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX

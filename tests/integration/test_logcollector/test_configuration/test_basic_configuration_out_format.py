@@ -8,7 +8,7 @@ import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 
 import sys
 
@@ -25,7 +25,7 @@ wazuh_component = get_service()
 local_internal_options = {'logcollector.debug': '2'}
 
 if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 

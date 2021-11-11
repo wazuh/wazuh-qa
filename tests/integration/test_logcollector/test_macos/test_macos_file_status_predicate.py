@@ -3,16 +3,18 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
+import sys
 
 from wazuh_testing.logcollector import (LOG_COLLECTOR_GLOBAL_TIMEOUT,
                                         callback_log_macos_stream_exit,
                                         callback_log_bad_predicate)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 from wazuh_testing.tools.monitoring import wait_file
 from wazuh_testing.tools.file import read_json
 from os.path import dirname, join, realpath
-
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
+    
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 

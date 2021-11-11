@@ -4,15 +4,16 @@
 
 import pytest
 import wazuh_testing.logcollector as logcollector
+import sys
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
 from wazuh_testing.tools.monitoring import FileMonitor, wait_file
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 from wazuh_testing.tools.file import read_json
 from os.path import dirname, join, realpath
 from re import match
-
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
