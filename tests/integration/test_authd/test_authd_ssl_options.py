@@ -156,12 +156,14 @@ def override_wazuh_conf(configuration):
 
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     '''
-    description: Check if the 'SSL' settings of the 'wazuh-authd' daemon work correctly by enrolling agents
-                 that use different values for these settings. Different types of encryption and secure
-                 connection protocols are tested, in addition to the 'ssl_auto_negotiate' option
-                 that automatically chooses the protocol to be used.
+    description:
+        Checks if the 'SSL' settings of the 'wazuh-authd' daemon work correctly by enrolling agents
+        that use different values for these settings. Different types of encryption and secure
+        connection protocols are tested, in addition to the 'ssl_auto_negotiate' option
+        that automatically chooses the protocol to be used.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -177,8 +179,9 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     assertions:
         - Verify that the response messages are consistent with the enrollment requests received.
 
-    input_description: Different test cases are contained in an external YAML file (enroll_ssl_options_tests.yaml)
-                       that includes enrollment events and the expected output.
+    input_description:
+        Different test cases are contained in an external YAML file (enroll_ssl_options_tests.yaml)
+        that includes enrollment events and the expected output.
 
     expected_output:
         - Multiple values located in the 'enroll_ssl_options_tests.yaml' file.
