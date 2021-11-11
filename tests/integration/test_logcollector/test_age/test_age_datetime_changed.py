@@ -32,6 +32,7 @@ local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug'
 now_date = datetime.now()
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
+timeout_file_read = 4
 
 file_structure = [
     {
@@ -100,6 +101,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
     """
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
+    time.sleep(timeout_file_read)
 
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
@@ -108,7 +110,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
             absolute_file_path = os.path.join(file['folder_path'], name)
 
             log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
-            log_monitor.start(timeout=5, callback=log_callback,
+            log_monitor.start(timeout=10, callback=log_callback,
                               error_message=f"{name} was not detected")
 
             fileinfo = os.stat(absolute_file_path)

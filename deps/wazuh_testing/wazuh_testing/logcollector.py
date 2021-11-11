@@ -663,9 +663,10 @@ def create_file_structure(get_files_list):
                 try:
                     with open(os.path.join(file['folder_path'], name), mode='w'):
                         pass
-                except:
-                    continue
-                break
+                    break
+                except Exception as e:
+                    print(f"Error creating file structure {e}")
+                    sleep(1)
 
             if 'age' in file:
                 fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")

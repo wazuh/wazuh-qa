@@ -13,7 +13,7 @@ from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOW
 import sys
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # Configuration
 no_restart_windows_after_configuration_set = True
@@ -23,12 +23,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 wazuh_component = get_service()
 
 local_internal_options = {'logcollector.debug': '2'}
-
-if sys.platform == 'win32':
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
-
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
