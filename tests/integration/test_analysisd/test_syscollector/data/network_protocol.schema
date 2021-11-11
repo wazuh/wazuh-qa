@@ -367,10 +367,7 @@
                             ],
                             "required": [
                                 "iface",
-                                "type",
-                                "gateway",
-                                "dhcp",
-                                "metric"
+                                "type"
                             ],
                             "properties": {
                                 "iface": {

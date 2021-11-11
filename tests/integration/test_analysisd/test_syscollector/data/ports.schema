@@ -321,14 +321,7 @@
                         "protocol",
                         "local_ip",
                         "local_port",
-                        "remote_ip",
-                        "remote_port",
-                        "tx_queue",
-                        "rx_queue",
-                        "inode",
-                        "state",
-                        "pid",
-                        "process"
+                        "inode"
                     ],
                     "properties": {
                         "protocol": {

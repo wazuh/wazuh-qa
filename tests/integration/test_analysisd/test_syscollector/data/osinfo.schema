@@ -356,16 +356,7 @@
                         }
                     ],
                     "required": [
-                        "hostname",
-                        "architecture",
-                        "name",
-                        "version",
-                        "codename",
-                        "major",
-                        "minor",
-                        "patch",
-                        "build",
-                        "platform"
+                        "name"
                     ],
                     "properties": {
                         "hostname": {

@@ -402,20 +402,7 @@
                                 }
                             ],
                             "required": [
-                                "name",
-                                "adapter",
-                                "type",
-                                "state",
-                                "mtu",
-                                "mac",
-                                "tx_packets",
-                                "rx_packets",
-                                "tx_bytes",
-                                "rx_bytes",
-                                "tx_errors",
-                                "rx_errors",
-                                "tx_dropped",
-                                "rx_dropped"
+                                "name"
                             ],
                             "properties": {
                                 "name": {
