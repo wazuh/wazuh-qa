@@ -35,7 +35,7 @@ configurations_path_default = os.path.join(test_data_path, default_log_format_co
 configurations_path_multiple_logcollector = os.path.join(test_data_path, multiple_logcollector_configuration)
 configurations_path_no_location = os.path.join(test_data_path, no_location_defined_configuration)
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
@@ -143,12 +143,6 @@ log_format_not_print_analyzing_info = ['command', 'full_command', 'eventlog', 'e
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
 
 
 def check_log_format_valid(cfg):

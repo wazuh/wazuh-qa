@@ -37,15 +37,18 @@ results = dict()
 ###############################
 report_files = [LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS]
 
+
 def set_report_files(files):
     if files:
         for file in files:
             report_files.append(file)
 
+
 def get_report_files():
     return report_files
 
 ###############################
+
 
 def pytest_runtest_setup(item):
     # Find if platform applies
@@ -279,10 +282,11 @@ def pytest_configure(config):
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
 
-   # Set WPK package path
+    # Set WPK package path
     global_parameters.wpk_package_path = config.getoption("--wpk_package_path")
     if global_parameters.wpk_package_path:
         global_parameters.wpk_package_path = global_parameters.wpk_package_path
+
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))
@@ -727,6 +731,7 @@ def create_file_structure_function(get_files_list):
 
     delete_file_structure(get_files_list)
 
+
 @pytest.fixture(scope='module')
 def configure_local_internal_options_module(request):
     """Fixture to configure the local internal options file.
@@ -827,7 +832,7 @@ def daemons_handler(get_configuration, request):
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
 
-    It uses de variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
+    It uses the variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
 
     Args:
         request (fixture): Provide information on the executing test function.

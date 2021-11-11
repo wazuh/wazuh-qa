@@ -90,11 +90,6 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
 
 def create_file_location(filename, type):
     """Creates a file with specific content for a log format particular.
@@ -385,15 +380,13 @@ def check_log_format_values(conf):
     file.remove_file(conf['location'])
 
 
-def test_log_format(get_configuration, configure_environment, get_local_internal_options,
-                    configure_local_internal_options,):
+def test_log_format(get_configuration, configure_environment, configure_local_internal_options_module):
     """Check if Wazuh log format field of logcollector works properly.
     Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
-        configure_local_internal_options (fixture): Set internal configuration.
         configure_environment (fixture): Configure a custom environment for testing.
 
     Raises:

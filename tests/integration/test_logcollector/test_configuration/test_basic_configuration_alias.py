@@ -30,6 +30,8 @@ if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
 elif sys.platform == 'darwin':
     command = 'ps aux'
+elif sys.platform == 'sunos5':
+    command = 'ps aux -xww'    
 else:
     command = 'ps -aux'
 
@@ -55,7 +57,7 @@ def get_configuration(request):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_configuration_alias(configure_local_internal_options_module, file_monitoring,
+def test_configuration_alias(configure_local_internal_options_module,
                              get_configuration, configure_environment, restart_logcollector):
     """Check if the module runs correctly with the specified command monitoring configuration and that it uses an alias value.
     Ensure command monitoring uses specified alias value. Also, in the case of the manager instance, check if the API

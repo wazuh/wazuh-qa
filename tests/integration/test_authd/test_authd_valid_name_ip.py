@@ -19,6 +19,8 @@ components:
 
 daemons:
     - wazuh-authd
+    - wazuh-db
+    - wazuh-modulesd
 
 os_platform:
     - linux
@@ -51,7 +53,7 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from authd import validate_authd_response
+from wazuh_testing.authd import validate_authd_response
 
 # Marks
 
@@ -93,17 +95,13 @@ def test_authd_force_options(get_configuration, configure_environment, configure
                              clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
                              connect_to_sockets_module, test_case, tear_down):
     '''
-    description: Check that every input message in 'authd' port generates the adequate output.
+    description:
+        Checks that every input message in authd port generates the adequate output.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
-        - clean_client_keys_file_module:
-            type: fixture
-            brief: Stops Wazuh and cleans any previus key in client.keys file at module scope.
-        - clean_client_keys_file_function:
-            type: fixture
-            brief: Cleans any previus key in client.keys file at function scope.
         - get_configuration:
             type: fixture
             brief: Get the configuration of the test.
@@ -113,28 +111,38 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         - configure_sockets_environment:
             type: fixture
             brief: Configure the socket listener to receive and send messages on the sockets.
+        - clean_client_keys_file_module:
+            type: fixture
+            brief: Stops Wazuh and cleans any previous key in client.keys file at module scope.
+        - restart_authd:
+            type: fixture
+            brief: Restart the 'wazuh-authd' daemon, clear the 'ossec.log' file and start a new file monitor.
+        - wait_for_authd_startup_module:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
         - connect_to_sockets_module:
             type: fixture
             brief: Bind to the configured sockets at module scope.
         - test_case:
             type: list
-            brief: List with all the test cases for the test.
+            brief: List all the test cases for the test.
         - tear_down:
             type: fixture
             brief: Roll back the daemon and client.keys state after the test ends.
 
     assertions:
-        - The manager registers agents with valid IP and name.
-        - The manager rejects invalid input.
+        - The manager registers agents with valid IP and name
+        - The manager rejects invalid input
 
     input_description:
-        Different test cases are contained in an external YAML file (test_authd_valid_name_ip.yaml) which
-        includes the different possible registration requests and the expected responses.
+        Different test cases are contained in an external YAML file (test_authd_valid_name_ip.yaml) which includes
+        the different possible registration requests and the expected responses.
 
     expected_output:
-        - Registration request responses on 'authd' socket.
+        - Registration request responses on Authd socket
     '''
-    for stage in test_case['test_case']:
+
+    for index, stage in enumerate(test_case['test_case']):
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         # Checking 'hostname' test case
@@ -158,6 +166,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
         if stage.get('expected_fail') == 'yes':
             with pytest.raises(Exception):
-                validate_authd_response(response, stage['output'])
+                result, err_msg = validate_authd_response(response, stage['output'])
+                assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
         else:
-            validate_authd_response(response, stage['output'])
+            result, err_msg = validate_authd_response(response, stage['output'])
+            assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
