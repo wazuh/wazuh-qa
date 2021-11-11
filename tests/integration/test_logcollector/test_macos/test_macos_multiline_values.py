@@ -16,8 +16,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_basic.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
-local_internal_options = {'logcollector.debug': 2,
-                          'logcollector.sample_log_length': 200}
+local_internal_options = {'logcollector.debug': '2',
+                          'logcollector.sample_log_length': '200'}
 
 daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
@@ -46,7 +46,8 @@ def get_connection_configuration():
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
 def test_macos_multiline_values(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
-                                macos_message, daemons_handler, file_monitoring):
+                                macos_message, configure_local_internal_options_module,
+                                daemons_handler, file_monitoring):
 
     """Check if logcollector correctly collects multiline events from the macOS unified logging system.
 
