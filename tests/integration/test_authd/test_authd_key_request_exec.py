@@ -51,15 +51,19 @@ tags:
     - key_request
 '''
 import os
+import shutil
 import subprocess
 
 import pytest
 import yaml
-from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH
+import time
+
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-# TODO Move to utils
+from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.file import read_yaml, truncate_file
+from wazuh_testing.authd import AUTHD_KEY_REQUEST_TIMEOUT, validate_authd_logs
 
 # Marks
 
@@ -69,66 +73,48 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+fetch_keys_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
 message_tests = read_yaml(os.path.join(test_data_path, 'test_key_request_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
+filename = "fetch_keys.py"
+
+shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
 
 # Variables
-log_monitor_paths = []
-ls_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest'))
-receiver_sockets_params = [(ls_sock_path, 'AF_UNIX', 'TCP')]
+kreq_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest'))
+log_monitor_paths = [LOG_FILE_PATH]
+receiver_sockets_params = [(kreq_sock_path, 'AF_UNIX', 'UDP')]
+test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case in message_tests]
 
 # TODO Replace or delete
-monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
-
+monitored_sockets_params = [('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
 
 # Tests
 
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=['key_request_exec'])
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
 
-@pytest.fixture(scope="function", params=message_tests)
-def set_up_keys(request):
+@pytest.fixture(scope='function', params=message_tests, ids=test_case_ids)
+def get_current_test_case(request):
     """
-    Set pre-existent groups and keys.
+    Get current test case from the module
     """
-    keys = request.param.get('pre_existent_keys', [])
-
-    # Stop Wazuh
-    control_service('stop')
-    # Write keys
-    try:
-        # The client.keys file is cleaned always
-        # but the keys are added only if pre_existent_keys has values
-        with open(CLIENT_KEYS_PATH, "w") as keys_file:
-            if(keys is not None):
-                for key in keys:
-                    keys_file.write(key + '\n')
-            keys_file.close()
-    except IOError as exception:
-        raise
-
-    # Starting wazuh in another fixture
-    # control_service('start')
+    return request.param
 
 
-def test_ossec_auth_key_request_exec(set_up_groups_keys, get_configuration, configure_environment,
-                             configure_sockets_environment_function, connect_to_sockets_function,
-                             wait_for_authd_startup_module):
+def test_key_request_exec(configure_environment, configure_sockets_environment, connect_to_sockets_function,
+                            get_current_test_case, tear_down):
     '''
     description: 
 
     wazuh_min_version: 4.4.0
 
     parameters:
-        - set_up_groups_keys:
-            type: fixture
-            brief: Set pre-existent groups and keys.
         - get_configuration:
             type: fixture
             brief: Get the configuration of the test.
@@ -146,23 +132,23 @@ def test_ossec_auth_key_request_exec(set_up_groups_keys, get_configuration, conf
             brief: Waits until Authd is accepting connections.
 
     assertions:
-        -
+        - The exec_path must be configured correctly
+        - The script works as expected
 
     input_description:
         Different test cases are contained in an external YAML file (test_authd_key_request_messages.yaml) which
         includes the different possible key requests and the expected responses.
 
-    expected_output:
-        - Key request responses on 'authd' socket.
+    expected_log:
+        - Key request responses on 'authd' logs.
     '''
-    test_case = set_up_groups_keys['test_case']
-    for stage in test_case:
+    case = get_current_test_case['test_case']
+    for index, stage in enumerate(case):
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
-        expected = stage['output']
+        expected = stage['log']
         message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=True)
-        response = receiver_sockets[0].receive(size=True).decode()
-        assert response[:len(expected)] == expected, \
-            'Failed test case "{}". Response was: {} instead of: {}' \
-            .format(set_up_groups_keys['name'], response, expected)
+        receiver_sockets[0].send(message, size=False)
+        response = stage.get('log', [])
+        validate_authd_logs(response)
+        assert response == expected, 'Failed stage {}: Response was: {} instead of: {}'.format(index+1, response, expected)

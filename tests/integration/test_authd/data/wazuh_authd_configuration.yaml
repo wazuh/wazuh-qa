@@ -391,139 +391,163 @@
     - tags:
       - all
       apply_to_modules:
-      - test_key_request_exec
+      - test_authd_key_request_exec
       sections:
       - section: auth
         elements:
         - disabled:
-          value: 'no'
-      - port:
-          value: 1515
-      - use_source_ip:
-          value: 'yes'
-      - force_insert:
-          value: 'yes'
-      - force_time:
-          value: 0
-      - purge:
-          value: 'yes'
-      - use_password:
-          value: 'no'
-      - limit_maxagents:
-          value: 'yes'
-      - ciphers:
-          value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
-      - ssl_verify_host:
-          value: 'no'
-      - ssl_manager_cert:
-          value: '/var/ossec/etc/sslmanager.cert'
-      - ssl_manager_key:
-          value: '/var/ossec/etc/sslmanager.key'
-      - ssl_auto_negotiate:
-          value: 'no'
-      - key_request:
-          elements:
-          - enabled:
-              value: 'yes'
-          - exec_path:
-              value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
-          - timeout:
-              value: 60
-          - threads:
-              value: 1
-          - queue_size:
-              value: 1024
+            value: 'no'
+        - port:
+            value: 1515
+        - use_source_ip:
+            value: 'yes'
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
+        - purge:
+            value: 'yes'
+        - use_password:
+            value: 'no'
+        - limit_maxagents:
+            value: 'yes'
+        - ciphers:
+            value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
+        - ssl_verify_host:
+            value: 'no'
+        - ssl_manager_cert:
+            value: '/var/ossec/etc/sslmanager.cert'
+        - ssl_manager_key:
+            value: '/var/ossec/etc/sslmanager.key'
+        - ssl_auto_negotiate:
+            value: 'no'
+        - key_request:
+            elements:
+            - enabled:
+                value: 'yes'
+            - exec_path:
+                value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
+            - timeout:
+                value: 60
+            - threads:
+                value: 1
+            - queue_size:
+                value: 1024
     #config key request socket
     - tags:
       - all
       apply_to_modules:
-      - test_key_request_socket
+      - test_authd_key_request_socket
       sections:
       - section: auth
         elements:
         - disabled:
-          value: 'no'
-      - port:
-          value: 1515
-      - use_source_ip:
-          value: 'yes'
-      - force_insert:
-          value: 'yes'
-      - force_time:
-          value: 0
-      - purge:
-          value: 'yes'
-      - use_password:
-          value: 'no'
-      - limit_maxagents:
-          value: 'yes'
-      - ciphers:
-          value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
-      - ssl_verify_host:
-          value: 'no'
-      - ssl_manager_cert:
-          value: '/var/ossec/etc/sslmanager.cert'
-      - ssl_manager_key:
-          value: '/var/ossec/etc/sslmanager.key'
-      - ssl_auto_negotiate:
-          value: 'no'
-      - key_request:
-          elements:
-          - enabled:
-              value: 'yes'
-          - exec_path:
-              value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
-          - socket:
-              value: 'idk'
-          - timeout:
-              value: 60
-          - threads:
-              value: 1
-          - queue_size:
-              value: 1024
+            value: 'no'
+        - port:
+            value: 1515
+        - use_source_ip:
+            value: 'yes'
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
+        - purge:
+            value: 'yes'
+        - use_password:
+            value: 'no'
+        - limit_maxagents:
+            value: 'yes'
+        - ciphers:
+            value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
+        - ssl_verify_host:
+            value: 'no'
+        - ssl_manager_cert:
+            value: '/var/ossec/etc/sslmanager.cert'
+        - ssl_manager_key:
+            value: '/var/ossec/etc/sslmanager.key'
+        - ssl_auto_negotiate:
+            value: 'no'
+        - key_request:
+            elements:
+            - enabled:
+                value: 'yes'
+            - exec_path:
+                value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
+            - socket:
+                value: 'idk'
+            - timeout:
+                value: 60
+            - threads:
+                value: 1
+            - queue_size:
+                value: 1024
     #config key request options
     - tags:
       - all
       apply_to_modules:
-      - test_key_request_options
+      - test_authd_key_request_options
       sections:
       - section: auth
         elements:
         - disabled:
-          value: 'no'
-      - port:
-          value: 1515
-      - use_source_ip:
-          value: 'yes'
-      - force_insert:
-          value: 'yes'
-      - force_time:
-          value: FORCE_INSERT
-      - purge:
-          value: 'yes'
-      - use_password:
-          value: 'no'
-      - limit_maxagents:
-          value: 'yes'
-      - ciphers:
-          value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
-      - ssl_verify_host:
-          value: 'no'
-      - ssl_manager_cert:
-          value: '/var/ossec/etc/sslmanager.cert'
-      - ssl_manager_key:
-          value: '/var/ossec/etc/sslmanager.key'
-      - ssl_auto_negotiate:
-          value: 'no'
-      - key_request:
-          elements:
-          - enabled:
-              value: 'yes'
-          - exec_path:
-              value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
-          - timeout:
-              value: TIMEOUT
-          - threads:
-              value: 1
-          - queue_size:
-              value: QUEUE_SIZE
+            value: 'no'
+        - port:
+            value: 1515
+        - use_source_ip:
+            value: 'yes'
+        - force:
+            elements:
+            - enabled:
+                value: 'yes'
+            - key_mismatch:
+                value: 'no'
+            - after_registration_time:
+                value: '0h'
+            - disconnected_time:
+                attributes:
+                - enabled: 'yes'
+                value: '0h'
+        - purge:
+            value: 'yes'
+        - use_password:
+            value: 'no'
+        - limit_maxagents:
+            value: 'yes'
+        - ciphers:
+            value: 'HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH'
+        - ssl_verify_host:
+            value: 'no'
+        - ssl_manager_cert:
+            value: '/var/ossec/etc/sslmanager.cert'
+        - ssl_manager_key:
+            value: '/var/ossec/etc/sslmanager.key'
+        - ssl_auto_negotiate:
+            value: 'no'
+        - key_request:
+            elements:
+            - enabled:
+                value: 'yes'
+            - exec_path:
+                value: '/var/ossec/framework/python/bin/python3 /tmp/fetch_keys.py'
+            - timeout:
+                value: TIMEOUT
+            - threads:
+                value: 1
+            - queue_size:
+                value: QUEUE_SIZE
