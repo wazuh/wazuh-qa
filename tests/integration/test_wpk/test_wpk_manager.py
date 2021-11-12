@@ -40,12 +40,9 @@ max_upgrade_result_status_retries = 30
 
 if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
-if global_parameters.wpk_revision is None:
-    raise ValueError("The WPK revision path must be defined by parameter. See README.md")
 if global_parameters.wpk_package_path is None:
     raise ValueError("The WPK package path must be defined by parameter. See README.md")
 
-wpk_revision = global_parameters.wpk_revision[0]   
 version_to_upgrade = global_parameters.wpk_version[0]
 
 MANAGER_VERSION = get_version()
@@ -828,7 +825,7 @@ def get_sha_list(metadata):
         protocol = 'http://' if metadata.get('message_params').get('use_http') else 'https://'
 
     # Generating file name
-    wpk_file = "wazuh_agent_{0}{1}_linux_{2}.wpk".format(agent_version, wpk_revision, architecture)
+    wpk_file = "wazuh_agent_{0}_linux_{1}.wpk".format(agent_version, architecture)
     wpk_url = protocol + wpk_repo + "linux/" + architecture + "/" + wpk_file
 
     wpk_file_path = os.path.join(UPGRADE_PATH, wpk_file)
@@ -875,6 +872,7 @@ def remove_current_wpk():
             raise Exception(f'Failed to remove {filename} file')
 
 
+@pytest.mark.skip(reason="Skipped for issue #2203 - needs fix or refactor")
 def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
