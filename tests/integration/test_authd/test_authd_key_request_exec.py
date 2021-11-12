@@ -52,18 +52,12 @@ tags:
 '''
 import os
 import shutil
-import subprocess
 
 import pytest
-import yaml
-import time
-
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH, CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.wazuh_db import query_wdb
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_yaml, truncate_file
-from wazuh_testing.authd import AUTHD_KEY_REQUEST_TIMEOUT, validate_authd_logs
+from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.authd import validate_authd_logs
 
 # Marks
 
@@ -82,7 +76,7 @@ filename = "fetch_keys.py"
 shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
 
 # Variables
-kreq_sock_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest'))
+kreq_sock_path = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest')
 log_monitor_paths = [LOG_FILE_PATH]
 receiver_sockets_params = [(kreq_sock_path, 'AF_UNIX', 'UDP')]
 test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case in message_tests]
@@ -108,7 +102,7 @@ def get_current_test_case(request):
 
 
 def test_key_request_exec(configure_environment, configure_sockets_environment, connect_to_sockets_function,
-                            get_current_test_case, tear_down):
+                          get_current_test_case, tear_down):
     '''
     description: 
 
@@ -127,9 +121,6 @@ def test_key_request_exec(configure_environment, configure_sockets_environment, 
         - connect_to_sockets_function:
             type: fixture
             brief: Bind to the configured sockets at function scope.
-        - wait_for_authd_startup_module:
-            type: fixture
-            brief: Waits until Authd is accepting connections.
 
     assertions:
         - The exec_path must be configured correctly
@@ -142,13 +133,14 @@ def test_key_request_exec(configure_environment, configure_sockets_environment, 
     expected_log:
         - Key request responses on 'authd' logs.
     '''
-    case = get_current_test_case['test_case']
-    for index, stage in enumerate(case):
-        # Reopen socket (socket is closed by manager after sending message with client key)
-        receiver_sockets[0].open()
-        expected = stage['log']
+
+    key_request_sock = receiver_sockets[0]
+
+    for stage in get_current_test_case['test_case']:
         message = stage['input']
-        receiver_sockets[0].send(message, size=False)
         response = stage.get('log', [])
+
+        # Reopen socket (socket is closed by manager after sending message with client key)
+        key_request_sock.open()
+        key_request_sock.send(message, size=False)
         validate_authd_logs(response)
-        assert response == expected, 'Failed stage {}: Response was: {} instead of: {}'.format(index+1, response, expected)
