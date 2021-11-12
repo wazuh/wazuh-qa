@@ -201,7 +201,7 @@ def overwrite_node_name(value):
         f.write(new_content)
 
 
-@pytest.mark.skip(reason="Skipped for issue wazuh-qa#2203")
+@pytest.mark.skip(reason="Blocked by issue wazuh-qa#2203, when is fixed we can enable this test again")
 def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
