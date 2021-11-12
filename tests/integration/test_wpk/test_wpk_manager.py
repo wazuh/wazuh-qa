@@ -872,7 +872,7 @@ def remove_current_wpk():
             raise Exception(f'Failed to remove {filename} file')
 
 
-@pytest.mark.skip(reason="Skipped for issue #2203 - needs fix or refactor")
+@pytest.mark.skip(reason="Skipped for issue wazuh-qa#2203")
 def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
     metadata = get_configuration.get('metadata')
