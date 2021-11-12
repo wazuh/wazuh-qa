@@ -74,6 +74,8 @@ tags:
     - fim_multiple_dirs
 '''
 import os
+from sys import platform
+import sys
 
 import pytest
 import yaml
@@ -147,7 +149,7 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.skip(reason="Skipped for issue wazuh-qa#2174")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Skipped for issue wazuh-qa#2174")
 @pytest.mark.parametrize('dir_list, tags_to_apply', [
     (test_directories, {'multiple_dir_entries'})
 ])
