@@ -136,4 +136,16 @@ def pytest_runtest_makereport(item, call):
                                                      '<b> - Found log:</b> {found_log}</p>'.format(**item)))
             extra.append(pytest_html.extras.html("</p><h1>Test output</h1>"))
 
+        # Attach repeated Integrity synchronizations per each node in the 'test_cluster_sync' test.
+        elif report.head_line == 'test_cluster_sync' and item.module.repeated_syncs:
+            extra.append(pytest_html.extras.html("<h1>Repeated Integrity synchronizations</h1>"))
+            output = []
+            # Keys are human/natural sorted.
+            for worker, values in sorted(item.module.repeated_syncs.items(),
+                                         key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d[0])]):
+                output.append('<b>{worker} - Log found {repeat_counter} times in a row:</b>\n'
+                              '{log}'.format(**values, worker=worker))
+            extra.append(pytest_html.extras.html('<p>' + '\n\n'.join(output) + '</p>'))
+            extra.append(pytest_html.extras.html("</p><h1>Test output</h1>"))
+
         report.extra = extra
