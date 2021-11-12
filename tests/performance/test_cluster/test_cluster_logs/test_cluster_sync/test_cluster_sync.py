@@ -14,6 +14,7 @@ test_data_path = join(dirname(realpath(__file__)), 'data')
 configuration = safe_load(open(join(test_data_path, 'configuration.yaml')))['configuration']
 node_name = compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
 synced_files = compile(configuration['log_regex'].encode())
+repeated_syncs = {}
 
 
 def test_cluster_sync(artifacts_path):
@@ -36,12 +37,16 @@ def test_cluster_sync(artifacts_path):
 
             previous_log = None
             for log in sync_logs:
-                if previous_log and log == previous_log:
+                if previous_log and log[1] == previous_log:
                     repeat_counter += 1
-                    if repeat_counter > configuration['repeat_threshold']:
-                        pytest.fail(f"The following sync log has been found more than "
-                                    f"{configuration['repeat_threshold']} times in a row in the "
-                                    f"'{node_name.search(log_file)[1]}': {log}")
+                    if repeat_counter >= configuration['repeat_threshold']:
+                        repeated_syncs[node_name.search(log_file)[1]] = {
+                            'log': log[0] + log[1],
+                            'repeat_counter': repeat_counter
+                        }
                 else:
-                    previous_log = log
+                    previous_log = log[1]
                     repeat_counter = 0
+
+    assert not repeated_syncs, '\n' + '\n'.join('Found {repeat_counter} times in {worker}: {log}'.format(
+        **values, worker=worker) for worker, values in repeated_syncs.items())
