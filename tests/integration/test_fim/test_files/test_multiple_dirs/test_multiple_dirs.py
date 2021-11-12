@@ -74,6 +74,7 @@ tags:
     - fim_multiple_dirs
 '''
 import os
+import sys
 
 import pytest
 from test_fim.test_files.test_multiple_dirs.common import multiple_dirs_test
