@@ -129,6 +129,7 @@ def wait_for_event():
 # tests
 
 
+@pytest.mark.skip(reason="Skipped for issue wazuh-qa#2174")
 @pytest.mark.parametrize('dir_list, tags_to_apply', [
     (test_directories, {'multiple_dirs'})
 ])
