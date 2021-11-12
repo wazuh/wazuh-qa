@@ -400,7 +400,7 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
   field is required to execute any WPK test and the WPK package must be previously created in
   the [repository](packages-dev.wazuh.com/trash/wpk/).
 - `--wpk_revision`: Specify the WPK package revision used to upgrade on WPK tests. (ex. --wpk_revision=-0.0.0.todelete or --wpk_revision= for no revision). Note: This
-  field is required to execute any WPK test and it must match a WPK package be previously created with matching revision.
+  field is required to execute Agent WPK tests (it is not used in Manager tests) and it must match a WPK package be previously created with matching revision.
 - `--wpk_package_path`: Specify the WPK package path used to upgrade on WPK tests. (ex. --wpk_package_path='packages-dev.wazuh.com/trash/wpk/'). 
    This field is required to execute any WPK test.
 - `--save-file`: Specify the files of execution of the tests that you need to download. (ex. --save-file=archives.json). 
