@@ -325,6 +325,7 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
             .format(index + 1, stage['stage'], expected_output, response)
 
 
+@pytest.mark.skip(reason="It will be blocked by #2217, when it is solved we can enable again this test")
 def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_registered_agents,
                          connect_to_sockets_module, pre_insert_agents):
     """Check that commands by chunks work properly when agents amount exceed the response maximum size"""
