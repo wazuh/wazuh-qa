@@ -132,6 +132,7 @@ def check_ignore_binaries_invalid(cfg):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_ignore_binaries(get_configuration, configure_environment):
     """Check if the Wazuh ignore_binaries field of logcollector works properly.
 

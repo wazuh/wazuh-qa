@@ -57,6 +57,7 @@ def get_configuration(request):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_configuration_alias(configure_local_internal_options_module,
                              get_configuration, configure_environment, restart_logcollector):
     """Check if the module runs correctly with the specified command monitoring configuration and that it uses an alias value.

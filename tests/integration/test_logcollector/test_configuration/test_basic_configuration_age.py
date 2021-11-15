@@ -136,6 +136,7 @@ def get_configuration(request):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_configuration_age(get_configuration, configure_environment):
     """Check if the Wazuh age field of logcollector works properly.
 

@@ -380,6 +380,7 @@ def check_log_format_values(conf):
     file.remove_file(conf['location'])
 
 
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_log_format(get_configuration, configure_environment, configure_local_internal_options_module):
     """Check if Wazuh log format field of logcollector works properly.
     Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.

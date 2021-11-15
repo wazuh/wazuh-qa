@@ -41,6 +41,7 @@ def get_local_internal_options(request):
     control_service('restart')
 
 
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_options_state_interval(get_local_internal_options):
     """Check if logcollector is running correctly with the specified logcollector.state_interval option.
 

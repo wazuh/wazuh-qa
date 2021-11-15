@@ -145,6 +145,7 @@ def test_command_execution(configure_local_internal_options_module, get_configur
                                                         escape=True))
 
 
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_command_execution_dbg(configure_local_internal_options_module, get_configuration,
                                configure_environment, file_monitoring, restart_logcollector):
     """Check if the debug logs are displayed correctly when the test commands are executed.
