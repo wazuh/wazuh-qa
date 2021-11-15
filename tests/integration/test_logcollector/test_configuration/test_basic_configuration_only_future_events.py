@@ -173,6 +173,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="Test blocked by #2209")
 def test_only_future_events(get_configuration, configure_environment, restart_logcollector):
     """Check if Wazuh only future events field of logcollector works properly.
 
