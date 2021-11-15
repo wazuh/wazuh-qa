@@ -97,6 +97,7 @@ nav:
           - Tests SCAN types:
             - tests/integration/test_vulnerability_detector/test_scan_types/index.md
             - Test baseline scan type: tests/integration/test_vulnerability_detector/test_scan_types/test_baseline_scan_type.md
+            - Test full scan type: tests/integration/test_vulnerability_detector/test_scan_types/test_full_scan_type.md
             - Test partial scan type: tests/integration/test_vulnerability_detector/test_scan_types/test_partial_scan_type.md
           - Tests Windows:
             - tests/integration/test_vulnerability_detector/test_windows/index.md
