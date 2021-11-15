@@ -102,6 +102,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -151,6 +152,7 @@ def get_configuration(request):
                  marks=(pytest.mark.win32,
                         pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
 ])
+@mark_skip_agentWindows
 def test_create_file_realtime_whodata(folder, name, filetype, content, checkers, tags_to_apply, encoding,
                                       get_configuration,
                                       configure_environment, restart_syscheckd, wait_for_fim_start):
