@@ -69,7 +69,7 @@ if sys.platform == 'win32':
         'windows.debug': '2',
         'agent.debug': '2'
     }
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
+    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'logcollector.debug': '2',

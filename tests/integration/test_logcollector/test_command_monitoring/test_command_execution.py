@@ -21,12 +21,8 @@ configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
 local_internal_options = {
     'logcollector.remote_commands': '1',
-<<<<<<< HEAD
-    'logcollector.max_lines': '100'
-=======
     'logcollector.max_lines': '100',
     'logcollector.debug': '2'
->>>>>>> 2096-logcollector-solaris-agent
 }
 
 parameters = [
