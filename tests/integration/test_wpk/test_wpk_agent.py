@@ -47,13 +47,10 @@ mark_skip_agentLinux = pytest.mark.skipif(get_service() == 'wazuh-agent' and
 
 if not global_parameters.wpk_version:
     raise Exception("The WPK package version must be defined by parameter. See README.md")
-if global_parameters.wpk_revision is None:
-    raise ValueError("The WPK revision must be defined by parameter. See Readme.md")
 if global_parameters.wpk_package_path is None:
     raise ValueError("The WPK package path must be defined by parameter. See README.md")
 
 version_to_upgrade = global_parameters.wpk_version[0]
-wpk_revision = global_parameters.wpk_revision[0]   
 package_path = global_parameters.wpk_package_path[0]
 
 _agent_version = get_version()
@@ -265,19 +262,19 @@ def download_wpk(get_configuration):
     wpk_file_path = ''
     # Generating file name
     if current_plaform == "windows":
-        wpk_file = "wazuh_agent_{0}{1}_{2}.wpk".format(agent_version,wpk_revision,
+        wpk_file = "wazuh_agent_{0}_{1}.wpk".format(agent_version,
                                                     current_plaform)
         wpk_url = protocol + wpk_repo + "windows/" + wpk_file
         wpk_file_path = os.path.join(WAZUH_PATH, 'tmp', wpk_file)
     elif current_plaform == "darwin":
-        wpk_file = "wazuh_agent_{0}{1}_macos_{2}.wpk"\
-                .format(agent_version, wpk_revision, architecture)
+        wpk_file = "wazuh_agent_{0}_macos_{1}.wpk"\
+                .format(agent_version, architecture)
         wpk_url = protocol + wpk_repo \
             + "macos/" + architecture + "/pkg/" + wpk_file
         wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
     else:
-        wpk_file = "wazuh_agent_{0}{1}_linux_{2}.wpk"\
-                .format(agent_version, wpk_revision, architecture)
+        wpk_file = "wazuh_agent_{0}_linux_{1}.wpk"\
+                .format(agent_version, architecture)
         wpk_url = protocol + wpk_repo \
             + "linux/" + architecture + "/" + wpk_file
         wpk_file_path = os.path.join(WAZUH_PATH, 'var', wpk_file)
