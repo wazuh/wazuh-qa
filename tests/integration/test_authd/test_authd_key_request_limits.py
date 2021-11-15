@@ -100,6 +100,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # Tests
 test_index = 0
 
+
 def get_current_test():
     """
     Get the current test case.
@@ -108,6 +109,7 @@ def get_current_test():
     current = test_index
     test_index += 1
     return current
+
 
 @pytest.fixture(scope="module", params=configurations, ids=test_case_ids)
 def get_configuration(request):
@@ -123,12 +125,12 @@ def get_current_test_case(request):
     return request.param
 
 
-def test_key_request_limits(get_configuration, configure_local_internal_options_module, configure_environment, configure_sockets_environment,
-                            connect_to_sockets_function, tear_down):
+def test_key_request_limits(get_configuration, configure_local_internal_options_module, configure_environment,
+                            configure_sockets_environment, connect_to_sockets_function, tear_down):
     '''
-    description: 
-        Checks that every input message on the key request port with different limits 'timeout' and 'queue_size' configuration,
-        along with a delayed script, shows the corresponding error in the manager logs.
+    description:
+        Checks that every input message on the key request port with different limits 'timeout' and 'queue_size'
+        configuration, along with a delayed script, shows the corresponding error in the manager logs.
 
     wazuh_min_version: 4.4.0
 

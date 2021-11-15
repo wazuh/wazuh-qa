@@ -26,7 +26,6 @@
     log:
       - '{"error": 4, "message": "No agent key found"}'
       - "Could not get a key from ID 004. Error: 'No agent key found'"
-
 -
   name: 'Error 5'
   description: 'The script has more than one entry for the agent ID.'

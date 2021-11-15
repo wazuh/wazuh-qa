@@ -7,7 +7,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check the different errors that may appear by modifying 
+brief: These tests will check the different errors that may appear by modifying
        the path of the configurable executable (exec_path).
 
 tier: 0
@@ -98,6 +98,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # Tests
 test_index = 0
 
+
 def get_current_test():
     """
     Get the current test case.
@@ -107,15 +108,17 @@ def get_current_test():
     test_index += 1
     return current
 
+
 @pytest.fixture(scope="module", params=configurations, ids=test_case_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
-def test_key_request_exec_path(get_configuration, configure_local_internal_options_module, configure_environment, configure_sockets_environment, 
-                                connect_to_sockets_function, tear_down):
+
+def test_key_request_exec_path(get_configuration, configure_local_internal_options_module, configure_environment,
+                               configure_sockets_environment, connect_to_sockets_function, tear_down):
     '''
-    description: 
+    description:
         Checks that every input message on the key request port with different exec_path configuration
         shows the corresponding error in the manager logs.
 

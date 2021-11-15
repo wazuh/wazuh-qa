@@ -87,6 +87,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Tests
 
+
 @pytest.fixture(scope="module", params=configurations, ids=['key_request'])
 def get_configuration(request):
     """Get configurations from the module"""
@@ -104,7 +105,7 @@ def get_current_test_case(request):
 def test_key_request_func(configure_environment, configure_sockets_environment, connect_to_sockets_function,
                           get_current_test_case, tear_down):
     '''
-    description: 
+    description:
         Checks that every input message on the key request port generates the appropiate response to the manager.
 
     wazuh_min_version: 4.4.0

@@ -1,3 +1,4 @@
+---
 -
   name: "Queue size 1"
   description: "Set queue size to 1 to fill it and cause failure"
@@ -5,7 +6,7 @@
   -
     log:
       - "Request queue is full. Discarding request."
-    input: 
+    input:
       - "id:001"
       - "id:002"
       - "ip:10.10.10.10"
@@ -30,6 +31,6 @@
   -
     log:
       - "Request 'id:001' already being processed. Discarding request."
-    input: 
+    input:
       - "id:001"
       - "id:001"

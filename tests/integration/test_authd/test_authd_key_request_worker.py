@@ -7,7 +7,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: This module verifies the correct behavior of key request under different messages in a Cluster scenario (for Worker)
+brief: This module verifies the correct behavior of key request under different messages in a
+       Cluster scenario (for Worker)
 
 tier: 0
 
@@ -117,6 +118,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 # Fixtures
+
 
 @pytest.fixture(scope='module', params=configurations, ids=['Worker'])
 def get_configuration(request):
