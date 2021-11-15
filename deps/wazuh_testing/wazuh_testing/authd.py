@@ -12,6 +12,9 @@ import time
 from wazuh_testing.tools import CLIENT_KEYS_PATH, LOG_FILE_PATH
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
+from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
+from wazuh_testing.tools.file import truncate_file
 
 
 DAEMON_NAME = 'wazuh-authd'
@@ -195,3 +198,24 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
 
     keys_file.close()
+
+def callback_agentd_startup(line):
+        if 'Accepting connections on port 1515' in line:
+            return line
+        return None
+
+def override_wazuh_conf(configuration):
+    # Stop Wazuh
+    control_service('stop', daemon='wazuh-authd')
+    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
+    truncate_file(LOG_FILE_PATH)
+
+    # Configuration for testing
+    test_config = set_section_wazuh_conf(configuration.get('sections'))
+    # Set new configuration
+    write_wazuh_conf(test_config)
+    # Start Wazuh daemons
+    control_service('start', daemon='wazuh-authd', debug_mode=True)
+
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+    log_monitor.start(timeout=AUTHD_KEY_REQUEST_TIMEOUT, callback=callback_agentd_startup)

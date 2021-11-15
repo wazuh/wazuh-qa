@@ -7,8 +7,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the 'wazuh-authd' daemon correctly handles the key requests
-       from agents with pre-existing IP addresses or names.
+brief: These tests will check the different errors that may appear by modifying 
+       the path of the configurable executable (exec_path).
 
 tier: 0
 
@@ -52,19 +52,13 @@ tags:
 '''
 import os
 import shutil
-import time
 
 import pytest
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf, \
-    load_wazuh_configurations
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.authd import validate_authd_logs
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service, check_daemon_status
-from wazuh_testing.tools.file import truncate_file
-
+from wazuh_testing.authd import validate_authd_logs, override_wazuh_conf
 
 # Marks
 
@@ -76,6 +70,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 fetch_keys_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
 message_tests = read_yaml(os.path.join(test_data_path, 'test_key_request_exec_path.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
+local_internal_options = {'authd.debug': '2'}
 filename = "fetch_keys.py"
 
 shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
@@ -103,7 +98,6 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # Tests
 test_index = 0
 
-
 def get_current_test():
     """
     Get the current test case.
@@ -113,39 +107,17 @@ def get_current_test():
     test_index += 1
     return current
 
-@pytest.fixture(scope="module", params=configurations)
+@pytest.fixture(scope="module", params=configurations, ids=test_case_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
-def override_wazuh_conf(configuration):
-    # Stop Wazuh
-    control_service('stop', daemon='wazuh-authd')
-    time.sleep(1)
-    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
-    truncate_file(log_monitor_paths[0])
-
-    # Configuration for testing
-    test_config = set_section_wazuh_conf(configuration.get('sections'))
-    # Set new configuration
-    write_wazuh_conf(test_config)
-    # Start Wazuh daemons
-    time.sleep(1)
-    control_service('start', daemon='wazuh-authd', debug_mode=True)
-
-    def callback_agentd_startup(line):
-        if 'Accepting connections on port 1515' in line:
-            return line
-        return None
-
-    log_monitor = FileMonitor(log_monitor_paths[0])
-    log_monitor.start(timeout=30, callback=callback_agentd_startup)
-    time.sleep(1)
-
-def test_key_request_exec_path2(get_configuration, configure_environment, configure_sockets_environment, connect_to_sockets_function,
-                                tear_down):
+def test_key_request_exec_path(get_configuration, configure_local_internal_options_module, configure_environment, configure_sockets_environment, 
+                                connect_to_sockets_function, tear_down):
     '''
     description: 
+        Checks that every input message on the key request port with different exec_path configuration
+        shows the corresponding error in the manager logs.
 
     wazuh_min_version: 4.4.0
 
@@ -156,34 +128,41 @@ def test_key_request_exec_path2(get_configuration, configure_environment, config
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - configure_sockets_environment_function:
             type: fixture
             brief: Configure the socket listener to receive and send messages on the sockets at function scope.
         - connect_to_sockets_function:
             type: fixture
             brief: Bind to the configured sockets at function scope.
-        - wait_for_authd_startup_module:
+        - tear_down:
             type: fixture
-            brief: Waits until Authd is accepting connections.
+            brief: Cleans the client.keys file.
 
     assertions:
         - The exec_path must be configured correctly
         - The script works as expected
 
     input_description:
-        Different test cases are contained in an external YAML file (test_authd_key_request_messages.yaml) which
-        includes the different possible key requests and the expected responses.
+        Different test cases are contained in an external YAML file (test_key_request_exec_path.yaml) which
+        includes the different possible key requests with different configurations and the expected responses.
 
     expected_log:
         - Key request responses on 'authd' logs.
     '''
     current_test = get_current_test()
     case = message_tests[current_test]['test_case']
+    # Overwrites the configuration with the values ​​set in the YAML file
     override_wazuh_conf(get_configuration)
+    key_request_sock = receiver_sockets[0]
+
     for stage in case:
         # Reopen socket (socket is closed by manager after sending message with client key)
-        receiver_sockets[0].open()
+        key_request_sock.open()
         message = stage['input']
-        receiver_sockets[0].send(message, size=False)
+        key_request_sock.send(message, size=False)
         response = stage.get('log', [])
+        # Monitor expected log messages
         validate_authd_logs(response)

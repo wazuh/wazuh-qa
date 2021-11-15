@@ -118,7 +118,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configurations, ids=['authd_worker_config'])
+@pytest.fixture(scope='module', params=configurations, ids=['Worker'])
 def get_configuration(request):
     """
     Get configurations from the module
@@ -139,8 +139,8 @@ def test_authd_key_request_worker(configure_environment, configure_sockets_envir
                                   connect_to_sockets_module, get_current_test_case):
     '''
     description:
-        Checks that every message from the agent is correctly formatted for master,
-        and every master response is correctly parsed for agent.
+        Checks that every message from the worker is correctly formatted for master,
+        and every master response is correctly parsed for worker.
 
     wazuh_min_version:
         4.4.0

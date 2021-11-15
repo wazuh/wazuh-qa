@@ -1,6 +1,6 @@
 ---
 -
-  name: 'Key request - ID'
+  name: 'ID'
   description: 'Obtain agent key with specific ID'
   test_case:
   -
@@ -9,7 +9,7 @@
       - Requesting local addition for agent '001' from the agent key request.
       - '{"error":0,"data":{"id":"001","name":"wazuh_agent1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c911"}}'
 -
-  name: 'Key request - IP'
+  name: 'IP'
   description: 'Obtain agent key with specific IP'
   test_case:
   -
@@ -17,16 +17,8 @@
     log:
       - Requesting local addition for agent '002' from the agent key request.
       - '{"error":0,"data":{"id":"002","name":"wazuh_agent2","ip":"10.10.10.10","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c912"}}'
-# -
-#   name: 'Error 2 Key request' # Can obtain a script failure?
-#   description: 'Script error'
-#   test_case:
-#   -
-#     input: "id:004"
-#     log:
-#       - '{"error": 2, "message": "ERROR"}'
 -
-  name: 'Error 4 Key request'
+  name: 'Error 4'
   description: 'The script does not have any key for the agent ID/IP'
   test_case:
   -
@@ -36,7 +28,7 @@
       - "Could not get a key from ID 004. Error: 'No agent key found'"
 
 -
-  name: 'Error 5 Key request'
+  name: 'Error 5'
   description: 'The script has more than one entry for the agent ID.'
   test_case:
   -
