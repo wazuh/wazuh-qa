@@ -73,6 +73,7 @@ tags:
     - fim_basic_usage
 '''
 import os
+import sys
 import shutil
 from collections import Counter
 
@@ -98,6 +99,7 @@ for direc in list(test_directories):
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2 = test_directories[2:]
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -120,6 +122,7 @@ def get_configuration(request):
     (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},),
     (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},)
 ])
+@mark_skip_agentWindows
 def test_delete_folder(folder, file_list, filetype, tags_to_apply,
                        get_configuration, configure_environment,
                        restart_syscheckd, wait_for_fim_start):
