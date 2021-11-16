@@ -46,7 +46,7 @@ def test_cluster_sync(artifacts_path):
                         }
                 else:
                     previous_log = log[1]
-                    repeat_counter = 0
+                    repeat_counter = 1
 
     assert not repeated_syncs, '\n' + '\n'.join('Found {repeat_counter} times in {worker}: {log}'.format(
         **values, worker=worker) for worker, values in repeated_syncs.items())
