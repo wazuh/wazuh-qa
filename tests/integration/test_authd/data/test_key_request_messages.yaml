@@ -35,3 +35,12 @@
     log:
       - '{"error": 5, "message": "Found more than one match for required id"}'
       - "Could not get a key from ID 007. Error: 'Found more than one match for required id'"
+-
+  name: 'Error duplicate agent 001'
+  description: 'Trying to add a duplicate agent 001'
+  test_case:
+  -
+    input: "id:001"
+    log:
+      - Duplicate ID, rejecting enrollment. Failed to get agent-info for agent '001'
+      - '{"error":9012,"message":"Duplicate ID"}'

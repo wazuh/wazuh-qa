@@ -53,23 +53,6 @@
       - 'Exec output: {"error": 1, "message": "Too few arguments"}'
       - "Could not get a key from ID . Error: 'Too few arguments'"
 -
-  name: 'Add agent 001'
-  description: 'Obtain agent key with specific ID'
-  test_case:
-  -
-    input: "id:001"
-    log:
-      - '{"error":0,"data":{"id":"001","name":"wazuh_agent1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c911"}}'
--
-  name: 'Error duplicate agent 001' # With a bad exec_path conf
-  description: 'Too few arguments passed to exec_path conf'
-  test_case:
-  -
-    input: "id:001"
-    log:
-      - Duplicate ID, rejecting enrollment. Failed to get agent-info for agent '001'
-      - '{"error":9012,"message":"Duplicate ID"}'
--
   name: 'Invalid request'
   description: 'Checking the handling of erroneous requests'
   test_case:
