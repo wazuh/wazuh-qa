@@ -172,7 +172,7 @@
   description: 'Test successfull and err while dealing with osinfo deltas'
   test_case:
   -
-    input: 'agent 001 dbsync osinfo INSERTED 2021/10/01 00:00:00|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1633433046844390706||'
+    input: 'agent 001 dbsync osinfo INSERTED 2021/10/01 00:00:00|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1637071785021722196||||'
     output: 'ok '
     stage: 'insert osinfo.'
   -
@@ -180,36 +180,32 @@
     output: 'err'
     stage: 'insert osinfo without enough fields.'
   -
-    input: 'agent 001 dbsync osinfo INSERTED 2021/10/01 00:00:00|wazuh-dev|x86_64|NULL|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1633433046844390706|'
+    input: 'agent 001 dbsync osinfo INSERTED 2021/10/01 00:00:00|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||||||'
     output: 'err'
     stage: 'insert osinfo with invalid field type.'
   -
-    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:00|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1633433046844390800|mydisplayname|'
-    output: 'ok 2021/10/01 00:00:00|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1633433046844390800|mydisplayname|'
+    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1637071785021722800|mydisplayname|NULL|NULL|'
+    output: 'ok 2021/10/01 00:00:20|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1637071785021722800|mydisplayname|||'
     stage: 'modify osinfo.'
   -
     input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
     output: 'err'
     stage: 'modify osinfo without enough fields.'
   -
-    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu-nonexistent|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1633433046844300100|'
+    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu-nonexistent|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1637071785021722800|mydisplayname|NULL|NULL|'
     output: 'err'
     stage: 'modify nonexistent osinfo.'
   -
-    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1633433046844300100|'
+    input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL||mydisplayname|NULL|NULL|'
     output: 'err'
     stage: 'modify osinfo with invalid field type.'
-  -
-    input: 'agent 001 dbsync osinfo DELETED NULL|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|'
-    output: 'err'
-    stage: 'modify osinfo without enough fields.'
   -
     input: 'agent 001 dbsync osinfo DELETED NULL|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|'
     output: 'err'
     ignore: 'yes'
     stage: 'delete osinfo without enough fields.'
   -
-    input: 'agent 001 dbsync osinfo DELETED NULL|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
+    input: 'agent 001 dbsync osinfo DELETED NULL|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
     output: 'err'
     ignore: 'yes'
     stage: 'delete osinfo.'
@@ -231,7 +227,7 @@
     stage: 'insert hwinfo with invalid field type.'
   -
     input: 'agent 001 dbsync hwinfo MODIFIED 2021/10/01 00:00:20|0|NULL|NULL|NULL|NULL|NULL|50|78793071d887ba34f60a67da99c4068a93aaaaaa|'
-    output: 'ok 2021/10/01 00:00:20|0|AMD Ryzen 7 PRO 4750U with Radeon Graphics|8|1697.000000|7957428|138384|50|78793071d887ba34f60a67da99c4068a93aaaaaa|'
+    output: 'ok 2021/10/01 00:00:20|0|AMD Ryzen 7 PRO 4750U with Radeon Graphics|8|1697.0|7957428|138384|50|78793071d887ba34f60a67da99c4068a93aaaaaa|'
     stage: 'modify hwinfo.'
   -
     input: 'agent 001 dbsync hwinfo MODIFIED 2021/10/01 00:00:20|0|NULL|NULL|NULL|NULL|NULL|50|'
