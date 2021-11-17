@@ -16,7 +16,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.authd_sim import AuthdSimulator
-from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH
+from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH, get_service
 from os.path import exists
 from os import remove
 
