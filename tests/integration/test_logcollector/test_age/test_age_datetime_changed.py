@@ -26,7 +26,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 wazuh_component = get_service()
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 'windows.debug': '2'}
 
 
 now_date = datetime.now()
@@ -88,7 +88,6 @@ def restart_logcollector_function():
 
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
-@pytest.mark.skip(reason="Test blocked by #2209")
 def test_configuration_age_datetime(get_configuration, configure_environment, configure_local_internal_options_module,
                                     restart_monitord, restart_logcollector_function, file_monitoring,
                                     new_datetime, get_files_list, create_file_structure_function):
@@ -102,7 +101,10 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
     """
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
-    time.sleep(timeout_file_read)
+
+    control_service('restart')
+    
+    time.sleep(10)
 
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
@@ -120,7 +122,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
 
             if age_seconds <= int(mfile_time):
                 log_callback = logcollector.callback_ignoring_file(absolute_file_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=30, callback=log_callback,
                                   error_message=f"{name} was not ignored")
             else:
                 with pytest.raises(TimeoutError):

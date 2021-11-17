@@ -79,6 +79,6 @@ def test_configuration_location(get_configuration, configure_environment, restar
         api.compare_config_api_response([cfg], 'localfile')
     else:
         if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
+            assert check_if_process_is_running('wazuh-agent.exe') == True
         else:
             check_if_process_is_running('wazuh-logcollector')
