@@ -232,7 +232,7 @@ def check_log_format_invalid(cfg):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_log_format(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_log_format(configure_local_internal_options_module, get_configuration,
                     configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
 
