@@ -198,7 +198,7 @@ class FileMonitor:
 
             monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
             self._result = monitor.start(timeout=timeout, callback=callback, accum_results=accum_results,
-                                         update_position=update_position, timeout_extra=timeout_extra,
+                                         update_position=True, timeout_extra=timeout_extra,
                                          error_message=error_message).result()
         finally:
             tailer.shutdown()

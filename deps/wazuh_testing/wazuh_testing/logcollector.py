@@ -123,7 +123,7 @@ def callback_ignored_removed_file(file):
     Returns:
         callable: Callback to detect this event.
     """
-    msg = fr"File not available, ignoring it: '{file}'."
+    msg = f"File not available, ignoring it: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -290,7 +290,7 @@ def callback_reading_syslog_message(message):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"DEBUG: Reading syslog message: '{message}'"
+    msg = f"DEBUG: Reading syslog message: '{message}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -397,7 +397,7 @@ def callback_match_pattern_file(file_pattern, file):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"New file that matches the '{file_pattern}' pattern: '{file}'."
+    msg = f"New file that matches the '{file_pattern}' pattern: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 

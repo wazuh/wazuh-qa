@@ -23,7 +23,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
 
-local_internal_options = {'logcollector.vcheck_files': 0, 'logcollector.debug': '2'}
+local_internal_options = {'logcollector.vcheck_files': 0, 'logcollector.debug': '2', 'windows.debug': '2'}
 
 
 file_structure = [
@@ -114,19 +114,19 @@ def test_configuration_age_basic(configure_local_internal_options_module, get_fi
             wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
             log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
-            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+            wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                     error_message=f"{name} was not detected")
 
             if int(age_seconds) <= int(file['age']):
                 log_callback = logcollector.callback_ignoring_file(
                     absolute_file_path)
-                wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                         error_message=f"{name} was not ignored")
 
             else:
                 with pytest.raises(TimeoutError):
                     log_callback = logcollector.callback_ignoring_file(absolute_file_path)
-                    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                    wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                             error_message=f"{name} was not ignored")
 
     for file in file_structure:
