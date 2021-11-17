@@ -23,7 +23,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
 
-local_internal_options = {'logcollector.vcheck_files': 0}
+local_internal_options = {'logcollector.vcheck_files': 0, 'logcollector.debug': '2'}
 
 
 file_structure = [
@@ -60,18 +60,18 @@ file_structure = [
 ]
 
 parameters = [
-    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '500m'},
-    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '9h'},
-    {'LOCATION': folder_path_regex, 'LOG_FORMAT': 'syslog', 'AGE': '200d'},
+    {'LOCATION': folder_path_regex, 'AGE': '4000s'},
+    {'LOCATION': folder_path_regex, 'AGE': '5m'},
+    {'LOCATION': folder_path_regex, 'AGE': '500m'},
+    {'LOCATION': folder_path_regex, 'AGE': '9h'},
+    {'LOCATION': folder_path_regex, 'AGE': '200d'},
 ]
 
 metadata = lower_case_key_dictionary_array(parameters)
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
-configuration_ids = [f"{x['location']}_{x['log_format']}" for x in metadata]
+configuration_ids = [f"{x['location']}_{x['age']}" for x in metadata]
 
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -92,9 +92,9 @@ def get_local_internal_options():
     return local_internal_options
 
 
-@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8438')
-def test_configuration_age_basic(get_local_internal_options, configure_local_internal_options, get_files_list,
-                                 create_file_structure_function, get_configuration, configure_environment, restart_logcollector):
+def test_configuration_age_basic(configure_local_internal_options_module, get_files_list,
+                                 create_file_structure_function, get_configuration, configure_environment,
+                                 file_monitoring, restart_logcollector):
     """Check if logcollector works correctly and uses the specified age value.
 
     Check that those files that have not been modified for a time greater than age value, are ignored for logcollector.
@@ -137,8 +137,7 @@ def test_configuration_age_basic(get_local_internal_options, configure_local_int
 
             log_callback = logcollector.callback_reading_syslog_message(file['content'][:-1])
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message=f"No syslog message received from {name}")
-
+                                    error_message=f"No syslog message received from {name}", update_position=False)
             log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path)
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                     error_message=f"No lines read from {name}")

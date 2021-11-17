@@ -657,24 +657,31 @@ def create_file_structure(get_files_list):
         get_files_list(dict):  Files to create.
     """
     for file in get_files_list:
-        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        for name in file['filename']:
+        file_folder_path = file['folder_path']
+        files_list = file['filename']
+        age = file['age'] if 'age' in file else None
+        size = file['size'] if 'size' in file else None
+        content = file['content'] if 'content' in file else None
+        size_kib = file['size_kib'] if 'size_kib' in file else None
+
+        os.makedirs(file_folder_path, exist_ok=True, mode=0o777)
+        for filename in files_list:
             for i in range(0, 5):
                 try:
-                    with open(os.path.join(file['folder_path'], name), mode='w'):
+                    with open(os.path.join(file_folder_path, filename), mode='w'):
                         pass
                     break
                 except Exception as e:
                     print(f"Error creating file structure {e}")
                     sleep(1)
 
-            if 'age' in file:
-                fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
-                os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
-                                                                      fileinfo.st_mtime - file['age']))
-            elif 'size' in file:
-                add_log_data(log_path=os.path.join(file['folder_path'], name),
-                             log_line_message=file['content'], size_kib=file['size_kib'])
+            if age:
+                fileinfo = os.stat(os.path.join(file_folder_path, filename))
+                os.utime(os.path.join(file_folder_path, filename), (fileinfo.st_atime - age,
+                                                                      fileinfo.st_mtime - age))
+            elif size:
+                add_log_data(log_path=os.path.join(file_folder_path, filename),
+                             log_line_message=content, size_kib=file['size_kib'])
 
 
 def delete_file_structure(get_files_list):
