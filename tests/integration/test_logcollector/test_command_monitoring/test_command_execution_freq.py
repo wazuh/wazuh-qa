@@ -18,7 +18,8 @@ pytestmark = [pytest.mark.tier(level=0)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2', 'monitord.rotate_log': '0',
+                          'windows.debug': '2'}
 
 
 parameters = [
