@@ -54,7 +54,7 @@ def get_configuration(request):
 
 
 def test_command_execution_freq(configure_local_internal_options_module, get_configuration, file_monitoring,
-                                configure_environment, restart_logcollector):
+                                configure_environment, restart_monitord, restart_logcollector):
     """Check if the Wazuh run correctly with the specified command monitoring option "frequency".
 
     For this purpose, it is verified that the command has not been executed

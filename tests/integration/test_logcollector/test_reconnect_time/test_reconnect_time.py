@@ -70,7 +70,7 @@ def get_local_internal_options():
 
 
 def test_reconnect_time(get_local_internal_options, configure_local_internal_options, get_configuration,
-                        configure_environment, restart_logcollector):
+                        configure_environment, restart_monitord, restart_logcollector):
     """Check if reconnect_time value works properly
 
     Ensure correspond debug logs are generated when Windows event log service stop. Also, when event log service is

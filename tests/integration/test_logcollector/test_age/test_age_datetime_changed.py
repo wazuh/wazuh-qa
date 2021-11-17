@@ -23,10 +23,10 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-wazuh_component = get_service()
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 'windows.debug': '2'}
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 
+                          'windows.debug': '2'}
 
 
 now_date = datetime.now()
@@ -72,15 +72,6 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope='module')
-def restart_monitord():
-    """Reset log file and start a new monitor."""
-    if wazuh_component == 'wazuh-manager':
-        control_service('restart', daemon='wazuh-monitord')
-    else:
-        control_service('restart', daemon='wazuh-agentd')
-
-
 @pytest.fixture(scope='function')
 def restart_logcollector_function():
     """Reset log file and start a new monitor."""
@@ -103,7 +94,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
     age_seconds = time_to_seconds(cfg['age'])
 
     control_service('restart')
-    
+
     time.sleep(10)
 
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))

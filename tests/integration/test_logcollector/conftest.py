@@ -88,3 +88,14 @@ def truncate_log_file():
     truncate_file(LOG_FILE_PATH)
 
     yield
+
+
+@pytest.fixture(scope='module')
+def restart_monitord():
+    wazuh_component = get_service()
+
+    """Reset log file and start a new monitor."""
+    if wazuh_component == 'wazuh-manager':
+        control_service('restart', daemon='wazuh-monitord')
+    else:
+        control_service('restart', daemon='wazuh-agentd')
