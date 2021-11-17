@@ -164,7 +164,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
 
     for agent in agents:
         id = agent['id'] if 'id' in agent else '001'
-        name = agent['name'] if 'name' in agent else f'TestAgent{id}'
+        name = agent['name'] if 'name' in agent else f"TestAgent{id}"
         ip = agent['ip'] if 'ip' in agent else 'any'
         key = agent['key'] if 'key' in agent else 'TopSecret'
         connection_status = agent['connection_status'] if 'connection_status' in agent else 'never_connected'
@@ -182,7 +182,7 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
             registration_time = time_now
 
         # Write agent in client.keys
-        keys_file.write(f'{id} {name} {ip} {key}\n')
+        keys_file.write(f"{id} {name} {ip} {key}\n")
 
         # Write agent in global.db
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
