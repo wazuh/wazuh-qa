@@ -130,9 +130,6 @@ def check_configuration_frequency_invalid(cfg):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if cfg['frequency'] in problematic_values:
-        pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
-
     log_callback = gc.callback_invalid_value('frequency', cfg['frequency'], prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
@@ -176,12 +173,14 @@ def test_configuration_frequency(configure_local_internal_options_module,
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_frequency_valid(cfg)
     else:
-        pytest.xfail("Expected Error in windows agent")
-        if sys.platform == 'win32':
-            expected_exception = ValueError
+        if cfg['frequency'] in problematic_values:
+            pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
-            expected_exception = sb.CalledProcessError
+            if sys.platform == 'win32':
+                expected_exception = ValueError
+            else:
+                expected_exception = sb.CalledProcessError
 
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_frequency_invalid(cfg)
+            with pytest.raises(expected_exception):
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_configuration_frequency_invalid(cfg)

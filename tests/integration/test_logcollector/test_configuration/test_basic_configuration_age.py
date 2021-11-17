@@ -111,9 +111,6 @@ def check_configuration_age_invalid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if cfg['age'] in problematic_values:
-        pytest.xfail("Logcollector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
-
     log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, severity='ERROR')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
@@ -136,7 +133,6 @@ def get_configuration(request):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-@pytest.mark.skip(reason="Test blocked by #2209")
 def test_configuration_age(get_configuration, configure_environment):
     """Check if the Wazuh age field of logcollector works properly.
 
@@ -154,11 +150,14 @@ def test_configuration_age(get_configuration, configure_environment):
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_age_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            expected_exception = ValueError
+        if cfg['age'] in problematic_values:
+            pytest.xfail("Logcollector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
-            expected_exception = sb.CalledProcessError
+            if sys.platform == 'win32':
+                expected_exception = ValueError
+            else:
+                expected_exception = sb.CalledProcessError
 
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_age_invalid(cfg)
+            with pytest.raises(expected_exception):
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_configuration_age_invalid(cfg)

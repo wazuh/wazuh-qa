@@ -68,6 +68,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 configuration_ids = [f"{x['location']}_{x['log_format']}_{x['ignore_binaries']}" for x in metadata]
+problematic_values = ['yesTesting', 'noTesting']
 
 
 # fixtures
@@ -148,12 +149,14 @@ def test_ignore_binaries(get_configuration, configure_environment):
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_ignore_binaries_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            pytest.xfail("Expected Error in windows agent")
-            expected_exception = ValueError
+        if cfg['ignore_binaries'] in problematic_values:
+            pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
-            expected_exception = sb.CalledProcessError
+            if sys.platform == 'win32':
+                expected_exception = ValueError
+            else:
+                expected_exception = sb.CalledProcessError
 
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_ignore_binaries_invalid(cfg)
+            with pytest.raises(expected_exception):
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_ignore_binaries_invalid(cfg)
