@@ -44,6 +44,11 @@ def set_qadocs_logger_level(logging_level):
 
 
 def set_parameters(args):
+    """Set the QADOCS parameters.
+
+    Args:
+        args (argparse.Namespace): The parameters that the tool receives.
+    """
     # Set the qa-docs logger level
     if args.debug_level:
         set_qadocs_logger_level('DEBUG')
@@ -59,8 +64,8 @@ def set_parameters(args):
         global OUTPUT_PATH
         OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs')
 
-    if args.output_path:
-        OUTPUT_PATH = args.output_path
+    if args.output_path and not args.run_with_docker:
+        OUTPUT_PATH = os.path.join(args.output_path, 'output')
 
     if args.output_format:
         global OUTPUT_FORMAT
