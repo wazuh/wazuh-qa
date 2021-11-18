@@ -59,7 +59,7 @@
 #   alert_expected_schema : 'osinfo.schema'
     alert_expected_values:
       rule.id: '100322'
-      data: '{"type":"dbsync_osinfo","os":{"hostname":"UBUNTU","architecture":"x86_64","name":"Microsoft Windows 7","version":"6.1.7601","major":"6","minor":"1","build":"7602","os_release":"sp1","display_version":"1634140017886803554"},"operation_type":"MODIFIED"}'
+      data: '{"type":"dbsync_osinfo","os":{"hostname":"UBUNTU","architecture":"x86_64","name":"Microsoft Windows 7","version":"6.1.7601","major":"6","minor":"1","build":"7602","os_release":"sp1","display_version":"test"},"operation_type":"MODIFIED"}'
   -
     description: 'Hwinfo creation'
     event_payload: '{"data":{"scan_time":"2021/10/13 14:41:43","board_serial":"Intel Corporation","checksum":"af7b22eef8f5e06c04af4db49c9f8d1d28963918","cpu_MHz":2904,"cpu_cores":2,"cpu_name":"Intel(R) Core(TM) i5-9400 CPU @ 2.90GHz","ram_free":2257872,"ram_total":4972208,"ram_usage":54},"operation":"INSERTED","type":"dbsync_hwinfo"}'
