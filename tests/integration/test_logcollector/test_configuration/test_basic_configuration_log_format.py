@@ -252,6 +252,8 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
         check_log_format_valid(cfg)
     else:
         if sys.platform == 'win32':
+            pytest.xfail("Windows agent allows invalid localfile configuration:\
+                          https://github.com/wazuh/wazuh/issues/10890")
             expected_exception = ValueError
         else:
             expected_exception = sb.CalledProcessError

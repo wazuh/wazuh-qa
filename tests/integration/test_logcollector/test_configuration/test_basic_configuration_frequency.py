@@ -177,6 +177,8 @@ def test_configuration_frequency(configure_local_internal_options_module,
             pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
             if sys.platform == 'win32':
+                pytest.xfail("Windows agent allows invalid localfile configuration:\
+                              https://github.com/wazuh/wazuh/issues/10890")
                 expected_exception = ValueError
             else:
                 expected_exception = sb.CalledProcessError

@@ -153,6 +153,8 @@ def test_ignore_binaries(get_configuration, configure_environment):
             pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
             if sys.platform == 'win32':
+                pytest.xfail("Windows agent allows invalid localfile configuration:\
+                              https://github.com/wazuh/wazuh/issues/10890")
                 expected_exception = ValueError
             else:
                 expected_exception = sb.CalledProcessError

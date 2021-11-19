@@ -151,9 +151,11 @@ def test_configuration_age(get_configuration, configure_environment):
         check_configuration_age_valid(cfg)
     else:
         if cfg['age'] in problematic_values:
-            pytest.xfail("Logcollector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
+            pytest.xfail("Logcollector accepts invalid values: https://github.com/wazuh/wazuh/issues/8158")
         else:
             if sys.platform == 'win32':
+                pytest.xfail("Windows agent allows invalid localfile configuration:\
+                              https://github.com/wazuh/wazuh/issues/10890")
                 expected_exception = ValueError
             else:
                 expected_exception = sb.CalledProcessError

@@ -119,9 +119,5 @@ def test_configuration_target(get_configuration, configure_environment, configur
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_target_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            with pytest.raises(ValueError):
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        else:
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_target_invalid(cfg)
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+        check_configuration_target_invalid(cfg)
