@@ -171,7 +171,7 @@ def write_data_to_file(data, output_file_path):
     with open(output_file_path, 'w') as file:
         file.write(json.dumps(data, indent=4))
 
-    script_logger.info(f"The check-files data has been written in {arguments.output_file} file")
+    script_logger.info(f"The check-files data has been written in {output_file_path} file")
 
 
 def get_script_parameters():
