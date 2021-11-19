@@ -76,7 +76,7 @@ def test_command_execution_freq(configure_local_internal_options_module, get_con
 
     seconds_to_travel = config['frequency'] / 2  # Middle of the command execution cycle.
 
-    log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
+    log_monitor.start(timeout=20, callback=log_callback,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     before = str(datetime.now())

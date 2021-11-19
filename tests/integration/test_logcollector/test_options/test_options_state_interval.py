@@ -21,7 +21,7 @@ pytestmark = pytest.mark.tier(level=1)
 # Configuration
 state_interval = [-2, 753951, 'dummy', 5, 30, 10, 15]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
+state_interval_update_timeout = 10
 
 # Fixtures
 @pytest.fixture(scope="module", params=state_interval)
@@ -63,7 +63,7 @@ def test_options_state_interval(get_local_internal_options):
                                                   f"logcollector.state_interval: {interval}.' didn't appear")
     else:
             control_service('restart')
-            sleep(2)
+            sleep(state_interval_update_timeout)
             logcollector.wait_statistics_file(timeout=interval + 5)
             previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
