@@ -55,10 +55,16 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
         get_output_path (fixture): Get the output path where the output will be located.ç
     """
     with open(get_first_file) as json_file:
-        file1_data = json.load(json_file)
+        try:
+            file1_data = json.load(json_file)
+        except ValueError:
+            assert False, "The first file is not a valid JSON."
 
     with open(get_second_file) as json_file:
-        file2_data = json.load(json_file)
+        try:
+            file2_data = json.load(json_file)
+        except ValueError:
+            assert False, "The second file is not a valid JSON."
 
     # The DeepDiff module gives us the differences between these two files.
     diff = DeepDiff(file1_data, file2_data)
