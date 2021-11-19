@@ -190,7 +190,7 @@ def get_script_parameters():
     return arg_parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     arguments = get_script_parameters()
     set_parameters(arguments)
 
@@ -204,3 +204,7 @@ if __name__ == '__main__':
         write_data_to_file(check_files_data, arguments.output_file)
     else:
         script_logger.info(json.dumps(check_files_data, indent=4))
+
+
+if __name__ == '__main__':
+    main()
