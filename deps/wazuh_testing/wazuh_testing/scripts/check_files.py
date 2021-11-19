@@ -54,10 +54,10 @@ _filemode_list = [
 
 
 def set_parameters(parameters):
-    """Set informaion parameters
+    """Configure the script logger
 
     Args:
-        parameters (ArgumentParser): entry parameter to debug or to info
+        parameters (ArgumentParser): script parameters.
     """
     logging_level = logging.DEBUG if parameters.debug else logging.INFO
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
@@ -70,11 +70,11 @@ def set_parameters(parameters):
 
 
 def get_check_files_data(path='/', ignored_paths=[]):
-    """Get a dictionary with all checkfile information from all files and directories located in a specific path
+    """Get a dictionary with all check-files information recursively from a specific path
 
     Args:
-        path (string): Path to begin extract information.
-        ignored_paths (list): Forder's lists to be ignored
+        path (string): Root path from which to obtain the information
+        ignored_paths (list): Path list to be ignored
 
     Returns:
         dict: Dictonary with all check files corresponding to the analized path. It has the following format:
@@ -111,7 +111,7 @@ def get_check_files_data(path='/', ignored_paths=[]):
 
 
 def get_filemode(mode):
-    """Convert a file's mode to a string of the form '-rwxrwxrwx'.
+    """Convert a file's mode to a string in format '-rwxrwxrwx'.
 
     Args:
        mode (int): st_mode field of a file or directory from os.stat_result (Example: 16893)
@@ -136,10 +136,10 @@ def get_filemode(mode):
 
 
 def get_data_information(item):
-    """Get the checkfile data from a file or directory.
+    """Get the check-file data from a file or directory.
 
     Args:
-        item (string): Filepath or directory.
+        item (string): File path or directory.
 
     Returns:
         dict: Dictionary with checkfile data.
@@ -157,11 +157,11 @@ def get_data_information(item):
 
 
 def write_data_to_file(data, output_file_path):
-    """White data file int the specified path
+    """Save the check-files data in the specified file path
 
     Args:
-        data (dict): Data dictionary to be stored in file
-        output_file_path (string): file path
+        data (dict): Check-files data
+        output_file_path (string): file path to save the data
     """
     output_dir = os.path.split(output_file_path)[0]
 
@@ -175,10 +175,10 @@ def write_data_to_file(data, output_file_path):
 
 
 def get_script_parameters():
-    """Generate option atributes to the entry point
+    """Process the script parameters
 
     Returns:
-        ArgumentParser: Atributes to the entry point
+        ArgumentParser: Parameters and their values
     """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-p", "--path", type=str, required=False, default='/',
@@ -195,8 +195,11 @@ if __name__ == '__main__':
     set_parameters(arguments)
 
     ignored_paths = arguments.ignore if arguments.ignore else []
+
+    # Get the check-files info
     check_files_data = get_check_files_data(arguments.path, ignored_paths)
 
+    # Save the check-files data to a file if specified, otherwise will be logged in the stdout
     if arguments.output_file:
         write_data_to_file(check_files_data, arguments.output_file)
     else:
