@@ -52,14 +52,14 @@ def test_options_state_interval(get_local_internal_options):
     if isinstance(interval, int):
         if interval not in range(0, 36001):
             with pytest.raises(ValueError):
+                if sys.platform == 'win32':
+                    pytest.xfail("Windows agent allows invalid localfile configuration:\
+                                  https://github.com/wazuh/wazuh/issues/10890")
                 control_service('restart')
-            if sys.platform == 'win32':
-                assert check_daemon_status(running_condition=False)
-            else:
-                log_callback = logcollector.callback_invalid_state_interval(interval)
-                wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                        error_message=f"The message: 'Invalid definition for "
-                                                  f"logcollector.state_interval: {interval}.' didn't appear")
+            log_callback = logcollector.callback_invalid_state_interval(interval)
+            wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
+                                    error_message=f"The message: 'Invalid definition for "
+                                                f"logcollector.state_interval: {interval}.' didn't appear")
         else:
             control_service('restart')
             logcollector.wait_statistics_file(timeout=interval + 5)
