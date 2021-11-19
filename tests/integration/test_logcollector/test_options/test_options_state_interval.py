@@ -63,6 +63,7 @@ def test_options_state_interval(get_local_internal_options):
                                                   f"logcollector.state_interval: {interval}.' didn't appear")
     else:
             control_service('restart')
+            sleep(2)
             logcollector.wait_statistics_file(timeout=interval + 5)
             previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
