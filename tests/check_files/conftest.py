@@ -2,9 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 def pytest_addoption(parser):
     """Method to add some options to launch tests.
-    
+
     Args:
         parser (argparse.ArgumentParser): Parser object to add the options.
     """
@@ -28,7 +29,7 @@ def pytest_generate_tests(metafunc):
     option_value = metafunc.config.option.after_file
     if 'after-file' in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize("--after-file", [option_value])
-    
+
     option_value = metafunc.config.option.output_path
     if 'output-path' in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize("--output-path", [option_value])
