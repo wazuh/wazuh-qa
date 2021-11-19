@@ -1,0 +1,79 @@
+{
+    "/home/jmv74211/Documents/trash/t/test_check_files/": {
+        "type": "directory",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "775",
+        "prot": "drwxrwxr-x"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/test_system_check_files.py": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/launcher.py": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/centos_7": {
+        "type": "directory",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "775",
+        "prot": "drwxrwxr-x"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/centos_7/entrypoint.py": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/centos_7/Dockerfile": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/centos_8": {
+        "type": "directory",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "775",
+        "prot": "drwxrwxr-x"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/centos_8/entrypoint.py": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04": {
+        "type": "directory",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "775",
+        "prot": "drwxrwxr-x"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "770",
+        "prot": "-rwxrwx---"
+    },
+    "/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/Dockerfile": {
+        "type": "file",
+        "user": "jmv74211",
+        "group": "jmv74211",
+        "mode": "664",
+        "prot": "-rw-rw-r--"
+    }
+}
