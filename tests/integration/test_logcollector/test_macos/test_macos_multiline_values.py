@@ -24,7 +24,7 @@ daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 macos_log_messages = [
     {
         'command': 'logger',
-        'message': "Here is a multiline log. Line 0 \nLine 1. \nLast line.",
+        'message': "Here is a multiline log. Line 0 \nLine 1. \nLast line.\n",
     }
 ]
 
@@ -45,7 +45,7 @@ def get_connection_configuration():
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
-def test_macos_multiline_values(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
+def test_macos_multiline_values(configure_local_internal_options_module, restart_logcollector_required_daemons_package, get_configuration, configure_environment,
                                 macos_message, daemons_handler, file_monitoring):
 
     """Check if logcollector correctly collects multiline events from the macOS unified logging system.
