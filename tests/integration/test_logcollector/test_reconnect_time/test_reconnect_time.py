@@ -70,7 +70,7 @@ def get_local_internal_options():
 
 
 def test_reconnect_time(get_local_internal_options, configure_local_internal_options, get_configuration,
-                        configure_environment, restart_monitord, restart_logcollector):
+                        configure_environment, restart_monitord, file_monitoring, restart_logcollector):
     """Check if reconnect_time value works properly
 
     Ensure correspond debug logs are generated when Windows event log service stop. Also, when event log service is
@@ -80,8 +80,7 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
     config = get_configuration['metadata']
 
     if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
-        pass
-        #pytest.xfail("Expected fail: https://github.com/wazuh/wazuh/issues/8580")
+        pytest.xfail("Expected fail: https://github.com/wazuh/wazuh/issues/8580")
 
     log_callback = logcollector.callback_eventchannel_analyzing(config['location'])
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,

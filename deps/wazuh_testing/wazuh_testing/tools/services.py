@@ -280,7 +280,7 @@ def control_event_log_service(control):
 
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
         result = command.returncode
-        if result == 0:
+        if result == 0 or result == 2:
             break
         else:
             time.sleep(1)
