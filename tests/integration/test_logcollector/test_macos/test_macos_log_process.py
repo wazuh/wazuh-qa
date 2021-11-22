@@ -36,7 +36,7 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope="module")
-def restart_required_logcollector_function():
+def restart_required_logcollector_module():
     """Get configurations from the module."""
     control_service('restart')
 
@@ -70,7 +70,8 @@ def check_process_status(process_list, running=True, stage=''):
         assert len(log_processes) == expected_process, f'Process {process} {is_running_msg} {stage}.'
 
 
-def test_independent_log_process(get_configuration, configure_environment, restart_required_logcollector_function, file_monitoring, up_wazuh_after_module):
+def test_independent_log_process(get_configuration, configure_environment, file_monitoring, 
+                                 restart_required_logcollector_module):
     """Check that independent execution of log processes (external to Wazuh) are not altered because of the Wazuh agent.
 
        Launches a log process and start Wazuh, check that the independent log process keep running along with the one
@@ -104,7 +105,8 @@ def test_independent_log_process(get_configuration, configure_environment, resta
 
     control_service('start')
 
-def test_macos_log_process_stop(get_configuration, configure_environment, restart_required_logcollector_function,  file_monitoring, up_wazuh_after_module):
+def test_macos_log_process_stop(get_configuration, configure_environment, file_monitoring, 
+                                restart_required_logcollector_module):
     """Check if logcollector stops the log and script process when Wazuh agent or logcollector stop.
 
     There are two process that would run on macOS system when logcollector is configured to get
@@ -138,7 +140,8 @@ def test_macos_log_process_stop(get_configuration, configure_environment, restar
     control_service('start')
 
 
-def test_macos_log_process_stop_suddenly_warning(restart_logcollector_required_daemons_package, get_configuration, configure_environment,restart_required_logcollector_function,file_monitoring, up_wazuh_after_module):
+def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_environment, file_monitoring,
+                                                 restart_required_logcollector_module):
     """Check if logcollector alerts when `log stream` process has stopped.
 
     In Sierra this tests also checks that, if log process ends, then script process also ends and the other way around.
