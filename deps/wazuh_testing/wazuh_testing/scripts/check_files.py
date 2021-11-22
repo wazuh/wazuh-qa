@@ -54,6 +54,11 @@ _filemode_list = [
 
 
 def set_parameters(parameters):
+    """Set informaion parameters
+
+    Args:
+        parameters (ArgumentParser): entry parameter to debug or to info
+    """
     logging_level = logging.DEBUG if parameters.debug else logging.INFO
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -65,6 +70,22 @@ def set_parameters(parameters):
 
 
 def get_check_files_data(path='/', ignored_paths=[]):
+    """Get a dictionary with all checkfile information from all files and directories located in a specific path
+
+    Args:
+        path (string): Path to begin extract information.
+        ignored_paths (list): Forder's lists to be ignored
+
+    Returns:
+        dict: Dictonary with all check files corresponding to the analized path. It has the following format:
+            "/var/ossec/active-response":{
+                    "group": "wazuh",
+                    "mode": "0750",
+                    "prot": "drwxr-x---",
+                    "type": "directory",
+                    "user": "root"
+            }, ...
+    """
     files_items_dict = {}
 
     script_logger.info(f"Ignoring the following paths: {ignored_paths}")
@@ -90,6 +111,17 @@ def get_check_files_data(path='/', ignored_paths=[]):
 
 
 def get_filemode(mode):
+    """Convert a file's mode to a string of the form '-rwxrwxrwx'.
+
+    Args:
+       mode (int): st_mode field of a file or directory from os.stat_result (Example: 16893)
+
+    Returns:
+        string: Permissions set '-rwxrwxrwx'
+
+    Example:
+        33204 --> -rw-rw-r--
+    """
     file_permission = []
 
     for item in _filemode_list:
@@ -104,6 +136,14 @@ def get_filemode(mode):
 
 
 def get_data_information(item):
+    """Get the checkfile data from a file or directory.
+
+    Args:
+        item (string): Filepath or directory.
+
+    Returns:
+        dict: Dictionary with checkfile data.
+    """
     stat_info = os.stat(item)
     user = pwd.getpwuid(stat_info.st_uid)[0]
     group = grp.getgrgid(stat_info.st_gid)[0]
@@ -117,6 +157,12 @@ def get_data_information(item):
 
 
 def write_data_to_file(data, output_file_path):
+    """White data file int the specified path
+
+    Args:
+        data (dict): Data dictionary to be stored in file
+        output_file_path (string): file path
+    """
     output_dir = os.path.split(output_file_path)[0]
 
     if not os.path.exists(output_dir):
@@ -129,6 +175,11 @@ def write_data_to_file(data, output_file_path):
 
 
 def get_script_parameters():
+    """Generate option atributes to the entry point
+
+    Returns:
+        ArgumentParser: Atributes to the entry point
+    """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-p", "--path", type=str, required=False, default='/',
                             help="Path base to inspect files recursively")
