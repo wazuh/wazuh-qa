@@ -120,7 +120,6 @@ def generate_macos_logs(get_configuration):
     global first_macos_log_process
     if not first_macos_log_process and sys.platform == 'darwin' and get_configuration['metadata']['log_format'] == 'macos':
         control_service('restart', 'wazuh-logcollector')
-        import pdb; pdb.set_trace() 
         time.sleep(10)
         first_macos_log_process=True
 
