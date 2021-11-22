@@ -140,4 +140,4 @@ def test_configuration_age_basic(configure_local_internal_options_module, get_fi
                                     error_message=f"No syslog message received from {name}", update_position=False)
             log_callback = logcollector.callback_read_line_from_file(1, absolute_file_path)
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                    error_message=f"No lines read from {name}")
+                                    error_message=f"No lines read from {name}", update_position=False)

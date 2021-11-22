@@ -40,7 +40,7 @@ def get_local_internal_options(request):
     control_service('restart')
 
 
-def test_options_state_interval(get_local_internal_options):
+def test_options_state_interval(get_local_internal_options, file_monitoring):
     """Check if logcollector is running correctly with the specified logcollector.state_interval option.
 
     Raises:
