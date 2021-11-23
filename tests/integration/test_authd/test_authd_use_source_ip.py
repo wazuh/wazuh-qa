@@ -83,12 +83,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # Variables
 
 log_monitor_paths = []
-for test_case in test_authd_use_source_ip_tests:
-    if 'ipv6' in test_case:
-        receiver_sockets_params = [(("localhost", 1515), 'AF_INET6', 'SSL_TLSv1_2')]
-    else:
-        receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
-
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -103,11 +97,28 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
-                         ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
-def test_authd_use_source_ip(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_function, restart_authd_function, wait_for_authd_startup_function,
-                             connect_to_sockets_function, test_case, tear_down):
+@pytest.fixture(scope='function', params=test_authd_use_source_ip_tests)
+def get_current_test_case(request):
+    """Get current test case from the module"""
+    return request.param
+
+
+@pytest.fixture(scope='function')
+def configure_receiver_sockets(request, get_current_test_case):
+    """
+    Get configurations from the module
+    """
+    global receiver_sockets_params
+    if 'ipv6' in get_current_test_case:
+        receiver_sockets_params = [(("localhost", 1515), 'AF_INET6', 'SSL_TLSv1_2')]
+    else:
+        receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+    return receiver_sockets_params
+
+
+def test_authd_use_source_ip(get_configuration, configure_environment, get_current_test_case, configure_receiver_sockets,
+                             configure_sockets_environment, clean_client_keys_file_function, restart_authd_function,
+                             wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
     '''
     description:
         Checks that every input message in authd port generates the adequate output
@@ -158,10 +169,12 @@ def test_authd_use_source_ip(get_configuration, configure_environment, configure
     '''
 
     metadata = get_configuration['metadata']
+    test_case =  get_current_test_case['test_case']
 
-    for index, stage in enumerate(test_case['test_case']):
-        # Reopen socket (socket is closed by manager after sending message with client key)
-        receiver_sockets[0].open()
+    # Reopen socket (socket is closed by manager after sending message with client key)
+    receiver_sockets[0].open()
+
+    for stage in test_case:
         message = stage['input']
         receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
@@ -170,11 +183,12 @@ def test_authd_use_source_ip(get_configuration, configure_environment, configure
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
-
-        if metadata['use_source_ip'] == 'yes' and test_case['ip_specified'] == 'no':
-            expected = {"status": "success", "name": "user1", "ip": "127.0.0.1"}
+        if metadata['use_source_ip'] == 'yes' and get_current_test_case['ip_specified'] == 'no':
+            if 'ipv6' in get_current_test_case:
+                expected = {"status": "success", "name": "user1", "ip": "::1"}
+            else:
+                expected = {"status": "success", "name": "user1", "ip": "127.0.0.1"}
         else:
             expected = stage['output']
-
         result, err_msg = validate_authd_response(response, expected)
-        assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
+        assert result == 'success', f"Failed stage '{get_current_test_case['name']}': {err_msg} Complete response: '{response}'"
