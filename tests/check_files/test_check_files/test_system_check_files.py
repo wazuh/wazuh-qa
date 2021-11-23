@@ -48,11 +48,17 @@ def validate_and_read_json(file_path):
 
     Args:
         file_path (str): JSON file path.
+
+    Returns:
+        The JSON file content.
+
+    Raises:
+        ValueError: If the given file is not valid.
     """
     if validate_json_file(file_path):
         file_data = read_json_file(file_path)
     else:
-        assert False, f"The file {file_path} is not a valid JSON."
+        raise ValueError(f"The file {file_path} is not a valid JSON.")
 
     return file_data
 
@@ -74,22 +80,22 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     file2_data = validate_and_read_json(get_second_file)
 
     # The DeepDiff module gives us the differences between these two files.
-    diff = DeepDiff(file1_data, file2_data)
+    differences = DeepDiff(file1_data, file2_data)
 
     # We need to change the format of the key that DeepDiff provides, so it is most descriptive
     # Given difference key example:
     # "root['/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
     # Result: /home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py - mode"
-    json_str = diff.to_json().replace('][', ' - ').replace('root[', '').replace(']', '').replace("'", '') \
-                             .replace('[', '')
+    differences_str = differences.to_json().replace('][', ' - ').replace('root[', '').replace(']', '') \
+                                           .replace("'", '').replace('[', '')
     # If there are differences between the given files
-    if diff != {}:
+    if differences != {}:
         # If the user specified an output path, the differences are saved in JSON format
         if get_output_path:
             output_path = os.path.join(get_output_path, OUTPUT_FILE)
-            write_json_file(output_path, json.loads(json_str))
+            write_json_file(output_path, json.loads(differences_str))
             assert False, f"The given files are not equal, check the diff within {output_path}"
         # If the user did not specify an output path, the differences are printed in JSON format
         else:
             assert False, 'The given files are not equal, these are the diff:\n' \
-                          f"{json.dumps(json.loads(json_str), indent=4)}"
+                          f"{json.dumps(json.loads(differences_str), indent=4)}"
