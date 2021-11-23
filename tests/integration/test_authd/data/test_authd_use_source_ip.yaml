@@ -33,18 +33,7 @@
         name: 'user1'
         ip: 'any'
   -
-    name: 'Let manager decide'
-    description: 'Let manager decide'
-    ip_specified: 'yes'
-    test_case:
-    -
-      input: "OSSEC A:'user1' IP:'src'"
-      output:
-        status: 'success'
-        name: 'user1'
-        ip: '127.0.0.1'
-  -
-    name: 'Let manager decide IPv6'
+    name: 'Let manager decide - IPv6'
     description: 'Let manager decide'
     ipv6: 'yes'
     ip_specified: 'yes'
@@ -54,4 +43,16 @@
       output:
         status: 'success'
         name: 'user1'
-        ip: ' ::1/128'
+        ip: '::1'
+  -
+    name: 'Not specific IPv6'
+    description: 'Not specific IPv6'
+    ipv6: 'yes'
+    ip_specified: 'no'
+    test_case:
+    -
+      input: "OSSEC A:'user1' "
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: 'any'
