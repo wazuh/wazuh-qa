@@ -385,3 +385,22 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def download_text_file(file_url, local_destination_path):
+    """Download a remote file with text/plain content type.
+
+    Args:
+        file_url (str): Remote URL path where the text file is located.
+        local_destination_path (str): Local path where to save the file content.
+
+    Raises:
+        ValueError: if the URL content type is not 'text/plain'.
+
+    """
+    request = requests.get(file_url, allow_redirects=True)
+
+    if 'text/plain' not in request.headers.get('content-type'):
+        raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
+
+    open(local_destination_path, 'wb').write(request.content)
