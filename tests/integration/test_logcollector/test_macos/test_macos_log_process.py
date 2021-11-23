@@ -6,6 +6,7 @@ import os
 import pytest
 import platform
 import signal
+import time
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools import LOG_FILE_PATH
@@ -46,6 +47,7 @@ def up_wazuh_after_module():
 
     yield
     control_service('restart')
+    time.sleep(10)
 
 
 @retry(AssertionError, attempts=5, delay=2, delay_multiplier=1)
@@ -103,7 +105,8 @@ def test_independent_log_process(get_configuration, configure_environment, file_
                                                                                 'after stopping Wazuh agent '
     os.kill(int(independent_log_pid), signal.SIGTERM)
 
-    control_service('start')
+    control_service('restart')
+    time.sleep(10)
 
 def test_macos_log_process_stop(get_configuration, configure_environment, file_monitoring, 
                                 restart_required_logcollector_module):
@@ -137,7 +140,8 @@ def test_macos_log_process_stop(get_configuration, configure_environment, file_m
     control_service('stop', daemon='wazuh-logcollector')
     check_process_status(process_to_stop, running=False, stage='after stop agent')
 
-    control_service('start')
+    control_service('restart')
+    time.sleep(10)
 
 
 def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_environment, file_monitoring,
@@ -153,7 +157,7 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
-
+    time.sleep(5)
     process_to_kill = ['log', 'script'] if macos_sierra else ['log']
 
     check_process_status(process_to_kill, running=True, stage='at start')
@@ -171,4 +175,5 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
 
         control_service('restart', daemon='wazuh-logcollector')
 
-    control_service('start')
+    control_service('restart')
+    time.sleep(10)
