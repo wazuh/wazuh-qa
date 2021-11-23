@@ -25,7 +25,7 @@ def get_first_file(request):
 
 @pytest.fixture
 def get_second_file(request):
-    """Allow to use the --after-file parameter in order to pass the file before making any changes to the environment.
+    """Allow to use the --after-file parameter in order to pass the file after making any changes to the environment.
 
     Args:
         request (fixture): Provide information on the executing test function.
@@ -72,9 +72,9 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     specifies an output path, it will be saved there instead.
 
     Args:
-        get_first_file (fixture): Get the output path where the result will be saved.
-        get_second_file (fixture): Get the file after the Wazuh installation/update/uninstallation
-        get_output_path (fixture): Get the output path where the output will be located.ç
+        get_first_file (fixture): Get the file before making any changes to the environment.
+        get_second_file (fixture): Get the file after making any changes to the environment.
+        get_output_path (fixture): Get the output path where the result will be saved.
     """
     file1_data = validate_and_read_json(get_first_file)
     file2_data = validate_and_read_json(get_second_file)
@@ -87,7 +87,7 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     # "root['/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
     # Result: /home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py - mode"
     differences_str = differences.to_json().replace('][', ' - ').replace('root[', '').replace(']', '') \
-                                           .replace("'", '').replace('[', '')
+                                           .replace('[', '')
     # If there are differences between the given files
     if differences != {}:
         # If the user specified an output path, the differences are saved in JSON format
