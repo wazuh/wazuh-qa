@@ -17,7 +17,7 @@ def pytest_addoption(parser):
 def pytest_generate_tests(metafunc):
     """Hook which is called when collecting a test function.
 
-    Using the metafunc object, you can call parametrize() to use parapmetrization.
+    Using the metafunc object, you can call parametrize() to use parameterization.
 
     Args:
         metafunc (Metafunc): Object with the requesting test context.
