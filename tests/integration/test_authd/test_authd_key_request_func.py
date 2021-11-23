@@ -45,7 +45,7 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/auth.html
-    - https://documentation.wazuh.com/current/user-manual/capabilities/agent-key-request.html
+    - https://documentation.wazuh.com/current/user-manual/registering/key-request.html
 
 tags:
     - key_request
@@ -81,7 +81,6 @@ log_monitor_paths = [LOG_FILE_PATH]
 receiver_sockets_params = [(kreq_sock_path, 'AF_UNIX', 'UDP')]
 test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case in message_tests]
 
-# TODO Replace or delete
 monitored_sockets_params = [('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
