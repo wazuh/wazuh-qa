@@ -8,37 +8,53 @@ import pytest
 from datetime import datetime
 from deepdiff import DeepDiff
 
+from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file
+
 OUTPUT_FILE = f"system_checkfiles_{datetime.now().timestamp()}.json"
 
 
 @pytest.fixture
 def get_first_file(request):
-    """Allows to use the --before-file in order to pass the file before an installation, update, or uninstallation.
+    """Allow to use the --before-file parameter in order to pass the file before making any changes to the environment.
 
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    return request.config.getoption("--before-file")
+    return request.config.getoption('--before-file')
 
 
 @pytest.fixture
 def get_second_file(request):
-    """Allows to use the --after-file in order to pass the file after an installation, update, or uninstallation.
+    """Allow to use the --after-file parameter in order to pass the file before making any changes to the environment.
 
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    return request.config.getoption("--after-file")
+    return request.config.getoption('--after-file')
 
 
 @pytest.fixture
 def get_output_path(request):
-    """Allows to use the --output-path so the users can save the output if they want.
+    """Allow to use the --output-path parameter to store the test result in the specified file.
 
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    return request.config.getoption("--output-path")
+    return request.config.getoption('--output-path')
+
+
+def validate_and_read_json(file_path):
+    """Validate the JSON file passed as argument and return its content.
+
+    Args:
+        file_path (str): JSON file path.
+    """
+    if validate_json_file(file_path):
+        file_data = read_json_file(file_path)
+    else:
+        assert False, f"The file {file_path} is not a valid JSON."
+
+    return file_data
 
 
 def test_system_check_files(get_first_file, get_second_file, get_output_path):
@@ -46,25 +62,16 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
 
     After an installation, update or uninstallation is necessary to check if the system files are the same as before.
     Two given files are checked for differences between them. After checking their contents, if there are differences
-    between them, a log will be printed in JSON format. If the user specifies an output path, it will be saved there
-    instead.
+    between them, the test will fail and a log specifying the differences will be printed in JSON format. If the user
+    specifies an output path, it will be saved there instead.
 
     Args:
-        get_first_file (fixture): Get the file before the Wazuh installation/update/uninstallation
+        get_first_file (fixture): Get the output path where the result will be saved.
         get_second_file (fixture): Get the file after the Wazuh installation/update/uninstallation
         get_output_path (fixture): Get the output path where the output will be located.ç
     """
-    with open(get_first_file) as json_file:
-        try:
-            file1_data = json.load(json_file)
-        except ValueError:
-            assert False, "The first file is not a valid JSON."
-
-    with open(get_second_file) as json_file:
-        try:
-            file2_data = json.load(json_file)
-        except ValueError:
-            assert False, "The second file is not a valid JSON."
+    file1_data = validate_and_read_json(get_first_file)
+    file2_data = validate_and_read_json(get_second_file)
 
     # The DeepDiff module gives us the differences between these two files.
     diff = DeepDiff(file1_data, file2_data)
@@ -77,12 +84,12 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
                              .replace('[', '')
     # If there are differences between the given files
     if diff != {}:
-        # If the user did specify an output path, the differences are saved in JSON format
+        # If the user specified an output path, the differences are saved in JSON format
         if get_output_path:
-            with open(os.path.join(get_output_path, OUTPUT_FILE), 'w+') as output_file:
-                output_file.write(f"{json.dumps(json.loads(json_str), indent=4)}\n")
-            assert False, f"The given files are not equal, check the diff within {get_output_path}"
+            output_path = os.path.join(get_output_path, OUTPUT_FILE)
+            write_json_file(output_path, json.loads(json_str))
+            assert False, f"The given files are not equal, check the diff within {output_path}"
         # If the user did not specify an output path, the differences are printed in JSON format
         else:
-            assert False, "The given files are not equal, these are the diff:\n" \
+            assert False, 'The given files are not equal, these are the diff:\n' \
                           f"{json.dumps(json.loads(json_str), indent=4)}"

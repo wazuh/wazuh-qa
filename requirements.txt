@@ -41,3 +41,4 @@ safety==1.10.3
 bandit==1.7.0
 git-repo==1.10.3
 wmi>=1.5.1; platform_system=='Windows'
+deepdiff

@@ -9,27 +9,27 @@ def pytest_addoption(parser):
     Args:
         parser (argparse.ArgumentParser): Parser object to add the options.
     """
-    parser.addoption("--before-file", action="store", dest='before_file')
-    parser.addoption("--after-file", action="store", dest='after_file')
-    parser.addoption("--output-path", action="store", dest='output_path')
+    parser.addoption('--before-file', action='store', dest='before_file')
+    parser.addoption('--after-file', action='store', dest='after_file')
+    parser.addoption('--output-path', action='store', dest='output_path')
 
 
 def pytest_generate_tests(metafunc):
     """Hook which is called when collecting a test function.
 
-    Using the metafunc object, you can call parametrize() to cause parapmetrization.
+    Using the metafunc object, you can call parametrize() to use parapmetrization.
 
     Args:
         metafunc (Metafunc): Object with the requesting test context.
     """
     option_value = metafunc.config.option.before_file
     if 'before-file' in metafunc.fixturenames and option_value is not None:
-        metafunc.parametrize("--before-file", [option_value])
+        metafunc.parametrize('--before-file', [option_value])
 
     option_value = metafunc.config.option.after_file
     if 'after-file' in metafunc.fixturenames and option_value is not None:
-        metafunc.parametrize("--after-file", [option_value])
+        metafunc.parametrize('--after-file', [option_value])
 
     option_value = metafunc.config.option.output_path
     if 'output-path' in metafunc.fixturenames and option_value is not None:
-        metafunc.parametrize("--output-path", [option_value])
+        metafunc.parametrize('--output-path', [option_value])
