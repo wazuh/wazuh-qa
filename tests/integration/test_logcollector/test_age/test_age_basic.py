@@ -92,6 +92,7 @@ def get_local_internal_options():
     return local_internal_options
 
 
+@pytest.mark.xfail(reason='Expected error. Issue https://github.com/wazuh/wazuh/issues/8438')
 def test_configuration_age_basic(configure_local_internal_options_module, get_files_list,
                                  create_file_structure_function, get_configuration, configure_environment,
                                  file_monitoring, restart_logcollector):
