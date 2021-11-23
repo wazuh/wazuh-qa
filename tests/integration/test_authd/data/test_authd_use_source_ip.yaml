@@ -43,3 +43,15 @@
         status: 'success'
         name: 'user1'
         ip: '127.0.0.1'
+  -
+    name: 'Let manager decide IPv6'
+    description: 'Let manager decide'
+    ipv6: 'yes'
+    ip_specified: 'yes'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'src'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: ' ::1/128'

@@ -83,7 +83,12 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 # Variables
 
 log_monitor_paths = []
-receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+for test_case in test_authd_use_source_ip_tests:
+    if 'ipv6' in test_case:
+        receiver_sockets_params = [(("localhost", 1515), 'AF_INET6', 'SSL_TLSv1_2')]
+    else:
+        receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
