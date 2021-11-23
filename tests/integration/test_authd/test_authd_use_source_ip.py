@@ -105,7 +105,7 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_source_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_source_ip_tests])
-def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
+def test_authd_use_source_ip(get_configuration, configure_environment, configure_sockets_environment,
                              clean_client_keys_file_function, restart_authd_function, wait_for_authd_startup_function,
                              connect_to_sockets_function, test_case, tear_down):
     '''
