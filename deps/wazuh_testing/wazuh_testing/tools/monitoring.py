@@ -240,6 +240,8 @@ class SocketController:
             self.family = socket.AF_UNIX
         elif family == 'AF_INET':
             self.family = socket.AF_INET
+        elif family == 'AF_INET6':
+            self.family = socket.AF_INET6
         else:
             raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
 
