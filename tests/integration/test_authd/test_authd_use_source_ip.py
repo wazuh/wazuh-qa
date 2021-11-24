@@ -78,6 +78,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.ya
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 test_authd_use_source_ip_tests = read_yaml(os.path.join(test_data_path, 'test_authd_use_source_ip.yaml'))
 configuration_ids = [f"Use_source_ip_{x['USE_SOURCE_IP']}" for x in parameters]
+test_cases_ids = [case['name'].replace(' ', '_') for case in test_authd_use_source_ip_tests]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 # Variables
@@ -97,7 +98,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function', params=test_authd_use_source_ip_tests)
+@pytest.fixture(scope='function', params=test_authd_use_source_ip_tests, ids=test_cases_ids)
 def get_current_test_case(request):
     """Get current test case from the module"""
     return request.param
