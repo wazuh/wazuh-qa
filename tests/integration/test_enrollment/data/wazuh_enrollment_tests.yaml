@@ -288,3 +288,47 @@
   message:
     expected: "OSSEC A:'{host_name}' G:'group_1' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
+-
+  name: "Valid agent IPv6 address"
+  description: "Check a valid IPv6 agent_address configuration"
+  configuration:
+    agent_address: "02db:4660:46af:e523:d05e:a62e:4ca7:8e58"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}' IP:'02db:4660:46af:e523:d05e:a62e:4ca7:8e58'\n"
+    response: "OSSEC K:'001 {host_name} 02db:4660:46af:e523:d05e:a62e:4ca7:8e58 TopSecret'\n"
+-
+  name: "Valid compressed agent IPv6 address"
+  description: "Check a valid compressed IPv6 agent_address configuration"
+  configuration:
+    agent_address: "2001:db8:0:b::1A"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}' IP:'2001:db8:0:b::1A'\n"
+    response: "OSSEC K:'001 {host_name} 2001:db8:0:b::1A TopSecret'\n"
+-
+  name: "Invalid Agent IPv6 address"
+  description: "Check an invalid agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "56FE::2159:5BBC::6594"
+  pre_existent_keys:
+    - ""
+  expected_error: "ERROR: Invalid IP address provided for sender IP."
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 56FE::2159:5BBC::6594 TopSecret'\n"
+-
+  name: "Valid manager IPv6 address"
+  description: "Check a valid manager_address configuration"
+  ipv6: 'manager'
+  configuration:
+    manager_address: "::1"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}'\n"
+    response: "OSSEC K:'001 {host_name} any TopSecret'\n"
