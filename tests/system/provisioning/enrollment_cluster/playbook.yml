@@ -5,14 +5,19 @@
     - ./vars/configurations.yml
   tasks:
     - name: Create a network
-      docker_network:
+      community.docker.docker_network:
         name: "{{ docker_network }}"
+        enable_ipv6: yes
+        ipam_config:
+          - subnet: 172.24.27.0/24
+          - subnet: fdd1:ac8c:0557:7ce2::/64
     - docker_container:
         name: "{{ master_hostname }}"
         image: "{{ image }}"
         hostname: "{{ master_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        privileged: yes
 
 - name: Create our container (Worker1)
   hosts: localhost
@@ -25,6 +30,7 @@
         hostname: "{{ worker1_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        privileged: yes
 
 - name: Create our container (Worker2)
   hosts: localhost
@@ -37,6 +43,7 @@
         hostname: "{{ worker2_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        privileged: yes
 
 - name: Create our container (Agent1)
   hosts: localhost
@@ -49,6 +56,7 @@
         hostname: "{{ agent1_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        privileged: yes
 
 - name: Wazuh Master
   hosts: wazuh-master
