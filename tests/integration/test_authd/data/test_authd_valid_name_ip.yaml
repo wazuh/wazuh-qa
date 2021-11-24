@@ -212,3 +212,32 @@
       output:
         status: 'error'
         message: 'Invalid IP: 10.10.10.1'
+  -
+    name: 'Valid IPv6'
+    description: 'Try register an agent with valid IPv6: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'02db:4660:46af:e523:d05e:a62e:4ca7:8e58'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '02db:4660:46af:e523:d05e:a62e:4ca7:8e58'
+  -
+    name: 'Valid compressed IPv6'
+    description: 'Try register an agent with valid compressed IPv6: register'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'2001:db8:0:b::1A'"
+      output:
+        status: 'success'
+        name: 'user1'
+        ip: '2001:db8:0:b::1A8'
+  -
+    name: 'Invalid IPv6: 2 double colons'
+    description: 'Try register an agent with invalid IPv6: rejected'
+    test_case:
+    -
+      input: "OSSEC A:'user1' IP:'56FE::2159:5BBC::6594'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 56FE::2159:5BBC::6594'
