@@ -28,7 +28,7 @@ DAEMON_NAME = "wazuh-logcollector"
 local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 
                           'windows.debug': '2'}
 
-
+timeout_logcollector_read = 10
 now_date = datetime.now()
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
@@ -95,7 +95,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
 
     control_service('restart')
 
-    time.sleep(10)
+    time.sleep(timeout_logcollector_read)
 
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 

@@ -20,7 +20,7 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
-LOG_COLLECTOR_GLOBAL_TIMEOUT = 30
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 40
 
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
@@ -681,7 +681,7 @@ def create_file_structure(get_files_list):
                                                                       fileinfo.st_mtime - age))
             elif size:
                 add_log_data(log_path=os.path.join(file_folder_path, filename),
-                             log_line_message=content, size_kib=file['size_kib'])
+                             log_line_message=content, size_kib=size_kib)
 
 
 def delete_file_structure(get_files_list):
