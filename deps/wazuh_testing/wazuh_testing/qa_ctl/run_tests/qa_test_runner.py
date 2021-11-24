@@ -2,8 +2,7 @@ import os
 import sys
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
@@ -39,43 +38,6 @@ class QATestRunner():
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
 
-    def __read_ansible_instance(self, host_info):
-        """Read every host info and generate the AnsibleInstance object.
-
-        Attributes:
-            host_info (dict): Dict with the host info needed coming from config file.
-
-        Returns:
-            instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
-        """
-        extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
-        private_key_path = None if 'local_private_key_file_path' not in host_info \
-                                   else host_info['local_private_key_file_path']
-
-        if host_info['system'] == 'windows':
-            instance = WindowsAnsibleInstance(
-                host=host_info['host'],
-                ansible_connection=host_info['ansible_connection'],
-                ansible_port=host_info['ansible_port'],
-                ansible_user=host_info['ansible_user'],
-                ansible_password=host_info['ansible_password'],
-                ansible_python_interpreter=host_info['ansible_python_interpreter'],
-                host_vars=extra_vars
-            )
-        else:
-            instance = UnixAnsibleInstance(
-                host=host_info['host'],
-                ansible_connection=host_info['ansible_connection'],
-                ansible_port=host_info['ansible_port'],
-                ansible_user=host_info['ansible_user'],
-                ansible_password=host_info['ansible_password'],
-                ansible_ssh_private_key_file=private_key_path,
-                ansible_python_interpreter=host_info['ansible_python_interpreter'],
-                host_vars=extra_vars
-            )
-
-        return instance
-
     def __process_inventory_data(self, instances_info):
         """Process config file info to generate the ansible inventory file.
 
@@ -90,7 +52,7 @@ class QATestRunner():
                 if module_key == 'host_info':
                     current_host = module_value['host']
                     if current_host:
-                        instances_list.append(self.__read_ansible_instance(module_value))
+                        instances_list.append(read_ansible_instance(module_value))
 
         inventory_instance = AnsibleInventory(ansible_instances=instances_list)
         self.inventory_file_path = inventory_instance.inventory_file_path

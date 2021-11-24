@@ -10,6 +10,7 @@ import random
 import shutil
 import socket
 import stat
+import sys
 import string
 import xml.etree.ElementTree as ET
 import zipfile
@@ -252,7 +253,9 @@ def copy(source, destination):
     """
     shutil.copy2(source, destination)
     source_stats = os.stat(source)
-    os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
+
+    if sys.platform != 'win32':
+        os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
 
 
 def bind_unix_socket(socket_path, protocol='TCP'):
@@ -264,7 +267,7 @@ def bind_unix_socket(socket_path, protocol='TCP'):
         socket_path (str): Path where create the unix socket.
         protocol (str): It can be TCP or UDP.
     """
-    if not os.path.exists(socket_path):
+    if not os.path.exists(socket_path) and sys.platform != 'win32':
         sock_type = socket.SOCK_STREAM if protocol.upper() == 'TCP' else socket.SOCK_DGRAM
         new_socket = socket.socket(socket.AF_UNIX, sock_type)
         new_socket.bind(socket_path)
@@ -298,14 +301,15 @@ def set_file_owner_and_group(file_path, owner, group):
     Raises:
         KeyError: If owner or group does not exist.
     """
-    from pwd import getpwnam
-    from grp import getgrnam
+    if sys.platform != 'win32':
+        from pwd import getpwnam
+        from grp import getgrnam
 
-    if os.path.exists(file_path):
-        uid = getpwnam(owner).pw_uid
-        gid = getgrnam(group).gr_gid
+        if os.path.exists(file_path):
+            uid = getpwnam(owner).pw_uid
+            gid = getgrnam(group).gr_gid
 
-        os.chown(file_path, uid, gid)
+            os.chown(file_path, uid, gid)
 
 
 def recursive_directory_creation(path):
@@ -385,3 +389,22 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def download_text_file(file_url, local_destination_path):
+    """Download a remote file with text/plain content type.
+
+    Args:
+        file_url (str): Remote URL path where the text file is located.
+        local_destination_path (str): Local path where to save the file content.
+
+    Raises:
+        ValueError: if the URL content type is not 'text/plain'.
+
+    """
+    request = requests.get(file_url, allow_redirects=True)
+
+    if 'text/plain' not in request.headers.get('content-type'):
+        raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
+
+    open(local_destination_path, 'wb').write(request.content)

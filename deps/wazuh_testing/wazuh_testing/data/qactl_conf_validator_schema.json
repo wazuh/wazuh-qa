@@ -161,7 +161,7 @@
                     "system": {
                       "type": "string",
                       "enum": [
-                      "rpm", 
+                      "rpm",
                       "deb",
                       "windows",
                       "macos",
@@ -272,6 +272,76 @@
         }
       }
     },
+    "tasks": {
+      "type": "object",
+      "patternProperties": {
+        "^task_[0-9]*$": {
+          "type": "object",
+          "required": ["host_info", "playbooks"],
+          "properties": {
+            "host_info": {
+              "type": "object",
+              "required": [
+                "ansible_connection",
+                "ansible_user",
+                "ansible_port",
+                "ansible_python_interpreter",
+                "host",
+                "system"
+              ],
+              "properties": {
+                "ansible_connection": {
+                  "type" : "string"
+                },
+                "host": {
+                  "type" : "string"
+                },
+                "ansible_user": {
+                  "type": "string"
+                },
+                "ansible_password": {
+                  "type": "string",
+                  "default": "empty"
+                },
+                "ssh_private_key_file_path":{
+                  "type": "string"
+                },
+                "ansible_port": {
+                  "type": "integer"
+                },
+                "ansible_python_interpreter": {
+                  "type": "string"
+                },
+                "system": {
+                  "type": "string"
+                }
+              },
+              "oneOf": [
+                {
+                  "required": ["ansible_password"]
+                },
+                {
+                  "required": ["ssh_private_key_file_path"]
+                }
+              ]
+            },
+            "playbooks": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "required": ["local_path"]
+                  },
+                  {
+                    "required": ["remote_url"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "tests": {
       "type": "object",
       "patternProperties": {
@@ -319,7 +389,6 @@
                 "system": {
                   "type": "string"
                 }
-
               },
               "oneOf": [
                 {
