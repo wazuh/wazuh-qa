@@ -24,6 +24,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+local_internal_options = {'logcollector.debug': '2'}
 
 local_internal_options = {'logcollector.debug': '2'}
 
@@ -118,9 +119,5 @@ def test_configuration_target(get_configuration, configure_environment, configur
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_target_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            with pytest.raises(ValueError):
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        else:
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_target_invalid(cfg)
+        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+        check_configuration_target_invalid(cfg)

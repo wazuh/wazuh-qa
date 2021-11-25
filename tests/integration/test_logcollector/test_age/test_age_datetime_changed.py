@@ -23,15 +23,16 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
-wazuh_component = get_service()
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0'}
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 
+                          'windows.debug': '2'}
 
-
+timeout_logcollector_read = 10
 now_date = datetime.now()
 folder_path = os.path.join(tempfile.gettempdir(), 'wazuh_testing_age')
 folder_path_regex = os.path.join(folder_path, '*')
+timeout_file_read = 4
 
 file_structure = [
     {
@@ -71,15 +72,6 @@ def get_files_list():
     return file_structure
 
 
-@pytest.fixture(scope='module')
-def restart_monitord():
-    """Reset log file and start a new monitor."""
-    if wazuh_component == 'wazuh-manager':
-        control_service('restart', daemon='wazuh-monitord')
-    else:
-        control_service('restart', daemon='wazuh-agentd')
-
-
 @pytest.fixture(scope='function')
 def restart_logcollector_function():
     """Reset log file and start a new monitor."""
@@ -101,6 +93,10 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
     cfg = get_configuration['metadata']
     age_seconds = time_to_seconds(cfg['age'])
 
+    control_service('restart')
+
+    time.sleep(timeout_logcollector_read)
+
     TimeMachine.travel_to_future(time_to_timedelta(new_datetime))
 
     for file in file_structure:
@@ -108,7 +104,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
             absolute_file_path = os.path.join(file['folder_path'], name)
 
             log_callback = logcollector.callback_match_pattern_file(cfg['location'], absolute_file_path)
-            log_monitor.start(timeout=5, callback=log_callback,
+            log_monitor.start(timeout=10, callback=log_callback,
                               error_message=f"{name} was not detected")
 
             fileinfo = os.stat(absolute_file_path)
@@ -117,7 +113,7 @@ def test_configuration_age_datetime(get_configuration, configure_environment, co
 
             if age_seconds <= int(mfile_time):
                 log_callback = logcollector.callback_ignoring_file(absolute_file_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=30, callback=log_callback,
                                   error_message=f"{name} was not ignored")
             else:
                 with pytest.raises(TimeoutError):

@@ -99,8 +99,7 @@ def test_command_execution(configure_local_internal_options_module, get_configur
     """Check if the Wazuh runs correctly by executing different commands with special characteristics.
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
-        configure_local_internal_options (fixture): Set internal configuration.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
         configure_environment (fixture): Configure a custom environment for testing.
         restart_logcollector (fixture): Reset log file and start a new monitor.

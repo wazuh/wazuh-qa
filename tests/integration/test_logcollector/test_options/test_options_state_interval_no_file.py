@@ -77,7 +77,6 @@ def get_local_internal_options_function(request):
     conf.set_wazuh_local_internal_options(backup_options_lines)
 
 
-@pytest.mark.xfail(reason="This test is incosistent. Issue: https://github.com/wazuh/wazuh/issues/10783")
 def test_options_state_interval_no_file(configure_local_internal_options_module, get_local_internal_options_function,
                                         get_files_list, create_file_structure_function,
                                         get_configuration, configure_environment):

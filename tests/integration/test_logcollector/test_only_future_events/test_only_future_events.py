@@ -3,17 +3,24 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import tempfile
+import sys
 
 import pytest
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import monitoring, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 
+
+if sys.platform == 'win32':
+    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
+else:
+    prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.tier(level=0)]
 
 # Configuration
 DAEMON_NAME = "wazuh-logcollector"
@@ -23,7 +30,7 @@ temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
 current_line = 0
 
-local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2'}
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': 2}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '10MB'},
@@ -91,8 +98,8 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
     global current_line
 
     # Ensure that the file is being analyzed
-    message = fr"INFO: \(\d*\): Analyzing file: '{log_test_path}'."
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    message = f"Analyzing file: '{log_test_path}'."
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
     log_monitor.start(timeout=global_parameters.default_timeout,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                       callback=callback_message)
@@ -102,7 +109,7 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
     log_monitor.start(timeout=global_parameters.default_timeout,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                       callback=callback_message)
@@ -120,13 +127,13 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
         # Logcollector should detect the first line written while it was stopped
         # Check first line
         message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
+        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
         log_monitor.start(timeout=global_parameters.default_timeout,
                           error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                           callback=callback_message)
         # Check last line
         message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
+        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
         log_monitor.start(timeout=global_parameters.default_timeout,
                           error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                           callback=callback_message)
@@ -135,14 +142,14 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
         with pytest.raises(TimeoutError):
             # Check first line
             message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
                                                         escape=True)
             log_monitor.start(timeout=global_parameters.default_timeout,
                               error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                               callback=callback_message)
             # Check last line
             message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
                                                         escape=True)
             log_monitor.start(timeout=global_parameters.default_timeout,
                               error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
@@ -153,7 +160,7 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
     log_monitor.start(timeout=global_parameters.default_timeout,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
                       callback=callback_message)

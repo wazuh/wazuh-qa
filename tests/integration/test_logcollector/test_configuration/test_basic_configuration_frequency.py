@@ -8,7 +8,7 @@ import sys
 import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor
 import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -27,7 +27,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 wazuh_component = get_service()
 
@@ -37,7 +37,7 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     command = 'tasklist'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
     command = 'ps -aux'
@@ -130,9 +130,6 @@ def check_configuration_frequency_invalid(cfg):
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if cfg['frequency'] in problematic_values:
-        pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
-
     log_callback = gc.callback_invalid_value('frequency', cfg['frequency'], prefix)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
@@ -157,14 +154,8 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_configuration_frequency(get_local_internal_options, configure_local_internal_options,
+def test_configuration_frequency(configure_local_internal_options_module,
                                  get_configuration, configure_environment):
     """Check if the Wazuh frequency field of logcollector works properly.
 
@@ -182,11 +173,16 @@ def test_configuration_frequency(get_local_internal_options, configure_local_int
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_configuration_frequency_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            expected_exception = ValueError
+        if cfg['frequency'] in problematic_values:
+            pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
-            expected_exception = sb.CalledProcessError
+            if sys.platform == 'win32':
+                pytest.xfail("Windows agent allows invalid localfile configuration:\
+                              https://github.com/wazuh/wazuh/issues/10890")
+                expected_exception = ValueError
+            else:
+                expected_exception = sb.CalledProcessError
 
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_configuration_frequency_invalid(cfg)
+            with pytest.raises(expected_exception):
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_configuration_frequency_invalid(cfg)
