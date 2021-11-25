@@ -103,7 +103,7 @@ class DataVisualizer:
         Returns:
             list: list of colors. The colors are represented as a tuple of float values.
         """
-        return sns.hls_palette(size - 1 if size > 1 else 1, h=.5)
+        return sns.hls_palette(size if size > 1 else 1, h=.5)
 
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
@@ -218,7 +218,7 @@ class DataVisualizer:
                 nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
                 current_df = self.dataframe[self.dataframe.activity == element]
                 current_df.reset_index(drop=True, inplace=True)
-                for node, color in zip(nodes, self._color_palette(len(nodes) + 1)):
+                for node, color in zip(nodes, self._color_palette(len(nodes))):
                     self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                      label=node, color=color)
                 self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
