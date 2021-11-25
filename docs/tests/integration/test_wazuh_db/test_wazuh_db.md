@@ -88,8 +88,8 @@ The different commands to the Global DataBase are tested:
 
 The tests cover different operations against agent's inventory tables product of incoming information deltas:
 
-- Operations against invalid db tables
-- Invalid syscollector operations against db
+- Operations against invalid DB tables
+- Invalid Syscollector operations against DB
 - Valid INSERTED, CREATE, and MODIFIED operations to valid tables
 - Invalid MODIFIED operations: nonexistent data, wrong number or arguments, invalid type
 - Invalid INSERTED operations: duplicated entry, wrong number or arguments, invalid types

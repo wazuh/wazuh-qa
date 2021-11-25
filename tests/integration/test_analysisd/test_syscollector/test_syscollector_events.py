@@ -10,8 +10,8 @@ type:
     integration
 
 brief:
-    These tests will check if the syscollector events, which are processed by
-    the `wazuh-analysisd` daemon, generates appropiate alerts based on the
+    These tests will check if the Syscollector events, which are processed by
+    the `wazuh-analysisd` daemon, generates appropriate alerts based on the
     information contained in the delta.
 
 tier:
@@ -57,7 +57,6 @@ references:
 import json
 import os
 import shutil
-import jsonschema
 
 import pytest
 import yaml
@@ -150,16 +149,16 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
                              wait_for_analysisd_startup, connect_to_sockets_function):
     '''
     description:
-        Check if analysisd handle syscollector deltas properly by generating alerts.
+        Check if Analysisd handle Syscollector deltas properly by generating alerts.
 
     wazuh_min_version:
-        4.3.0
+        4.4.0
 
     parameters:
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-        - get_configuration:
+        - mock_agent:
             type: fixture
             brief: Create mock agent and get agent_id
         - configure_custom_rules:
@@ -177,7 +176,6 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
 
     assertions:
         - Verify that specific syscollector deltas trigger specific custom alert with certain values.
-        - Verify that those custom alerts meet certain schema and expected values (optional)
 
     input_description:
         Input dataset (defined as event_header + event_payload in syscollector.yaml)
@@ -186,8 +184,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         network_address, network_protocol, ports and hotfixes.
 
     expected_output:
-        Expected output (defined as alert_expected_schema + alert_expected_values in syscollector.yaml)
-        try to match any generated alert against an expeced json schema and specific values.
+        Expected output (defined as alert_expected_values in syscollector.yaml)
 
     tags:
         - rules
@@ -203,13 +200,6 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         alert_expected_values = stage['alert_expected_values']
         alert_expected_values['agent.id'] = agent_id
 
-        # Check if stage have json schema check (optional)
-        if stage.get('alert_expected_schema'):
-            schema_path = os.path.join(TEST_DATA_PATH, stage['alert_expected_schema'])
-            expected_schema = json.load(open(schema_path))
-        else:
-            expected_schema = None
-
         # Create full message by header and payload concatenation
         test_msg = event_header + stage['event_payload']
 
@@ -217,12 +207,12 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         receiver_sockets[0].send(test_msg)
 
         # Set callback according to stage parameters
-        alert_callback = CallbackWithContext(callback_check_syscollector_alert, alert_expected_values, expected_schema)
+        alert_callback = CallbackWithContext(callback_check_syscollector_alert, alert_expected_values)
 
         # Find expected outputs
         wazuh_log_monitor.start(timeout=alert_timeout,
                                 callback=alert_callback,
-                                error_message=f'Timeout expecting {stage["description"]} message.')
+                                error_message=f"Timeout expecting {stage['description']} message.")
 
 
 class CallbackWithContext(object):
@@ -234,12 +224,11 @@ class CallbackWithContext(object):
         return self.function(param, *self.ctxt)
 
 
-def callback_check_syscollector_alert(alert, expected_alert, expected_schema):
+def callback_check_syscollector_alert(alert, expected_alert):
     """Check if an alert meet certain criteria and values .
     Args:
         line (str): alert (json) to check.
         expected_alert (dict): values to check.
-        expected_schema (dict): json schema to check. None to skip validation.
     Returns:
         True if line match the criteria. None otherwise
     """
@@ -273,12 +262,6 @@ def callback_check_syscollector_alert(alert, expected_alert, expected_schema):
             expected_value = str(expected_alert[field])
 
         if current_value != expected_value:
-            return None
-
-    if expected_schema:
-        try:
-            jsonschema.validate(instance=alert, schema=expected_schema)
-        except jsonschema.exceptions.ValidationError:
             return None
 
     return True
