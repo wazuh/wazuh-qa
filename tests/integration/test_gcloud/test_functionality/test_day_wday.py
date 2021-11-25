@@ -1,7 +1,63 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
+       (Data access, Admin activity, System events, DNS queries, etc.) from the
+       Google Cloud infrastructure. Once events are collected, Wazuh processes
+       them using its threat detection rules. Specifically, these tests
+       will check if the 'gcp-pubsub' module gets the GCP logs at the date-time
+       specified in the configuration and sleeps up to it.
+
+tier: 0
+
+modules:
+    - gcloud
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#day
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#wday
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#time
+
+tags:
+    - gcloud_functionality
+'''
 import datetime
 import os
 import sys
@@ -74,10 +130,51 @@ def get_configuration(request):
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                   restart_wazuh, wait_for_gcp_start):
-    """
-    These tests verify the module starts to pull according to the day of the week
-    or month and time.
-    """
+    '''
+    description: Check if the 'gcp-pubsub' module starts to pull logs according to the day of the week,
+                 of the month, or time set in the configuration. For this purpose, the test will use
+                 different values for the 'day', 'wday', and 'time' tags (depending on the test case).
+                 Then, it will check that the 'sleep' event is triggered and matches with the set interval.
+                 Finally, the test will travel in time to the specified interval and verify that
+                 the 'fetch' event is generated.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - wait_for_gcp_start:
+            type: fixture
+            brief: Wait for the 'gpc-pubsub' module to start.
+
+    assertions:
+        - Verify that the 'gcp-pubsub' module sleeps up to the date-time specified in the configuration.
+        - Verify that the 'gcp-pubsub' module starts to pull logs at the date-time specified in the configuration.
+
+    input_description: Tree test cases are contained in an external YAML file (wazuh_schedule_conf.yaml)
+                       which includes configuration settings for the 'gcp-pubsub' module. Those are
+                       combined with the scheduling values defined in the module. The GCP access
+                       credentials can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*'
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
+
+    tags:
+        - logs
+        - scheduled
+        - time_travel
+    '''
     def get_next_scan(next_scan_time: str):
         next_scan_time = next_scan_time_log.split()
         date = next_scan_time[0].split('/')
@@ -85,7 +182,8 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
 
         date_before = datetime.datetime.now()
 
-        date_after = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]), int(hour[2]))
+        date_after = datetime.datetime(int(date[0]), int(date[1]), int(date[2]),
+                                       int(hour[0]), int(hour[1]), int(hour[2]))
         diff_time = (date_after - date_before).total_seconds()
 
         return int(diff_time)
@@ -113,10 +211,47 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment,
                            restart_wazuh, wait_for_gcp_start):
-    """
-    These tests verify the module calculates correctly the next scan using
-    time intervals greater than one month, one week or one day.
-    """
+    '''
+    description: Check if the 'gcp-pubsub' module calculates the next scan correctly using time intervals
+                 greater than one month, one week, or one day. For this purpose, the test will use different
+                 values for the 'day', 'wday', and 'time' tags (depending on the test case). Finally, it
+                 will check that the 'sleep' event is triggered and matches with the set interval.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - wait_for_gcp_start:
+            type: fixture
+            brief: Wait for the 'gpc-pubsub' module to start.
+
+    assertions:
+        - Verify that the 'gcp-pubsub' module calculates the next scan correctly from
+          the date-time and interval values specified in the configuration.
+
+    input_description: Tree test cases are contained in an external YAML file (wazuh_schedule_conf.yaml)
+                       which includes configuration settings for the 'gcp-pubsub' module. Those are
+                       combined with the scheduling values defined in the module. The GCP access
+                       credentials can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*'
+
+    tags:
+        - logs
+        - scheduled
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']

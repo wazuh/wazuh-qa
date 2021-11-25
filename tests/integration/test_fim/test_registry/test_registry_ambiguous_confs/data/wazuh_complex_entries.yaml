@@ -35,6 +35,20 @@
         - check_owner: "no"
         - check_group: "no"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration 3
 - tags:
   - complex_report_changes
@@ -65,6 +79,20 @@
         attributes:
         - report_changes: "yes"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration 3
 - tags:
   - complex_tags
@@ -94,3 +122,17 @@
         attributes:
         - tags: TAG_3
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

@@ -68,6 +68,25 @@
         - FIM_MODE
         - check_all: "no"
         - check_inode: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 - tags:
   - test_check_others
   apply_to_modules:
@@ -136,3 +155,21 @@
         - check_sha1sum: "yes"
         - check_all: "no"
         - check_sha256sum: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

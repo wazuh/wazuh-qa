@@ -56,7 +56,7 @@ def create_dummy_session():
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
-def test_load_rules_decoders(test_case):
+def test_load_rules_decoders(restart_required_logtest_daemons, wait_for_logtest_startup, test_case):
     # List to store assert messages
     errors = []
 
