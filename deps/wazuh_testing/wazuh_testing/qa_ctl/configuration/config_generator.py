@@ -113,7 +113,7 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master',
+    def __init__(self, tests=None, wazuh_version=None, qa_branch='master',
                  qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
         self.tests = tests
         self.wazuh_version = wazuh_version
@@ -567,3 +567,67 @@ class QACTLConfigGenerator:
             self.__delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
+
+    def get_deployment_configuration(self, instances):
+        """Generate the qa-ctl configuration required for the deployment of the specified config-instances.
+
+        Args:
+            instances(list(ConfigInstance)): List of config-instances to deploy.
+
+        Returns:
+            dict: Configuration block corresponding to the deployment of the instances
+
+        Raises:
+            QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
+
+        """
+        deployment_configuration = {'deployment': {} }
+
+        for index, instance in enumerate(instances):
+            if instance.os not in self.SYSTEMS:
+                raise QAValueError(f"Could not generate deployment configuration for {instance}. The {instance.os} OS "
+                                   f"is not allowed. Allowed OS: {self.SYSTEMS.keys()}",
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
+
+            os_version = self.SYSTEMS[instance.os]['os_version']
+            box = self.BOX_MAPPING[os_version]
+            system = self.BOX_INFO[box]['system']
+            instance_ip = self.__get_host_IP()
+            # Assign the IP to the instance object (Needed later to generate host config data)
+            instance.ip = instance_ip
+
+            deployment_configuration['deployment'][f"host_{index + 1}"] = {
+                'provider': {
+                    'vagrant': {
+                        'enabled': True,
+                        'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
+                        'vagrant_box': box,
+                        'vm_memory': instance.memory,
+                        'vm_cpu': instance.cpu,
+                        'vm_name': instance.name,
+                        'vm_system': system,
+                        'label': instance.name,
+                        'vm_ip': instance_ip
+                    }
+                }
+            }
+
+        return deployment_configuration
+
+    def get_tasks_configuration(self, instances, playbooks, playbook_path='local'):
+        tasks_configuration = {'tasks': {}}
+
+        for index, instance in enumerate(instances):
+            instance_box = self.BOX_MAPPING[self.SYSTEMS[instance.os]['os_version']]
+            host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+            host_info['host'] = instance.ip
+
+            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else \
+                {'remote_url': playbook} for playbook in playbooks]
+
+            tasks_configuration['tasks'][f"task_{index + 1}"] = {
+                'host_info': host_info,
+                'playbooks': playbooks_dict
+            }
+
+        return tasks_configuration
