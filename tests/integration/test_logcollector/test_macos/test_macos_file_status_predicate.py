@@ -15,7 +15,7 @@ from wazuh_testing.tools.file import read_json
 from os.path import dirname, join, realpath
 if sys.platform != 'win32':
     from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
-    
+
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
@@ -45,7 +45,8 @@ def get_configuration(request):
     return request.param
 
 
-def test_macos_file_status_predicate(restart_logcollector_required_daemons_package, truncate_log_file, 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+def test_macos_file_status_predicate(restart_logcollector_required_daemons_package, truncate_log_file,
                                      delete_file_status_json,
                                      configure_local_internal_options_module,
                                      get_configuration, configure_environment,
