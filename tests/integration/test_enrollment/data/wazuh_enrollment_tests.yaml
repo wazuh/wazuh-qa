@@ -57,7 +57,7 @@
     agent_address: "192.168.0.1000"
   pre_existent_keys:
     - ""
-  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
+  expected_error: "ERROR: Invalid IP address provided for sender IP."
   expected_fail:
     os: "any"
     reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
