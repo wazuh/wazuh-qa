@@ -132,3 +132,15 @@
                     value: '1514'
                 - protocol:
                     value: 'tcp'
+
+    - tags:
+      - test_agentd_server_configuration
+      apply_to_modules:
+      - test_agentd_server_configuration
+      sections:
+      - section: client
+        elements:
+            - server:
+                elements:
+                - address:
+                    value: SERVER_IP

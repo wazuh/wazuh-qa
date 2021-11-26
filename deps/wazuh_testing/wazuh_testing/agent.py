@@ -308,3 +308,15 @@ def callback_exit_cleaning():
         callable: callback to detect this event.
     """
     return monitoring.make_callback(pattern='Exit Cleaning', prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+def callback_unable_to_connect(line):
+    match = re.match(r'.*Unable to connect to', line)
+    return True if match is not None else None
+
+def callback_invalid_server_address(line):
+    match = re.match(r'.*Invalid server address found', line)
+    return True if match is not None else None
+
+def callback_could_not_resolve_hostname(line):
+    match = re.match(r'.*Could not resolve hostname', line)
+    return True if match is not None else None
