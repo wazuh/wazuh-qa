@@ -5,13 +5,11 @@
 import os
 from subprocess import Popen, PIPE, DEVNULL
 import re
-import json
-from json import JSONDecodeError
-
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, callback_detect_event
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, callback_detect_event, \
+                              callback_detect_delete_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -34,29 +32,11 @@ testdir1, testdir2 = test_directories[2:]
 # configurations
 
 conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params, modes=['whodata'])
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+parameters, metadata = generate_params(extra_params=conf_params, modes=['whodata'])
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
-
-# callback
-def callback_detect_delete_event(line):
-    msg = r'.*Sending FIM event: (.+)$'
-    match = re.match(msg, line)
-
-    try:
-        event = json.loads(match.group(1))
-        if (event['type'] == 'event' and
-                event['data']['type'] == 'deleted' and
-                'process_name' not in event['data']['audit']):
-            return event
-    except (AttributeError, JSONDecodeError, KeyError):
-        pass
-
-    return None
 
 # fixtures
-
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -114,7 +94,7 @@ def test_deferred_delete_file(folder, file_list, filetype, tags_to_apply,
     confirmation = re.search(r'\((\w)\/\w\)\?', stdout[0])
     assert confirmation
 
-    # Run the command again and this time delete the files
+    # Run the command again and confirm deletion of files
     cmd = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=DEVNULL, universal_newlines=True)
     try:
         stdout = cmd.communicate('{}\n'.format(confirmation.group(1)), timeout=global_parameters.default_timeout)
