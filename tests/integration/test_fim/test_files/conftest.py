@@ -22,6 +22,18 @@ def restart_syscheckd(get_configuration, request):
     control_service('start', daemon='wazuh-syscheckd')
 
 
+@pytest.fixture(scope='function')
+def restart_syscheckd_function(get_configuration, request):
+    """
+    Restart syscheckd daemon.
+    """
+    control_service('stop', daemon='wazuh-syscheckd')
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+    control_service('start', daemon='wazuh-syscheckd')
+
+
 @pytest.fixture(scope='module')
 def wait_for_fim_start(get_configuration, request):
     """
@@ -58,4 +70,3 @@ def wait_for_fim_start_function(get_configuration, request):
             detect_initial_scan(file_monitor)
     except KeyError:
         detect_initial_scan(file_monitor)
-        
