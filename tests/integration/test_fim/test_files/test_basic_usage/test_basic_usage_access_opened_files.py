@@ -24,6 +24,9 @@ path: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_ac
 daemons:
     - wazuh-syscheckd
 
+modes:
+    - scheduled
+    
 os_platform:
     - linux
     - windows
