@@ -51,10 +51,11 @@ os_version:
     - Red Hat 8
     - Red Hat 7
     - Red Hat 6
+    - Windows 10
 
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/vulnerability-detection/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/vuln-detector.html#enabled
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/fim-configuration.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html
 
 tags:
     - syscheck
