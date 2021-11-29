@@ -56,89 +56,35 @@ references:
 '''
 import json
 import os
-import shutil
 
 import pytest
 import yaml
-from wazuh_testing.tools import (ALERT_FILE_PATH, LOG_FILE_PATH,
-                                 WAZUH_UNIX_USER, WAZUH_UNIX_GROUP,
-                                 CUSTOM_RULES_PATH, ANALYSISD_QUEUE_SOCKET_PATH)
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.vulnerability_detector import create_mocked_agent, delete_mocked_agent
+
+from wazuh_testing.tools import (ANALYSISD_QUEUE_SOCKET_PATH, ALERT_FILE_PATH)
+from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollector_alert
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
-
-# Configurations
-TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-messages_path = os.path.join(TEST_DATA_PATH, 'syscollector.yaml')
-with open(messages_path) as f:
-    test_cases = yaml.safe_load(f)
-
-
-# Fixtures
-@pytest.fixture(scope='module')
-def configure_custom_rules(get_configuration):
-    """Configure a syscollector custom rules for testing.
-    Restarting wazuh-analysisd is required to apply this changes.
-    """
-    source_rule = os.path.join(TEST_DATA_PATH, get_configuration['rule_file'])
-    target_rule = os.path.join(CUSTOM_RULES_PATH, get_configuration['rule_file'])
-
-    # copy custom rule with specific privileges
-    shutil.copy(source_rule, target_rule)
-    shutil.chown(target_rule, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
-
-    yield
-
-    # remove custom rule
-    os.remove(target_rule)
-
-
-@pytest.fixture(scope='module')
-def restart_analysisd():
-    """wazuh-analysisd restart and log truncation"""
-    required_logtest_daemons = ['wazuh-analysisd']
-
-    truncate_file(ALERT_FILE_PATH)
-    truncate_file(LOG_FILE_PATH)
-
-    for daemon in required_logtest_daemons:
-        control_service('restart', daemon=daemon)
-
-    yield
-
-    for daemon in required_logtest_daemons:
-        control_service('stop', daemon=daemon)
-
-
-@pytest.fixture(scope='module')
-def mock_agent():
-    """Fixture to create a mocked agent in wazuh databases"""
-    control_service('stop', daemon='wazuh-db')
-    agent_id = create_mocked_agent(name="mocked_agent")
-    control_service('start', daemon='wazuh-db')
-
-    yield agent_id
-
-    control_service('stop', daemon='wazuh-db')
-    delete_mocked_agent(agent_id)
-    control_service('start', daemon='wazuh-db')
-
-
-@pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
 
 
 # Variables
 receiver_sockets_params = [(ANALYSISD_QUEUE_SOCKET_PATH, 'AF_UNIX', 'UDP')]
 receiver_sockets = None
-wazuh_log_monitor = FileMonitor(ALERT_FILE_PATH)
 alert_timeout = 5
+file_to_monitor = ALERT_FILE_PATH
+
+# Configurations
+data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+messages_path = os.path.join(data_dir, 'syscollector.yaml')
+with open(messages_path) as f:
+    test_cases = yaml.safe_load(f)
+
+
+# Fixtures
+@pytest.fixture(scope='module', params=test_cases, ids=[test_case['name'] for test_case in test_cases])
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
 
 
 # Tests
@@ -146,7 +92,7 @@ alert_timeout = 5
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
 def test_syscollector_events(test_case, get_configuration, mock_agent, configure_custom_rules, restart_analysisd,
-                             wait_for_analysisd_startup, connect_to_sockets_function):
+                             wait_for_analysisd_startup, connect_to_sockets_function, file_monitoring):
     '''
     description:
         Check if Analysisd handle Syscollector deltas properly by generating alerts.
@@ -173,6 +119,9 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         - connect_to_sockets_function:
             type: fixture
             brief: Connect to analysisd event queue.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
 
     assertions:
         - Verify that specific syscollector deltas trigger specific custom alert with certain values.
@@ -210,58 +159,6 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         alert_callback = CallbackWithContext(callback_check_syscollector_alert, alert_expected_values)
 
         # Find expected outputs
-        wazuh_log_monitor.start(timeout=alert_timeout,
-                                callback=alert_callback,
-                                error_message=f"Timeout expecting {stage['description']} message.")
-
-
-class CallbackWithContext(object):
-    def __init__(self, function, *ctxt):
-        self.ctxt = ctxt
-        self.function = function
-
-    def __call__(self, param):
-        return self.function(param, *self.ctxt)
-
-
-def callback_check_syscollector_alert(alert, expected_alert):
-    """Check if an alert meet certain criteria and values .
-    Args:
-        line (str): alert (json) to check.
-        expected_alert (dict): values to check.
-    Returns:
-        True if line match the criteria. None otherwise
-    """
-    try:
-        alert = json.loads(alert)
-    except Exception:
-        return None
-
-    def dotget(dotdict, k):
-        """Get value from dict using dot notation keys
-
-        Args:
-            dotdict (dict): dict to get value from
-            k (str): dot-separated key.
-
-        Returns:
-            value of specified key. None otherwise
-        """
-        if '.' in k:
-            key = k.split('.', 1)
-            return dotget(dotdict[key[0]], key[1])
-        else:
-            return dotdict.get(k)
-
-    for field in expected_alert.keys():
-        current_value = dotget(alert, field)
-        try:
-            expected_value = json.loads(expected_alert[field])
-            expected_value = expected_value if type(expected_value) is dict else str(expected_value)
-        except ValueError as e:
-            expected_value = str(expected_alert[field])
-
-        if current_value != expected_value:
-            return None
-
-    return True
+        log_monitor.start(timeout=alert_timeout,
+                          callback=alert_callback,
+                          error_message=f"Timeout expecting {stage['description']} message.")
