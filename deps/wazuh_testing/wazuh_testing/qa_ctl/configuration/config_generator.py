@@ -125,6 +125,9 @@ class QACTLConfigGenerator:
         self.qa_branch = qa_branch
         self.qa_files_path = qa_files_path
 
+        # Create qa-ctl temporarily files path
+        file.recursive_directory_creation(join(gettempdir(), 'wazuh_qa_ctl'))
+
     def __get_test_info(self, test_name):
         """Get information from a documented test.
 
@@ -590,8 +593,8 @@ class QACTLConfigGenerator:
                                    QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
             os_version = self.SYSTEMS[instance.os]['os_version']
+            os_platform = self.SYSTEMS[instance.os]['os_platform']
             box = self.BOX_MAPPING[os_version]
-            system = self.BOX_INFO[box]['system']
             instance_ip = self.__get_host_IP()
             # Assign the IP to the instance object (Needed later to generate host config data)
             instance.ip = instance_ip
@@ -605,7 +608,7 @@ class QACTLConfigGenerator:
                         'vm_memory': instance.memory,
                         'vm_cpu': instance.cpu,
                         'vm_name': instance.name,
-                        'vm_system': system,
+                        'vm_system': os_platform,
                         'label': instance.name,
                         'vm_ip': instance_ip
                     }
