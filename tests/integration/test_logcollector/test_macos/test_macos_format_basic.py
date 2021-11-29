@@ -4,10 +4,12 @@
 
 import os
 import pytest
+import time
 
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.remote import check_agent_received_message
+from wazuh_testing.tools.services import control_service
+
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
@@ -17,6 +19,11 @@ configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_basic.yam
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
+daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
+
+local_internal_options = {'logcollector.debug': 2,
+                          'logcollector.sample_log_length': 200}
+
 macos_log_messages = [
     {
         'command': 'os_log',
@@ -24,10 +31,17 @@ macos_log_messages = [
         'level': 'error',
         'subsystem': 'testing.wazuh-agent.macos',
         'category': 'category',
-        'id': 'example'
+        'id': 'os_log_command'
+    },
+    {
+        'command': 'logger',
+        'message': 'Logger message example',
+        'id': 'logger_command'
     }
 ]
 
+macos_log_message_timeout = 40
+macos_monitoring_macos_log_timeout = 30
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations)
@@ -36,16 +50,18 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_connection_configuration():
-    """Get configurations from the module."""
-    return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
+@pytest.fixture(scope="function")
+def restart_logcollector_function():
+    control_service('restart', 'wazuh-logcollector')
+
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
-def test_macos_format_basic(get_configuration, configure_environment, get_connection_configuration,
-                            init_authd_remote_simulator, macos_message, restart_logcollector):
+def test_macos_format_basic(restart_logcollector_required_daemons_package, get_configuration, configure_environment, 
+                            configure_local_internal_options_module,
+                            macos_message, file_monitoring, daemons_handler,
+                            restart_logcollector_function):
 
     """Check if logcollector gather correctly macOS unified logging system events.
 
@@ -58,9 +74,10 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
     expected_macos_message = ""
     log_command = macos_message['command']
 
-    macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
-    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+    log_monitor.start(timeout=macos_monitoring_macos_log_timeout, callback=logcollector.callback_monitoring_macos_logs,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+
+    time.sleep(3)
 
     if log_command == 'logger':
         logcollector.generate_macos_logger_log(macos_message['message'])
@@ -68,11 +85,12 @@ def test_macos_format_basic(get_configuration, configure_environment, get_connec
                                                                            macos_message['message'])
 
     elif log_command == 'os_log':
-        logcollector.generate_macos_custom_log(macos_message['type'], macos_message['level'],
-                                               macos_message['subsystem'], macos_message['category'])
+        logcollector.generate_macos_custom_log(macos_message['type'],macos_message['level'], macos_message['subsystem'],
+                                               macos_message['category'])
         expected_macos_message = logcollector.format_macos_message_pattern(
-                                                'custom_log', logcollector.TEMPLATE_OSLOG_MESSAGE,
-                                                subsystem=macos_message['subsystem'],
-                                                category=macos_message['category'])
+                                                'custom_log',
+                                                logcollector.TEMPLATE_OSLOG_MESSAGE, 'log', macos_message['subsystem'],
+                                                macos_message['category'])
 
-    check_agent_received_message(remoted_simulator.rcv_msg_queue, expected_macos_message, timeout=40)
+    log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
