@@ -10,7 +10,7 @@ type: integration
 brief: Check that files that are being scanned by the syscheckd daemon can
        modified (renamed/deleted), and that wazuh is not blocking the files.
 
-tier: 0
+tier: 1
 
 modules:
     - syscheck
@@ -79,7 +79,7 @@ from wazuh_testing.tools.file import delete_path_recursively
 
 
 # Marks
-pytestmark = [pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
 directory_str = os.path.join(PREFIX, "testdir1")

@@ -985,6 +985,9 @@ def callback_detect_end_scan(line):
 
 
 def callback_detect_scan_start(line):
+    """
+    Detect the start of a scheduled scan or initial scan.
+    """
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
     if not match:
@@ -998,6 +1001,9 @@ def callback_detect_scan_start(line):
 
 
 def callback_get_scan_timestap(line):
+    """
+    Get the timestamp for the end of the initial scan or a scheduled scan
+    """
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
     if not match:
@@ -1010,6 +1016,9 @@ def callback_get_scan_timestap(line):
 
 
 def callback_detect_event(line):
+    """
+    Detect an 'event' type FIM log.
+    """
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
     if not match:
