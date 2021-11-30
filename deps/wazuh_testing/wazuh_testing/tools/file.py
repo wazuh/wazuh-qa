@@ -345,7 +345,8 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
-        
+
+
 def count_file_lines(filepath):
     """Count number of lines of a specified file.
 
@@ -357,3 +358,22 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def create_large_file(directory, file_path):
+    """ Create a large file
+    Args:
+         directory(str): directory where the file will be genarated
+         file_path(str): absolute path of the file
+    """
+    # If path exists delete it
+    if os.path.exists(directory):
+        delete_path_recursively(directory)
+    # create directory
+    os.mkdir(directory)
+    file_size = 1024 * 1024 * 960  # 968 MB
+    chunksize = 1024 * 768
+    # create file and write to it.
+    with open(file_path, "a") as f:
+        while os.stat(file_path).st_size < file_size:
+            f.write(random.choice(string.printable) * chunksize)

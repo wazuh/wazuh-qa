@@ -75,7 +75,7 @@ from wazuh_testing.tools.configuration import (
     check_apply_test,
 )
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import delete_path_recursively
+from wazuh_testing.tools.file import delete_path_recursively, create_large_file
 
 
 # Marks
@@ -104,64 +104,34 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope="function")
-def create_and_delete_large_file(get_configuration, request):
-    """
-    Create a large file and later delete the path.
-    """
-    if get_configuration["metadata"]["fim_mode"] != "scheduled":
-        pytest.skip("This test does not apply to realtime or whodata modes")
-    # If path exists delete it
-    if os.path.exists(directory_str):
-        delete_path_recursively(directory_str)
-    # create directory
-    os.mkdir(directory_str)
-    file_size = 1024 * 1024 * 960  # 968 MB
-    chunksize = 1024 * 768
-    # create file and write to it.
-    with open(file_path, "a") as f:
-        while os.stat(file_path).st_size < file_size:
-            f.write(random.choice(string.printable) * chunksize)
+def create_and_delete_file(request):
+    """Creates a file and later deletes the path."""
+
+    create_large_file(directory_str, file_path)
     yield
-    # delete the file and path
     delete_path_recursively(directory_str)
-
-
-@pytest.fixture(scope="function")
-def wait_for_scan_start(get_configuration, request):
-    """
-    Wait for start of initial FIM scan.
-    """
-    file_monitor = getattr(request.module, "wazuh_log_monitor")
-    try:
-        detect_initial_scan_start(file_monitor)
-    except KeyError:
-        detect_initial_scan_start(file_monitor)
 
 
 # Tests
 @pytest.mark.parametrize(
-    "operation, tags_to_apply", [("delete", {"ossec_conf"}), ("rename", {"ossec_conf"})]
+    "tags_to_apply", [({"ossec_conf"}), ({"ossec_conf"})]
 )
-def test_basic_usage_access_opened_files(
-    operation,
+def test_basic_usage_modify_opened_files(
     tags_to_apply,
     get_configuration,
     configure_environment,
-    create_and_delete_large_file,
+    create_and_delete_file,
     restart_syscheckd_function,
     wait_for_scan_start,
 ):
     """
     description: Check that files that are being scanned by syscheckd daemon
-                 can modified (renamed/deleted), and that wazuh is not
+                 can modified (renamed), and that wazuh is not
                  blocking the files.
 
     wazuh_min_version: 4.3
 
     parameters:
-        - operation:
-            type: string
-            brief: Tells which operation has to be performed.
         - tags_to_apply:
             type: string
             brief: Tells which configuration to use.
@@ -171,7 +141,7 @@ def test_basic_usage_access_opened_files(
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - create_and_delete_large_file:
+        - create_and_delete_file:
             type: fixture
             brief: Creates file to be monitored. Cleans enviroment after test.
         - restart_syscheckd_function:
@@ -182,37 +152,93 @@ def test_basic_usage_access_opened_files(
             brief: Wait for start of initial FIM scan start.
 
     assertions:
-        - Verify that the file hast been modified (renamed/deleted).
+        - Verify that the file hast been modified renamed.
         - Verify that the modificaction is done before the initial scan ends.
-
-    input_description: Two use cases are found in the test module and include
-                       parameters for operation (`delete` and `rename`).
     """
 
     check_apply_test(tags_to_apply, get_configuration["tags"])
+    if get_configuration["metadata"]["fim_mode"] != "scheduled":
+        pytest.skip("This test does not apply to realtime or whodata modes")
 
     # Wait a few seconds for scan to run on created file.
     time.sleep(3)
 
     modify_time = None
-    # Modify/Delete the file
-    if operation == "rename":
-        changed_path = os.path.join(directory_str, "changed_name")
-        try:
-            modify_time = time.time()
-            os.rename(file_path, changed_path)
-            # Assert the file has been changed
-            assert os.path.isfile(changed_path) == True
-        except (OSError, IOError, PermissionError) as error:
-            pytest.fail(f"Could not rename file - Error: {error}")
-    elif operation == "delete":
-        try:
-            os.remove(file_path)
-            modify_time = time.time()
-            # Assert the file has been deleted
-            assert os.path.isfile(file_path) == False
-        except (OSError, IOError, PermissionError) as error:
-            pytest.fail(f"Could not delete file - Error: {error}")
+    # Modify the file
+    changed_path = os.path.join(directory_str, "changed_name")
+    try:
+        modify_time = time.time()
+        os.rename(file_path, changed_path)
+        # Assert the file has been changed
+        assert os.path.isfile(changed_path) == True
+    except (OSError, IOError, PermissionError) as error:
+        pytest.fail(f"Could not rename file - Error: {error}")
+
+    # Capture scan end timestamp & assert the file was modified before scan end
+    scan_timestamp = get_scan_timestamp(wazuh_log_monitor)
+    assert modify_time < scan_timestamp
+
+
+@pytest.mark.parametrize(
+    "tags_to_apply", [({"ossec_conf"}), ({"ossec_conf"})]
+)
+def test_basic_usage_delete_opened_files(
+    tags_to_apply,
+    get_configuration,
+    configure_environment,
+    create_and_delete_file,
+    restart_syscheckd_function,
+    wait_for_scan_start,
+):
+    """
+    description: Check that files that are being scanned by syscheckd daemon
+                 can deleted deleted, and that wazuh is not
+                 blocking the files.
+
+    wazuh_min_version: 4.3
+
+    parameters:
+        - tags_to_apply:
+            type: string
+            brief: Tells which configuration to use.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - create_and_delete_file:
+            type: fixture
+            brief: Creates file to be monitored. Cleans enviroment after test.
+        - restart_syscheckd_function:
+            type: fixture
+            brief: Restart the `wazuh-syscheckd` daemon.
+        - wait for scan start:
+            type: fixture
+            brief: Wait for start of initial FIM scan start.
+
+    assertions:
+        - Verify that the file has been deleted.
+        - Verify that the modificaction is done before the initial scan ends.
+
+    """
+
+    check_apply_test(tags_to_apply, get_configuration["tags"])
+    if get_configuration["metadata"]["fim_mode"] != "scheduled":
+        pytest.skip("This test does not apply to realtime or whodata modes")
+
+    # Wait a few seconds for scan to run on created file.
+    time.sleep(3)
+
+    modify_time = None
+    # Delete the file
+    try:
+        os.remove(file_path)
+        modify_time = time.time()
+        # Assert the file has been deleted
+        assert os.path.isfile(file_path) == False
+    except (OSError, IOError, PermissionError) as error:
+        pytest.fail(f"Could not delete file - Error: {error}")
 
     # Capture scan end timestamp & assert the file was modified before scan end
     scan_timestamp = get_scan_timestamp(wazuh_log_monitor)
