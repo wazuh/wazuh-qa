@@ -53,10 +53,13 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     for process in options.process_list:
-        monitor = Monitor(process_name=process, value_unit=options.data_unit, time_step=options.sleep_time,
-                          version=options.version, dst_dir=options.store_path)
-        monitor.start()
-        MONITOR_LIST.append(monitor)
+        # Launch a monitor for every possible child process
+        for i, pid in enumerate(Monitor.get_process_pids(process)):
+            p_name = process if i == 0 else f'{process}_child_{i}'
+            monitor = Monitor(process_name=p_name, pid=pid, value_unit=options.data_unit, time_step=options.sleep_time,
+                              version=options.version, dst_dir=options.store_path)
+            monitor.start()
+            MONITOR_LIST.append(monitor)
 
 
 if __name__ == '__main__':
