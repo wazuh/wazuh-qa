@@ -26,7 +26,7 @@ daemons:
 
 modes:
     - scheduled
-    
+
 os_platform:
     - linux
     - windows
@@ -67,17 +67,9 @@ import string
 import pytest
 import time
 
-from wazuh_testing.fim import (
-    LOG_FILE_PATH,
-    generate_params,
-    detect_initial_scan_start,
-    get_scan_timestamp,
-)
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, detect_initial_scan_start, get_scan_timestamp
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import (
-    load_wazuh_configurations,
-    check_apply_test,
-)
+from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import delete_path_recursively, create_large_file
 
@@ -95,9 +87,7 @@ configurations_path = os.path.join(test_data_path, "wazuh_conf.yaml")
 # configurations
 conf_params = {"TEST_DIRECTORIES": directory_str, "MODULE_NAME": __name__}
 parameters, metadata = generate_params(extra_params=conf_params)
-configurations = load_wazuh_configurations(
-    configurations_path, __name__, params=parameters, metadata=metadata
-)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
 # Fixtures
@@ -117,17 +107,9 @@ def create_and_delete_file(request):
 
 
 # Tests
-@pytest.mark.parametrize(
-    "tags_to_apply", [({"ossec_conf"}), ({"ossec_conf"})]
-)
-def test_basic_usage_modify_opened_files(
-    tags_to_apply,
-    get_configuration,
-    configure_environment,
-    create_and_delete_file,
-    restart_syscheckd_function,
-    wait_for_scan_start,
-):
+@pytest.mark.parametrize("tags_to_apply", [({"ossec_conf"})])
+def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, configure_environment, 
+                                        create_and_delete_file, restart_syscheckd_function, wait_for_scan_start):
     """
     description: Check that files that are being scanned by syscheckd daemon
                  can modified (renamed), and that wazuh is not
@@ -183,17 +165,9 @@ def test_basic_usage_modify_opened_files(
     assert modify_time < scan_timestamp
 
 
-@pytest.mark.parametrize(
-    "tags_to_apply", [({"ossec_conf"}), ({"ossec_conf"})]
-)
-def test_basic_usage_delete_opened_files(
-    tags_to_apply,
-    get_configuration,
-    configure_environment,
-    create_and_delete_file,
-    restart_syscheckd_function,
-    wait_for_scan_start,
-):
+@pytest.mark.parametrize("tags_to_apply", [({"ossec_conf"})])
+def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, configure_environment,
+                                        create_and_delete_file, restart_syscheckd_function, wait_for_scan_start):
     """
     description: Check that files that are being scanned by syscheckd daemon
                  can deleted deleted, and that wazuh is not
