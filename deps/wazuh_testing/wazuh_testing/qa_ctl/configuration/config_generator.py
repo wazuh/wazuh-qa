@@ -587,14 +587,12 @@ class QACTLConfigGenerator:
         deployment_configuration = {'deployment': {} }
 
         for index, instance in enumerate(instances):
-            if instance.os not in self.SYSTEMS:
-                raise QAValueError(f"Could not generate deployment configuration for {instance}. The {instance.os} OS "
-                                   f"is not allowed. Allowed OS: {self.SYSTEMS.keys()}",
-                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
+            try:
+                box = self.BOX_MAPPING[instance.os_version]
+            except KeyError as exception:
+                raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
 
-            os_version = self.SYSTEMS[instance.os]['os_version']
-            os_platform = self.SYSTEMS[instance.os]['os_platform']
-            box = self.BOX_MAPPING[os_version]
             instance_ip = self.__get_host_IP()
             # Assign the IP to the instance object (Needed later to generate host config data)
             instance.ip = instance_ip
@@ -608,7 +606,7 @@ class QACTLConfigGenerator:
                         'vm_memory': instance.memory,
                         'vm_cpu': instance.cpu,
                         'vm_name': instance.name,
-                        'vm_system': os_platform,
+                        'vm_system': instance.os_platform,
                         'label': instance.name,
                         'vm_ip': instance_ip
                     }
@@ -621,7 +619,7 @@ class QACTLConfigGenerator:
         tasks_configuration = {'tasks': {}}
 
         for index, instance in enumerate(instances):
-            instance_box = self.BOX_MAPPING[self.SYSTEMS[instance.os]['os_version']]
+            instance_box = self.BOX_MAPPING[instance.os_version]
             host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
             host_info['host'] = instance.ip
 
