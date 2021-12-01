@@ -309,14 +309,14 @@ def callback_exit_cleaning():
     """
     return monitoring.make_callback(pattern='Exit Cleaning', prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
-def callback_unable_to_connect(line):
-    match = re.match(r'.*Unable to connect to', line)
-    return True if match is not None else None
+def callback_invalid_server_address(server_ip):
+    msg = fr"ERROR: \(4112\): Invalid server address found: '{server_ip}'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
-def callback_invalid_server_address(line):
-    match = re.match(r'.*Invalid server address found', line)
-    return True if match is not None else None
+def callback_could_not_resolve_hostname(server_ip):
+    msg = fr"DEBUG: Could not resolve hostname '{server_ip}'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
-def callback_could_not_resolve_hostname(line):
-    match = re.match(r'.*Could not resolve hostname', line)
-    return True if match is not None else None
+def callback_unable_to_connect(server_ip):
+    msg = fr"ERROR: \(1216\): Unable to connect to '{server_ip}:1514/tcp': 'No route to host'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)

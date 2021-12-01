@@ -143,4 +143,4 @@
             - server:
                 elements:
                 - address:
-                    value: SERVER_IP
+                    value: SERVER_ADDRESS
