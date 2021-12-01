@@ -22,15 +22,15 @@ class PlaybookGenerator:
                 raise ValueError(f"{required_parameter} is a required parameter to generate the playbook.")
 
     @staticmethod
-    def install_wazuh(package_name, package_url, package_destination, os_system, os_platform, playbook_parameters=None):
+    def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform, playbook_parameters=None):
         tasks = []
         _os_system = _clean_os_system(os_system)
 
         if os_platform == 'linux':
             if PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'RPM':
-                tasks = _install_wazuh_rpm(package_url, package_destination)
+                tasks = _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target)
             elif PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'DEB':
-                tasks = _install_wazuh_deb(package_name, package_url, package_destination)
+                tasks = _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target)
             else:
                 raise ValueError(f"{os_system} is not supported in PlaybookGenerator")
         else:
@@ -62,15 +62,15 @@ class PlaybookGenerator:
         return _build_playbook(parameters)
 
     @staticmethod
-    def uninstall_wazuh(os_system, os_platform, playbook_parameters=None):
+    def uninstall_wazuh(wazuh_target, os_system, os_platform, playbook_parameters=None):
         tasks = []
         _os_system = _clean_os_system(os_system)
 
         if os_platform == 'linux':
             if PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'RPM':
-                tasks = _uninstall_wazuh_rpm()
+                tasks = _uninstall_wazuh_rpm(wazuh_target)
             elif PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'DEB':
-                tasks = _uninstall_wazuh_deb()
+                tasks = _uninstall_wazuh_deb(wazuh_target)
             else:
                 raise ValueError(f"{os_system} is not supported in PlaybookGenerator")
         else:
@@ -156,18 +156,79 @@ def _download_wazuh_package(package_url, package_destination):
         })
     ]
 
-
-def _start_wazuh_systemd_service():
+def _start_wazuh_manager_systemd_service():
     return [
         AnsibleTask({
-            'name': 'Start Wazuh service with systemd',
+            'name': 'Start Wazuh Manager service with systemd',
             'become': True,
-            'shell': 'systemctl start wazuh-*'
+            'ansible.builtin.systemd':{
+              'state': 'started',
+              'name': 'wazuh-manager'
+            }
+            # 'shell': 'systemctl start wazuh-manager'
+
         })
     ]
 
+def _start_wazuh_agent_systemd_service():
+    return [
+        AnsibleTask({
+            'name': 'Start Wazuh Agent service with systemd',
+            'become': True,
+            'ansible.builtin.systemd':{
+              'state': 'started',
+              'name': 'wazuh-agent'
+            }
+            # 'shell': 'systemctl start wazuh-agent'
+        })
+    ]
 
-def _install_wazuh_rpm(package_url, package_destination):
+def _stop_wazuh_manager_systemd_service():
+    return [
+        AnsibleTask({
+            'name': 'Start Wazuh Manager service with systemd',
+            'become': True,
+            'ansible.builtin.systemd':{
+              'state': 'stopped',
+              'name': 'wazuh-manager'
+            }
+            # 'shell': 'systemctl start wazuh-manager'
+
+        })
+    ]
+
+def _stop_wazuh_agent_systemd_service():
+    return [
+        AnsibleTask({
+            'name': 'Start Wazuh Agent service with systemd',
+            'become': True,
+            'ansible.builtin.systemd':{
+              'state': 'stopped',
+              'name': 'wazuh-agent'
+            }
+            # 'shell': 'systemctl start wazuh-agent'
+        })
+    ]
+
+def _start_wazuh_control_service():
+    return [
+        AnsibleTask({
+            'name': 'Start Wazuh Manager service with systemd',
+            'become': True,
+            'shell': '/var/ossec/bin/wazuh-control start',
+        })
+    ]
+
+def _stop_wazuh_control_service():
+    return [
+        AnsibleTask({
+            'name': 'Start Wazuh Manager service with systemd',
+            'become': True,
+            'shell': '/var/ossec/bin/wazuh-control stop',
+        })
+    ]
+
+def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target):
     tasks = []
 
     tasks.extend(_download_wazuh_package(package_url, package_destination))
@@ -175,18 +236,25 @@ def _install_wazuh_rpm(package_url, package_destination):
         AnsibleTask({
             'name': 'Install Wazuh RPM package',
             'become': True,
-            'shell': 'yum install -y wazuh-*',
+            'shell': f"yum install -y {package_name}",
             'args': {
                 'chdir': package_destination
-            }
+            },
+            'register':'rpm_install',
+            'retries': 6,
+            'delay': 10,
+            'until': 'rpm_install is success',
         })
     )
-    tasks.extend(_start_wazuh_systemd_service())
+    if 'manager' in wazuh_target:
+        tasks.extend(_start_wazuh_manager_systemd_service())
+    elif 'agent' in wazuh_target:
+        tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
 
 
-def _install_wazuh_deb(package_name, package_url, package_destination):
+def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target):
     tasks = []
 
     tasks.extend(_download_wazuh_package(package_url, package_destination))
@@ -194,10 +262,17 @@ def _install_wazuh_deb(package_name, package_url, package_destination):
         AnsibleTask({
             'name': 'Install Wazuh DEB package',
             'become': True,
-            'apt': {'deb': f'{package_destination}/{package_name}'},
+            'apt': {'deb': f"{package_destination}/{package_name}"},
+            'register':'deb_install',
+            'retries': 6,
+            'delay': 10,
+            'until': 'deb_install is success',
         })
     )
-    tasks.extend(_start_wazuh_systemd_service())
+    if 'manager' in wazuh_target:
+        tasks.extend(_start_wazuh_manager_systemd_service())
+    elif 'agent' in wazuh_target:
+        tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
 
@@ -211,9 +286,9 @@ def _upgrade_wazuh_rpm(package_name, package_url, package_destination):
         AnsibleTask({
             'name': 'Upgrade wazuh RPM package',
             'become': True,
-            'yum':{
-                'name': f"{package_destination}/{package_name}",
-                'state': 'latest'
+            'shell': f"yum install -y {package_name}",
+            'args': {
+                'chdir': package_destination
             },
             'register':'rpm_upgrade',
             'retries': 6,
@@ -236,8 +311,6 @@ def _upgrade_wazuh_deb(package_name, package_url, package_destination):
             'become': True,
             'apt':{
                 'deb': f"{package_destination}/{package_name}",
-                'state': 'present',
-                'update_cache':True
             },
             'register':'deb_upgrade',
             'retries': 6,
@@ -249,16 +322,12 @@ def _upgrade_wazuh_deb(package_name, package_url, package_destination):
     return tasks
 
 
-def _uninstall_wazuh_rpm():
+def _uninstall_wazuh_rpm(wazuh_target):
     return [
         AnsibleTask({
             'name': 'Uninstall wazuh RPM package',
             'become': True,
-            'yum':{
-                'name': 'wazuh-*',
-                'state': 'absent'
-            },
-            'ignore_errors':True
+            'shell': f"yum remove -y wazuh-{wazuh_target}",
         }),
         AnsibleTask({
             'name': 'Delete /var/ossec directory',
@@ -266,23 +335,21 @@ def _uninstall_wazuh_rpm():
             'file':{
                 'state': 'absent',
                 'path': '/var/ossec/'
-            },
-            'ignore_errors':True
+            }
         })
     ]
 
 
-def _uninstall_wazuh_deb():
+def _uninstall_wazuh_deb(wazuh_target):
     return [
         AnsibleTask({
             'name': 'Uninstall wazuh DEB package',
             'become': True,
             'apt': {
-                'name':'wazuh-*',
+                'name': f"wazuh-{wazuh_target}",
                 'state':'absent',
                 'purge':True
-            },
-            'ignore_errors':True
+            }
         })
     ]
 
