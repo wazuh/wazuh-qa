@@ -5,6 +5,7 @@ from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePl
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_task import AnsibleTask
 from wazuh_testing.tools.time import get_current_timestamp
 
+
 class PlaybookGenerator:
 
     OS_SYSTEM = ['centos', 'ubuntu']
@@ -21,7 +22,7 @@ class PlaybookGenerator:
                 raise ValueError(f"{required_parameter} is a required parameter to generate the playbook.")
 
     @staticmethod
-    def install_wazuh(package_url, package_destination, os_system, os_platform, playbook_parameters=None):
+    def install_wazuh(package_name, package_url, package_destination, os_system, os_platform, playbook_parameters=None):
         tasks = []
         _os_system = _clean_os_system(os_system)
 
@@ -29,7 +30,7 @@ class PlaybookGenerator:
             if PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'RPM':
                 tasks = _install_wazuh_rpm(package_url, package_destination)
             elif PlaybookGenerator.PACKAGE_MANAGER[_os_system] == 'DEB':
-                tasks = _install_wazuh_deb(package_url, package_destination)
+                tasks = _install_wazuh_deb(package_name, package_url, package_destination)
             else:
                 raise ValueError(f"{os_system} is not supported in PlaybookGenerator")
         else:
@@ -60,7 +61,6 @@ class PlaybookGenerator:
 
         return _build_playbook(parameters)
 
-
     @staticmethod
     def uninstall_wazuh(os_system, os_platform, playbook_parameters=None):
         tasks = []
@@ -78,6 +78,33 @@ class PlaybookGenerator:
 
         parameters = dict(**playbook_parameters) if playbook_parameters else {}
         parameters.update({'name': 'uninstall_wazuh', 'tasks_list': tasks})
+
+        return _build_playbook(parameters)
+
+    @staticmethod
+    def run_linux_commands(commands, playbook_parameters=None):
+        tasks = _run_linux_commands(commands)
+
+        parameters = dict(**playbook_parameters) if playbook_parameters else {}
+        parameters.update({'name': 'run_linux_commands', 'tasks_list': tasks})
+
+        return _build_playbook(parameters)
+
+    @staticmethod
+    def download_files(files_data, playbook_parameters=None):
+        tasks = _download_files(files_data)
+
+        parameters = dict(**playbook_parameters) if playbook_parameters else {}
+        parameters.update({'name': 'download_files', 'tasks_list': tasks})
+
+        return _build_playbook(parameters)
+
+    @staticmethod
+    def fetch_files(files_data, playbook_parameters=None):
+        tasks = _fetch_files(files_data)
+
+        parameters = dict(**playbook_parameters) if playbook_parameters else {}
+        parameters.update({'name': 'fetch_files', 'tasks_list': tasks})
 
         return _build_playbook(parameters)
 
@@ -159,7 +186,7 @@ def _install_wazuh_rpm(package_url, package_destination):
     return tasks
 
 
-def _install_wazuh_deb(package_url, package_destination):
+def _install_wazuh_deb(package_name, package_url, package_destination):
     tasks = []
 
     tasks.extend(_download_wazuh_package(package_url, package_destination))
@@ -167,9 +194,7 @@ def _install_wazuh_deb(package_url, package_destination):
         AnsibleTask({
             'name': 'Install Wazuh DEB package',
             'become': True,
-            'shell': f"dpkg -i {package_destination}"
-            #'apt': {'deb': f'{self.installation_files_path}'},
-
+            'apt': {'deb': f'{package_destination}/{package_name}'},
         })
     )
     tasks.extend(_start_wazuh_systemd_service())
@@ -259,4 +284,49 @@ def _uninstall_wazuh_deb():
             },
             'ignore_errors':True
         })
+    ]
+
+
+def _run_linux_commands(commands):
+    return [
+       AnsibleTask({
+           'name': f"Run Command {command}",
+           'shell': command
+        }) for command in commands
+    ]
+
+
+def _download_files(files_data):
+    """
+    files_data -> {file_url: file_destination}
+    """
+    return [
+       AnsibleTask({
+           'name': f"Download_file {file_url}",
+           'get_url': {
+                'url': file_url,
+                'dest': file_destination,
+                'mode': '0755'
+            },
+            'register': 'download_file',
+            'retries': 3,
+            'delay': 10,
+            'until': 'download_file is success'
+        }) for file_url, file_destination in files_data.items()
+    ]
+
+
+def _fetch_files(files_data):
+    """
+    files_data -> {remote_path: local_destination_path}
+    """
+    return [
+       AnsibleTask({
+            'name': f"Fetch {remote_file_path} from remote path to {local_file_path} local path",
+            'fetch': {
+                'src': remote_file_path,
+                'dest': local_file_path,
+                'flat': 'yes'
+            }
+        }) for remote_file_path, local_file_path in files_data.items()
     ]
