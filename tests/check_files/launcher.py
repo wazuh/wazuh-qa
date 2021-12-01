@@ -109,22 +109,23 @@ def validate_parameters(parameters):
                            logger.error, QACTL_LOGGER)
 
     # Check version parameter
-    if len((parameters.wazuh_version).split('.')) != 3:
+    if parameters.wazuh_version and len((parameters.wazuh_version).split('.')) != 3:
         raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {parameters.wazuh_version}",
                            logger.error, QACTL_LOGGER)
 
     # Check if Wazuh has the specified version
-    if not github_checks.version_is_released(parameters.wazuh_version):
+    if parameters.wazuh_version and not github_checks.version_is_released(parameters.wazuh_version):
         raise QAValueError(f"The wazuh {parameters.wazuh_version} version has not been released. Enter a right "
                            'version.', logger.error, QACTL_LOGGER)
     logger.info('Input parameters validation has passed successfully')
 
 
-def generate_qa_ctl_configuration(parameters, qa_ctl_config_generator):
+def generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_generator):
     """Generate the qa-ctl configuration according to the script parameters and write it into a file.
 
     Args:
         parameters (argparse.Namespace): Object with the user parameters.
+        playbook_path (list(str)): List with the playbooks path to run with qa-ctl
         qa_ctl_config_generator (QACTLConfigGenerator): qa-ctl config generator object.
 
     Returns:
@@ -143,9 +144,6 @@ def generate_qa_ctl_configuration(parameters, qa_ctl_config_generator):
     # Generate deployment configuration
     deployment_configuration = qa_ctl_config_generator.get_deployment_configuration([instance])
 
-    # Get the necessary playbooks to run according to the test action
-    playbooks_path = ACTION_MAPPING[parameters.test_action]
-
     # Generate tasks configuration data
     tasks_configuration = qa_ctl_config_generator.get_tasks_configuration([instance], playbooks_path)
 
@@ -158,7 +156,8 @@ def generate_qa_ctl_configuration(parameters, qa_ctl_config_generator):
     return config_file_path
 
 
-def generate_test_playbooks(test_action, os_system, wazuh_target, wazuh_version):
+def generate_test_playbooks(test_action, os_system, wazuh_target, wazuh_version, qa_branch, local_checkfiles_data_path,
+                            debug):
     """Generate the necessary playbooks to run the test.
 
     Args:
@@ -167,24 +166,66 @@ def generate_test_playbooks(test_action, os_system, wazuh_target, wazuh_version)
         wazuh_target (str): Wazuh target, manager or agent.
         wazuh_version (str): Wazuh version to install and test.
     """
-    if wazuh_version:
-        package_url = get_production_package_url(wazuh_target, os_system, wazuh_version)
-    else:
-        package_url = get_last_production_package_url(wazuh_target, os_system)
-
+    playbooks_path = []
+    package_url = get_production_package_url(wazuh_target, os_system, wazuh_version) if wazuh_version else \
+        get_last_production_package_url(wazuh_target, os_system)
     package_name = os.path.split(package_url)[1]
 
+    check_files_too_url = f"https://raw.githubusercontent.com/wazuh/wazuh-qa/{qa_branch}/deps/" \
+                          'wazuh_testing/wazuh_testing/scripts/check_files.py'
+    check_files_tool_destination = '/var/ossec/check_files.py'
+    ignore_check_files_path = ['/sys', '/proc', '/run', '/var/ossec']
+    check_files_extra_args = '' if debug == 0 else ('-d' if debug == 1 else '-dd')
+    check_files_data_output_path = '/post_check_files_data.json'
+    check_files_command = f"sudo python3 {check_files_tool_destination} -p / -i {' '.join(ignore_check_files_path)} " \
+                          f"-o {check_files_data_output_path} {check_files_extra_args}"
+
     if test_action == 'install':
-        path = PlaybookGenerator.install_wazuh(package_url=package_url, package_destination='/tmp', os_system=os_system,
-                                               os_platform='linux')
+        # Install Wazuh on remote host
+        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
+                                                              package_destination='/tmp', os_system=os_system,
+                                                              os_platform='linux'))
+        # Download the check-files tool in the remote host
+        playbooks_path.append(PlaybookGenerator.download_files({check_files_too_url: check_files_tool_destination},
+                                                               playbook_parameters={'become': True}))
+        # Run the check-files tool
+        playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command],
+                                                                   playbook_parameters={'become': True}))
+        # Get the check-files result data
+        playbooks_path.append(
+            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path},
+                                          playbook_parameters={'become': True})
+        )
+
     elif test_action == 'upgrade':
-        path = PlaybookGenerator.upgrade_wazuh(package_name=package_name, package_url=package_url,
-                                               package_destination='/tmp', os_system=os_system, os_platform='linux')
+        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
+                                                              package_destination='/tmp', os_system=os_system,
+                                                              os_platform='linux'))
+        playbooks_path.append(PlaybookGenerator.upgrade_wazuh(package_name=package_name, package_url=package_url,
+                                                              package_destination='/tmp', os_system=os_system,
+                                                              os_platform='linux'))
+        # Run the check-files tool
+        playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command]))
+        # Get the check-files result data
+        playbooks_path.append(
+            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path})
+        )
 
     elif test_action == 'uninstall':
-        path = PlaybookGenerator.uninstall_wazuh(os_system=os_system, os_platform='linux')
+        # Install Wazuh on remote host
+        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
+                                                              package_destination='/tmp', os_system=os_system,
+                                                              os_platform='linux'))
+        # Uninstall Wazuh on remote host
+        playbooks_path.append(PlaybookGenerator.uninstall_wazuh(os_system=os_system, os_platform='linux'))
+        # Run the check-files tool
+        playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command]))
+        # Get the check-files result data
+        playbooks_path.append(
+            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path})
+        )
 
-    print(file.read_file(path))
+    return playbooks_path
 
 
 def main():
@@ -192,6 +233,7 @@ def main():
     parameters = get_parameters()
     qa_ctl_config_generator = QACTLConfigGenerator()
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
+    post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
 
     # Set logging and Download QA files
     set_environment(parameters)
@@ -201,15 +243,17 @@ def main():
         validate_parameters(parameters)
 
     # Generate the test playbooks to run with qa-ctl
-    generate_test_playbooks(parameters.test_action, parameters.os_system,
-                            parameters.wazuh_target, parameters.wazuh_version)
+    playbooks_path = generate_test_playbooks(parameters.test_action, parameters.os_system, parameters.wazuh_target,
+                                             parameters.wazuh_version, parameters.qa_branch, post_check_files_data_path,
+                                             parameters.debug)
 
     # Generate the qa-ctl configuration
-    # qa_ctl_config_file_path = generate_qa_ctl_configuration(parameters, qa_ctl_config_generator)
+    qa_ctl_config_file_path = generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_generator)
 
     # Run the qa-ctl with the generated configuration. Launch deployment + custom playbooks.
-    # qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
-    # local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
+    qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
+    local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args} "
+                                                    '--no-validation-logging')
 
     # # Get check-files data
     # baseline_file_path = os.path.join(TMP_FILES, 'wazuh_qa_ctl', f"baseline_{arguments.os_system}_"
