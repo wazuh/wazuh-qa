@@ -2,7 +2,7 @@ import os
 import sys
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance
+from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance, remove_known_host
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
@@ -51,6 +51,10 @@ class QATestRunner():
             for module_key, module_value in host_value.items():
                 if module_key == 'host_info':
                     current_host = module_value['host']
+
+                    # Remove the host IP from known host file to avoid the SSH key fingerprint error
+                    remove_known_host(current_host, QATestRunner.LOGGER)
+
                     if current_host:
                         instances_list.append(read_ansible_instance(module_value))
 

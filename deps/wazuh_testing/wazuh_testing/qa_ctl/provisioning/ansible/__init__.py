@@ -1,5 +1,10 @@
+import sys
+import os
+from pathlib import Path
+
 from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
 from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_returning_output
 
 
 def read_ansible_instance(host_info):
@@ -38,3 +43,13 @@ def read_ansible_instance(host_info):
         )
 
     return instance
+
+
+def remove_known_host(host_ip, logger=None):
+    if sys.platform != 'win32':
+        known_host_file = os.path.join(str(Path.home()), '.ssh', 'known_hosts')
+        if os.path.exists(known_host_file):
+            if logger:
+                logger.debug(f"Removing {host_ip} from {known_host_file} file")
+
+            run_local_command_returning_output(f"ssh-keygen -f {known_host_file} -R {host_ip}")
