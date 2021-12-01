@@ -38,9 +38,9 @@ metadata = [
     {'server_address': '172.28.128.12',                           'invalid_address': False, 'resolve_hostname': True},
     {'server_address': '::ffff:ac1c:800c',                        'invalid_address': False, 'resolve_hostname': True},
     {'server_address': '0000:0000:0000:0000:0000:ffff:ac1c:800c', 'invalid_address': False, 'resolve_hostname': True},
-    {'server_address': 'unable',                                  'invalid_address': False, 'resolve_hostname': True},
-    {'server_address': 'unable6compressed',                       'invalid_address': False, 'resolve_hostname': True},
-    {'server_address': 'unable6',                                 'invalid_address': False, 'resolve_hostname': True}
+    {'server_address': 'unable', 'invalid_address': False, 'resolve_hostname': True, 'real_ip': '172.28.128.12'},
+    {'server_address': 'unable6compressed', 'invalid_address': False, 'resolve_hostname': True, 'real_ip': '::ffff:ac1c:800c'},
+    {'server_address': 'unable6', 'invalid_address': False, 'resolve_hostname': True, 'real_ip': '0000:0000:0000:0000:0000:ffff:ac1c:800c'}
 ]
 
 # Configuration data
@@ -48,16 +48,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 configuration_ids = [f"{x['SERVER_IP']}" for x in parameters]
 
 # Functions
-def get_ip_from_hostname(hostname):
-    find_ip = subprocess.run(["grep", "-w", hostname, "/etc/hosts"], stdout=subprocess.PIPE)
-    code = find_ip.returncode
-    
-    if code == 0:
-        ip = find_ip.stdout.split()[0].decode('UTF-8')
-    else:
-        ip = hostname
-
-    return ip
 
 
 # Fixtures
@@ -67,23 +57,19 @@ def get_configuration(request):
     return request.param
 
 @pytest.fixture(scope="module")
-def edit_hosts():
-    with open('/etc/hosts', 'r+') as file:
-        original_content = file.read()
-        
-        new_content = original_content
-        new_content += "\n172.28.128.12 unable"
-        new_content += "\n::ffff:ac1c:800c unable6compressed"
-        new_content += "\n0000:0000:0000:0000:0000:ffff:ac1c:800c unable6\n"
-        file.seek(0)
-        file.write(new_content)
-        file.truncate()
+def edit_hosts(get_configuration):
+    if 'real_ip' in get_configuration['metadata']:
+        with open('/etc/hosts', 'r+') as file:
+            original_content = file.read()
 
-        yield
+            new_content = get_configuration['metadata']['real_ip'] + ' ' + get_configuration['metadata']['server_address']
+            file.write(new_content)
 
-        file.seek(0)
-        file.write(original_content)
-        file.truncate()
+    yield
+
+    if 'real_ip' in get_configuration['metadata']:
+        with open('/etc/hosts', 'w') as file:
+            file.write(original_content)
 
 # Tests
 def test_agentd_server_configuration(get_configuration, configure_environment, configure_local_internal_options_module,
@@ -101,7 +87,11 @@ def test_agentd_server_configuration(get_configuration, configure_environment, c
             log_monitor.start(timeout=TIMEOUT, callback=callback,
                                     error_message=f"The expected 'Could not resolve hostname' message has not been produced")
         else:
-            ip = get_ip_from_hostname(cfg['server_address'])
+            if 'real_ip' in cfg:
+                ip = cfg['real_ip']
+            else:
+                ip = cfg['server_address']
+            
             callback = agent.callback_unable_to_connect(ip)
             log_monitor.start(timeout=TIMEOUT, callback=callback,
                                     error_message=f"The expected 'Unable to connect to' message has not been produced")
