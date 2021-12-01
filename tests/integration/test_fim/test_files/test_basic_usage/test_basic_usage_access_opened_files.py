@@ -133,7 +133,7 @@ def test_basic_usage_modify_opened_files(
                  can modified (renamed), and that wazuh is not
                  blocking the files.
 
-    wazuh_min_version: 4.3
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
@@ -199,7 +199,7 @@ def test_basic_usage_delete_opened_files(
                  can deleted deleted, and that wazuh is not
                  blocking the files.
 
-    wazuh_min_version: 4.3
+    wazuh_min_version: 4.2
 
     parameters:
         - tags_to_apply:
