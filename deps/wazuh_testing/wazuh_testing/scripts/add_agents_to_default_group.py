@@ -8,8 +8,8 @@ def main():
     """Add agents to default group. To use the script, pass two arguments indicating the first agent ID and the last
     agent ID from the range of agents to be added to the default group.
 
-    The result of the intersection of the agents list generated, and the list of agents with which ID is in the
-    client.keys file; will be the agents for which agent-groups will be created.
+    The agents for which agent-groups will be created will be the intersection of the agent list generated and the list
+    of agents whose ID is in the client.keys file.
 
     This script must be used in a Wazuh worker node.
     """
