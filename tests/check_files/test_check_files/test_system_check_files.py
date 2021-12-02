@@ -5,12 +5,13 @@
 import json
 import os
 import pytest
+import time
 from datetime import datetime
 from deepdiff import DeepDiff
 
 from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file
 
-OUTPUT_FILE = f"system_checkfiles_{datetime.now().timestamp()}.json"
+OUTPUT_FILE = f"system_checkfiles_{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime.now().timestamp()))}.json"
 
 
 @pytest.fixture
@@ -86,8 +87,7 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     # Given difference key example:
     # "root['/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
     # Result: /home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py - mode"
-    differences_str = differences.to_json().replace('][', ' - ').replace('root[', '').replace(']', '') \
-                                           .replace('[', '')
+    differences_str = differences.to_json().replace('root', '')
     # If there are differences between the given files
     if differences != {}:
         # If the user specified an output path, the differences are saved in JSON format

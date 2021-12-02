@@ -5,7 +5,8 @@ import grp
 import pwd
 import json
 import logging
-
+import hashlib
+from datetime import datetime
 
 script_logger = logging.getLogger('check_files')
 _filemode_list = [
@@ -151,9 +152,16 @@ def get_data_information(item):
     mode_str = str(mode).replace('o', '')
     mode = mode_str[-3:] if len(mode_str) > 3 else mode_str
     _type = 'directory' if os.path.isdir(item) else 'file'
-    protection = get_filemode(stat_info.st_mode)
+    permissions = get_filemode(stat_info.st_mode)
+    last_update = datetime.fromtimestamp(os.path.getmtime(item)).strftime('%Y-%m-%d %H:%M:%S')
+    if _type != 'directory':
+        checksum = hashlib.md5(open(item, 'rb').read()).hexdigest()
 
-    return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'prot': protection}
+        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
+                'last_update': last_update, 'checksum': checksum}
+    else:
+        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
+                'last_update': last_update}
 
 
 def write_data_to_file(data, output_file_path):
