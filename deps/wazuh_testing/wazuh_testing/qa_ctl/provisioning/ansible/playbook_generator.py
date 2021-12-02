@@ -22,7 +22,8 @@ class PlaybookGenerator:
                 raise ValueError(f"{required_parameter} is a required parameter to generate the playbook.")
 
     @staticmethod
-    def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform, playbook_parameters=None):
+    def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform,
+                      playbook_parameters=None):
         tasks = []
         _os_system = _clean_os_system(os_system)
 
@@ -108,6 +109,24 @@ class PlaybookGenerator:
 
         return _build_playbook(parameters)
 
+    @staticmethod
+    def delete_files(files_path, playbook_parameters=None):
+        tasks = _delete_files(files_path)
+
+        parameters = dict(**playbook_parameters) if playbook_parameters else {}
+        parameters.update({'name': 'delete_files', 'tasks_list': tasks})
+
+        return _build_playbook(parameters)
+
+    @staticmethod
+    def wait_seconds(num_seconds, playbook_parameters=None):
+        tasks = _wait_seconds(num_seconds)
+
+        parameters = dict(**playbook_parameters) if playbook_parameters else {}
+        parameters.update({'name': 'delete_files', 'tasks_list': tasks})
+
+        return _build_playbook(parameters)
+
 
 ### PLAYBOOK BUILDER UTILS FUNCTIONS ###
 
@@ -165,8 +184,6 @@ def _start_wazuh_manager_systemd_service():
               'state': 'started',
               'name': 'wazuh-manager'
             }
-            # 'shell': 'systemctl start wazuh-manager'
-
         })
     ]
 
@@ -179,7 +196,6 @@ def _start_wazuh_agent_systemd_service():
               'state': 'started',
               'name': 'wazuh-agent'
             }
-            # 'shell': 'systemctl start wazuh-agent'
         })
     ]
 
@@ -192,8 +208,6 @@ def _stop_wazuh_manager_systemd_service():
               'state': 'stopped',
               'name': 'wazuh-manager'
             }
-            # 'shell': 'systemctl start wazuh-manager'
-
         })
     ]
 
@@ -206,9 +220,9 @@ def _stop_wazuh_agent_systemd_service():
               'state': 'stopped',
               'name': 'wazuh-agent'
             }
-            # 'shell': 'systemctl start wazuh-agent'
         })
     ]
+
 
 def _start_wazuh_control_service():
     return [
@@ -219,6 +233,7 @@ def _start_wazuh_control_service():
         })
     ]
 
+
 def _stop_wazuh_control_service():
     return [
         AnsibleTask({
@@ -227,6 +242,7 @@ def _stop_wazuh_control_service():
             'shell': '/var/ossec/bin/wazuh-control stop',
         })
     ]
+
 
 def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target):
     tasks = []
@@ -323,21 +339,17 @@ def _upgrade_wazuh_deb(package_name, package_url, package_destination):
 
 
 def _uninstall_wazuh_rpm(wazuh_target):
-    return [
+    tasks = [
         AnsibleTask({
             'name': 'Uninstall wazuh RPM package',
             'become': True,
             'shell': f"yum remove -y wazuh-{wazuh_target}",
-        }),
-        AnsibleTask({
-            'name': 'Delete /var/ossec directory',
-            'become': True,
-            'file':{
-                'state': 'absent',
-                'path': '/var/ossec/'
-            }
         })
     ]
+
+    tasks.extend(_delete_files(['/var/ossec']))
+
+    return tasks
 
 
 def _uninstall_wazuh_deb(wazuh_target):
@@ -396,4 +408,31 @@ def _fetch_files(files_data):
                 'flat': 'yes'
             }
         }) for remote_file_path, local_file_path in files_data.items()
+    ]
+
+
+def _delete_files(files_path):
+    """
+    files_path -> [path1, path2, ...]
+    """
+    return [
+        AnsibleTask({
+            'name': f"Delete {item}",
+            'become': True,
+            'file':{
+                'state': 'absent',
+                'path': item
+            }
+        }) for item in files_path
+    ]
+
+
+def _wait_seconds(num_seconds):
+    return [
+        AnsibleTask({
+            'name': f"Wait {num_seconds} seconds",
+            'pause':{
+                'seconds': num_seconds,
+            }
+        })
     ]
