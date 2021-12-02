@@ -32,6 +32,7 @@ def register_agent():
     """Restart the removed agent to trigger auto-enrollment."""
     yield
     host_manager.get_host(agent_host).ansible('command', f'service wazuh-agent restart', check=False)
+    sleep(15)
 
 
 def test_agent_files_deletion(register_agent):
@@ -40,6 +41,7 @@ def test_agent_files_deletion(register_agent):
     master_token = host_manager.get_api_token(master_host)
     response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
                                           endpoint=f'/agents?select=id,name&q=manager={worker_host}')
+
     assert response['status'] == 200, f'Failed when trying to obtain agent ID: {response}'
     try:
         agent_id = response['json']['data']['affected_items'][0]['id']
@@ -57,6 +59,7 @@ def test_agent_files_deletion(register_agent):
                            f'{file["path"].format(id=agent_id, name=agent_name)}'
 
     # Check that agent information exists in global.db
+    sleep(time_to_sync)
     for host in managers_hosts:
         for query in db_queries:
             result = host_manager.run_command(
