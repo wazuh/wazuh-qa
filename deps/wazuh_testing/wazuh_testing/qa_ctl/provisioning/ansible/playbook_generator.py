@@ -15,7 +15,7 @@ def validate_playbook_parameters(parameters):
     """Validate if the required parameters to build the playbook are specified.
 
     Raises:
-        ValueError: If a script parameters has an invalid value.
+        ValueError: If a required playbook parameter has not been specified.
     """
     required_parameters = ['tasks_list']
 
@@ -26,7 +26,7 @@ def validate_playbook_parameters(parameters):
 
 def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform,
                   playbook_parameters=None):
-    """Generate the necessary playbooks to install Wazuh.
+    """Generate the playbook to install Wazuh.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
@@ -34,11 +34,11 @@ def install_wazuh(wazuh_target, package_name, package_url, package_destination, 
         package_url (str): URL of the package to be installed.
         package_destination (str): Destination folder where the package will be downloaded.
         os_system (str): Operating system where the test will be launched.
-        os_platform (str): Platform where the package will be installed [Centos 7, Centos 8, Ubuntu].
-        playbook_parameters (str): Parameters of the playbook to be generated.
+        os_platform (str): Platform where the package will be installed.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Raises:
-        ValueError: If a script parameters has an invalid value.
+        ValueError: If os_system or os_platform has not an expected value.
 
     Returns:
         str: Playbook file path generated.
@@ -63,18 +63,18 @@ def install_wazuh(wazuh_target, package_name, package_url, package_destination, 
 
 
 def upgrade_wazuh(package_name, package_url, package_destination, os_system, os_platform, playbook_parameters=None):
-    """Generate the necessary playbooks to upgrade Wazuh.
+    """Generate the playbook to upgrade Wazuh.
 
     Args:
         package_name (str): Name of the package to be installed.
         package_url (str): URL of the package to be installed.
         package_destination (str): Destination folder where the package will be downloaded.
         os_system (str): Operating system where the test will be launched.
-        os_platform (str): Platform where the package will be installed [Centos 7, Centos 8, Ubuntu].
-        playbook_parameters (str): Parameters of the playbook to be generated.
+        os_platform (str): Platform where the package will be installed.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Raises:
-        ValueError: If a script parameters has an invalid value.
+       ValueError: If os_system or os_platform has not an expected value.
 
     Returns:
         str: Playbook file path generated.
@@ -99,16 +99,16 @@ def upgrade_wazuh(package_name, package_url, package_destination, os_system, os_
 
 
 def uninstall_wazuh(wazuh_target, os_system, os_platform, playbook_parameters=None):
-    """Generate the necessary playbooks to uninstall Wazuh.
+    """Generate the playbook to uninstall Wazuh.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
         os_system (str): Operating system where the test will be launched.
-        os_platform (str): Platform where the package will be installed [Centos 7, Centos 8, Ubuntu].
-        playbook_parameters (str): Parameters of the playbook to be generated.
+        os_platform (str): Platform where the package will be installed.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Raises:
-        ValueError: If a script parameters has an invalid value.
+        ValueError: If os_system or os_platform has not an expected value.
 
     Returns:
         str: Playbook file path generated.
@@ -133,11 +133,11 @@ def uninstall_wazuh(wazuh_target, os_system, os_platform, playbook_parameters=No
 
 
 def run_linux_commands(commands, playbook_parameters=None):
-    """Generate a playbook to run a linux command.
+    """Generate a playbook to run linux commands.
 
     Args:
-        command (str): Command to be run in the playbook.
-        playbook_parameters (str): Parameters of the playbook.
+        commands (list(str)): Commands to run with the playbook. [command1, command2, ...]
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Returns:
         str: Playbook file path generated.
@@ -154,8 +154,8 @@ def download_files(files_data, playbook_parameters=None):
     """Generate a playbook to download files.
 
     Args:
-        files_data (dict): File information about destination and url to generate the playbook.
-        playbook_parameters (str): Parameters of the playbook.
+        files_data (list(dict)): URL and download destination info. [{url: destination}, ...]
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Returns:
         str: Playbook file path generated.
@@ -172,8 +172,8 @@ def fetch_files(files_data, playbook_parameters=None):
     """Generate a playbook to fetch files.
 
     Args:
-        files_data (dict): File information about destination and url to generate the playbook.
-        playbook_parameters (str): Parameters of the playbook.
+        files_data (list(dict)): Source and destination data. [{remote_src: local_destination}, ...]
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Returns:
         str: Playbook file path generated.
@@ -190,8 +190,8 @@ def delete_files(files_path, playbook_parameters=None):
     """Generate a playbook to delete files.
 
     Args:
-        files_path (dict): Paths of the file to generate the playbook.
-        playbook_parameters (str): Parameters of the playbook.
+        files_path (list(str)): List of files path to delete. [file_path1, file_path2, ...]
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Returns:
         str: Playbook file path generated.
@@ -205,11 +205,11 @@ def delete_files(files_path, playbook_parameters=None):
 
 
 def wait_seconds(num_seconds, playbook_parameters=None):
-    """Generate a playbook to wait.
+    """Generate a playbook to wait for the indicated time.
 
     Args:
-        num_seconds (int): Number of second to generate the playbook.
-        playbook_parameters (str): Parameters of the playbook.
+        num_seconds (int): Number of seconds to wait.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
 
     Returns:
         str: Playbook file path generated.
@@ -252,16 +252,16 @@ def _build_playbook(parameters):
 
 
 def _clean_os_system(os_system):
-    """Return a clean operating system.
+    """Clean the operating system version, returning only the system.
 
     Args:
-        os_system (str): Operating system to create the playbook.
+        os_system (str): Operating system.
 
     Raises:
         ValueError: If the os_system has an invalid value.
 
     Returns:
-        str: Operating system [centos or ubuntu].
+        str: Operating system without the version.
     """
     if 'centos' in os_system:
         return 'centos'
@@ -275,15 +275,16 @@ def _clean_os_system(os_system):
 #                                        PLAYBOOK TASKS DEFINITION                                                     #
 # -------------------------------------------------------------------------------------------------------------------- #
 
+
 def _download_wazuh_package(package_url, package_destination):
-    """Create a playbook to download a package.
+    """Ansible tasks to download a package.
 
     Args:
         package_url (str): URL of the package to be downloaded.
         package_destination (str): Destination where the package will be stored
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks to download the wazuh package.
     """
     return [
         AnsibleTask({
@@ -302,10 +303,10 @@ def _download_wazuh_package(package_url, package_destination):
 
 
 def _start_wazuh_manager_systemd_service():
-    """Create a playbook to start a manager with systemd command.
+    """"Ansible tasks to start the wazuh-manager service with systemd.
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -320,10 +321,10 @@ def _start_wazuh_manager_systemd_service():
 
 
 def _start_wazuh_agent_systemd_service():
-    """Create a playbook to start an agent with systemd command.
+    """Ansible tasks to start the wazuh-agent service with systemd.
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -338,10 +339,10 @@ def _start_wazuh_agent_systemd_service():
 
 
 def _stop_wazuh_manager_systemd_service():
-    """Create a playbook to stop a manager with systemd command.
+    """Ansible tasks to stop the wazuh-manager service with systemd.
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -356,10 +357,10 @@ def _stop_wazuh_manager_systemd_service():
 
 
 def _stop_wazuh_agent_systemd_service():
-    """Create a playbook to stop an agent with systemd command.
+    """Ansible tasks to stop the wazuh-agent service with systemd.
 
     Returns:
-        str: The playbook task created.
+       list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -374,13 +375,13 @@ def _stop_wazuh_agent_systemd_service():
 
 
 def _start_wazuh_control_service(wazuh_target):
-    """Create a playbook to start a manager or agent with wazuh-control command.
+    """Ansible tasks to start the wazuh-agent or wazuh-manager using wazuh-control.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+       list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -392,13 +393,13 @@ def _start_wazuh_control_service(wazuh_target):
 
 
 def _stop_wazuh_control_service(wazuh_target):
-    """Create a playbook to stop a manager or agent with wazuh-control command.
+    """Ansible tasks to stop the wazuh-agent or wazuh-manager using wazuh-control.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -410,7 +411,7 @@ def _stop_wazuh_control_service(wazuh_target):
 
 
 def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target):
-    """Create a playbook to install a RPM package of a manager or agent.
+    """Ansible tasks to install a wazuh RPM package.
 
     Args:
         package_name (str): Name of the package to be installed.
@@ -419,7 +420,7 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     tasks = []
 
@@ -447,7 +448,7 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
 
 
 def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target):
-    """Create a playbook to install a DEB package of a manager or agent.
+    """Ansible tasks to install a wazuh DEB package.
 
     Args:
         package_name (str): Name of the package to be installed.
@@ -456,7 +457,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     tasks = []
 
@@ -481,7 +482,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
 
 
 def _upgrade_wazuh_rpm(package_name, package_url, package_destination):
-    """Create a playbook to upgrade a RPM package.
+    """Ansible tasks to upgrade a wazuh RPM package.
 
     Args:
         package_name (str): Name of the package to be installed.
@@ -489,7 +490,7 @@ def _upgrade_wazuh_rpm(package_name, package_url, package_destination):
         package_destination (str): Destination folder where the package will be downloaded.
 
     Returns:
-        str: The playbook task created.
+       list(AnsibleTask): Ansible tasks.
     """
     tasks = []
 
@@ -514,7 +515,7 @@ def _upgrade_wazuh_rpm(package_name, package_url, package_destination):
 
 
 def _upgrade_wazuh_deb(package_name, package_url, package_destination):
-    """Create a playbook to upgrade a DEB package.
+    """Ansible tasks to upgrade a wazuh DEB package.
 
     Args:
         package_name (str): Name of the package to be installed.
@@ -522,7 +523,7 @@ def _upgrade_wazuh_deb(package_name, package_url, package_destination):
         package_destination (str): Destination folder where the package will be downloaded.
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     tasks = []
 
@@ -546,13 +547,13 @@ def _upgrade_wazuh_deb(package_name, package_url, package_destination):
 
 
 def _uninstall_wazuh_rpm(wazuh_target):
-    """Create a playbook to uninstall a RPM package of a manager or agent.
+    """Ansible tasks to uninstall a wazuh RPM package.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     tasks = [
         AnsibleTask({
@@ -568,13 +569,13 @@ def _uninstall_wazuh_rpm(wazuh_target):
 
 
 def _uninstall_wazuh_deb(wazuh_target):
-    """Create a playbook to uninstall a DEB package of a manager or agent.
+    """Ansible tasks to uninstall a wazuh DEB package.
 
     Args:
         wazuh_target (str): Wazuh target [manager or agent].
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -590,13 +591,13 @@ def _uninstall_wazuh_deb(wazuh_target):
 
 
 def _run_linux_commands(commands):
-    """Create a playbook to run a command in linux.
+    """Ansible tasks to run linux commands.
 
     Args:
-        commands (str): Command to be run.
+        commands (list(str)): Commands to run with the playbook. [command1, command2, ...]
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
        AnsibleTask({
@@ -607,13 +608,13 @@ def _run_linux_commands(commands):
 
 
 def _download_files(files_data):
-    """Create a playbook to download a file.
+    """Ansible tasks to download files.
 
     Args:
-        files_data (dict): File URL and file destination {file_url: file_destination}.
+        files_data (list(dict)): URL and download destination info. [{url: destination}, ...]
 
     Returns:
-        str: The playbook task created.
+       list(AnsibleTask): Ansible tasks.
     """
     return [
        AnsibleTask({
@@ -632,13 +633,13 @@ def _download_files(files_data):
 
 
 def _fetch_files(files_data):
-    """Create a playbook to fetct a file.
+    """Ansible tasks to fetch remote files to a local path.
 
     Args:
-        files_data (dict): Remote path  and destination path to fetch {remote_path: local_destination_path}.
+        files_data (list(dict)): Source and destination data. [{remote_src: local_destination}, ...]
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
        AnsibleTask({
@@ -653,13 +654,13 @@ def _fetch_files(files_data):
 
 
 def _delete_files(files_path):
-    """Create a playbook to delete files.
+    """Ansible tasks to delete files.
 
     Args:
-        files_path (list): Path of the files to be deleted [path1, path2, ...].
+        files_path (list(str)): List of files path to delete. [file_path1, file_path2, ...]
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
@@ -674,13 +675,13 @@ def _delete_files(files_path):
 
 
 def _wait_seconds(num_seconds):
-    """Create a playbook to wait.
+    """Ansible tasks to wait for the indicated time.
 
     Args:
-        num_seconds (int): Nomber of seconds to wait.
+        num_seconds (int): Number of seconds to wait.
 
     Returns:
-        str: The playbook task created.
+        list(AnsibleTask): Ansible tasks.
     """
     return [
         AnsibleTask({
