@@ -31,7 +31,7 @@ configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
 local_internal_options = {'logcollector.debug': 2,
-                          'logcollector.sample_log_length': 100}
+                          'logcollector.sample_log_length': 200}
 
 macos_log_message_timeout = 40
 macos_monitoring_macos_log_timeout = 30
