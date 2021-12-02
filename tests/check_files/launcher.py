@@ -47,7 +47,7 @@ def get_parameters():
                         help='Wazuh action to be carried out to check the check-files')
 
     parser.add_argument('--os', '-o', type=str, action='store', required=False, dest='os_system',
-                        choices=['centos7', 'centos8', 'ubuntu'], default='ubuntu')
+                        choices=['centos_7', 'centos_8', 'ubuntu'], default='ubuntu')
 
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='wazuh_version',
                         help='Wazuh installation and tests version.')
@@ -171,7 +171,7 @@ def generate_test_playbooks(test_action, os_system, wazuh_target, wazuh_version,
         get_last_production_package_url(wazuh_target, os_system)
     package_name = os.path.split(package_url)[1]
 
-    check_files_too_url = f"https://raw.githubusercontent.com/wazuh/wazuh-qa/{qa_branch}/deps/" \
+    check_files_tool_url = f"https://raw.githubusercontent.com/wazuh/wazuh-qa/{qa_branch}/deps/" \
                           'wazuh_testing/wazuh_testing/scripts/check_files.py'
     check_files_tool_destination = '/var/ossec/check_files.py'
     ignore_check_files_path = ['/sys', '/proc', '/run', '/var/ossec']
@@ -179,51 +179,56 @@ def generate_test_playbooks(test_action, os_system, wazuh_target, wazuh_version,
     check_files_data_output_path = '/post_check_files_data.json'
     check_files_command = f"sudo python3 {check_files_tool_destination} -p / -i {' '.join(ignore_check_files_path)} " \
                           f"-o {check_files_data_output_path} {check_files_extra_args}"
+    # Playbook parameters
+    wazuh_install_playbook_parameters = {'wazuh_target': wazuh_target, 'package_name': package_name,
+                                         'package_url': package_url, 'package_destination': '/tmp',
+                                         'os_system': os_system, 'os_platform': 'linux'}
+    download_files_playbook_parameters = {'files_data': {check_files_tool_url: check_files_tool_destination},
+                                          'playbook_parameters': {'become': True}}
+    run_check_files_playbook_parameters = {'commands': [check_files_command], 'playbook_parameters': {'become': True}}
+    fetch_files_playbook_parameters = {'files_data': {check_files_data_output_path: local_checkfiles_data_path},
+                                       'playbook_parameters': {'become': True}}
+    upgrade_wazuh_playbook_parameters = {'package_name': package_name,  'package_url': package_url,
+                                         'package_destination': '/tmp', 'os_system': os_system, 'os_platform': 'linux'}
+    uninstall_wazuh_playbook_parameters = {'wazuh_target': wazuh_target, 'os_system': os_system, 'os_platform': 'linux'}
 
     if test_action == 'install':
-        # Install Wazuh on remote host
-        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
-                                                              package_destination='/tmp', os_system=os_system,
-                                                              os_platform='linux'))
-        # Download the check-files tool in the remote host
-        playbooks_path.append(PlaybookGenerator.download_files({check_files_too_url: check_files_tool_destination},
-                                                               playbook_parameters={'become': True}))
-        # Run the check-files tool
-        playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command],
-                                                                   playbook_parameters={'become': True}))
-        # Get the check-files result data
-        playbooks_path.append(
-            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path},
-                                          playbook_parameters={'become': True})
-        )
+        # 1. - Install Wazuh on remote host
+        # 2. - Download the check-files tool in the remote host
+        # 3. - Wait 30 seconds before running check-files tool
+        # 4. - Run the check-files tool
+        # 5. - Get the check-files result data
+        playbooks_path.append(PlaybookGenerator.install_wazuh(**wazuh_install_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.download_files(**download_files_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.wait_seconds(30))
+        playbooks_path.append(PlaybookGenerator.run_linux_commands(**run_check_files_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.fetch_files(**fetch_files_playbook_parameters))
 
     elif test_action == 'upgrade':
-        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
-                                                              package_destination='/tmp', os_system=os_system,
-                                                              os_platform='linux'))
-        playbooks_path.append(PlaybookGenerator.upgrade_wazuh(package_name=package_name, package_url=package_url,
-                                                              package_destination='/tmp', os_system=os_system,
-                                                              os_platform='linux'))
-        # Run the check-files tool
+        # 1. - Install Wazuh on remote host
+        # 2. - Wait 30 seconds before upgrading Wazuh
+        # 3. - Upgrade Wazuh on remote host
+        # 4. - Wait 30 seconds before running check-files tool
+        # 5. - Run the check-files tool
+        # 6. - Get the check-files result data
+        playbooks_path.append(PlaybookGenerator.install_wazuh(**wazuh_install_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.wait_seconds(30))
+        playbooks_path.append(PlaybookGenerator.upgrade_wazuh(**upgrade_wazuh_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.wait_seconds(30))
         playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command]))
-        # Get the check-files result data
-        playbooks_path.append(
-            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path})
-        )
+        playbooks_path.append(PlaybookGenerator.fetch_files(**fetch_files_playbook_parameters))
 
     elif test_action == 'uninstall':
-        # Install Wazuh on remote host
-        playbooks_path.append(PlaybookGenerator.install_wazuh(package_name=package_name, package_url=package_url,
-                                                              package_destination='/tmp', os_system=os_system,
-                                                              os_platform='linux'))
-        # Uninstall Wazuh on remote host
-        playbooks_path.append(PlaybookGenerator.uninstall_wazuh(os_system=os_system, os_platform='linux'))
-        # Run the check-files tool
-        playbooks_path.append(PlaybookGenerator.run_linux_commands([check_files_command]))
-        # Get the check-files result data
-        playbooks_path.append(
-            PlaybookGenerator.fetch_files({check_files_data_output_path: local_checkfiles_data_path})
-        )
+        # 1. - Install Wazuh on remote host
+        # 2. - Wait 30 seconds before uninstalling Wazuh
+        # 3. - Uninstall Wazuh on remote host
+        # 4. - Run the check-files tool
+        # 5. - Get the check-files result data
+        playbooks_path.append(PlaybookGenerator.install_wazuh(**wazuh_install_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.wait_seconds(30))
+        playbooks_path.append(PlaybookGenerator.uninstall_wazuh(**uninstall_wazuh_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.run_linux_commands(**run_check_files_playbook_parameters))
+        playbooks_path.append(PlaybookGenerator.fetch_files(**fetch_files_playbook_parameters))
 
     return playbooks_path
 
@@ -247,13 +252,15 @@ def main():
                                              parameters.wazuh_version, parameters.qa_branch, post_check_files_data_path,
                                              parameters.debug)
 
-    # Generate the qa-ctl configuration
+    # Generate the qa-ctl configurationgenerate_qa_ctl_configuration
     qa_ctl_config_file_path = generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_generator)
 
+    print(file.read_file(qa_ctl_config_file_path))
+
     # Run the qa-ctl with the generated configuration. Launch deployment + custom playbooks.
-    qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
-    local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args} "
-                                                    '--no-validation-logging')
+    # qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
+    # local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args} "
+    #                                                 '--no-validation-logging')
 
     # # Get check-files data
     # baseline_file_path = os.path.join(TMP_FILES, 'wazuh_qa_ctl', f"baseline_{arguments.os_system}_"
