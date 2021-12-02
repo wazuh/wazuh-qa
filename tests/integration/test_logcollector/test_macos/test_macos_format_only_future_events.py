@@ -27,6 +27,7 @@ metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
+elapsed_time_macos_log = 10
 
 daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
@@ -36,6 +37,7 @@ local_internal_options = {'logcollector.debug': 2,
 macos_log_message_timeout = 40
 macos_monitoring_macos_log_timeout = 30
 macos_monitoring_timout_after_logcollector_started = 3
+
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -56,7 +58,7 @@ def get_connection_configuration():
 
 def test_macos_format_only_future_events(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
                                          configure_local_internal_options_module,
-                                         daemons_handler, file_monitoring):
+                                         file_monitoring, daemons_handler):
     """Check if logcollector use correctly only-future-events option using macos log format.
 
     Raises:
@@ -83,14 +85,15 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
                               callback=logcollector.callback_macos_log(expected_old_macos_message))
 
     ## Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
+    time.sleep(elapsed_time_macos_log)
 
-    control_service('stop')
+    control_service('stop', 'wazuh-logcollector')
 
     truncate_file(LOG_FILE_PATH)
     log_monitor = FileMonitor(LOG_FILE_PATH)
     logcollector.generate_macos_logger_log(old_message)
 
-    control_service('start')
+    control_service('start', 'wazuh-logcollector')
 
     if only_future_events == 'yes':
         with pytest.raises(TimeoutError):
