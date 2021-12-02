@@ -5,6 +5,14 @@ from wazuh_testing.tools import CLIENT_KEYS_PATH
 
 
 def main():
+    """Add agents to default group. To use the script, pass two arguments indicating the first agent ID and the last
+    agent ID from the range of agents to be added to the default group.
+
+    The result of the intersection of the agents list generated, and the list of agents with which ID is in the
+    client.keys file; will be the agents for which agent-groups will be created.
+
+    This script must be used in a Wazuh worker node.
+    """
     if len(sys.argv) != 3:
         print(f"add_agents_to_default_group.py <first_id> <last_id> (you used {' '.join(sys.argv)})")
         exit(1)

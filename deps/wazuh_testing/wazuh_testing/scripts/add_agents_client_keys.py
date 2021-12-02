@@ -4,6 +4,13 @@ from wazuh_testing.tools import CLIENT_KEYS_PATH
 
 
 def main():
+    """Add fake agents to client.keys. To use the script, pass two arguments indicating the first agent ID and the last
+    agent ID from the range of agents to be added.
+
+    The agents added will have ID={agent_id}, name=new_agent_{agent_id}, address=any; and password={agent_id}.
+
+    This script must be used in the Wazuh master node.
+    """
     if len(sys.argv) != 3:
         print(f"add_agents_client_keys.py <first_id> <last_id> (you used {' '.join(sys.argv)})")
         exit(1)

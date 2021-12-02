@@ -5,7 +5,22 @@ import time
 
 
 def main():
+    """Desynchronize agents in the worker's global.db. To use the script, pass three arguments indicating the first
+    agent ID, the last agent ID from the range of agents to be added to the default group; and the node name.
+
+    The script updates the global.db agent table entries where ID is one in the range specified. This update includes
+    setting the node_name and the agent version. After that, each agent is marked as required to be synchronized
+    (synreq) every 10 seconds.
+
+    This script must be used in a Wazuh worker node.
+    """
+
     def send_msg(msg):
+        """Send message to a socket.
+
+        Args:
+            msg (str): Message to be sent to the socket.
+        """
         msg = struct.pack('<I', len(msg)) + msg.encode()
 
         # Send msg
