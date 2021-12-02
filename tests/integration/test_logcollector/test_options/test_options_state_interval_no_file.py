@@ -64,9 +64,6 @@ def check_wazuh_logcollector_status_file(file):
     global_files = data['global']['files']
     interval_files = data['interval']['files']
 
-    print(list(filter(lambda global_file: global_file['location'] == file, global_files)), 
-           list(filter(lambda interval_file: interval_file['location'] == file, interval_files)))
-
     return (list(filter(lambda global_file: global_file['location'] == file, global_files)), 
            list(filter(lambda interval_file: interval_file['location'] == file, interval_files)))
 
@@ -107,6 +104,9 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
 
     configuration = get_configuration['metadata']
     use_regex = configuration['regex']
+    if not use_regex:
+        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/10783')
+
     location = configuration['location']
 
     interval = int(local_internal_options['logcollector.state_interval'])
@@ -153,7 +153,7 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
                                         error_message="File not available callback has not been generated")
             
             time_to_update_statistics_file = (interval if use_regex else interval*open_attempts) + 5
-            
+
             sleep(time_to_update_statistics_file)
 
             if use_regex:
