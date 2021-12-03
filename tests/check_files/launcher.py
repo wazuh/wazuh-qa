@@ -19,21 +19,9 @@ from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_check_files')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
 CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'check_files')
-CHECK_FILES_PLAYBOOKS_PATH = os.path.join(CHECK_FILES_TEST_PATH, 'playbooks')
-INSTALL_PLAYBOOK_PATH = os.path.join(CHECK_FILES_PLAYBOOKS_PATH, 'install_wazuh.yaml')
-UPGRADE_PLAYBOOK_PATH = os.path.join(CHECK_FILES_PLAYBOOKS_PATH, 'upgrade_wazuh.yaml')
-UNINSTALL_PLAYBOOOK_PATH = os.path.join(CHECK_FILES_PLAYBOOKS_PATH, 'uninstall_wazuh.yaml')
-CHECK_FILES_PLAYBOOOK_PATH = os.path.join(CHECK_FILES_PLAYBOOKS_PATH, 'run_check_files_tool.yaml')
-FETCH_FILES_PLAYBOOOK_PATH = os.path.join(CHECK_FILES_PLAYBOOKS_PATH, 'fetch_files.yaml')
-
-ACTION_MAPPING = {
-    'install': [INSTALL_PLAYBOOK_PATH, CHECK_FILES_PLAYBOOOK_PATH, FETCH_FILES_PLAYBOOOK_PATH],
-    'upgrade': [INSTALL_PLAYBOOK_PATH, UPGRADE_PLAYBOOK_PATH, CHECK_FILES_PLAYBOOOK_PATH, FETCH_FILES_PLAYBOOOK_PATH],
-    'uninstall': [INSTALL_PLAYBOOK_PATH, CHECK_FILES_PLAYBOOOK_PATH, FETCH_FILES_PLAYBOOOK_PATH]
-}
 
 logger = Logging(QACTL_LOGGER)
-
+test_build_files = []
 
 def get_parameters():
     """
@@ -85,6 +73,7 @@ def set_environment(parameters):
 
     # Download wazuh-qa repository to launch the check-files test files.
     local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=TMP_FILES)
+    test_build_files.append(WAZUH_QA_FILES)
 
 
 def set_logger(parameters):
@@ -156,6 +145,7 @@ def generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_gene
     # Generate qa-ctl configuration file
     qa_ctl_configuration = {**deployment_configuration, **tasks_configuration}
     file.write_yaml_file(config_file_path, qa_ctl_configuration)
+    test_build_files.append(config_file_path)
 
     logger.info(f"The qa-ctl configuration has been created successfully in {config_file_path}")
 
@@ -248,7 +238,7 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
         # 1. - Install Wazuh on remote host
         # 2. - Wait 30 seconds before upgrading Wazuh
         # 3. - Upgrade Wazuh on remote host
-        # 5. - Wait 30 seconds before running check-files tool
+        # 4. - Wait 30 seconds before running check-files tool
         playbooks_path.append(playbook_generator.install_wazuh(**wazuh_install_playbook_parameters))
         playbooks_path.append(playbook_generator.wait_seconds(30))
         playbooks_path.append(playbook_generator.upgrade_wazuh(**upgrade_wazuh_playbook_parameters))
@@ -272,50 +262,64 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
 
 def main():
     """Run the check-files test according to the script parameters."""
-    parameters = get_parameters()
-    qa_ctl_config_generator = QACTLConfigGenerator()
-    current_timestamp = str(get_current_timestamp()).replace('.', '_')
-    pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
-    post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
+    try:
+        parameters = get_parameters()
+        qa_ctl_config_generator = QACTLConfigGenerator()
+        current_timestamp = str(get_current_timestamp()).replace('.', '_')
+        pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
+        post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
 
-    # Set logging and Download QA files
-    set_environment(parameters)
+        # Set logging and Download QA files
+        set_environment(parameters)
 
-    # Validate script parameters
-    if not parameters.no_validation:
-        validate_parameters(parameters)
+        # Validate script parameters
+        if not parameters.no_validation:
+            validate_parameters(parameters)
 
-    # Generate the test playbooks to run with qa-ctl
-    playbooks_path = generate_test_playbooks(parameters, post_check_files_data_path, pre_check_files_data_path)
+        # Generate the test playbooks to run with qa-ctl
+        playbooks_path = generate_test_playbooks(parameters, post_check_files_data_path, pre_check_files_data_path)
+        test_build_files.extend(playbooks_path)
 
-    # Generate the qa-ctl configurationgenerate_qa_ctl_configuration
-    qa_ctl_config_file_path = generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_generator)
+        # Generate the qa-ctl configurationgenerate_qa_ctl_configuration
+        qa_ctl_config_file_path = generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_generator)
 
-    # Run the qa-ctl with the generated configuration. Launch deployment + custom playbooks.
-    qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
-    qa_ctl_extra_args += ' -p' if parameters.persistent else ''
-    local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args} "
-                                                    '--no-validation-logging')
-    # Check that the post-check-files data has been fetched correctly
-    if os.path.exists(post_check_files_data_path):
-        logger.info(f"The post-check-files data has been saved in {post_check_files_data_path}")
-    else:
-        raise QAValueError(f"Could not find the post-check-files data in {TMP_FILES} path", logger.error, QACTL_LOGGER)
+        # Run the qa-ctl with the generated configuration. Launch deployment + custom playbooks.
+        qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
+        qa_ctl_extra_args += ' -p' if parameters.persistent else ''
+        local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args} "
+                                                        '--no-validation-logging')
+        # Check that the post-check-files data has been fetched correctly
+        if os.path.exists(post_check_files_data_path):
+            test_build_files.append(post_check_files_data_path)
+            logger.info(f"The post-check-files data has been saved in {post_check_files_data_path}")
+        else:
+            raise QAValueError(f"Could not find the post-check-files data in {TMP_FILES} path", logger.error,
+                               QACTL_LOGGER)
 
-    if parameters.baseline:
-        pass # Download the S3 file
+        if parameters.baseline:
+            pass # Download the S3 file
 
-    # Check that the pre-check-files data has been fetched or downloaded correctly
-    if os.path.exists(pre_check_files_data_path):
-        logger.info(f"The pre-check-files data has been saved in {pre_check_files_data_path}")
-    else:
-        raise QAValueError(f"Could not find the pre-check-files data in {TMP_FILES} path", logger.error, QACTL_LOGGER)
+        # Check that the pre-check-files data has been fetched or downloaded correctly
+        if os.path.exists(pre_check_files_data_path):
+            test_build_files.append(pre_check_files_data_path)
+            logger.info(f"The pre-check-files data has been saved in {pre_check_files_data_path}")
+        else:
+            raise QAValueError(f"Could not find the pre-check-files data in {TMP_FILES} path", logger.error,
+                               QACTL_LOGGER)
 
-    # # Launch the check-files pytest
-    # pytest_launcher = 'python -m pytest' if sys.platform == 'win32' else 'python3 -m pytest'
-    # pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} test_system_check_files --before-file " \
-    #                  f"{pre_check_files_data_path} --after-file {post_check_files_data_path}"
-    # test_result = local_actions.run_local_command_returning_output(pytest_command)
+        # Launch the check-files pytest
+        pytest_launcher = 'python -m pytest' if sys.platform == 'win32' else 'python3 -m pytest'
+        pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} test_check_files --before-file " \
+                         f"{pre_check_files_data_path} --after-file {post_check_files_data_path} " \
+                         f"--output-path {TMP_FILES}"
+        test_result = local_actions.run_local_command_returning_output(pytest_command)
+        print(test_result)
+    finally:
+        # Clean test build files
+        if not parameters.persistent:
+            logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
+            for file_to_remove in test_build_files:
+                file.remove_file(file_to_remove)
 
 
 if __name__ == '__main__':
