@@ -59,11 +59,9 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params, callback_detect_integrity_event
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.file import write_file_without_close
+from wazuh_testing.tools.file import write_file_without_close, remove_file
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import PREFIX
-
-from deps.wazuh_testing.wazuh_testing.tools.file import remove_file
 
 
 # Marks
