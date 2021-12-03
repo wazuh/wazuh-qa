@@ -46,9 +46,7 @@ def wait_for_fim_start(get_configuration, request):
     Wait for realtime start, whodata start or end of initial FIM scan.
     """
     file_monitor = getattr(request.module, "wazuh_log_monitor")
-    mode_key = (
-        "fim_mode" if "fim_mode2" not in get_configuration["metadata"] else "fim_mode2"
-    )
+    mode_key = "fim_mode" if "fim_mode2" not in get_configuration["metadata"] else "fim_mode2"
 
     try:
         if get_configuration["metadata"][mode_key] == "realtime":
