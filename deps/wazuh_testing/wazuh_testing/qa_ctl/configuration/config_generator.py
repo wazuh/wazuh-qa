@@ -365,9 +365,9 @@ class QACTLConfigGenerator:
                 if self.__validate_test_info(test):
                     os_version = ''
                     if 'CentOS 8' in test['os_version']:
-                        os_version = 'Ubuntu Focal'
-                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'CentOS 8'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'Ubuntu Focal'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
                     else:
