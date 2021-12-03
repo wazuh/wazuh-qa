@@ -142,6 +142,17 @@ def write_yaml_file(file_path, data, allow_unicode=True, sort_keys=False):
     write_file(file_path, yaml.dump(data, allow_unicode=allow_unicode, sort_keys=sort_keys))
 
 
+def rename_file(file_path, new_path):
+    """
+    Renames a file
+    Args:
+        file_path (str): File path of the file to rename.
+        new_path (str): New file path after rename.
+    """
+    if os.path.exists(file_path):
+        os.rename(file_path, new_path)
+
+
 def delete_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)

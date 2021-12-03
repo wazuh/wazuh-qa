@@ -73,16 +73,20 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import delete_path_recursively, create_large_file
 
+from deps.wazuh_testing.wazuh_testing.tools.file import delete_file, rename_file
+
 
 # Marks
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
 directory_str = os.path.join(PREFIX, "testdir1")
-file_path = os.path.join(directory_str, "large_file")
+filenames = ["large_file","changed_name"]
+file_path = os.path.join(directory_str, filenames[0])
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 configurations_path = os.path.join(test_data_path, "wazuh_conf.yaml")
+sleep_time = 3
 
 # configurations
 conf_params = {"TEST_DIRECTORIES": directory_str, "MODULE_NAME": __name__}
@@ -138,23 +142,20 @@ def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, confi
             brief: Wait for start of initial FIM scan start.
 
     assertions:
-        - Verify that the file hast been modified renamed.
         - Verify that the modificaction is done before the initial scan ends.
     """
 
     check_apply_test(tags_to_apply, get_configuration["tags"])
 
     # Wait a few seconds for scan to run on created file.
-    time.sleep(3)
+    time.sleep(sleep_time)
 
     modify_time = None
     # Modify the file
-    changed_path = os.path.join(directory_str, "changed_name")
     try:
+        renamed_path = os.path.join(directory_str, filenames[1])
         modify_time = time.time()
-        os.rename(file_path, changed_path)
-        # Assert the file has been changed
-        assert os.path.isfile(changed_path) == True
+        rename_file(file_path, renamed_path)
     except (OSError, IOError, PermissionError) as error:
         pytest.fail(f"Could not rename file - Error: {error}")
 
@@ -194,7 +195,6 @@ def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, confi
             brief: Wait for start of initial FIM scan start.
 
     assertions:
-        - Verify that the file has been deleted.
         - Verify that the modificaction is done before the initial scan ends.
 
     """
@@ -202,15 +202,13 @@ def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, confi
     check_apply_test(tags_to_apply, get_configuration["tags"])
 
     # Wait a few seconds for scan to run on created file.
-    time.sleep(3)
+    time.sleep(sleep_time)
 
     modify_time = None
     # Delete the file
     try:
-        os.remove(file_path)
+        delete_file(file_path)
         modify_time = time.time()
-        # Assert the file has been deleted
-        assert os.path.isfile(file_path) == False
     except (OSError, IOError, PermissionError) as error:
         pytest.fail(f"Could not delete file - Error: {error}")
 
