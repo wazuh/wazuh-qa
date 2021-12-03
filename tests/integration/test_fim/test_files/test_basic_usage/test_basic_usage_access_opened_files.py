@@ -67,13 +67,13 @@ import string
 import pytest
 import time
 
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, detect_initial_scan_start, get_scan_timestamp
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, get_scan_timestamp
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import delete_path_recursively, create_large_file
 
-from deps.wazuh_testing.wazuh_testing.tools.file import delete_file, rename_file
+from wazuh_testing.tools.file import delete_file, rename_file
 
 
 # Marks
