@@ -120,6 +120,11 @@ def write_file(file_path, data):
         f.write(data)
 
 
+def write_file_without_close(file_path, data=''):
+    file = open(file_path, "w")
+    file.write(data)
+
+
 def read_json_file(file_path):
     return json.loads(read_file(file_path))
 
