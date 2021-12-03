@@ -3,10 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import json
-import socket
-from netifaces import interfaces, ifaddresses, AF_INET
+
 import pytest
+
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
@@ -14,13 +13,14 @@ from wazuh_testing.tools.system import HostManager
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
 
-inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'basic_environment', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 tmp_path = os.path.join(local_path, 'tmp')
-agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'provisioning', 'basic_environment', 'roles', 'agent-role', 'files', 'ossec.conf')
+agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
+                                'provisioning', 'basic_environment', 'roles', 'agent-role', 'files', 'ossec.conf')
 
 system_elements = ['manager', 'agent']
 ip_format = ['ipv4', 'ipv6']
@@ -123,14 +123,10 @@ def modify_ip_address_conf(test_case):
 
     with open(agent_conf_file, 'r') as file:
 	    old_configuration = file.read()
-        #print(f'OLD: {old_configuration}')
     if 'ipv4' in test_case['wazuh-manager']:
-        print('HOLI')
         new_configuration = old_configuration.replace('<address>MANAGER_IP</address>',f"<address>{network['manager_network'][0]}</address>")
         host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf', content=new_configuration)
-        #print(f'NEW: {new_configuration}')
     elif 'ipv6' in test_case['wazuh-manager']:
-        print('CHAO')
         new_configuration = old_configuration.replace('<address>MANAGER_IP</address>',f"<address>{network['manager_network'][1]}</address>")
         host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf', content=new_configuration)
     else:
