@@ -86,7 +86,7 @@ configurations_path = os.path.join(test_data_path, "wazuh_conf.yaml")
 
 # configurations
 conf_params = {"TEST_DIRECTORIES": directory_str, "MODULE_NAME": __name__}
-parameters, metadata = generate_params(extra_params=conf_params)
+parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
@@ -143,8 +143,6 @@ def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, confi
     """
 
     check_apply_test(tags_to_apply, get_configuration["tags"])
-    if get_configuration["metadata"]["fim_mode"] != "scheduled":
-        pytest.skip("This test does not apply to realtime or whodata modes")
 
     # Wait a few seconds for scan to run on created file.
     time.sleep(3)
@@ -202,8 +200,6 @@ def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, confi
     """
 
     check_apply_test(tags_to_apply, get_configuration["tags"])
-    if get_configuration["metadata"]["fim_mode"] != "scheduled":
-        pytest.skip("This test does not apply to realtime or whodata modes")
 
     # Wait a few seconds for scan to run on created file.
     time.sleep(3)
