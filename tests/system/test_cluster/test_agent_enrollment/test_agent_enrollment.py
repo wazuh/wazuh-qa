@@ -3,7 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import json
 
 import pytest
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
@@ -19,24 +18,6 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 tmp_path = os.path.join(local_path, 'tmp')
-
-system_elements = ['master', 'worker', 'agent']
-ip_format = ['ipv4', 'ipv6']
-
-network_configuration = [
-    {
-        'wazuh-master': 'ipv6',
-        'wazuh-worker1': 'ipv4',
-        'wazuh-agent1': 'ipv6'
-    },
-    {
-        'wazuh-master': 'ipv4',
-        'wazuh-worker1': 'ipv4',
-        'wazuh-agent1': 'ipv6'
-    }
-]
-
-network = {}
 
 
 # Remove the agent once the test has finished
@@ -79,28 +60,3 @@ def test_agent_enrollment(clean_environment):
     # Check if the agent is active
     agent_id = host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
     assert host_manager.run_command('wazuh-master', f'{WAZUH_PATH}/bin/agent_control -i {agent_id} | grep Active')
-
-# IPV6 fixtures
-@pytest.fixture(scope='module')
-def get_ip_direcctions():
-    global network
-    master_network = json.loads(host_manager.run_command('wazuh-master', f'ip -j a'))
-    worker_network = json.loads(host_manager.run_command('wazuh-worker1', f'ip -j a'))
-    agent_network = json.loads(host_manager.run_command('wazuh-agent1', f'ip -j a'))
-
-    network['wazuh-master'] = master_network
-    network['wazuh-worker1'] = agent_network
-    network['wazuh-agent1'] = worker_network
-
-
-@pytest.fixture(scope='function')
-def configure_network(get_ip_direcctions, network_configuration):
-    for key,value in network_configuration.items():
-        if value == 'ipv6':
-            host_manager.run_command(key, f'ip -4 addr flush dev eth0')
-
-    yield 
-
-    for key,value in network_configuration.items():
-        if value == 'ipv6':
-            host_manager.run_command(key, f"ip addr add {get_ip_direcctions[key][1]['addr_info'][0]['local']} dev eth0")
