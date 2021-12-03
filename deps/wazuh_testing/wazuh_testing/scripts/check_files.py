@@ -154,14 +154,17 @@ def get_data_information(item):
     _type = 'directory' if os.path.isdir(item) else 'file'
     permissions = get_filemode(stat_info.st_mode)
     last_update = datetime.fromtimestamp(os.path.getmtime(item)).strftime('%Y-%m-%d %H:%M:%S')
-    if _type != 'directory':
-        checksum = hashlib.md5(open(item, 'rb').read()).hexdigest()
 
-        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
-                'last_update': last_update, 'checksum': checksum}
-    else:
-        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
-                'last_update': last_update}
+    check_files_data = {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
+                        'last_update': last_update}
+
+    if _type != 'directory':
+        try:
+            check_files_data.update({'checksum': hashlib.md5(open(item, 'rb').read()).hexdigest()})
+        except PermissionError:
+            pass
+
+    return check_files_data
 
 
 def write_data_to_file(data, output_file_path):
