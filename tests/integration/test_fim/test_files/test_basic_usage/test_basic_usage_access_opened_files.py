@@ -168,7 +168,7 @@ def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, confi
                                         create_and_delete_file, restart_syscheckd_function, wait_for_scan_start):
     """
     description: Check that files that are being scanned by syscheckd daemon
-                 can deleted deleted, and that wazuh is not
+                 can deleted, and that wazuh is not
                  blocking the files.
 
     wazuh_min_version: 4.2
