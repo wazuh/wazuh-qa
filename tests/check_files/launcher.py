@@ -153,14 +153,12 @@ def generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_gene
 
 
 def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_checkfiles_post_data_path):
-
     """Generate the necessary playbooks to run the test.
 
     Args:
-        test_action (str): Test action [install, upgrade, uninstall...]
-        os_system (str): Operating system where the test will be launched.
-        wazuh_target (str): Wazuh target, manager or agent.
-        wazuh_version (str): Wazuh version to install and test.
+        parameters (argparse.Namespace): Object with the user parameters.
+        local_checkfiles_pre_data_path (str): Local path where the pre-check-files data will be saved.
+        local_checkfiles_post_data_path (str): Local path where the post-check-files data will be saved.
     """
     playbooks_path = []
     package_url = get_production_package_url(parameters.wazuh_target, parameters.os_system, parameters.wazuh_version) \
@@ -172,7 +170,7 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
     os_platform = 'linux'
     package_destination = '/tmp'
     check_files_tool_destination = '/bin/check_files.py'
-    ignore_check_files_path = ['/sys', '/proc', '/run', '/var/ossec', '/bin/check_files.py']
+    ignore_check_files_path = ['/sys', '/proc', '/run', '/dev', '/var/ossec', '/bin/check_files.py']
     check_files_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
     pre_check_files_data_output_path = '/pre_check_files_data.json'
     post_check_files_data_output_path = '/post_check_files_data.json'
@@ -316,7 +314,7 @@ def main():
         print(test_result)
     finally:
         # Clean test build files
-        if not parameters.persistent:
+        if parameters and not parameters.persistent:
             logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
             for file_to_remove in test_build_files:
                 file.remove_file(file_to_remove)
