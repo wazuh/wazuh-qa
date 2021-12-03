@@ -19,7 +19,6 @@ modules:
 
 components:
     - agent
-    - manager
 
 daemons:
     - wazuh-syscheckd
@@ -99,11 +98,11 @@ def test_file_currently_open(tags_to_apply, get_configuration, configure_environ
                              restart_syscheckd):
     '''
     description: Check if FIM could work correctly when a file is open..
-                 For this purpose, the test uses open a file without close and restart Wazuh
+                 For this purpose, the test open a file without close and restart Wazuh
                  in order to get the first scan of FIM. Finally, it verifies that
                  the FIM events have been generated properly.
 
-    wazuh_min_version: 4.1.0
+    wazuh_min_version: 4.1.3
 
     parameters:
         - tags_to_apply:
