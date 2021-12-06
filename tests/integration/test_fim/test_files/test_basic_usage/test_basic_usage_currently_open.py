@@ -12,7 +12,7 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
+tier: 1
 
 modules:
     - fim
@@ -65,7 +65,7 @@ from wazuh_testing.tools import PREFIX
 
 # Marks
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 
 # variables
