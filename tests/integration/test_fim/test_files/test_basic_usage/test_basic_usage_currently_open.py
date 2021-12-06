@@ -70,7 +70,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 
-directory_str = os.path.join(PREFIX, 'testdir123')
+directory_str = os.path.join(PREFIX, 'testdir')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_conf.yaml')
 
@@ -91,9 +91,7 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf'}
-])
+@pytest.mark.parametrize('tags_to_apply', [{'ossec_conf'}])
 def test_file_currently_open(tags_to_apply, get_configuration, configure_environment, file_monitoring,
                              restart_syscheckd):
     '''
