@@ -120,6 +120,7 @@ def write_file(file_path, data):
         f.write(data)
 
 
+# Created and writre file without close
 def write_file_without_close(file_path, data=''):
     file = open(file_path, "w")
     file.write(data)
