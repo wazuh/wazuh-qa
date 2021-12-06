@@ -121,7 +121,7 @@ def write_file(file_path, data):
 
 
 def write_file_without_close(file_path, data=''):
-     """
+    """
     Create and write file without close
 
     Args:
