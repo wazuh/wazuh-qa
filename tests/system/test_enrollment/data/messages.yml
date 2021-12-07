@@ -1,12 +1,18 @@
 ---
 wazuh-manager:
-  - regex: ".*Agent key generated for agent.*"
+  - regex: ".*Received request for a new agent .* from: AGENT_IP"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Agent key generated for.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
 
 
 wazuh-agent1:
-  - regex: ".*Requesting a key from server:.*"
+  - regex: ".*Server IP Address: MANAGER_IP"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Requesting a key from server: MANAGER_IP"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
   - regex: ".*Registering agent to unverified manager"
