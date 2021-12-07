@@ -72,12 +72,12 @@ import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 
 import sys
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # Configuration
 no_restart_windows_after_configuration_set = True
@@ -86,10 +86,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+local_internal_options = {'logcollector.debug': '2'}
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
@@ -214,8 +211,9 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
-def test_configuration_out_format(get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_out_format(get_configuration, configure_environment, configure_local_internal_options_module,
+                                  restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'out_format' tag.
                  For this purpose, the test will set a 'localfile' section using both valid and invalid values
@@ -232,6 +230,9 @@ def test_configuration_out_format(get_configuration, configure_environment, rest
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the Wazuh local internal options file.
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.

@@ -126,6 +126,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_location(get_configuration, configure_environment, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon starts properly when the 'location' tag is used.
@@ -169,6 +170,6 @@ def test_configuration_location(get_configuration, configure_environment, restar
         api.compare_config_api_response([cfg], 'localfile')
     else:
         if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
+            assert check_if_process_is_running('wazuh-agent.exe') == True
         else:
             check_if_process_is_running('wazuh-logcollector')
