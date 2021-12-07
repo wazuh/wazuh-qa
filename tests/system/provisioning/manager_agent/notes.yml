@@ -1,0 +1,10 @@
+
+- name: "Download package"
+  get_url:
+    url: "{{agent_package}}"
+    dest: /tmp/wazuh-agent.deb
+    mode: "0664"
+
+- name: Install agent
+  apt:
+    deb: /tmp/wazuh-agent.deb

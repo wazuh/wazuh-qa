@@ -1,0 +1,8 @@
+---
+wazuh-agent2:
+  - regex: "(\\\\x27touch \/tmp\/injection; \\\\x24token:\\\\x21\\\\x60)"
+    path: "/var/ossec/logs/active-responses.log.log"
+    timeout: 60
+  - regex: "(\\\\x27touch \/tmp\/injection; \\\\x24token:\\\\x21\\\\x60)"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
