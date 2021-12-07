@@ -47,9 +47,14 @@ network_configuration = [
         'wazuh-agent1': 'ipv6'
     },
     {
-        'name': 'manager_dns',
+        'name': 'manager_dns_agent_ipv4',
         'wazuh-manager': 'dns',
         'wazuh-agent1': 'ipv4'
+    },
+    {
+        'name': 'manager_dns_agent_ipv6',
+        'wazuh-manager': 'dns',
+        'wazuh-agent1': 'ipv6'
     }
 ]
 
