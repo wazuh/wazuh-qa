@@ -125,6 +125,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_label(get_configuration, configure_environment, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon can monitor log files configured to use labels.

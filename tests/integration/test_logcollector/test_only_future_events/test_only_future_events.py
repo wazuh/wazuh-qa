@@ -3,17 +3,24 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import tempfile
+import sys
 
 import pytest
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import monitoring, file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 
+
+if sys.platform == 'win32':
+    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
+else:
+    prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.tier(level=0)]
 
 # Configuration
 DAEMON_NAME = "wazuh-logcollector"
@@ -23,7 +30,7 @@ temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
 current_line = 0
 
-local_internal_options = {'logcollector.vcheck_files': 5}
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': 2}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '10MB'},
@@ -70,7 +77,7 @@ def get_files_list():
     return file_structure
 
 
-def test_only_future_events(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_only_future_events(configure_local_internal_options_module, get_configuration, file_monitoring,
                             configure_environment, get_files_list, create_file_structure_module, restart_logcollector):
     """Check if the "only-future-events" option is working correctly.
 
@@ -91,21 +98,21 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
     global current_line
 
     # Ensure that the file is being analyzed
-    message = fr"INFO: \(\d*\): Analyzing file: '{log_test_path}'."
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    message = f"Analyzing file: '{log_test_path}'."
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)
 
     # Add one KiB of data to log
     current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)
 
     control_service('stop', daemon=DAEMON_NAME)
 
@@ -120,40 +127,40 @@ def test_only_future_events(get_local_internal_options, configure_local_internal
         # Logcollector should detect the first line written while it was stopped
         # Check first line
         message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                callback=callback_message)
+        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
+        log_monitor.start(timeout=global_parameters.default_timeout,
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                          callback=callback_message)
         # Check last line
         message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                callback=callback_message)
+        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
+        log_monitor.start(timeout=global_parameters.default_timeout,
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                          callback=callback_message)
     else:
         # Logcollector should NOT detect the log lines written while it was stopped
         with pytest.raises(TimeoutError):
             # Check first line
             message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
                                                         escape=True)
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                    callback=callback_message)
+            log_monitor.start(timeout=global_parameters.default_timeout,
+                              error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                              callback=callback_message)
             # Check last line
             message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX,
+            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
                                                         escape=True)
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                    callback=callback_message)
+            log_monitor.start(timeout=global_parameters.default_timeout,
+                              error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                              callback=callback_message)
 
     # Add another KiB of data to log (additional check)
     current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX, escape=True)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)

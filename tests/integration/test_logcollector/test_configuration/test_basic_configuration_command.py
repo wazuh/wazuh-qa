@@ -86,7 +86,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 wazuh_component = get_service()
 
-local_internal_options = {'logcollector.remote_commands': 1}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo Testing'},
@@ -126,13 +126,8 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
-def test_configuration_command(get_local_internal_options, configure_local_internal_options, get_configuration,
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_command(configure_local_internal_options_module, get_configuration,
                                configure_environment, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon can monitor commands that use multiple parameters.

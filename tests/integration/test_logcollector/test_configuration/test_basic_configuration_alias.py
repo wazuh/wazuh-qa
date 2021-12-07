@@ -86,7 +86,7 @@ pytestmark = pytest.mark.tier(level=0)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2', 'windows.debug': '2'}
 
 wazuh_component = get_service()
 
@@ -95,6 +95,8 @@ if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
 elif sys.platform == 'darwin':
     command = 'ps aux'
+elif sys.platform == 'sunos5':
+    command = 'ps aux -xww'    
 else:
     command = 'ps -aux'
 
@@ -112,21 +114,16 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 configuration_ids = [f"{x['log_format']}_{x['command']}_{x['alias']}" for x in metadata]
 
 
-# fixtures
+# Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get local internal options from the module."""
-    return local_internal_options
-
-
-def test_configuration_alias(get_local_internal_options, configure_local_internal_options,
-                             get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_alias(configure_local_internal_options_module,
+                             get_configuration, configure_environment, file_monitoring, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon changes a command name in the log messages by
                  the one defined in the 'alias' tag. For this purpose, the test will monitor a command
@@ -138,10 +135,7 @@ def test_configuration_alias(get_local_internal_options, configure_local_interna
     wazuh_min_version: 4.2.0
 
     parameters:
-        - get_local_internal_options:
-            type: fixture
-            brief: Get local internal options from the module.
-        - configure_local_internal_options:
+        - configure_local_internal_options_module:
             type: fixture
             brief: Configure the Wazuh local internal options.
         - get_configuration:
@@ -150,6 +144,9 @@ def test_configuration_alias(get_local_internal_options, configure_local_interna
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
@@ -171,8 +168,8 @@ def test_configuration_alias(get_local_internal_options, configure_local_interna
     cfg = get_configuration['metadata']
 
     log_callback = logcollector.callback_command_alias_output(cfg['alias'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+    log_monitor.start(timeout=10, callback=log_callback,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()

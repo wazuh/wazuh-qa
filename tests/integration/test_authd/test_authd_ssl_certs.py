@@ -81,10 +81,11 @@ SSL_AGENT_PRIVATE_KEY = '/tmp/test_sslagent.key'
 SSL_VERIFY_HOSTS = ['no', 'yes']
 SIM_OPTIONS = ['NO CERT', 'VALID CERT', 'INCORRECT CERT', 'INCORRECT HOST']
 
+AGENT_ID = 0
 AGENT_NAME = 'test_agent'
 AGENT_IP = '127.0.0.1'
 WRONG_IP = '10.0.0.240'
-INPUT_MESSAGE = f"OSSEC A:'{AGENT_NAME}'"
+INPUT_MESSAGE = "OSSEC A:'{}_{}'"
 OUPUT_MESSAGE = "OSSEC K:'"
 # Ossec.conf configurations
 params = [{
@@ -164,14 +165,16 @@ def override_wazuh_conf(configuration):
     time.sleep(1)
 
 
-def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
+def test_authd_ssl_certs(get_configuration, generate_ca_certificate, tear_down):
     '''
-    description: Check if the 'wazuh-authd' daemon can manage 'SSL' connections with agents
-                 and the 'host verification' feature is working properly. For this purpose,
-                 it generates and signs the necessary certificates and builds the
-                 enrollment requests using them.
+    description:
+        Checks if the 'wazuh-authd' daemon can manage 'SSL' connections with agents
+        and the 'host verification' feature is working properly. For this purpose,
+        it generates and signs the necessary certificates and builds the
+        enrollment requests using them.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -180,14 +183,18 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
         - generate_ca_certificate:
             type: fixture
             brief: Build the 'CA' (Certificate of Authority) and sign the certificate used by the testing agent.
+        - tear_down:
+            type: fixture
+            brief: cleans the client.keys file
 
     assertions:
         - Verify that the agent can only connect to the 'wazuh-authd' daemon socket using a valid certificate.
         - Verify that using a valid certificate the agent can only enroll using the IP address linked to it.
 
-    input_description: Different test cases are found in the test module and include
-                       parameters for the environment setup, the requests
-                       to be made, and the expected result.
+    input_description:
+        Different test cases are found in the test module and include
+        parameters for the environment setup, the requests
+        to be made, and the expected result.
 
     expected_output:
         - r'OSSEC K:' (When the agent has enrolled in the manager)
@@ -213,7 +220,9 @@ def test_authd_ssl_certs(get_configuration, generate_ca_certificate):
             return
         else:
             raise AssertionError(f'Option {option} expected successful socket connection but it failed')
-    SSL_socket.send(INPUT_MESSAGE, size=False)
+    global AGENT_ID
+    SSL_socket.send(INPUT_MESSAGE.format(AGENT_NAME, AGENT_ID), size=False)
+    AGENT_ID = AGENT_ID + 1
     try:
         response = ''
         timeout = time.time() + 10

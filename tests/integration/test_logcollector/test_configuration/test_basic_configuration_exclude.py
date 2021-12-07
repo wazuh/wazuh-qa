@@ -86,7 +86,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
-
 if sys.platform == 'win32':
     parameters = [
         {'LOG_FORMAT': 'syslog', 'LOCATION': r'C:\tmp\*', 'EXCLUDE': r'C:\tmp\file.txt'},
@@ -134,7 +133,8 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_exclude(get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_exclude(get_configuration, configure_environment, file_monitoring, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon starts properly when the 'exclude' tag is used.
                  For this purpose, the test will configure the logcollector to monitor a 'syslog' directory
@@ -151,6 +151,9 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
@@ -174,6 +177,6 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
 
     else:
         if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
+            assert check_if_process_is_running('wazuh-agent.exe') == True
         else:
             assert check_if_process_is_running('wazuh-logcollector')

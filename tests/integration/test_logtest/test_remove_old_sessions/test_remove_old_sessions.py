@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-logtest' tool allows the testing and verification of rules and decoders against provided log examples
+       remotely inside a sandbox in 'wazuh-analysisd'. This functionality is provided by the manager, whose work
+       parameters are configured in the ossec.conf file in the XML rule_test section. Test logs can be evaluated through
+       the 'wazuh-logtest' tool or by making requests via RESTful API. These tests will check if the logtest
+       configuration is valid. Also checks rules, decoders, decoders, alerts matching logs correctly.
+
+tier: 0
+
+modules:
+    - logtest
+
+components:
+    - manager
+
+daemons:
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/tools/wazuh-logtest.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/wazuh-logtest/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+
+tags:
+    - logtest_configuration
+'''
 import pytest
 import os
 
@@ -24,7 +76,8 @@ local_internal_options = {'analysisd.debug': '2'}
 # Variables
 local_internal_options = {'analysisd.debug': '1'}
 create_session_data = {'version': 1, 'command': 'log_processing',
-                       'parameters': {'event': 'Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928',
+                       'parameters': {'event': 'Oct 15 21:07:56 linux-agent sshd[29205]: Invalid user blimey '
+                                      'from 18.18.18.18 port 48928',
                                       'log_format': 'syslog',
                                       'location': 'master->/var/log/syslog'}}
 msg_create_session = dumps(create_session_data)
@@ -54,10 +107,55 @@ def test_remove_old_session(configure_local_internal_options_module,
                             get_configuration, configure_environment,
                             file_monitoring, restart_required_logtest_daemons,
                             wait_for_logtest_startup):
-    """Create more sessions than allowed and wait for the message which
-    informs that Wazuh-logtest has removed the oldest session.
-    """
+    '''
+    description: Check if 'wazuh-logtest' correctly detects and handles the situation where trying to use more
+                 sessions than allowed. To do this, it creates more sessions than allowed and wait for the message which
+                 informs that 'wazuh-logtest' has removed the oldest session.
 
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
+        - get_configuration:
+            type: fixture
+            brief: Get configuration from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+        - restart_required_logtest_daemons:
+            type: fixture
+            brief: Wazuh logtests daemons handler.
+        - wait_for_logtest_startup:
+            type: fixture
+            brief: Wait until logtest has begun.
+
+    assertions:
+        - Verify that the session will exceed the allowed sessions with the last one to verify that the first(oldest)
+         session is correctly removed.
+        - Verify that every session is correctly created.
+        - Verify that the first session is valid.
+        - Verify that the 'removal session' is created.
+        - Verify that the removed session is the first one.
+        - Verify that the session that exceeds the limit is created.
+
+    input_description: Some test cases are defined in the module. These include some input configurations stored in
+                       the 'wazuh_conf.yaml' and the session creation data from the module.
+
+    expected_output:
+        - 'Session initialization event not found'
+        - 'Session removal event not found'
+        - 'Incorrect session removed'
+        - r'Error when executing .* in daemon .*. Exit status: .*'
+
+    tags:
+        - session_limit
+        - analysisd
+    '''
     max_sessions = int(get_configuration['sections'][0]['elements'][2]['max_sessions']['value'])
 
     first_session_token = None
