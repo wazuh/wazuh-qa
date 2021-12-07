@@ -15,6 +15,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import search_process, control_service
 from wazuh_testing.tools.utils import retry
 
+pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
 macos_sierra = True if str(platform.mac_ver()[0]).startswith('10.12') else False
 
