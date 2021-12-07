@@ -60,12 +60,14 @@ local_internal_options = {'logcollector.debug': '2'}
 def check_wazuh_logcollector_status_file(file):
     with open(LOGCOLLECTOR_STATISTICS_FILE, 'r') as json_file:
         data = load(json_file)
+    try:
+        global_files = data['global']['files']
+        interval_files = data['interval']['files']
 
-    global_files = data['global']['files']
-    interval_files = data['interval']['files']
-
-    return (list(filter(lambda global_file: global_file['location'] == file, global_files)), 
-           list(filter(lambda interval_file: interval_file['location'] == file, interval_files)))
+        return (list(filter(lambda global_file: global_file['location'] == file, global_files)),
+                list(filter(lambda interval_file: interval_file['location'] == file, interval_files)))
+    except Exception:
+        return (False, False)
 
 
 # Fixtures

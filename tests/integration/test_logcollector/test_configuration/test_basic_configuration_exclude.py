@@ -5,7 +5,9 @@
 import os
 import sys
 import pytest
+from time import sleep
 import wazuh_testing.api as api
+
 from wazuh_testing.tools.services import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
@@ -18,6 +20,7 @@ pytestmark = pytest.mark.tier(level=0)
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+logcollector_start_up_timeout = 10
 
 wazuh_component = get_service()
 
@@ -83,9 +86,10 @@ def test_configuration_exclude(get_configuration, configure_environment, file_mo
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()
         api.compare_config_api_response([cfg], 'localfile')
-
     else:
-        if sys.platform == 'win32':
-            assert check_if_process_is_running('wazuh-agent.exe') == True
-        else:
-            assert check_if_process_is_running('wazuh-logcollector')
+        sleep(logcollector_start_up_timeout)
+
+    if sys.platform == 'win32':
+        assert check_if_process_is_running('wazuh-agent.exe')
+    else:
+        assert check_if_process_is_running('wazuh-logcollector')
