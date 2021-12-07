@@ -61,7 +61,7 @@ daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 macos_log_messages = [
     {
         'command': 'logger',
-        'message': "Here is a multiline log. Line 0 \nLine 1. \nLast line.",
+        'message': "Here is a multiline log. Line 0\nLine 1.\nLast line.\n",
     }
 ]
 
@@ -83,8 +83,9 @@ def get_connection_configuration():
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
-def test_macos_multiline_values(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
-                                macos_message, daemons_handler, file_monitoring):
+def test_macos_multiline_values(configure_local_internal_options_module, restart_logcollector_required_daemons_package, 
+                                get_configuration, configure_environment, macos_message, file_monitoring, 
+                                daemons_handler):
     '''
     description: Check if the 'wazuh-logcollector' daemon collects multiline events from the macOS ULS
                  (unified logging system). For this purpose, the test will configure a 'localfile' section
@@ -96,6 +97,9 @@ def test_macos_multiline_values(restart_logcollector_required_daemons_package, g
     wazuh_min_version: 4.2.0
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set internal configuration for testing.
         - restart_logcollector_required_daemons_package:
             type: fixture
             brief: Restart the 'wazuh-agentd', 'wazuh-logcollector', and 'wazuh-modulesd' daemons.
@@ -136,11 +140,11 @@ def test_macos_multiline_values(restart_logcollector_required_daemons_package, g
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
     time.sleep(macos_uls_time_to_wait_after_start)
 
-    multiline_message = macos_message['message'].split('\n')
+    multiline_message = macos_message['message'].split('\n')[:-1]
     multiline_logger = f"\"$(printf \"{macos_message['message']}\")\""
     logcollector.generate_macos_logger_log(multiline_logger)
-
+    
     for line in multiline_message:
         log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
                           callback=logcollector.callback_read_macos_message(line),
-                          error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                          error_message=f"Error expected line: {line}")

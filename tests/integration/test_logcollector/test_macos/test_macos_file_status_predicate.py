@@ -39,15 +39,18 @@ tags:
     - logcollector_macos
 '''
 import pytest
+import sys
+import time
 
 from wazuh_testing.logcollector import (LOG_COLLECTOR_GLOBAL_TIMEOUT,
                                         callback_log_macos_stream_exit,
                                         callback_log_bad_predicate)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 from wazuh_testing.tools.monitoring import wait_file
 from wazuh_testing.tools.file import read_json
 from os.path import dirname, join, realpath
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
 
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
@@ -78,8 +81,10 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 def test_macos_file_status_predicate(restart_logcollector_required_daemons_package, truncate_log_file,
-                                     delete_file_status_json, configure_local_internal_options_module,
+                                     delete_file_status_json,
+                                     configure_local_internal_options_module,
                                      get_configuration, configure_environment,
                                      file_monitoring, daemons_handler):
     '''
@@ -137,6 +142,7 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
     tags:
         - logs
     '''
+    time.sleep(2)
     log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT,
                       callback=callback_log_bad_predicate(),
                       error_message='Expected log that matches the regex ".*Execution error \'log:" could not be found')

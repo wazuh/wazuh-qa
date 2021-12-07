@@ -54,6 +54,7 @@ tags:
     - fim_env_variables
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -76,6 +77,7 @@ test_env = "%TEST_ENV_VAR%"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_dir.yaml')
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 conf_params = {'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
@@ -92,6 +94,7 @@ def get_configuration(request):
 
 # Test
 @pytest.mark.parametrize('directory', [subdir1])
+@mark_skip_agentWindows
 def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
     '''

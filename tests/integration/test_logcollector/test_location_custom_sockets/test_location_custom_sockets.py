@@ -123,10 +123,11 @@ def get_files_list():
     return file_structure
 
 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, create_file_structure_module,
-                                 batch, create_socket, restart_logcollector):
+                                 batch, create_socket, restart_monitord, restart_logcollector):
     """Check if the "location" option used with custom sockets is working correctly.
 
     To do this, a UNIX "named socket" is created and added to the configuration
@@ -199,6 +200,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
 
 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
                                          get_configuration, configure_environment, create_file_structure_module,
