@@ -83,12 +83,19 @@ def control_service(action, daemon=None, debug_mode=False):
             control_service('start')
             result = 0
         else:
-            command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
-            result = command.returncode
-            if command.returncode != 0:
-                if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
-                    result = 0
-                print(command.stderr.decode())
+            error_109_windows_retry = 3
+            for _ in range(error_109_windows_retry):
+                command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
+                result = command.returncode
+                if result != 0:
+                    if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
+                        result = 0
+                        break
+                    if action == 'start' and 'The requested service has already been started.' in command.stderr.decode():
+                        result= 0
+                        break
+                    elif not "System error 109 has occurred" in command.stderr.decode():
+                        break
     else:  # Default Unix
         if daemon is None:
             if sys.platform == 'darwin' or sys.platform == 'sunos5':
@@ -205,6 +212,7 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
         elapsed_time = 0
 
         while elapsed_time < timeout and not condition_met:
+
             control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
                                                    stdout=subprocess.PIPE).stdout.decode()
             condition_met = True
@@ -272,18 +280,19 @@ def control_event_log_service(control):
     for _ in range(10):
         control_sc = 'disabled' if control == 'stop' else 'auto'
 
-        command = subprocess.run(f'sc config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+        command = subprocess.run(f'sc.exe config eventlog start= {control_sc}', stderr=subprocess.PIPE)
         result = command.returncode
         if result != 0:
             raise ValueError(f'Event log service did not stop correctly')
 
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
         result = command.returncode
-        if result == 0:
+
+        if ("The requested service has already been started." in str(command.stderr)) or  \
+           ("The Windows Event Log service is not started." in str(command.stderr)):
             break
-        else:
-            time.sleep(1)
+
+        time.sleep(1)
     else:
         raise ValueError(f"Event log service did not stop correctly")
-
     time.sleep(1)

@@ -72,13 +72,15 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
 
-local_internal_options = {'logcollector.remote_commands': 1}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2', 'monitord.rotate_log': '0',
+                          'windows.debug': '2'}
+
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo command_5m', 'FREQUENCY': 300},  # 5 minutes.
@@ -112,14 +114,8 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
-def test_command_execution_freq(get_local_internal_options, configure_local_internal_options, get_configuration,
-                                configure_environment, restart_logcollector):
+def test_command_execution_freq(configure_local_internal_options_module, get_configuration, file_monitoring,
+                                configure_environment, restart_monitord, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon runs commands at the specified interval, set in
                  the 'frequency' tag. For this purpose, the test will configure the logcollector to run
@@ -131,18 +127,21 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
     wazuh_min_version: 4.2.0
 
     parameters:
-        - get_local_internal_options:
+        - configure_local_internal_options_module:
             type: fixture
-            brief: Get local internal options from the module.
-        - configure_local_internal_options:
-            type: fixture
-            brief: Configure the Wazuh local internal options.
+            brief: Configure the Wazuh local internal options file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - restart_monitord:
+            type: fixture
+            brief: Reset the log file and start a new monitor.
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
@@ -169,8 +168,8 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
 
     seconds_to_travel = config['frequency'] / 2  # Middle of the command execution cycle.
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+    log_monitor.start(timeout=20, callback=log_callback,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     before = str(datetime.now())
     TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
@@ -178,15 +177,15 @@ def test_command_execution_freq(get_local_internal_options, configure_local_inte
 
     # The command should not be executed in the middle of the command execution cycle.
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+        log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     before = str(datetime.now())
     TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
     logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+    log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     # Restore the system clock.
     TimeMachine.time_rollback()

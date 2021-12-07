@@ -80,7 +80,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_keep_running_conf.yaml
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test_log.log')
 
-local_internal_options = {'logcollector.vcheck_files': 5}
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2'}
 
 parameters = [
     {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path},
@@ -118,18 +118,12 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get internal configuration."""
-    return local_internal_options
-
-
-@pytest.fixture(scope="module")
 def get_files_list():
     """Get file list to create from the module."""
     return file_structure
 
 
-def test_keep_running(get_local_internal_options, configure_local_internal_options, get_configuration,
+def test_keep_running(configure_local_internal_options_module, get_configuration, file_monitoring,
                       configure_environment, create_file_structure_module, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon keeps running once a log is rotated or truncated.
@@ -144,15 +138,15 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
     wazuh_min_version: 4.2.0
 
     parameters:
-        - get_local_internal_options:
-            type: fixture
-            brief: Get local internal options from the module.
-        - configure_local_internal_options:
+        - configure_local_internal_options_module:
             type: fixture
             brief: Configure the Wazuh local internal options.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
@@ -187,9 +181,9 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
     # Ensure that the file is being analyzed
     message = fr"INFO: \(\d*\): Analyzing file: '{config['location']}'."
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)
 
     # Add another MiB of data to log
     logcollector.add_log_data(log_path=config['location'],
@@ -198,9 +192,9 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_before']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)
 
     if config['mode'] == 'rotate':
         file.remove_file(config['location'])
@@ -208,17 +202,17 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
         # Ensure that the rotation has been completed:
         message = f"DEBUG: File inode changed. {config['location']}"
         callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                callback=callback_message)
+        log_monitor.start(timeout=global_parameters.default_timeout,
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                        callback=callback_message)
     else:
         file.truncate_file(config['location'])
         # Ensure that the truncate has been completed:
         message = f"DEBUG: File size reduced. {config['location']}"
         callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                                callback=callback_message)
+        log_monitor.start(timeout=global_parameters.default_timeout,
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                          callback=callback_message)
 
     # Add a MiB of data to rotated/truncated log
     logcollector.add_log_data(log_path=config['location'],
@@ -227,6 +221,6 @@ def test_keep_running(get_local_internal_options, configure_local_internal_optio
 
     message = f"DEBUG: Reading syslog message: '{config['log_line_after']}{config['mode']}'"
     callback_message = monitoring.make_callback(pattern=message, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                            callback=callback_message)
+    log_monitor.start(timeout=global_parameters.default_timeout,
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
+                      callback=callback_message)
