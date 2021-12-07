@@ -23,7 +23,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
-date = datetime.date.today().strftime("%Y-%m-%d")
+date = datetime.date.today().strftime(r"%Y-%m-%d")
 
 file_structure = [
     {
@@ -66,7 +66,7 @@ parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'c*test.txt'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'LOG_FORMAT': 'syslog', 'PATH_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')},
-    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'), 'LOG_FORMAT': 'syslog'}
 ]
 
@@ -105,8 +105,8 @@ metadata = [
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')],
      'log_format': 'syslog', 'path_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'file_type': 'duplicated_file'},
-    {'location': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing',f'file.log-{date}')], 'log_format': 'syslog',
+    {'location': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'),
+     'files': [os.path.join(temp_dir, 'wazuh-testing', f'file.log-{date}')], 'log_format': 'syslog',
      'file_type': 'single_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', 'multiple')],
@@ -121,7 +121,7 @@ if sys.platform != 'win32':
                     value['filename'].append('テスト.txt')
                     value['filename'].append('ИСПЫТАНИЕ.txt')
                     value['filename'].append('测试.txt')
-                    value['filename'].append( 'اختبار.txt')
+                    value['filename'].append('اختبار.txt')
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'テスト.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', 'ИСПЫТАНИЕ.txt'))
             case['files'].append(os.path.join(temp_dir, 'wazuh-testing', '测试.txt'))
