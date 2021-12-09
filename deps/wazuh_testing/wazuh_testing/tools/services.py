@@ -288,10 +288,17 @@ def control_event_log_service(control):
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
         result = command.returncode
 
-        if ("The requested service has already been started." in str(command.stderr)) or  \
-           ("The Windows Event Log service is not started." in str(command.stderr)):
-            break
+        if result != 0 and control == 'stop':
+            eventlog_id = subprocess.run(f'Get-WmiObject -Class win32_service -Filter "name = \'eventlog\'" select -exp \
+                                       ProcessId', stderr=subprocess.PIPE)
+            subprocess.run(f'taskkill /F /PID {eventlog_id}', stderr=subprocess.PIPE)
 
+            command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+            result = command.returncode
+
+        if ("The requested service has already been started." in str(command.stderr)) or  \
+           ("The Windows Event Log service is not started." in str(command.stderr)) or result == 0:
+            break
         time.sleep(1)
     else:
         raise ValueError(f"Event log service did not stop correctly")
