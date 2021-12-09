@@ -20,7 +20,7 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 messages_files = ['data/messages_415_or_lower.yml', 'data/messages_420_to_424.yml', 'data/messages_425_or_greater.yml']
 tmp_path = os.path.join(local_path, 'tmp')
 log_path = "/var/log/secure"
-log_cases=["Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from 192.168.123.321 port 52620 '$token: `132`!' ssh2"]
+log_cases=["Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from 192.168.123.321 port 52620 $token: `132`! ssh2"]
 sleep_time = 10
 
 
@@ -39,8 +39,10 @@ def test_active_response_log_format(wazuh_agent, message_file):
 
     clean_environment(wazuh_agent)
     
+    # Insert log
     command = f"echo {log_cases[0]} >> {log_path}"
-    
+
+    # wait for active responses messages to be genrated
     time.sleep(sleep_time)
     
     # Add log message to agent monitored source
