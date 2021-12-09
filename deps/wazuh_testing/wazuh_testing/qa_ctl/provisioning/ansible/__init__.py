@@ -46,6 +46,12 @@ def read_ansible_instance(host_info):
 
 
 def remove_known_host(host_ip, logger=None):
+    """Remove an IP host from SSH known_hosts file.
+
+    Args:
+        host_ip (str): Host IP to remove from SSH known_host file.
+        logger (logging.Logging): Logger where log the messages.
+    """
     if sys.platform != 'win32':
         known_host_file = os.path.join(str(Path.home()), '.ssh', 'known_hosts')
         if os.path.exists(known_host_file):

@@ -582,9 +582,8 @@ class QACTLConfigGenerator:
 
         Raises:
             QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
-
         """
-        deployment_configuration = {'deployment': {} }
+        deployment_configuration = {'deployment': {}}
 
         for index, instance in enumerate(instances):
             try:
@@ -616,6 +615,16 @@ class QACTLConfigGenerator:
         return deployment_configuration
 
     def get_tasks_configuration(self, instances, playbooks, playbook_path='local'):
+        """Generate the qa-ctl configuration required for running ansible tasks.
+
+        Args:
+            instances (list(ConfigInstance)): List of config-instances to deploy.
+            playbooks (list(str)): List of playbooks path to run.
+            playbook_path (str): Playbook path configuration [local or remote_url].
+
+        Returns:
+            dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
+        """
         tasks_configuration = {'tasks': {}}
 
         for index, instance in enumerate(instances):
@@ -623,8 +632,8 @@ class QACTLConfigGenerator:
             host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
             host_info['host'] = instance.ip
 
-            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else \
-                {'remote_url': playbook} for playbook in playbooks]
+            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else
+                              {'remote_url': playbook} for playbook in playbooks]
 
             tasks_configuration['tasks'][f"task_{index + 1}"] = {
                 'host_info': host_info,
