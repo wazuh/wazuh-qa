@@ -84,7 +84,7 @@ no_restart_windows_after_configuration_set = True
 force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-local_internal_options = {'windows.debug': '0', 'agent.debug': '0'}
+local_internal_options = {'windows.debug': '2', 'agent.debug': '0', 'logcollector.debug':'2'}
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
@@ -152,12 +152,6 @@ log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nm
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
 
 
 def create_file_location(filename, type):
@@ -449,8 +443,7 @@ def check_log_format_values(conf):
     file.remove_file(conf['location'])
 
 
-def test_log_format(get_configuration, configure_environment, get_local_internal_options,
-                    configure_local_internal_options):
+def test_log_format(configure_local_internal_options_module, get_configuration, configure_environment):
     '''
     description: Check if the 'wazuh-logcollector' accepts only allowed values for the 'log_format' tag, and the content
                  of the log file to monitor is compatible with those values. For this purpose, the test will create a
@@ -462,18 +455,15 @@ def test_log_format(get_configuration, configure_environment, get_local_internal
     wazuh_min_version: 4.2.0
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set internal configuration for testing.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - get_local_internal_options:
-            type: fixture
-            brief: Get internal configuration.
-        - configure_local_internal_options:
-            type: fixture
-            brief: Set internal configuration for testing.
 
     assertions:
         - Verify that the logcollector accepts only valid values for the 'log_format' tag.

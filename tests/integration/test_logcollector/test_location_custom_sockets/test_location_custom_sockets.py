@@ -179,10 +179,11 @@ def get_files_list():
     return file_structure
 
 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, create_file_structure_module,
-                                 batch, create_socket, restart_logcollector):
+                                 batch, create_socket, restart_monitord, restart_logcollector):    
     '''
     description: Check if the 'wazuh-logcollector' use custom sockets when the 'location' option is used.
                  For this purpose, the test will create a UNIX 'named socket' and add it to the configuration
@@ -215,6 +216,9 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         - create_socket:
             type: fixture
             brief: Create a UNIX named socket for testing.
+        - restart_monitord:
+            type: fixture
+            brief: Reset the log file and start a new monitor.
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
@@ -292,6 +296,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
 
 
+@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
                                          get_configuration, configure_environment, create_file_structure_module,

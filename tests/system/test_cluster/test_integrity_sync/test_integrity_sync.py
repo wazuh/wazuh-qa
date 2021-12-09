@@ -16,7 +16,7 @@ worker_hosts = test_hosts[1:]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 
-time_to_sync = 10
+time_to_sync = 21
 host_manager = HostManager(inventory_path)
 client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
 
