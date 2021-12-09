@@ -62,7 +62,7 @@ network = {}
 
 
 # Remove the agent once the test has finished
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def clean_environment():
     yield
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
@@ -101,7 +101,7 @@ def test_agent_enrollment(test_case, ipv6_enabled, get_ip_directions, configure_
 @pytest.fixture(scope='module')
 def get_ip_directions():
     global network
-    host_manager.get_host('wazuh-manager')
+
     manager_network = host_manager.get_host_ip('wazuh-manager')
     agent_network = host_manager.get_host_ip('wazuh-agent1')
 
@@ -114,11 +114,15 @@ def configure_network(test_case):
 
     if 'ipv6' in test_case['wazuh-agent1']:
         host_manager.run_command('wazuh-agent1', 'ip -4 addr flush dev eth0')
+    elif 'ipv4' in test_case['wazuh-agent1']:
+        host_manager.run_command('wazuh-agent1', 'ip -6 addr flush dev eth0')
 
     yield
 
     if 'ipv6' in test_case['wazuh-agent1']:
         host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][0]} dev eth0")
+    elif 'ipv4' in test_case['wazuh-agent1']:
+        host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
 
 
 @pytest.fixture(scope='function')
