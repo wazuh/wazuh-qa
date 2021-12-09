@@ -1,0 +1,32 @@
+---
+wazuh-manager:
+  - regex: ".*Received request for a new agent .* from: fdd1:ac8c:557:7ce2::3"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Agent key generated for.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+
+
+wazuh-agent1:
+  - regex: ".*Server IP Address: fdd1:ac8c:557:7ce2::2"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Requesting a key from server: fdd1:ac8c:557:7ce2::2"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Registering agent to unverified manager"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Using agent name as:*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Waiting for server reply"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Valid key received"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Waiting .* seconds before server connection"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
