@@ -614,13 +614,13 @@ class QACTLConfigGenerator:
 
         return deployment_configuration
 
-    def get_tasks_configuration(self, instances, playbooks, playbook_path='local'):
+    def get_tasks_configuration(self, instances, playbook_info, playbook_type='local'):
         """Generate the qa-ctl configuration required for running ansible tasks.
 
         Args:
             instances (list(ConfigInstance)): List of config-instances to deploy.
-            playbooks (list(str)): List of playbooks path to run.
-            playbook_path (str): Playbook path configuration [local or remote_url].
+            playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
+            playbook_type (str): Playbook path configuration [local or remote_url].
 
         Returns:
             dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
@@ -632,8 +632,9 @@ class QACTLConfigGenerator:
             host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
             host_info['host'] = instance.ip
 
-            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else
-                              {'remote_url': playbook} for playbook in playbooks]
+            playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
+                              {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
+                              in playbook_info.items()]
 
             tasks_configuration['tasks'][f"task_{index + 1}"] = {
                 'host_info': host_info,
