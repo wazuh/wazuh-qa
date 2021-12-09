@@ -14,6 +14,7 @@ from tempfile import gettempdir
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
+from wazuh_testing.qa_ctl.run_tasks.qa_tasks_launcher import QATasksLauncher
 from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfiguration
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -28,6 +29,7 @@ from wazuh_testing.tools.file import recursive_directory_creation
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
+TASKS_KEY = 'tasks'
 TEST_KEY = 'tests'
 WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')
 RUNNING_ON_DOCKER_CONTAINER = True if 'RUNNING_ON_DOCKER_CONTAINER' in os.environ else False
@@ -41,6 +43,7 @@ launched = {
     'config_generator': False,
     'instance_handler': False,
     'qa_provisioning': False,
+    'tasks_runner': False,
     'test_runner': False
 }
 
@@ -304,6 +307,9 @@ def get_script_parameters():
     parser.add_argument('--skip-provisioning', action='store_true',
                         help='Flag to skip the provisioning phase. Set it only if -c or --config was specified.')
 
+    parser.add_argument('--skip-tasks', action='store_true',
+                        help='Flag to skip the tasks phase. Set it only if -c or --config was specified.')
+
     parser.add_argument('--skip-testing', action='store_true',
                         help='Flag to skip the testing phase. Set it only if -c or --config was specified.')
 
@@ -375,6 +381,12 @@ def main():
             qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
             qa_provisioning.run()
             launched['qa_provisioning'] = True
+
+        if TASKS_KEY in configuration_data and not arguments.skip_tasks:
+            tasks_dict = configuration_data[TASKS_KEY]
+            tasks_runner = QATasksLauncher(tasks_dict, qactl_configuration)
+            tasks_runner.run()
+            launched['tasks_runner'] = True
 
         if TEST_KEY in configuration_data and not arguments.skip_testing:
             test_dict = configuration_data[TEST_KEY]
