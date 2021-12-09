@@ -1,8 +1,8 @@
 ---
 wazuh-agent2:
-  - regex: "(\\\\x27touch \/tmp\/injection; \\\\x24token:\\\\x21\\\\x60)"
+  - regex: "(wazuh-agent2).*(\\\\x27\\\\x24token: \\\\x60132\\\\x60\\\\x21\\\\x27).*("program":"active-response\/bin\/firewall-drop)"
     path: "/var/ossec/logs/active-responses.log.log"
     timeout: 60
-  - regex: "(\\\\x27touch \/tmp\/injection; \\\\x24token:\\\\x21\\\\x60)"
+  - regex: "(wazuh-agent2).*(\\\\x27\\\\x24token: \\\\x60132\\\\x60\\\\x21\\\\x27).*("program":"active-response\/bin\/firewall-drop)"
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
