@@ -1,14 +1,35 @@
 # Change Log
 All notable changes to this tool will be documented in this file.
 
+## [v0.3] - 2021-12-09
+
+### Added
+
+- Added new module to be able to launch custom ansible tasks with `qa-ctl`.
+- Added new methods to avoid the SSH fingerprint check ansible error.
+- Added generation of independent configuration blocks for instance and task deployment.
+
+### Changed
+
+- Improved modularization of functions for reading data from ansible instances.
+
+
+### Fixed
+
+- Fixed some typos in qa-ctl logs.
+- Fixed some uses of UNIX libraries in `file` module under Windows.
+
+
 ## [v0.2] - 2021-11-05
+
 ### Added
 - Added operating systems validation for specified OS in tests ([#2168](https://github.com/wazuh/wazuh-qa/pull/2168))
 - Added Windows testing support in `qa-ctl` ([#2152](https://github.com/wazuh/wazuh-qa/pull/2152))
 - Updated `qa-docs` usage in `qa-ctl` ([#2081](https://github.com/wazuh/wazuh-qa/pull/2081))
 - Added `--os` parameter to specify the systems where to launch the tests ([#2064](https://github.com/wazuh/wazuh-qa/pull/2064))
 - Added no-validation flag for `qa-ctl` docker run on windows ([#2028](https://github.com/wazuh/wazuh-qa/pull/2028))
-- Added documentation tests validation precondition for automatic mode ([#2023](https://github.com/wazuh/wazuh-qa/issues/2023)) 
+- Added documentation tests validation precondition for automatic mode ([#2023](https://github.com/wazuh/wazuh-qa/issues/2023))
+
 
 ### Changed
 - Updated `JSON Schema validator` ([#2164](https://github.com/wazuh/wazuh-qa/issues/2164))
@@ -19,12 +40,14 @@ All notable changes to this tool will be documented in this file.
 - Renamed `qa-ctl` temporary files directory ([#2029](https://github.com/wazuh/wazuh-qa/pull/2029))
 - Updated `qa-ctl` help menu information ([#2026](https://github.com/wazuh/wazuh-qa/pull/2026))
 
+
 ### Fixed
 - Fixed `Docker` issues for `qa-ctl` (manual mode) in `Windows` ([#2147](https://github.com/wazuh/wazuh-qa/pull/2147))
 - Fixed `qa-ctl` configuration path separators for `windows` ([#2036](https://github.com/wazuh/wazuh-qa/pull/2036))
 
 
 ## [v0.1]
+
 
 ### Added
   - Added new folder level for temporary files ([#1993](https://github.com/wazuh/wazuh-qa/pull/1993))

@@ -260,7 +260,7 @@ def get_script_parameters():
     """
     description = \
         '''
-        Current version: v0.2
+        Current version: v0.3
 
         Description: qa-ctl is a tool for launching tests locally, automating the deployment, provisioning and testing
                      phase.
