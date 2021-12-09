@@ -280,22 +280,18 @@ def control_event_log_service(control):
     for _ in range(10):
         control_sc = 'disabled' if control == 'stop' else 'auto'
 
+        subprocess.run(f'sc.exe config netprofm start= {control_sc}', stderr=subprocess.PIPE)
         command = subprocess.run(f'sc.exe config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+
         result = command.returncode
         if result != 0:
             raise ValueError(f'Event log service did not stop correctly')
 
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+        subprocess.run(f"net {control} netprofm /y", stderr=subprocess.PIPE)
+
         result = command.returncode
-
-        if result != 0 and control == 'stop':
-            eventlog_id = subprocess.run(f'Get-WmiObject -Class win32_service -Filter "name = \'eventlog\'" select -exp \
-                                       ProcessId', stderr=subprocess.PIPE)
-            subprocess.run(f'taskkill /F /PID {eventlog_id}', stderr=subprocess.PIPE)
-
-            command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
-            result = command.returncode
-
+        
         if ("The requested service has already been started." in str(command.stderr)) or  \
            ("The Windows Event Log service is not started." in str(command.stderr)) or result == 0:
             break
