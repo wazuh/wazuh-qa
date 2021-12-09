@@ -1,10 +1,5 @@
+  \!\t><|;\\
 
-- name: "Download package"
-  get_url:
-    url: "{{agent_package}}"
-    dest: /tmp/wazuh-agent.deb
-    mode: "0664"
+  "$token:" [01](02){'symbols':'!#*'}
 
-- name: Install agent
-  apt:
-    deb: /tmp/wazuh-agent.deb
+  (\\\"\\\$token\\\:\\\" \\\[01\\\]\\\(02\\\)\\\{\\\'symbols\\\'\\\:\\\'\\\!\\\#\\\*\\\'\\\})

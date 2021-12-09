@@ -22,37 +22,24 @@
     update_cache: yes
     cache_valid_time: 3600
 
-- name: "Clone wazuh repository"
-  git:
-    repo: "https://github.com/wazuh/wazuh"
-    dest: /wazuh
-    version: "{{ wazuh_branch }}"
+- name: "Create log source"
+  shell: echo "" > "{{log_file}}"
 
-- name: Install master
-  args:
-    chdir: /wazuh
-    creates: /var/ossec
-  environment:
-    USER_LANGUAGE: "en"
-    USER_NO_STOP: "y"
-    USER_INSTALL_TYPE: "server"
-    USER_DIR: "/var/ossec"
-    USER_ENABLE_EMAIL: "n"
-    USER_ENABLE_SYSCHECK: "n"
-    USER_ENABLE_ROOTCHECK: "n"
-    USER_ENABLE_OPENSCAP: "n"
-    USER_WHITE_LIST: "n"
-    USER_ENABLE_SYSLOG: "y"
-    USER_ENABLE_AUTHD: "y"
-    USER_AUTO_START: "y"
-    USER_UPDATE: "n"
-  shell: "./install.sh"
+- name: "Download package"
+  get_url:
+    url: "{{agent_package}}"
+    dest: /tmp/wazuh-agent.deb
+    mode: "0664"
+
+- name: Install agent
+  apt:
+    deb: /tmp/wazuh-agent.deb
 
 - name: Copy ossec.conf file
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: root
+    owner: "{{agent_user}}"
     mode: '0664'
 
 - name: enable execd debug mode
@@ -70,7 +57,7 @@
   lineinfile:
     path: /var/ossec/etc/client.keys
     line: "{{ agent_id }} {{agent_hostname}} any {{ agent_key }}"
-    owner: root
+    owner: "{{agent_user}}"
     mode: "0664"
     create: yes
 
@@ -82,4 +69,4 @@
     backrefs: yes
 
 - name: Restart Wazuh
-  command: /var/ossec/bin/wazuh-control restart
+  command: "{{restart_command}}"
