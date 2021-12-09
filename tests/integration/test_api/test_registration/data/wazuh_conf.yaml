@@ -1,0 +1,12 @@
+---
+- tags:
+  - test_api_registration
+  apply_to_modules:
+  - test_api_registration
+  sections:
+  - section: auth
+    elements:
+    - disabled:
+        value: 'no'
+    - ipv6:
+        value: 'IPV6'
