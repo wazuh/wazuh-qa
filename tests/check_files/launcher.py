@@ -266,6 +266,7 @@ def main():
         current_timestamp = str(get_current_timestamp()).replace('.', '_')
         pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
         post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
+        test_output_path = os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
 
         # Set logging and Download QA files
         set_environment(parameters)
@@ -309,8 +310,10 @@ def main():
         pytest_launcher = 'python -m pytest' if sys.platform == 'win32' else 'python3 -m pytest'
         pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} test_check_files --before-file " \
                          f"{pre_check_files_data_path} --after-file {post_check_files_data_path} " \
-                         f"--output-path {TMP_FILES}"
+                         f"--output-path {test_output_path}"
         test_result = local_actions.run_local_command_returning_output(pytest_command)
+        logger.info(f"The check-files test result was saved in {test_output_path} file")
+
         print(test_result)
     finally:
         # Clean test build files
