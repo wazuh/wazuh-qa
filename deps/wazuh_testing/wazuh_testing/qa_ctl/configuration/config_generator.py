@@ -113,7 +113,7 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master',
+    def __init__(self, tests=None, wazuh_version=None, qa_branch='master',
                  qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
         self.tests = tests
         self.wazuh_version = wazuh_version
@@ -124,6 +124,9 @@ class QACTLConfigGenerator:
         self.hosts = []
         self.qa_branch = qa_branch
         self.qa_files_path = qa_files_path
+
+        # Create qa-ctl temporarily files path
+        file.recursive_directory_creation(join(gettempdir(), 'wazuh_qa_ctl'))
 
     def __get_test_info(self, test_name):
         """Get information from a documented test.
@@ -365,9 +368,9 @@ class QACTLConfigGenerator:
                 if self.__validate_test_info(test):
                     os_version = ''
                     if 'CentOS 8' in test['os_version']:
-                        os_version = 'CentOS 8'
-                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'Ubuntu Focal'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'CentOS 8'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
                     else:
@@ -567,3 +570,65 @@ class QACTLConfigGenerator:
             self.__delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
+
+    def get_deployment_configuration(self, instances):
+        """Generate the qa-ctl configuration required for the deployment of the specified config-instances.
+
+        Args:
+            instances(list(ConfigInstance)): List of config-instances to deploy.
+
+        Returns:
+            dict: Configuration block corresponding to the deployment of the instances
+
+        Raises:
+            QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
+
+        """
+        deployment_configuration = {'deployment': {} }
+
+        for index, instance in enumerate(instances):
+            try:
+                box = self.BOX_MAPPING[instance.os_version]
+            except KeyError as exception:
+                raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
+
+            instance_ip = self.__get_host_IP()
+            # Assign the IP to the instance object (Needed later to generate host config data)
+            instance.ip = instance_ip
+
+            deployment_configuration['deployment'][f"host_{index + 1}"] = {
+                'provider': {
+                    'vagrant': {
+                        'enabled': True,
+                        'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
+                        'vagrant_box': box,
+                        'vm_memory': instance.memory,
+                        'vm_cpu': instance.cpu,
+                        'vm_name': instance.name,
+                        'vm_system': instance.os_platform,
+                        'label': instance.name,
+                        'vm_ip': instance_ip
+                    }
+                }
+            }
+
+        return deployment_configuration
+
+    def get_tasks_configuration(self, instances, playbooks, playbook_path='local'):
+        tasks_configuration = {'tasks': {}}
+
+        for index, instance in enumerate(instances):
+            instance_box = self.BOX_MAPPING[instance.os_version]
+            host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+            host_info['host'] = instance.ip
+
+            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else \
+                {'remote_url': playbook} for playbook in playbooks]
+
+            tasks_configuration['tasks'][f"task_{index + 1}"] = {
+                'host_info': host_info,
+                'playbooks': playbooks_dict
+            }
+
+        return tasks_configuration
