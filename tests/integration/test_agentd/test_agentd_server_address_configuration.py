@@ -42,7 +42,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, DEFAULT_WAIT_FILE_TIMEOUT
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.agent import agent
+from wazuh_testing import agent
 
 
 # Marks
@@ -78,7 +78,7 @@ metadata = [
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['SERVER_IP']}" for x in parameters]
+configuration_ids = [f"{x['SERVER_ADDRESS']}" for x in parameters]
 
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):

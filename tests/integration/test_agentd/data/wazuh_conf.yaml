@@ -134,9 +134,9 @@
                     value: 'tcp'
 
     - tags:
-      - test_agentd_server_configuration
+      - test_agentd_server_address_configuration
       apply_to_modules:
-      - test_agentd_server_configuration
+      - test_agentd_server_address_configuration
       sections:
       - section: client
         elements:
