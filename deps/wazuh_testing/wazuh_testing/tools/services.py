@@ -280,7 +280,11 @@ def control_event_log_service(control):
     for _ in range(10):
         control_sc = 'disabled' if control == 'stop' else 'auto'
 
-        subprocess.run(f'sc.exe config netprofm start= {control_sc}', stderr=subprocess.PIPE)
+        try:
+            subprocess.run(f'sc.exe config netprofm start= {control_sc}', stderr=subprocess.PIPE)
+        except Exception:
+            pass
+
         command = subprocess.run(f'sc.exe config eventlog start= {control_sc}', stderr=subprocess.PIPE)
 
         result = command.returncode
@@ -288,7 +292,11 @@ def control_event_log_service(control):
             raise ValueError(f'Event log service did not stop correctly')
 
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
-        subprocess.run(f"net {control} netprofm /y", stderr=subprocess.PIPE)
+
+        try:
+            subprocess.run(f"net {control} netprofm /y", stderr=subprocess.PIPE)
+        except Exception:
+            pass
 
         result = command.returncode
         
