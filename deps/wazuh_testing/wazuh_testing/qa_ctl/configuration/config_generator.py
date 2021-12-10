@@ -105,7 +105,7 @@ class QACTLConfigGenerator:
             'ansible_user': 'vagrant',
             'ansible_password': 'vagrant',
             'ansible_port': 22,
-            'ansible_python_interpreter': '/usr/bin/python3',
+            'ansible_python_interpreter': '/usr/bin/python',
             'system': 'rpm',
             'installation_files_path': LINUX_TMP
         },
