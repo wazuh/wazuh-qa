@@ -1,14 +1,14 @@
 # Change Log
 All notable changes to this tool will be documented in this file.
 
-## [v0.3] - 2021-12-09
+## [v0.3] - 2021-12-10
 
 ### Added
 
 - Added new module to be able to launch custom ansible tasks with `qa-ctl`.
 - Added new methods to avoid the SSH fingerprint check ansible error.
 - Added generation of independent configuration blocks for instance and task deployment.
-
+- Added CentOS 7 support.
 ### Changed
 
 - Improved modularization of functions for reading data from ansible instances.

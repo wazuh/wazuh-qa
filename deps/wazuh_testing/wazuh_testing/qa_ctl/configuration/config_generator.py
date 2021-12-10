@@ -46,32 +46,41 @@ class QACTLConfigGenerator:
     LINUX_DEFAULT_WAZUH_INSTALL_PATH = '/var/ossec'
 
     BOX_MAPPING = {
-        'Ubuntu Focal': 'qactl/ubuntu_20_04',
+        'CentOS 7': 'qactl/centos_7',
         'CentOS 8': 'qactl/centos_8',
+        'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'Windows Server 2019': 'qactl/windows_2019'
     }
 
     SYSTEMS = {
-        'centos': {
+        'centos_7': {
+            'os_version': 'CentOS 7',
+            'os_platform': 'linux'
+        },
+        'centos_8': {
             'os_version': 'CentOS 8',
             'os_platform': 'linux'
         },
-        'ubuntu': {
+        'ubuntu_focal': {
             'os_version': 'Ubuntu Focal',
             'os_platform': 'linux'
         },
-        'windows': {
+        'windows_2019': {
             'os_version': 'Windows Server 2019',
             'os_platform': 'windows'
         }
     }
 
     DEFAULT_BOX_RESOURCES = {
-        'qactl/ubuntu_20_04': {
+        'qactl/centos_7': {
             'cpu': 1,
             'memory': 1024
         },
         'qactl/centos_8': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/ubuntu_20_04': {
             'cpu': 1,
             'memory': 1024
         },
@@ -89,6 +98,15 @@ class QACTLConfigGenerator:
             'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
+            'installation_files_path': LINUX_TMP
+        },
+        'qactl/centos_7': {
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
+            'ansible_python_interpreter': '/usr/bin/python3',
+            'system': 'rpm',
             'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
@@ -368,9 +386,11 @@ class QACTLConfigGenerator:
                 if self.__validate_test_info(test):
                     os_version = ''
                     if 'CentOS 8' in test['os_version']:
-                        os_version = 'Ubuntu Focal'
-                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'CentOS 8'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'Ubuntu Focal'
+                    elif 'CentOS 7' in test['os_version']:
+                        os_version = 'CentOS 7'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
                     else:
