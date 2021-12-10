@@ -41,6 +41,7 @@ def restart_required_logcollector_function():
     """Get configurations from the module."""
     control_service('restart')
 
+
 @retry(AssertionError, attempts=5, delay=2, delay_multiplier=1)
 def check_process_status(process_list, running=True, stage=''):
     """Assert that some processes are running or not.
@@ -63,7 +64,7 @@ def check_process_status(process_list, running=True, stage=''):
         assert len(log_processes) == expected_process, f'Process {process} {is_running_msg} {stage}.'
 
 
-def test_independent_log_process(get_configuration, configure_environment, file_monitoring, 
+def test_independent_log_process(get_configuration, configure_environment, file_monitoring,
                                  restart_required_logcollector_function):
     """Check that independent execution of log processes (external to Wazuh) are not altered because of the Wazuh agent.
 
@@ -75,7 +76,7 @@ def test_independent_log_process(get_configuration, configure_environment, file_
     """
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     control_service('stop')
     check_process_status(['log'], running=False, stage='after stop agent')
@@ -97,7 +98,7 @@ def test_independent_log_process(get_configuration, configure_environment, file_
     os.kill(int(independent_log_pid), signal.SIGTERM)
 
 
-def test_macos_log_process_stop(get_configuration, configure_environment, file_monitoring, 
+def test_macos_log_process_stop(get_configuration, configure_environment, file_monitoring,
                                 restart_required_logcollector_function):
     """Check if logcollector stops the log and script process when Wazuh agent or logcollector stop.
 
@@ -112,7 +113,7 @@ def test_macos_log_process_stop(get_configuration, configure_environment, file_m
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     check_process_status(process_to_stop, running=True, stage='at start')
 
@@ -122,7 +123,7 @@ def test_macos_log_process_stop(get_configuration, configure_environment, file_m
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     check_process_status(process_to_stop, running=True, stage='after start logcollector')
 
@@ -142,7 +143,7 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
     time.sleep(5)
     process_to_kill = ['log', 'script'] if macos_sierra else ['log']
 
@@ -157,6 +158,6 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
 
         macos_logcollector_monitored = logcollector.callback_log_stream_exited_error()
         log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                          error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
         control_service('restart', daemon='wazuh-logcollector')

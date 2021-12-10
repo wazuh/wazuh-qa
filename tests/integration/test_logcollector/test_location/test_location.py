@@ -187,8 +187,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
 
             try:
                 wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' "
-                                                  f"message has not been produced")
-            except:                                      
+                                        error_message=f"The expected 'File limit has been reached' "
+                                                      f"message has not been produced")
+            except Exception:
                 if sys.platform == 'sunos5':
                     pytest.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/10751')

@@ -38,6 +38,7 @@ macos_log_message_timeout = 40
 macos_monitoring_macos_log_timeout = 30
 macos_monitoring_timout_after_logcollector_started = 3
 
+
 # Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -56,8 +57,9 @@ def get_connection_configuration():
     """Get configurations from the module."""
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATIO
 
-def test_macos_format_only_future_events(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
-                                         configure_local_internal_options_module,
+
+def test_macos_format_only_future_events(restart_logcollector_required_daemons_package, get_configuration,
+                                         configure_environment, configure_local_internal_options_module,
                                          file_monitoring, daemons_handler):
     """Check if logcollector use correctly only-future-events option using macos log format.
 
@@ -68,7 +70,7 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
     time.sleep(macos_monitoring_timout_after_logcollector_started)
 
@@ -80,11 +82,10 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
     logcollector.generate_macos_logger_log(old_message)
     expected_old_macos_message = logcollector.format_macos_message_pattern('logger', old_message)
 
+    log_monitor.start(timeout=macos_log_message_timeout,
+                      callback=logcollector.callback_macos_log(expected_old_macos_message))
 
-    log_monitor.start(timeout=macos_log_message_timeout, 
-                              callback=logcollector.callback_macos_log(expected_old_macos_message))
-
-    ## Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
+    # Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
     time.sleep(elapsed_time_macos_log)
 
     control_service('stop', 'wazuh-logcollector')
@@ -97,13 +98,16 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
 
     if only_future_events == 'yes':
         with pytest.raises(TimeoutError):
-            log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_old_macos_message))
+            log_monitor.start(timeout=macos_log_message_timeout,
+                              callback=logcollector.callback_macos_log(expected_old_macos_message))
 
     else:
-        log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_old_macos_message))
+        log_monitor.start(timeout=macos_log_message_timeout,
+                          callback=logcollector.callback_macos_log(expected_old_macos_message))
 
     logcollector.generate_macos_logger_log(new_message)
 
     expected_new_macos_message = logcollector.format_macos_message_pattern('logger', new_message)
-    log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_new_macos_message),
-                error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+    log_monitor.start(timeout=macos_log_message_timeout,
+                      callback=logcollector.callback_macos_log(expected_new_macos_message),
+                      error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)

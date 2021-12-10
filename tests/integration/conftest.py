@@ -731,6 +731,7 @@ def create_file_structure_function(get_files_list):
 
     delete_file_structure(get_files_list)
 
+
 @pytest.fixture(scope='module')
 def daemons_handler(get_configuration, request):
     """Handler of Wazuh daemons.

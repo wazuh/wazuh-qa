@@ -60,7 +60,7 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
         FileNotFoundError: If the file_status.json is not available in the expected time.
     """
     time.sleep(file_status_update_time)
-    
+
     log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT,
                       callback=callback_log_bad_predicate(),
                       error_message='Expected log that matches the regex ".*Execution error \'log:" could not be found')

@@ -5,7 +5,6 @@ from os import path, unlink
 from sys import platform
 if platform != 'win32':
     from socket import AF_UNIX
-    
 from socket import SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
 from tempfile import gettempdir
 
@@ -122,6 +121,7 @@ def get_files_list():
     """Get file list to create from the module."""
     return file_structure
 
+
 @pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
@@ -197,6 +197,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
             assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
     else:
         assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
+
 
 @pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])

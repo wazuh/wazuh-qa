@@ -91,10 +91,11 @@ def control_service(action, daemon=None, debug_mode=False):
                     if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
                         result = 0
                         break
-                    if action == 'start' and 'The requested service has already been started.' in command.stderr.decode():
-                        result= 0
+                    if action == 'start' and 'The requested service has already been started.' \
+                       in command.stderr.decode():
+                        result = 0
                         break
-                    elif not "System error 109 has occurred" in command.stderr.decode():
+                    elif "System error 109 has occurred" not in command.stderr.decode():
                         break
     else:  # Default Unix
         if daemon is None:
@@ -299,7 +300,7 @@ def control_event_log_service(control):
             pass
 
         result = command.returncode
-        
+
         if ("The requested service has already been started." in str(command.stderr)) or  \
            ("The Windows Event Log service is not started." in str(command.stderr)) or result == 0:
             break

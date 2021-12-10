@@ -90,11 +90,11 @@ def get_local_internal_options_function(request):
     local_internal_options = {'logcollector.open_attempts': request.param['open_attempts'],
                               'logcollector.state_interval': request.param['state_interval'],
                               'logcollector.vcheck_files': '3',
-                               'logcollector.debug': '2'}
+                              'logcollector.debug': '2'}
 
 
 def test_options_state_interval_no_file(get_local_internal_options_function, configure_local_internal_options_function,
-                                        get_files_list, create_file_structure_function, get_configuration, 
+                                        get_files_list, create_file_structure_function, get_configuration,
                                         configure_environment, file_monitoring):
     """Check if the monitorized file does not appear in logcollector.state when it is removed.
 
@@ -125,35 +125,35 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
             if use_regex:
                 log_callback = logcollector.callback_match_pattern_file(location, log_path)
                 log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
+                                  error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
             else:
                 log_callback = logcollector.callback_analyzing_file(log_path)
                 log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
+                                  error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
             # Ensure wazuh-logcollector.state is created
             logcollector.wait_statistics_file(timeout=interval + 10)
-            
+
             sleep(interval)
 
-            assert all(check_wazuh_logcollector_status_file(log_path))  
+            assert all(check_wazuh_logcollector_status_file(log_path))
 
             os.remove(log_path)
             if use_regex:
                 log_callback = logcollector.callback_removed_file(log_path)
                 log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message="File no longer exists has not been generated")
+                                  error_message="File no longer exists has not been generated")
 
             else:
                 for n_attempts in range(open_attempts):
                     log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - (n_attempts + 1))
                     log_monitor.start(timeout=5, callback=log_callback,
-                                            error_message="Unable to open file callback has not been generated")
+                                      error_message="Unable to open file callback has not been generated")
 
                 log_callback = logcollector.callback_ignored_removed_file(log_path)
                 log_monitor.start(timeout=5, callback=log_callback,
-                                        error_message="File not available callback has not been generated")
-            
+                                  error_message="File not available callback has not been generated")
+
             time_to_update_statistics_file = (interval if use_regex else interval*open_attempts) + 5
 
             sleep(time_to_update_statistics_file)
