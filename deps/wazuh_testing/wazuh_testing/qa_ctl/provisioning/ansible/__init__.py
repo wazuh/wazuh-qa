@@ -58,4 +58,4 @@ def remove_known_host(host_ip, logger=None):
             if logger:
                 logger.debug(f"Removing {host_ip} from {known_host_file} file")
 
-            run_local_command_returning_output(f"ssh-keygen -f {known_host_file} -R {host_ip}")
+            run_local_command_returning_output(f"ssh-keygen -f {known_host_file} -R {host_ip} &> /dev/null")
