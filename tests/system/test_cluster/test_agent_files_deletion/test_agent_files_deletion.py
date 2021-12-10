@@ -2,17 +2,21 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
 from os.path import join, dirname, abspath
 from time import sleep
 
 import pytest
-
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 master_host = 'wazuh-master'
 worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
+local_path = os.path.dirname(os.path.abspath(__file__))
+messages_path = os.path.join(local_path, 'data/messages.yml')
+tmp_path = os.path.join(local_path, 'tmp')
 managers_hosts = [master_host, worker_host]
 inventory_path = join(dirname(dirname(dirname(abspath(__file__)))), 'provisioning', 'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
@@ -32,11 +36,19 @@ def register_agent():
     """Restart the removed agent to trigger auto-enrollment."""
     yield
     host_manager.get_host(agent_host).ansible('command', f'service wazuh-agent restart', check=False)
-    sleep(15)
+
+    # Wait until the agent is reconnected
+    HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+    sleep(time_to_sync)
 
 
 def test_agent_files_deletion(register_agent):
     """Check that when an agent is deleted, all its related files in managers are also removed."""
+    # Clean ossec.log and cluster.log
+    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+    host_manager.control_service(host='wazuh-master', service='wazuh', state="restarted")
+
     # Get the current ID and name of the agent that is reporting to worker_host.
     master_token = host_manager.get_api_token(master_host)
     response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
@@ -59,7 +71,6 @@ def test_agent_files_deletion(register_agent):
                            f'{file["path"].format(id=agent_id, name=agent_name)}'
 
     # Check that agent information exists in global.db
-    sleep(time_to_sync)
     for host in managers_hosts:
         for query in db_queries:
             result = host_manager.run_command(
