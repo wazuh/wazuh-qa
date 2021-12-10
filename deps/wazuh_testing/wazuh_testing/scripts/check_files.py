@@ -70,6 +70,21 @@ def set_parameters(parameters):
     script_logger.addHandler(handler)
 
 
+def get_human_readable_bytes(bytes):
+    gb = 1024*1024*1024
+    mb = 1024*1024
+    kb = 1024
+
+    if bytes > gb:
+        return f"{format(bytes/gb, '.2f')}GB"
+    elif bytes > mb:
+        return f"{format(bytes/mb, '.2f')}MB"
+    elif bytes > kb:
+        return f"{format(bytes/kb, '.2f')}KB"
+    else:
+        return f"{bytes}B"
+
+
 def get_check_files_data(path='/', ignored_paths=[]):
     """Get a dictionary with all check-files information recursively from a specific path
 
@@ -154,14 +169,15 @@ def get_data_information(item):
     _type = 'directory' if os.path.isdir(item) else 'file'
     permissions = get_filemode(stat_info.st_mode)
     last_update = datetime.fromtimestamp(os.path.getmtime(item)).strftime('%Y-%m-%d %H:%M:%S')
+    size = get_human_readable_bytes(stat_info.st_size)
     if _type != 'directory':
         checksum = hashlib.md5(open(item, 'rb').read()).hexdigest()
 
         return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
-                'last_update': last_update, 'checksum': checksum}
+                'last_update': last_update, 'md5sum': checksum, 'size': size}
     else:
         return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
-                'last_update': last_update}
+                'last_update': last_update, 'size': size}
 
 
 def write_data_to_file(data, output_file_path):
