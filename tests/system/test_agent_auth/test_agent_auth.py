@@ -74,7 +74,7 @@ def clean_environment():
 
 @pytest.mark.parametrize('ipv6_enabled', ['yes', 'no'])
 @pytest.mark.parametrize('test_case', [cases for cases in network_configuration], ids = [cases['name'] for cases in network_configuration])
-def test_agent_enrollment(test_case, ipv6_enabled, get_ip_directions, configure_network, modify_ip_address_conf, clean_environment):
+def test_agent_auth(test_case, ipv6_enabled, get_ip_directions, configure_network, modify_ip_address_conf, clean_environment):
     """Check agent enrollment process works as expected. An agent pointing to a worker should be able to register itself
     into the manager by starting Wazuh-agent process."""
     # Clean ossec.log and cluster.log
