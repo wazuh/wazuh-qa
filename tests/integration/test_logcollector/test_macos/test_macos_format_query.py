@@ -317,15 +317,13 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
         TimeoutError: If the expected callback is not generated.
     """
 
-    sleep(1)
-
     cfg = get_configuration['metadata']
 
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
-    wazuh_log_monitor.start(timeout=30, callback=macos_logcollector_monitored,
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
-    ## Generate macOS log messages
+    # Generate macOS log messages
     for macos_log in macos_log_list:
         log_message_command = macos_log['program_name']
 
@@ -363,8 +361,8 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
             if macos_log_type not in configuration_type:
                 same_type = False
 
-        if logcollector.MAP_MACOS_LEVEL_VALUE[macos_log_level] < logcollector.MAP_MACOS_LEVEL_VALUE[
-            configuration_level]:
+        if logcollector.MAP_MACOS_LEVEL_VALUE[macos_log_level] \
+           < logcollector.MAP_MACOS_LEVEL_VALUE[configuration_level]:
             same_level = False
 
         for clause in cfg['clause']:
@@ -382,7 +380,7 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
 
         if cfg['lambda_function'](*clauses_values) and same_level and same_type:
             log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),
-                                        error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                              error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
         else:
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),

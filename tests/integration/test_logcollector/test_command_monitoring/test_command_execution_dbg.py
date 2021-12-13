@@ -125,7 +125,7 @@ def dbg_reading_command(command, alias, log_format):
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-@pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11192')
+@pytest.mark.xfail(reason='Fixed in https://github.com/wazuh/wazuh-qa/issues/2318')
 def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
                                configure_environment, restart_logcollector):
     """Check if the debug logs are displayed correctly when the test commands are executed.

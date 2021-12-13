@@ -165,4 +165,4 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
             else:
                 assert all(check_wazuh_logcollector_status_file(log_path)),  f"Using hardcoded location, file \
                                                                                {log_path} has been deleted \
-                                                                               sfrom {LOGCOLLECTOR_STATISTICS_FILE}"
+                                                                               from {LOGCOLLECTOR_STATISTICS_FILE}"

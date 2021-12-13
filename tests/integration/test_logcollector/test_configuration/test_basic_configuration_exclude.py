@@ -4,13 +4,12 @@
 
 import os
 import sys
-import pytest
 from time import sleep
-import wazuh_testing.api as api
+import pytest
 
-from wazuh_testing.tools.services import get_service
+from wazuh_testing import api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
+from wazuh_testing.tools.services import check_if_process_is_running, get_service
 
 
 # Marks

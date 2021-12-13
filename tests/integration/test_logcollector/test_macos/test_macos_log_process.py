@@ -18,7 +18,7 @@ from wazuh_testing.tools.utils import retry
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
 macos_sierra = True if str(platform.mac_ver()[0]).startswith('10.12') else False
-
+macos_log_init_timeout = 5
 # Marks
 
 
@@ -144,7 +144,9 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
     macos_logcollector_monitored = logcollector.callback_monitoring_macos_logs
     log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=macos_logcollector_monitored,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
-    time.sleep(5)
+
+    time.sleep(macos_log_init_timeout)
+
     process_to_kill = ['log', 'script'] if macos_sierra else ['log']
 
     check_process_status(process_to_kill, running=True, stage='at start')
