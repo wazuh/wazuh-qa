@@ -2,7 +2,7 @@
     "false_positives": [],
     "to_fix": [
         {
-            "code": " default_api_configuration = {\n     \"host\": \"0.0.0.0\",\n     \"port\": 55000,\n     \"use_only_authd\": False,\n     \"drop_privileges\": True,\n     \"experimental_features\": False,\n     \"max_upload_size\": 10485760,\n     \"intervals\": {\n         \"request_timeout\": 10\n38     },\n39     \"https\": {\n40         \"enabled\": True,\n41         \"key\": \"api/configuration/ssl/server.key\",\n42         \"cert\": \"api/configuration/ssl/server.crt\",\n43         \"use_ca\": False,\n44         \"ca\": \"api/configuration/ssl/ca.crt\",\n45         \"ssl_protocol\": \"TLSv1.2\",\n46         \"ssl_ciphers\": \"\"\n47     },\n48     \"logs\": {\n49         \"level\": \"info\",\n50         \"path\": \"logs/api.log\"\n51     },\n52     \"cors\": {\n53         \"enabled\": False,\n54         \"source_route\": \"*\",\n55         \"expose_headers\": \"*\",\n56         \"allow_headers\": \"*\",\n57         \"allow_credentials\": False,\n58     },\n59     \"cache\": {\n60         \"enabled\": True,\n61         \"time\": 0.750\n62     },\n63     \"access\": {\n64         \"max_login_attempts\": 50,\n65         \"block_time\": 300,\n66         \"max_request_per_minute\": 300\n67     },\n68     \"remote_commands\": {\n69         \"localfile\": {\n70             \"enabled\": True,\n71             \"exceptions\": []\n72         },\n73         \"wodle_command\": {\n74             \"enabled\": True,\n75             \"exceptions\": []\n76         }\n77     }\n",
+            "code": " default_api_configuration = {\n     \"host\": \"0.0.0.0\",\n     \"port\": 55000,\n     \"drop_privileges\": True,\n     \"experimental_features\": False,\n     \"max_upload_size\": 10485760,\n     \"intervals\": {\n         \"request_timeout\": 10\n     },\n38     \"https\": {\n39         \"enabled\": True,\n40         \"key\": \"api/configuration/ssl/server.key\",\n41         \"cert\": \"api/configuration/ssl/server.crt\",\n42         \"use_ca\": False,\n43         \"ca\": \"api/configuration/ssl/ca.crt\",\n44         \"ssl_protocol\": \"TLSv1.2\",\n45         \"ssl_ciphers\": \"\"\n46     },\n47     \"logs\": {\n48         \"level\": \"info\",\n49         \"path\": \"logs/api.log\"\n50     },\n51     \"cors\": {\n52         \"enabled\": False,\n53         \"source_route\": \"*\",\n54         \"expose_headers\": \"*\",\n55         \"allow_headers\": \"*\",\n56         \"allow_credentials\": False,\n57     },\n58     \"cache\": {\n59         \"enabled\": True,\n60         \"time\": 0.750\n61     },\n62     \"access\": {\n63         \"max_login_attempts\": 50,\n64         \"block_time\": 300,\n65         \"max_request_per_minute\": 300\n66     },\n67     \"remote_commands\": {\n68         \"localfile\": {\n69             \"enabled\": True,\n70             \"exceptions\": []\n71         },\n72         \"wodle_command\": {\n73             \"enabled\": True,\n74             \"exceptions\": []\n75         }\n76     }\n",
             "filename": "api/api/configuration.py",
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
@@ -10,22 +10,22 @@
             "line_number": 30,
             "line_range": [
                 29,
-                75
+                74
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
             "test_name": "hardcoded_bind_all_interfaces"
         },
         {
-            "code": "                                )\n     app.add_api('spec.yaml',\n                 arguments={'title': 'Wazuh API',\n                            'protocol': 'https' if api_conf['https']['enabled'] else 'http',\n                            'host': api_conf['host'],\n                            'port': api_conf['port']\n                            },\n                 strict_validation=True,\n                 validate_responses=False,\n162                 pass_context_arg_name='request',\n163                 options={\"middlewares\": [response_postprocessing, set_user_name, security_middleware, request_logging,\n164                                          set_secure_headers]})\n165 \n",
+            "code": "                                )\n     app.add_api('spec.yaml',\n                 arguments={'title': 'Wazuh API',\n                            'protocol': 'https' if api_conf['https']['enabled'] else 'http',\n                            'host': api_conf['host'],\n                            'port': api_conf['port']\n                            },\n                 strict_validation=True,\n                 validate_responses=False,\n168                 pass_context_arg_name='request',\n169                 options={\"middlewares\": [response_postprocessing, set_user_name, security_middleware, request_logging,\n170                                          set_secure_headers]})\n171 \n",
             "filename": "api/scripts/wazuh-apid.py",
             "issue_confidence": "MEDIUM",
             "issue_severity": "LOW",
             "issue_text": "Possible hardcoded password: 'request'",
-            "line_number": 154,
+            "line_number": 160,
             "line_range": [
-                154,
-                164
+                160,
+                170
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b106_hardcoded_password_funcarg.html",
             "test_id": "B106",
