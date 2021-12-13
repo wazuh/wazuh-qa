@@ -33,15 +33,13 @@ tags:
     - server_address
 '''
 import os
-import subprocess
+import sys
 import pytest
 from time import sleep
 
 from wazuh_testing.tools import HOSTS_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, DEFAULT_WAIT_FILE_TIMEOUT
-from wazuh_testing.tools.services import control_service
 from wazuh_testing import agent
 
 
@@ -52,7 +50,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 daemons_handler_configuration = {'daemons': ['wazuh-agentd'], 'ignore_errors': True}
-local_internal_options = {'agent.debug': '2'}
+local_internal_options = {'windows.debug': '2'} if sys.platform == 'win32' else {'agent.debug': '2'}
 
 parameters = [
     {'SERVER_ADDRESS': 'MANAGER_IP'},                               # Invalid server address
@@ -100,7 +98,7 @@ def edit_hosts(get_configuration):
         with open(HOSTS_FILE_PATH, 'w') as file:
             file.write(original_content)
 
-def test_agentd_server_configuration(get_configuration, configure_environment, configure_local_internal_options_module,
+def test_agentd_server_address_configuration(get_configuration, configure_environment, configure_local_internal_options_module,
                 edit_hosts, daemons_handler, file_monitoring):
 
 
