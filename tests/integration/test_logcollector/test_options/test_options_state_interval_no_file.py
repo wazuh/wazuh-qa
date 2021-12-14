@@ -124,15 +124,16 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
 
             if use_regex:
                 log_callback = logcollector.callback_match_pattern_file(location, log_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                   error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
             else:
                 log_callback = logcollector.callback_analyzing_file(log_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                   error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
 
             # Ensure wazuh-logcollector.state is created
-            logcollector.wait_statistics_file(timeout=interval + 10)
+            elapsed_time_statistics_file = 10
+            logcollector.wait_statistics_file(timeout=interval + elapsed_time_statistics_file)
 
             sleep(interval)
 
@@ -141,17 +142,17 @@ def test_options_state_interval_no_file(get_local_internal_options_function, con
             os.remove(log_path)
             if use_regex:
                 log_callback = logcollector.callback_removed_file(log_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                   error_message="File no longer exists has not been generated")
 
             else:
                 for n_attempts in range(open_attempts):
                     log_callback = logcollector.callback_unable_to_open(log_path, open_attempts - (n_attempts + 1))
-                    log_monitor.start(timeout=5, callback=log_callback,
+                    log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                       error_message="Unable to open file callback has not been generated")
 
                 log_callback = logcollector.callback_ignored_removed_file(log_path)
-                log_monitor.start(timeout=5, callback=log_callback,
+                log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                                   error_message="File not available callback has not been generated")
 
             time_to_update_statistics_file = (interval if use_regex else interval*open_attempts) + 5
