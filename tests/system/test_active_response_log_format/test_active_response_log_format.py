@@ -35,11 +35,9 @@ os_version:
     - Red Hat 7
     - Red Hat 6
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/vulnerability-detection/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/vuln-detector.html#enabled
+    - https://github.com/wazuh/wazuh/issues/10858
 tags:
     - active_response
-    - 
 """
 
 import os
