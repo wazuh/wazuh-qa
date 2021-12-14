@@ -101,6 +101,40 @@ def edit_hosts(get_configuration):
 def test_agentd_server_address_configuration(get_configuration, configure_environment, configure_local_internal_options_module,
                 edit_hosts, daemons_handler, file_monitoring):
 
+    '''
+    description: Check the messages produced by the agent when introducing
+                 a valid and invalid server address, with IPv4 and IPv6
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options for testing.
+        - edit_hosts:
+            type: fixture
+            brief: Edit the hosts file to add custom hostnames for testing.
+        - daemons_handler:
+            type: fixture
+            brief: Restart the agentd daemon for restarting the agent.
+        - file_monitoring:
+            type: fixture
+            brief: Configure the FileMonitor to monitor the logs produced.
+
+    assertions:
+        - Verify that the messages have been produced in ossec.log
+
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Eight test cases are found in the test module and include parameters
+                       for the environment setup using the TCP  protocols.
+
+    tags:
+        - server_address
+    '''
 
     cfg = get_configuration['metadata']
     if cfg['invalid_address']:
