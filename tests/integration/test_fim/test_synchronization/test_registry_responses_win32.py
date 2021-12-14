@@ -148,11 +148,15 @@ def extra_configuration_after_yield():
 
 
 @pytest.fixture(scope='function', params=configurations)
-def remove_key_and_restart(request):
-    """Fixture that removes the test key and restart the agent. The aim of this
+def create_key(request):
+    """Fixture that create the test key And then delete the key and truncate the file. The aim of this
        fixture is to avoid false positives if the manager still has the test  key
        in it's DB.
     """
+    control_service('stop')
+    fim.create_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
+
+    yield
     fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
     control_service('stop')
     truncate_file(fim.LOG_FILE_PATH)
@@ -172,7 +176,7 @@ def remove_key_and_restart(request):
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, get_configuration, configure_environment,
-                                     remove_key_and_restart):
+                                     create_key):
     '''
     description: Check if the 'wazuh-syscheckd' daemon synchronizes the registry DB when a modification
                  is performed while the agent is down. For this purpose, the test will monitor a key and
@@ -196,9 +200,9 @@ def test_registry_sync_after_restart(key_name, value_name, get_configuration, co
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - remove_key_and_restart:
+        - create_key:
             type: fixture
-            brief: Remove the test key and restart the agent.
+            brief: Create the test key.
 
     assertions:
         - Verify that FIM sync events generated include the monitored value path and
@@ -221,8 +225,6 @@ def test_registry_sync_after_restart(key_name, value_name, get_configuration, co
     value_path = os.path.join(key, key_path, value_name)
 
     # stops syscheckd
-    control_service('stop')
-    fim.create_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
     key_handle = fim.create_registry(fim.registry_parser[key], key_path, fim.KEY_WOW64_64KEY)
 
     fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
