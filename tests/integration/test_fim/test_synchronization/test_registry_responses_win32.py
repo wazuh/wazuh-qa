@@ -168,10 +168,10 @@ def remove_key_and_restart(request):
 
 # tests
 
-@pytest.mark.parametrize('tags_to_apply', [{'registry_sync_responses'}])
+
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
-def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_configuration, configure_environment,
+def test_registry_sync_after_restart(key_name, value_name, get_configuration, configure_environment,
                                      remove_key_and_restart):
     '''
     description: Check if the 'wazuh-syscheckd' daemon synchronizes the registry DB when a modification
@@ -190,9 +190,6 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_co
         - value_name:
             type: str
             brief: Name of the value that will be created in the test.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -220,7 +217,6 @@ def test_registry_sync_after_restart(key_name, value_name, tags_to_apply, get_co
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     key_path = os.path.join(monitored_key, key_name)
     value_path = os.path.join(key, key_path, value_name)
 
