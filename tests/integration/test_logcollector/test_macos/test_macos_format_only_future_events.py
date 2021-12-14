@@ -85,7 +85,7 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
     log_monitor.start(timeout=macos_log_message_timeout,
                       callback=logcollector.callback_macos_log(expected_old_macos_message))
 
-    # Stop wazuh agent and ensure it gets old macos messages if only-future-events option is disabled
+    # Stop logcollector and ensure it gets old macos messages if only-future-events option is disabled
     time.sleep(elapsed_time_macos_log)
 
     control_service('stop', 'wazuh-logcollector')
