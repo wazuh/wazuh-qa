@@ -62,6 +62,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list
 
 # Marks
 
@@ -121,25 +122,6 @@ def get_sync_msgs(tout, new_data=True):
         events.append(sync_event)
 
     return events
-
-
-def find_value_in_event_list(key_path, value_name, event_list):
-    """Function that looks for a key path and value_name in a list of json events.
-    Params:
-        path (str): Path of the registry key.
-        value_name (str): Name of the value
-        event_list (list): List containing the events in JSON format.
-    Returns:
-        The event that matches the specified path. None if no event was found.
-    """
-    for event in event_list:
-        if 'value_name' not in event.keys():
-            continue
-
-        if event['path'] == key_path and event['value_name'] == value_name:
-            return event
-
-    return None
 
 
 def extra_configuration_after_yield():
