@@ -49,9 +49,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 44,
+            "line_number": 61,
             "line_range": [
-                44
+                61
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -70,21 +70,6 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
             "test_id": "B404",
             "test_name": "blacklist"
-        },
-        {
-            "code": "         return stdout.decode()\n     except Exception:\n         pass\n \n",
-            "filename": "wodles/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Try, Except, Pass detected.",
-            "line_number": 47,
-            "line_range": [
-                47,
-                48
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html",
-            "test_id": "B110",
-            "test_name": "try_except_pass"
         }
     ]
 }
