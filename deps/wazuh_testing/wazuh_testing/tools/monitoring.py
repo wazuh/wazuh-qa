@@ -424,6 +424,7 @@ class QueueMonitor:
                 else:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
+                logger.debug(msg)
                 item = callback(msg)
                 logging.debug(msg)
                 if item is not None and item:
@@ -834,7 +835,8 @@ def new_process(fn):
 
 def callback_generator(regex):
     def new_callback(line):
-        match = re.match(regex, line)
+        match = re.search(regex, line)
+        logger.debug(line)
         if match:
             return line
 
