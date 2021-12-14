@@ -1,6 +1,5 @@
 {
-    "false_positives": [],
-    "to_fix": [
+    "false_positives": [
         {
             "code": "     # Build the request\n     md5_hash = md5(args.la_query.encode()).hexdigest()\n     url = f\"{url_analytics}/v1/workspaces/{args.workspace}/query\"\n",
             "filename": "wodles/azure/azure-logs.py",
@@ -42,7 +41,9 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
-        },
+        }
+    ],
+    "to_fix": [
         {
             "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
             "filename": "wodles/utils.py",
