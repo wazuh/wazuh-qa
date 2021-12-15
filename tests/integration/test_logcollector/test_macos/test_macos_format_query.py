@@ -400,10 +400,10 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
            and macos_log['same_type']:
             log_monitor.start(timeout=elapsed_time_filemonitor_read_event, 
                               callback=logcollector.callback_macos_log(macos_log['expected_macos_message']),
-                              error_message=f"Not macos log message generated: {macos_log['expected_macos_message']}")
+                              error_message=f"No macos log message generated: {macos_log['expected_macos_message']}")
         else:
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=elapsed_time_filemonitor_read_event,
                                   callback=logcollector.callback_macos_log(macos_log['expected_macos_message']),
-                                  error_message=f"Not macos log message generated: \
+                                  error_message=f"Unexpected macos log message generated: \
                                                  {macos_log['expected_macos_message']}")
