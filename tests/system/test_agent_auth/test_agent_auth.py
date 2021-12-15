@@ -49,24 +49,30 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
     # Start the agent enrollment process using agent-auth
-    if 'ipv4' in test_case['wazuh-manager']:
-        host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m {network['manager_network'][0]}")
-    elif 'ipv6' in test_case['wazuh-manager']:
-        host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m {network['manager_network'][1]}")
-    else:
-        host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m wazuh-manager")
+    for configuration in test_case['test_case']:
+        if 'ipv4' in configuration['ip_type']:
+            host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m {network['manager_network'][0]}")
+        elif 'ipv6' in configuration['ip_type']:
+            host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m {network['manager_network'][1]}")
+        else:
+            host_manager.run_command('wazuh-agent1', f"{WAZUH_PATH}/bin/agent-auth -m wazuh-manager")
+
+    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="started")
 
     # Run the callback checks for the ossec.log
     HostMonitor(inventory_path=inventory_path,
                 messages_path=messages_path,
                 tmp_path=tmp_path).run()
 
-    # Make sure the agent's client.keys is not empty
-    assert host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    # Make sure the agent's and manager's client.keys have the same keys
+    agent_client_keys =  host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    manager_client_keys =  host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    assert agent_client_keys == manager_client_keys
 
     # Check if the agent is active
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
-    assert host_manager.run_command('wazuh-manager', f'{WAZUH_PATH}/bin/agent_control -i {agent_id} | grep Active')
+    agent_info = host_manager.run_command('wazuh-manager', f'{WAZUH_PATH}/bin/agent_control -i {agent_id}')
+    assert 'Active' in agent_info
 
 # IPV6 fixtures
 @pytest.fixture(scope='module')
