@@ -328,7 +328,7 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
     match_query_list = []
-    
+
     # Generate macOS log messages
     for macos_log in macos_log_list:
         log_message_command = macos_log['program_name']
@@ -400,9 +400,10 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
            and macos_log['same_type']:
             log_monitor.start(timeout=elapsed_time_filemonitor_read_event, 
                               callback=logcollector.callback_macos_log(macos_log['expected_macos_message']),
-                              error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                              error_message=f"Not macos log message generated: {macos_log['expected_macos_message']}")
         else:
             with pytest.raises(TimeoutError):
                 log_monitor.start(timeout=elapsed_time_filemonitor_read_event,
                                   callback=logcollector.callback_macos_log(macos_log['expected_macos_message']),
-                                  error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+                                  error_message=f"Not macos log message generated: \
+                                                 {macos_log['expected_macos_message']}")
