@@ -25,12 +25,46 @@ daemons:
 os_platform:
     - linux
     - windows
+    - macOS
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+    - Solaris 11
+    - Solaris 10
+    - macOS Catalina
+    - macOS Sierra
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/client.html#address
 
 tags:
     - server_address
+    - agentd
 '''
 import os
 import sys
@@ -104,6 +138,8 @@ def test_agentd_server_address_configuration(get_configuration, configure_enviro
     '''
     description: Check the messages produced by the agent when introducing
                  a valid and invalid server address, with IPv4 and IPv6
+
+    wazuh_min_version: 4.4.0
 
     parameters:
         - get_configuration:
