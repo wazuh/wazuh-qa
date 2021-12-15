@@ -1,3 +1,7 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 def find_value_in_event_list(key_path, value_name, event_list):
     """Function that looks for a key path and value_name in a list of json events.
     Params:
