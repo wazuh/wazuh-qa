@@ -61,7 +61,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list
+from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
 from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, MAX_EVENTS_VALUE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
 from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
 
@@ -76,7 +76,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
 conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
-wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
+
 
 # configurations
 
@@ -91,36 +91,6 @@ local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-def get_sync_msgs(tout, new_data=True):
-    """Look for as many synchronization events as possible.
-    This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
-    Params:
-        tout (int): Timeout that will be used to get the dbsync_no_data message.
-        new_data (bool): Specifies if the test will wait the event `dbsync_no_data`
-    Returns:
-        A list with all the events in json format.
-    """
-    events = []
-    if new_data:
-        wazuh_log_monitor.start(timeout=tout,
-                                callback=fim.callback_dbsync_no_data,
-                                error_message='Did not receive expected '
-                                              '"db sync no data" event')
-    for _ in range(0, MAX_EVENTS_VALUE):
-        try:
-            sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                 callback=fim.callback_detect_registry_integrity_state_event,
-                                                 accum_results=1,
-                                                 error_message='Did not receive expected '
-                                                               'Sending integrity control message"').result()
-        except TimeoutError:
-            break
-
-        events.append(sync_event)
-
-    return events
 
 
 # tests
