@@ -63,26 +63,24 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list
+from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, MAX_EVENTS_VALUE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
+
 
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
-key = "HKEY_LOCAL_MACHINE"
-monitored_key = "SOFTWARE\\random_key"
 
-sync_interval = 20
-max_events = 20
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_responses_win32.yaml')
-conf_params = {'WINDOWS_REGISTRY': os.path.join(key, monitored_key), 'SYNC_INTERVAL': sync_interval}
+conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
 wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = fim.generate_params(extra_params=conf_params, modes=['scheduled'])
+conf_params, conf_metadata = fim.generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
@@ -109,7 +107,7 @@ def get_sync_msgs(tout, new_data=True):
                                 callback=fim.callback_dbsync_no_data,
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
-    for _ in range(0, max_events):
+    for _ in range(0, MAX_EVENTS_VALUE):
         try:
             sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                  callback=fim.callback_detect_registry_integrity_state_event,
@@ -122,11 +120,6 @@ def get_sync_msgs(tout, new_data=True):
         events.append(sync_event)
 
     return events
-
-
-def extra_configuration_after_yield():
-    """Remove the registry key when the test ends"""
-    fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
 
 
 # tests
@@ -180,16 +173,16 @@ def test_registry_sync_after_restart(key_name, value_name, get_configuration, co
         - scheduled
         - time_travel
     '''
-    key_path = os.path.join(monitored_key, key_name)
-    value_path = os.path.join(key, key_path, value_name)
+    key_path = os.path.join(MONITORED_KEY, key_name)
+    value_path = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path, value_name)
 
     # stops syscheckd
-    key_handle = fim.create_registry(fim.registry_parser[key], key_path, fim.KEY_WOW64_64KEY)
+    key_handle = fim.create_registry(fim.registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key_path, fim.KEY_WOW64_64KEY)
 
     fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
     control_service('start')
 
-    events = get_sync_msgs(sync_interval)
+    events = get_sync_msgs(SYNC_INTERVAL_VALUE)
 
     assert find_value_in_event_list(
-               os.path.join(key, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
+               os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
