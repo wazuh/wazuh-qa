@@ -48,7 +48,8 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
-# Hosts
+# Hosts and variables
+# In order to run this test, first you need to launch the manager_agent enviroment
 testinfra_hosts = ["wazuh-master", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'system','provisioning', 'manager_agent', 'inventory.yml')
@@ -58,8 +59,8 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 messages_files = ['data/messages_415_or_lower.yml', 'data/messages_420_to_424.yml', 'data/messages_425_or_greater.yml']
 tmp_path = os.path.join(local_path, 'tmp')
 log_path = "/var/log/secure"
-log_cases=["Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from 192.168.222.111 port 52620 '$token': `132`! ssh2\n\n"]
-sleep_time = 15
+log_cases=["Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from 192.168.222.11 port 52620 '$token': `132`! ssh2\n\n"]
+sleep_time = 5
 
 
 def clean_environment(wazuh_agent):

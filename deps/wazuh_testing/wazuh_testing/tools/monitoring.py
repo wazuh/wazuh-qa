@@ -424,7 +424,6 @@ class QueueMonitor:
                 else:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
-                logger.debug(msg)
                 item = callback(msg)
                 logging.debug(msg)
                 if item is not None and item:
