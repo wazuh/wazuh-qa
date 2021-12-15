@@ -61,10 +61,9 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list
 from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, MAX_EVENTS_VALUE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
-from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
+from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 
 # Marks
@@ -83,6 +82,7 @@ wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
 conf_params, conf_metadata = fim.generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 
 # fixtures
@@ -128,8 +128,8 @@ def get_sync_msgs(tout, new_data=True):
 
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
-def test_registry_sync_after_restart(key_name, value_name, get_configuration, configure_environment,
-                                     create_key):
+def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,
+                                     get_configuration, configure_environment, create_key):
     '''
     description: Check if the 'wazuh-syscheckd' daemon synchronizes the registry DB when a modification
                  is performed while the agent is down. For this purpose, the test will monitor a key and
