@@ -2,7 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import wazuh_testing.fim as fim
+from wazuh_testing.fim import LOG_FILE_PATH, callback_dbsync_no_data, callback_detect_registry_integrity_state_event
 from wazuh_testing import global_parameters
 from wazuh_testing.fim_module.fim_variables import MAX_EVENTS_VALUE
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -17,17 +17,17 @@ def get_sync_msgs(tout, new_data=True):
     Returns:
         A list with all the events in json format.
     """
-    wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     events = []
     if new_data:
         wazuh_log_monitor.start(timeout=tout,
-                                callback=fim.callback_dbsync_no_data,
+                                callback=callback_dbsync_no_data,
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
     for _ in range(0, MAX_EVENTS_VALUE):
         try:
             sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                 callback=fim.callback_detect_registry_integrity_state_event,
+                                                 callback=callback_detect_registry_integrity_state_event,
                                                  accum_results=1,
                                                  error_message='Did not receive expected '
                                                                'Sending integrity control message"').result()
@@ -38,7 +38,7 @@ def get_sync_msgs(tout, new_data=True):
 
     return events
 
-    
+
 def find_value_in_event_list(key_path, value_name, event_list):
     """Function that looks for a key path and value_name in a list of json events.
     Params:

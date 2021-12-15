@@ -56,7 +56,7 @@ tags:
 '''
 import os
 import pytest
-import wazuh_testing.fim as fim
+from wazuh_testing.fim import generate_params, create_registry, modify_registry_value, registry_parser, KEY_WOW64_64KEY, REG_SZ
 from wazuh_testing import global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -80,7 +80,7 @@ conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITO
 
 # configurations
 
-conf_params, conf_metadata = fim.generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
+conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
@@ -148,9 +148,9 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
     value_path = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path, value_name)
 
     # stops syscheckd
-    key_handle = fim.create_registry(fim.registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key_path, fim.KEY_WOW64_64KEY)
+    key_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key_path, KEY_WOW64_64KEY)
 
-    fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
+    modify_registry_value(key_handle, value_name, REG_SZ, 'This is a test with syscheckd down.')
     control_service(WAZUH_SERVICES_START)
 
     events = get_sync_msgs(SYNC_INTERVAL_VALUE)
