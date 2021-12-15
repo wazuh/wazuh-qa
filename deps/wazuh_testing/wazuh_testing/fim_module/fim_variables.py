@@ -21,3 +21,6 @@ SYNC_INTERVAL_VALUE = MAX_EVENTS_VALUE = 20
 
 # FIM modules
 SCHEDULE_MODE = 'scheduled'
+
+# YAML Configuration
+YAML_CONF_REGISTRY_RESPONSE = 'wazuh_conf_registry_responses_win32.yaml'
