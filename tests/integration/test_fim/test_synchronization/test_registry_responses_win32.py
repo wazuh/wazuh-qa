@@ -62,7 +62,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
-from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, MAX_EVENTS_VALUE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
+from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
 from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 
