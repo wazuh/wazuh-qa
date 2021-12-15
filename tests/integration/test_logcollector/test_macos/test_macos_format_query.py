@@ -391,7 +391,7 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
 
         match_query_list.append(match_values)
 
-    sleep(macos_log_message_timeout)
+    sleep(macos_log_message_timeout + 20)
     elapsed_time_filemonitor_read_event = 2
 
     for macos_log in match_query_list:
