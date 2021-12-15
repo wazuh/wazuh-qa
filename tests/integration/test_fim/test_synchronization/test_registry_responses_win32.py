@@ -64,6 +64,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list
 from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, MAX_EVENTS_VALUE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
+from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
 
 
 # Marks
@@ -73,8 +74,8 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 # variables
 
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_registry_responses_win32.yaml')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
+configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
 conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
 wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 
@@ -180,7 +181,7 @@ def test_registry_sync_after_restart(key_name, value_name, get_configuration, co
     key_handle = fim.create_registry(fim.registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key_path, fim.KEY_WOW64_64KEY)
 
     fim.modify_registry_value(key_handle, value_name, fim.REG_SZ, 'This is a test with syscheckd down.')
-    control_service('start')
+    control_service(WAZUH_SERVICES_START)
 
     events = get_sync_msgs(SYNC_INTERVAL_VALUE)
 

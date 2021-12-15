@@ -9,8 +9,8 @@ The purpose of this file is to contain all the variables necessary for FIM in or
 # variables
 
 # key variables
-WINDOWS_HKEY_LOCAL_MACHINE = "HKEY_LOCAL_MACHINE"
-MONITORED_KEY = "SOFTWARE\\random_key"
+WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
+MONITORED_KEY = 'SOFTWARE\\random_key'
 WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 
