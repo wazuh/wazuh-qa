@@ -58,7 +58,7 @@ import os
 import pytest
 import wazuh_testing.fim as fim
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
@@ -127,29 +127,6 @@ def get_sync_msgs(tout, new_data=True):
 def extra_configuration_after_yield():
     """Remove the registry key when the test ends"""
     fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
-
-
-@pytest.fixture(scope='function', params=configurations)
-def create_key(request):
-    """Fixture that create the test key And then delete the key and truncate the file. The aim of this
-       fixture is to avoid false positives if the manager still has the test  key
-       in it's DB.
-    """
-    control_service('stop')
-    fim.create_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
-
-    yield
-    fim.delete_registry(fim.registry_parser[key], monitored_key, fim.KEY_WOW64_64KEY)
-    control_service('stop')
-    truncate_file(fim.LOG_FILE_PATH)
-    file_monitor = FileMonitor(fim.LOG_FILE_PATH)
-    setattr(request.module, 'wazuh_log_monitor', file_monitor)
-    control_service('start')
-
-    # wait until the sync is done.
-    wazuh_log_monitor.start(timeout=sync_interval + global_parameters.default_timeout,
-                            callback=fim.callback_detect_registry_integrity_clear_event,
-                            error_message='Did not receive expected "integrity clear" event')
 
 
 # tests
