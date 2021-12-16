@@ -18,9 +18,19 @@ WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 SYNC_INTERVAL = 'SYNC_INTERVAL'
 SYNC_INTERVAL_VALUE = MAX_EVENTS_VALUE = 20
 
+# Folders variables
+TEST_DIR_1 = 'testdir1'
+TEST_DIRECTORIES = 'TEST_DIRECTORIES'
 
 # FIM modules
 SCHEDULE_MODE = 'scheduled'
 
 # YAML Configuration
 YAML_CONF_REGISTRY_RESPONSE = 'wazuh_conf_registry_responses_win32.yaml'
+YAML_CONF_SYNC_WIN32 = 'wazuh_sync_conf_win32.yaml'
+
+# Synchronization options
+SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
+
+# Callbacks message
+INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
