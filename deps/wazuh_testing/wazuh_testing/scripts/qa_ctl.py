@@ -14,6 +14,7 @@ from tempfile import gettempdir
 from wazuh_testing.qa_ctl.deployment.qa_infraestructure import QAInfraestructure
 from wazuh_testing.qa_ctl.provisioning.qa_provisioning import QAProvisioning
 from wazuh_testing.qa_ctl.run_tests.qa_test_runner import QATestRunner
+from wazuh_testing.qa_ctl.run_tasks.qa_tasks_launcher import QATasksLauncher
 from wazuh_testing.qa_ctl.configuration.qa_ctl_configuration import QACTLConfiguration
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -28,6 +29,7 @@ from wazuh_testing.tools.file import recursive_directory_creation
 
 DEPLOY_KEY = 'deployment'
 PROVISION_KEY = 'provision'
+TASKS_KEY = 'tasks'
 TEST_KEY = 'tests'
 WAZUH_QA_FILES = os.path.join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa')
 RUNNING_ON_DOCKER_CONTAINER = True if 'RUNNING_ON_DOCKER_CONTAINER' in os.environ else False
@@ -41,6 +43,7 @@ launched = {
     'config_generator': False,
     'instance_handler': False,
     'qa_provisioning': False,
+    'tasks_runner': False,
     'test_runner': False
 }
 
@@ -179,7 +182,8 @@ def validate_parameters(parameters):
 
             for op_system in parameters.operating_systems:
                 # Check platform
-                platform = 'linux' if op_system == 'ubuntu' or op_system == 'centos' else op_system
+                platform = QACTLConfigGenerator.SYSTEMS[op_system]['os_platform'] if op_system in \
+                    QACTLConfigGenerator.SYSTEMS.keys() else op_system
                 if platform not in test_data['os_platform']:
                     raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed platforms: "
                                        f"{test_data['os_platform']} (ubuntu and centos are from linux platform)")
@@ -257,7 +261,7 @@ def get_script_parameters():
     """
     description = \
         '''
-        Current version: v0.2
+        Current version: v0.3
 
         Description: qa-ctl is a tool for launching tests locally, automating the deployment, provisioning and testing
                      phase.
@@ -292,7 +296,8 @@ def get_script_parameters():
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
     parser.add_argument('--os', '-o', type=str, action='store', required=False, nargs='+', dest='operating_systems',
-                        choices=['centos', 'ubuntu', 'windows'], help='System/s where the tests will be launched.')
+                        choices=['centos_7', 'centos_8', 'ubuntu_focal', 'windows_2019'],
+                        help='System/s where the tests will be launched.')
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                         help='Set a custom wazuh-qa branch to use in the run and provisioning. This '
@@ -303,6 +308,9 @@ def get_script_parameters():
 
     parser.add_argument('--skip-provisioning', action='store_true',
                         help='Flag to skip the provisioning phase. Set it only if -c or --config was specified.')
+
+    parser.add_argument('--skip-tasks', action='store_true',
+                        help='Flag to skip the tasks phase. Set it only if -c or --config was specified.')
 
     parser.add_argument('--skip-testing', action='store_true',
                         help='Flag to skip the testing phase. Set it only if -c or --config was specified.')
@@ -375,6 +383,12 @@ def main():
             qa_provisioning = QAProvisioning(provision_dict, qactl_configuration)
             qa_provisioning.run()
             launched['qa_provisioning'] = True
+
+        if TASKS_KEY in configuration_data and not arguments.skip_tasks:
+            tasks_dict = configuration_data[TASKS_KEY]
+            tasks_runner = QATasksLauncher(tasks_dict, qactl_configuration)
+            tasks_runner.run()
+            launched['tasks_runner'] = True
 
         if TEST_KEY in configuration_data and not arguments.skip_testing:
             test_dict = configuration_data[TEST_KEY]

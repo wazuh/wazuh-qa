@@ -3,8 +3,7 @@ import sys
 from tempfile import gettempdir
 from time import sleep
 
-from wazuh_testing.qa_ctl.provisioning.ansible.unix_ansible_instance import UnixAnsibleInstance
-from wazuh_testing.qa_ctl.provisioning.ansible.windows_ansible_instance import WindowsAnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance, remove_known_host
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_local_package import WazuhLocalPackage
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
@@ -52,56 +51,23 @@ class QAProvisioning():
 
         self.__process_inventory_data()
 
-    def __read_ansible_instance(self, host_info):
-        """Read every host info and generate the AnsibleInstance object.
-
-        Args:
-            host_info (dict): Dict with the host info needed coming from config file.
-
-        Returns:
-            instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
-        """
-        extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
-        private_key_path = None if 'local_private_key_file_path' not in host_info \
-                                   else host_info['local_private_key_file_path']
-
-        if host_info['system'] == 'windows':
-            instance = WindowsAnsibleInstance(
-                host=host_info['host'],
-                ansible_connection=host_info['ansible_connection'],
-                ansible_port=host_info['ansible_port'],
-                ansible_user=host_info['ansible_user'],
-                ansible_password=host_info['ansible_password'],
-                ansible_python_interpreter=host_info['ansible_python_interpreter'],
-                host_vars=extra_vars
-            )
-        else:
-            instance = UnixAnsibleInstance(
-                host=host_info['host'],
-                ansible_connection=host_info['ansible_connection'],
-                ansible_port=host_info['ansible_port'],
-                ansible_user=host_info['ansible_user'],
-                ansible_password=host_info['ansible_password'],
-                host_vars=extra_vars,
-                ansible_ssh_private_key_file=private_key_path,
-                ansible_python_interpreter=host_info['ansible_python_interpreter']
-            )
-
-        return instance
-
     def __process_inventory_data(self):
         """Process config file info to generate the ansible inventory file."""
         QAProvisioning.LOGGER.debug('Processing inventory data from provisioning hosts info')
 
         for root_key, root_value in self.provision_info.items():
-            if root_key == "hosts":
+            if root_key == 'hosts':
                 for _, host_value in root_value.items():
                     for module_key, module_value in host_value.items():
-                        if module_key == "host_info":
+                        if module_key == 'host_info':
                             current_host = module_value['host']
+
+                            # Remove the host IP from known host file to avoid the SSH key fingerprint error
+                            remove_known_host(current_host, QAProvisioning.LOGGER)
+
                             if current_host:
-                                self.instances_list.append(self.__read_ansible_instance(module_value))
-            elif root_key == "groups":
+                                self.instances_list.append(read_ansible_instance(module_value))
+            elif root_key == 'groups':
                 self.group_dict.update(self.provision_info[root_key])
 
         inventory_instance = AnsibleInventory(ansible_instances=self.instances_list,

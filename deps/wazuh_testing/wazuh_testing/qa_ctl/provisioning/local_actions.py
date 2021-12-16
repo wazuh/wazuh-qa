@@ -8,7 +8,7 @@ from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 from wazuh_testing.tools.github_checks import branch_exists
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
-from wazuh_testing.tools.file import delete_path_recursively
+from wazuh_testing.tools.file import delete_path_recursively, recursive_directory_creation
 
 
 LOGGER = Logging.get_logger(QACTL_LOGGER)
@@ -64,6 +64,9 @@ def download_local_wazuh_qa_repository(branch, path):
         branch (string): Wazuh QA repository branch.
         path (string): Local path where save the repository files.
     """
+    # Create path if it does not exist
+    recursive_directory_creation(path)
+
     wazuh_qa_path = os.path.join(path, 'wazuh-qa')
     mute_output = '&> /dev/null' if sys.platform != 'win32' else '>nul 2>&1'
     command = ''
@@ -83,6 +86,7 @@ def download_local_wazuh_qa_repository(branch, path):
                   f"{mute_output} && mv wazuh-* wazuh-qa {mute_output} && rm -rf *tar.gz {mute_output}"
 
     LOGGER.debug(f"Downloading {branch} files of wazuh-qa repository in {wazuh_qa_path}")
+
     run_local_command_returning_output(command)
 
 

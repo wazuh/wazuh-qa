@@ -64,6 +64,7 @@ class Vagrantfile():
         """
         box_mapping = {
             'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu_20_04.box',
+            'qactl/centos_7': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_7.box',
             'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box',
             'qactl/windows_2019': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_windows_server_2019.box'
         }
@@ -94,7 +95,7 @@ class Vagrantfile():
             List: List with the content of the template vagrant template."""
         with open(self.TEMPLATE_FILE, 'r') as template_fd:
             return template_fd.readlines()
-        Vagrantfile.LOGGER.debug(f"Read vagrantfile {self.TEMPLATE_FILE} template")
+        Vagrantfile.LOGGER.debug(f"Read Vagrantfile {self.TEMPLATE_FILE} template")
 
     def write_vagrantfile(self):
         """Replace the self.REPLACE_PATTERN line with a string with the parameters in JSON format and write the new
@@ -106,10 +107,10 @@ class Vagrantfile():
 
         with open(self.file_path, 'w') as vagrantfile_fd:
             vagrantfile_fd.writelines(read_lines)
-        Vagrantfile.LOGGER.debug(f"Vagranfile written in {self.file_path}")
+        Vagrantfile.LOGGER.debug(f"Vagrantfile written in {self.file_path}")
 
     def remove_vagrantfile(self):
         """Removes the file self.file_path if it exists."""
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
-            Vagrantfile.LOGGER.debug(f"{self.file_path} Vagranfile was removed")
+            Vagrantfile.LOGGER.debug(f"{self.file_path} Vagrantfile was removed")

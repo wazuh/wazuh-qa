@@ -22,21 +22,24 @@ class AnsibleRunner:
         ansible_playbook_path (string): Path where is located the playbook file.
         private_data_dir (string): Path where the artifacts files (result files) will be stored.
         output (boolean): True for showing ansible task output in stdout False otherwise.
+        task_id (str): Runner task id. It allows to identify the task.
 
     Attributes:
         ansible_inventory_path (string): Path where is located the ansible inventory file.
         ansible_playbook_path (string): Path where is located the playbook file.
         private_data_dir (string): Path where the artifacts files (result files) will be stored.
         output (boolean): True for showing ansible task output in stdout False otherwise.
+        task_id (str): Runner task id. It allows to identify the task.
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
     def __init__(self, ansible_inventory_path, ansible_playbook_path,
-                 private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False):
+                 private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False, task_id=None):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir
         self.output = output
+        self.task_id = task_id
 
     def run(self, log_ansible_error=True):
         """Run the ansible playbook in the indicated hosts.
