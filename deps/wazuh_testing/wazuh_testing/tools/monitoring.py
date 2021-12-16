@@ -43,6 +43,7 @@ WAZUH_DB_PREFIX = r'.*wazuh-db.*'
 DEFAULT_POLL_FILE_TIME = 1
 DEFAULT_WAIT_FILE_TIMEOUT = 30
 
+
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
 
@@ -330,7 +331,7 @@ class SocketController:
                 while 1:
                     try:  # error means no more data
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
-                    except:
+                    except Exception:
                         break
 
         return output
@@ -514,6 +515,7 @@ class Queue(queue.Queue):
             an object of this class should be printed.
         """
         return str(self.queue)
+
 
 class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
