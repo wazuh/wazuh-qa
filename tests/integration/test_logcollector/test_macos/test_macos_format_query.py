@@ -328,6 +328,8 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
     match_query_list = []
+    sleep(macos_log_message_timeout)
+
 
     # Generate macOS log messages
     for macos_log in macos_log_list:
@@ -391,7 +393,7 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
 
         match_query_list.append(match_values)
 
-    sleep(macos_log_message_timeout + 20)
+    sleep(macos_log_message_timeout)
     elapsed_time_filemonitor_read_event = 2
 
     for macos_log in match_query_list:
