@@ -4,7 +4,6 @@ import shutil
 from tempfile import gettempdir
 from os.path import join
 
-
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_output import AnsibleOutput
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_playbook import AnsiblePlaybook
 from wazuh_testing.qa_ctl import QACTL_LOGGER
@@ -13,6 +12,7 @@ from wazuh_testing.tools.exceptions import AnsibleException
 
 if sys.platform != 'win32':
     import ansible_runner
+
 
 class AnsibleRunner:
     """Allow to run ansible playbooks in the indicated hosts.
@@ -31,7 +31,8 @@ class AnsibleRunner:
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
-    def __init__(self, ansible_inventory_path, ansible_playbook_path, private_data_dir=join(gettempdir(), 'qa_ctl'), output=False):
+    def __init__(self, ansible_inventory_path, ansible_playbook_path,
+                 private_data_dir=join(gettempdir(), 'wazuh_qa_ctl'), output=False):
         self.ansible_inventory_path = ansible_inventory_path
         self.ansible_playbook_path = ansible_playbook_path
         self.private_data_dir = private_data_dir
@@ -51,7 +52,8 @@ class AnsibleRunner:
                                    f"{self.ansible_inventory_path} inventory")
 
         runner = ansible_runner.run(private_data_dir=self.private_data_dir, playbook=self.ansible_playbook_path,
-                                    inventory=self.ansible_inventory_path, quiet=quiet)
+                                    inventory=self.ansible_inventory_path, quiet=quiet,
+                                    envvars={'ANSIBLE_GATHER_TIMEOUT': 30, 'ANSIBLE_TIMEOUT': 20})
         ansible_output = AnsibleOutput(runner)
 
         if ansible_output.rc != 0:
@@ -84,7 +86,7 @@ class AnsibleRunner:
             AnsibleRunner.LOGGER.debug(f"Running {ansible_playbook.playbook_file_path} ansible-playbook with "
                                        f"{ansible_inventory_path} inventory")
             runner = ansible_runner.run(playbook=ansible_playbook.playbook_file_path, inventory=ansible_inventory_path,
-                                        quiet=quiet)
+                                        quiet=quiet, envvars={'ANSIBLE_GATHER_TIMEOUT': 30, 'ANSIBLE_TIMEOUT': 20})
             ansible_output = AnsibleOutput(runner)
 
             if ansible_output.rc != 0 and raise_on_error:

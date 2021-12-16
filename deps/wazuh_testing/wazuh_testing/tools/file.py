@@ -345,7 +345,35 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
-        
+
+
+def join_path(path, system):
+    """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
+
+    Path can be defined by the following formats
+       path = ['tmp', 'user', 'test']
+       path = ['/tmp/user', test]
+
+    Parameters:
+        path (list(str)): Path list (one item for level).
+        system (str): host system.
+
+    Returns:
+        str: Joined path.
+    """
+    result_path = []
+
+    for item in path:
+        if '\\' in item:
+            result_path.extend([path_item for path_item in item.split('\\')])
+        elif '/' in item:
+            result_path.extend([path_item for path_item in item.split('/')])
+        else:
+            result_path.append(item)
+
+    return '\\'.join(result_path) if system == 'windows' else '/'.join(result_path)
+
+
 def count_file_lines(filepath):
     """Count number of lines of a specified file.
 

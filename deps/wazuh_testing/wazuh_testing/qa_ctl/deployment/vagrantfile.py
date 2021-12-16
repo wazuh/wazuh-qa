@@ -1,9 +1,9 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-from pathlib import Path
 import os
 import json
+from pathlib import Path
 
 from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -64,7 +64,8 @@ class Vagrantfile():
         """
         box_mapping = {
             'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu_20_04.box',
-            'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box'
+            'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box',
+            'qactl/windows_2019': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_windows_server_2019.box'
         }
 
         try:

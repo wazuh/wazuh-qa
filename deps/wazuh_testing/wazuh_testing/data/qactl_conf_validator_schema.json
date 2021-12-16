@@ -9,7 +9,7 @@
       "$id": "#/properties/deployment",
       "type": "object",
       "patternProperties": {
-        "^host[0-9]*$": {
+        "^host_[0-9]*$": {
           "type": "object",
           "properties": {
             "provider": {
@@ -48,7 +48,8 @@
                       "type": "string"
                     },
                     "vm_system": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": ["linux","windows"]
                     },
                     "label": {
                       "type": "string"
@@ -117,7 +118,7 @@
       "properties": {
         "hosts": {
           "patternProperties": {
-            "^host[0-9]*$": {
+            "^host_[0-9]*$": {
               "type": "object",
               "required": [
                 "host_info"
@@ -126,31 +127,49 @@
                 "host_info": {
                   "type": "object",
                   "required": [
-                    "connection_method",
-                    "host",
-                    "user",
-                    "password",
-                    "connection_port",
-                    "ansible_python_interpreter"
+                    "ansible_connection",
+                    "ansible_user",
+                    "ansible_password",
+                    "ansible_port",
+                    "system",
+                    "installation_files_path",
+                    "ansible_python_interpreter",
+                    "host"
                   ],
                   "properties": {
-                    "connection_method": {
+                    "ansible_connection": {
                       "type": "string"
                     },
                     "host": {
                       "type": "string"
                     },
-                    "user": {
+                    "ansible_user": {
                       "type": "string"
                     },
-                    "password": {
+                    "ansible_password": {
                       "type": "string"
                     },
-                    "connection_port": {
+                    "ansible_port": {
                       "type": "integer"
                     },
                     "ansible_python_interpreter": {
                       "type": "string"
+                    },
+                    "installation_files_path": {
+                      "type": "string"
+                    },
+                    "system": {
+                      "type": "string",
+                      "enum": [
+                      "rpm", 
+                      "deb",
+                      "windows",
+                      "macos",
+                      "solaris10",
+                      "solaris11",
+                      "rpm5",
+                      "wpk-linux",
+                      "wpk-windows"]
                     }
                   }
                 },
@@ -159,7 +178,8 @@
                   "required": [
                     "type",
                     "target",
-                    "installation_files_path"
+                    "installation_files_path",
+                    "wazuh_install_path"
                   ],
                   "properties": {
                     "type": {
@@ -255,46 +275,55 @@
     "tests": {
       "type": "object",
       "patternProperties": {
-        "^host[0-9]*$": {
+        "^host_[0-9]*$": {
           "type": "object",
           "required": ["host_info", "test"],
           "properties": {
             "host_info": {
               "type": "object",
               "required": [
-                "connection_method",
+                "ansible_connection",
+                "ansible_user",
+                "ansible_port",
+                "installation_files_path",
+                "ansible_python_interpreter",
                 "host",
-                "user",
-                "connection_port",
-                "ansible_python_interpreter"
+                "system"
               ],
               "properties": {
-                "connection_method": {
+                "ansible_connection": {
                   "type" : "string"
                 },
                 "host": {
                   "type" : "string"
                 },
-                "user": {
+                "ansible_user": {
                   "type": "string"
                 },
-                "password": {
+                "ansible_password": {
                   "type": "string",
                   "default": "empty"
                 },
                 "ssh_private_key_file_path":{
                   "type": "string"
                 },
-                "connection_port": {
+                "ansible_port": {
                   "type": "integer"
                 },
                 "ansible_python_interpreter": {
                   "type": "string"
+                },
+                "installation_files_path": {
+                  "type": "string"
+                },
+                "system": {
+                  "type": "string"
                 }
+
               },
               "oneOf": [
                 {
-                  "required": ["password"]
+                  "required": ["ansible_password"]
                 },
                 {
                   "required": ["ssh_private_key_file_path"]
@@ -303,7 +332,10 @@
             },
             "test": {
               "type": "object",
-              "required": ["path"],
+              "required": [
+                "path",
+                "type"
+              ],
               "properties": {
                 "hosts": {
                   "type": "string"
@@ -367,30 +399,33 @@
           }
         }
       }
-    }
-  },
-  "config": {
-    "$id": "#/properties/config",
-    "type": "object",
-    "patternProperties": {
-      "vagrant_output": {
-        "type": "boolean"
-      },
-      "ansible_output": {
-        "type": "boolean"
-      },
-      "logging":{
-        "type": "object",
-        "properties": {
-          "enable": {
-            "type": "boolean"
-          },
-          "level": {
-            "type": "string",
-            "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-          },
-          "file": {
-            "type": "string"
+    },
+    "config": {
+      "$id": "#/properties/config",
+      "type": "object",
+      "patternProperties": {
+        "qa_ctl_launcher_branch": {
+          "type": "string"
+        },
+        "vagrant_output": {
+          "type": "boolean"
+        },
+        "ansible_output": {
+          "type": "boolean"
+        },
+        "logging":{
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean"
+            },
+            "level": {
+              "type": "string",
+              "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+            },
+            "file": {
+              "type": "string"
+            }
           }
         }
       }
