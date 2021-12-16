@@ -5,7 +5,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: system
 brief: Check that when an Active Response is activated, the manager sends back the information to the agent
     and that it appears in active-response.log and ossec.log with the expected format.
-tier: 0
+tier: 1
 modules:
     - active_response
 components:
@@ -50,7 +50,7 @@ from wazuh_testing.tools.system import HostManager
 
 # Hosts and variables
 # In order to run this test, first you need to launch the manager_agent enviroment
-testinfra_hosts = ["wazuh-master", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
+testinfra_hosts = ["wazuh-manager", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'system','provisioning', 'manager_agent', 'inventory.yml')
 host_manager = HostManager(inventory_path)
@@ -98,10 +98,10 @@ def test_active_response_log_format(wazuh_agent, message_file):
     # Add log message to agent monitored source
     host_manager.modify_file_content(host=wazuh_agent, path=log_path, content=log_cases[0])
     
-    # wait for active responses messages to be genrated
+    # wait for active responses messages to be generated
     time.sleep(sleep_time)
 
-    # Run the callback checks for the ossec.log and the actibe-responses.log
+    # Run the callback checks for the ossec.log and the active-responses.log
     HostMonitor(inventory_path=inventory_path,
                 messages_path=os.path.join(local_path,message_file),
                 tmp_path=tmp_path).run()

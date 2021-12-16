@@ -1,5 +1,5 @@
 ---
-- name: Create our container (Master)
+- name: Create our container (Manager)
   hosts: localhost
   vars_files:
     - ./vars/configurations.yml
@@ -8,9 +8,9 @@
       docker_network:
         name: "{{ docker_network }}"
     - docker_container:
-        name: "{{ master_hostname }}"
+        name: "{{ manager_hostname }}"
         image: "{{ image }}"
-        hostname: "{{ master_hostname }}"
+        hostname: "{{ manager_hostname }}"
         networks:
           - name: "{{ docker_network }}"
         privileged: yes
@@ -54,20 +54,20 @@
           - name: "{{ docker_network }}"
         privileged: yes
 
-- name: Wazuh Master
-  hosts: wazuh-master
+- name: Wazuh Manager
+  hosts: wazuh-manager
   vars:
-    master_hostname: "wazuh-master"
+    manager_hostname: "wazuh-manager"
   vars_files:
     - ./vars/configurations.yml
   roles:
-    - name: "roles/master-role"
+    - name: "roles/manager-role"
 
 - name: Wazuh Agent1
   hosts: wazuh-agent1
   vars:
     agent_package: "{{agent1_package}}"
-    manager_hostname: wazuh-master
+    manager_hostname: wazuh-manager
     agent_id: "{{ agent1_id }}"
     agent_hostname: "{{ agent1_hostname }}"
     agent_key: "{{ agent1_key }}"
@@ -77,11 +77,12 @@
     - ./vars/configurations.yml
   roles:
     - name: "roles/agent-role"
+    
 - name: Wazuh Agent2
   hosts: wazuh-agent2
   vars:
     agent_package: "{{agent2_package}}"
-    manager_hostname: wazuh-master
+    manager_hostname: wazuh-manager
     agent_id: "{{ agent2_id }}"
     agent_hostname: "{{ agent2_hostname }}"
     agent_key: "{{ agent2_key }}"
@@ -95,7 +96,7 @@
   hosts: wazuh-agent3
   vars:
     agent_package: "{{agent3_package}}"
-    manager_hostname: wazuh-master
+    manager_hostname: wazuh-manager
     agent_id: "{{ agent3_id }}"
     agent_hostname: "{{ agent3_hostname }}"
     agent_key: "{{ agent3_key }}"

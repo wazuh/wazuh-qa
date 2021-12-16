@@ -1,6 +1,6 @@
 cluster_key: "00000000000000000000000000000000"
 
-master_hostname: "wazuh-master"
+manager_hostname: "wazuh-manager"
 
 log_file: "/var/log/secure" #Remember to change in agents ossec.conf if changed
 agent_user: "ossec" #Only valid for agents verions<4.2.5

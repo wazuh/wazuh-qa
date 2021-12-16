@@ -2,18 +2,11 @@
 - hosts: localhost
   tasks:
   - docker_container:
-      name: wazuh-master
+      name: wazuh-manager
       state: absent
       force_kill: yes
   - docker_container:
-      name: wazuh-agent1
+      name: "wazuh-agent{{item}}"
       state: absent
       force_kill: yes
-  - docker_container:
-      name: wazuh-agent2
-      state: absent
-      force_kill: yes
-  - docker_container:
-      name: wazuh-agent3
-      state: absent
-      force_kill: yes
+    with_sequence: count=3
