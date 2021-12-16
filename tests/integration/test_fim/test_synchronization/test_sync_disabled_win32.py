@@ -64,7 +64,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.wazuh_variables import DATA
 from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, YAML_CONF_SYNC_WIN32,
-                                                   TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE)
+                                                   TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE, SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -82,7 +82,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 conf_params = {TEST_DIRECTORIES: test_directories[0],
                TEST_REGISTRIES: test_regs[0],
-               SYNCHRONIZATION_ENABLED: 'no'}
+               SYNCHRONIZATION_ENABLED: 'no',
+               SYNCHRONIZATION_REGISTRY_ENABLED: 'no'}
 
 # configurations
 
