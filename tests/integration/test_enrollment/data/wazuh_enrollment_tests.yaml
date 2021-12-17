@@ -315,7 +315,9 @@
     agent_address: "56FE::2159:5BBC::6594"
   pre_existent_keys:
     - ""
-  expected_error: "ERROR: Invalid IP address provided for sender IP."
+  expected_error:
+     agent-auth: "ERROR: Invalid IP address provided for sender IP."
+     agent-enrollment: "ERROR: (4104): Invalid hostname: '56FE::2159:5BBC::6594'."
   expected_fail:
     os: "win32"
     reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
@@ -339,7 +341,9 @@
     agent_address: "11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA"
   pre_existent_keys:
     - ""
-  expected_error: "ERROR: Invalid IP address provided for sender IP."
+  expected_error:
+    agent-auth: "ERROR: Invalid IP address provided for sender IP."
+    agent-enrollment: "ERROR: (4104): Invalid hostname: '11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'."
   expected_fail:
     os: "win32"
     reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
@@ -352,7 +356,9 @@
     agent_address: "02db:4660:46af:invalid:d05e:a62e:4ca7:8e58"
   pre_existent_keys:
     - ""
-  expected_error: "ERROR: Invalid IP address provided for sender IP."
+  expected_error:
+     agent-auth: "ERROR: Invalid IP address provided for sender IP."
+     agent-enrollment: "ERROR: (4104): Invalid hostname: '02db:4660:46af:invalid:d05e:a62e:4ca7:8e58'."  
   expected_fail:
     os: "win32"
     reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"

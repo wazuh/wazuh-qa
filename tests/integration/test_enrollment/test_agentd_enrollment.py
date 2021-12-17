@@ -157,9 +157,12 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
+        expected_error_dict = get_current_test_case['expected_error']
+        expected_error = expected_error_dict['agent-enrollment'] if 'agent-enrollment' in expected_error_dict else \
+                                                                    expected_error_dict
         try:
             log_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT,
-                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                              callback=make_callback(expected_error, prefix='.*',
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:
