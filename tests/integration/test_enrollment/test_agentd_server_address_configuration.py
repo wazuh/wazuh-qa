@@ -85,27 +85,36 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 daemons_handler_configuration = {'daemons': ['wazuh-agentd'], 'ignore_errors': True}
 local_internal_options = {'windows.debug': '2'} if sys.platform == 'win32' else {'agent.debug': '2'}
+monitored_sockets_params = []
+log_monitor_paths = []
+
 
 parameters = [
     {'SERVER_ADDRESS': 'MANAGER_IP'},                               # Invalid server address
+    {'SERVER_ADDRESS': '127.0.0.1'},                               # Invalid server address
+    {'SERVER_ADDRESS': '::1'},                               # Invalid server address
+
     {'SERVER_ADDRESS': '172.28.128.hello'},                         # Could not resolve hostname
-    {'SERVER_ADDRESS': '172.28.128.12'},                            # Valid IP, unable to connect (IPv4)
-    {'SERVER_ADDRESS': '::ffff:ac1c:800c'},                         # Valid IP, unable to connect (IPv6 compressed)
-    {'SERVER_ADDRESS': '0000:0000:0000:0000:0000:ffff:ac1c:800c'},  # Valid IP, unable to connect (IPv6 expanded)
+    {'SERVER_ADDRESS': '::ffff:ac1c::::::::800c'},                         # Valid IP, unable to connect (IPv6 compressed)
+
     {'SERVER_ADDRESS': 'unable'},                                   # Resolve hostname, valid IP, unable to connect (IPv4)
     {'SERVER_ADDRESS': 'unable6compressed'},                        # Resolve hostname, valid IP, unable to connect (IPv6 compressed)
     {'SERVER_ADDRESS': 'unable6'}                                   # Resolve hostname, valid IP, unable to connect (IPv6 expanded)
 ]
 
 metadata = [
-    {'server_address': 'MANAGER_IP',                              'invalid_address': True,  'resolve_hostname': False},
-    {'server_address': '172.28.128.hello',                        'invalid_address': False, 'resolve_hostname': False},
-    {'server_address': '172.28.128.12',                           'invalid_address': False, 'resolve_hostname': True},
-    {'server_address': '::ffff:ac1c:800c',                        'invalid_address': False, 'resolve_hostname': True},
-    {'server_address': '0000:0000:0000:0000:0000:ffff:ac1c:800c', 'invalid_address': False, 'resolve_hostname': True},
+    {'server_address': 'MANAGER_IP',                             'invalid_address': True, 'resolve_hostname': False},
+    {'server_address': '127.0.0.1',                              'invalid_address': False,  'resolve_hostname': False},
+    {'server_address': '::1',                                    'invalid_address': False, 'ipv6':True, 'resolve_hostname': False},
+
+
+    {'server_address': '172.28.128.hello', 'invalid_address': True, 'resolve_hostname': True},                         # Could not resolve hostname
+    {'server_address': '::ffff:ac1c::::::::800c', 'invalid_address': True, 'resolve_hostname': True},                         # Valid IP, unable to connect (IPv6 compressed)
+
     {'server_address': 'unable', 'invalid_address': False, 'resolve_hostname': True, 'host_ip': '172.28.128.12'},
     {'server_address': 'unable6compressed', 'invalid_address': False, 'resolve_hostname': True, 'host_ip': '::ffff:ac1c:800c'},
     {'server_address': 'unable6', 'invalid_address': False, 'resolve_hostname': True, 'host_ip': '0000:0000:0000:0000:0000:ffff:ac1c:800c'}
+
 ]
 
 # Configuration data
@@ -132,8 +141,12 @@ def edit_hosts(get_configuration):
         with open(HOSTS_FILE_PATH, 'w') as file:
             file.write(original_content)
 
-def test_agentd_server_address_configuration(get_configuration, configure_environment, configure_local_internal_options_module,
-                edit_hosts, daemons_handler, file_monitoring):
+@pytest.fixture(scope="module")
+def get_current_test_case(get_configuration):
+    return get_configuration['metadata']
+
+
+def test_agentd_server_address_configuration(get_configuration, configure_environment, configure_local_internal_options_module, configure_sockets_environment, configure_socket_listener, create_certificates, edit_hosts, daemons_handler, file_monitoring):
 
     '''
     description: Check the messages produced by the agent when introducing
@@ -173,17 +186,22 @@ def test_agentd_server_address_configuration(get_configuration, configure_enviro
     '''
 
     cfg = get_configuration['metadata']
-    if cfg['invalid_address']:
+    manager_address = cfg['server_address']
+
+    if manager_address == 'MANAGER_IP':
         callback = agent.callback_invalid_server_address(cfg['server_address'])
         log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
                                 error_message="The expected 'Invalid server address found' message has not been produced")
-    else:
-        if not cfg['resolve_hostname']:
-            callback = agent.callback_could_not_resolve_hostname(cfg['server_address'])
-            log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                                    error_message="The expected 'Could not resolve hostname' message has not been produced")
-        else:
-            ip = cfg['host_ip'] if 'host_ip' in cfg else cfg['server_address']
-            callback = agent.callback_unable_to_connect(ip)
-            log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                                    error_message="The expected 'Unable to connect to' message has not been produced")
+    # else:
+    #     if cfg['invalid_address']:
+
+    #     else:
+    #         if not cfg['resolve_hostname']:
+    #             callback = agent.callback_could_not_resolve_hostname(cfg['server_address'])
+    #             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
+    #                                     error_message="The expected 'Could not resolve hostname' message has not been produced")
+    #         else:
+    #             ip = cfg['host_ip'] if 'host_ip' in cfg else cfg['server_address']
+    #             callback = agent.callback_unable_to_connect(ip)
+    #             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
+    #                                     error_message="The expected 'Unable to connect to' message has not been produced")
