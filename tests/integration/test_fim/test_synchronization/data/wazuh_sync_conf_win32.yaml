@@ -4,6 +4,7 @@
   - sync_disabled
   apply_to_modules:
   - test_sync_disabled_win32
+  - test_sync_enabled_win32
   sections:
   - section: syscheck
     elements:
