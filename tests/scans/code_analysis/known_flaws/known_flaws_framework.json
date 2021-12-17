@@ -1,6 +1,119 @@
 {
     "false_positives": [
         {
+            "code": "         try:\n             proc = subprocess.Popen([wazuh_control, \"info\"], stdout=subprocess.PIPE)\n             (stdout, stderr) = proc.communicate()\n",
+            "filename": "framework/scripts/wazuh-logtest.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "subprocess call - check for execution of untrusted input.",
+            "line_number": 442,
+            "line_range": [
+                442
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
+            "test_id": "B603",
+            "test_name": "subprocess_without_shell_equals_true"
+        },
+        {
+            "code": "         try:\n             subprocess.check_output([os_path.join(common.wazuh_path, \"bin\", \"verify-agent-conf\"), '-f', tmp_file_path],\n                                     stderr=subprocess.STDOUT)\n         except subprocess.CalledProcessError as e:\n",
+            "filename": "framework/wazuh/core/configuration.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "subprocess call - check for execution of untrusted input.",
+            "line_number": 713,
+            "line_range": [
+                713,
+                714
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
+            "test_id": "B603",
+            "test_name": "subprocess_without_shell_equals_true"
+        },
+        {
+            "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
+            "filename": "framework/wazuh/core/common.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "subprocess call - check for execution of untrusted input.",
+            "line_number": 63,
+            "line_range": [
+                63
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
+            "test_id": "B603",
+            "test_name": "subprocess_without_shell_equals_true"
+        },
+        {
+            "code": "     \"\"\"\n     return set(str(check_output(['hostname', '--all-ip-addresses']).decode()).split(\" \")[:-1])\n \n",
+            "filename": "framework/wazuh/core/cluster/cluster.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "subprocess call - check for execution of untrusted input.",
+            "line_number": 42,
+            "line_range": [
+                42
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
+            "test_id": "B603",
+            "test_name": "subprocess_without_shell_equals_true"
+        },
+        {
+            "code": " import struct\n import subprocess\n import sys\n",
+            "filename": "framework/scripts/wazuh-logtest.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Consider possible security implications associated with subprocess module.",
+            "line_number": 14,
+            "line_range": [
+                14
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
+            "test_id": "B404",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " import re\n import subprocess\n import sys\n",
+            "filename": "framework/wazuh/core/configuration.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Consider possible security implications associated with subprocess module.",
+            "line_number": 9,
+            "line_range": [
+                9
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
+            "test_id": "B404",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " import os\n import subprocess\n from contextvars import ContextVar\n",
+            "filename": "framework/wazuh/core/common.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Consider possible security implications associated with subprocess module.",
+            "line_number": 7,
+            "line_range": [
+                7
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
+            "test_id": "B404",
+            "test_name": "blacklist"
+        },
+        {
+            "code": " from shutil import rmtree\n from subprocess import check_output\n from time import time\n",
+            "filename": "framework/wazuh/core/cluster/cluster.py",
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_text": "Consider possible security implications associated with check_output module.",
+            "line_number": 15,
+            "line_range": [
+                15
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
+            "test_id": "B404",
+            "test_name": "blacklist"
+        },
+        {
             "code": "     # end time\n     result = wdb_conn.execute(f\"agent {agent_id} sql SELECT max(date_last) FROM pm_event WHERE \"\n                               \"log = 'Ending rootcheck scan.'\")\n",
             "filename": "framework/wazuh/core/rootcheck.py",
             "issue_confidence": "MEDIUM",
@@ -60,20 +173,6 @@
             "test_name": "try_except_pass"
         },
         {
-            "code": " from signal import signal, alarm, SIGALRM\n from subprocess import CalledProcessError, check_output\n from xml.etree.ElementTree import ElementTree\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with CalledProcessError module.",
-            "line_number": 25,
-            "line_range": [
-                25
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
             "code": " from os import remove, path as os_path\n from xml.etree.ElementTree import tostring\n \n from defusedxml.minidom import parseString\n",
             "filename": "framework/wazuh/core/configuration.py",
             "issue_confidence": "HIGH",
@@ -89,15 +188,15 @@
             "test_name": "blacklist"
         },
         {
-            "code": " from subprocess import CalledProcessError, check_output\n from xml.etree.ElementTree import ElementTree\n \n from cachetools import cached, TTLCache\n",
+            "code": " from signal import signal, alarm, SIGALRM\n from xml.etree.ElementTree import ElementTree\n \n from cachetools import cached, TTLCache\n",
             "filename": "framework/wazuh/core/utils.py",
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-            "line_number": 26,
+            "line_number": 24,
             "line_range": [
-                26,
-                27
+                24,
+                25
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
             "test_id": "B405",
@@ -109,9 +208,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 649,
+            "line_number": 619,
             "line_range": [
-                649
+                619
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -137,9 +236,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 1764,
+            "line_number": 1734,
             "line_range": [
-                1764
+                1734
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
             "test_id": "B108",
@@ -173,91 +272,6 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
             "test_name": "hardcoded_bind_all_interfaces"
-        },
-        {
-            "code": " import os\n import subprocess\n from contextvars import ContextVar\n",
-            "filename": "framework/wazuh/core/common.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 7,
-            "line_range": [
-                7
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " import re\n import subprocess\n import sys\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 9,
-            "line_range": [
-                9
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         try:\n             subprocess.check_output([os_path.join(common.wazuh_path, \"bin\", \"verify-agent-conf\"), '-f', tmp_file_path],\n                                     stderr=subprocess.STDOUT)\n         except subprocess.CalledProcessError as e:\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 713,
-            "line_range": [
-                713,
-                714
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": "     try:\n         output = check_output(command)\n     except CalledProcessError as error:\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 113,
-            "line_range": [
-                113
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " import struct\n import subprocess\n import sys\n",
-            "filename": "framework/scripts/wazuh-logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 14,
-            "line_range": [
-                14
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         try:\n             proc = subprocess.Popen([wazuh_control, \"info\"], stdout=subprocess.PIPE)\n             (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/scripts/wazuh-logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 442,
-            "line_range": [
-                442
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
         }
     ]
 }
