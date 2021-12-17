@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+from time import sleep
 
 import pytest
 
@@ -26,6 +27,7 @@ manager_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.
                                 'provisioning', 'basic_environment', 'roles', 'manager-role', 'files', 'ossec.conf')
 test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_agent_auth_cases.yml'))
 
+wait_agent_start = 20
 network = {}
 
 
@@ -47,6 +49,7 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+    host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
 
     # Start the agent enrollment process using agent-auth
     for configuration in test_case['test_case']:
@@ -71,6 +74,7 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
 
     # Check if the agent is active
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+    sleep(wait_agent_start)
     agent_info = host_manager.run_command('wazuh-manager', f'{WAZUH_PATH}/bin/agent_control -i {agent_id}')
     assert 'Active' in agent_info
 
