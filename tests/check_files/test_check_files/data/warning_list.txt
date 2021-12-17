@@ -71,5 +71,3 @@
 /var/spool/anacron/cron.weekly
 /var/spool/anacron/cron.monthly
 /var/tmp/dnf-vagrant-*
-/var/ossec
-/etc/rc.d
