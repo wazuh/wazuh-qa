@@ -28,7 +28,7 @@ manager_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.
                                 'provisioning', 'basic_environment', 'roles', 'manager-role', 'files', 'ossec.conf')
 test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_enrollment_cases.yml'))
 
-wait_agent_start = 10
+wait_agent_start = 20
 network = {}
 
 
@@ -40,6 +40,7 @@ def clean_environment():
     host_manager.get_host('wazuh-manager').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
                                                   check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
+    host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
 
