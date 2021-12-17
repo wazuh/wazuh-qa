@@ -1,4 +1,7 @@
 {
     "version": "0.3",
-    "revision": 1
+    "revision": 2,
+    "last_changes": [
+        "Fixed the ansible ssh private key usage in qa-ctl"
+    ]
 }
