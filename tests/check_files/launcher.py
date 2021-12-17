@@ -58,6 +58,11 @@ def get_parameters():
     parser.add_argument('--baseline', action='store_true', help='Launch the test using the check-files baseline data '
                                                                 'instead of getting them directly on the initial '
                                                                 'status')
+
+    parser.add_argument('--deployment-info', type=str, action='store', required=False, dest='deployment_info',
+                        help='Path to the file that contains the deployment information. If specified, local instances '
+                             'will not be deployed')
+
     arguments = parser.parse_args()
 
     return arguments
@@ -97,6 +102,20 @@ def validate_parameters(parameters):
     Raises:
         QAValueError: If a script parameters has a invalid value.
     """
+    def validate_deployment_info_data(data):
+        """Check that all deployment data required parameters has been specified"""
+        required_data = ['ansible_connection', 'ansible_user', 'ansible_port', 'ansible_python_interpreter', 'host',
+                         'system']
+        for key_data in required_data:
+            if not key_data in data.keys():
+                return False
+
+        # Check for password data
+        if 'ansible_password' not in data.keys() and 'ansible_ssh_private_key_file' not in data.keys():
+            return False
+
+        return True
+
     logger.info('Validating input parameters')
 
     # Check if QA branch exists
@@ -113,6 +132,27 @@ def validate_parameters(parameters):
     if parameters.wazuh_version and not github_checks.version_is_released(parameters.wazuh_version):
         raise QAValueError(f"The wazuh {parameters.wazuh_version} version has not been released. Enter a right "
                            'version.', logger.error, QACTL_LOGGER)
+
+    # Check the deployment-info parameter
+    if parameters.deployment_info:
+        # Validate the file parameter
+        if not os.path.isfile(parameters.deployment_info) or not os.path.exists(parameters.deployment_info):
+            raise QAValueError('The specified deployment-info file does not exist.', logger.error, QACTL_LOGGER)
+
+        # Read parameter file format
+        if not file.validate_yaml_file(parameters.deployment_info):
+            raise QAValueError(f"The deployment-info {parameters.deployment_info} is not in YAML format, or it has "
+                               'wrong syntax', logger.error, QACTL_LOGGER)
+        deployment_data = file.read_yaml(parameters.deployment_info)
+
+        # Validate the data content
+        for item in deployment_data:
+            if not validate_deployment_info_data(item):
+                raise QAValueError('Some necessary field is missing in the deployment-info file. The necessary one '
+                                   'are as follows: [ansible_connection, ansible_user, ansible_port, '
+                                   'ansible_python_interpreter, host, system] and (ansible_password | '
+                                   'ansible_ssh_private_key_file)')
+
     logger.info('Input parameters validation has passed successfully')
 
 
@@ -134,17 +174,29 @@ def generate_qa_ctl_configuration(parameters, playbooks_path, qa_ctl_config_gene
     config_file_path = os.path.join(TMP_FILES, f"check_files_config_{current_timestamp}.yaml")
     os_system = parameters.os_system
 
-    instance_name = f"check_files_{os_system}_{current_timestamp}"
-    instance = ConfigInstance(instance_name, os_system)
+    if parameters.deployment_info:  # If a custom deployment file has been specified
+        # Read the host data
+        deployment_data = file.read_yaml(parameters.deployment_info)
 
-    # Generate deployment configuration
-    deployment_configuration = qa_ctl_config_generator.get_deployment_configuration([instance])
+        # Generate tasks configuration data
+        tasks_configuration = qa_ctl_config_generator.get_tasks_configuration(playbooks_path,
+                                                                              remote_hosts_info=deployment_data)
+        # Generate qa-ctl configuration file
+        qa_ctl_configuration = {**tasks_configuration}
 
-    # Generate tasks configuration data
-    tasks_configuration = qa_ctl_config_generator.get_tasks_configuration([instance], playbooks_path)
+    else:  # Add deployment section for local instances
+        instance_name = f"check_files_{os_system}_{current_timestamp}"
+        instance = ConfigInstance(instance_name, os_system)
 
-    # Generate qa-ctl configuration file
-    qa_ctl_configuration = {**deployment_configuration, **tasks_configuration}
+        # Generate deployment configuration
+        deployment_configuration = qa_ctl_config_generator.get_deployment_configuration([instance])
+
+        # Generate tasks configuration data
+        tasks_configuration = qa_ctl_config_generator.get_tasks_configuration(playbooks_path, instances=[instance])
+
+        # Generate qa-ctl configuration file
+        qa_ctl_configuration = {**deployment_configuration, **tasks_configuration}
+
     file.write_yaml_file(config_file_path, qa_ctl_configuration)
     test_build_files.append(config_file_path)
 
