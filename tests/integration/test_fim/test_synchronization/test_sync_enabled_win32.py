@@ -64,8 +64,9 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, YAML_CONF_SYNC_WIN32,
-                                                   TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                                    SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -140,11 +141,11 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     # The file synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_integrity_event, update_position=True).result()
-                             
+
     assert event['component'] == 'fim_file', 'Wrong event component'
 
     # The registry synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
                                     callback=callback_detect_integrity_event).result()
-                                      
+
     assert event['component'] == 'fim_registry', 'Wrong event component'

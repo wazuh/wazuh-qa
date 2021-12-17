@@ -64,8 +64,10 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, YAML_CONF_SYNC_WIN32,
-                                                   TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE, SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                                    SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE,
+                                                    SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -107,7 +109,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
-                 Finally, it will verify that no FIM 'integrity' event is generated when the registry 
+                 Finally, it will verify that no FIM 'integrity' event is generated when the registry
                  synchronization is disablede.
 
     wazuh_min_version: 4.2.0
@@ -128,7 +130,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     assertions:
         - Verify that no FIM 'integrity' events are generated when the value
           of the 'enabled' tag is set to 'no' (registry synchronization disabled).
-        
+
     input_description: Different test cases are contained in external YAML file (wazuh_sync_conf_win32.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined with
                        the testing directory/key to be monitored defined in this module.
@@ -147,5 +149,5 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
 
     # The registry synchronization event shouldn't be triggered
     with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
-                                            callback=callback_generator(INTEGRITY_CONTROL_MESSAGE)).result()
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
+                                        callback=callback_generator(INTEGRITY_CONTROL_MESSAGE)).result()

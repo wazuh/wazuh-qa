@@ -56,13 +56,15 @@ tags:
 '''
 import os
 import pytest
-from wazuh_testing.fim import generate_params, create_registry, modify_registry_value, registry_parser, KEY_WOW64_64KEY, REG_SZ
-from wazuh_testing import global_parameters
+from wazuh_testing.fim import (generate_params, create_registry, modify_registry_value, registry_parser,
+                               KEY_WOW64_64KEY, REG_SZ)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
-from wazuh_testing.fim_module.fim_variables import SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE, YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
+from wazuh_testing.fim_module.fim_variables import (SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE,
+                                                    YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE,
+                                                    MONITORED_KEY)
 from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 
@@ -75,7 +77,8 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
-conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
+conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
+               SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
 
 
 # configurations
@@ -155,5 +158,5 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     events = get_sync_msgs(SYNC_INTERVAL_VALUE)
 
-    assert find_value_in_event_list(
-               os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name, events) is not None, f"No sync event was found for {value_path}"
+    assert (find_value_in_event_list(os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name, events)
+            is not None, f"No sync event was found for {value_path}")

@@ -3,7 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 '''
-The purpose of this file is to contain all the variables necessary for FIM in order to be easier to maintain if one of them changes in the future
+The purpose of this file is to contain all the variables necessary for FIM in order to be easier to
+maintain if one of them changes in the future.
 '''
 
 # variables

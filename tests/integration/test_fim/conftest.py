@@ -5,7 +5,8 @@
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim import create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry, LOG_FILE_PATH, callback_detect_registry_integrity_clear_event
+from wazuh_testing.fim import (create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry,
+                               LOG_FILE_PATH, callback_detect_registry_integrity_clear_event)
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE
 from wazuh_testing.wazuh_variables import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP, WAZUH_LOG_MONITOR
@@ -30,6 +31,6 @@ def create_key(request):
     control_service(WAZUH_SERVICES_START)
 
     # wait until the sync is done.
-    file_monitor.start(timeout= SYNC_INTERVAL_VALUE + global_parameters.default_timeout,
-                            callback=callback_detect_registry_integrity_clear_event,
-                            error_message='Did not receive expected "integrity clear" event')
+    file_monitor.start(timeout=SYNC_INTERVAL_VALUE + global_parameters.default_timeout,
+                       callback=callback_detect_registry_integrity_clear_event,
+                       error_message='Did not receive expected "integrity clear" event')
