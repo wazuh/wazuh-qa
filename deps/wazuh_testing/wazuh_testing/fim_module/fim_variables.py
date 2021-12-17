@@ -36,3 +36,4 @@ SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
 # Callbacks message
 INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
+REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
