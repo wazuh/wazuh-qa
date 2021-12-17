@@ -2,28 +2,28 @@
 wazuh-manager:
   - regex: ".*New connection from AGENT_IP"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*Received request for a new agent .* from: AGENT_IP"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*Agent key generated for.*"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
 
 
 wazuh-agent1:
   - regex: ".*Requesting a key from server: MANAGER_IP"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*No authentication password provided"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*Using agent name as:*"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*Waiting for server reply"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
   - regex: ".*Valid key received"
     path: "/var/ossec/logs/ossec.log"
-    timeout: 10
+    timeout: 20
