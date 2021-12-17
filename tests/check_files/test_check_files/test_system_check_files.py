@@ -4,14 +4,17 @@
 
 import json
 import os
+from typing import Type
 import pytest
 import time
+import re
+import warnings
 from datetime import datetime
 from deepdiff import DeepDiff
 
-from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file
+from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file, get_file_lines
 
-OUTPUT_FILE = f"system_checkfiles_{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime.now().timestamp()))}.json"
+WARNING_LIST_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'warning_list.txt')
 
 
 @pytest.fixture
@@ -44,6 +47,25 @@ def get_output_path(request):
     return request.config.getoption('--output-path')
 
 
+def read_warning_list(path):
+    """Read the warning list content.
+
+    Args:
+        path (str): Path to the warning list file.
+
+    Returns:
+        warning_list (list): Paths from the warning list.
+    """
+    lines = get_file_lines(path)
+    warning_list = []
+
+    for line in lines:
+        warning_list.append(line.replace('\n', ''))
+
+    # Discard the last item because it is a newline.
+    return warning_list[:-1]
+
+
 def validate_and_read_json(file_path):
     """Validate the JSON file passed as argument and return its content.
 
@@ -64,13 +86,135 @@ def validate_and_read_json(file_path):
     return file_data
 
 
+def validate_and_create_output_path(output_path):
+    """"Check that the given output path is a directory if it already exists and create it if does not exist yet.
+
+    Args:
+        output_path (str): Path that the user pass as argument.
+    """
+    try:
+        if os.path.exists(output_path) and not os.path.isdir(output_path):
+            raise ValueError(f"The given output path {output_path} already exists and is not a directory.")
+    except TypeError:
+        raise TypeError(f"The --output-path flag expects a string with the path where you want to save the test "
+                        "results.")
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+
+def path_in_warning_list(path_to_check, warning_list):
+    """Check if a path is contained in the warning list.
+
+    It checks if the path is contained in each path from the warning list, if it is a file it will be True or False.
+    But if it is a directory, it is included because of its ascendancy.
+
+    Args:
+        path_to_check (str): Path that will be checked.
+        warning_list (list): Warning list that contains the paths to compare.
+
+    Returns:
+        boolean: True if the given path is contained in the warning list, False otherwise.
+    """
+    for path in warning_list:
+        if path in path_to_check:
+            return True
+
+    return False
+
+
+def add_differences_to_dict(path, dict, field, value_changes):
+    """Add the given values to a specific dictionary.
+
+    Args:
+        path (str): Path(dict key) to add or modify the dictionary with the given '{field: value}'
+        dict (dict): Dictionary where the given '{field: value}' will be added.
+        field (str): Field to be added. e.g. last_update, md5sum, size, etc.
+        value_changes (str): Changes to be added. e.g. {"new_value": "2021-12-14 04:50:46",
+                             "old_value": "2021-12-14 04:48:41"}
+    """
+    if path not in dict:
+        dict[path] = {field: value_changes}
+    else:
+        dict[path][field] = value_changes
+
+
+def check_diffs_in_warning_list(diff, warning_list):
+    """"Check if the given differences are contained in the warning list or not.
+
+    Each possible state has a dictionary that contains the paths that have been changed, the related metadata and its
+    old-new values changes. Every path that is listed in the warning list results in a instance within the dictionary
+    related to warnings(yellow). If a path is not listed in the warning list, it is added to the red dictionary instead.
+
+    Args:
+        diff (dict): Differences between the given files.
+        warning_list (list): Paths that are allowed to change but a manual revision is required.
+
+    Returns:
+        (state, yellow_dict, red_dict): 3-tuple with a boolean that represents if the test has a warning related to the
+                                        warning list or it fails, and the states dictionaries.
+    """
+    # The following regex matches for example with:
+    # "root['/home/roro/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
+    fields_regex = re.compile(r"\['(.+?)'\]+")
+    state = 'yellow'
+    yellow_matched_list = []
+    red_matched_list = []
+    yellow_matched_dict = {}
+    red_matched_dict = {}
+
+    for key in diff:
+        if isinstance(diff[key], list):
+            for path in diff[key]:
+                matched_path = re.match(fields_regex, path).group(1)
+
+                if path_in_warning_list(matched_path, warning_list):
+                    yellow_matched_list.append(matched_path)
+                else:
+                    state = 'red'
+                    red_matched_list.append(matched_path)
+
+            # Clear the lists so they can be used if there are more keys that are a list within the differences
+            yellow_matched_dict[key] = yellow_matched_list.copy()
+            red_matched_dict[key] = red_matched_list.copy()
+            yellow_matched_list.clear()
+            red_matched_list.clear()
+
+        if isinstance(diff[key], dict):
+            for path_and_field in diff[key]:
+                matched_fields = re.findall(fields_regex, path_and_field)
+                matched_path = matched_fields[0]
+                matched_field = matched_fields[1]
+                values_changes = diff[key][path_and_field]
+
+                if path_in_warning_list(matched_path, warning_list):
+                    add_differences_to_dict(matched_path, yellow_matched_dict, matched_field, values_changes)
+                else:
+                    state = 'red'
+                    add_differences_to_dict(matched_path, red_matched_dict, matched_field, values_changes)
+
+    return state, yellow_matched_dict, red_matched_dict
+
+
 def test_system_check_files(get_first_file, get_second_file, get_output_path):
-    """This test checks if two files are not equal.
+    """This test checks if two files are not equal and if differences exist, check if the path where are changes,
+    is listed in the warning list or not.
 
     After an installation, update or uninstallation is necessary to check if the system files are the same as before.
     Two given files are checked for differences between them. After checking their contents, if there are differences
-    between them, the test will fail and a log specifying the differences will be printed in JSON format. If the user
-    specifies an output path, it will be saved there instead.
+    between them, the test will check if any of the paths that have changed is listed in the warning list(which would
+    change the test state to 'warning', aka 'yellow') or not(which would change the test state to 'failed', aka 'red').
+    These differences(separated by state) will be stored in the path that user pass as argument.
+
+    If the test shows a warning related to the differences, the state of the test exectuion requires a manual revision.
+
+    The possible states after the test execution are:
+        - yellow: When there are paths with changes but are listed in the warning list.
+        - red: When there are paths with changes not listed in the warning list.
+
+    Example run:
+        python3 -m pytest wazuh-qa/tests/check_files/test_check_files/test_system_check_files.py
+        --before-file initial_state --after_file after_installing_manager --output-path /tmp/system_check_files
 
     Args:
         get_first_file (fixture): Get the file before making any changes to the environment.
@@ -79,23 +223,26 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     """
     file1_data = validate_and_read_json(get_first_file)
     file2_data = validate_and_read_json(get_second_file)
+    validate_and_create_output_path(get_output_path)
 
     # The DeepDiff module gives us the differences between these two files.
     differences = DeepDiff(file1_data, file2_data)
-
-    # We need to change the format of the key that DeepDiff provides, so it is most descriptive
-    # Given difference key example:
-    # "root['/home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
-    # Result: /home/jmv74211/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py - mode"
     differences_str = differences.to_json().replace('root', '')
+
     # If there are differences between the given files
     if differences != {}:
-        # If the user specified an output path, the differences are saved in JSON format
-        if get_output_path:
-            output_path = os.path.join(get_output_path, OUTPUT_FILE)
-            write_json_file(output_path, json.loads(differences_str))
-            assert False, f"The given files are not equal, check the diff within {output_path}"
-        # If the user did not specify an output path, the differences are printed in JSON format
-        else:
-            assert False, 'The given files are not equal, these are the diff:\n' \
-                          f"{json.dumps(json.loads(differences_str), indent=4)}"
+        differences_json = json.loads(differences_str)
+        test_state, yellos_json_dict, red_json_dict = check_diffs_in_warning_list(differences_json,
+                                                                                  read_warning_list(WARNING_LIST_PATH))
+
+        yellow_path = os.path.join(get_output_path, 'paths_in_wl.json')
+        write_json_file(yellow_path, yellos_json_dict)
+        warnings.warn("There are some directories that are contained in the warning list. "
+                      f"Please check {yellow_path} file in order to determinate if the test passes "
+                      "or not.", UserWarning)
+
+        if test_state == 'red':
+            red_path = os.path.join(get_output_path, 'paths_not_in_wl.json')
+            write_json_file(red_path, red_json_dict)
+            raise AssertionError("There are some directories that not contained within the warning list. "
+                                 f"These paths are logged here: {red_path}.")
