@@ -120,6 +120,9 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
         - value_name:
             type: str
             brief: Name of the value that will be created in the test.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.    
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -158,5 +161,6 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     events = get_sync_msgs(SYNC_INTERVAL_VALUE)
 
-    assert (find_value_in_event_list(os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name, events)
-            is not None, f"No sync event was found for {value_path}")
+    assert find_value_in_event_list(
+            os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name,
+            events) is not None, f"No sync event was found for {value_path}"

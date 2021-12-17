@@ -110,7 +110,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
                  Finally, it will verify that no FIM 'integrity' event is generated when the synchronization
-                 is disablede and registry synchronization is enabled.
+                 is disabled and registry synchronization is enabled.
 
     wazuh_min_version: 4.2.0
 
