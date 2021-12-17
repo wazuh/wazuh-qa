@@ -74,9 +74,12 @@ class QATasksLauncher:
 
             # Create runner objects. One for each playbook using the same inventory for each host
             for index, playbook in enumerate(playbooks_path):
+                task_id = f"{task_data['playbooks'][index]['name']} task from playbook {playbook}" if 'name' in \
+                          task_data['playbooks'][index] else f"Running playbook {playbook}"
+
                 self.ansible_runners.append(AnsibleRunner(inventory_path, playbook,
                                                           output=self.qa_ctl_configuration.ansible_output,
-                                                          task_id=f"{task_id} - playbook_{index + 1}"))
+                                                          task_id=task_id))
 
         QATasksLauncher.LOGGER.debug('Tasks module data has been processed successfully')
 

@@ -15,7 +15,7 @@ from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 
@@ -35,14 +35,14 @@ configurations_path_default = os.path.join(test_data_path, default_log_format_co
 configurations_path_multiple_logcollector = os.path.join(test_data_path, multiple_logcollector_configuration)
 configurations_path_no_location = os.path.join(test_data_path, no_location_defined_configuration)
 
-local_internal_options = {'logcollector.remote_commands': '1'}
+local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.debug': '2'}
 
 if sys.platform == 'win32':
     no_restart_windows_after_configuration_set = True
     force_restart_after_restoring = True
     location = r'C:\testing.txt'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
     location = '/tmp/test.txt'
@@ -145,12 +145,6 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
-
-
 def check_log_format_valid(cfg):
     """Check if Wazuh run correctly with the specified log formats.
 
@@ -237,7 +231,8 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
-def test_log_format(get_local_internal_options, configure_local_internal_options, get_configuration,
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_log_format(configure_local_internal_options_module, get_configuration,
                     configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
 
@@ -257,6 +252,8 @@ def test_log_format(get_local_internal_options, configure_local_internal_options
         check_log_format_valid(cfg)
     else:
         if sys.platform == 'win32':
+            pytest.xfail("Windows agent allows invalid localfile configuration:\
+                          https://github.com/wazuh/wazuh/issues/10890")
             expected_exception = ValueError
         else:
             expected_exception = sb.CalledProcessError

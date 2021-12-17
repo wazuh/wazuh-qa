@@ -64,6 +64,7 @@ class Vagrantfile():
         """
         box_mapping = {
             'qactl/ubuntu_20_04': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_ubuntu_20_04.box',
+            'qactl/centos_7': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_7.box',
             'qactl/centos_8': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_centos_8.box',
             'qactl/windows_2019': 'https://s3.amazonaws.com/ci.wazuh.com/qa/boxes/QACTL_windows_server_2019.box'
         }

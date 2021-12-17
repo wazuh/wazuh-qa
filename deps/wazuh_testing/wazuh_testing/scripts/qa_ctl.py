@@ -182,7 +182,8 @@ def validate_parameters(parameters):
 
             for op_system in parameters.operating_systems:
                 # Check platform
-                platform = 'linux' if op_system == 'ubuntu' or op_system == 'centos' else op_system
+                platform = QACTLConfigGenerator.SYSTEMS[op_system]['os_platform'] if op_system in \
+                    QACTLConfigGenerator.SYSTEMS.keys() else op_system
                 if platform not in test_data['os_platform']:
                     raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed platforms: "
                                        f"{test_data['os_platform']} (ubuntu and centos are from linux platform)")
@@ -260,7 +261,7 @@ def get_script_parameters():
     """
     description = \
         '''
-        Current version: v0.2
+        Current version: v0.3
 
         Description: qa-ctl is a tool for launching tests locally, automating the deployment, provisioning and testing
                      phase.
@@ -295,7 +296,8 @@ def get_script_parameters():
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
     parser.add_argument('--os', '-o', type=str, action='store', required=False, nargs='+', dest='operating_systems',
-                        choices=['centos', 'ubuntu', 'windows'], help='System/s where the tests will be launched.')
+                        choices=['centos_7', 'centos_8', 'ubuntu_focal', 'windows_2019'],
+                        help='System/s where the tests will be launched.')
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch',
                         help='Set a custom wazuh-qa branch to use in the run and provisioning. This '

@@ -46,32 +46,41 @@ class QACTLConfigGenerator:
     LINUX_DEFAULT_WAZUH_INSTALL_PATH = '/var/ossec'
 
     BOX_MAPPING = {
-        'Ubuntu Focal': 'qactl/ubuntu_20_04',
+        'CentOS 7': 'qactl/centos_7',
         'CentOS 8': 'qactl/centos_8',
+        'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'Windows Server 2019': 'qactl/windows_2019'
     }
 
     SYSTEMS = {
-        'centos': {
+        'centos_7': {
+            'os_version': 'CentOS 7',
+            'os_platform': 'linux'
+        },
+        'centos_8': {
             'os_version': 'CentOS 8',
             'os_platform': 'linux'
         },
-        'ubuntu': {
+        'ubuntu_focal': {
             'os_version': 'Ubuntu Focal',
             'os_platform': 'linux'
         },
-        'windows': {
+        'windows_2019': {
             'os_version': 'Windows Server 2019',
             'os_platform': 'windows'
         }
     }
 
     DEFAULT_BOX_RESOURCES = {
-        'qactl/ubuntu_20_04': {
+        'qactl/centos_7': {
             'cpu': 1,
             'memory': 1024
         },
         'qactl/centos_8': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/ubuntu_20_04': {
             'cpu': 1,
             'memory': 1024
         },
@@ -89,6 +98,15 @@ class QACTLConfigGenerator:
             'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
+            'installation_files_path': LINUX_TMP
+        },
+        'qactl/centos_7': {
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
+            'ansible_python_interpreter': '/usr/bin/python',
+            'system': 'rpm',
             'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
@@ -368,9 +386,11 @@ class QACTLConfigGenerator:
                 if self.__validate_test_info(test):
                     os_version = ''
                     if 'CentOS 8' in test['os_version']:
-                        os_version = 'Ubuntu Focal'
-                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'CentOS 8'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'Ubuntu Focal'
+                    elif 'CentOS 7' in test['os_version']:
+                        os_version = 'CentOS 7'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
                     else:
@@ -582,9 +602,8 @@ class QACTLConfigGenerator:
 
         Raises:
             QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
-
         """
-        deployment_configuration = {'deployment': {} }
+        deployment_configuration = {'deployment': {}}
 
         for index, instance in enumerate(instances):
             try:
@@ -615,7 +634,17 @@ class QACTLConfigGenerator:
 
         return deployment_configuration
 
-    def get_tasks_configuration(self, instances, playbooks, playbook_path='local'):
+    def get_tasks_configuration(self, instances, playbook_info, playbook_type='local'):
+        """Generate the qa-ctl configuration required for running ansible tasks.
+
+        Args:
+            instances (list(ConfigInstance)): List of config-instances to deploy.
+            playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
+            playbook_type (str): Playbook path configuration [local or remote_url].
+
+        Returns:
+            dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
+        """
         tasks_configuration = {'tasks': {}}
 
         for index, instance in enumerate(instances):
@@ -623,8 +652,9 @@ class QACTLConfigGenerator:
             host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
             host_info['host'] = instance.ip
 
-            playbooks_dict = [{'local_path': playbook} if playbook_path == 'local' else \
-                {'remote_url': playbook} for playbook in playbooks]
+            playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
+                              {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
+                              in playbook_info.items()]
 
             tasks_configuration['tasks'][f"task_{index + 1}"] = {
                 'host_info': host_info,
