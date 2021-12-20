@@ -210,7 +210,7 @@ def modify_ip_address_conf(test_case):
             messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
         elif 'dns' in configuration['ip_type']:
             if 'yes' in configuration['ipv6_enabled']:
-                if 'ipv4' in configuration['agent_network']:
+                if 'ipv4' in configuration['agent_network'] or 'ipv4' in configuration['manager_network']:
                     messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
                 else:
                     messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
