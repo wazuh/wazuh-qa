@@ -317,21 +317,21 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
 
 def main():
     """Run the check-files test according to the script parameters."""
+    parameters = get_parameters()
+    qa_ctl_config_generator = QACTLConfigGenerator()
+    current_timestamp = str(get_current_timestamp()).replace('.', '_')
+    pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
+    post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
+    test_output_path = os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
+
+    # Set logging and Download QA files
+    set_environment(parameters)
+
+    # Validate script parameters
+    if not parameters.no_validation:
+        validate_parameters(parameters)
+
     try:
-        parameters = get_parameters()
-        qa_ctl_config_generator = QACTLConfigGenerator()
-        current_timestamp = str(get_current_timestamp()).replace('.', '_')
-        pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
-        post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
-        test_output_path = os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
-
-        # Set logging and Download QA files
-        set_environment(parameters)
-
-        # Validate script parameters
-        if not parameters.no_validation:
-            validate_parameters(parameters)
-
         # Generate the test playbooks to run with qa-ctl
         playbooks_info = generate_test_playbooks(parameters, post_check_files_data_path, pre_check_files_data_path)
         test_build_files.extend([playbook_path for playbook_path in playbooks_info.values()])
