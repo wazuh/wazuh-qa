@@ -1,6 +1,29 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: system
+brief: Wazuh includes a registration process that provides the user with an automated mechanism to enroll agents with minimal configuration steps.
+       To register an agent using the enrollment method, a manager with a valid IP needs to be configured first.
+       The agent then checks for the registration key in the client.keys file, and when the file is empty, it automatically requests the key
+       from the configured manager the agent is reporting to.
+tier: 0
+modules:
+    - enrollment
+components:
+    - manager
+    - agent
+daemons:
+    - wazuh-authd
+os_platform:
+    - linux
+os_version:
+    - Debian Buster
+references:
+    - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
+tags:
+    - authd
+'''
 
 import os
 from time import sleep
@@ -46,8 +69,45 @@ def clean_environment():
 
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids = [cases['name'] for cases in test_cases_yaml])
 def test_agent_enrollment(test_case, get_ip_directions, configure_network, modify_ip_address_conf, clean_environment):
-    """Check agent enrollment process works as expected. An agent pointing to a worker should be able to register itself
-    into the manager by starting Wazuh-agent process."""
+    '''
+    description: Check if enrollment messages are sent in the correct format
+                 and the agent is registered and connected.
+    wazuh_min_version: 4.4.0
+    parameters:
+        - test_case:
+            type: list
+            brief: List of tests to be performed.
+        - get_ip_directions:
+            type: fixture
+            brief: Get IP from the manager and the agent.
+        - configure_network:
+            type: fixture
+            brief: Configure a custom network environment for testing.
+        - modify_ip_address_conf:
+            type: fixture
+            brief: Add IP to test configuration.
+        - clean_environment:
+            type: fixture
+            brief: Clean environment after every test execution.
+    assertions:
+        - Verify that expected logs are received after registering an agent.
+        - Verify that 'client.keys' are equal in manager and agent.
+        - Verify that the agent is 'Active'
+    input_description: Different use cases are found in the test module and include parameters
+                       for 'agent-auth' messages.
+    expected_output:
+        - '.*Received request for a new agent .* from: AGENT_IP'
+        - '.*Agent key generated for.*'
+        - '.*Server IP Address: MANAGER_IP'
+        - '.*Requesting a key from server: MANAGER_IP'
+        - '.*Registering agent to unverified manager'
+        - '.*Using agent name as:*'
+        - '.*Waiting for server reply'
+        - '.*Valid key received'
+        - '.*Waiting .* seconds before server connection'
+    tags:
+        - authd
+    '''
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
