@@ -7,15 +7,15 @@ The purpose of this file is to contain all the variables necessary for FIM in or
 maintain if one of them changes in the future.
 '''
 
-# variables
+# Variables
 
-# key variables
+# Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
 MONITORED_KEY = 'SOFTWARE\\random_key'
 WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 
-# value key
+# Value key
 SYNC_INTERVAL = 'SYNC_INTERVAL'
 SYNC_INTERVAL_VALUE = MAX_EVENTS_VALUE = 20
 
@@ -27,7 +27,7 @@ TEST_REGISTRIES = 'TEST_REGISTRIES'
 # FIM modules
 SCHEDULE_MODE = 'scheduled'
 
-# YAML Configuration
+# Yaml Configuration
 YAML_CONF_REGISTRY_RESPONSE = 'wazuh_conf_registry_responses_win32.yaml'
 YAML_CONF_SYNC_WIN32 = 'wazuh_sync_conf_win32.yaml'
 

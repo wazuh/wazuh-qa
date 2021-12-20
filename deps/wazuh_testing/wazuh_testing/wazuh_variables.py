@@ -6,13 +6,13 @@
 The purpose of this file is to contain all the variables necessary for Wazuh in order to be easier
 to maintain if one of them changes in the future.
 '''
-# local internal options
+# Local internal options
 WINDOWS_DEBUG = 'windows.debug'
 VERBOSE_DEBUG_OUTPUT = 2
 
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
 
-# configurations
+# Configurations
 DATA = 'data'
 WAZUH_LOG_MONITOR = 'wazuh_log_monitor'
