@@ -82,7 +82,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'server_address_configuration.yaml')
 daemons_handler_configuration = {'daemons': ['wazuh-agentd'], 'ignore_errors': True}
 local_internal_options = {'windows.debug': '2'} if sys.platform == 'win32' else {'agent.debug': '2'}
 monitored_sockets_params = []
@@ -179,7 +179,7 @@ def test_agentd_server_address_configuration(get_configuration, configure_enviro
     assertions:
         - Verify that the messages have been produced in ossec.log
 
-    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+    input_description: An external YAML file (server_address_configuration.yaml) includes configuration settings for the agent.
                        Eight test cases are found in the test module and include parameters
                        for the environment setup using the TCP  protocols.
 
