@@ -18,7 +18,7 @@ from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_check_files')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'check_files')
+CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'check_file_system_integrity')
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
