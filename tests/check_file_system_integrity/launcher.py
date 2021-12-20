@@ -55,10 +55,6 @@ def get_parameters():
 
     parser.add_argument('--no-validation', action='store_true', help='Disable the script parameters validation.')
 
-    parser.add_argument('--baseline', action='store_true', help='Launch the test using the check-files baseline data '
-                                                                'instead of getting them directly on the initial '
-                                                                'status')
-
     parser.add_argument('--deployment-info', type=str, action='store', required=False, dest='deployment_info',
                         help='Path to the file that contains the deployment information. If specified, local instances '
                              'will not be deployed')
@@ -262,14 +258,13 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
     playbooks_info.update({'download_check_files_tool':
                            playbook_generator.download_files(**download_files_playbook_parameters)})
 
-    if not parameters.baseline:
-        # Add pre-check-files task
-        playbooks_info.update({'run_pre_check_files_scan':
-                               playbook_generator.run_linux_commands(**run_pre_check_files_playbook_parameters)})
-        # Add task for fetching pre-check-files data
-        fetch_files_playbook_parameters['files_data'].update({
-            pre_check_files_data_output_path: local_checkfiles_pre_data_path
-        })
+    # Add pre-check-files task
+    playbooks_info.update({'run_pre_check_files_scan':
+                            playbook_generator.run_linux_commands(**run_pre_check_files_playbook_parameters)})
+    # Add task for fetching pre-check-files data
+    fetch_files_playbook_parameters['files_data'].update({
+        pre_check_files_data_output_path: local_checkfiles_pre_data_path
+    })
 
     if parameters.test_action == 'install':
         # 1. - Install Wazuh on remote host
@@ -351,9 +346,6 @@ def main():
         else:
             raise QAValueError(f"Could not find the post-check-files data in {TMP_FILES} path", logger.error,
                                QACTL_LOGGER)
-
-        if parameters.baseline:
-            pass  # Download the S3 file
 
         # Check that the pre-check-files data has been fetched or downloaded correctly
         if os.path.exists(pre_check_files_data_path):
