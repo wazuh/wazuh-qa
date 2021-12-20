@@ -636,7 +636,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
     def unix_forward(self, data):
         """Default TCP unix socket forwarder for MITM servers."""
         # Create a socket context
-        with socket.socket(self.address_family, socket.SOCK_STREAM) as forwarded_sock:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as forwarded_sock:
             # Connect to server and send data
             forwarded_sock.connect(self.server.mitm.forwarded_socket_path)
             forwarded_sock.sendall(wazuh_pack(len(data)) + data)
@@ -707,7 +707,7 @@ class DatagramHandler(socketserver.BaseRequestHandler):
 
     def unix_forward(self, data):
         """Default UDP unix socket forwarder for MITM servers."""
-        with socket.socket(self.address_family, socket.SOCK_DGRAM) as forwarded_sock:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as forwarded_sock:
             forwarded_sock.sendto(data, self.server.mitm.forwarded_socket_path)
 
     def default_wazuh_handler(self):
