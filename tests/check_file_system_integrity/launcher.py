@@ -357,7 +357,7 @@ def main():
 
         # Launch the check-files pytest
         pytest_launcher = 'python -m pytest' if sys.platform == 'win32' else 'python3 -m pytest'
-        pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} test_check_files --before-file " \
+        pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} --before-file " \
                          f"{pre_check_files_data_path} --after-file {post_check_files_data_path} " \
                          f"--output-path {test_output_path}"
         test_result = local_actions.run_local_command_returning_output(pytest_command)
