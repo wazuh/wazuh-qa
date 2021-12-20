@@ -320,6 +320,11 @@ def callback_could_not_resolve_hostname(server_ip):
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 
-def callback_unable_to_connect(server_ip):
-    msg = f"ERROR: \(\d\+): Unable to connect to '{server_ip}:1514/tcp': 'No route to host'"
+def callback_unable_to_connect(server_ip, port='1515'):
+    msg = f"ERROR: Unable to connect to {server_ip}:{port}"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_connected_to_manager_ip(server_ip, port='1515'):
+    msg = f"Connected to {server_ip}:{port}"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
