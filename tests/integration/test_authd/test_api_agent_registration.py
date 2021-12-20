@@ -93,7 +93,7 @@ metadata = [
 configurations_path = os.path.join(test_data_path, 'agent_api_registration_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ipv6']}" for x in metadata]
-api_registration_requests_ids = [tcase['name'].replace('', '-').lower() for tcase in api_registration_requests]
+api_registration_requests_ids = [tcase['name'].replace(' ', '-').lower() for tcase in api_registration_requests]
 
 
 # fixtures
