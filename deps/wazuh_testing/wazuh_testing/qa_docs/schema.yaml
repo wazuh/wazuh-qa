@@ -173,9 +173,12 @@ predefined_values:
   tags:
     - active_response
     - agentd
+    - alas_feeds
     - alerts
     - analysisd
     - api
+    - archlinux
+    - archlinux_feeds
     - ar_analysisd
     - ar_execd
     - auditd
@@ -185,9 +188,13 @@ predefined_values:
     - aws
     - brute_force_attack
     - cache
+    - canonical
+    - canonical_feeds
     - cluster
     - cors
     - cpe
+    - debian
+    - debian_feeds
     - dos_attack
     - download
     - enrollment
@@ -247,11 +254,14 @@ predefined_values:
     - master
     - mitre
     - msu
+    - msu_feeds
     - nvd
     - office365
     - oval
     - rbac
     - realtime
+    - redhat
+    - redhat_feeds
     - remoted
     - rids
     - rootcheck
@@ -262,6 +272,7 @@ predefined_values:
     - simulator
     - ssl
     - stats_file
+    - system_inventory
     - time_travel
     - token
     - vulnerability
