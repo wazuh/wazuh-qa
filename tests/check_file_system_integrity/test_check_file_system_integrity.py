@@ -60,7 +60,7 @@ def validate_and_read_json(file_path):
     return file_data
 
 
-def test_system_check_files(get_first_file, get_second_file, get_output_path):
+def test_check_file_system_integrity(get_first_file, get_second_file, get_output_path):
     """This test checks if two files are not equal.
 
     After an installation, update or uninstallation is necessary to check if the system files are the same as before.
