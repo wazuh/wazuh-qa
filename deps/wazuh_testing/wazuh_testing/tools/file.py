@@ -10,6 +10,7 @@ import random
 import shutil
 import socket
 import stat
+import sys
 import string
 import xml.etree.ElementTree as ET
 import zipfile
@@ -159,8 +160,16 @@ def download_file(source_url, dest_path):
 
 
 def remove_file(file_path):
+    """Remove a file or a directory path.
+
+    Args:
+        file_path (str): File or directory path to remove.
+    """
     if os.path.exists(file_path):
-        os.remove(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            delete_path_recursively(file_path)
 
 
 def validate_json_file(file_path):
@@ -252,7 +261,9 @@ def copy(source, destination):
     """
     shutil.copy2(source, destination)
     source_stats = os.stat(source)
-    os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
+
+    if sys.platform != 'win32':
+        os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
 
 
 def bind_unix_socket(socket_path, protocol='TCP'):
@@ -264,7 +275,7 @@ def bind_unix_socket(socket_path, protocol='TCP'):
         socket_path (str): Path where create the unix socket.
         protocol (str): It can be TCP or UDP.
     """
-    if not os.path.exists(socket_path):
+    if not os.path.exists(socket_path) and sys.platform != 'win32':
         sock_type = socket.SOCK_STREAM if protocol.upper() == 'TCP' else socket.SOCK_DGRAM
         new_socket = socket.socket(socket.AF_UNIX, sock_type)
         new_socket.bind(socket_path)
@@ -298,14 +309,15 @@ def set_file_owner_and_group(file_path, owner, group):
     Raises:
         KeyError: If owner or group does not exist.
     """
-    from pwd import getpwnam
-    from grp import getgrnam
+    if sys.platform != 'win32':
+        from pwd import getpwnam
+        from grp import getgrnam
 
-    if os.path.exists(file_path):
-        uid = getpwnam(owner).pw_uid
-        gid = getgrnam(group).gr_gid
+        if os.path.exists(file_path):
+            uid = getpwnam(owner).pw_uid
+            gid = getgrnam(group).gr_gid
 
-        os.chown(file_path, uid, gid)
+            os.chown(file_path, uid, gid)
 
 
 def recursive_directory_creation(path):
@@ -345,7 +357,35 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
-        
+
+
+def join_path(path, system):
+    """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
+
+    Path can be defined by the following formats
+       path = ['tmp', 'user', 'test']
+       path = ['/tmp/user', test]
+
+    Parameters:
+        path (list(str)): Path list (one item for level).
+        system (str): host system.
+
+    Returns:
+        str: Joined path.
+    """
+    result_path = []
+
+    for item in path:
+        if '\\' in item:
+            result_path.extend([path_item for path_item in item.split('\\')])
+        elif '/' in item:
+            result_path.extend([path_item for path_item in item.split('/')])
+        else:
+            result_path.append(item)
+
+    return '\\'.join(result_path) if system == 'windows' else '/'.join(result_path)
+
+
 def count_file_lines(filepath):
     """Count number of lines of a specified file.
 
@@ -357,3 +397,22 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def download_text_file(file_url, local_destination_path):
+    """Download a remote file with text/plain content type.
+
+    Args:
+        file_url (str): Remote URL path where the text file is located.
+        local_destination_path (str): Local path where to save the file content.
+
+    Raises:
+        ValueError: if the URL content type is not 'text/plain'.
+
+    """
+    request = requests.get(file_url, allow_redirects=True)
+
+    if 'text/plain' not in request.headers.get('content-type'):
+        raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
+
+    open(local_destination_path, 'wb').write(request.content)

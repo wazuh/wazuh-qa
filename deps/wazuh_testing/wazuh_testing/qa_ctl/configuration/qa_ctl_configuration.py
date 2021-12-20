@@ -16,6 +16,7 @@ class QACTLConfiguration:
         logging_level (string): Defines the logging level for the outputs.
         Four options are available: DEBUG, INFO, WARNING, ERROR, CRITICAL.
         logging_file (string): This field defines a path for a file where the outputs will be logged as well
+        qa_ctl_launcher_branch (str): QA branch to launch the qa-ctl tool in the docker container (for Windows native)
     """
 
     def __init__(self, configuration_data, script_parameters):
@@ -25,6 +26,7 @@ class QACTLConfiguration:
         self.logging_enable = True
         self.logging_level = 'INFO'
         self.logging_file = None
+        self.qa_ctl_launcher_branch = None
         self.script_parameters = script_parameters
         self.debug_level = script_parameters.debug
 
@@ -53,9 +55,11 @@ class QACTLConfiguration:
                     self.logging_level = self.configuration_data['config']['logging']['level']
                 if 'file' in self.configuration_data['config']['logging']:
                     self.logging_file = self.configuration_data['config']['logging']['file']
+            if 'qa_ctl_launcher_branch' in self.configuration_data['config']:
+                self.qa_ctl_launcher_branch = self.configuration_data['config']['qa_ctl_launcher_branch']
 
     def __str__(self):
         """Define how the class object is to be displayed."""
         return f"vagrant_output: {self.vagrant_output}\nansible_output: {self.ansible_output}\n" \
                f"logging_enable: {self.logging_enable}\nloggin_level: {self.logging_level}\n"\
-               f"logging_file: {self.logging_file}\n"
+               f"logging_file: {self.logging_file}\nqa_ctl_launcher_branch:{self.qa_ctl_launcher_branch}\n"
