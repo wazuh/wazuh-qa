@@ -1,16 +1,16 @@
 import pytest
 import os
 import yaml
-from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
+
+from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH, API_LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, set_section_wazuh_conf,\
-                                              load_wazuh_configurations
+                                              load_wazuh_configurations                                      
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.monitoring import QueueMonitor
-
-
 from wazuh_testing.authd import DAEMON_NAME
+from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -149,3 +149,28 @@ def override_authd_force_conf(format_configuration):
 
     # Restore previous configuration
     write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='module')
+def get_api_details():
+    return get_api_details_dict
+
+
+@pytest.fixture(scope='module')
+def restart_api_module():
+    # Stop Wazuh and Wazuh API
+    control_service('stop')
+    control_service('start')
+
+
+@pytest.fixture(scope='module')
+def wait_for_start_module():
+    # Wait for API to start
+    file_monitor = FileMonitor(API_LOG_FILE_PATH)
+    file_monitor.start(timeout=20, callback=callback_detect_api_start,
+                       error_message='Did not receive expected "INFO: Listening on ..." event')
+
+
+@pytest.fixture(scope='module')
+def restart_and_wait_api(restart_api_module, wait_for_start_module):
+    pass

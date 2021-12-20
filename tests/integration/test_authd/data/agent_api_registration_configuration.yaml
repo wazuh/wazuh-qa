@@ -1,8 +1,8 @@
 ---
 - tags:
-  - test_api_registration
+  - test_api_agent_registration
   apply_to_modules:
-  - test_api_registration
+  - test_api_agent_registration
   sections:
   - section: auth
     elements:
