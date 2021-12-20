@@ -90,7 +90,7 @@ metadata = [
     {'ipv6': 'no'},
 ]
 
-configurations_path = os.path.join(test_data_path, 'test_api_agent_registration_configuration.yaml')
+configurations_path = os.path.join(test_data_path, 'agent_api_registration_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ipv6']}" for x in metadata]
 api_registration_requests_ids = [tcase['name'].replace('', '-').lower() for tcase in api_registration_requests]
@@ -111,7 +111,7 @@ def retrieve_client_key_entry(agent_parameters):
             client_key_agent_list = entry.split()
 
             client_key_agent_dict = {}
-            client_key_agent_dict.update({'id': client_key_agent_list[0], 'name': client_key_agent_list[1], 
+            client_key_agent_dict.update({'id': client_key_agent_list[0], 'name': client_key_agent_list[1],
                                           'ip': client_key_agent_list[2], 'key': client_key_agent_list[3]})
 
             client_keys_dictionary.append(client_key_agent_dict)
@@ -146,23 +146,27 @@ def check_valid_agent_key(key):
 
 def check_api_data_response(api_response, expected_response):
     api_response_error = api_response['error']
-    assert api_response_error == expected_response['error']
+    assert api_response_error == expected_response['error'], f"Expected API response \
+                                                               {expected_response} but {api_response_error} \
+                                                               was received instead"
 
     if api_response_error == 0:
         if 'key' in expected_response['data']:
-            assert check_valid_agent_key(api_response['data']['key'])
+            assert check_valid_agent_key(api_response['data']['key']), f"Invalid agent key received:\
+                                                                        {api_response['data']['key']}"
             del api_response['data']['key']
             del expected_response['data']['key']
 
         if 'id' in expected_response['data']:
-            assert check_valid_agent_id(api_response['data']['id']) 
+            assert check_valid_agent_id(api_response['data']['id']), f"Invalid id received:\
+                                                                        {api_response['data']['id']}"
             del api_response['data']['id']
             del expected_response['data']['id']
 
     return api_response == expected_response
 
 
-@pytest.mark.parametrize("api_registration_parameters", api_registration_requests)
+@pytest.mark.parametrize("api_registration_parameters", api_registration_requests, ids=api_registration_requests_ids)
 def test_agentd_server_configuration(api_registration_parameters, get_configuration, configure_environment,
                                      restart_and_wait_api, clean_registered_agents):
     '''
@@ -231,11 +235,14 @@ def test_agentd_server_configuration(api_registration_parameters, get_configurat
                                  verify=False)
 
         if get_configuration['metadata']['ipv6'] == 'no' and registration_ip_ipv6:
-            assert check_api_data_response(response.json(), expected_json_ipv6_not_valid)
+            assert check_api_data_response(response.json(), expected_json_ipv6_not_valid), \
+                f"The API response expected {expected_json_ipv6_not_valid} but {response.json()} was received"
         else:
             # Assert response is the same specified in the api_registration_parameters
-            assert check_api_data_response(response.json(), expected['json'])
+            assert check_api_data_response(response.json(), expected['json']), \
+                f"The API response expected {expected['json']} but {response.json()} was received"
 
         # Ensure client keys is updated
         if response.json()['error'] == 0:
-            assert retrieve_client_key_entry(expected_client_keys_entry)
+            assert retrieve_client_key_entry(expected_client_keys_entry),\
+                f"Client keys expected {expected_client_keys_entry} but no agent was found for that configuration"
