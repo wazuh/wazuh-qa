@@ -99,3 +99,18 @@ def wait_for_start(get_configuration, request):
 @pytest.fixture(scope='module')
 def get_api_details():
     return get_api_details_dict
+
+
+@pytest.fixture(scope='module')
+def restart_api_module(request):
+    # Stop Wazuh and Wazuh API
+    control_service('stop')
+    control_service('start')
+
+
+@pytest.fixture(scope='module')
+def wait_for_start_module(request):
+    # Wait for API to start
+    file_monitor = FileMonitor(API_LOG_FILE_PATH)
+    file_monitor.start(timeout=20, callback=callback_detect_api_start,
+                       error_message='Did not receive expected "INFO: Listening on ..." event')
