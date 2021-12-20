@@ -9,7 +9,3 @@
               elements:
               - address:
                   value: SERVER_ADDRESS
-    - section: auth
-      elements:
-          - ipv6: 
-              value: 'yes'
