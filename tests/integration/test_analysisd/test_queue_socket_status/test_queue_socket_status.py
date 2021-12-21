@@ -3,6 +3,8 @@ import pytest
 import subprocess
 
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.services import control_service, check_daemon_status
+
 
 
 # Marks
@@ -15,10 +17,20 @@ analysisd_path =  os.path.join(WAZUH_PATH,'bin', 'wazuh-analysisd')
 command_exec = f'{analysisd_path} -t'
 
 
-
 def test_queue_socket_status():
+
+    # Check if analysisd daemon is running 
+    check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
+
     current_inode_file = os.stat(ANALYSISD_SOCKET).st_ino
     current_status_time = os.path.getmtime(ANALYSISD_SOCKET)
+
+    # Stop analysisd daemon
+    control_service('stop', daemon='wazuh-analysisd')
+    check_daemon_status(running_condition=False, target_daemon='wazuh-analysisd')
+
+    control_service('start', daemon='wazuh-analysisd')
+
 
     # Updating Analysisd
     run = subprocess.Popen(['/bin/bash', '-c', command_exec])
