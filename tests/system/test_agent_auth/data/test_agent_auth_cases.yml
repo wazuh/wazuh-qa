@@ -31,14 +31,6 @@
     ipv6_enabled: 'yes'
     ip_type: 'dns'
 -
-  name: 'manager_both_agent_both-dns-no'
-  test_case:
-  -
-    manager_network: 'both'
-    agent_network: 'both'
-    ipv6_enabled: 'no'
-    ip_type: 'dns'
--
   name: 'manager_ipv4_agent_ipv4-ipv4-yes'
   test_case:
   -
@@ -151,22 +143,6 @@
     agent_network: 'both'
     ipv6_enabled: 'no'
     ip_type: 'ipv4'
--
-  name: 'manager_ipv4_agent_both-dns-yes'
-  test_case:
-  -
-    manager_network: 'ipv4'
-    agent_network: 'both'
-    ipv6_enabled: 'yes'
-    ip_type: 'dns'
--
-  name: 'manager_ipv4_agent_both-dns-no'
-  test_case:
-  -
-    manager_network: 'ipv4'
-    agent_network: 'both'
-    ipv6_enabled: 'no'
-    ip_type: 'dns'
 -
   name: 'manager_ipv6_agent_both-ipv6-yes'
   test_case:
