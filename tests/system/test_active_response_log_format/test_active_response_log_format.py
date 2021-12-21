@@ -42,8 +42,8 @@ tags:
 
 import os
 import time
-
 import pytest
+from random import randint
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
@@ -58,7 +58,8 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 messages_files = ['data/messages_415_or_lower.yml', 'data/messages_420_to_424.yml', 'data/messages_425_or_greater.yml']
 tmp_path = os.path.join(local_path, 'tmp')
 log_path = "/var/log/secure"
-log_sample= "Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from 192.168.222.11 port 52620 '$token': `132`! ssh2\n\n"
+ip = ".".join(str(randint(0, 255)) for _ in range(4))
+log_sample= f"Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from {ip} port 52620 '$token': `132`! ssh2\n\n"
 sleep_time = 5
 
 
@@ -101,3 +102,5 @@ def test_active_response_log_format(wazuh_agent, message_file):
     HostMonitor(inventory_path=inventory_path,
                 messages_path=os.path.join(local_path,message_file),
                 tmp_path=tmp_path).run()
+    
+    host_manager.modify_file_content(host=wazuh_agent, path=log_path, content="")
