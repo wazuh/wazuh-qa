@@ -181,6 +181,14 @@ def validate_json_file(file_path):
         return False
 
 
+def validate_yaml_file(file_path):
+    try:
+        read_yaml(file_path)
+        return True
+    except yaml.composer.ComposerError:
+        return False
+
+
 def validate_xml_file(file_path):
     try:
         ET.parse(file_path)

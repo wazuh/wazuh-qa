@@ -241,7 +241,7 @@ def time_to_seconds(time_):
     Args:
         time_ (str): String (1s, 1m, 1h, 1d, 1w).
 
-    Returns
+    Returns:
         time_value (int): Number of seconds.
     """
     time_unit = time_[len(time_) - 1:]
@@ -254,5 +254,9 @@ def time_to_seconds(time_):
 
 
 def get_current_timestamp():
-    """Get the current timestamp. For example: 1627028708.303002"""
+    """Get the current timestamp. For example: 1627028708.303002
+
+    Returns:
+        int: current timestamp.
+    """
     return datetime.now().timestamp()

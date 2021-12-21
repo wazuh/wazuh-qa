@@ -5,13 +5,9 @@
 import json
 import os
 import pytest
-import time
-from datetime import datetime
 from deepdiff import DeepDiff
 
-from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file
-
-OUTPUT_FILE = f"system_checkfiles_{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime.now().timestamp()))}.json"
+from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file, recursive_directory_creation
 
 
 @pytest.fixture
@@ -64,7 +60,7 @@ def validate_and_read_json(file_path):
     return file_data
 
 
-def test_system_check_files(get_first_file, get_second_file, get_output_path):
+def test_check_file_system_integrity(get_first_file, get_second_file, get_output_path):
     """This test checks if two files are not equal.
 
     After an installation, update or uninstallation is necessary to check if the system files are the same as before.
@@ -92,9 +88,10 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
     if differences != {}:
         # If the user specified an output path, the differences are saved in JSON format
         if get_output_path:
-            output_path = os.path.join(get_output_path, OUTPUT_FILE)
-            write_json_file(output_path, json.loads(differences_str))
-            assert False, f"The given files are not equal, check the diff within {output_path}"
+            # If the directories do not exist, they are created
+            recursive_directory_creation(os.path.dirname(get_output_path))
+            write_json_file(get_output_path, json.loads(differences_str))
+            assert False, f"The given files are not equal, check the diff within {get_output_path}"
         # If the user did not specify an output path, the differences are printed in JSON format
         else:
             assert False, 'The given files are not equal, these are the diff:\n' \
