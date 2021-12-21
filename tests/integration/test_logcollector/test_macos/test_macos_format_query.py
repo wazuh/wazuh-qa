@@ -6,7 +6,6 @@ import os
 import pytest
 from wazuh_testing import logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.remote import check_agent_received_message
 from time import sleep
 
 # Marks
@@ -32,7 +31,9 @@ metadata_query_type = []
 parameters_query = []
 metadata_query = []
 
-
+local_internal_options = {'logcollector.debug': 2,
+                          'logcollector.sample_log_length': 200}
+macos_log_message_timeout = 10
 macos_log_list = [
     {
         'program_name': 'logger',
@@ -125,7 +126,7 @@ query_list = [
         'query_predicate': 'process = "logger"',
         'level': 'default',
         'type': ['log'],
-        'lambda_function': lambda clause: clause == "logger.",
+        'lambda_function': lambda clause: clause == "logger",
         'clause': ['program_name']
     },
     {
@@ -307,15 +308,16 @@ def get_connection_configuration():
     return logcollector.DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION
 
 
-def test_macos_format_query(restart_logcollector_required_daemons_package, get_configuration, configure_environment, get_connection_configuration,
-                                         init_authd_remote_simulator, restart_logcollector):
+def test_macos_format_query(configure_local_internal_options_module, restart_logcollector_required_daemons_package, 
+                            get_configuration, configure_environment, get_connection_configuration, file_monitoring,
+                            restart_logcollector):
     """Check if logcollector use correctly query option using macos log format.
 
     Raises:
         TimeoutError: If the expected callback is not generated.
     """
 
-    sleep(10)
+    sleep(1)
 
     cfg = get_configuration['metadata']
 
@@ -324,7 +326,6 @@ def test_macos_format_query(restart_logcollector_required_daemons_package, get_c
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
     ## Generate macOS log messages
-
     for macos_log in macos_log_list:
         log_message_command = macos_log['program_name']
 
@@ -380,7 +381,10 @@ def test_macos_format_query(restart_logcollector_required_daemons_package, get_c
                 category=macos_log['category'])
 
         if cfg['lambda_function'](*clauses_values) and same_level and same_type:
-            check_agent_received_message(remoted_simulator, expected_macos_message, timeout=60)
+            log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),
+                                        error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
         else:
             with pytest.raises(TimeoutError):
-                check_agent_received_message(remoted_simulator, expected_macos_message, timeout=5)
+                log_monitor.start(timeout=macos_log_message_timeout, callback=logcollector.callback_macos_log(expected_macos_message),
+                                            error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
+  

@@ -160,8 +160,16 @@ def download_file(source_url, dest_path):
 
 
 def remove_file(file_path):
+    """Remove a file or a directory path.
+
+    Args:
+        file_path (str): File or directory path to remove.
+    """
     if os.path.exists(file_path):
-        os.remove(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            delete_path_recursively(file_path)
 
 
 def validate_json_file(file_path):
