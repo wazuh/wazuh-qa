@@ -1,12 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [v4.3.0]
+## [v1.0.0]
 ### Added
 
 ### Changed
-
-### Fixed
+- Refactor FIM test synchronization [#2358] (https://github.com/wazuh/wazuh-qa/pull/2358)
 
 ### Deleted
 
@@ -41,7 +40,6 @@ All notable changes to this project will be documented in this file.
 - Rename ossec-control in framework tests [#983](https://github.com/wazuh/wazuh-qa/pull/983)
 - Change names of daemons in integration tests [#973](https://github.com/wazuh/wazuh-qa/pull/973)
 - Rename all ossec-control references [#965](https://github.com/wazuh/wazuh-qa/pull/965)
-- Refactor FIM test synchronization [#2358] (https://github.com/wazuh/wazuh-qa/pull/2358)
 ### Fixed
 - Fix an error in the Active Response tests related to the configuration file [#1080](https://github.com/wazuh/wazuh-qa/pull/1080)
 - Fix an error in the Agent simulator while parsing the messages received from the manager [#1084](https://github.com/wazuh/wazuh-qa/pull/1084).
