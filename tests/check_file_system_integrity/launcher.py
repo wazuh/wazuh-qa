@@ -370,7 +370,12 @@ def main():
                          f"--output-path {test_output_path}"
 
         try:
+            # Run the pytest
             test_result = local_actions.run_local_command_returning_output(pytest_command)
+
+            # Check the test results and propagate the result
+            assert 'AssertionError' not in test_result, "The check file system integrity test has failed"
+
         finally:
             # Save pytest result if the pytest has been launched
             file.write_file(os.path.join(test_output_path, 'pytest_result.txt'), test_result)
