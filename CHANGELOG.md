@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
-- Refactor FIM test synchronization [#2358] (https://github.com/wazuh/wazuh-qa/pull/2358)
+- Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
 
 ### Deleted
 
