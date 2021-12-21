@@ -59,6 +59,9 @@ def get_parameters():
                         help='Path to the file that contains the deployment information. If specified, local instances '
                              'will not be deployed')
 
+    parser.add_argument('--output-file-path', type=str, action='store', required=False, dest='output_file_path',
+                        help='Path to store all test results')
+
     arguments = parser.parse_args()
 
     return arguments
@@ -76,6 +79,10 @@ def set_environment(parameters):
     # Download wazuh-qa repository to launch the check-files test files.
     local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch, path=TMP_FILES)
     test_build_files.append(WAZUH_QA_FILES)
+
+    # Create output file if it has been specified and it does not exist
+    if parameters.output_file_path:
+        file.recursive_directory_creation(parameters.output_file_path)
 
 
 def set_logger(parameters):
@@ -103,7 +110,7 @@ def validate_parameters(parameters):
         required_data = ['ansible_connection', 'ansible_user', 'ansible_port', 'ansible_python_interpreter', 'host',
                          'system']
         for key_data in required_data:
-            if not key_data in data.keys():
+            if key_data not in data.keys():
                 return False
 
         # Check for password data
@@ -260,7 +267,7 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
 
     # Add pre-check-files task
     playbooks_info.update({'run_pre_check_files_scan':
-                            playbook_generator.run_linux_commands(**run_pre_check_files_playbook_parameters)})
+                           playbook_generator.run_linux_commands(**run_pre_check_files_playbook_parameters)})
     # Add task for fetching pre-check-files data
     fetch_files_playbook_parameters['files_data'].update({
         pre_check_files_data_output_path: local_checkfiles_pre_data_path
@@ -317,7 +324,8 @@ def main():
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
     pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
     post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
-    test_output_path = os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
+    test_output_path = parameters.output_file_path if parameters.output_file_path else \
+        os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
 
     # Set logging and Download QA files
     set_environment(parameters)
@@ -360,9 +368,14 @@ def main():
         pytest_command = f"cd {CHECK_FILES_TEST_PATH} && {pytest_launcher} . --before-file " \
                          f"{pre_check_files_data_path} --after-file {post_check_files_data_path} " \
                          f"--output-path {test_output_path}"
-        test_result = local_actions.run_local_command_returning_output(pytest_command)
-        logger.info(f"The check-files test result was saved in {test_output_path} file")
-        print(test_result)
+
+        try:
+            test_result = local_actions.run_local_command_returning_output(pytest_command)
+        finally:
+            # Save pytest result if the pytest has been launched
+            file.write_file(os.path.join(test_output_path, 'pytest_result.txt'), test_result)
+            logger.info(f"The test results have been stored in {test_output_path}")
+            print(test_result)
     finally:
         # Clean test build files
         if parameters and not parameters.persistent:
