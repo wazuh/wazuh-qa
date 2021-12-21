@@ -70,6 +70,21 @@ def set_parameters(parameters):
     script_logger.addHandler(handler)
 
 
+def get_human_readable_bytes(bytes):
+    gb = 1024*1024*1024
+    mb = 1024*1024
+    kb = 1024
+
+    if bytes > gb:
+        return f"{format(bytes/gb, '.2f')}GB"
+    elif bytes > mb:
+        return f"{format(bytes/mb, '.2f')}MB"
+    elif bytes > kb:
+        return f"{format(bytes/kb, '.2f')}KB"
+    else:
+        return f"{bytes}B"
+
+
 def get_check_files_data(path='/', ignored_paths=[]):
     """Get a dictionary with all check-files information recursively from a specific path
 
@@ -97,22 +112,16 @@ def get_check_files_data(path='/', ignored_paths=[]):
 
         for ignore_path in ignored_paths:
             if ignore_path in dirpath:
+                script_logger.debug(f"Skipping '{dirpath}' path")
                 skip_path_checking = True
 
         if not skip_path_checking:
             for filename in filenames:
                 file_path = os.path.join(dirpath, filename)
-                if os.path.exists(dirpath):
-                    try:
-                        files_items_dict[dirpath] = get_data_information(dirpath)
-                    except OSError:  # Ignore errors like "No such device or address" due to dynamic and temporary files
-                        pass
+                files_items_dict[dirpath] = get_data_information(dirpath)
 
-                if file_path not in ignored_paths and os.path.exists(file_path):
-                    try:
-                        files_items_dict[file_path] = get_data_information(file_path)
-                    except OSError:  # Ignore errors like "No such device or address" due to dynamic and temporary files
-                        pass
+                if file_path not in ignored_paths:
+                    files_items_dict[file_path] = get_data_information(file_path)
 
     return files_items_dict
 
@@ -160,17 +169,15 @@ def get_data_information(item):
     _type = 'directory' if os.path.isdir(item) else 'file'
     permissions = get_filemode(stat_info.st_mode)
     last_update = datetime.fromtimestamp(os.path.getmtime(item)).strftime('%Y-%m-%d %H:%M:%S')
-
-    check_files_data = {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
-                        'last_update': last_update}
-
+    size = get_human_readable_bytes(stat_info.st_size)
     if _type != 'directory':
-        try:
-            check_files_data.update({'checksum': hashlib.md5(open(item, 'rb').read()).hexdigest()})
-        except PermissionError:
-            pass
+        checksum = hashlib.md5(open(item, 'rb').read()).hexdigest()
 
-    return check_files_data
+        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
+                'last_update': last_update, 'md5sum': checksum, 'size': size}
+    else:
+        return {'type': _type, 'user': user, 'group': group, 'mode': mode, 'permissions': permissions,
+                'last_update': last_update, 'size': size}
 
 
 def write_data_to_file(data, output_file_path):
