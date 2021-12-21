@@ -151,7 +151,7 @@ def add_differences_to_dict(path, dict, field, value_changes):
         dict[path][field] = value_changes
 
 
-def move_misplaced_red(state, red_dict, yellow_dict):
+def move_misplaced_red(state, red_diff, yellow_diff):
     """Move the misplaced paths in the red state dictionary to yellow when it proceeds.
 
     If there is a path that its descendency is already in the yellow dict, it is moved from 'red' to 'yellow'.
@@ -162,26 +162,33 @@ def move_misplaced_red(state, red_dict, yellow_dict):
         yellow_dict (dict): Dictionary with the knowing warning differences.
 
     Returns:
-        boolean: True if there were changes in the red dictionary, False otherwise.
+        move (boolean): True if there were changes in the red dictionary, False otherwise.
     """
-    initial_red_len = len(red_dict)
-    to_remove = []
+    move = False
+    break_loop = False
+    to_move = []
 
     if state == 'red':
-        for red_path in red_dict:
-            for yellow_path in yellow_dict:
-                if red_path in yellow_path:
-                    # Only remove it from red state if only changes the 'last_update' field
-                    if 'last_update' in red_dict[red_path] and len(red_dict[red_path]) == 1:
-                        to_remove.append((red_path, red_dict[red_path]))
+        for red_path in red_diff:
+            for yellow_change_type in yellow_diff:
+                for yellow_path in yellow_diff[yellow_change_type]:
+                    if red_path in yellow_path:
+                        to_move.append((red_path, red_diff[red_path]))
+                        move = True
+                        break_loop = True
+                        # Iterates thru the next path in red diff
+                        break
+
+                if break_loop:
+                    break_loop = False
                     break
 
     # Remove all the misplaced occurrences
-    for path, values_changes in to_remove:
-        yellow_dict[path] = values_changes
-        red_dict.pop(path, None)
+    for path, values_changes in to_move:
+        yellow_diff['values_changed'][path] = values_changes
+        red_diff.pop(path, None)
 
-    return True if initial_red_len > len(red_dict) else False
+    return move
 
 
 def check_diffs_in_warning_list(diff, warning_list):
@@ -244,12 +251,14 @@ def check_diffs_in_warning_list(diff, warning_list):
             copy_to_dict_and_reset(change_type, yellow_output_dict, yellow_matched_dict)
             copy_to_dict_and_reset(change_type, red_output_dict, red_matched_dict)
 
-            # If after moving the misplaced paths within the red diff, still there are red diffs the state is red
-            # If there are no red diffs, that means that only wrong red diffs were in the red diff, so the state is
-            # yellow
-            if move_misplaced_red(state, red_output_dict[change_type], yellow_output_dict[change_type]) \
-               and not red_output_dict:
-                state = 'yellow'
+    # If after moving the misplaced paths within the red diff, still there are red diffs the state is red
+    # If there are no red diffs, that means that only wrong red diffs were in the red diff, so the state is
+    # yellow
+    if move_misplaced_red(state, red_output_dict['values_changed'], yellow_output_dict):
+        if not red_output_dict['values_changed']:
+            red_output_dict.pop('values_changed', None)
+        if not red_output_dict:
+            state = 'yellow'
 
     return state, yellow_output_dict, red_output_dict
 
