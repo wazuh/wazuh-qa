@@ -132,7 +132,8 @@ def modify_admin_resources(api_details, admin_ids, endpoint, body):
 
 # Tests
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_admin_users(restart_api, get_api_details):
+def test_admin_users(restart_api, wait_for_start, get_api_details):
+    """Test if admin security users can be removed."""
     '''
     description: Check if the admin security users can be removed. For this purpose,
                  it tries to delete these users, expecting an error as a response.
@@ -176,7 +177,8 @@ def test_admin_users(restart_api, get_api_details):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_admin_roles(restart_api, get_api_details):
+def test_admin_roles(restart_api, wait_for_start, get_api_details):
+    """Test if admin security roles can be removed."""
     '''
     description: Check if the admin security roles can be removed. For this purpose,
                  it tries to delete these roles, expecting an error as a response.
@@ -223,7 +225,8 @@ def test_admin_roles(restart_api, get_api_details):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_admin_policies(restart_api, get_api_details):
+def test_admin_policies(restart_api, wait_for_start, get_api_details):
+    """Test if admin security policies can be removed."""
     '''
     description: Check if the admin security policies can be removed. For this purpose,
                  it tries to delete these policies, expecting an error as a response.
@@ -271,7 +274,8 @@ def test_admin_policies(restart_api, get_api_details):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_admin_rules(restart_api, get_api_details):
+def test_admin_rules(restart_api, wait_for_start, get_api_details):
+    """Test if admin security rules can be removed."""
     '''
     description: Check if the admin security rules can be removed. For this purpose,
                  it tries to delete these rules, expecting an error as a response.

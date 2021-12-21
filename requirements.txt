@@ -20,7 +20,7 @@ psutil>=5.6.6
 py~=1.10.0
 pycryptodome>=3.9.8
 pyOpenSSL==19.1.0
-pytest-html==2.0.1
+pytest-html==3.1.1
 pytest==6.2.2
 pyyaml==5.4
 requests==2.23.0

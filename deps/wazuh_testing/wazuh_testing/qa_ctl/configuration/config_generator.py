@@ -4,6 +4,7 @@ import copy
 from os.path import join, exists
 from tempfile import gettempdir
 from packaging.version import parse
+from copy import deepcopy
 
 from wazuh_testing.tools import file
 from wazuh_testing.tools.exceptions import QAValueError
@@ -46,32 +47,41 @@ class QACTLConfigGenerator:
     LINUX_DEFAULT_WAZUH_INSTALL_PATH = '/var/ossec'
 
     BOX_MAPPING = {
-        'Ubuntu Focal': 'qactl/ubuntu_20_04',
+        'CentOS 7': 'qactl/centos_7',
         'CentOS 8': 'qactl/centos_8',
+        'Ubuntu Focal': 'qactl/ubuntu_20_04',
         'Windows Server 2019': 'qactl/windows_2019'
     }
 
     SYSTEMS = {
-        'centos': {
+        'centos_7': {
+            'os_version': 'CentOS 7',
+            'os_platform': 'linux'
+        },
+        'centos_8': {
             'os_version': 'CentOS 8',
             'os_platform': 'linux'
         },
-        'ubuntu': {
+        'ubuntu_focal': {
             'os_version': 'Ubuntu Focal',
             'os_platform': 'linux'
         },
-        'windows': {
+        'windows_2019': {
             'os_version': 'Windows Server 2019',
             'os_platform': 'windows'
         }
     }
 
     DEFAULT_BOX_RESOURCES = {
-        'qactl/ubuntu_20_04': {
+        'qactl/centos_7': {
             'cpu': 1,
             'memory': 1024
         },
         'qactl/centos_8': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/ubuntu_20_04': {
             'cpu': 1,
             'memory': 1024
         },
@@ -89,6 +99,15 @@ class QACTLConfigGenerator:
             'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
+            'installation_files_path': LINUX_TMP
+        },
+        'qactl/centos_7': {
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
+            'ansible_python_interpreter': '/usr/bin/python',
+            'system': 'rpm',
             'installation_files_path': LINUX_TMP
         },
         'qactl/centos_8': {
@@ -113,7 +132,7 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master',
+    def __init__(self, tests=None, wazuh_version=None, qa_branch='master',
                  qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
         self.tests = tests
         self.wazuh_version = wazuh_version
@@ -124,6 +143,9 @@ class QACTLConfigGenerator:
         self.hosts = []
         self.qa_branch = qa_branch
         self.qa_files_path = qa_files_path
+
+        # Create qa-ctl temporarily files path
+        file.recursive_directory_creation(join(gettempdir(), 'wazuh_qa_ctl'))
 
     def __get_test_info(self, test_name):
         """Get information from a documented test.
@@ -365,9 +387,11 @@ class QACTLConfigGenerator:
                 if self.__validate_test_info(test):
                     os_version = ''
                     if 'CentOS 8' in test['os_version']:
-                        os_version = 'Ubuntu Focal'
-                    elif 'Ubuntu Focal' in test['os_version']:
                         os_version = 'CentOS 8'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'Ubuntu Focal'
+                    elif 'CentOS 7' in test['os_version']:
+                        os_version = 'CentOS 7'
                     elif 'Windows Server 2019' in test['os_version']:
                         os_version = 'Windows Server 2019'
                     else:
@@ -567,3 +591,83 @@ class QACTLConfigGenerator:
             self.__delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
+
+    def get_deployment_configuration(self, instances):
+        """Generate the qa-ctl configuration required for the deployment of the specified config-instances.
+
+        Args:
+            instances(list(ConfigInstance)): List of config-instances to deploy.
+
+        Returns:
+            dict: Configuration block corresponding to the deployment of the instances
+
+        Raises:
+            QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
+        """
+        deployment_configuration = {'deployment': {}}
+
+        for index, instance in enumerate(instances):
+            try:
+                box = self.BOX_MAPPING[instance.os_version]
+            except KeyError as exception:
+                raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
+
+            instance_ip = self.__get_host_IP()
+            # Assign the IP to the instance object (Needed later to generate host config data)
+            instance.ip = instance_ip
+
+            deployment_configuration['deployment'][f"host_{index + 1}"] = {
+                'provider': {
+                    'vagrant': {
+                        'enabled': True,
+                        'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
+                        'vagrant_box': box,
+                        'vm_memory': instance.memory,
+                        'vm_cpu': instance.cpu,
+                        'vm_name': instance.name,
+                        'vm_system': instance.os_platform,
+                        'label': instance.name,
+                        'vm_ip': instance_ip
+                    }
+                }
+            }
+
+        return deployment_configuration
+
+    def get_tasks_configuration(self, playbook_info, instances=None, playbook_type='local', remote_hosts_info=None):
+        """Generate the qa-ctl configuration required for running ansible tasks.
+
+        Args:
+            instances (list(ConfigInstance)): List of config-instances to deploy.
+            playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
+            playbook_type (str): Playbook path configuration [local or remote_url].
+            remote_hosts_info (list(dict)): List with all the information of the remote hosts.
+
+        Returns:
+            dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
+        """
+        def get_tasks_configuration(host_info, playbook_info, playbook_type):
+            playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
+                              {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
+                              in playbook_info.items()]
+            return {
+                'host_info': host_info,
+                'playbooks': playbooks_dict
+            }
+
+        tasks_configuration = {'tasks': {}}
+
+        if instances:  # Build task configuration for local instances host
+            for index, instance in enumerate(instances):
+                instance_box = self.BOX_MAPPING[instance.os_version]
+                host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+                host_info['host'] = instance.ip
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                                                                                            playbook_type)
+        elif remote_hosts_info:  # Build task configuration for remote AWS hosts
+            for index, custom_host_info in enumerate(remote_hosts_info):
+                host_info = deepcopy(custom_host_info)
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                                                                                            playbook_type)
+        return tasks_configuration

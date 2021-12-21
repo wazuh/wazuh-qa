@@ -4,7 +4,7 @@ from copy import deepcopy
 from tempfile import gettempdir
 
 from wazuh_testing.tools.file import download_text_file, remove_file
-from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance
+from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance, remove_known_host
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_runner import AnsibleRunner
 from wazuh_testing.qa_ctl import QACTL_LOGGER
@@ -48,6 +48,11 @@ class QATasksLauncher:
 
             if 'host_info' in task_data:
                 instance = read_ansible_instance(task_data['host_info'])
+
+                # Remove the host IP from known host file to avoid the SSH key fingerprint error
+                if 'host' in task_data['host_info']:
+                    remove_known_host(task_data['host_info']['host'], QATasksLauncher.LOGGER)
+
                 inventory_instance = AnsibleInventory(ansible_instances=[instance])
                 inventory_path = inventory_instance.inventory_file_path
 
@@ -69,9 +74,12 @@ class QATasksLauncher:
 
             # Create runner objects. One for each playbook using the same inventory for each host
             for index, playbook in enumerate(playbooks_path):
+                task_id = f"{task_data['playbooks'][index]['name']} task from playbook {playbook}" if 'name' in \
+                          task_data['playbooks'][index] else f"Running playbook {playbook}"
+
                 self.ansible_runners.append(AnsibleRunner(inventory_path, playbook,
                                                           output=self.qa_ctl_configuration.ansible_output,
-                                                          task_id=f"{task_id} - playbook_{index + 1}"))
+                                                          task_id=task_id))
 
         QATasksLauncher.LOGGER.debug('Tasks module data has been processed successfully')
 

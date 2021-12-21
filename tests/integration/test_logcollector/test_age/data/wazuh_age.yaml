@@ -9,6 +9,6 @@
     - location:
         value: LOCATION
     - log_format:
-         value: LOG_FORMAT
+         value: syslog
     - age:
          value: AGE
