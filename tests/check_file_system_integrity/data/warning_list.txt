@@ -10,6 +10,8 @@
 /etc/gshadow-
 /etc/gshadow
 /etc/hostname
+/etc/init.d/wazuh-agent
+/etc/init.d/wazuh-manager
 /etc/kernel/postinst.d/vboxadd
 /etc/kernel/postinst.d/vboxadd
 /etc/ld.so.cache
@@ -50,7 +52,8 @@
 /usr/share/doc/openssl
 /usr/share/doc/libxml2
 /usr/share/doc/perl
-/usr/share/lintian/overrides/wazuh-manager|agent
+/usr/share/lintian/overrides/wazuh-manager
+/usr/share/lintian/overrides/wazuh-agent
 /usr/share/man/man1/ex.1.gz
 /usr/share/man/man1/rview.1.gz
 /usr/share/man/man1/view.1.gz

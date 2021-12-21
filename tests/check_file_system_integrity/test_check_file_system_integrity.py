@@ -154,7 +154,7 @@ def add_differences_to_dict(path, dict, field, value_changes):
 def move_misplaced_red(state, red_dict, yellow_dict):
     """Move the misplaced paths in the red state dictionary to yellow when it proceeds.
 
-    If there is a path that its ascendency is already in the yellow dict, it is moved from 'red' to 'yellow'.
+    If there is a path that its descendency is already in the yellow dict, it is moved from 'red' to 'yellow'.
 
     Args:
         state (str): Test state
@@ -254,7 +254,7 @@ def check_diffs_in_warning_list(diff, warning_list):
     return state, yellow_output_dict, red_output_dict
 
 
-def test_system_check_files(get_first_file, get_second_file, get_output_path):
+def test_check_file_system_integrity(get_first_file, get_second_file, get_output_path):
     """This test checks if two files are not equal and if differences exist, and check if the path where are changes
     is listed in the warning list or not.
 
