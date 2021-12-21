@@ -4,12 +4,9 @@
 
 import json
 import os
-from typing import Type
 import pytest
-import time
 import re
 import warnings
-from datetime import datetime
 from deepdiff import DeepDiff
 
 from wazuh_testing.tools.file import validate_json_file, read_json_file, write_json_file, get_file_lines
@@ -87,7 +84,7 @@ def validate_and_read_json(file_path):
 
 
 def validate_and_create_output_path(output_path):
-    """"Check that the given output path is a directory if it already exists and create it if does not exist yet.
+    """"Check that the given output path is a directory if it already exists and creates it when it does not exist yet.
 
     Args:
         output_path (str): Path that the user pass as argument.
@@ -106,8 +103,8 @@ def validate_and_create_output_path(output_path):
 def path_in_warning_list(path_to_check, warning_list):
     """Check if a path is contained in the warning list.
 
-    It checks if the path is contained in each path from the warning list, if it is a file it will be True or False.
-    But if it is a directory, it is included because of its ascendancy.
+    It checks if the path is contained in each path from the warning list. If the path to check appears in the list or
+    is a descendant, it will return True.
 
     Args:
         path_to_check (str): Path that will be checked.
@@ -121,6 +118,21 @@ def path_in_warning_list(path_to_check, warning_list):
             return True
 
     return False
+
+
+def copy_to_dict_and_reset(key, dict, data_structure):
+    """Copy a data structure content into a dictionary using the given key.
+
+    The given content to copy is cleared after its copy.
+
+    Args:
+        key (str): Dict key where the content will be copied.
+        dict (dict): Where the data will be copied.
+        data_structure (list|dict): Content to copy.
+    """
+    if data_structure:
+        dict[key] = data_structure.copy()
+        data_structure.clear()
 
 
 def add_differences_to_dict(path, dict, field, value_changes):
@@ -139,6 +151,39 @@ def add_differences_to_dict(path, dict, field, value_changes):
         dict[path][field] = value_changes
 
 
+def move_misplaced_red(state, red_dict, yellow_dict):
+    """Move the misplaced paths in the red state dictionary to yellow when it proceeds.
+
+    If there is a path that its ascendency is already in the yellow dict, it is moved from 'red' to 'yellow'.
+
+    Args:
+        state (str): Test state
+        red_dict (dict): Dictionary with the differences to be checked.
+        yellow_dict (dict): Dictionary with the knowing warning differences.
+
+    Returns:
+        boolean: True if there were changes in the red dictionary, False otherwise.
+    """
+    initial_red_len = len(red_dict)
+    to_remove = []
+
+    if state == 'red':
+        for red_path in red_dict:
+            for yellow_path in yellow_dict:
+                if red_path in yellow_path:
+                    # Only remove it from red state if only changes the 'last_update' field
+                    if 'last_update' in red_dict[red_path] and len(red_dict[red_path]) == 1:
+                        to_remove.append((red_path, red_dict[red_path]))
+                    break
+
+    # Remove all the misplaced occurrences
+    for path, values_changes in to_remove:
+        yellow_dict[path] = values_changes
+        red_dict.pop(path, None)
+
+    return True if initial_red_len > len(red_dict) else False
+
+
 def check_diffs_in_warning_list(diff, warning_list):
     """"Check if the given differences are contained in the warning list or not.
 
@@ -155,17 +200,19 @@ def check_diffs_in_warning_list(diff, warning_list):
                                         warning list or it fails, and the states dictionaries.
     """
     # The following regex matches for example with:
-    # "root['/home/roro/Documents/trash/t/test_check_files/dockerfiles/ubuntu_20_04/entrypoint.py']['mode']"
+    # "['/etc/mtab']['last_update']" and "['/usr/share/doc/openssl']"
     fields_regex = re.compile(r"\['(.+?)'\]+")
     state = 'yellow'
     yellow_matched_list = []
     red_matched_list = []
     yellow_matched_dict = {}
     red_matched_dict = {}
+    yellow_output_dict = {}
+    red_output_dict = {}
 
-    for key in diff:
-        if isinstance(diff[key], list):
-            for path in diff[key]:
+    for change_type in diff:
+        if isinstance(diff[change_type], list):
+            for path in diff[change_type]:
                 matched_path = re.match(fields_regex, path).group(1)
 
                 if path_in_warning_list(matched_path, warning_list):
@@ -175,17 +222,17 @@ def check_diffs_in_warning_list(diff, warning_list):
                     red_matched_list.append(matched_path)
 
             # Clear the lists so they can be used if there are more keys that are a list within the differences
-            yellow_matched_dict[key] = yellow_matched_list.copy()
-            red_matched_dict[key] = red_matched_list.copy()
-            yellow_matched_list.clear()
-            red_matched_list.clear()
+            copy_to_dict_and_reset(change_type, yellow_output_dict, yellow_matched_list)
+            copy_to_dict_and_reset(change_type, red_output_dict, red_matched_list)
 
-        if isinstance(diff[key], dict):
-            for path_and_field in diff[key]:
+        if isinstance(diff[change_type], dict):
+            # add key to matched dict, values changed is not
+
+            for path_and_field in diff[change_type]:
                 matched_fields = re.findall(fields_regex, path_and_field)
                 matched_path = matched_fields[0]
                 matched_field = matched_fields[1]
-                values_changes = diff[key][path_and_field]
+                values_changes = diff[change_type][path_and_field]
 
                 if path_in_warning_list(matched_path, warning_list):
                     add_differences_to_dict(matched_path, yellow_matched_dict, matched_field, values_changes)
@@ -193,24 +240,35 @@ def check_diffs_in_warning_list(diff, warning_list):
                     state = 'red'
                     add_differences_to_dict(matched_path, red_matched_dict, matched_field, values_changes)
 
-    return state, yellow_matched_dict, red_matched_dict
+            # Clear the dicts so they can be used if there are more keys that are a dict within the differences
+            copy_to_dict_and_reset(change_type, yellow_output_dict, yellow_matched_dict)
+            copy_to_dict_and_reset(change_type, red_output_dict, red_matched_dict)
+
+            # If after moving the misplaced paths within the red diff, still there are red diffs the state is red
+            # If there are no red diffs, that means that only wrong red diffs were in the red diff, so the state is
+            # yellow
+            if move_misplaced_red(state, red_output_dict[change_type], yellow_output_dict[change_type]) \
+               and not red_output_dict:
+                state = 'yellow'
+
+    return state, yellow_output_dict, red_output_dict
 
 
 def test_system_check_files(get_first_file, get_second_file, get_output_path):
-    """This test checks if two files are not equal and if differences exist, check if the path where are changes,
+    """This test checks if two files are not equal and if differences exist, and check if the path where are changes
     is listed in the warning list or not.
 
     After an installation, update or uninstallation is necessary to check if the system files are the same as before.
     Two given files are checked for differences between them. After checking their contents, if there are differences
     between them, the test will check if any of the paths that have changed is listed in the warning list(which would
     change the test state to 'warning', aka 'yellow') or not(which would change the test state to 'failed', aka 'red').
-    These differences(separated by state) will be stored in the path that user pass as argument.
+    These differences(a file for each state) will be stored in the path that the user passes as an argument.
 
     If the test shows a warning related to the differences, the state of the test exectuion requires a manual revision.
 
     The possible states after the test execution are:
-        - yellow: When there are paths with changes but are listed in the warning list.
-        - red: When there are paths with changes not listed in the warning list.
+        - yellow: When there are paths with changes but they appear in the warning list.
+        - red: When there are paths with changes that do not appear in the warning list.
 
     Example run:
         python3 -m pytest wazuh-qa/tests/check_files/test_check_files/test_system_check_files.py
@@ -235,14 +293,14 @@ def test_system_check_files(get_first_file, get_second_file, get_output_path):
         test_state, yellos_json_dict, red_json_dict = check_diffs_in_warning_list(differences_json,
                                                                                   read_warning_list(WARNING_LIST_PATH))
 
-        yellow_path = os.path.join(get_output_path, 'paths_in_wl.json')
+        yellow_path = os.path.join(get_output_path, 'warning_diff.json')
         write_json_file(yellow_path, yellos_json_dict)
         warnings.warn("There are some directories that are contained in the warning list. "
                       f"Please check {yellow_path} file in order to determinate if the test passes "
                       "or not.", UserWarning)
 
         if test_state == 'red':
-            red_path = os.path.join(get_output_path, 'paths_not_in_wl.json')
+            red_path = os.path.join(get_output_path, 'fail_diff.json')
             write_json_file(red_path, red_json_dict)
             raise AssertionError("There are some directories that not contained within the warning list. "
                                  f"These paths are logged here: {red_path}.")
