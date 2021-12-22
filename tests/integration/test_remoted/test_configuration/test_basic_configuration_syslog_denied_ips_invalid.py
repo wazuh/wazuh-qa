@@ -21,13 +21,25 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 parameters = [
     {'ALLOWED': '127.0.0.0', 'DENIED': '192.168.1.1.1'},
     {'ALLOWED': '127.0.0.0', 'DENIED': 'Testing'},
-    {'ALLOWED': '127.0.0.0', 'DENIED': '192.168.1.1/7890'}
+    {'ALLOWED': '127.0.0.0', 'DENIED': '192.168.1.1/7890'},
+    {'ALLOWED': '::1', 'DENIED': 'ec97:6bcc:8675:20e8:1c27:da5a:fdbf:fd3f:1c27'},
+    {'ALLOWED': '::1', 'DENIED': 'ec97:6bcc:8675:20e8'},
+    {'ALLOWED': '::1', 'DENIED': 'ec97::8675::20e8'},
+    {'ALLOWED': '::1', 'DENIED': 'Testing'},
+    {'ALLOWED': '::1', 'DENIED': 'ec97:6bcc:8675:20e8:1c27:da5a:fdbf:fd3f/512'},
+    {'ALLOWED': '::1', 'DENIED': '::fd3f/512'}
 ]
 
 metadata = [
     {'allowed-ips': '127.0.0.0', 'denied-ips': '192.168.1.1.1'},
     {'allowed-ips': '127.0.0.0', 'denied-ips': 'Testing'},
-    {'allowed-ips': '127.0.0.0', 'denied-ips': '192.168.1.1/7890'}
+    {'allowed-ips': '127.0.0.0', 'denied-ips': '192.168.1.1/7890'},
+    {'allowed-ips': '::1', 'denied-ips': 'ec97:6bcc:8675:20e8:1c27:da5a:fdbf:fd3f:1c27'},
+    {'allowed-ips': '::1', 'denied-ips': 'ec97:6bcc:8675:20e8'},
+    {'allowed-ips': '::1', 'denied-ips': 'ec97::8675::20e8'},
+    {'allowed-ips': '::1', 'denied-ips': 'Testing'},
+    {'allowed-ips': '::1', 'denied-ips': 'ec97:6bcc:8675:20e8:1c27:da5a:fdbf:fd3f/512'},
+    {'allowed-ips': '::1', 'denied-ips': '::fd3f/512'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
