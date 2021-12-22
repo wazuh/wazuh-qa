@@ -22,14 +22,22 @@ parameters = [
     {'ALLOWED': '127.0.0.0.0', 'DENIED': '192.168.1.1'},
     {'ALLOWED': 'Testing', 'DENIED': '192.168.1.1'},
     {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1.1'}
+    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1.1'},
+    {'ALLOWED': '::1::1', 'DENIED': 'fe80::1003:889f:a584:0101'},
+    {'ALLOWED': 'Testing', 'DENIED': 'fe80::1003:889f:a584:0101'},
+    {'ALLOWED': '::1/512', 'DENIED': 'fe80::1003:889f:a584:0101'},
+    {'ALLOWED': '::1/512', 'DENIED': 'fe80::1003:889f:a584::0101'}
 ]
 
 metadata = [
     {'allowed-ips': '127.0.0.0.0', 'denied-ips': '192.168.1.1'},
     {'allowed-ips': 'Testing', 'denied-ips': '192.168.1.1'},
     {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1.1'}
+    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1.1'},
+    {'allowed-ips': '::1::1', 'denied-ips': 'fe80::1003:889f:a584:0101'},
+    {'allowed-ips': 'Testing', 'denied-ips': 'fe80::1003:889f:a584:0101'},
+    {'allowed-ips': '::1/512', 'denied-ips': 'fe80::1003:889f:a584:0101'},
+    {'allowed-ips': '::1/512', 'denied-ips': 'fe80::1003:889f:a584::0101'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
