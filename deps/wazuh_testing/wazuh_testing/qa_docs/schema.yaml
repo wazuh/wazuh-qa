@@ -177,10 +177,10 @@ predefined_values:
     - alerts
     - analysisd
     - api
-    - archlinux
-    - archlinux_feeds
     - ar_analysisd
     - ar_execd
+    - archlinux
+    - archlinux_feeds
     - auditd
     - audit_keys
     - audit_rules
