@@ -40,8 +40,8 @@ def register_agent():
         if int(host_manager.run_shell('wazuh-worker2',
                                       f'{WAZUH_PATH}/bin/cluster_control -a | '
                                       f'grep active | wc -l')) == 4 and int(host_manager.run_shell('wazuh-master',
-                                      f'{WAZUH_PATH}/bin/cluster_control -a | '
-                                      f'grep active | wc -l')) == 4 or time() > timeout:
+                                                                                                   f'{WAZUH_PATH}/bin/cluster_control -a | '
+                                                                                                   f'grep active | wc -l')) == 4 or time() > timeout:
             break
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
 
@@ -78,7 +78,8 @@ def test_agent_files_deletion(register_agent):
     # Check that agent information is in the wdb socket
     query = f'global sql select * from agent where id={agent_id}'
     for host in managers_hosts:
-        result = host_manager.run_command(host, f"/var/ossec/framework/python/bin/python3.9 /send_msg.py {query}")
+        result = host_manager.run_command(host,
+                                          f"/var/ossec/framework/python/bin/python3.9 /get_wdb_agent.py '{query}'")
         assert result, f'This db query should have returned something in {host}, but it did not: {result}'
 
     # Remove the agent
@@ -101,5 +102,5 @@ def test_agent_files_deletion(register_agent):
     # Check that agent information is not in the wdb socket
     for host in managers_hosts:
         result = host_manager.run_command(host,
-                                          f"/var/ossec/framework/python/bin/python3.9 /send_msg.py {query}")
+                                          f"/var/ossec/framework/python/bin/python3.9 /get_wdb_agent.py '{query}'")
         assert not result, f'This db query should have not returned anything in {host}, but it did: {result}'

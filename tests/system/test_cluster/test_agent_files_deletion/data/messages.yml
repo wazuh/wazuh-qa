@@ -1,6 +1,6 @@
 ---
 wazuh-worker2:
-  - regex: '.*Received 1 shared files to update from .*'
+  - regex: '.*Received.*shared files to update from .*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: '.*Worker wazuh-worker2.*Integrity sync.*Finished in.*'
