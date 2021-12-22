@@ -71,6 +71,14 @@ def set_parameters(parameters):
 
 
 def get_human_readable_bytes(bytes):
+    """Get a human readable string from a count of bytes.
+
+    Args:
+        bytes (int): Count of bytes.
+
+    Returns:
+        (string): Human readable count of bytes/kilobytes/megabytes/gigabytes.
+    """
     gb = 1024*1024*1024
     mb = 1024*1024
     kb = 1024
