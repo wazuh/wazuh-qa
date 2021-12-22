@@ -30,13 +30,20 @@ network_interfaces = netifaces.interfaces()
 for interface in network_interfaces:
     try:
         ip = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]['addr']
+        ip6 = netifaces.ifaddresses(interface)[netifaces.AF_INET6][0]['addr']
+        contains_interface = ip6.find('%')
+        if contains_interface != -1:
+            ip6 = ip6[:contains_interface]
         array_interfaces_ip.append(ip)
+        array_interfaces_ip.append(ip6)
     except KeyError:
         pass
 
 for local_ip in array_interfaces_ip:
-    parameters.append({'LOCAL_IP': local_ip})
-    metadata.append({'local_ip': local_ip})
+    parameters.append({'LOCAL_IP': local_ip, 'IPV6': 'yes'})
+    metadata.append({'local_ip': local_ip, 'ipv6': 'yes'})
+    parameters.append({'LOCAL_IP': local_ip, 'IPV6': 'no'})
+    metadata.append({'local_ip': local_ip, 'ipv6': 'no'})
 
 configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip",
                                            params=parameters, metadata=metadata)

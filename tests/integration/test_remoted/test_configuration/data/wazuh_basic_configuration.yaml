@@ -61,6 +61,8 @@
         value: secure
     - port:
         value: 1514
+    - ipv6:
+        value: IPV6
     - local_ip:
         value: LOCAL_IP
     - protocol:
