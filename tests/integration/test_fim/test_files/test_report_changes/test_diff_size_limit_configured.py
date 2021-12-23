@@ -80,11 +80,13 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.fim_module.fim_variables import TEST_DIR_1, YAML_CONF_DIFF
+from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, YAML_CONF_DIFF, DIFF_LIMIT_VALUE,
+                                                    DIFF_SIZE_LIMIT, DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT,
+                                                    FILE_SIZE_ENABLED, FILE_SIZE_LIMIT, MAXIMUM_FILE_SIZE,
+                                                    REPORT_CHANGES, TEST_DIRECTORIES
 from wazuh_testing.wazuh_variables import DATA, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
-from deps.wazuh_testing.wazuh_testing.fim_module.fim_variables import DIFF_LIMIT_VALUE, DIFF_SIZE_LIMIT, DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT, FILE_SIZE_ENABLED, FILE_SIZE_LIMIT, MAXIMUM_FILE_SIZE, REPORT_CHANGES, TEST_DIRECTORIES
 
 # Marks
 
