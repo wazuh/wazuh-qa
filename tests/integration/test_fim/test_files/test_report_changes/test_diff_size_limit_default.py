@@ -77,10 +77,12 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_diff_size_limit_value, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+
+from deps.wazuh_testing.wazuh_testing.fim_module.fim_variables import MAXIMUM_FILE_SIZE
 
 # Marks
 
@@ -118,7 +120,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf_diff_default'}
 ])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
+#@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
@@ -163,7 +165,7 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
 
     diff_size_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callback_diff_size_limit_value,
+        callback=callback_generator(MAXIMUM_FILE_SIZE),
         error_message='Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
                                               ).result()
 
