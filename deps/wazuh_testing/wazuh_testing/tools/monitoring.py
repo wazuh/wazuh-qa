@@ -705,7 +705,6 @@ class StreamHandler(socketserver.BaseRequestHandler):
 
 
 class DatagramHandler(socketserver.BaseRequestHandler):
-    address_family = socket.AF_INET
 
     def unix_forward(self, data):
         """Default UDP unix socket forwarder for MITM servers."""
