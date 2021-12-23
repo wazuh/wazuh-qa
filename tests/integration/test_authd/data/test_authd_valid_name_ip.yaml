@@ -134,7 +134,6 @@
       output:
         status: 'error'
         message: 'Invalid IP: 10.10.10.257'
-      expected_fail: 'yes'
   -
     name: 'Invalid IP: greater than 255: 2'
     description: 'Try register an agent with invalid IP'
@@ -145,7 +144,6 @@
       output:
         status: 'error'
         message: 'Invalid IP: 257.257.257.257'
-      expected_fail: 'yes'
   -
     name: 'Invalid IP: 4 digits'
     description: 'Try register an agent with invalid IP: rejected'
@@ -221,7 +219,7 @@
       output:
         status: 'success'
         name: 'user1'
-        ip: '02db:4660:46af:e523:d05e:a62e:4ca7:8e58'
+        ip: '02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58'
   -
     name: 'Valid compressed IPv6'
     description: 'Try register an agent with valid compressed IPv6: register'
@@ -231,7 +229,7 @@
       output:
         status: 'success'
         name: 'user1'
-        ip: '2001:db8:0:b::1A8'
+        ip: '2001:0DB8:0000:000B:0000:0000:0000:001A'
   -
     name: 'Invalid IPv6: 2 double colons'
     description: 'Try register an agent with invalid IPv6: rejected'
