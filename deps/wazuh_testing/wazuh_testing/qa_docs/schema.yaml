@@ -250,6 +250,7 @@ predefined_values:
     - nvd
     - office365
     - oval
+    - providers
     - rbac
     - realtime
     - remoted
