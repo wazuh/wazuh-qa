@@ -236,6 +236,7 @@ predefined_values:
     - fim_registry_restrict
     - fim_synchronization
     - gcloud
+    - general_settings
     - github
     - integrity
     - keys
