@@ -219,7 +219,6 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
 
         request_parameters = api_registration_parameters['parameters'][stage]
         expected = api_registration_parameters['expected'][stage]
-        registration_ip_ipv6 = api_registration_parameters['parameters'][stage]['ipv6']
 
         api_details = get_api_details_dict()
         api_query = f"{api_details['base_url']}/agents?"
@@ -227,8 +226,10 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
         expected_client_keys_ip = request_parameters['agent_ip']
         if api_registration_parameters['parameters'][stage]['ipv6']:
             expected_client_keys_ip = (ipaddress.IPv6Address(request_parameters['agent_ip']).exploded).upper()
-        else:
-            expected_client_keys_ip = (ipaddress.IPv4Address(request_parameters['agent_ip']).exploded).upper()
+
+        if 'ipv4_as_ipv6' in request_parameters:
+            # IPv4 as IPv6 format: "::ffff:127.1.3.4"
+            expected_client_keys_ip = expected_client_keys_ip.split(':')[3]
 
         expected_client_keys_entry = {'name': request_parameters['agent_name'],
                                       'ip':  expected_client_keys_ip}

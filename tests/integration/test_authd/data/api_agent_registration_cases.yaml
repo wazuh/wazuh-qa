@@ -14,22 +14,6 @@
         error: 0
 
 - 
-  name: "Basic name IPV4 formatted as IPV6"
-  parameters:
-    -
-      agent_name: "api-registration-agent-1"
-      agent_ip: "::ffff:172.14.1.2"
-      ipv6: False
-  expected:
-    -
-      json: 
-        data: &agent_create_response
-          id: ANY
-          key: ANY
-        error: 0
-
-
-- 
   name: "Basic name and IPV6 exploded"
   parameters:
     -
@@ -460,4 +444,51 @@
         dapi_errors:
           node01:
             error: "There is an agent with the same IP or the IP is invalid: 172.14.1.2"
+        error: 1706
+
+- 
+  name: "Basic name IPV4 formatted as IPV6"
+  parameters:
+    -
+      agent_name: "api-registration-agent-30"
+      agent_ip: "::ffff:172.14.1.4"
+      ipv4_as_ipv6: True
+      ipv6: False
+  expected:
+    -
+      json:
+        data:
+          <<: *agent_create_response
+        error: 0
+
+
+- 
+  name: "Basic name and IPV4 repeated IP using IPv4 as IPV6"
+  parameters:
+    -
+      agent_name: "api-registration-agent-31" 
+      agent_ip: "172.14.1.5"
+      ipv6: False
+
+    -
+      agent_name: "api-registration-agent-32" 
+      agent_ip: "::ffff:172.14.1.5"
+      ipv6: False
+      ipv4_as_ipv6: True
+
+  expected:
+    -
+      json:
+        data:
+          <<: *agent_create_response
+        error: 0
+
+    -
+      json:
+        title: "Bad Request"
+        detail: "There is an agent with the same IP or the IP is invalid: ::ffff:172.14.1.5"
+        remediation: "Please choose another IP"
+        dapi_errors:
+          node01:
+            error: "There is an agent with the same IP or the IP is invalid: ::ffff:172.14.1.5"
         error: 1706
