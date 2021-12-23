@@ -242,6 +242,8 @@ class SocketController:
             self.family = socket.AF_UNIX
         elif family == 'AF_INET':
             self.family = socket.AF_INET
+        elif family == 'AF_INET6':
+            self.family = socket.AF_INET6
         else:
             raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
 
@@ -726,14 +728,6 @@ class DatagramHandler(socketserver.BaseRequestHandler):
             self.server.mitm.put_queue(data)
 
 
-class DatagramHandlerV6(DatagramHandler):
-    address_family = socket.AF_INET6
-
-
-class StreamHandlerV6(StreamHandler):
-    address_family = socket.AF_INET6
-
-
 class ManInTheMiddle:
 
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
@@ -783,19 +777,9 @@ class ManInTheMiddle:
                 }
             },
             'handler': {
-                'tcp': {
-                    'AF_INET': StreamHandler,
-                    'AF_INET6': StreamHandlerV6
-                },
-                'udp': {
-                    'AF_INET': DatagramHandler,
-                    'AF_INET6': DatagramHandlerV6
-                },
-                'ssl': {
-                    'AF_INET': StreamHandler,
-                    'AF_INET6': StreamHandlerV6
-                }
-
+                'tcp': StreamHandler,
+                'udp': DatagramHandler,
+                'ssl': StreamHandler
             }
         }
         if hasattr(socketserver, 'ThreadingUnixStreamServer'):
@@ -803,7 +787,7 @@ class ManInTheMiddle:
             class_tree['listener']['udp']['AF_UNIX'] = DatagramServerUnix
 
         self.listener_class = class_tree['listener'][self.mode][self.family]
-        self.handler_class = class_tree['handler'][self.mode][self.family]
+        self.handler_class = class_tree['handler'][self.mode]
         self.handler_func = func
         self.listener = None
         self.thread = None
