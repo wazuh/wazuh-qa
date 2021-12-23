@@ -27,6 +27,8 @@
          value: ALLOWED
     -  denied-ips:
          value: DENIED
+    - ipv6:
+        value: IPV6
     - port:
         value: 514
     - protocol:
