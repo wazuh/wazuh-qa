@@ -2,6 +2,7 @@
   - ossec_conf_diff_size_limit
   apply_to_modules:
   - test_diff_size_limit_configured
+  - test_diff_size_limit_default
   sections:
   - section: sca
     elements:

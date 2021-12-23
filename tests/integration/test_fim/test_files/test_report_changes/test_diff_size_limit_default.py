@@ -79,10 +79,11 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
-
-from deps.wazuh_testing.wazuh_testing.fim_module.fim_variables import MAXIMUM_FILE_SIZE
+from wazuh_testing.wazuh_variables import DATA
+from deps.wazuh_testing.wazuh_testing.fim_module.fim_variables import DIFF_DEFAULT_LIMIT_VALUE, MAXIMUM_FILE_SIZE, REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_DIFF
+from deps.wazuh_testing.wazuh_testing.wazuh_variables import SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 # Marks
 
@@ -91,21 +92,18 @@ pytestmark = [pytest.mark.tier(level=1)]
 # Variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1')]
-directory_str = ','.join(test_directories)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = test_directories[0]
-DEFAULT_SIZE = 50 * 1024
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
+configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
+
 
 # Configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
-                                                           'TEST_DIRECTORIES': directory_str,
-                                                           'MODULE_NAME': __name__})
+parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {REPORT_CHANGES: 'yes'},
+                                                           TEST_DIRECTORIES: test_directories[0]})
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
-
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
+local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 # Fixtures
 
@@ -117,11 +115,8 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff_default'}
-])
-#@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
-def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+
+def test_diff_size_limit_default(configure_local_internal_options_module, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
                  the default value of the 'diff_size_limit' attribute. For this purpose, the test will monitor
@@ -132,9 +127,9 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.    
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -161,7 +156,6 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
         - diff
         - scheduled
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     diff_size_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -169,7 +163,5 @@ def test_diff_size_limit_default(tags_to_apply, get_configuration, configure_env
         error_message='Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
                                               ).result()
 
-    if diff_size_value:
-        assert diff_size_value == str(DEFAULT_SIZE), 'Wrong value for diff_size_limit'
-    else:
-        raise AssertionError('Wrong value for diff_size_limit')
+    assert diff_size_value == str(DIFF_DEFAULT_LIMIT_VALUE), 'Wrong value for diff_size_limit'
+   
