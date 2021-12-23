@@ -32,7 +32,7 @@
   git:
     repo: "https://github.com/wazuh/wazuh-qa"
     dest: /wazuh-qa
-    version: "{{ wazuh_qa_branch}}"
+    version: "{{ wazuh_qa_branch }}"
     depth: '1'
 
 - name: Install master

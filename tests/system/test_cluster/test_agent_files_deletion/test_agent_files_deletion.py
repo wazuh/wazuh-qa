@@ -1,10 +1,9 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import datetime
 import os
 from os.path import join, dirname, abspath
-from time import time
+from time import time, sleep
 
 import pytest
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
@@ -20,6 +19,8 @@ tmp_path = os.path.join(local_path, 'tmp')
 managers_hosts = [master_host, worker_host]
 inventory_path = join(dirname(dirname(dirname(abspath(__file__)))), 'provisioning', 'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
+time_to_sync = 10
+time_to_agent_reconnect = 180
 
 # Each file should exist in all hosts specified in 'hosts'.
 files = [{'path': join(WAZUH_PATH, 'queue', 'rids', '{id}'), 'hosts': managers_hosts},
@@ -35,15 +36,14 @@ def register_agent():
     host_manager.get_host(agent_host).ansible('command', f'service wazuh-agent restart', check=False)
 
     # Wait until the agent is reconnected
-    timeout = time() + 180
+    timeout = time() + time_to_agent_reconnect
+    command = f'{WAZUH_PATH}/bin/cluster_control -a | grep active | wc -l'
     while True:
         if int(host_manager.run_shell('wazuh-worker2',
-                                      f'{WAZUH_PATH}/bin/cluster_control -a | '
-                                      f'grep active | wc -l')) == 4 and int(host_manager.run_shell('wazuh-master',
-                                                                                                   f'{WAZUH_PATH}/bin/cluster_control -a | '
-                                                                                                   f'grep active | wc -l')) == 4 or time() > timeout:
+                                      command)) == 4 and int(host_manager.run_shell('wazuh-master',
+                                                                                    command)) == 4 or time() > timeout:
             break
-    HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+    sleep(time_to_sync)
 
 
 def test_agent_files_deletion(register_agent):
@@ -89,6 +89,7 @@ def test_agent_files_deletion(register_agent):
 
     # Wait until information is synced to all workers
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+    sleep(time_to_sync)
 
     # Check that agent-related files where removed from each node.
     for file in files:
