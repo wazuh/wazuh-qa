@@ -136,7 +136,7 @@ def pre_insert_agents():
 @pytest.fixture(scope='function')
 def insert_agents_test():
     """Insert agents. Only used for the agent queries"""
-    agent_list = [1, 2]
+    agent_list = [1, 2, 3]
     for agent in agent_list:
         insert_agent(agent)
 
