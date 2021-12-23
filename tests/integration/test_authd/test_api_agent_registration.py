@@ -227,6 +227,8 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
         expected_client_keys_ip = request_parameters['agent_ip']
         if api_registration_parameters['parameters'][stage]['ipv6']:
             expected_client_keys_ip = (ipaddress.IPv6Address(request_parameters['agent_ip']).exploded).upper()
+        else:
+            expected_client_keys_ip = (ipaddress.IPv4Address(request_parameters['agent_ip']).exploded).upper()
 
         expected_client_keys_entry = {'name': request_parameters['agent_name'],
                                       'ip':  expected_client_keys_ip}
