@@ -75,6 +75,8 @@
     elements:
     - connection:
         value: CONNECTION
+    - ipv6:
+        value: IPV6
     - port:
         value: 514
     - protocol:

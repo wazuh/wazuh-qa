@@ -16,10 +16,12 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = [
-    {'CONNECTION': 'syslog'}
+    {'CONNECTION': 'syslog', 'IPV6': 'no'},
+    {'CONNECTION': 'syslog', 'IPV6': 'yes'}
 ]
 metadata = [
-    {'connection': 'syslog'}
+    {'connection': 'syslog', 'ipv6': 'no'},
+    {'connection': 'syslog', 'ipv6': 'yes'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
