@@ -160,6 +160,7 @@ def get_api_details():
 def restart_api_module():
     # Stop Wazuh and Wazuh API
     control_service('stop')
+    truncate_file(API_LOG_FILE_PATH)
     control_service('start')
 
 

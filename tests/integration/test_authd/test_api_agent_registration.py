@@ -58,9 +58,10 @@ import yaml
 import requests
 import re
 import ipaddress
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-
+from wazuh_testing.tools import API_LOG_FILE_PATH
 
 from wazuh_testing.api import get_api_details_dict
 from wazuh_testing.tools import CLIENT_KEYS_PATH
@@ -77,17 +78,13 @@ api_registration_requets_file = os.path.join(test_data_path, 'api_agent_registra
 daemons_handler_configuration = {'all_daemons': True}
 api_registration_requests = []
 with open(api_registration_requets_file) as tcases:
-    api_registration_requests = yaml.load(tcases)
-
-expected_json_ipv6_not_valid = {'error': 1}
+    api_registration_requests = yaml.safe_load(tcases)
 
 parameters = [
     {'IPV6': 'yes'},
-    {'IPV6': 'no'}
 ]
 metadata = [
     {'ipv6': 'yes'},
-    {'ipv6': 'no'},
 ]
 
 configurations_path = os.path.join(test_data_path, 'agent_api_registration_configuration.yaml')
@@ -136,6 +133,11 @@ def clean_registered_agents():
     control_service('start')
 
 
+@pytest.fixture(scope="module")
+def truncate_api_log():
+    truncate_file(API_LOG_FILE_PATH)
+
+
 def check_valid_agent_id(id):
     return re.match("(^[0-9][0-9][0-9]$)", id)
 
@@ -166,9 +168,10 @@ def check_api_data_response(api_response, expected_response):
     return api_response == expected_response
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize("api_registration_parameters", api_registration_requests, ids=api_registration_requests_ids)
-def test_agentd_server_configuration(api_registration_parameters, get_configuration, configure_environment,
-                                     restart_and_wait_api, clean_registered_agents):
+def test_agentd_server_configuration(get_configuration, configure_environment, truncate_api_log,
+                                     clean_registered_agents, wait_for_start_module, api_registration_parameters):
     '''
     description:
         Checks `wazuh-api` responds correctly to agent registration requests. Also, ensure client.keys is update
@@ -207,8 +210,7 @@ def test_agentd_server_configuration(api_registration_parameters, get_configurat
     expected_output:
         - r'{"error":0,' (When the agent has enrolled)
         - r'{"error":1706,' (When the agent name or IP is already used)
-        - r'{"error":expected_json_ipv6_not_valid,' (When the agent use an IPV6 without
-                                                     enabling it in the configuration)
+
     tags:
         - api
         - registration
@@ -234,13 +236,9 @@ def test_agentd_server_configuration(api_registration_parameters, get_configurat
         response = requests.post(api_query, headers=api_details['auth_headers'], json=request_json,
                                  verify=False)
 
-        if get_configuration['metadata']['ipv6'] == 'no' and registration_ip_ipv6:
-            assert check_api_data_response(response.json(), expected_json_ipv6_not_valid), \
-                f"The API response expected {expected_json_ipv6_not_valid} but {response.json()} was received"
-        else:
-            # Assert response is the same specified in the api_registration_parameters
-            assert check_api_data_response(response.json(), expected['json']), \
-                f"The API response expected {expected['json']} but {response.json()} was received"
+        # Assert response is the same specified in the api_registration_parameters
+        assert check_api_data_response(response.json(), expected['json']), \
+            f"The API response expected {expected['json']} but {response.json()} was received"
 
         # Ensure client keys is updated
         if response.json()['error'] == 0:

@@ -107,7 +107,7 @@
   parameters:
     -
       agent_name: "api-registration-agent-8" 
-      agent_ip: "::0000:ffff:ac0e:0107"
+      agent_ip: "::0000:ffff:ac0e:0108"
       ipv6: True
 
   expected:
@@ -116,7 +116,6 @@
         data:
           <<: *agent_create_response
         error: 0
-
 
 
 - 
@@ -233,8 +232,6 @@
         data:
           <<: *agent_create_response
         error: 0
-
-
 
 
 - 
