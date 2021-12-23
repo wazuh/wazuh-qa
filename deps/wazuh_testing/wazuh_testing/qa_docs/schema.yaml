@@ -257,6 +257,7 @@ predefined_values:
     - rootcheck
     - rules
     - scan
+    - scan_results
     - scheduled
     - settings
     - simulator
