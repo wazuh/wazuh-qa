@@ -81,9 +81,11 @@ receiver_sockets = None  # Set in the fixtures
                          ids=[test_case['name'] for test_case in test_cases])
 def test_precoder_supported_formats(connect_to_sockets_function, test_case: list):
     '''
-    description: 
-
-    wazuh_min_version: 
+    description: Check that the predecoder returns the correct fields when receives different sets of syslog formats.
+                 To do this, it receives syslog format and checks that the predecoder JSON responses
+                 are the same that the loaded ouput for each test case from the 'syslog_socket_input.yaml' file.
+    
+    wazuh_min_version: 4.3.0
 
     parameters:
         -  connect_to_sockets_function:
@@ -94,14 +96,13 @@ def test_precoder_supported_formats(connect_to_sockets_function, test_case: list
             brief: List of tests to be performed.
 
     assertions:
-        - Verify that the output logs are consistent with the predecoder received.
+        - Checks that the predecoder gives the expected output.
 
     input_description: Different test cases that are contained in an external YAML file (syslog_socket_input.yaml)
                        that includes syslog events data and the expected precoder output.
 
     expected_output:
-        - Multiple messages (event logs) corresponding to each test case,
-          located in the external input data file.
+        - Precoder JSON with the correct fields (timestamp, program name, etc) corresponding to each test case.
     '''
     stage = test_case[0]
 
