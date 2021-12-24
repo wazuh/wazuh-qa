@@ -269,5 +269,6 @@ predefined_values:
     - wazuh_db
     - wdb_socket
     - who_data
+    - windows
     - worker
     - wpk
