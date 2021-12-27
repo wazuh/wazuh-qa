@@ -44,7 +44,7 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 tmp_path = os.path.join(local_path, 'tmp')
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
-                                'provisioning', 'basic_environment', 'roles', 'agent-role', 'files', 'ossec.conf')
+                               'provisioning', 'basic_environment', 'roles', 'agent-role', 'files', 'ossec.conf')
 manager_conf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml')
 test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_agent_keep_alive_cases.yml'))
 
@@ -154,7 +154,7 @@ def clean_environment():
     yield
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
     host_manager.get_host('wazuh-manager').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                  check=False)
+                                                   check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
@@ -171,7 +171,8 @@ def enrollment():
     host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent restart', check=False)
 
     # Get agent's client.keys
-    agent_client_keys =  host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc', 'client.keys')).split()
+    agent_client_keys = host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc',
+                                                      'client.keys')).split()
     key = agent_client_keys[3]
 
     yield key
@@ -190,7 +191,6 @@ def get_ip_directions():
 
 @pytest.fixture(scope='function')
 def configure_network(test_case):
-
 
     for configuration in test_case['test_case']:
         # Manager network configuration
@@ -224,7 +224,6 @@ def configure_network(test_case):
         elif 'ipv4' in configuration['agent_network']:
             host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
             host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][2]} dev eth0")
-
 
 
 @pytest.fixture(scope='function')
@@ -269,8 +268,10 @@ def modify_ip_address_conf(test_case):
         file.write(old_manager_configuration)
 
 
-@pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name'] for cases in test_cases_yaml])
-def test_agent_keep_alive(test_case, configure_network, get_ip_directions, modify_ip_address_conf, enrollment, clean_environment):
+@pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml],
+                         ids=[cases['name'] for cases in test_cases_yaml])
+def test_agent_keep_alive(test_case, configure_network, get_ip_directions, modify_ip_address_conf, enrollment,
+                          clean_environment):
     '''
     description: Check if keep alive messages are sent in the correct format
                  and the manager sends the ACK.
