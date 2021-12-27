@@ -29,6 +29,9 @@ daemons:
 os_platform:
     - linux
     - windows
+    - macos
+    - solaris
+    
 
 os_version:
     - Arch Linux
@@ -56,6 +59,9 @@ os_version:
     - Windows Server 2012
     - Windows Server 2003
     - Windows XP
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -65,6 +71,7 @@ pytest_args:
     - fim_mode:
         realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled: Implies scheduled scan
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -82,7 +89,9 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import DIFF_DEFAULT_LIMIT_VALUE, MAXIMUM_FILE_SIZE, REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_DIFF
+from wazuh_testing.fim_module.fim_variables import (DIFF_DEFAULT_LIMIT_VALUE, MAXIMUM_FILE_SIZE,
+                                                    REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES,
+                                                    YAML_CONF_DIFF)
 from wazuh_testing.wazuh_variables import SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 # Marks
@@ -100,12 +109,13 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
 # Configurations
 
 parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {REPORT_CHANGES: 'yes'},
-                                                           TEST_DIRECTORIES: test_directories[0]})
+                                                     TEST_DIRECTORIES: test_directories[0]})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 # Fixtures
+
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -116,7 +126,8 @@ def get_configuration(request):
 # Tests
 
 
-def test_diff_size_limit_default(configure_local_internal_options_module, get_configuration, configure_environment, restart_syscheckd):
+def test_diff_size_limit_default(configure_local_internal_options_module, get_configuration,
+                                 configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
                  the default value of the 'diff_size_limit' attribute. For this purpose, the test will monitor
@@ -129,7 +140,7 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
     parameters:
         - configure_local_internal_options_module:
             type: fixture
-            brief: Configure the local internal options file.    
+            brief: Configure the local internal options file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -144,8 +155,8 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
         - Verify that an FIM event is generated indicating the size limit of 'diff' information to generate
           with the default value of the 'diff_size_limit' attribute (50MB).
 
-    input_description: A test case (ossec_conf_diff_default) is contained in external YAML
-                       file (wazuh_conf.yaml) which includes configuration settings for
+    input_description: A test case (ossec_conf_diff_size_limit) is contained in external YAML
+                       file (wazuh_conf_diff.yaml) which includes configuration settings for
                        the 'wazuh-syscheckd' daemon and, these are combined with the
                        testing directory to be monitored defined in the module.
 
@@ -155,6 +166,8 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
     tags:
         - diff
         - scheduled
+        - realtime
+        - whodata
     '''
 
     diff_size_value = wazuh_log_monitor.start(
@@ -164,4 +177,3 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
                                               ).result()
 
     assert diff_size_value == str(DIFF_DEFAULT_LIMIT_VALUE), 'Wrong value for diff_size_limit'
-   
