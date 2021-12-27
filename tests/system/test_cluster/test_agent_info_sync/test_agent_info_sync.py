@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-from time import sleep
+from time import sleep, time
 
 import pytest
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
@@ -19,7 +19,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
-messages_path_remove = os.path.join(local_path, 'data/messages_remove_agent.yml')
+messages_deletion_path = os.path.join(local_path, 'data/messages_deletion.yml')
 tmp_path = os.path.join(local_path, 'tmp')
 global_db_path = os.path.join(WAZUH_PATH, "queue", "db", "global.db")
 client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
@@ -27,6 +27,8 @@ client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
 label = "test_label"
 modified_agent = "wazuh-agent2"
 deleted_agent = "wazuh-agent3"
+time_to_sync = 21
+time_to_agent_reconnect = 180
 
 
 @pytest.fixture(scope='function')
@@ -54,6 +56,15 @@ def register_agent():
     """Restart the removed agent to trigger auto-enrollment."""
     yield
     host_manager.get_host(deleted_agent).ansible('command', f'service wazuh-agent restart', check=False)
+    timeout = time() + time_to_agent_reconnect
+    command = f'{WAZUH_PATH}/bin/cluster_control -a | grep active | wc -l'
+    while True:
+        if int(host_manager.run_shell('wazuh-worker2', command)) == 4 or time() > timeout:
+            if int(host_manager.run_shell('wazuh-worker1', command)) == 4 or time() > timeout:
+                if int(host_manager.run_shell('wazuh-master', command)) == 4 or time() > timeout:
+                    break
+        sleep(5)
+    sleep(time_to_sync)
 
 
 def test_agent_info_sync(clean_cluster_logs, remove_labels):
@@ -76,7 +87,7 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
                 global_db_path,
                 "SELECT id FROM labels WHERE key='{}'".format(f'\\"{label}\\"'))):
             break
-        sleep(21)
+        sleep(time_to_sync)
     else:
         pytest.fail(f"Label {label} couldn't be found in master's global.db database.")
 
@@ -99,4 +110,9 @@ def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
     host_manager.run_command('wazuh-master', f'{WAZUH_PATH}/bin/manage_agents -r {agent_id[0:3]}')
 
     # Check the Workers synchronize and the agent is removed from the nodes
-    HostMonitor(inventory_path=inventory_path, messages_path=messages_path_remove, tmp_path=tmp_path).run()
+    sleep(time_to_sync)
+    for host in testinfra_hosts:
+        assert not host_manager.run_command(host, f'grep {deleted_agent} {client_keys_path}'), \
+            f'{deleted_agent} was found in {host}\'s client.keys file.'
+
+    HostMonitor(inventory_path=inventory_path, messages_path=messages_deletion_path, tmp_path=tmp_path).run()
