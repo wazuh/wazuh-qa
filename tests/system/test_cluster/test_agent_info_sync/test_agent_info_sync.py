@@ -3,7 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+<<<<<<< HEAD
 import re
+=======
+>>>>>>> Fix the test according to new changes
 from time import sleep, time
 
 import pytest
