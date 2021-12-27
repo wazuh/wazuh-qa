@@ -13,7 +13,7 @@ wazuh-manager:
       - queue_size:
           value: 131072
       - ipv6:
-          value: 'yes'
+          value: IPV6_ENABLED
   - section: auth
     elements:
       - disabled:
