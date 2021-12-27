@@ -852,7 +852,7 @@ class HostMonitor:
     custom error message.
     """
 
-    def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5):
+    def __init__(self, inventory_path, messages_path, tmp_path, time_step=0.5, delete_files=True):
         """Create a new instance to monitor any given file in any specified host.
 
         Args:
@@ -874,6 +874,7 @@ class HostMonitor:
             pass
         with open(messages_path, 'r') as f:
             self.test_cases = yaml.safe_load(f)
+        self._delete_files = delete_files
 
     def run(self):
         """This method creates and destroy the needed processes for the messages founded in messages_path.
@@ -898,7 +899,10 @@ class HostMonitor:
                 for file_collector in self._file_content_collectors:
                     file_collector.terminate()
                     file_collector.join()
-                self.clean_tmp_files()
+                if self._delete_files:
+                    self.clean_tmp_files()
+                else:
+                    pass
                 break
             time.sleep(self._time_step)
         self.check_result()
