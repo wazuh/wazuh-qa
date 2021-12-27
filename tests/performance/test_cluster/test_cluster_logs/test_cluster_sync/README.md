@@ -4,7 +4,9 @@
 
 Check that cluster sync log is not identical multiple times in a row.
 
-This test checks the log below is not printed more than N (`repeat_threshold`) times in a row with the same number of files. If it does, it could mean that the files are not being correctly synced. This could happen if, for instance, modulesd delete the synced files as soon as they are copied in the destination cluster node.
+This test checks the log below is not printed more than N (`repeat_threshold`) times in a row with the same number of files. If it does, the number of files for which the MD5 is calculated is also checked. If multiple identical syncs are repeated and the number of calculated MD5s does not change, the test is marked as failed.
+
+In that case, it could mean that the files are not being correctly synced. This could happen if, for instance, modulesd delete the synced files as soon as they are copied in the destination cluster node.
 ```
 Files to create: N | Files to update: N | Files to delete: N | Files to send: N
 ```
@@ -80,8 +82,8 @@ test_cluster_logs/test_cluster_sync/test_cluster_sync.py:42: Failed
 ========================================================================================= 1 failed in 0.29 seconds ==========================================================================================
 ```
 
-### Modifying log or threshold
-Log regex or repeat threshold can be updated in the `data/configuration.yaml` file.
+### Modifying threshold
+The repeat threshold can be updated in the `data/configuration.yaml` file.
 
 ### Tests information
 

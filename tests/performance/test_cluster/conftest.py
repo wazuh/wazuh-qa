@@ -143,8 +143,8 @@ def pytest_runtest_makereport(item, call):
             # Keys are human/natural sorted.
             for worker, values in sorted(item.module.repeated_syncs.items(),
                                          key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d[0])]):
-                output.append('<b>{worker} - Log found {repeat_counter} times in a row ({datetime}):</b>\n'
-                              '{synced_files}'.format(**values, worker=worker))
+                output.append('<b>{worker} - Log found {repeat_counter} times in a row:</b>\n'
+                              '{log}'.format(**values, worker=worker))
             extra.append(pytest_html.extras.html('<p>' + '\n\n'.join(output) + '</p>'))
             extra.append(pytest_html.extras.html("</p><h1>Test output</h1>"))
 
