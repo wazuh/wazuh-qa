@@ -1,4 +1,2 @@
 configuration:
-  repeat_threshold: 4
-  log_regex: '(.*)(Files to create: [0-9]* \| Files to update: [0-9]* \| Files to delete: [0-9]* \| Files to
-  send: [0-9]*).*'
+  repeat_threshold: 3
