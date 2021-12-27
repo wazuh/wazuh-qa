@@ -244,3 +244,30 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+    def get_host_ip(self, host: str):
+            """Get the Ansible object for communicating with the specified host.
+
+            Args:
+                host (str): Hostname
+
+            Returns:
+                testinfra.modules.base.Ansible: Host instance from hostspec
+            """
+            return self.get_host(host).interface('eth0').addresses
+
+    def run_db_query(self, host: str, query: str, db_path: str, check: bool = False):
+        """Run a shell command on the specified host and return its stdout.
+
+        The difference with run_command is that here, shell symbols like &, |, etc. are interpreted.
+
+        Args:
+            host (str) : Hostname
+            cmd (str): Shell command to execute
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+
+        Returns:
+            stdout (str): The output of the command execution.
+        """
+        cmd = f"sqlite3 {db_path} '{query}'"
+        return self.get_host(host).ansible('command', cmd, check=check)['stdout']
