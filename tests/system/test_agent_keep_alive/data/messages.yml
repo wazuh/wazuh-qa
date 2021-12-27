@@ -1,0 +1,61 @@
+---
+wazuh-manager:
+  - regex: ".*Checking for keys file changes."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Updating state file."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Updating shared files sums."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*End updating shared files sums."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Updating state file."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*inserting.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*merged.mg*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*agent_ip.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*reading.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*merged.mg*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*agent_ip.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*reading.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+
+wazuh-agent1:
+  - regex: ".*Updating state file."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Sending agent notification."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Sending keep alive: #!-Linux |wazuh-agent1 |.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*merged.mg"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*agent_ip.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Received message: '#!-agent ack '"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
+  - regex: ".*Updating state file."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 20
