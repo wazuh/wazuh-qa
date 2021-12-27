@@ -1,7 +1,76 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Prepare an environment with different agents to test WPK upgrade,
+        with different scenarios containing agents already updated, agents
+        that can not be updated, repository not reachable, disconected agents...
+
+tier: 0
+
+modules:
+    - wpk
+
+components:
+    - manager
+    - agent
+
+daemons:
+    - wazuh-authd
+    - wazuh-csyslogd
+    - wazuh-execd
+    - wazuh-logcollector
+    - wazuh-monitord
+    - wazuh-remoted
+    - wazuh-syscheckd
+    - wazuh-clusterd
+    - wazuh-modulesd
+    - wazuh-db
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+
+references:
+    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import json
 import os
 import pytest
@@ -869,6 +938,45 @@ def get_sha_list(metadata):
 
 def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
+    '''
+    description: Prepare an environment with different agents to test WPK upgrade,
+                 with different scenarios containing agents already updated, agents
+                 that can not be updated, repository not reachable, disconected agents...
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Sets the debug mode in the manager.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: Restarts Wazuh manager.
+        - configure_agents:
+            type: fixture
+            brief: Configure all simulated agents.
+        
+
+    assertions:
+        - Verify that version and HTTP are the expected
+        - Verify that successful upgrade proccess
+        - Verify the first attemp is successful
+        - Verify the results are the expected
+
+    input_description: 
+
+    expected_output:
+        - r'Upgrade process result'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     expected_status = metadata['status']

@@ -1,6 +1,66 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Prepare the agent to upgrade usign WPK packages, checking
+        the expected messeges are correct.
+
+tier: 0
+
+modules:
+    - wpk
+
+components:
+    - agent
+
+daemons:
+    - wazuh-authd
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+
+references:
+    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import hashlib
 import os
 import platform
@@ -331,6 +391,47 @@ def prepare_agent_version(get_configuration):
 
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
+    '''
+    description: Prepare the agent to upgrade usign WPK packages, checking
+                 the expected messeges are correct.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - prepare_agent_version:
+            type: fixture
+            brief: Prepare the initial agent version to match the expected.
+        - download_wpk:
+            type: fixture
+            brief: Download the WPK package to upgrade the agent.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - start_agent:
+            type: fixture
+            brief: Start the agent, as well as the remoted and authd simulators.
+
+    assertions:
+        - Verify that initial agent version matches the expected
+        - Verify the successful upgrade proccess
+        - Verify the upgrade result code is the expected or the error message is the expected
+        - Verify notification status was the expected
+        - Verify the end version matches the expected
+
+    input_description: 
+
+    expected_output:
+        - r'Upgrade process result'
+        - r'Upgrade result code'
+        - r'Notification status'
+        - r'End version'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
 

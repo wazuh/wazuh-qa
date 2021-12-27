@@ -1,7 +1,75 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Register agents in the manager and test upgrading
+        them through a command, which will made the agent
+        to upgrade using WPK packages.
+
+tier: 0
+
+modules:
+    - wpk
+
+components:
+    - manager
+
+daemons:
+    - wazuh-authd
+    - wazuh-csyslogd
+    - wazuh-execd
+    - wazuh-logcollector
+    - wazuh-monitord
+    - wazuh-remoted
+    - wazuh-syscheckd
+    - wazuh-clusterd
+    - wazuh-modulesd
+    - wazuh-db
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+
+references:
+    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import json
 import os
 import socket
@@ -202,6 +270,42 @@ def overwrite_node_name(value):
 
 def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
+    '''
+    description: Register agents in the manager and test upgrading
+                 them through a command, which will made the agent
+                 to upgrade using WPK packages.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: Restarts Wazuh manager.
+        - configure_agents:
+            type: fixture
+            brief: Configure all simulated agents.
+        
+
+    assertions:
+        - Verify that the first attemp is success
+        - Verify the upgrade status matches the expected
+        - Verify the upgrade status after restarting
+        - Verify the upgrade response matches the expected
+
+    input_description: 
+
+    expected_output:
+        - r'Upgrade process result'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     first_status = metadata['first_status']
