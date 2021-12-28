@@ -209,7 +209,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
                                                       callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
                                                       error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
                                                       
-        assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_DB_LIMIT
+        assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_DB_LIMIT 
 
     else:  # Database back to normal
         event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
