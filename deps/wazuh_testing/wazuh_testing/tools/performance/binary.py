@@ -16,8 +16,6 @@ from time import sleep
 
 import psutil
 
-MONITOR_LIST = []
-
 logger = logging.getLogger('wazuh-monitor')
 logger.setLevel(logging.INFO)
 
@@ -42,6 +40,7 @@ class Monitor:
         pid (int): PID of the process.
         event (thread.Event): thread Event used to control the scans.
         thread (thread): thread to scan the data.
+        healthy (thread.Event): thread Event used to control the monitor health status.
         csv_file (str): path to the CSV file.
     """
     def __init__(self, process_name, pid, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
@@ -56,6 +55,7 @@ class Monitor:
         self.proc = None
         self.event = None
         self.thread = None
+        self.healthy = None
         self.previous_read = None
         self.previous_write = None
         self.set_process()
@@ -175,15 +175,9 @@ class Monitor:
                         self.previous_read = info[f'Disk_Read({self.value_unit})']
                         self.previous_write = info[f'Disk_Written({self.value_unit})']
         except psutil.NoSuchProcess:
-            logger.warning(f'Lost PID for {self.process_name}. Trying to obtain a new one. '
-                           'If the process has child processes, this test will not be valid')
-            try:
-                # Try to get another PID for the current process name. This could be wrong if there is more than
-                # one process with the same name (child processes)
-                self.pid = Monitor.get_process_pids(self.process_name, check_children=False)[0]
-                self.set_process()
-            except ValueError:
-                logger.warning(f'Could not obtain a new PID for {self.process_name}. Trying again in {self.time_step}s')
+            logger.warning(f'Lost PID for {self.process_name}')
+            self.shutdown()
+            self.healthy.set()
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for process {self.pid}')
@@ -222,6 +216,7 @@ class Monitor:
         self.event = Event()
         self.thread = Thread(target=self._monitor_process)
         self.thread.start()
+        self.healthy = Event()
 
     def start(self):
         """Start the monitoring threads."""
