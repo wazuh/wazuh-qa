@@ -55,25 +55,26 @@ tags:
     - fim_registry_file_limit
 '''
 import os
-
+from sys import platform
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, callback_file_limit_capacity, \
     callback_registry_count_entries, check_time_travel, delete_registry_value, callback_file_limit_back_to_normal, \
     registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey
+from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+if platform == 'win32':
+    import pywintypes
 
 # Marks
-
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-
-KEY = "HKEY_LOCAL_MACHINE"
-sub_key_1 = "SOFTWARE\\test_key"
+KEY = WINDOWS_HKEY_LOCAL_MACHINE
+sub_key_1 = MONITORED_KEY
 
 test_regs = [os.path.join(KEY, sub_key_1)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -163,7 +164,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         - time_travel
     '''
     # This import must be here in order to avoid problems in Linux.
-    import pywintypes
+    #import pywintypes
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
