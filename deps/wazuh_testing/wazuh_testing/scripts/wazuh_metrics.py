@@ -1,23 +1,31 @@
 import argparse
 import logging
+from collections import defaultdict
 from datetime import datetime
 from os import makedirs
 from os.path import join
 from signal import signal, SIGTERM, SIGINT
 from tempfile import gettempdir
-from time import time
+from time import time, sleep
 
 from wazuh_testing.tools.performance.binary import Monitor, logger
 
 METRICS_FOLDER = join(gettempdir(), 'process_metrics')
 CURRENT_SESSION = join(METRICS_FOLDER, datetime.now().strftime('%d-%m-%Y'), str(int(time())))
-MONITOR_LIST = []
+ACTIVE_MONITORS = defaultdict(list)
+SESSION_ACTIVE = True
 
 
 def shutdown_threads(signal_number, frame):
     logger.info('Attempting to shutdown all monitor threads')
-    for monitor in MONITOR_LIST:
+
+    global SESSION_ACTIVE
+    SESSION_ACTIVE = False
+
+    # Shutdown all possible monitors
+    for monitor in sum(ACTIVE_MONITORS.values(), []):
         monitor.shutdown()
+
     logger.info('Process finished')
 
 
@@ -37,6 +45,52 @@ def get_script_arguments():
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
 
     return parser.parse_args()
+
+
+def check_monitors_health(options, errors=0):
+    for process, monitors in ACTIVE_MONITORS.items():
+        # Check if there is any unhealthy monitor
+        if any(filter(lambda m: m.event.is_set(), monitors)):
+            logger.warning(f'Monitoring of {process} failed. Attempting to create new monitor instances')
+
+            try:
+                # Try to get new PIDs
+                process_pids = Monitor.get_process_pids(process)
+                # Shutdown all the related monitors to the failed process (necessary for multiprocessing)
+                for monitor in monitors:
+                    monitor.shutdown()
+            except ValueError as e:
+                errors_allowed = 5 * len(ACTIVE_MONITORS)
+                errors += 1
+                logger.warning(f'Could not create new monitor instances for {process}. Error {errors}/{errors_allowed}')
+                if errors >= errors_allowed:
+                    logger.error('Reached maximum number of retries. Aborting')
+                    raise e
+                continue
+
+            for i, pid in enumerate(process_pids):
+                # Attempt to create new monitor instances for the process
+                p_name = process if i == 0 else f'{process}_child_{i}'
+                monitor = Monitor(process_name=p_name, pid=pid, value_unit=options.data_unit,
+                                  time_step=options.sleep_time,
+                                  version=options.version, dst_dir=options.store_path)
+                monitor.start()
+
+                try:
+                    # Replace old monitors for new ones
+                    ACTIVE_MONITORS[process][i] = monitor
+                except IndexError:
+                    ACTIVE_MONITORS[process].append(monitor)
+
+    return errors
+
+
+def monitor_healthcheck(options):
+    errors = 0
+    while SESSION_ACTIVE:
+        monitoring_errors = check_monitors_health(options, errors)
+        errors = 0 if monitoring_errors == errors else monitoring_errors
+        sleep(5)
 
 
 def main():
@@ -59,7 +113,9 @@ def main():
             monitor = Monitor(process_name=p_name, pid=pid, value_unit=options.data_unit, time_step=options.sleep_time,
                               version=options.version, dst_dir=options.store_path)
             monitor.start()
-            MONITOR_LIST.append(monitor)
+            ACTIVE_MONITORS[process].append(monitor)
+
+    monitor_healthcheck(options)
 
 
 if __name__ == '__main__':
