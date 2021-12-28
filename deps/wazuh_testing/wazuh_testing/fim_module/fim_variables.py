@@ -38,3 +38,13 @@ SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 # Callbacks message
 INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
+CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
+CB_FILE_LIMIT_BACK_TO_NORMAL = r".*Sending DB back to normal alert."
+CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
+
+#Error Messages
+ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
+ERR_MSG_WRONG_CAPACITY_DB_LIMIT = 'Wrong capacity log for DB file_limit'
+ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., path count: ..." event'
+ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ...: Sending DB back to normal alert." event'
+ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'

@@ -61,9 +61,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, callback_file_limit_capacity, \
     callback_registry_count_entries, check_time_travel, delete_registry_value, callback_file_limit_back_to_normal, \
     registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey
-from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
+from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, \
+    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_DB_LIMIT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, \
+    ERR_MSG_DB_BACK_TO_NORMAL,CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 if platform == 'win32':
     import pywintypes
 
@@ -188,8 +190,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
 
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_end_scan,
-                                error_message='Did not receive expected '
-                                              '"Fim inode entries: ..., path count: ..." event')
+                                error_message=ERR_MSG_FIM_INODE_ENTRIES)
 
         for i in range(limit):
             try:
@@ -205,32 +206,19 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
 
     if percentage >= 80:  # Percentages 80 and 90
         file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                      callback=callback_file_limit_capacity,
-                                                      error_message='Did not receive expected '
-                                                                    '"DEBUG: ...: Sending DB ...% full alert." event'
-                                                      ).result()
+                                                      callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
+                                                      error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
+                                                      
+        assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_DB_LIMIT
 
-        if file_limit_capacity:
-            assert file_limit_capacity == str(percentage), 'Wrong capacity log for DB file_limit'
-        else:
-            pytest.fail('Wrong capacity log for DB file_limit')
     else:  # Database back to normal
         event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                              callback=callback_file_limit_back_to_normal,
-                                              error_message='Did not receive expected '
-                                                            '"DEBUG: ...: Sending DB back to normal alert." event'
-                                              ).result()
-
-        assert event_found, 'Event "Sending DB back to normal alert." not found'
+                                              callback=callback_generator(CB_FILE_LIMIT_BACK_TO_NORMAL),
+                                              error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=callback_registry_count_entries,
-                                      error_message='Did not receive expected '
-                                                    '"Fim inode entries: ..., path count: ..." event'
-                                      ).result()
+                                      callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),
+                                      error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
-    if entries:
-        # We add 1 because of the key created to hold the values
-        assert entries == str(NUM_REGS + 1), 'Wrong number of entries count.'
-    else:
-        pytest.fail('Wrong number of entries count')
+    # We add 1 because of the key created to hold the values
+    assert entries == str(NUM_REGS + 1), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
