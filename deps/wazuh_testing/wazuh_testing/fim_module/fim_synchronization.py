@@ -4,7 +4,7 @@
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_registry_integrity_state_event
 from wazuh_testing import global_parameters
-from wazuh_testing.fim_module.fim_variables import MAX_EVENTS_VALUE, REGISTRY_DBSYNC_NO_DATA
+from wazuh_testing.fim_module.fim_variables import MAX_EVENTS_VALUE, CB_REGISTRY_DBSYNC_NO_DATA
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
 
@@ -21,7 +21,7 @@ def get_sync_msgs(tout, new_data=True):
     events = []
     if new_data:
         wazuh_log_monitor.start(timeout=tout,
-                                callback=callback_generator(REGISTRY_DBSYNC_NO_DATA),
+                                callback=callback_generator(CB_REGISTRY_DBSYNC_NO_DATA),
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
     for _ in range(0, MAX_EVENTS_VALUE):

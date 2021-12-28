@@ -64,7 +64,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim_module.fim_variables import MAXIMUM_FILE_SIZE
+from wazuh_testing.fim_module.fim_variables import CB_MAXIMUM_FILE_SIZE
 
 # Marks
 
@@ -178,7 +178,7 @@ def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
     mode = get_configuration['metadata']['fim_mode']
 
     file_size_values = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_generator(MAXIMUM_FILE_SIZE),
+                                               callback=callback_generator(CB_MAXIMUM_FILE_SIZE),
                                                accum_results=3,
                                                error_message='Did not receive expected '
                                                              '"Maximum file size limit to generate diff information '

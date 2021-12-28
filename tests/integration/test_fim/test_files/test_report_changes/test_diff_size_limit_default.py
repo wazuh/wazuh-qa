@@ -89,9 +89,10 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (DIFF_DEFAULT_LIMIT_VALUE, MAXIMUM_FILE_SIZE,
+from wazuh_testing.fim_module.fim_variables import (DIFF_DEFAULT_LIMIT_VALUE, CB_MAXIMUM_FILE_SIZE,
                                                     REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES,
-                                                    YAML_CONF_DIFF)
+                                                    YAML_CONF_DIFF, ERR_MSG_MAXIMUM_FILE_SIZE,
+                                                    ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 from wazuh_testing.wazuh_variables import SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 
 # Marks
@@ -172,8 +173,8 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
 
     diff_size_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callback_generator(MAXIMUM_FILE_SIZE),
-        error_message='Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
+        callback=callback_generator(CB_MAXIMUM_FILE_SIZE),
+        error_message=ERR_MSG_MAXIMUM_FILE_SIZE
                                               ).result()
 
-    assert diff_size_value == str(DIFF_DEFAULT_LIMIT_VALUE), 'Wrong value for diff_size_limit'
+    assert diff_size_value == str(DIFF_DEFAULT_LIMIT_VALUE), ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE

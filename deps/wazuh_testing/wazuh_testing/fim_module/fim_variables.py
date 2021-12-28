@@ -52,6 +52,6 @@ SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
 # Callbacks message
-INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
-REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
-MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
+CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
+CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
+CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
