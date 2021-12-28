@@ -58,12 +58,12 @@ import os
 from sys import platform
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, callback_file_limit_capacity, \
-    callback_registry_count_entries, check_time_travel, delete_registry_value, callback_file_limit_back_to_normal, \
-    registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value,  check_time_travel, \
+    delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
+    RegOpenKeyEx, RegCloseKey
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, \
-    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_DB_LIMIT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, \
-    ERR_MSG_DB_BACK_TO_NORMAL,CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, \
+    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 if platform == 'win32':
@@ -84,7 +84,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 reg1 = test_regs[0]
 
 # Configurations
-
 
 file_limit_list = ['100']
 
@@ -109,11 +108,8 @@ def get_configuration(request):
 # Tests
 
 
-@pytest.mark.parametrize('percentage, tags_to_apply', [
-    (80, {'file_limit_registry_conf'}),
-    (90, {'file_limit_registry_conf'}),
-    (0, {'file_limit_registry_conf'})
-])
+@pytest.mark.parametrize('percentage, tags_to_apply', [(80, {'file_limit_registry_conf'}), 
+                        (90, {'file_limit_registry_conf'}), (0, {'file_limit_registry_conf'})])
 def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration, configure_environment,
                                    restart_syscheckd, wait_for_fim_start):
     '''
@@ -165,17 +161,13 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         - scheduled
         - time_travel
     '''
-    # This import must be here in order to avoid problems in Linux.
-    #import pywintypes
-
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     limit = int(get_configuration['metadata']['file_limit'])
 
     NUM_REGS = int(limit * (percentage / 100)) + 1
 
     if percentage == 0:
-        NUM_REGS = limit - 10
+        NUM_REGS = 0
 
     reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
@@ -183,16 +175,16 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         for i in range(NUM_REGS):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
     else:  # Database back to normal
-        for i in range(NUM_REGS):
+        for i in range(limit - 10):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
-        check_time_travel(scheduled, monitor=wazuh_log_monitor)
+        check_time_travel(True, monitor=wazuh_log_monitor)
 
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_end_scan,
                                 error_message=ERR_MSG_FIM_INODE_ENTRIES)
 
-        for i in range(NUM_REGS+1):
+        for i in range(limit):
             try:
                 delete_registry_value(reg1_handle, f'value_{i}')
             except OSError:
@@ -202,19 +194,17 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
 
     RegCloseKey(reg1_handle)
 
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if percentage >= 80:  # Percentages 80 and 90
-        file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                      callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
-                                                      error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
-                                                      
-        assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_DB_LIMIT 
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
+                                error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
 
     else:  # Database back to normal
-        event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                              callback=callback_generator(CB_FILE_LIMIT_BACK_TO_NORMAL),
-                                              error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=callback_generator(CB_FILE_LIMIT_BACK_TO_NORMAL),
+                                error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),

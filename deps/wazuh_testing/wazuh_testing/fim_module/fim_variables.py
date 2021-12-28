@@ -41,10 +41,13 @@ REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
 CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
+CB_DATABASE_FULL_ALERT_EVENT = r".*Sending DB (\d+)% full alert."
+CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*"
 
 #Error Messages
 ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
-ERR_MSG_WRONG_CAPACITY_DB_LIMIT = 'Wrong capacity log for DB file_limit'
 ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., path count: ..." event'
 ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ...: Sending DB back to normal alert." event'
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
+ERR_MSG_DATABASE_FULL_ALERT_EVENT = 'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
+ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
