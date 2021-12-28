@@ -40,7 +40,6 @@ class Monitor:
         pid (int): PID of the process.
         event (thread.Event): thread Event used to control the scans.
         thread (thread): thread to scan the data.
-        healthy (thread.Event): thread Event used to control the monitor health status.
         csv_file (str): path to the CSV file.
     """
     def __init__(self, process_name, pid, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
@@ -55,7 +54,6 @@ class Monitor:
         self.proc = None
         self.event = None
         self.thread = None
-        self.healthy = None
         self.previous_read = None
         self.previous_write = None
         self.set_process()
@@ -177,7 +175,6 @@ class Monitor:
         except psutil.NoSuchProcess:
             logger.warning(f'Lost PID for {self.process_name}')
             self.shutdown()
-            self.healthy.set()
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for process {self.pid}')
@@ -216,7 +213,6 @@ class Monitor:
         self.event = Event()
         self.thread = Thread(target=self._monitor_process)
         self.thread.start()
-        self.healthy = Event()
 
     def start(self):
         """Start the monitoring threads."""
