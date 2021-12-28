@@ -44,8 +44,7 @@ messages_path = os.path.join(local_path, 'data/messages.yml')
 tmp_path = os.path.join(local_path, 'tmp')
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
                                'provisioning', 'basic_environment', 'roles', 'agent-role', 'files', 'ossec.conf')
-manager_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
-                                 'provisioning', 'basic_environment', 'roles', 'manager-role', 'files', 'ossec.conf')
+manager_conf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml')
 test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_agent_auth_cases.yml'))
 
 wait_agent_start = 20
@@ -125,9 +124,9 @@ def modify_ip_address_conf(test_case):
 
     for configuration in test_case['test_case']:
         if 'yes' in configuration['ipv6_enabled']:
-            new_manager_configuration = old_manager_configuration.replace('<ipv6>no</ipv6>', '<ipv6>yes</ipv6>')
-            host_manager.modify_file_content(host='wazuh-manager', path='/var/ossec/etc/ossec.conf',
-                                             content=new_manager_configuration)
+            new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'yes'")
+        else:
+            new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'no'")
 
         if 'ipv4' in configuration['ip_type']:
             new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
@@ -161,6 +160,11 @@ def modify_ip_address_conf(test_case):
             else:
                 messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
 
+    with open(manager_conf_file, 'w') as file:
+        file.write(new_manager_configuration)
+
+    host_manager.apply_config(manager_conf_file)
+
     with open(messages_path, 'w') as file:
         file.write(messages_with_ip)
 
@@ -168,6 +172,9 @@ def modify_ip_address_conf(test_case):
 
     with open(messages_path, 'w') as file:
         file.write(messages)
+
+    with open(manager_conf_file, 'w') as file:
+        file.write(old_manager_configuration)
 
 
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
