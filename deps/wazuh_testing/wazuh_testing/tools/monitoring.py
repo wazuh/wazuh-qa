@@ -633,7 +633,6 @@ if hasattr(socketserver, 'ThreadingUnixStreamServer'):
 
 
 class StreamHandler(socketserver.BaseRequestHandler):
-    address_family = socket.AF_INET
 
     def unix_forward(self, data):
         """Default TCP unix socket forwarder for MITM servers."""
