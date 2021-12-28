@@ -55,10 +55,9 @@ network = {}
 @pytest.fixture(scope='function')
 def clean_environment():
     yield
-    agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
-    host_manager.get_host('wazuh-manager').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                   check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
+    agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+    host_manager.run_command('wazuh-manager', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id}")
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
@@ -101,6 +100,7 @@ def configure_network(test_case):
             host_manager.run_command('wazuh-manager', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
         elif 'ipv4' in configuration['manager_network']:
             host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][1]} dev eth0")
+            host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][2]} dev eth0")
 
         # Restore agent network configuration
         if 'ipv6' in configuration['agent_network']:
@@ -108,6 +108,7 @@ def configure_network(test_case):
             host_manager.run_command('wazuh-agent1', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
         elif 'ipv4' in configuration['agent_network']:
             host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
+            host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][2]} dev eth0")
 
 
 @pytest.fixture(scope='function')

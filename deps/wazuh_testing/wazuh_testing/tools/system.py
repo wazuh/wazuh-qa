@@ -246,12 +246,10 @@ class HostManager:
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
 
     def get_host_ip(self, host: str):
-            """Get the Ansible object for communicating with the specified host.
-
-            Args:
-                host (str): Hostname
-
-            Returns:
-                testinfra.modules.base.Ansible: Host instance from hostspec
-            """
-            return self.get_host(host).interface('eth0').addresses
+        """Get the Ansible object for communicating with the specified host.
+        Args:
+            host (str): Hostname
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
+        """
+        return self.get_host(host).interface('eth0').addresses
