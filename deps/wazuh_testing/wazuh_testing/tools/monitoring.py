@@ -836,9 +836,7 @@ def callback_generator(regex):
     def new_callback(line):
         match = re.match(regex, line)
         if match:
-            if match.group(1) is not None:
-                return match.group(1)
-            return True
+            return match.group(1)
 
     return new_callback
 

@@ -39,7 +39,7 @@ SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
-CB_FILE_LIMIT_BACK_TO_NORMAL = r".*Sending DB back to normal alert."
+CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
 
 #Error Messages

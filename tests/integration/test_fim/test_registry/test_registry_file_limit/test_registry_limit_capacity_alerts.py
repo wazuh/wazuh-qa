@@ -175,7 +175,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
     NUM_REGS = int(limit * (percentage / 100)) + 1
 
     if percentage == 0:
-        NUM_REGS = 0
+        NUM_REGS = limit - 10
 
     reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
@@ -183,7 +183,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         for i in range(NUM_REGS):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
     else:  # Database back to normal
-        for i in range(limit - 10):
+        for i in range(NUM_REGS):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
         check_time_travel(scheduled, monitor=wazuh_log_monitor)
@@ -192,7 +192,7 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
                                 callback=callback_detect_end_scan,
                                 error_message=ERR_MSG_FIM_INODE_ENTRIES)
 
-        for i in range(limit):
+        for i in range(NUM_REGS+1):
             try:
                 delete_registry_value(reg1_handle, f'value_{i}')
             except OSError:
