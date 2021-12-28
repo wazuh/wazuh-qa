@@ -45,11 +45,13 @@ def test_cluster_sync(artifacts_path):
             for i in range(len(sync_logs)):
                 # Compare whether current log and the previous one are equal.
                 if sync_logs[i][1] and sync_logs[i-2][1] and sync_logs[i-2][2:] == sync_logs[i][2:]:
-                    # If missing or extra valid files are synced, the number of calculated MD5 should be different
+                    # If missing or extra valid files are being synced, the number of calculated MD5 should be different
                     # in the following iteration.
-                    if sync_logs[i][2] != b'0' or sync_logs[i][5] != b'0':
-                        if sync_logs[i-1][0] and sync_logs[i+1][0] and sync_logs[i-1] == sync_logs[i+1]:
-                            repeat_counter += 1
+                    if sync_logs[i][2] != b'0' or sync_logs[i][4] != b'0':
+                        # If same number of missing and extra-valid files is synced, MD5 count should remain the same.
+                        if sync_logs[i][2] != sync_logs[i][4]:
+                            if sync_logs[i-1][0] and sync_logs[i+1][0] and sync_logs[i-1] == sync_logs[i+1]:
+                                repeat_counter += 1
                     # If only 1 shared file is synced, it could be the 'client.keys' so it doesn't count as a repeated
                     # log (agents could be registering).
                     elif sync_logs[i][2:] != (b'0', b'1', b'0', b'0'):
