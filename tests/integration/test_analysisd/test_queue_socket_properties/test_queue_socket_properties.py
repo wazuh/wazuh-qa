@@ -7,10 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: The 'wazuh-analysisd' daemon refreshes the queue socket file every time the daemon is set to
-       the testing configuration.
-       Specifically, this test will check if after setting up the 'wazuh-analysisd' daemon to the 
-       testing configuration the Inode and Filetime properties of the queue socket are changed.
+brief: The 'wazuh-analysisd' daemon refreshes the queue socket file every time the testing configuration is executed
+       Specifically, this test will check if after running the configuration test of 'wazuh-analysisd' the properties 
+       of the queue socket file are changed.
 
 tier: 0
 
@@ -72,12 +71,12 @@ command_exec = f'{analysisd_path} -t'
 
 @pytest.fixture(scope="function")
 def socket_file_properties():
-    """Get the Inode and File time value of the 'queue' socket of 'wazuh-analysisd'"""
+    """Get the inode and modification time values of the 'queue' socket of 'wazuh-analysisd'"""
     return os.stat(ANALYSISD_SOCKET).st_ino, os.path.getmtime(ANALYSISD_SOCKET)
 
 @pytest.fixture(scope="function")
 def run_analysisd_test_config():
-    """Run the test configuration mode for the 'wazuh-analysisd' daemon"""
+    """Run the daemon configuration test mode of 'wazuh-analysisd'"""
      # restart analysisd daemon
     control_service('restart', daemon='wazuh-analysisd')
     check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
@@ -89,8 +88,8 @@ def run_analysisd_test_config():
 
 def test_queue_socket_properties(socket_file_properties, run_analysisd_test_config):
     '''
-    description: Check if when the 'wazuh-analysisd' daemon is set up to the testing configuration, the Inode value
-                 and the File time value of the 'queue' socket are modified.
+    description: check if after running the configuration test of 'wazuh-analysisd' the properties 
+                 of the queue socket file are changed.
 
     wazuh_min_version: 4.2.0
 
@@ -100,21 +99,21 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
             brief: Obtain the current properties of the 'queue' socket.
         - run_analysisd_test_config:
             type: fixture
-            brief: Change the wazuh-analysisd daemon configuration into the testing configuration mode.
+            brief: Run the daemon configuration test mode of 'wazuh-analysisd'
         
 
     assertions:
-        - Verify that the Inode value of the socket file does not change its value after analysisd gets the
-          testing configuration set up.
-        - Verify that the File time value of the socket file does not change its value after analysisd
-          gets the testing configuration set up.
+        - Verify that the Inode value of the socket file does not change its value after running the
+          configuration test of 'wazuh-analysisd'
+        - Verify that the File time value of the socket file does not change its value after running the
+          configuration test of 'wazuh-analysisd'
     
-    input_description: The test gets the current properties of the socket file and some configutation parameters
-                       to configure the 'wazuh-analysisd' daemon.
+    input_description: The test gets the current properties of the socket file and some parameters
+                       to run the daemon configuration test of 'wazuh-analysisd'.
 
     expected_output:
-        - f"The Inode value for the socket  {ANALYSISD_SOCKET} has changed"
-        - f"The Filetime value for the socket {ANALYSISD_SOCKET} has changed"
+        - f"The inode value for the socket  {ANALYSISD_SOCKET} has changed"
+        - f"The modification time property for the socket {ANALYSISD_SOCKET} has changed"
     tags:
         - errors
     '''
@@ -126,7 +125,7 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     run_analysisd_test_config
 
     assert current_inode_file == os.stat(ANALYSISD_SOCKET).st_ino, \
-            f"The Inode value for the socket  {ANALYSISD_SOCKET} has changed"
+            f"The inode value for the socket  {ANALYSISD_SOCKET} has changed"
 
     assert current_status_time == os.path.getmtime(ANALYSISD_SOCKET), \
-            f"The File time value for the socket {ANALYSISD_SOCKET} has changed"
+            f"The modification time property value for the socket {ANALYSISD_SOCKET} has changed"
