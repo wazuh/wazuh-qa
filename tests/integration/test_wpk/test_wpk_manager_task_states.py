@@ -8,7 +8,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: Register agents in the manager and test upgrading
-        them through a command, which will made the agent
+        them through a command, which will make the agent
         to upgrade using WPK packages.
 
 tier: 0
@@ -61,7 +61,7 @@ os_version:
     - Windows Server 2003
 
 references:
-    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
 
 pytest_args:
     - wpk_version: Specify the version to upgrade
@@ -272,7 +272,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
     '''
     description: Register agents in the manager and test upgrading
-                 them through a command, which will made the agent
+                 them through a command, which will make the agent
                  to upgrade using WPK packages.
 
     wazuh_min_version: 4.2.0
@@ -286,7 +286,7 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
             brief: Configure a custom environment for testing.
         - restart_service:
             type: fixture
-            brief: Restarts Wazuh manager.
+            brief: Restart Wazuh manager.
         - configure_agents:
             type: fixture
             brief: Configure all simulated agents.

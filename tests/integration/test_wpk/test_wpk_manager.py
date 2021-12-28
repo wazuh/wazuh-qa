@@ -9,7 +9,7 @@ type: integration
 
 brief: Prepare an environment with different agents to test WPK upgrade,
         with different scenarios containing agents already updated, agents
-        that can not be updated, repository not reachable, disconected agents...
+        that can not be updated, repository not reachable, disconnected agents...
 
 tier: 0
 
@@ -62,7 +62,7 @@ os_version:
     - Windows Server 2003
 
 references:
-    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
 
 pytest_args:
     - wpk_version: Specify the version to upgrade
@@ -941,14 +941,14 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
     '''
     description: Prepare an environment with different agents to test WPK upgrade,
                  with different scenarios containing agents already updated, agents
-                 that can not be updated, repository not reachable, disconected agents...
+                 that can not be updated, repository not reachable, disconnected agents...
 
     wazuh_min_version: 4.2.0
 
     parameters:
         - set_debug_mode:
             type: fixture
-            brief: Sets the debug mode in the manager.
+            brief: Set the debug mode in the manager.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -957,7 +957,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
             brief: Configure a custom environment for testing.
         - restart_service:
             type: fixture
-            brief: Restarts Wazuh manager.
+            brief: Restart Wazuh manager.
         - configure_agents:
             type: fixture
             brief: Configure all simulated agents.
