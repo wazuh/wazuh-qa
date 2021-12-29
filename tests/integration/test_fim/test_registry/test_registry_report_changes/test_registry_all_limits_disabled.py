@@ -62,6 +62,7 @@ from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
     calculate_registry_diff_paths
+from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -71,12 +72,11 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-key = "HKEY_LOCAL_MACHINE"
-sub_key_1 = "SOFTWARE\\test_key"
-sub_key_2 = "SOFTWARE\\Classes\\test_key"
+key = WINDOWS_HKEY_LOCAL_MACHINE
+sub_key_1 = MONITORED_KEY
+sub_key_2 = MONITORED_KEY_2
 
-test_regs = [os.path.join(key, sub_key_1),
-             os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(key, sub_key_1), os.path.join(key, sub_key_2)]
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -111,10 +111,9 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_limits'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_limits'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
-def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply,
-                             get_configuration, configure_environment, restart_syscheckd,
-                             wait_for_fim_start):
+## @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
+def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply, get_configuration, configure_environment,
+                             restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates all FIM events when the 'file_size' and
                  the 'disk_quota' tags have set a small limit but they are disabled. For this purpose,
@@ -182,7 +181,6 @@ def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply,
         assert os.path.exists(diff_file), '{diff_file} does not exist'
         assert event['data'].get('content_changes') is not None, 'content_changes is empty'
 
-    registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
+    registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, time_travel=True,
                        min_timeout=global_parameters.default_timeout, triggers_event=True,
                        validators_after_update=[report_changes_validator_diff])

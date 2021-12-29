@@ -154,7 +154,6 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     '''
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    import pdb
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                 callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                 error_message=ERR_MSG_FILE_LIMIT_VALUES).result()

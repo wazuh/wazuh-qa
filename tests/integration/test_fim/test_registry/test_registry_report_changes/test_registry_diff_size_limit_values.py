@@ -88,7 +88,7 @@ p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': 
                                                           'WINDOWS_REGISTRY_2': reg2,
                                                           'DIFF_SIZE_LIMIT': {'diff_size_limit': '10KB'}})
 
-configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_registry_file_size_values.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
