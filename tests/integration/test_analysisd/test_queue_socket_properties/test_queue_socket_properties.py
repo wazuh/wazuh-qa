@@ -7,7 +7,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: The 'wazuh-analysisd' daemon refreshes the queue socket file every time the testing configuration is executed
+brief: The 'wazuh-analysisd' daemon refreshes the queue socket file every time the test configuration is executed
        Specifically, this test will check if after running the configuration test of 'wazuh-analysisd' the properties 
        of the queue socket file are changed.
 
