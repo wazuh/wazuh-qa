@@ -12,6 +12,7 @@ maintain if one of them changes in the future.
 # Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
 MONITORED_KEY = 'SOFTWARE\\random_key'
+MONITORED_KEY_2 = "SOFTWARE\\Classes\\random_key_2"
 WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 
