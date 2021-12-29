@@ -75,6 +75,8 @@ from wazuh_testing.tools import HOSTS_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, DEFAULT_WAIT_FILE_TIMEOUT
 from wazuh_testing import agent
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.agent import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_PATH
 
 
 # Marks
@@ -90,26 +92,21 @@ log_monitor_paths = []
 
 
 parameters = [
-    {'SERVER_ADDRESS': 'MANAGER_IP'},                               # Invalid server address
-    {'SERVER_ADDRESS': '127.0.0.1'},                               # Server address Ipv4
-    {'SERVER_ADDRESS': '::1'},                               # Server address ipv6
-
-    {'SERVER_ADDRESS': '172.28.128.hello'},                         # Could not resolve hostname
-    {'SERVER_ADDRESS': '::ffff:ac1c::::::::800c'},                         # Valid IP, unable to connect (IPv6 compressed)
-
-    {'SERVER_ADDRESS': 'wazuh-manager-ipv4'},                                   # Resolve hostname, valid IP, unable to connect (IPv4)
-    {'SERVER_ADDRESS': 'wazuh-manager-ipv6'},                        # Resolve hostname, valid IP, unable to connect (IPv6 compressed)
+    {'SERVER_ADDRESS': 'MANAGER_IP'},                 # Invalid server address
+    {'SERVER_ADDRESS': '127.0.0.1'},                  # Server address Ipv4
+    {'SERVER_ADDRESS': '::1'},                        # Server address ipv6
+    {'SERVER_ADDRESS': '172.28.128.hello'},           # Could not resolve hostname
+    {'SERVER_ADDRESS': '::ffff:ac1c::::::::800c'},    # Valid IP, unable to connect (IPv6 compressed)
+    {'SERVER_ADDRESS': 'wazuh-manager-ipv4'},         # Resolve hostname, valid IP, unable to connect (IPv4)
+    {'SERVER_ADDRESS': 'wazuh-manager-ipv6'},         # Resolve hostname, valid IP, unable to connect (IPv6 compressed)
 ]
 
 metadata = [
     {'server_address': 'MANAGER_IP'},
     {'server_address': '127.0.0.1', 'valid_ip': True, 'expected_connection': True},
     {'server_address': '::1', 'valid_ip': True, 'expected_connection': True, 'ipv6': True},
-
-
-    {'server_address': '172.28.128.hello'},                        
-    {'server_address': '::ffff:ac1c::::::::800c'},                         
-
+    {'server_address': '172.28.128.hello'},
+    {'server_address': '::ffff:ac1c::::::::800c'},
     {'server_address': 'wazuh-manager-ipv4', 'host_ip': '127.0.0.1', 'expected_connection': True},
     {'server_address': 'wazuh-manager-ipv6', 'host_ip': '::1', 'expected_connection': True, 'ipv6': True}
 ]
@@ -123,6 +120,7 @@ configuration_ids = [f"{x['SERVER_ADDRESS']}" for x in parameters]
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 @pytest.fixture(scope="module")
 def edit_hosts(get_configuration):
@@ -146,8 +144,14 @@ def get_current_test_case(get_configuration):
     return get_configuration['metadata']
 
 
-def test_agentd_server_address_configuration(get_configuration, configure_environment, configure_local_internal_options_module, 
-                                             configure_sockets_environment, configure_socket_listener, 
+@pytest.fixture(scope="module")
+def clean_client_keys(get_configuration):
+    truncate_file(CLIENT_KEYS_PATH)
+
+
+def test_agentd_server_address_configuration(configure_local_internal_options_module, clean_client_keys,
+                                             get_configuration, configure_environment,
+                                             configure_sockets_environment, configure_socket_listener,
                                              create_certificates, edit_hosts, daemons_handler, file_monitoring):
 
     '''
@@ -179,7 +183,7 @@ def test_agentd_server_address_configuration(get_configuration, configure_enviro
     assertions:
         - Verify that the messages have been produced in ossec.log
 
-    input_description: An external YAML file (server_address_configuration.yaml) includes configuration settings for the agent.
+    input_description: The `server_address_configuration.yaml` file includes configuration settings for the agent.
                        Eight test cases are found in the test module and include parameters
                        for the environment setup using the TCP  protocols.
 
@@ -208,7 +212,7 @@ def test_agentd_server_address_configuration(get_configuration, configure_enviro
         if 'expected_connection' in cfg:
             callback = agent.callback_connected_to_manager_ip(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                              error_message="The expected 'Unable to connect to' message has not been produced")
+                              error_message="The expected 'Connected to the server' message has not been produced")
         else:
             callback = agent.callback_unable_to_connect(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
