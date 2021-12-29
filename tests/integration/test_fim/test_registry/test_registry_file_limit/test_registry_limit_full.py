@@ -67,7 +67,6 @@ from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
 # Marks
 
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
