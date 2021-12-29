@@ -23,10 +23,34 @@
     elements:
     - connection:
         value: syslog
-    -  allowed-ips:
-         value: ALLOWED
-    -  denied-ips:
-         value: DENIED
+    - allowed-ips:
+        value: ALLOWED
+    - denied-ips:
+        value: DENIED
+    - ipv6:
+        value: IPV6
+    - port:
+        value: 514
+    - protocol:
+        value: UDP
+
+- tags:
+  - test_basic_configuration_multiple_allowed_denied_ips
+  apply_to_modules:
+  - test_basic_configuration_multiple_allowed_denied_ips
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: syslog
+    - allowed-ips:
+        value: ALLOWED
+    - allowed-ips:
+        value: ALLOWED2
+    - denied-ips:
+        value: DENIED
+    - ipv6:
+        value: IPV6
     - port:
         value: 514
     - protocol:
