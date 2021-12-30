@@ -242,6 +242,7 @@
   -
     name: "Invalid long agent IPv6 address"
     description: "Try register an agent with valid compressed IPv6"
+    test_case:
     -
       input: "OSSEC A:'user1' IP:'11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'"
       output:
@@ -250,6 +251,7 @@
 -
     name: "Invalid Agent IPv6 address with words"
     description: "Try to register an invalid agent_address"
+    test_case:
     -
       input: "OSSEC A:'user1' IP:'02db:4660:46af:invalid:d05e:a62e:4ca7:8e58'"
       output:
