@@ -174,20 +174,6 @@
             "test_name": "blacklist"
         },
         {
-            "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/wazuh/core/common.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 63,
-            "line_range": [
-                63
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
             "code": " import re\n import subprocess\n import sys\n",
             "filename": "framework/wazuh/core/configuration.py",
             "issue_confidence": "HIGH",
