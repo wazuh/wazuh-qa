@@ -61,43 +61,21 @@ import ipaddress
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import API_LOG_FILE_PATH
-
+from wazuh_testing.tools.file import truncate_file, read_yaml
+from wazuh_testing.tools import API_LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.api import get_api_details_dict
-from wazuh_testing.tools import CLIENT_KEYS_PATH
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 api_registration_requets_file = os.path.join(test_data_path, 'api_agent_registration_cases.yaml')
 daemons_handler_configuration = {'all_daemons': True}
-api_registration_requests = []
-with open(api_registration_requets_file) as tcases:
-    api_registration_requests = yaml.safe_load(tcases)
+api_registration_requests = read_yaml(api_registration_requets_file)
 
-parameters = [
-    {'IPV6': 'yes'},
-]
-metadata = [
-    {'ipv6': 'yes'},
-]
-
-configurations_path = os.path.join(test_data_path, 'agent_api_registration_configuration.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['ipv6']}" for x in metadata]
 api_registration_requests_ids = [tcase['name'].replace(' ', '-').lower() for tcase in api_registration_requests]
-
-
-# fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
 
 
 def retrieve_client_key_entry(agent_parameters):
@@ -120,7 +98,7 @@ def retrieve_client_key_entry(agent_parameters):
     return desired_entries
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def clean_registered_agents():
     control_service('stop')
     truncate_file(CLIENT_KEYS_PATH)
@@ -133,13 +111,13 @@ def clean_registered_agents():
     control_service('start')
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def truncate_api_log():
     truncate_file(API_LOG_FILE_PATH)
 
 
 def check_valid_agent_id(id):
-    return re.match("(^[0-9][0-9][0-9]$)", id)
+    return re.match('(^[0-9][0-9][0-9]$)', id)
 
 
 def check_valid_agent_key(key):
@@ -169,9 +147,9 @@ def check_api_data_response(api_response, expected_response):
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-@pytest.mark.parametrize("api_registration_parameters", api_registration_requests, ids=api_registration_requests_ids)
-def test_agentd_server_configuration(get_configuration, configure_environment, truncate_api_log,
-                                     clean_registered_agents, wait_for_start_module, api_registration_parameters):
+@pytest.mark.parametrize('api_registration_parameters', api_registration_requests, ids=api_registration_requests_ids)
+def test_agentd_server_configuration(truncate_api_log, clean_registered_agents, wait_for_start_module,
+                                     api_registration_parameters):
     '''
     description:
         Checks `wazuh-api` responds correctly to agent registration requests. Also, ensure client.keys is update
@@ -190,13 +168,15 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - restart_and_wait_api:
+        - truncate_api_log:
             type: fixture
-            brief: Restart `wazuh-api` and wait until it is ready to accept requests.
+            brief: Truncate API logs.
         - clean_registered_agents:
             type: fixture
             brief: Remove current registered agents in the environment.
-
+        - wait_for_start_module:
+            type: fixture
+            brief: Wait for api starts.
 
     assertions:
         - Verify that agents IPV4 agents can be registered
@@ -208,8 +188,8 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
                        Manager configuration is contained in agent_api_registration_configuration.yaml
 
     expected_output:
-        - r'{"error":0,' (When the agent has enrolled)
-        - r'{"error":1706,' (When the agent name or IP is already used)
+        - r"{'error':0," (When the agent has enrolled)
+        - r"{'error':1706," (When the agent name or IP is already used)
 
     tags:
         - api
@@ -228,7 +208,7 @@ def test_agentd_server_configuration(get_configuration, configure_environment, t
             expected_client_keys_ip = (ipaddress.IPv6Address(request_parameters['agent_ip']).exploded).upper()
 
         if 'ipv4_as_ipv6' in request_parameters:
-            # IPv4 as IPv6 format: "::ffff:127.1.3.4"
+            # IPv4 as IPv6 format: '::ffff:127.1.3.4'
             expected_client_keys_ip = expected_client_keys_ip.split(':')[3]
 
         expected_client_keys_entry = {'name': request_parameters['agent_name'],

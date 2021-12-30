@@ -170,8 +170,3 @@ def wait_for_start_module():
     file_monitor = FileMonitor(API_LOG_FILE_PATH)
     file_monitor.start(timeout=20, callback=callback_detect_api_start,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
-
-
-@pytest.fixture(scope='module')
-def restart_and_wait_api(restart_api_module, wait_for_start_module):
-    pass
