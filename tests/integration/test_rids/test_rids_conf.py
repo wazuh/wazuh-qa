@@ -121,7 +121,7 @@ def set_internal_options_conf(param, value):
 
 def test_rids_conf(get_configuration, configure_environment):
     '''
-    description: Check that RIDS configuration works as expected for the following fields: `remoted.verify_msg_id` and
+    description: Check that RIDS configuration works as expected for the following fields, `remoted.verify_msg_id` and
                  `remoted.worker_pool`. To do this, it modifies the local internal options with the test case metadata
                  and restarts Wazuh to verify that the daemon starts or not. Finally, when a correct configuration has
                  been tested, it restores the `internal_options.conf` as it was before running the test.
@@ -143,8 +143,8 @@ def test_rids_conf(get_configuration, configure_environment):
                        the 'wazuh_manager_conf.yaml'.
 
     expected_output:
-        - `expected_start` boolean variable with `True` when a defined valid RIDS configuration is loaded.
-        - `expected_start` boolean variable with `False` when a defined wrong RIDS configuration is loaded.
+        - The `expected_start` boolean variable with `True` when a defined valid RIDS configuration is loaded.
+        - The `expected_start` boolean variable with `False` when a defined wrong RIDS configuration is loaded.
     '''
     metadata = get_configuration.get('metadata')
     expected_start = metadata['expected_start']

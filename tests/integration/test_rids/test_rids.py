@@ -183,8 +183,8 @@ def test_rids(get_configuration, configure_environment, restart_service):
                        the 'wazuh_manager_conf.yaml'.
 
     expected_output:
-        - `rids_for_agent_open` boolean variable with `True` when RIDS should be `opened`.
-        - `rids_for_agent_open` boolean variable with `False` when RIDS should be `closed`.
+        - The `rids_for_agent_open` boolean variable with `True` when RIDS should be `opened`.
+        - The `rids_for_agent_open` boolean variable with `False` when RIDS should be `closed`.
     '''
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
