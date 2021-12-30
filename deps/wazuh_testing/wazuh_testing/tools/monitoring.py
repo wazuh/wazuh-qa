@@ -755,7 +755,7 @@ class ManInTheMiddle:
         if family in ('AF_UNIX', 'AF_INET', 'AF_INET6'):
             self.family = family
         else:
-            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
+            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         self.forwarded_socket_path = None
 
