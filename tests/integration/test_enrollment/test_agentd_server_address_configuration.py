@@ -89,7 +89,7 @@ daemons_handler_configuration = {'daemons': ['wazuh-agentd'], 'ignore_errors': T
 local_internal_options = {'windows.debug': '2'} if sys.platform == 'win32' else {'agent.debug': '2'}
 monitored_sockets_params = []
 log_monitor_paths = []
-
+no_restart_windows_after_configuration_set = True
 
 parameters = [
     {'SERVER_ADDRESS': 'MANAGER_IP'},                 # Invalid server address
