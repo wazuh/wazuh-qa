@@ -122,9 +122,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Chmod setting a permissive mask 0o770 on file (group_path).",
-            "line_number": 635,
+            "line_number": 634,
             "line_range": [
-                635
+                634
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b103_set_bad_file_permissions.html",
             "test_id": "B103",
@@ -136,9 +136,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible binding to all interfaces.",
-            "line_number": 55,
+            "line_number": 67,
             "line_range": [
-                55
+                67
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
@@ -264,27 +264,13 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 453,
+            "line_number": 442,
             "line_range": [
-                453
+                442
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
             "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": "     failed_files = list()\n     zip_file_path = path.join(common.wazuh_path, 'queue', 'cluster', name, f'{name}-{time()}-{str(random())[2:]}.zip')\n     if not path.exists(path.dirname(zip_file_path)):\n",
-            "filename": "framework/wazuh/core/cluster/cluster.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-            "line_number": 264,
-            "line_range": [
-                264
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b311-random",
-            "test_id": "B311",
-            "test_name": "blacklist"
         }
     ]
 }
