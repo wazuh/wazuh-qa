@@ -1,5 +1,48 @@
 {
-    "false_positives": [],
+    "false_positives": [
+        {
+            "code": "     # end time\n     result = wdb_conn.execute(f\"agent {agent_id} sql SELECT max(date_last) FROM pm_event WHERE \"\n                               \"log = 'Ending rootcheck scan.'\")\n",
+            "filename": "framework/wazuh/core/rootcheck.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Possible SQL injection vector through string-based query construction.",
+            "line_number": 98,
+            "line_range": [
+                98
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
+            "test_id": "B608",
+            "test_name": "hardcoded_sql_expressions"
+        },
+        {
+            "code": " def syscheck_delete_agent(agent: str, wdb_conn: WazuhDBConnection) -> None:\n     wdb_conn.execute(f\"agent {agent} sql delete from fim_entry\", delete=True)\n",
+            "filename": "framework/wazuh/core/syscheck.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Possible SQL injection vector through string-based query construction.",
+            "line_number": 49,
+            "line_range": [
+                49
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
+            "test_id": "B608",
+            "test_name": "hardcoded_sql_expressions"
+        },
+        {
+            "code": "     # start time\n     result = wdb_conn.execute(f\"agent {agent_id} sql SELECT max(date_last) FROM pm_event \"\n                               \"WHERE log = 'Starting rootcheck scan.'\")\n",
+            "filename": "framework/wazuh/core/rootcheck.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "MEDIUM",
+            "issue_text": "Possible SQL injection vector through string-based query construction.",
+            "line_number": 104,
+            "line_range": [
+                104
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
+            "test_id": "B608",
+            "test_name": "hardcoded_sql_expressions"
+        }
+    ],
     "to_fix": [
         {
             "code": "             child.kill()\n         except Exception:\n             pass\n \n",
@@ -15,20 +58,6 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html",
             "test_id": "B110",
             "test_name": "try_except_pass"
-        },
-        {
-            "code": " def syscheck_delete_agent(agent: str, wdb_conn: WazuhDBConnection) -> None:\n     wdb_conn.execute(f\"agent {agent} sql delete from fim_entry\", delete=True)\n",
-            "filename": "framework/wazuh/core/syscheck.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 49,
-            "line_range": [
-                49
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
-            "test_id": "B608",
-            "test_name": "hardcoded_sql_expressions"
         },
         {
             "code": " from signal import signal, alarm, SIGALRM\n from subprocess import CalledProcessError, check_output\n from xml.etree.ElementTree import ElementTree\n",
@@ -201,34 +230,6 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
             "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": "     # end time\n     result = wdb_conn.execute(f\"agent {agent_id} sql SELECT max(date_last) FROM pm_event WHERE \"\n                               \"log = 'Ending rootcheck scan.'\")\n",
-            "filename": "framework/wazuh/core/rootcheck.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 98,
-            "line_range": [
-                98
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
-            "test_id": "B608",
-            "test_name": "hardcoded_sql_expressions"
-        },
-        {
-            "code": "     # start time\n     result = wdb_conn.execute(f\"agent {agent_id} sql SELECT max(date_last) FROM pm_event \"\n                               \"WHERE log = 'Starting rootcheck scan.'\")\n",
-            "filename": "framework/wazuh/core/rootcheck.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 104,
-            "line_range": [
-                104
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
-            "test_id": "B608",
-            "test_name": "hardcoded_sql_expressions"
         },
         {
             "code": "     try:\n         output = check_output(command)\n     except CalledProcessError as error:\n",
