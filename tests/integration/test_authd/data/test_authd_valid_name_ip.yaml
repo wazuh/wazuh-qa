@@ -248,7 +248,7 @@
       output:
         status: 'error'
         message: 'Invalid IP: 11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'
--
+  -
     name: "Invalid Agent IPv6 address with words"
     description: "Try to register an invalid agent_address"
     test_case:
