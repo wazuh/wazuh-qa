@@ -55,7 +55,9 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#max-messages
 
 tags:
-    - gcloud_functionality
+    - limits
+    - scan
+    - maximum
 '''
 import os
 import sys

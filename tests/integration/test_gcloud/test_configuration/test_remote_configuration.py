@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
 
 tags:
-    - gcloud_configuration
+    - config
+    - remote
 '''
 import os
 import pytest

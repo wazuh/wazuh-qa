@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#logging
 
 tags:
-    - gcloud_functionality
+    - logging
+    - logs
 '''
 import os
 import sys

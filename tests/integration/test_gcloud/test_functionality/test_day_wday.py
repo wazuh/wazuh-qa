@@ -56,7 +56,10 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#time
 
 tags:
-    - gcloud_functionality
+    - week_day
+    - scan
+    - scheduled
+    - interval
 '''
 import datetime
 import os

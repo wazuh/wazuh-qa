@@ -53,7 +53,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
 
 tags:
-    - gcloud_functionality
+    - rules
+    - config
 '''
 import os
 import sys

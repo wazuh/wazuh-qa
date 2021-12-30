@@ -54,7 +54,9 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#interval
 
 tags:
-    - gcloud_functionality
+    - scan
+    - scheduled
+    - interval
 '''
 import datetime
 import os

@@ -54,7 +54,10 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#pull-on-start
 
 tags:
-    - gcloud_functionality
+    - pull
+    - config
+    - on_start
+    - scan
 '''
 import os
 import sys
