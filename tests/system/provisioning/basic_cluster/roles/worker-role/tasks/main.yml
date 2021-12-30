@@ -99,15 +99,3 @@
 
 - name: "Install necessary dependencies"
   command: /var/ossec/framework/python/bin/python3.9 -m pip install lockfile filetype certifi testinfra
-
-- name: "Create wdb get agent script"
-  copy:
-    dest: "/get_wdb_agent.py"
-    content: |
-      import sys
-      sys.path.append('/wazuh-qa/deps/wazuh_testing')
-      from wazuh_testing import wazuh_db
-
-      result = wazuh_db.query_wdb(sys.argv[1])
-      if result:
-          print(result)

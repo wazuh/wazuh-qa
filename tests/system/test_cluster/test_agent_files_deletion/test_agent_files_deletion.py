@@ -15,6 +15,7 @@ worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
+script_path = '/wazuh-qa/tests/system/test_cluster/test_agent_files_deletion/data'
 tmp_path = os.path.join(local_path, 'tmp')
 managers_hosts = [master_host, worker_host]
 inventory_path = join(dirname(dirname(dirname(abspath(__file__)))), 'provisioning', 'basic_cluster', 'inventory.yml')
@@ -32,15 +33,15 @@ queries = ['global sql select * from agent where id={id}',
            'global sql select * from belongs where id_agent={id}']
 
 
-def agent_healthcheck():
+def agent_healthcheck(master_token):
     """Check if the agent is active and reporting."""
 
     timeout = time() + time_to_agent_reconnect
-    command = f'{WAZUH_PATH}/bin/cluster_control -a | grep active | wc -l'
     while True:
-        if int(host_manager.run_shell('wazuh-worker2',
-                                      command)) == 4 and int(host_manager.run_shell('wazuh-master',
-                                                                                    command)) == 4 or time() > timeout:
+        response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
+                                              endpoint=f'/agents?status=active')
+        assert response['status'] == 200, f'Failed when trying to get the active agents'
+        if int(response["json"]["data"]["total_affected_items"]) == 4 or time() > timeout:
             break
         sleep(5)
     sleep(time_to_sync)
@@ -54,11 +55,13 @@ def test_agent_files_deletion():
         host_manager.clear_file(host=hosts, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
         host_manager.control_service(host=hosts, service='wazuh', state="restarted")
 
+    # Get the token
+    master_token = host_manager.get_api_token(master_host)
+
     # Check if the agent is connected and reporting
-    agent_healthcheck()
+    agent_healthcheck(master_token)
 
     # Get the current ID and name of the agent that is reporting to worker_host.
-    master_token = host_manager.get_api_token(master_host)
     response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
                                           endpoint=f'/agents?select=id,name&q=manager={worker_host}')
 
@@ -81,9 +84,9 @@ def test_agent_files_deletion():
     # Check that agent information is in the wdb socket
     for host in managers_hosts:
         for query in queries:
-            print(query.format(id=agent_id))
             result = host_manager.run_command(host,
-                                              f"/var/ossec/framework/python/bin/python3.9 /get_wdb_agent.py "
+                                              f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                              f"{script_path}/get_wdb_agent.py "
                                               f"'{query.format(id=agent_id)}'")
         assert result, f'This db query should have returned something in {host}, but it did not: {result}'
 
@@ -109,9 +112,10 @@ def test_agent_files_deletion():
     for host in managers_hosts:
         for query in queries:
             result = host_manager.run_command(host,
-                                              f"/var/ossec/framework/python/bin/python3.9 /get_wdb_agent.py "
+                                              f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                              f"{script_path}/get_wdb_agent.py "
                                               f"'{query.format(id=agent_id)}'")
         assert not result, f'This db query should have not returned anything in {host}, but it did: {result}'
 
     host_manager.get_host(agent_host).ansible('command', f'service wazuh-agent restart', check=False)
-    agent_healthcheck()
+    agent_healthcheck(master_token)
