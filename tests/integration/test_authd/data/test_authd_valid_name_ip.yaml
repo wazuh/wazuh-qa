@@ -239,3 +239,19 @@
       output:
         status: 'error'
         message: 'Invalid IP: 56FE::2159:5BBC::6594'
+  -
+    name: "Invalid long agent IPv6 address"
+    description: "Try register an agent with valid compressed IPv6"
+    -
+      input: "OSSEC A:'user1' IP:'11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'
+-
+    name: "Invalid Agent IPv6 address with words"
+    description: "Try to register an invalid agent_address"
+    -
+      input: "OSSEC A:'user1' IP:'02db:4660:46af:invalid:d05e:a62e:4ca7:8e58'"
+      output:
+        status: 'error'
+        message: 'Invalid IP: 02db:4660:46af:invalid:d05e:a62e:4ca7:8e58'
