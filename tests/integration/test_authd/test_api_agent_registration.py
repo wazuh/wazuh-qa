@@ -52,18 +52,16 @@ tags:
     - authd
     - api
 '''
+import ipaddress
+import re
+import requests
 import os
 import pytest
-import yaml
-import requests
-import re
-import ipaddress
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import truncate_file, read_yaml
 from wazuh_testing.tools import API_LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.api import get_api_details_dict
+from wazuh_testing.tools.file import truncate_file, read_yaml
+from wazuh_testing.tools.services import control_service
 
 
 # Marks
