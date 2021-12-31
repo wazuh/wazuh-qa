@@ -62,7 +62,12 @@ configurations_single = load_wazuh_configurations(configurations_path, "test_bas
 configurations_multiple = load_wazuh_configurations(configurations_path, "test_basic_configuration_multiple_allowed_denied_ips",
                                            params=parameters_multiple, metadata=metadata_multiple)
 configurations = configurations_single + configurations_multiple
-configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
+configuration_ids = []
+for x in parameters:
+    if 'ALLOWED2' not in x:
+        configuration_ids.append(f"{x['ALLOWED']}_{x['DENIED']}_{x['IPV6']}")
+    else:
+        configuration_ids.append(f"{x['ALLOWED']}_{x['ALLOWED2']}_{x['DENIED']}_{x['IPV6']}")
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
@@ -84,13 +89,16 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     netmask = cfg['allowed-ips'][-3:]
     allowed_ips = ipaddress.ip_address(address).exploded + netmask
     log_callback = remote.callback_detect_syslog_allowed_ips(allowed_ips)
-    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
+    wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
     if 'allowed-ips2' in cfg:
         address2 = cfg['allowed-ips2'][:-3]
         netmask2 = cfg['allowed-ips2'][-3:]
         allowed_ips2 = ipaddress.ip_address(address2).exploded + netmask2
         log_callback = remote.callback_detect_syslog_allowed_ips(allowed_ips2)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
+        wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
 
-    #compare_config_api_response([cfg], 'remote')
+        cfg['allowed-ips'] = [cfg['allowed-ips'], cfg['allowed-ips2']]
+        cfg.pop('allowed-ips2')
+    
+    compare_config_api_response([cfg], 'remote')
