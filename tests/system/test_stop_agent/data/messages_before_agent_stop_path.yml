@@ -1,0 +1,4 @@
+wazuh-agent1:
+  - regex: ".*Unable to connect to the Auth service at.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 90

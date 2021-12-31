@@ -1,0 +1,58 @@
+wazuh-manager:
+  - regex: ".*wazuh-modulesd:syscollector: INFO: Stop received for Syscollector."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: ".*wazuh-modulesd:syscollector: INFO: Module finished."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: ".*wazuh-monitord:.*Terminated.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-logcollector:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-remoted:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-syscheckd:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-analysisd:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-execd:.*Shutdown received.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-execd:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-db:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-authd.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+
+
+wazuh-agent1:
+  - regex: ".*wazuh-modulesd:syscollector: INFO: Stop received for Syscollector."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: ".*wazuh-modulesd:syscollector: INFO: Module finished."
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: ".*wazuh-logcollector:.*Terminated.*"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-syscheckd:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-agentd.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-execd:.*Shutdown received.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10
+  - regex: '.*wazuh-execd:.*Terminated.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 10

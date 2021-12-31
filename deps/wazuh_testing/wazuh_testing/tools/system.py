@@ -244,3 +244,7 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+    def get_running_process(self, host: str, process: str):
+
+        return self.get_host(host).process.get(comm=process)
