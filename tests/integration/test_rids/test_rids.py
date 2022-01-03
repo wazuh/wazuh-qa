@@ -22,6 +22,7 @@ components:
 
 daemons:
     - wazuh-remoted
+    - wazuh-agentd
 
 os_platform:
     - linux
@@ -170,14 +171,14 @@ def test_rids(get_configuration, configure_environment, restart_service):
             brief: Get configuration from the module.
         - configure_environment:
             type: fixture
-            brief: Configure a custom environment for testing
+            brief: Configure a custom environment for testing.
         - restart_service:
             type: fixture
             brief: Method to restart the service.
 
     assertions:
-        - Verify that every agent rid is open
-        - Verify that every agent rid is closed
+        - Verify that every agent rid is open.
+        - Verify that every agent rid is closed.
 
     input_description: Some metadata is defined in the module. These include some configurations stored in
                        the 'wazuh_manager_conf.yaml'.

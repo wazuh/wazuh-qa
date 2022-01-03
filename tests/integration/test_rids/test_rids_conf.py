@@ -22,6 +22,7 @@ components:
 
 daemons:
     - wazuh-remoted
+    - wazuh-agentd
 
 os_platform:
     - linux
@@ -134,10 +135,10 @@ def test_rids_conf(get_configuration, configure_environment):
             brief: Get configuration from the module.
         - configure_environment:
             type: fixture
-            brief: Configure a custom environment for testing
+            brief: Configure a custom environment for testing.
 
     assertions:
-        - Verify that the RIDS configuration is applied correctly(or not)
+        - Verify that the RIDS configuration is applied correctly(or not).
 
     input_description: Some metadata is defined in the module. These include some configurations stored in
                        the 'wazuh_manager_conf.yaml'.
