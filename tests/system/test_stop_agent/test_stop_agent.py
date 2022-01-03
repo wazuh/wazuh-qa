@@ -3,7 +3,24 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-
+brief: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish the communication.
+       This test will check that Wazuh is stopped during this loop.
+tier: 0
+modules:
+    - agentd
+components:
+    - manager
+    - agent
+daemons:
+    - wazuh-agentd
+    - wazuh-modulesd
+    - wazuh-execd
+    - wazuh-syscheckd
+    - wazuh-logcollector
+os_platform:
+    - linux
+os_version:
+    - Debian Buster
 '''
 
 import os
@@ -11,7 +28,7 @@ from time import sleep
 
 import pytest
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
@@ -33,7 +50,11 @@ wait_agent_start = 70
 # Remove the agent once the test has finished
 @pytest.fixture(scope='function')
 def clean_environment():
+
+    host_manager.clear_file(host='wazuh-agent1', file_path=WAZUH_LOCAL_INTERNAL_OPTIONS)
+
     yield
+
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
     host_manager.get_host('wazuh-manager').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
                                                    check=False)
@@ -45,7 +66,30 @@ def clean_environment():
 
 def test_stop_agent(clean_environment):
     '''
-
+    description: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish the communication.
+                 This test will check that Wazuh is stopped during this loop.
+    wazuh_min_version: 4.3.0
+    parameters:
+        - clean_environment:
+            type: fixture
+            brief: Clean environment after every test execution.
+    assertions:
+        - Verify that expected logs are received after manager and agent stop.
+        - Verify that no processes are running in the agent.
+    input_description: There is no specific input for this test.
+    expected_output:
+        - '.*wazuh-modulesd:syscollector: INFO: Stop received for Syscollector.'
+        - '.*wazuh-modulesd:syscollector: INFO: Module finished.'
+        - '.*wazuh-monitord:.*Terminated.*'
+        - '.*wazuh-logcollector:.*Terminated.*'
+        - '.*wazuh-remoted:.*Terminated.*'
+        - '.*wazuh-syscheckd:.*Terminated.*'
+        - '.*wazuh-analysisd:.*Terminated.*'
+        - '.*wazuh-execd:.*Shutdown received.*'
+        - '.*wazuh-execd:.*Terminated.*'
+        - '.*wazuh-db:.*Terminated.*'
+        - '.*wazuh-authd.*Terminated.*'
+        - '.*wazuh-agentd.*Terminated.*'
     '''
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
