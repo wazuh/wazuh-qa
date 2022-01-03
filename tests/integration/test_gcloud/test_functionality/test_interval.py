@@ -117,8 +117,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_interval(get_configuration, configure_environment,
-                  daemons_handler, wait_for_gcp_start):
+def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs at the periods set in the configuration
                  by the 'interval' tag. For this purpose, the test will use different intervals and check if
@@ -166,7 +165,6 @@ def test_interval(get_configuration, configure_environment,
     start_time = time.time()
     next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                                                  callback=callback_detect_start_gcp_sleep,
-                                                 accum_results=1,
                                                  error_message='Did not receive expected '
                                                                '"Sleeping until ..." event').result()
 
@@ -181,7 +179,6 @@ def test_interval(get_configuration, configure_environment,
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
                             callback=callback_detect_start_fetching_logs,
-                            accum_results=1,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
     end_time = time.time()
