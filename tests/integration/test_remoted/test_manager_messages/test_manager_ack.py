@@ -1,3 +1,59 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Check if the manager sends the ACK message after receiving
+        the start-up message from the agent.
+
+tier: 0
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
+
+tags:
+    - remoted
+'''
 import pytest
 import os
 import wazuh_testing.tools.agent_simulator as ag
@@ -93,7 +149,29 @@ def get_configuration(request):
 
 
 def test_manager_ack(get_configuration, configure_environment, restart_remoted):
-    """Check if the manager sends the ACK message after receiving the start-up message from the agent."""
+    '''
+    description: Check if the manager sends the ACK message after receiving
+                 the start-up message from the agent.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_remoted:
+            type: fixture
+            brief: Restart 'wazuh-remoted' daemon in manager.
+    
+    assertions:
+    
+    input_description: 
+    
+    expected_output:
+    '''
     protocol = get_configuration['metadata']['protocol']
 
     if is_tcp_udp(protocol):

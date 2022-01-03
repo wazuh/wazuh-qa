@@ -1,7 +1,58 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+type: integration
+
+brief: Test if wazuh-remoted sends the #pong message
+
+tier: 0
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
+
+tags:
+    - remoted
+'''
 import os
 import pytest
 
@@ -83,11 +134,29 @@ def get_configuration(request):
 
 
 def test_ping_pong_message(get_configuration, configure_environment, restart_remoted):
-    """Test if wazuh-remoted sends the #pong message
-
-    Raises:
-        AssertionError: if `wazuh-remoted` doesn't respond `#pong`
-    """
+    '''
+    description: Test if wazuh-remoted sends the #pong message
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_remoted:
+            type: fixture
+            brief: Restart 'wazuh-remoted' daemon in manager.
+    
+    assertions:
+        - Verify the #pong message is sent correctly.
+    
+    input_description: 
+    
+    expected_output:
+    '''
     config = get_configuration['metadata']
 
     test_multiple_pings = False
