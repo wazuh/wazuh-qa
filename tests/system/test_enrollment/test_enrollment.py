@@ -70,8 +70,8 @@ def clean_environment():
 def get_ip_directions():
     global network
 
-    manager_network = host_manager.get_host_ip('wazuh-manager')
-    agent_network = host_manager.get_host_ip('wazuh-agent1')
+    manager_network = host_manager.get_host_ip('wazuh-manager', 'eth0')
+    agent_network = host_manager.get_host_ip('wazuh-agent1', 'eth0')
 
     network['manager_network'] = manager_network
     network['agent_network'] = agent_network
