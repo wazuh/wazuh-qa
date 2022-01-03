@@ -146,20 +146,6 @@
             "test_name": "hardcoded_tmp_directory"
         },
         {
-            "code": "         chmod_r(group_path, 0o660)\n         chmod(group_path, 0o770)\n         msg = f\"Group '{group_id}' created.\"\n",
-            "filename": "framework/wazuh/agent.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Chmod setting a permissive mask 0o770 on file (group_path).",
-            "line_number": 634,
-            "line_range": [
-                634
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b103_set_bad_file_permissions.html",
-            "test_id": "B103",
-            "test_name": "set_bad_file_permissions"
-        },
-        {
             "code": "     iv = InputValidator()\n     reservated_ips = {'localhost', 'NODE_IP', '0.0.0.0', '127.0.1.1'}\n \n",
             "filename": "framework/wazuh/core/cluster/cluster.py",
             "issue_confidence": "MEDIUM",
