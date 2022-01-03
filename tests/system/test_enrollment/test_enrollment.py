@@ -31,7 +31,7 @@ from time import sleep
 import pytest
 
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.file import read_file, read_yaml, write_file
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
@@ -112,14 +112,11 @@ def configure_network(test_case):
 @pytest.fixture(scope='function')
 def modify_ip_address_conf(test_case):
 
-    with open(agent_conf_file, 'r') as file:
-        old_agent_configuration = file.read()
+    old_agent_configuration = read_file(agent_conf_file)
 
-    with open(messages_path, 'r') as file:
-        messages = file.read()
+    messages = read_file(messages_path)
 
-    with open(manager_conf_file, 'r') as file:
-        old_manager_configuration = file.read()
+    old_manager_configuration = read_file(manager_conf_file)
 
     if 'yes' in test_case['ipv6_enabled']:
         new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'yes'")
@@ -162,21 +159,17 @@ def modify_ip_address_conf(test_case):
         else:
             messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
 
-    with open(manager_conf_file, 'w') as file:
-        file.write(new_manager_configuration)
+    write_file(manager_conf_file, new_manager_configuration)
 
     host_manager.apply_config(manager_conf_file)
 
-    with open(messages_path, 'w') as file:
-        file.write(messages_with_ip)
+    write_file(messages_path, messages_with_ip)
 
     yield
 
-    with open(messages_path, 'w') as file:
-        file.write(messages)
+    write_file(messages_path, messages)
 
-    with open(manager_conf_file, 'w') as file:
-        file.write(old_manager_configuration)
+    write_file(manager_conf_file, old_manager_configuration)
 
 
 @pytest.mark.parametrize('test_case', [cases['test_case'] for cases in test_cases_yaml], ids=[cases['name']
