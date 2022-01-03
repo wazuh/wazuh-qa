@@ -3,8 +3,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-brief: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish the communication.
-       This test will check that Wazuh is stopped during this loop.
+brief: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish
+       the communication. This test will check that Wazuh is stopped during this loop.
 tier: 0
 modules:
     - agentd
@@ -66,8 +66,8 @@ def clean_environment():
 
 def test_stop_agent(clean_environment):
     '''
-    description: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish the communication.
-                 This test will check that Wazuh is stopped during this loop.
+    description: When Wazuh Agent fails to connect with the manager it starts a try loop until re-establish
+                 the communication. This test will check that Wazuh is stopped during this loop.
     wazuh_min_version: 4.3.0
     parameters:
         - clean_environment:
@@ -109,8 +109,8 @@ def test_stop_agent(clean_environment):
 
     for process in wazuh_agent_processes:
         try:
-            pid = host_manager.get_running_process(host='wazuh-agent1', process = process)
-        except:
+            pid = host_manager.get_running_process(host='wazuh-agent1', process=process)
+        except Exception:
             pass
         else:
             pytest.fail(f'{process} was running')
