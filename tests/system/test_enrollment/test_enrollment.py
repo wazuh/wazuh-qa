@@ -118,10 +118,8 @@ def modify_ip_address_conf(test_case):
 
     old_manager_configuration = read_file(manager_conf_file)
 
-    if 'yes' in test_case['ipv6_enabled']:
-        new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'yes'")
-    else:
-        new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'no'")
+    new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', f"'{test_case['ipv6_enabled']}'")
+
     if 'ipv4' in test_case['ip_type']:
         new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                             f"<address>{network['manager_network'][0]}</address>")
