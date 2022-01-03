@@ -37,7 +37,7 @@ from wazuh_testing.tools.system import HostManager
 
 
 # Hosts
-testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
+testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'basic_environment', 'inventory.yml')
