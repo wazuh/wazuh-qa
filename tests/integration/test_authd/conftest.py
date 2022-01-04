@@ -27,7 +27,6 @@ def truncate_client_keys_file():
     truncate_file(CLIENT_KEYS_PATH)
 
 
-
 @pytest.fixture(scope='function')
 def clean_client_keys_file_function():
     """
