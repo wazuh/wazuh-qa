@@ -20,7 +20,13 @@ package_data_list = [
     'data/sslmanager.key',
     'data/sslmanager.cert',
     'tools/macos_log/log_generator.m',
-    'qa_docs/config.yaml'
+    'qa_docs/schema.yaml',
+    'qa_docs/VERSION.json'
+    'qa_ctl/deployment/dockerfiles/*',
+    'qa_ctl/deployment/dockerfiles/qa_ctl/*',
+    'qa_ctl/deployment/vagrantfile_template.txt',
+    'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
+    'data/qactl_conf_validator_schema.json',
 ]
 
 scripts_list = [
@@ -30,7 +36,11 @@ scripts_list = [
     'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
     'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
     'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
-    'qa-docs=wazuh_testing.scripts.qa_docs:main'
+    'qa-docs=wazuh_testing.scripts.qa_docs:main',
+    'qa-ctl=wazuh_testing.scripts.qa_ctl:main',
+    'add-agents-client-keys=wazuh_testing.scripts.add_agents_client_keys:main',
+    'add-agents-to-default-group=wazuh_testing.scripts.add_agents_to_default_group:main',
+    'unsync-agents=wazuh_testing.scripts.unsync_agents:main'
 ]
 
 
@@ -38,11 +48,11 @@ def get_files_from_directory(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join(path, filename))
+            paths.append(os.path.join('..', path, filename))
     return paths
 
 
-package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui/'))
+package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(name='wazuh_testing',
       version='4.3.0',
@@ -57,3 +67,4 @@ setup(name='wazuh_testing',
       include_package_data=True,
       zip_safe=False
       )
+

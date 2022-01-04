@@ -7,7 +7,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the content of the `wazuh-agentd` daemon statistics file is valid.
+brief: The 'wazuh-agentd' program is the client-side daemon that communicates with the server.
+       These tests will check if the content of the 'wazuh-agentd' daemon statistics file is valid.
        The statistics files are documents that show real-time information about the Wazuh environment.
 
 tier: 0
@@ -47,9 +48,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-agentd-state.html
@@ -135,10 +138,10 @@ def add_custom_key():
                          ids=[test_case['name'] for test_case in test_cases])
 def test_agentd_state(configure_environment, test_case: list):
     '''
-    description: Check that the statistics file `wazuh-agentd.state` is created automatically
+    description: Check that the statistics file 'wazuh-agentd.state' is created automatically
                  and verify that the content of its fields is correct.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_environment:
@@ -149,13 +152,13 @@ def test_agentd_state(configure_environment, test_case: list):
             brief: List of tests to be performed.
 
     assertions:
-        - Verify that the `wazuh-agentd.state` statistics file has been created.
-        - Verify that the information stored in the `wazuh-agentd.state` statistics file
-          is consistent with the connection status to the `wazuh-remoted` daemon.
+        - Verify that the 'wazuh-agentd.state' statistics file has been created.
+        - Verify that the information stored in the 'wazuh-agentd.state' statistics file
+          is consistent with the connection status to the 'wazuh-remoted' daemon.
 
-    input_description: Different test cases that are contained in an external
-                       `YAML` file (wazuh_state_tests.yaml) that includes
-                       the parameters and their expected responses.
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases that are contained in an external YAML file (wazuh_state_tests.yaml)
+                       that includes the parameters and their expected responses.
 
     expected_output:
         - r'pending'

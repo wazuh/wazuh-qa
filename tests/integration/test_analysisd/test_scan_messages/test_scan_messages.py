@@ -7,9 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `wazuh-analysisd` daemon correctly handles incoming events related
-       to file scanning. The `wazuh-analysisd` daemon receives the log messages and compares
-       them to the rules. It then creates an alert when a log message matches an applicable rule.
+brief: The 'wazuh-analysisd' daemon receives the log messages and compares them to the rules.
+       It then creates an alert when a log message matches an applicable rule.
+       Specifically, these tests will check if the 'wazuh-analysisd' daemon correctly handles
+       incoming events related to file scanning.
 
 tier: 0
 
@@ -100,11 +101,11 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def test_scan_messages(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                        test_case: list):
     '''
-    description: Check if when the `wazuh-analysisd` daemon socket receives a message with
+    description: Check if when the 'wazuh-analysisd' daemon socket receives a message with
                  a file scanning-related event, it generates the corresponding alert
-                 that sends to the `wazuh-db` daemon socket.
+                 that sends to the 'wazuh-db' daemon socket.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_sockets_environment:
@@ -112,10 +113,10 @@ def test_scan_messages(configure_sockets_environment, connect_to_sockets_module,
             brief: Configure environment for sockets and MITM.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
+            brief: Module scope version of 'connect_to_sockets' fixture.
         - wait_for_analysisd_startup:
             type: fixture
-            brief: Wait until the `wazuh-analysisd` has begun and the `alerts.json` file is created.
+            brief: Wait until the 'wazuh-analysisd' has begun and the 'alerts.json' file is created.
         - test_case:
             type: list
             brief: List of tests to be performed.
@@ -123,8 +124,8 @@ def test_scan_messages(configure_sockets_environment, connect_to_sockets_module,
     assertions:
         - Verify that the messages generated are consistent with the events received.
 
-    input_description: Different test cases that are contained in an external `YAML` file (scan_messages.yaml)
-                       that includes `syscheck` events data and the expected output.
+    input_description: Different test cases that are contained in an external YAML file (scan_messages.yaml)
+                       that includes 'syscheck' events data and the expected output.
 
     expected_output:
         - Multiple messages (scan status logs) corresponding to each test case,

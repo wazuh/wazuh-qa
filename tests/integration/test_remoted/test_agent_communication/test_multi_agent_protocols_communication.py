@@ -56,6 +56,7 @@ import pytest
 
 import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
+import wazuh_testing.tools.monitoring as mo
 
 from time import sleep
 from wazuh_testing import TCP, UDP, TCP_UDP
@@ -149,12 +150,11 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
         send_event_threads.append(ThreadExecutor(send_event, {'event': event, 'protocol': protocol,
                                                               'manager_port': manager_port, 'agent': agent}))
 
-    # Create socket monitor thread and start it
-    socket_monitor_thread = ThreadExecutor(rd.check_queue_socket_event, {'raw_events': search_patterns})
-    socket_monitor_thread.start()
+    # Create archives log monitor
+    archives_monitor = rd.create_archives_log_monitor()
 
-    # Wait 3 seconds until socket monitor is fully initialized
-    sleep(3)
+    # Wait 10 seconds until remoted is fully initialized
+    sleep(10)
 
     # Start sender event threads
     for thread in send_event_threads:
@@ -164,8 +164,13 @@ def validate_agent_manager_protocol_communication(num_agents=2, manager_port=151
     for thread in send_event_threads:
         thread.join()
 
-    # Wait until socket monitor thread finishes
-    socket_monitor_thread.join()
+    # Monitor archives log to find the sent messages
+    for search_pattern in search_patterns:
+        rd.detect_archives_log_event(archives_monitor,
+                                     callback=mo.make_callback(pattern=search_pattern, prefix=r".*"),
+                                     update_position=False,
+                                     timeout=30,
+                                     error_message="Agent message wasn't received or took too much time.")
 
 
 # Fixtures

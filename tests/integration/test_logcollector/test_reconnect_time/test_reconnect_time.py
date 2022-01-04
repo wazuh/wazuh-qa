@@ -18,7 +18,8 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 local_internal_options = {
     'logcollector.remote_commands': 1,
     'logcollector.debug': 2,
-    'monitord.rotate_log': 0
+    'monitord.rotate_log': 0,
+    'windows.debug': '2'
 }
 
 # Configuration
@@ -26,6 +27,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_reconnect_time.yaml')
 
 timeout_callback_reconnect_time = 30
+timeout_eventlog_read = 5
 
 parameters = [
     {'LOCATION': 'Application', 'LOG_FORMAT': 'eventchannel', 'RECONNECT_TIME': '5s'},
@@ -68,8 +70,13 @@ def get_local_internal_options():
     return local_internal_options
 
 
-def test_reconnect_time(get_local_internal_options, configure_local_internal_options, get_configuration,
-                        configure_environment, restart_logcollector):
+@pytest.fixture(scope="module")
+def start_eventlog_process(get_configuration):
+    services.control_event_log_service('start')
+
+
+def test_reconnect_time(start_eventlog_process, get_local_internal_options, configure_local_internal_options, get_configuration,
+                        configure_environment, restart_monitord, file_monitoring, restart_logcollector):
     """Check if reconnect_time value works properly
 
     Ensure correspond debug logs are generated when Windows event log service stop. Also, when event log service is
@@ -85,15 +92,17 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
+    time.sleep(timeout_eventlog_read)
+    
     services.control_event_log_service('stop')
 
     log_callback = logcollector.callback_event_log_service_down(config['location'])
-    wazuh_log_monitor.start(timeout=30, callback=log_callback,
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
     log_callback = logcollector.callback_trying_to_reconnect(config['location'],
                                                              time_to_seconds(config['reconnect_time']))
-    wazuh_log_monitor.start(timeout=30, callback=log_callback,
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
     services.control_event_log_service('start')
@@ -114,7 +123,7 @@ def test_reconnect_time(get_local_internal_options, configure_local_internal_opt
         TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
         logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
 
-    wazuh_log_monitor.start(timeout=30, callback=log_callback,
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     TimeMachine.time_rollback()

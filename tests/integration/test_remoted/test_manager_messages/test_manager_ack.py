@@ -137,7 +137,7 @@ def check_manager_ack(protocol):
         sender.send_event(agent.startup_msg)
 
         # Check ACK manager message
-        rd.check_agent_received_message(agent.rcv_msg_queue, '#!-agent ack')
+        rd.check_agent_received_message(agent, '#!-agent ack')
     finally:
         injector.stop_receive()
 

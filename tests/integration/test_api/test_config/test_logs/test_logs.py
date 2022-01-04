@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `level` setting of the API is working properly. This setting
-       allows specifying the level of detail (INFO, DEBUG) of the messages written to the `api.log` file.
-       The Wazuh API is an open source `RESTful` API that allows for interaction with the Wazuh manager
-       from a web browser, command line tool like `cURL` or any script or program that can make web requests.
+brief: These tests will check if the 'level' setting of the API is working properly. This setting
+       allows specifying the level of detail (INFO, DEBUG) of the messages written to the 'api.log' file.
+       The Wazuh API is an open source 'RESTful' API that allows for interaction with the Wazuh manager
+       from a web browser, command line tool like 'cURL' or any script or program that can make web requests.
 
 tier: 0
 
@@ -109,11 +109,11 @@ def extra_configuration_before_yield():
 def test_logs(tags_to_apply, get_configuration, configure_api_environment, restart_api):
     '''
     description: Check if the logs are saved in the desired path and with desired level.
-                 Logs are usually store in `/var/ossec/logs/api.log` and with level `info`.
-                 In this test the API log has a different path and `debug` level configured.
-                 It checks if logs are saved in the new path and with `debug` level.
+                 Logs are usually store in '/var/ossec/logs/api.log' and with level 'info'.
+                 In this test the API log has a different path and 'debug' level configured.
+                 It checks if logs are saved in the new path and with 'debug' level.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - tags_to_apply:
@@ -127,13 +127,13 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
 
     assertions:
-        - Verify that no `DEBUG` messages are written when the value of the `level` setting is set to `info`.
-        - Verify that `DEBUG` messages are written when the value of the `level` setting is set to `debug`.
+        - Verify that no 'DEBUG' messages are written when the value of the 'level' setting is set to 'info'.
+        - Verify that 'DEBUG' messages are written when the value of the 'level' setting is set to 'debug'.
 
-    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+    input_description: Different test cases are contained in an external YAML file (conf.yaml)
                        which includes API configuration parameters (log paths and log levels).
 
     expected_output:

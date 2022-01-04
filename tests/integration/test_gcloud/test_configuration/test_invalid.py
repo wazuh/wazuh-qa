@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
+       (Data access, Admin activity, System events, DNS queries, etc.) from the
+       Google Cloud infrastructure. Once events are collected, Wazuh processes
+       them using its threat detection rules. Specifically, these tests
+       will check if that module detects invalid configurations and indicates
+       the location of the errors detected.
+
+tier: 1
+
+modules:
+    - gcloud
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
+
+tags:
+    - gcloud_configuration
+'''
 import os
 import sys
 
@@ -15,26 +69,13 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
+
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
 
 # variables
 
-if global_parameters.gcp_project_id is not None:
-    project_id = global_parameters.gcp_project_id
-else:
-    raise ValueError(f"Google Cloud project id not found. Please use --gcp-project-id")
-
-if global_parameters.gcp_subscription_name is not None:
-    subscription_name = global_parameters.gcp_subscription_name
-else:
-    raise ValueError(f"Google Cloud subscription name not found. Please use --gcp-subscription-name")
-
-if global_parameters.gcp_credentials_file is not None:
-    credentials_file = global_parameters.gcp_credentials_file
-else:
-    raise ValueError(f"Credentials json file not found. Please enter a valid path using --gcp-credentials-file")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'invalid_conf.yaml')
@@ -43,8 +84,9 @@ force_restart_after_restoring = True
 # configurations
 
 monitoring_modes = ['scheduled']
-conf_params = {'PROJECT_ID': project_id, 'SUBSCRIPTION_NAME': subscription_name,
-               'CREDENTIALS_FILE': credentials_file, 'MODULE_NAME': __name__}
+conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
+               'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
+               'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
@@ -62,18 +104,44 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_invalid(get_configuration, configure_environment, reset_ossec_log):
-    """
-    Checks if an invalid configuration is detected
+    '''
+    description: Check if the 'gcp-pubsub' module detects invalid configurations. For this purpose, the test
+                 will configure 'gcp-pubsub' using invalid configuration settings with different attributes.
+                 Finally, it will verify that error events are generated indicating the source of the errors.
 
-    Using invalid configurations with different attributes,
-    expect an error message and gcp-pubsub unable to start.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - reset_ossec_log:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that the 'gcp-pubsub' module generates error events when invalid configurations are used.
+
+    input_description: Different test cases are contained in an external YAML file (invalid_conf.yaml) which
+                       includes configuration settings for the 'gcp-pubsub' module. The GCP access credentials
+                       can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - r'.*read_main_elements.*: ERROR.* Invalid element in the configuration.*'
+        - r'.*at _sched_scan_validate_parameters.*: ERROR.*'
+        - r'.*at sched_scan_read.*: ERROR.*'
+        - r'.*at sched_scan_read.*: ERROR.*'
+
+    tags:
+        - invalid_settings
+    '''
     # Configuration error -> ValueError raised
-    try:
+    with pytest.raises(ValueError):
         control_service('restart')
-    except ValueError:
-        assert sys.platform != 'win32', 'Restarting ossec with invalid configuration should ' \
-                                        'not raise an exception in win32'
+
     tags_to_apply = get_configuration['tags'][0]
 
     if tags_to_apply == 'invalid_gcp_wmodule':

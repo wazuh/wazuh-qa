@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM monitors newly added directories
+       that match a wildcard used in the configuration.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 import sys
 import pytest
@@ -27,6 +97,7 @@ expresion_str = ','.join(expressions)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards.yml')
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -54,29 +125,56 @@ def get_configuration(request):
 @pytest.mark.parametrize('subfolder_name', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards'}])
+@mark_skip_agentWindows
 def test_basic_usage_wildcards(subfolder_name, file_name, tags_to_apply,
                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """Test the correct expansion of wildcards for monitored directories in syscheck
+    '''
+    description: Check if the number of directories to monitor grows when using wildcards to specify them.
+                 For this purpose, the test creates a set of directories that match the wildcard expressions
+                 and ones that do not match the expressions set in the directories to be monitored.
+                 Then, the test will create, modify and delete files inside a folder given as an argument.
+                 Finally, the test will wait for events only if the folder where the changes are made
+                 matches the expression previously set in the 'wazuh-syscheckd' daemon configuration.
 
-    The following wildcards expansions will be tried against the directory list:
-        - test_folder/simple? will match simple?
-        - test_folder/star* will match stars123
-        - test_folder/*ple* will match simple1 and multiple_1
-        - not_monitored_directory won't match any of the previous expressions
+    wazuh_min_version: 4.2.0
 
-    For each subfolder there will be three different calls to regular_file_cud and
-    for every subfolder the variable triggers_event will be set properly depending on the
-    wildcards matching of the subfolder.
+    parameters:
+        - subfolder_name:
+            type: str
+            brief: Path to the subdirectory in the monitored folder.
+        - filename:
+            type: str
+            brief: Name of the testing file that will be created in the subfolder.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait until the first FIM scan is completed.
 
-    Params:
-        subfolder_name (str): Name of the subfolder under root folder.
-        file_name (str): Name of the file that will be created under subfolder.
-        tags_to_apply (str): Value holding the configuration used in the test.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
-    """
+    assertions:
+        - Verify that FIM monitors newly added directories that match a wildcard used in the configuration.
+
+    input_description: A test case (ossec_conf_wildcards) is contained in external YAML file
+                       (wazuh_conf_wildcards.yaml) which includes configuration settings for
+                       the 'wazuh-syscheckd' daemon and, it is combined with the testing
+                       directories to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+
+    tags:
+        - scheduled
+    '''
     if sys.platform == 'win32':
         if '?' in file_name or '*' in file_name:
             pytest.skip("Windows can't create files with wildcards.")

@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `wazuh-authd` daemon correctly handles the enrollment requests
-       from agents with pre-existing IP addresses or names. The `wazuh-authd` daemon can automatically
-       add a Wazuh agent to a Wazuh manager and provide the key to the agent. It’s used along with
-       the `agent-auth` application.
+brief: These tests will check if the 'wazuh-authd' daemon correctly handles the enrollment requests
+       from agents with pre-existing IP addresses or names. The 'wazuh-authd' daemon can automatically
+       add a Wazuh agent to a Wazuh manager and provide the key to the agent. It is used along with
+       the 'agent-auth' application.
 
 tier: 0
 
@@ -75,18 +75,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """Loads a yaml file from a path
-    Return
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
 # Variables
@@ -298,7 +288,9 @@ def register_agent_main_server(Name, Group=None, IP=None):
 
 
 def register_agent_local_server(Name, Group=None, IP=None):
-    message = '{{"arguments":{{"force":0,"name":"{}"'.format(Name)
+    message = ('{"arguments":{"force":{"enabled":true,"disconnected_time":{"enabled":true,"value":"0"},'
+               '"key_mismatch":true,"after_registration_time":"0"}')
+    message += ',"name":"{}"'.format(Name)
     if Group:
         message += ',"groups":"{}"'.format(Group)
     if IP:
@@ -316,7 +308,7 @@ def register_agent_local_server(Name, Group=None, IP=None):
 
 # Tests
 def duplicate_ip_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated IP.
+    """Register a first agent, then register an agent with duplicate IP.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
@@ -358,7 +350,7 @@ def duplicate_ip_agent_delete_test(server):
 
 
 def duplicate_name_agent_delete_test(server):
-    """Register a first agent, then register an agent with duplicated Name.
+    """Register a first agent, then register an agent with duplicate Name.
         Check that client.keys, agent-groups, agent-timestamp and agent diff were updated correctly
 
     Parameters
@@ -402,12 +394,14 @@ def duplicate_name_agent_delete_test(server):
 def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
                                      configure_sockets_environment, connect_to_sockets_module):
     '''
-    description: Check if when the `wazuh-authd` daemon receives an enrollment request from an agent
-                 that has an IP address or name that is already registered, `authd` creates a record
-                 for the new agent and deletes the old one. In this case, the enrollment requests
-                 are sent to an IP v4 network socket.
+    description:
+        Check if when the 'wazuh-authd' daemon receives an enrollment request from an agent
+        that has an IP address or name that is already registered, 'authd' creates a record
+        for the new agent and deletes the old one. In this case, the enrollment requests
+        are sent to an IP v4 network socket.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -424,17 +418,18 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
             brief: Configure environment for sockets and MITM.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
+            brief: Module scope version of 'connect_to_sockets' fixture.
 
     assertions:
         - Verify that agents using an already registered IP address can successfully enroll.
         - Verify that agents using an already registered name can successfully enroll.
 
-    input_description: Different test cases are contained in an external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-authd` daemon.
+    input_description:
+        Different test cases are contained in an external YAML file (wazuh_conf.yaml)
+        which includes configuration settings for the 'wazuh-authd' daemon.
 
     expected_output:
-        - r'Accepting connections on port 1515' (When the `wazuh-authd` daemon is ready to accept enrollments)
+        - r'Accepting connections on port 1515' (When the 'wazuh-authd' daemon is ready to accept enrollments)
         - r'OSSEC K:' (When the agent has enrolled in the manager)
     tags:
         - keys
@@ -460,12 +455,14 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
 def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
                                       configure_sockets_environment, connect_to_sockets_module):
     '''
-    description: Check if when the `wazuh-authd` daemon receives an enrollment request from an agent
-                 that has an IP address or name that is already registered, `authd` creates a record
-                 for the new agent and deletes the old one. In this case, the enrollment requests
-                 are sent to a local `UNIX` socket.
+    description:
+        Checks if when the 'wazuh-authd' daemon receives an enrollment request from an agent
+        that has an IP address or name that is already registered, 'authd' creates a record
+        for the new agent and deletes the old one. In this case, the enrollment requests
+        are sent to a local 'UNIX' socket.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -482,17 +479,17 @@ def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configur
             brief: Configure environment for sockets and MITM.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
+            brief: Module scope version of 'connect_to_sockets' fixture.
 
     assertions:
         - Verify that agents using an already registered IP address can successfully enroll.
         - Verify that agents using an already registered name can successfully enroll.
 
-    input_description: Different test cases are contained in an external `YAML` file (wazuh_conf.yaml)
-                       which includes configuration settings for the `wazuh-authd` daemon.
+    input_description: Different test cases are contained in an external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-authd' daemon.
 
     expected_output:
-        - r'Accepting connections on port 1515' (When the `wazuh-authd` daemon is ready to accept enrollments)
+        - r'Accepting connections on port 1515' (When the 'wazuh-authd' daemon is ready to accept enrollments)
         - r'{"error":0,' (When the agent has enrolled)
     tags:
         - keys

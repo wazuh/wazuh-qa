@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check that the API works correctly using the `HTTPS` protocol.
-       The Wazuh API is an open source `RESTful` API that allows for interaction with
-       the Wazuh manager from a web browser, command line tool like `cURL` or any script
+brief: These tests will check that the API works correctly using the 'HTTPS' protocol.
+       The Wazuh API is an open source 'RESTful' API that allows for interaction with
+       the Wazuh manager from a web browser, command line tool like 'cURL' or any script
        or program that can make web requests.
 
 tier: 0
@@ -91,16 +91,17 @@ def get_configuration(request):
     {'https_disabled'},
     {'https_enabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_https(tags_to_apply, get_configuration, configure_api_environment,
                restart_api, wait_for_start, get_api_details):
     '''
     description:
-        Check if the API works with `HTTP` and `HTTPS` protocols.
+        Check if the API works with 'HTTP' and 'HTTPS' protocols.
         For this purpose, it configures the API to use both protocols
         and makes requests to it, waiting for a correct response.
 
     wazuh_min_version:
-        4.2
+        4.2.0
 
     parameters:
         - tags_to_apply:
@@ -114,7 +115,7 @@ def test_https(tags_to_apply, get_configuration, configure_api_environment,
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -123,9 +124,9 @@ def test_https(tags_to_apply, get_configuration, configure_api_environment,
             brief: Get API information.
 
     assertions:
-        - Verify that the API requests are made correctly using both `HTTP` and `HTTPS` protocols.
+        - Verify that the API requests are made correctly using both 'HTTP' and 'HTTPS' protocols.
 
-    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+    input_description: Different test cases are contained in an external YAML file (conf.yaml)
                        which includes API configuration parameters (HTTPS settings).
 
     expected_output:

@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the IP blocking feature of the API handled by the `wazuh-apid` daemon
-       is working properly. The Wazuh API is an open source `RESTful` API that allows for interaction
-       with the Wazuh manager from a web browser, command line tool like `cURL` or any script
+brief: These tests will check if the IP blocking feature of the API handled by the 'wazuh-apid' daemon
+       is working properly. The Wazuh API is an open source 'RESTful' API that allows for interaction
+       with the Wazuh manager from a web browser, command line tool like 'cURL' or any script
        or program that can make web requests.
 
 tier: 0
@@ -86,6 +86,7 @@ def get_configuration(request):
     {'config1'},
     {'config2'}
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                                     wait_for_start, get_api_details):
     '''
@@ -93,7 +94,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
                  For this purpose, the test causes an IP blocking, make a request before
                  the blocking time finishes and one after the blocking time.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - tags_to_apply:
@@ -107,7 +108,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -120,7 +121,7 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
         - Verify that the IP address is still blocked even when using
           the correct credentials within the blocking time.
 
-    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+    input_description: Different test cases are contained in an external YAML file (conf.yaml)
                        which includes API configuration parameters.
 
     expected_output:

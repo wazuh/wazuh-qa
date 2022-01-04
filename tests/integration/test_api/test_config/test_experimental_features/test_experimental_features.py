@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `experimental_features` setting of the API is working properly.
+brief: These tests will check if the 'experimental_features' setting of the API is working properly.
        This setting allows users to access API endpoints containing features that are under development.
-       The Wazuh API is an open source `RESTful` API that allows for interaction with the Wazuh manager
-       from a web browser, command line tool like `cURL` or any script or program that can make web requests.
+       The Wazuh API is an open source 'RESTful' API that allows for interaction with the Wazuh manager
+       from a web browser, command line tool like 'cURL' or any script or program that can make web requests.
 
 tier: 0
 
@@ -86,6 +86,7 @@ def get_configuration(request):
     {'experimental_enabled'},
     {'experimental_disabled'},
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_experimental_features(tags_to_apply, get_configuration, configure_api_environment,
                                restart_api, wait_for_start, get_api_details):
     '''
@@ -93,7 +94,7 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
                  to the configuration. For this purpose, it configures the API to use
                  this functionality and makes requests to it, waiting for a correct response.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - tags_to_apply:
@@ -107,7 +108,7 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -116,17 +117,17 @@ def test_experimental_features(tags_to_apply, get_configuration, configure_api_e
             brief: Get API information.
 
     assertions:
-        - Verify that when `experimental_features` is enabled,
+        - Verify that when 'experimental_features' is enabled,
           it is possible to access experimental API endpoints.
-        - Verify that when `experimental_features` is disabled,
+        - Verify that when 'experimental_features' is disabled,
           it is not possible to access experimental API endpoints.
 
-    input_description: Different test cases are contained in an external `YAML` file (conf.yaml)
+    input_description: Different test cases are contained in an external YAML file (conf.yaml)
                        which includes API configuration parameters.
 
     expected_output:
-        - r'200' ('OK' HTTP status code if `experimental_features == true`)
-        - r'404' ('Forbidden' HTTP status code if `experimental_features == false`)
+        - r'200' ('OK' HTTP status code if 'experimental_features == true')
+        - r'404' ('Forbidden' HTTP status code if 'experimental_features == false')
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     experimental = get_configuration['configuration']['experimental_features']

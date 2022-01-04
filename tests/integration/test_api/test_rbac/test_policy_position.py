@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+brief: These tests will check if the 'RBAC' (Role-Based Access Control) feature of the API is working properly.
        Specifically, they will verify that that the policies are applied to the roles in the right order.
-       The `RBAC` capability allows users accessing the API to be assigned a role
+       The 'RBAC' capability allows users accessing the API to be assigned a role
        that will define the privileges they have.
 
 tier: 0
@@ -128,12 +128,13 @@ def add_role_policy(api_details, p_id, position):
 
 
 # Tests
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_policy_position(set_security_resources, add_new_policies, get_api_details):
     '''
     description: Check if the correct order between role-policy relationships remain after
-                 removing some of them and adding others using the `position` parameter.
+                 removing some of them and adding others using the 'position' parameter.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_security_resources:
@@ -151,13 +152,13 @@ def test_policy_position(set_security_resources, add_new_policies, get_api_detai
         - Verify that the role-policy positions are kept in order when deleting or adding a role-policy.
 
     inputs:
-        - The testing `policy_ids` array as a module variable.
+        - The testing 'policy_ids' array as a module variable.
 
-    input_description: From the `add_new_policies`, `remove_role_policy` and `add_role_policy` fixtures
-                       information is obtained to perform the test, concretely the `policy_ids` array.
+    input_description: From the 'add_new_policies', 'remove_role_policy' and 'add_role_policy' fixtures
+                       information is obtained to perform the test, concretely the 'policy_ids' array.
 
     expected_output:
-        - r'200' (`OK` HTTP status code when deleting or adding a role-policy)
+        - r'200' ('OK' HTTP status code when deleting or adding a role-policy)
         - An integer array with the role-policy positions.
 
     tags:

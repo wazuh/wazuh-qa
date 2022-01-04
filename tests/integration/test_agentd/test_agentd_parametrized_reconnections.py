@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check that the connection is finally made when there are delays
-       between connection attempts to the server. The objective is to check how
-       the `wazuh-agentd` daemon behaves when there are delays between connection
-       attempts to `wazuh-remoted` using `TCP` and `UDP` protocols.
+brief: The 'wazuh-agentd' program is the client-side daemon that communicates with the server.
+       The objective is to check how the 'wazuh-agentd' daemon behaves when there are delays
+       between connection attempts to the 'wazuh-remoted' daemon using TCP and UDP protocols.
+       The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
 
 tier: 0
 
@@ -50,9 +50,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -317,23 +319,23 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
     '''
     description: Check how the agent behaves when there are delays between connection
                  attempts to the server. For this purpose, different values for
-                 `max_retries` and `retry_interval` parameters are tested.
+                 'max_retries' and 'retry_interval' parameters are tested.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated `wazuh-authd` connection.
+            brief: Initializes a simulated 'wazuh-authd' connection.
         - start_authd:
             type: fixture
-            brief: Enable the `wazuh-authd` daemon to accept connections and perform enrollments.
+            brief: Enable the 'wazuh-authd' daemon to accept connections and perform enrollments.
         - stop_agent:
             type: fixture
             brief: Stop Wazuh's agent.
         - set_keys:
             type: fixture
-            brief: Write to `client.keys` file the agent's enrollment details.
+            brief: Write to 'client.keys' file the agent's enrollment details.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
@@ -342,13 +344,14 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
             brief: Get configurations from the module.
 
     assertions:
-        - Verify that when the `wazuh-agentd` daemon initializes, it connects to
-          the `wazuh-remoted` daemon of the manager before reaching the maximum number of attempts.
+        - Verify that when the 'wazuh-agentd' daemon initializes, it connects to
+          the 'wazuh-remoted' daemon of the manager before reaching the maximum number of attempts.
         - Verify the successful enrollment of the agent if the auto-enrollment option is enabled.
         - Verify that the rollback feature of the server works correctly.
 
-    input_description: Different test cases are found in the test module and include parameters
-                       for the environment setup using the `TCP` and `UDP` protocols.
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases are found in the test module and include parameters
+                       for the environment setup using the TCP and UDP protocols.
 
     expected_output:
         - r'Valid key received'

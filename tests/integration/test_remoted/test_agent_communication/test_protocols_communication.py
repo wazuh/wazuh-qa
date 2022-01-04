@@ -62,7 +62,6 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import remote as rd
 
-
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 

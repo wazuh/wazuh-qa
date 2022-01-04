@@ -93,6 +93,7 @@ configuration_ids = [f"{x['PROTOCOL']}_{x['PORT']}" for x in parameters]
 
 manager_address = 'localhost'
 
+
 # fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
@@ -100,6 +101,9 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="It requires review and a rework for the agent simulator."
+                         "Sometimes it doesn't work properly when it sends keepalives "
+                         "messages causing the agent to never being in active status.")
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
     '''
     description: Check if the 'wazuh-remoted' daemon sends active response commands to the Wazuh agent.
@@ -150,16 +154,11 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
         agent.set_module_status('keepalive', 'enabled')
 
         # Time necessary until socket creation
-        time.sleep(1)
+        time.sleep(10)
 
-        sender = ag.Sender(manager_address, protocol=protocol, manager_port=manager_port)
-
-        injector = ag.Injector(sender, agent)
+        sender, injector = ag.connect(agent, manager_address, protocol, manager_port)
 
         try:
-            injector.run()
-            agent.wait_status_active()
-
             active_response_message = f"(local_source) [] NRN {agent.id} {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}"
 
             send_active_response_message(active_response_message)
@@ -173,7 +172,6 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
             wazuh_log_monitor.start(timeout=10, callback=log_callback,
                                     error_message='The expected event has not been found in ossec.log')
 
-            remote.check_agent_received_message(agent.rcv_msg_queue, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}",
-                                                                     escape=True)
+            remote.check_agent_received_message(agent, f"#!-execd {remote.ACTIVE_RESPONSE_EXAMPLE_COMMAND}", escape=True)
         finally:
             injector.stop_receive()

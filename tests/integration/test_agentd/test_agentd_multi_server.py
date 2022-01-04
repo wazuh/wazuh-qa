@@ -7,8 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check the agent's enrollment and connection to a manager in a multi-server environment.
-       The objective is to check how the agent manages the connections to the servers depending on their status.
+brief: A Wazuh cluster is a group of Wazuh managers that work together to enhance the availability
+       and scalability of the service. These tests will check the agent enrollment in a multi-server
+       environment and how the agent manages the connections to the servers depending on their status.
 
 tier: 0
 
@@ -48,9 +49,11 @@ os_version:
     - Windows 10
     - Windows 8
     - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows server 2012
-    - Windows server 2003
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -402,21 +405,21 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                  Initialize an environment with multiple simulated servers in which the agent is forced to enroll
                  under different test conditions, verifying the agent's behavior through its log files.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - add_hostnames:
             type: fixture
-            brief: Adds to the `hosts` file the names and the IP addresses of the testing servers.
+            brief: Adds to the 'hosts' file the names and the IP addresses of the testing servers.
         - configure_authd_server:
             type: fixture
-            brief: Initializes a simulated `wazuh-authd` connection.
+            brief: Initializes a simulated 'wazuh-authd' connection.
         - set_authd_id:
             type: fixture
-            brief: Sets the agent id to `101` in the `wazuh-authd` simulated connection.
+            brief: Sets the agent id to '101' in the 'wazuh-authd' simulated connection.
         - clean_keys:
             type: fixture
-            brief: Clears the `client.keys` file used by the simulated remote connections.
+            brief: Clears the 'client.keys' file used by the simulated remote connections.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
@@ -425,10 +428,10 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
             brief: Get configurations from the module.
 
     assertions:
-        - Agent without keys. Verify that all servers will refuse the connection to the `wazuh-remoted` daemon
+        - Agent without keys. Verify that all servers will refuse the connection to the 'wazuh-remoted' daemon
           but will accept enrollment. The agent should try to connect and enroll each of them.
         - Agent without keys. Verify that the first server only has enrollment available, and the third server
-          only has the `wazuh-remoted` daemon available. The agent should enroll in the first server and
+          only has the 'wazuh-remoted' daemon available. The agent should enroll in the first server and
           connect to the third one.
         - Agent without keys. Verify that the agent should enroll and connect to the first server, and then
           the first server will disconnect. The agent should connect to the second server with the same key.
@@ -440,9 +443,9 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
           third servers are not responding. The agent on disconnection should try the second and third servers
           and go back finally to the first server.
 
-    input_description: Different test cases are found in the test module and include
-                       parameters for the environment setup, the requests
-                       to be made, and the expected result.
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases are found in the test module and include parameters for
+                       the environment setup, the requests to be made, and the expected result.
 
     expected_output:
         - r'Requesting a key from server'

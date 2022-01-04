@@ -7,11 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `wazuh-analysisd` daemon
-       processes `active response` messages correctly. Active responses
-       perform various countermeasures to address active threats,
-       such as blocking access to an agent from the threat source
-       when certain criteria are met.
+brief: Active responses perform various countermeasures to address active threats, such as blocking access
+       to an agent from the threat source when certain criteria are met. These tests will check if
+       the 'wazuh-analysisd' daemon processes 'active response' messages correctly.
 
 tier: 0
 
@@ -23,9 +21,6 @@ components:
 
 daemons:
     - wazuh-analysisd
-    - wazuh-authd
-    - wazuh-execd
-    - wazuh-remoted
 
 os_platform:
     - linux
@@ -51,6 +46,9 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
+
+tags:
+    - ar_analysisd
 '''
 import json
 import os
@@ -401,13 +399,13 @@ def validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, a
 # TESTS
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
     '''
-    description: Check if `active response` messages are sent in the correct format
+    description: Check if 'active response' messages are sent in the correct format
                  depending on the agent version used. For this purpose, simulated agents
                  with different properties are created, and messages in two formats
-                 (string and `JSON`) are sent to the socket of the `wazuh-analisysd` daemon,
+                 (string and JSON) are sent to the socket of the 'wazuh-analisysd' daemon,
                  which should process them correctly.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_debug_mode:
@@ -421,17 +419,17 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
             brief: Configure a custom environment for testing.
         - restart_service:
             type: fixture
-            brief: Restart the Wazuh manager and clean the ossec.log file.
+            brief: Restart the Wazuh manager and clean the 'ossec.log' file.
         - configure_agents:
             type: fixture
             brief: Create simulated agents for testing.
 
     assertions:
-        - Verify that the `active response` messages in the old string format are valid.
-        - Verify that the `active response` messages in the new `JSON` format are valid.
+        - Verify that 'active response' messages in the old string format are valid.
+        - Verify that 'active response' messages in the new JSON format are valid.
 
     input_description: Different use cases are found in the test module and include parameters
-                       for `active response` messages and metadata to configure the testing environment.
+                       for 'active response' messages and metadata to configure the testing environment.
 
     expected_output:
         - r'Active response request received'

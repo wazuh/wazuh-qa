@@ -7,9 +7,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `RBAC` (Role-Based Access Control) feature of the API is working properly.
+brief: These tests will check if the 'RBAC' (Role-Based Access Control) feature of the API is working properly.
        Specifically, they will verify that when resources are added with the same identifier of previously
-       existing ones, the previous relationships are not maintained. The `RBAC` capability allows users
+       existing ones, the previous relationships are not maintained. The 'RBAC' capability allows users
        accessing the API to be assigned a role that will define the privileges they have.
 
 tier: 0
@@ -57,6 +57,7 @@ tags:
     - api
 '''
 import requests
+import pytest
 from wazuh_testing.api import get_security_resource_information
 
 # Variables
@@ -64,12 +65,13 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 
 # Tests
-def test_add_old_user(set_security_resources, get_api_details):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_add_old_user(restart_api_module, wait_for_start_module, set_security_resources, get_api_details):
     '''
     description: Check if the security relationships of a previous user are maintained
                  in the system after adding a new user with the same ID.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_security_resources:
@@ -86,15 +88,15 @@ def test_add_old_user(set_security_resources, get_api_details):
         - Verify that security relationships do not exist between the old and the new user.
 
     inputs:
-        - The testing `user_id` as a module attribute.
+        - The testing 'user_id' as a module attribute.
 
-    input_description: From the `set_security_resources` fixture information is obtained to perform
-                       the test, concretely the `user_id`.
+    input_description: From the 'set_security_resources' fixture information is obtained to perform
+                       the test, concretely the 'user_id'.
 
     expected_output:
-        - A `JSON` string in the response body with information of the old user.
-        - r'200' (`OK` HTTP status code at deleting the old user)
-        - r'200' (`OK` HTTP status code at inserting the old user)
+        - A 'JSON' string in the response body with information of the old user.
+        - r'200' ('OK' HTTP status code at deleting the old user)
+        - r'200' ('OK' HTTP status code at inserting the old user)
 
     tags:
         - rbac
@@ -118,12 +120,13 @@ def test_add_old_user(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_role(set_security_resources, get_api_details):
     '''
     description: Check if the security relationships of a previous role are maintained
                  in the system after adding a new role with the same ID.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_security_resources:
@@ -140,15 +143,15 @@ def test_add_old_role(set_security_resources, get_api_details):
         - Verify that security relationships do not exist between the old and the new role.
 
     inputs:
-        - The testing `role_id` as a module attribute.
+        - The testing 'role_id' as a module attribute.
 
-    input_description: From the `set_security_resources` fixture information is obtained
-                       to perform the test, concretely the `role_id`.
+    input_description: From the 'set_security_resources' fixture information is obtained
+                       to perform the test, concretely the 'role_id'.
 
     expected_output:
-        - A `JSON` string in the response body with information of the old role.
-        - r'200' (`OK` HTTP status code at deleting the old role)
-        - r'200' (`OK` HTTP status code at inserting the old role)
+        - A 'JSON' string in the response body with information of the old role.
+        - r'200' ('OK' HTTP status code at deleting the old role)
+        - r'200' ('OK' HTTP status code at inserting the old role)
 
     tags:
         - rbac
@@ -171,12 +174,13 @@ def test_add_old_role(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_policy(set_security_resources, get_api_details):
     '''
     description: Check if the security relationships of a previous policy are maintained
                  in the system after adding a new policy with the same ID.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_security_resources:
@@ -193,15 +197,15 @@ def test_add_old_policy(set_security_resources, get_api_details):
         - Verify that security relationships do not exist between the old and the new policy.
 
     inputs:
-        - The testing `policy_id` as a module attribute.
+        - The testing 'policy_id' as a module attribute.
 
-    input_description: From the `set_security_resources` fixture information is obtained to perform the test,
-                       concretely the `policy_id`.
+    input_description: From the 'set_security_resources' fixture information is obtained to perform the test,
+                       concretely the 'policy_id'.
 
     expected_output:
-        - A `JSON` string in the response body with information of the old policy.
-        - r'200' (`OK` HTTP status code at deleting the old policy)
-        - r'200' (`OK` HTTP status code at inserting the old policy)
+        - A 'JSON' string in the response body with information of the old policy.
+        - r'200' ('OK' HTTP status code at deleting the old policy)
+        - r'200' ('OK' HTTP status code at inserting the old policy)
 
     tags:
         - rbac
@@ -227,12 +231,13 @@ def test_add_old_policy(set_security_resources, get_api_details):
             assert not value, f'Relationships are not empty: {key}->{value}'
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_add_old_rule(set_security_resources, get_api_details):
     '''
     description: Check if the security relationships of a previous rule are maintained
                  in the system after adding a new rule with the same ID.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_security_resources:
@@ -249,15 +254,15 @@ def test_add_old_rule(set_security_resources, get_api_details):
         - Verify that security relationships do not exist between the old and the new rule.
 
     inputs:
-        - The testing `rule_id` as a module attribute.
+        - The testing 'rule_id' as a module attribute.
 
-    input_description: From the `set_security_resources` fixture information is obtained
-                       to perform the test, concretely the `rule_id`.
+    input_description: From the 'set_security_resources' fixture information is obtained
+                       to perform the test, concretely the 'rule_id'.
 
     expected_output:
-        - A `JSON` string in the response body with information of the old rule.
-        - r'200' (`OK` HTTP status code at deleting the old rule)
-        - r'200' (`OK` HTTP status code at inserting the old rule)
+        - A 'JSON' string in the response body with information of the old rule.
+        - r'200' ('OK' HTTP status code at deleting the old rule)
+        - r'200' ('OK' HTTP status code at inserting the old rule)
 
     tags:
         - rbac

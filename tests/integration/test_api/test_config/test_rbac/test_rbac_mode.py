@@ -7,11 +7,11 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `rbac_mode` (Role-Based Access Control) setting of the API
+brief: These tests will check if the 'rbac_mode' (Role-Based Access Control) setting of the API
        is working properly. This setting allows you to specify the operating mode between
-       `whitelist mode` and `blacklist mode`. The Wazuh API is an open source `RESTful` API
+       'whitelist mode' and 'blacklist mode'. The Wazuh API is an open source 'RESTful' API
        that allows for interaction with the Wazuh manager from a web browser, command line tool
-       like `cURL` or any script or program that can make web requests.
+       like 'cURL' or any script or program that can make web requests.
 
 tier: 0
 
@@ -114,16 +114,17 @@ def extra_configuration_after_yield():
     {'rbac_white'},
     {'rbac_black'}
 ])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, restart_api,
                    wait_for_start, get_api_details):
     '''
-    description: Check if the `RBAC` mode selected in `api.yaml` is applied. This test creates a user
-                 without any assigned permission. For this reason, when `RBAC` is in `white mode`,
-                 there is no endpoint that the user can execute, so the `HTTP status code`
-                 must be 403 (`forbidden`). On the other hand, when it is in `black mode`,
-                 there is no endpoint that has it denied, so the status code must be 200 (`ok`).
+    description: Check if the 'RBAC' mode selected in 'api.yaml' is applied. This test creates a user
+                 without any assigned permission. For this reason, when 'RBAC' is in 'white mode',
+                 there is no endpoint that the user can execute, so the 'HTTP status code'
+                 must be 403 ('forbidden'). On the other hand, when it is in 'black mode',
+                 there is no endpoint that has it denied, so the status code must be 200 ('ok').
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - tags_to_apply:
@@ -137,7 +138,7 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -146,19 +147,19 @@ def test_rbac_mode(tags_to_apply, get_configuration, configure_api_environment, 
             brief: Get API information.
 
     assertions:
-        - Check that when the value of the `rbac_mode` setting is set to `white`,
+        - Check that when the value of the 'rbac_mode' setting is set to 'white',
           the API forbids requests.
-        - Verify that when the value of the `rbac_mode` setting is set to `black`,
+        - Verify that when the value of the 'rbac_mode' setting is set to 'black',
           the API requests are performed correctly.
 
-    input_description: Different test cases are contained in an external `YAML` file (conf_mode.yaml)
+    input_description: Different test cases are contained in an external YAML file (conf_mode.yaml)
                        which includes API configuration parameters (rbac operation modes).
-                       Two `SQL` scripts are also used to add (schema_add_user.sql)
+                       Two 'SQL' scripts are also used to add (schema_add_user.sql)
                        and remove (schema_delete_user.sql) the testing user.
 
     expected_output:
-        - r'200' (`OK` HTTP status code if `rbac_white == True`)
-        - r'403' (`Forbidden` HTTP status code if `rbac_white == False`)
+        - r'200' ('OK' HTTP status code if 'rbac_white == True')
+        - r'403' ('Forbidden' HTTP status code if 'rbac_white == False')
 
     tags:
         - rbac

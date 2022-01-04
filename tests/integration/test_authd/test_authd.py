@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `wazuh-authd` daemon correctly handles the enrollment requests,
+brief: These tests will check if the 'wazuh-authd' daemon correctly handles the enrollment requests,
        generating consistent responses to the requests received on its IP v4 network socket.
-       The `wazuh-authd` daemon can automatically add a Wazuh agent to a Wazuh manager and provide
-       the key to the agent. It’s used along with the `agent-auth` application.
+       The 'wazuh-authd' daemon can automatically add a Wazuh agent to a Wazuh manager and provide
+       the key to the agent. It is used along with the 'agent-auth' application.
 
 tier: 0
 
@@ -59,10 +59,10 @@ import subprocess
 import time
 
 import pytest
-import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 
@@ -71,21 +71,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """Loads a yaml file from a path
-    Args:
-        path (str): path to the file.
-
-    Returns:
-        dict: dictionary containing the test info.
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-message_tests = load_tests(os.path.join(test_data_path, 'enroll_messages.yaml'))
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+message_tests = read_yaml(os.path.join(test_data_path, 'enroll_messages.yaml'))
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
 
 # Variables
@@ -116,36 +104,19 @@ def get_configuration(request):
     yield request.param
 
 
-@pytest.fixture(scope="module")
-def clean_client_keys_file():
-    client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-    # Stop Wazuh
-    control_service('stop')
-
-    # Clean client.keys
-    try:
-        with open(client_keys_path, 'w') as client_file:
-            client_file.close()
-    except IOError as exception:
-        raise
-
-    # Start Wazuh
-    control_service('start')
-
-
-def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_groups, configure_environment,
-                             configure_sockets_environment, connect_to_sockets_module, wait_for_agentd_startup):
+def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
+                             connect_to_sockets_module):
     '''
-    description: Check if when the `wazuh-authd` daemon receives different kinds of enrollment requests,
-                 it responds appropriately to them. In this case, the enrollment requests
-                 are sent to an IP v4 network socket.
+    description:
+        Checks if when the `wazuh-authd` daemon receives different types of enrollment requests,
+        it responds appropriately to them. In this case, the enrollment requests are sent to
+        an IP v4 network socket.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version:
+        4.2.0
 
     parameters:
-        - clean_client_keys_file:
-            type: fixture
-            brief: Delete the agent keys stored in the `client.keys` file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -158,18 +129,26 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
+        - clean_client_keys_file_module:
+            type: fixture
+            brief: Stops Wazuh and cleans any previous key in client.keys file at module scope.
+        - restart_authd:
+            type: fixture
+            brief: Restart the 'wazuh-authd' daemon, clear the 'ossec.log' file and start a new file monitor.
+        - wait_for_authd_startup_module:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
-        - wait_for_agentd_startup:
-            type: fixture
-            brief: Wait until the `wazuh-agentd` has begun.
+            brief: Module scope version of 'connect_to_sockets' fixture.
+
 
     assertions:
         - Verify that the response messages are consistent with the enrollment requests received.
 
-    input_description: Different test cases are contained in an external `YAML` file (enroll_messages.yaml)
-                       that includes enrollment events and the expected output.
+    input_description:
+        Different test cases are contained in an external `YAML` file (enroll_messages.yaml)
+        that includes enrollment events and the expected output.
 
     expected_output:
         - Multiple values located in the `enroll_messages.yaml` file.
@@ -184,7 +163,7 @@ def test_ossec_auth_messages(clean_client_keys_file, get_configuration, set_up_g
         receiver_sockets[0].open()
         expected = stage['output']
         message = stage['input']
-        receiver_sockets[0].send(stage['input'], size=False)
+        receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':

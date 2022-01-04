@@ -58,6 +58,8 @@ import pytest
 
 from wazuh_testing.api import compare_config_api_response
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from urllib3.exceptions import InsecureRequestWarning
+import requests
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)

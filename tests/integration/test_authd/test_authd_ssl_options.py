@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `SSL` (Secure Socket Layer) protocol-related settings of
-       the `wazuh-authd` daemon are working correctly. The `wazuh-authd` daemon can
+brief: These tests will check if the 'SSL' (Secure Socket Layer) protocol-related settings of
+       the 'wazuh-authd' daemon are working correctly. The 'wazuh-authd' daemon can
        automatically add a Wazuh agent to a Wazuh manager and provide the key
-       to the agent. It’s used along with the `agent-auth` application.
+       to the agent. It is used along with the 'agent-auth' application.
 
 tier: 0
 
@@ -64,7 +64,7 @@ from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, read_yaml
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 
@@ -75,19 +75,9 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 
-def load_tests(path):
-    """Loads a yaml file from a path
-    Returns
-    ----------
-    yaml structure
-    """
-    with open(path) as f:
-        return yaml.safe_load(f)
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-ssl_configuration_tests = load_tests(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
+configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
+ssl_configuration_tests = read_yaml(os.path.join(test_data_path, 'enroll_ssl_options_tests.yaml'))
 
 # Ossec.conf configurations
 DEFAULT_CIPHERS = "HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH"
@@ -118,6 +108,9 @@ test_index = 0
 
 
 def get_current_test():
+    """
+    Get the current test case.
+    """
     global test_index
     current = test_index
     test_index += 1
@@ -131,6 +124,9 @@ def get_configuration(request):
 
 
 def override_wazuh_conf(configuration):
+    """
+    Write a particular Wazuh configuration for the test case.
+    """
     # Stop Wazuh
     control_service('stop', daemon='wazuh-authd')
     time.sleep(1)
@@ -146,7 +142,7 @@ def override_wazuh_conf(configuration):
     # Start Wazuh
     control_service('start', daemon='wazuh-authd')
 
-    """Wait until agentd has begun"""
+    """Wait until authd has begun"""
 
     def callback_agentd_startup(line):
         if 'Accepting connections on port 1515' in line:
@@ -160,12 +156,14 @@ def override_wazuh_conf(configuration):
 
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     '''
-    description: Check if the `SSL` settings of the `wazuh-authd` daemon work correctly by enrolling agents
-                 that use different values for these settings. Different types of encryption and secure
-                 connection protocols are tested, in addition to the `ssl_auto_negotiate` option
-                 that automatically chooses the protocol to be used.
+    description:
+        Checks if the 'SSL' settings of the 'wazuh-authd' daemon work correctly by enrolling agents
+        that use different values for these settings. Different types of encryption and secure
+        connection protocols are tested, in addition to the 'ssl_auto_negotiate' option
+        that automatically chooses the protocol to be used.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version:
+        4.2.0
 
     parameters:
         - get_configuration:
@@ -181,11 +179,12 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     assertions:
         - Verify that the response messages are consistent with the enrollment requests received.
 
-    input_description: Different test cases are contained in an external `YAML` file (enroll_ssl_options_tests.yaml)
-                       that includes enrollment events and the expected output.
+    input_description:
+        Different test cases are contained in an external YAML file (enroll_ssl_options_tests.yaml)
+        that includes enrollment events and the expected output.
 
     expected_output:
-        - Multiple values located in the `enroll_ssl_options_tests.yaml` file.
+        - Multiple values located in the 'enroll_ssl_options_tests.yaml' file.
 
     tags:
         - keys

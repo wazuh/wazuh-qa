@@ -1,6 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM manages properly 'diff' folders
+       and files when removing a monitored key/value or the 'report_changes' option is disabled.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#windows-registry
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#diff
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_report_changes
+'''
 import os
 
 import pytest
@@ -90,30 +143,70 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", False, {'test_duplicate_report'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", True, {'test_duplicate_report'})
 ])
+@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to_apply,
                                  get_configuration, configure_environment, restart_syscheckd,
                                  wait_for_fim_start):
-    """
-    Check that the diff files are generated when there is a modification in a value and these files are deleted when
-    the value is deleted.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon creates a 'diff' file when a modification is made on
+                 a monitored value and deletes that 'diff' file when it is deleted. This test also checks
+                 that a 'diff' folder of a monitored key is removed when that key is deleted. For this purpose,
+                 the test will monitor a key and make value operations inside it. Then, it will check if the
+                 'diff' file has been created/deleted if the 'report_changes' option is enabled, and vice versa.
+                 Finally, the test will remove the monitored key and verify that the 'diff' folder has been deleted.
 
-    It also checks that the diff folder of the key is deleted when the key is deleted.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    key : str
-        Root key (HKEY_*)
-    subkey : str
-        path of the registry.
-    arch : str
-        Architecture of the registry.
-    value_name : str
-        Name of the value that will be created
-    enabled: boolean
-        True if report_changes is enabled
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    """
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - subkey:
+            type: str
+            brief: The registry key being monitored by syscheck.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - value_name:
+            type: str
+            brief: Name of the testing value that will be created
+        - enabled:
+            type: bool
+            brief: True if the 'report_changes' option is enabled. False otherwise.
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM adds/removes a 'diff' file when modifying/deleting the corresponding value,
+          and the 'report_changes' option is enabled.
+        - Verify that FIM removes the 'diff' file of a related value when disabling the 'report_changes' option.
+        - Verify that FIM removes the 'diff' folder when removing the related key.
+
+    input_description: A test case (test_report_changes) is contained in external YAML file
+                       (wazuh_registry_report_changes.yaml) which includes configuration
+                       settings for the 'wazuh-syscheckd' daemon. That is combined with
+                       the testing registry keys to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     vals_after_update = None
@@ -152,9 +245,47 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
 
 
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if diff directories are removed after disabling report_changes and Wazuh is restarted.
-    """
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon removes the 'diff' directories when disabling
+                 the 'report_changes' option and Wazuh is restarted. For this purpose, the test
+                 will monitor two keys and make value operations inside them. Then, it will check if
+                 the related 'diff' folders have been created. After this, it will apply a new main
+                 configuration with the 'report_changes' disabled and restart Wazuh. Finally, the test
+                 will verify that the 'diff' folders have been deleted.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM adds the 'diff' folders when the testing keys are created.
+        - Verify that FIM deletes the 'diff' folders when disabling the 'report_changes' option
+          and Wazuh is restarted.
+
+    input_description: A test case (test_delete_after_restart) is contained in external YAML file
+                       (wazuh_registry_report_changes.yaml) which includes configuration settings
+                       for the 'wazuh-syscheckd' daemon. That is combined with the testing registry
+                       keys to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_delete_after_restart'}, get_configuration['tags'])
     value_name = 'random_value'
 

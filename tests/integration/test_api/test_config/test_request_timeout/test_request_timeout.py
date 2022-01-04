@@ -7,10 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if the `request_timeout` setting of the API is working properly.
+brief: These tests will check if the 'request_timeout' setting of the API is working properly.
        This setting allows specifying the time limit for the API to process a request.
-       The Wazuh API is an open source `RESTful` API that allows for interaction with
-       the Wazuh manager from a web browser, command line tool like `cURL` or any script
+       The Wazuh API is an open source 'RESTful' API that allows for interaction with
+       the Wazuh manager from a web browser, command line tool like 'cURL' or any script
        or program that can make web requests.
 
 tier: 0
@@ -93,10 +93,10 @@ def test_request_timeout(tags_to_apply, get_configuration, configure_api_environ
                          wait_for_start, get_api_details):
     '''
     description: Check if the maximum request time for an API request works.
-                 For this purpose, a value of `0` seconds is set for the `request_timeout`
+                 For this purpose, a value of '0' seconds is set for the 'request_timeout'
                  setting, and a request is made to the API, expecting an error in the response.
 
-    wazuh_min_version: 4.3
+    wazuh_min_version: 4.3.0
 
     parameters:
         - tags_to_apply:
@@ -110,7 +110,7 @@ def test_request_timeout(tags_to_apply, get_configuration, configure_api_environ
             brief: Configure a custom environment for API testing.
         - restart_api:
             type: fixture
-            brief: Reset `api.log` and start a new monitor.
+            brief: Reset 'api.log' and start a new monitor.
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
@@ -121,12 +121,12 @@ def test_request_timeout(tags_to_apply, get_configuration, configure_api_environ
     assertions:
         - Verify that the request cannot finish successfully, resulting in a timeout error.
 
-    input_description: A test case is contained in an external `YAML` file (conf.yaml) which includes
-                       API configuration parameters (`request_timeout` set to `0` seconds).
+    input_description: A test case is contained in an external YAML file (conf.yaml) which includes
+                       API configuration parameters ('request_timeout' set to '0' seconds).
 
     expected_output:
-        - r'500' (`Internal server error` HTTP status code)
-        - r'3021' (`timeout error` in the response body)
+        - r'500' ('Internal server error' HTTP status code)
+        - r'3021' ('timeout error' in the response body)
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     get_response = requests.get(f'{api.API_PROTOCOL}://{api.API_HOST}:{api.API_PORT}{api.API_LOGIN_ENDPOINT}',

@@ -7,9 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: These tests will verify if the `wazuh-analysisd` daemon correctly handles `syscheck` common events.
-       The `wazuh-analysisd` daemon receives the log messages and compares them to the rules. It then creates
-       an alert when a log message matches an applicable rule.
+brief: The 'wazuh-analysisd' daemon receives the log messages and compares them to the rules.
+       It then creates an alert when a log message matches an applicable rule.
+       Specifically, these tests will verify if the 'wazuh-analysisd' daemon correctly handles
+       'syscheck' common events.
 
 tier: 2
 
@@ -101,10 +102,10 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def test_validate_socket_responses(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                                    test_case: list):
     '''
-    description: Validate every response from the `wazuh-analysisd` daemon socket
-                 to the `wazuh-db` daemon socket using `syscheck` common events.
+    description: Validate every response from the 'wazuh-analysisd' daemon socket
+                 to the 'wazuh-db' daemon socket using 'syscheck' common events.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_sockets_environment:
@@ -112,10 +113,10 @@ def test_validate_socket_responses(configure_sockets_environment, connect_to_soc
             brief: Configure environment for sockets and MITM.
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
+            brief: Module scope version of 'connect_to_sockets' fixture.
         - wait_for_analysisd_startup:
             type: fixture
-            brief: Wait until the `wazuh-analysisd` has begun and the `alerts.json` file is created.
+            brief: Wait until the 'wazuh-analysisd' has begun and the 'alerts.json' file is created.
         - test_case:
             type: list
             brief: List of tests to be performed.
@@ -123,11 +124,11 @@ def test_validate_socket_responses(configure_sockets_environment, connect_to_soc
     assertions:
         - Verify that the output logs are consistent with the syscheck events received.
 
-    input_description: Different test cases that are contained in an external `YAML` file (syscheck_events.yaml)
-                       that includes `syscheck` events data and the expected output.
+    input_description: Different test cases that are contained in an external 'YAML' file (syscheck_events.yaml)
+                       that includes 'syscheck' events data and the expected output.
 
     inputs:
-        - 4096 test cases distributed among `syscheck` events of type `Added`, `Modified`, and `Deleted`.
+        - 4096 test cases distributed among 'syscheck' events of type 'added', 'modified', and 'deleted'.
 
     expected_output:
         - Multiple messages (event logs) corresponding to each test case,
