@@ -117,51 +117,44 @@ def modify_ip_address_conf(test_case):
     messages = read_file(messages_path)
 
     old_manager_configuration = read_file(manager_conf_file)
-
     new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', f"'{test_case['ipv6_enabled']}'")
-
-    if 'ipv4' in test_case['ip_type']:
-        new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                            f"<address>{network['manager_network'][0]}</address>")
-        host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                         content=new_configuration)
-        messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][0]}")
-    elif 'ipv6' in test_case['ip_type']:
-        new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                            f"<address>{network['manager_network'][1]}</address>")
-        host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                         content=new_configuration)
-        messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][1]}")
-    elif 'dns' in test_case['ip_type']:
-        new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                            f"<address>wazuh-manager</address>")
-        host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                         content=new_configuration)
-        if 'yes' in test_case['ipv6_enabled']:
-            if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
-                messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][0]}")
-            else:
-                messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][1]}")
-        else:
-            messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][0]}")
-    if 'ipv4' in test_case['ip_type']:
-        messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-    elif 'ipv6' in test_case['ip_type']:
-        messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
-    elif 'dns' in test_case['ip_type']:
-        if 'yes' in test_case['ipv6_enabled']:
-            if 'ipv4' in test_case['agent_network']:
-                messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-            else:
-                messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
-        else:
-            messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-
     write_file(manager_conf_file, new_manager_configuration)
-
     host_manager.apply_config(manager_conf_file)
 
-    write_file(messages_path, messages_with_ip)
+    address_ip = ''
+    message_ip_manager = ''
+    message_ip_agent = ''
+    final_message = ''
+
+    if test_case['ip_type'] == 'ipv4':
+        address_ip = network['manager_network'][0]
+        message_ip_manager = address_ip
+        message_ip_agent = network['agent_network'][0]
+    elif test_case['ip_type'] == 'ipv6':
+        address_ip = network['manager_network'][1]
+        message_ip_manager = address_ip
+        message_ip_agent = network['agent_network'][1]
+    else:
+        address_ip = 'wazuh-manager'
+        if test_case['ipv6_enabled'] == 'yes':
+            if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
+                message_ip_manager = f"{address_ip}/{network['manager_network'][0]}"
+                message_ip_agent = message_ip_agent = network['agent_network'][0]
+            else:
+                message_ip_manager = f"{address_ip}/{network['manager_network'][1]}"
+                message_ip_agent = message_ip_agent = network['agent_network'][1]
+        else:
+            message_ip_manager = f"{address_ip}/{network['manager_network'][0]}"
+            message_ip_agent = message_ip_agent = network['agent_network'][0]
+
+    new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
+                                                        f"<address>{address_ip}</address>")
+    host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
+                                     content=new_configuration)
+
+    message_with_manager_ip = messages.replace('MANAGER_IP', message_ip_manager)
+    final_message = message_with_manager_ip.replace('AGENT_IP', message_ip_agent)
+    write_file(messages_path, final_message)
 
     yield
 
