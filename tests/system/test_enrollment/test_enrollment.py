@@ -15,6 +15,7 @@ components:
     - agent
 daemons:
     - wazuh-authd
+    - wazuh-agentd
 os_platform:
     - linux
 os_version:
@@ -23,6 +24,7 @@ references:
     - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
 tags:
     - authd
+    - agentd
 '''
 
 import os
@@ -204,6 +206,7 @@ def test_agent_enrollment(test_case, get_ip_directions, configure_network, modif
         - '.*Waiting .* seconds before server connection'
     tags:
         - authd
+        - agentd
     '''
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
