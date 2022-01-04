@@ -7,8 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Prepare the agent to upgrade using WPK packages, checking
-        the expected messages are correct.
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, on the agent side,
+        that the WPK upgrade works correctly.
 
 tier: 0
 
@@ -392,7 +394,7 @@ def prepare_agent_version(get_configuration):
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     '''
-    description: Prepare the agent to upgrade using WPK packages, checking
+    description: Upgrade the agent  by WPK package, checking
                  the expected messages are correct.
 
     wazuh_min_version: 4.2.0

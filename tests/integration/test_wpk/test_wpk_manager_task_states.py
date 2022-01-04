@@ -7,9 +7,11 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Register agents in the manager and test upgrading
-        them through a command, which will make the agent
-        to upgrade using WPK packages.
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+        the WPK upgrade on the manager side, in case of the manager stopped before finishing
+        the upgrade.
 
 tier: 0
 
@@ -20,14 +22,8 @@ components:
     - manager
 
 daemons:
-    - wazuh-authd
-    - wazuh-csyslogd
-    - wazuh-execd
-    - wazuh-logcollector
     - wazuh-monitord
     - wazuh-remoted
-    - wazuh-syscheckd
-    - wazuh-clusterd
     - wazuh-modulesd
     - wazuh-db
 
@@ -271,9 +267,11 @@ def overwrite_node_name(value):
 def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
     '''
-    description: Register agents in the manager and test upgrading
-                 them through a command, which will make the agent
-                 to upgrade using WPK packages.
+    description: Agents can be upgraded remotely. This upgrade is performed by the manager which
+                  sends each registered agent a WPK (Wazuh signed package) file that contains the files
+                  needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+                  the WPK upgrade on the manager side, in case of the manager stopped before finishing
+                  the upgrade.
 
     wazuh_min_version: 4.2.0
 
