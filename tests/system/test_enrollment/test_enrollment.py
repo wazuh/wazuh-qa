@@ -61,8 +61,11 @@ network = {}
 def clean_environment():
     yield
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
-    agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
-    host_manager.run_command('wazuh-manager', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id}")
+
+    agent_ids = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys').split()
+    for agent_id in agent_ids:
+        host_manager.run_command('wazuh-manager', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id}")
+
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
