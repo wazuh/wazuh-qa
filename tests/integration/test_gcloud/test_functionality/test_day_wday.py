@@ -133,8 +133,7 @@ def get_configuration(request):
     ({'ossec_time_conf'})
 ])
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday(tags_to_apply, get_configuration, configure_environment,
-                  daemons_handler, wait_for_gcp_start):
+def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs according to the day of the week,
                  of the month, or time set in the configuration. For this purpose, the test will use
@@ -214,7 +213,7 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
 ])
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, daemons_handler, wait_for_gcp_start):
+def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler):
     '''
     description: Check if the 'gcp-pubsub' module calculates the next scan correctly using time intervals
                  greater than one month, one week, or one day. For this purpose, the test will use different
@@ -263,7 +262,6 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
 
     next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                                                  callback=callback_detect_start_gcp_sleep,
-                                                 accum_results=1,
                                                  error_message='Did not receive expected '
                                                                '"Sleeping until ..." event').result()
 
@@ -273,8 +271,6 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
 
     next_scan_time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(hour[0]), int(hour[1]),
                                        int(hour[2]))
-    #raise ValueError(f'HOLA5 {next_scan_time_log}')
-    #raise ValueError(f'HOLA6 {str_interval}')
 
     if tags_to_apply == {'ossec_day_multiple_conf'}:
         if today.month + time_interval <= 12:
