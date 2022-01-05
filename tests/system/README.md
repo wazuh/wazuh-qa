@@ -195,7 +195,7 @@ If you want to specify a particular branch of the Wazuh repository, you will nee
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1"}'
 ```
-In the **basic cluster**, you can also specify a branch from the Wazuh QA repository.
+In the **basic cluster**, you also have to specify a branch from the Wazuh QA repository.
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1", "wazuh_qa_branch":"master"}'
 ```

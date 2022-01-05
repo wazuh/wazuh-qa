@@ -113,18 +113,6 @@
   roles:
     - name: "roles/agent-role"
 
-- name: Wazuh Agent3
-  hosts: wazuh-agent3
-  vars:
-    manager_hostname: wazuh-worker2
-    agent_id: "{{ agent3_id }}"
-    agent_hostname: "{{ agent3_hostname }}"
-    agent_key: "{{ agent3_key }}"
-  vars_files:
-    - ./vars/configurations.yml
-  roles:
-    - name: "roles/agent-role"
-
 - name: Wazuh Agent2
   hosts: wazuh-agent2
   vars:
@@ -132,6 +120,18 @@
     agent_id: "{{ agent2_id }}"
     agent_hostname: "{{ agent2_hostname }}"
     agent_key: "{{ agent2_key }}"
+  vars_files:
+    - ./vars/configurations.yml
+  roles:
+    - name: "roles/agent-role"
+
+- name: Wazuh Agent3
+  hosts: wazuh-agent3
+  vars:
+    manager_hostname: wazuh-worker2
+    agent_id: "{{ agent3_id }}"
+    agent_hostname: "{{ agent3_hostname }}"
+    agent_key: "{{ agent3_key }}"
   vars_files:
     - ./vars/configurations.yml
   roles:
