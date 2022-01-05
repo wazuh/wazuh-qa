@@ -15,8 +15,9 @@ const httpAgent = new http.Agent();
 exports.handler = function(event, context, callback) {
   const host = process.env.ELASTICSEARCH_HOST;
   const agent = host.startsWith("http:") ? httpAgent : httpsAgent;
+  const index = process.env.INDEX;
 
-  fetch(`${host}/qa-doc/_search`, {
+  fetch(`${host}/${index}/_search`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: event.body,

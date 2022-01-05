@@ -66,7 +66,7 @@ user_id, role_id, policy_id, rule_id = None, None, None, None
 
 # Tests
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_add_old_user(set_security_resources, get_api_details):
+def test_add_old_user(restart_api_module, wait_for_start_module, set_security_resources, get_api_details):
     '''
     description: Check if the security relationships of a previous user are maintained
                  in the system after adding a new user with the same ID.
