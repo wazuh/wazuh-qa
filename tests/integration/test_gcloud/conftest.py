@@ -52,8 +52,8 @@ def wait_for_gcp_start(get_configuration, request):
 
 @pytest.fixture(scope="session", autouse=True)
 def configure_internal_options():
-    local_internal_options = {'wazuh_modules.debug': 2, 'analysisd.debug': 2, "monitord.rotate_log": 0}
+    local_internal_options = {'wazuh_modules.debug': 2, 'analysisd.debug': 2, 'monitord.rotate_log': 0, 'monitord.day_wait': 0, 'monitord.keep_log_days': 0,'monitord.size_rotate': 0}
     conf.set_local_internal_options_dict(local_internal_options)
     yield
-    local_internal_options = {'wazuh_modules.debug': 0, 'analysisd.debug': 0, "monitord.rotate_log": 1}
+    local_internal_options = {'wazuh_modules.debug': 0, 'analysisd.debug': 0, "monitord.rotate_log": 1, "monitord.day_wait": 10, "monitord.keep_log_days": 31,'monitord.size_rotate': 512}
     conf.set_local_internal_options_dict(local_internal_options)
