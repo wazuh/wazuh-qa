@@ -217,34 +217,6 @@
             "test_name": "blacklist"
         },
         {
-            "code": "     # path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".xml\")\n     # create temporary file for parsing xml input and validate XML format\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 676,
-            "line_range": [
-                676
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
-            "test_id": "B108",
-            "test_name": "hardcoded_tmp_directory"
-        },
-        {
-            "code": "     # Path of temporary files for parsing xml input\n     handle, tmp_file_path = tempfile.mkstemp(prefix=f'{common.wazuh_path}/tmp/api_tmp_file_', suffix=\".tmp\")\n     try:\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "MEDIUM",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Probable insecure usage of temp file/directory.",
-            "line_number": 1734,
-            "line_range": [
-                1734
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b108_hardcoded_tmp_directory.html",
-            "test_id": "B108",
-            "test_name": "hardcoded_tmp_directory"
-        },
-        {
             "code": "     iv = InputValidator()\n     reservated_ips = {'localhost', 'NODE_IP', '0.0.0.0', '127.0.1.1'}\n \n",
             "filename": "framework/wazuh/core/cluster/cluster.py",
             "issue_confidence": "MEDIUM",
