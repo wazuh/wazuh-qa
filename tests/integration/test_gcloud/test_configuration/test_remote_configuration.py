@@ -149,7 +149,7 @@ def get_remote_configuration(component_name, config):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
+def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the remote configuration matches the local configuration of the 'gcp-pubsub' module.
                  For this purpose, the test will use different settings and get the remote configuration applied.
