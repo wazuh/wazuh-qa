@@ -321,5 +321,5 @@ def callback_unable_to_connect(server_ip, port='1515'):
 
 
 def callback_connected_to_manager_ip(server_ip, port='1515'):
-    msg = f"Connected to {server_ip}:{port}"
+    msg = f"Connected to the Auth service at {server_ip}:{port}"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
