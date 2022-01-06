@@ -112,9 +112,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
-@pytest.mark.parametrize('tags_to_apply', [{'file_limit_registry_conf'}])
-def test_file_limit_full(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'file_limit' tag.
@@ -158,8 +156,6 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_generator(CB_DATABASE_FULL_ALERT_EVENT),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()

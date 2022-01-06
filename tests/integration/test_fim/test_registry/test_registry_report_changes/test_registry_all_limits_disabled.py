@@ -76,11 +76,10 @@ key = WINDOWS_HKEY_LOCAL_MACHINE
 sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
-test_regs = [os.path.join(key, sub_key_1), os.path.join(key, sub_key_2)]
-
+reg1 = os.path.join(key, sub_key_1)
+reg2 =  os.path.join(key, sub_key_2)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-reg1, reg2 = test_regs
 size_limit_configured = 10 * 1024
 
 # Configurations
@@ -106,13 +105,13 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_limits'}),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_limits'}),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_limits'})
+@pytest.mark.parametrize('key, subkey, arch, value_name', [
+    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
+    (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
+    (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
 ])
 ## @pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
-def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply, get_configuration, configure_environment,
+def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, configure_environment,
                              restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates all FIM events when the 'file_size' and
@@ -170,7 +169,6 @@ def test_all_limits_disabled(key, subkey, arch, value_name, tags_to_apply, get_c
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     value_content = generate_string(4 * 1024 * 1024, '0')
     values = {value_name: value_content}
 

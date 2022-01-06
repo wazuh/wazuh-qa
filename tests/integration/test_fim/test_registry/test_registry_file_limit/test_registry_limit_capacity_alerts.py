@@ -108,9 +108,8 @@ def get_configuration(request):
 # Tests
 
 
-@pytest.mark.parametrize('percentage, tags_to_apply', [(80, {'file_limit_registry_conf'}), 
-                        (90, {'file_limit_registry_conf'}), (0, {'file_limit_registry_conf'})])
-def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration, configure_environment,
+@pytest.mark.parametrize('percentage', [(80), (90),(0)])
+def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment,
                                    restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
@@ -161,7 +160,6 @@ def test_file_limit_capacity_alert(percentage, tags_to_apply, get_configuration,
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     limit = int(get_configuration['metadata']['file_limit'])
 
     NUM_REGS = int(limit * (percentage / 100)) + 1

@@ -62,7 +62,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_va
     KEY_WOW64_64KEY, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey,create_registry
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE, \
     ERR_MSG_FILE_LIMIT_VALUES, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
 # Marks
@@ -110,9 +110,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
-@pytest.mark.parametrize('tags_to_apply', [{'file_limit_registry_conf'}])
-def test_file_limit_values(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
                  the maximum number of entries to monitor from the 'file_limit' option of FIM. For this purpose,
@@ -153,7 +151,6 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
         - time_travel
     '''
 
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                 callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                 error_message=ERR_MSG_FILE_LIMIT_VALUES).result()

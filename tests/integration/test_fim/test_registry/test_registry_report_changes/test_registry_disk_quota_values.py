@@ -62,6 +62,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
     calculate_registry_diff_paths, create_registry, delete_registry, registry_parser, \
     check_time_travel
+from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2)
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -71,16 +72,15 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-key = "HKEY_LOCAL_MACHINE"
-sub_key_1 = "SOFTWARE\\key1"
-sub_key_2 = "SOFTWARE\\key2"
+key = WINDOWS_HKEY_LOCAL_MACHINE
+sub_key_1 = MONITORED_KEY
+sub_key_2 = MONITORED_KEY_2
 
-test_regs = [os.path.join(key, sub_key_1),
-             os.path.join(key, sub_key_2)]
+reg1 = os.path.join(key, sub_key_1)
+reg2 = os.path.join(key, sub_key_2)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-reg1, reg2 = test_regs
 size_limit_configured = 10 * 1024
 
 # Configurations
@@ -93,7 +93,6 @@ p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': 
                                                           'DISK_QUOTA_LIMIT': '1KB'})
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
-
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -106,16 +105,13 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('size', [
-    (4 * 1024),
-    (32 * 1024)
+@pytest.mark.parametrize('size', [(4 * 1024),(32 * 1024)])
+@pytest.mark.parametrize('key, subkey, arch, value_name', [
+    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
+    (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
+    (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
 ])
-@pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_limits'}),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_limits'}),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_limits'})
-])
-def test_disk_quota_values(key, subkey, arch, value_name, tags_to_apply, size,
+def test_disk_quota_values(key, subkey, arch, value_name, size,
                            get_configuration, configure_environment, restart_syscheckd,
                            wait_for_fim_start):
     '''
@@ -178,7 +174,6 @@ def test_disk_quota_values(key, subkey, arch, value_name, tags_to_apply, size,
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     value_content = generate_string(size, '0')
     values = {value_name: value_content}
 
