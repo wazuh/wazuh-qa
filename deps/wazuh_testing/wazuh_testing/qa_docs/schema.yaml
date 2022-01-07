@@ -245,6 +245,7 @@ predefined_values:
     - fim_wildcards_complex
     - fim_windows_audit_interval
     - gcloud
+    - general_settings
     - github
     - integrity
     - interval
