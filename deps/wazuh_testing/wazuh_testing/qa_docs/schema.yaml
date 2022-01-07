@@ -278,6 +278,7 @@ predefined_values:
     - rootcheck
     - rules
     - scan
+    - scan_results
     - schedule
     - scheduled
     - settings
