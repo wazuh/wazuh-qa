@@ -11,6 +11,7 @@
 /etc/rc.d/rc3.d
 /etc/rc.d/rc4.d
 /etc/rc.d/rc5.d
+/etc/selinux/targeted
 /etc/shadow
 /etc/shadow-
 /home/vagrant/.ansible/tmp/ansible-tmp-
