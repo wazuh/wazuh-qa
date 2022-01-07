@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#interval
 
 tags:
-    - gcloud_configuration
+    - config
+    - schedule
 '''
 import os
 import sys
@@ -66,6 +67,7 @@ from wazuh_testing.gcloud import callback_detect_schedule_validate_parameters_wa
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
@@ -77,10 +79,11 @@ interval = ['1d', '1w', '1M']
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'schedule_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -102,7 +105,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_schedule(get_configuration, configure_environment, restart_wazuh):
+def test_schedule(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
     '''
     description: Check if the 'gcp-pubsub' module is executed in the periods specified in the 'interval' tag.
                  For this purpose, the test will use different values for the 'interval' tag (a positive number
@@ -137,44 +140,22 @@ def test_schedule(get_configuration, configure_environment, restart_wazuh):
     tags:
         - scheduled
     '''
+
     str_interval = get_configuration['sections'][0]['elements'][3]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     tags_to_apply = get_configuration['tags'][0]
-
-    if tags_to_apply == 'schedule_day':
-        if 'M' not in str_interval:
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
-                                    callback=callback_detect_schedule_validate_parameters_warn,
-                                    accum_results=2,
-                                    error_message='Did not receive expected '
-                                                  'at _sched_scan_validate_parameters(): WARNING:').result()
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_detect_schedule_validate_parameters_warn).result()
-                raise AttributeError(f'Unexpected event {event}')
-
-    elif tags_to_apply == 'schedule_wday':
-        if 'w' not in str_interval:
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
-                                    callback=callback_detect_schedule_validate_parameters_warn,
-                                    accum_results=2,
-                                    error_message='Did not receive expected '
-                                                  'at _sched_scan_validate_parameters(): WARNING:').result()
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_detect_schedule_validate_parameters_warn).result()
-                raise AttributeError(f'Unexpected event {event}')
+    
+    # Warning log must appear in log (cause interval is not compatible with <day/month/week>)
+    if (tags_to_apply == 'schedule_day' and 'M' not in str_interval) or \
+    (tags_to_apply == 'schedule_wday' and 'w' not in str_interval) or \
+    (tags_to_apply == 'schedule_time' and ('d' not in str_interval and 'w' not in str_interval)):
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
+                                callback=callback_detect_schedule_validate_parameters_warn,
+                                error_message='Did not receive expected '
+                                                'at _sched_scan_validate_parameters(): WARNING:').result()
+    # Warning is not suppose to appear
     else:
-        if 'd' not in str_interval and 'w' not in str_interval:
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
-                                    callback=callback_detect_schedule_validate_parameters_warn,
-                                    accum_results=2,
-                                    error_message='Did not receive expected '
-                                                  'at _sched_scan_validate_parameters(): WARNING:').result()
-        else:
-            with pytest.raises(TimeoutError):
-                event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_detect_schedule_validate_parameters_warn).result()
-                raise AttributeError(f'Unexpected event {event}')
+        with pytest.raises(TimeoutError):
+            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                            callback=callback_detect_schedule_validate_parameters_warn).result()
+            raise AttributeError(f'Unexpected event {event}')
