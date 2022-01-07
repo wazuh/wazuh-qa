@@ -216,8 +216,6 @@ def check_diffs_in_warning_list(diff, warning_list):
     yellow_output_dict = {}
     red_output_dict = {}
 
-    print(warning_list)
-
     for change_type in diff:
         if isinstance(diff[change_type], list):
             for path in diff[change_type]:
