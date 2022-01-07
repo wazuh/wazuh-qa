@@ -59,8 +59,7 @@ def read_warning_list(path):
     for line in lines:
         warning_list.append(line.replace('\n', ''))
 
-    # Discard the last item because it is a newline.
-    return warning_list[:-1]
+    return warning_list
 
 
 def validate_and_read_json(file_path):
@@ -216,6 +215,8 @@ def check_diffs_in_warning_list(diff, warning_list):
     red_matched_dict = {}
     yellow_output_dict = {}
     red_output_dict = {}
+
+    print(warning_list)
 
     for change_type in diff:
         if isinstance(diff[change_type], list):
