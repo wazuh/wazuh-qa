@@ -136,7 +136,7 @@ def pre_insert_agents():
 @pytest.fixture(scope='function')
 def insert_agents_test():
     """Insert agents. Only used for the agent queries"""
-    agent_list = [1, 2]
+    agent_list = [1, 2, 3]
     for agent in agent_list:
         insert_agent(agent)
 
@@ -155,7 +155,7 @@ def restart_wazuh(request):
     control_service('stop')
 
 
-def execute_wazuh_db_query(command):
+def execute_wazuh_db_query(command, single_response=True):
     """Function to send a command to the wazuh-db socket.
     Args:
         command(str): Message to send to the socket.
@@ -163,7 +163,32 @@ def execute_wazuh_db_query(command):
         str: A response from the socket
     """
     receiver_sockets[0].send(command, size=True)
-    return receiver_sockets[0].receive(size=True).decode()
+    if single_response == True:
+        return receiver_sockets[0].receive(size=True).decode()
+    else:
+        response_array = []
+        while True:
+            response = receiver_sockets[0].receive(size=True).decode()
+            response_array.append(response)
+            status = response.split()[0]
+            if status != 'due':
+                break
+
+        return response_array[0] if len(response_array) == 1 else response_array
+
+
+def validate_wazuh_db_response(expected_output, response):
+    if isinstance(response, list):
+        if len(expected_output) != len(response):
+            return False
+
+        result = True
+        for index, item in enumerate(response):
+            if expected_output[index] != item:
+                result = False
+        return result
+    else:
+        return expected_output == response
 
 
 def insert_agent(agent_id, agent_name='TestName'):
@@ -223,12 +248,12 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
         command = stage['input']
         expected_output = stage['output']
 
-        response = execute_wazuh_db_query(command)
+        response = execute_wazuh_db_query(command, False)
 
         if 'use_regex' in stage and stage['use_regex'] == 'yes':
             match = True if regex_match(expected_output, response) else False
         else:
-            match = (expected_output == response)
+            match = validate_wazuh_db_response(expected_output, response)
         assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
             .format(index + 1, stage['stage'], expected_output, response)
 
@@ -252,12 +277,12 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
         command = stage['input']
         expected_output = stage['output']
 
-        response = execute_wazuh_db_query(command)
+        response = execute_wazuh_db_query(command, False)
 
         if 'use_regex' in stage and stage['use_regex'] == 'yes':
             match = True if regex_match(expected_output, response) else False
         else:
-            match = (expected_output == response)
+            match = validate_wazuh_db_response(expected_output, response)
         assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
             .format(index + 1, stage['stage'], expected_output, response)
 
