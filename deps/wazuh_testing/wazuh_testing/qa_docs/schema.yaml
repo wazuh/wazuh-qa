@@ -282,5 +282,6 @@ predefined_values:
     - wdb_socket
     - week_day
     - who_data
+    - windows
     - worker
     - wpk
