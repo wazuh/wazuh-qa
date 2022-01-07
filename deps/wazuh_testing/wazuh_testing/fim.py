@@ -1339,13 +1339,6 @@ def callback_detect_max_files_per_second(line):
     return match is not None
 
 
-def callback_dbsync_no_data(line):
-    match = re.match(r'.*#!-fim_registry dbsync no_data (.+)', line)
-    if match:
-        return match.group(1)
-    return None
-
-
 def callback_detect_end_runtime_wildcards(line):
     match = re.match(r".*Configuration wildcards update finalize\.", line)
     return match is not None
