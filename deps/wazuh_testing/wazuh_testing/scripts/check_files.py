@@ -119,7 +119,7 @@ def get_check_files_data(path='/', ignored_paths=[]):
         skip_path_checking = False
 
         for ignore_path in ignored_paths:
-            if ignore_path in dirpath:
+            if ignore_path == dirpath[0:len(ignore_path)]:
                 skip_path_checking = True
 
         if not skip_path_checking:

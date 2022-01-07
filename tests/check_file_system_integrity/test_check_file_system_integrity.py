@@ -59,8 +59,7 @@ def read_warning_list(path):
     for line in lines:
         warning_list.append(line.replace('\n', ''))
 
-    # Discard the last item because it is a newline.
-    return warning_list[:-1]
+    return warning_list
 
 
 def validate_and_read_json(file_path):

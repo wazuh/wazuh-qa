@@ -226,7 +226,9 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
     os_platform = 'linux'
     package_destination = '/tmp'
     check_files_tool_destination = '/bin/check_files.py'
-    ignore_check_files_path = ['/sys', '/proc', '/run', '/dev', '/var/ossec', '/bin/check_files.py']
+    ignore_check_files_path = ['/sys', '/proc', '/run', '/dev', '/var/ossec', '/bin/check_files.py',
+                               '/usr/lib/python3/dist-packages/ufw/__pycache__',
+                               '/var/cache/yum/x86_64/7/epel/metalink.xml']
     check_files_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
     pre_check_files_data_output_path = '/pre_check_files_data.json'
     post_check_files_data_output_path = '/post_check_files_data.json'
@@ -322,8 +324,8 @@ def main():
     parameters = get_parameters()
     qa_ctl_config_generator = QACTLConfigGenerator()
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
-    pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.yaml")
-    post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.yaml")
+    pre_check_files_data_path = os.path.join(TMP_FILES, f"pre_check_files_data_{current_timestamp}.json")
+    post_check_files_data_path = os.path.join(TMP_FILES, f"post_check_files_data_{current_timestamp}.json")
     test_output_path = parameters.output_file_path if parameters.output_file_path else \
         os.path.join(TMP_FILES, f"test_check_files_result_{current_timestamp}")
 
@@ -336,7 +338,7 @@ def main():
 
     try:
         # Generate the test playbooks to run with qa-ctl
-        playbooks_info = generate_test_playbooks(parameters, post_check_files_data_path, pre_check_files_data_path)
+        playbooks_info = generate_test_playbooks(parameters, pre_check_files_data_path, post_check_files_data_path)
         test_build_files.extend([playbook_path for playbook_path in playbooks_info.values()])
 
         # Generate the qa-ctl configurationgenerate_qa_ctl_configuration
