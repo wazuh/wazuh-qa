@@ -102,7 +102,7 @@ pytestmark = [pytest.mark.tier(level=1)]
 # Variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+test_directory = os.path.join(PREFIX, TEST_DIR_1)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
 
@@ -111,7 +111,7 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
 
 parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {REPORT_CHANGES: 'yes'},
                                                      DIFF_SIZE_LIMIT.upper(): {DIFF_SIZE_LIMIT: '2kb'},
-                                                     TEST_DIRECTORIES: test_directories[0],
+                                                     TEST_DIRECTORIES: test_directory,
                                                      FILE_SIZE_ENABLED: 'yes',
                                                      FILE_SIZE_LIMIT: '1GB',
                                                      DISK_QUOTA_ENABLED: 'no',

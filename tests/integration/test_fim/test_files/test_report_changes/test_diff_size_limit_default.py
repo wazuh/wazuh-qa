@@ -102,7 +102,7 @@ pytestmark = [pytest.mark.tier(level=1)]
 # Variables
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+test_directory = os.path.join(PREFIX, TEST_DIR_1)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
 
@@ -110,7 +110,7 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
 # Configurations
 
 parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {REPORT_CHANGES: 'yes'},
-                                                     TEST_DIRECTORIES: test_directories[0]})
+                                                     TEST_DIRECTORIES: test_directory})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
