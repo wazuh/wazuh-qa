@@ -1,0 +1,7 @@
+wazuh-manager:
+  - regex: ".*Agent 001 query: fim_file integrity_check_global"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
+  - regex: ".*Agent 001 query: syscheck delete"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
