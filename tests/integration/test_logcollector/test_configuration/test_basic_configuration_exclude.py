@@ -21,7 +21,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
-
 if sys.platform == 'win32':
     parameters = [
         {'LOG_FORMAT': 'syslog', 'LOCATION': r'C:\tmp\*', 'EXCLUDE': r'C:\tmp\file.txt'},
@@ -69,7 +68,8 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_exclude(get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_exclude(get_configuration, configure_environment, file_monitoring, restart_logcollector):
     """Check if the Wazuh run correctly with the specified exclude field value.
 
     Ensure logcollector allows the specified exclude attribute. Also, in case of the manager instance, check if the API
@@ -86,6 +86,6 @@ def test_configuration_exclude(get_configuration, configure_environment, restart
 
     else:
         if sys.platform == 'win32':
-            assert get_process_cmd('wazuh-agent.exe') != 'None'
+            assert check_if_process_is_running('wazuh-agent.exe') == True
         else:
             assert check_if_process_is_running('wazuh-logcollector')
