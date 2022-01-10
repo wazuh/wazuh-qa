@@ -242,8 +242,10 @@ class SocketController:
             self.family = socket.AF_UNIX
         elif family == 'AF_INET':
             self.family = socket.AF_INET
+        elif family == 'AF_INET6':
+            self.family = socket.AF_INET6
         else:
-            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
+            raise TypeError(f"Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6")
 
         # Set socket protocol
         if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
@@ -331,7 +333,7 @@ class SocketController:
                 while 1:
                     try:  # error means no more data
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
-                    except:
+                    except Exception:
                         break
 
         return output
@@ -516,6 +518,7 @@ class Queue(queue.Queue):
         """
         return str(self.queue)
 
+
 class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
 
@@ -600,7 +603,20 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
         return connstream, fromaddr
 
 
+class SSLStreamServerPortV6(SSLStreamServerPort):
+    address_family = socket.AF_INET6
+
+
+class StreamServerPortV6(StreamServerPort):
+    address_family = socket.AF_INET6
+
+
 class DatagramServerPort(socketserver.ThreadingUDPServer):
+    pass
+
+
+class DatagramServerPortV6(DatagramServerPort):
+    address_family = socket.AF_INET6
     pass
 
 
@@ -653,7 +669,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
             while 1:
                 try:  # error means no more data
                     received += self.request.recv(chunk_size, socket.MSG_DONTWAIT)
-                except:
+                except Exception:
                     break
         return received
 
@@ -736,23 +752,26 @@ class ManInTheMiddle:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                             f'Valid ones are TCP or UDP')
 
-        if family in ('AF_UNIX', 'AF_INET'):
+        if family in ('AF_UNIX', 'AF_INET', 'AF_INET6'):
             self.family = family
         else:
-            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
+            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         self.forwarded_socket_path = None
 
         class_tree = {
             'listener': {
                 'tcp': {
-                    'AF_INET': StreamServerPort
+                    'AF_INET': StreamServerPort,
+                    'AF_INET6': StreamServerPortV6
                 },
                 'udp': {
-                    'AF_INET': DatagramServerPort
+                    'AF_INET': DatagramServerPort,
+                    'AF_INET6': DatagramServerPortV6
                 },
                 'ssl': {
-                    'AF_INET': SSLStreamServerPort
+                    'AF_INET': SSLStreamServerPort,
+                    'AF_INET6': SSLStreamServerPortV6
                 }
             },
             'handler': {
