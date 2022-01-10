@@ -66,7 +66,7 @@ tests = read_yaml(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 host_name = socket.gethostname()
-
+no_restart_windows_after_configuration_set = True
 configuration_ids = ['agentd_enrollment']
 test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
