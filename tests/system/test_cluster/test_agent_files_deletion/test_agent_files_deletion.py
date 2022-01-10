@@ -38,16 +38,21 @@ queries = ['global sql select * from agent where id={id}',
 
 def agent_healthcheck(master_token):
     """Check if the agent is active and reporting."""
-
     timeout = time() + time_to_agent_reconnect
-    while True:
+    healthy = False
+
+    while not healthy:
         response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
                                               endpoint='/agents?status=active')
+
         assert response['status'] == 200, 'Failed when trying to get the active agents'
         if int(response['json']['data']['total_affected_items']) == 4:
-            break
+            for item in response['json']['data']['affected_items']:
+                if item['name'] == agent_host and item['manager'] == worker_host:
+                    healthy = True
         elif time() > timeout:
             print("The agent 'wazuh-agent3' is not 'Active' yet.")
+            break
         sleep(while_time)
     sleep(time_to_sync)
 
