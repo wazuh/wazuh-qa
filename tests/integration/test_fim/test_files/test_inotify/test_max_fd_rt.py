@@ -110,6 +110,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh-qa#2174")
 @pytest.mark.parametrize('tags_to_apply', [{'test_max_fd_rt'}])
 def test_max_fd_win_rt(tags_to_apply, get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''

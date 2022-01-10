@@ -21,7 +21,7 @@ no_restart_windows_after_configuration_set = True
 force_restart_after_restoring = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-local_internal_options = {'windows.debug': '0', 'agent.debug': '0'}
+local_internal_options = {'windows.debug': '2', 'agent.debug': '0', 'logcollector.debug':'2'}
 
 if sys.platform == 'win32':
     location = r'C:\test.txt'
@@ -89,11 +89,6 @@ log_format_not_print_reading_info = ['audit', 'mysql_log', 'postgresql_log', 'nm
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get configurations from the module."""
-    return local_internal_options
 
 
 def create_file_location(filename, type):
@@ -385,15 +380,13 @@ def check_log_format_values(conf):
     file.remove_file(conf['location'])
 
 
-def test_log_format(get_configuration, configure_environment, get_local_internal_options,
-                    configure_local_internal_options,):
+def test_log_format(configure_local_internal_options_module, get_configuration, configure_environment):
     """Check if Wazuh log format field of logcollector works properly.
     Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.
 
     Args:
-        get_local_internal_options (fixture): Get internal configuration.
+        configure_local_internal_options_module (fixture): Set internal configuration.
         get_configuration (fixture): Get configurations from the module.
-        configure_local_internal_options (fixture): Set internal configuration.
         configure_environment (fixture): Configure a custom environment for testing.
 
     Raises:
@@ -423,4 +416,3 @@ def test_log_format(get_configuration, configure_environment, get_local_internal
         create_file_location(conf['location'], conf['log_format'])
         control_service('start')
         check_log_format_values(conf)
-

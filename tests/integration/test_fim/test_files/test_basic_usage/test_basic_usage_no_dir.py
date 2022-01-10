@@ -72,9 +72,7 @@ pytest_args:
 tags:
     - fim_basic_usage
 '''
-
 import os
-
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_empty_directories

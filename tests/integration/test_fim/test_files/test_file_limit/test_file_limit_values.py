@@ -97,6 +97,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
@@ -133,6 +134,7 @@ def extra_configuration_before_yield():
 @pytest.mark.parametrize('tags_to_apply', [
     {'file_limit_conf'}
 ])
+@mark_skip_agentWindows
 def test_file_limit_values(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the value of the 'entries' tag, which corresponds

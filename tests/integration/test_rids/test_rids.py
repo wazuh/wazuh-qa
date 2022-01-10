@@ -1,7 +1,62 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The RIDS(Remote Identifiers) are the agent-manager remoted messages counter. Each message is identified by the
+       next possible number(identifier). Only the incoming messages with a valid RID(higher than previous) are allowed.
+       This functionality has a closing time value, which allows removing an agent's file handler when it does not send
+       a message during a period of time(five minutes by default).
+
+tier: 0
+
+modules:
+    - rids
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+    - wazuh-agentd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://github.com/wazuh/wazuh/blob/master/src/os_crypto/shared/msgs.c
+    - https://documentation.wazuh.com/current/user-manual/reference/internal-options.html#remoted
+    - https://github.com/wazuh/wazuh/blob/master/src/config/remote-config.c
+    - https://github.com/wazuh/wazuh/pull/459
+    - https://github.com/wazuh/wazuh/issues/6112
+    - https://github.com/wazuh/wazuh/pull/7746
+
+tags:
+    - rids
+'''
 import os
 import time
 
@@ -103,6 +158,35 @@ def set_recv_counter_flush(new_recv_counter):
 
 
 def test_rids(get_configuration, configure_environment, restart_service):
+    '''
+    description: Check that RIDS is opened and closed as expected. To do this, it creates injectors(agents and senders)
+                 to be able to communicate with the manager. Then, it stops the agents' listening and checks if RIDS is
+                 closed(when it`s needed).
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configuration from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: Method to restart the service.
+
+    assertions:
+        - Verify that every agent rid is open.
+        - Verify that every agent rid is closed.
+
+    input_description: Some metadata is defined in the module. These include some configurations stored in
+                       the 'wazuh_manager_conf.yaml'.
+
+    expected_output:
+        - The `rids_for_agent_open` boolean variable with `True` when RIDS should be `opened`.
+        - The `rids_for_agent_open` boolean variable with `False` when RIDS should be `closed`.
+    '''
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
     check_close = metadata['check_close']
