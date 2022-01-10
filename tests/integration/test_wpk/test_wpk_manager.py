@@ -42,6 +42,7 @@ if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
 if global_parameters.wpk_package_path is None:
     raise ValueError("The WPK package path must be defined by parameter. See README.md")
+
 version_to_upgrade = global_parameters.wpk_version[0]
 
 MANAGER_VERSION = get_version()
@@ -871,6 +872,7 @@ def remove_current_wpk():
             raise Exception(f'Failed to remove {filename} file')
 
 
+@pytest.mark.skip(reason="Blocked by issue wazuh-qa#2203, when is fixed we can enable this test again")
 def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
     metadata = get_configuration.get('metadata')

@@ -55,7 +55,9 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#max-messages
 
 tags:
-    - gcloud_functionality
+    - limits
+    - scan
+    - maximum
 '''
 import os
 import sys
@@ -67,6 +69,7 @@ from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_r
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file
 from google.cloud import pubsub_v1
 
 # Marks
@@ -83,10 +86,11 @@ logging = 'info'
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -99,6 +103,9 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+# Preparing
+
+truncate_file(LOG_FILE_PATH)
 
 # fixtures
 
@@ -116,8 +123,7 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
-def test_max_messages(get_configuration, configure_environment, publish_messages,
-                      restart_wazuh, wait_for_gcp_start):
+def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls a message number less than or equal to the limit set
                  in the 'max_messages' tag. For this purpose, the test will use a fixed limit and generate a
