@@ -42,7 +42,6 @@ REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
 CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
-CB_DATABASE_FULL_ALERT_EVENT = r".*Sending DB (\d+)% full alert."
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
 

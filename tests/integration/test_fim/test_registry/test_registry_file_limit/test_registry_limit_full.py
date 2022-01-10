@@ -59,7 +59,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_DATABASE_FULL_ALERT_EVENT, \
+from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, \
     ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT, \
     CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -157,7 +157,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
         - time_travel
     '''
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                             callback=callback_generator(CB_DATABASE_FULL_ALERT_EVENT),
+                                             callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
     assert database_state == '100', 'Wrong value for full database alert.'
