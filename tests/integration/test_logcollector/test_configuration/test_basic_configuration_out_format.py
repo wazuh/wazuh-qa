@@ -8,12 +8,12 @@ import wazuh_testing.api as api
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 
 import sys
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0)]
 
 # Configuration
 no_restart_windows_after_configuration_set = True
@@ -22,10 +22,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 wazuh_component = get_service()
 
-if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
-else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+local_internal_options = {'logcollector.debug': '2'}
 
 parameters = [
     {'SOCKET_NAME': 'custom_socket', 'SOCKET_PATH': '/var/log/messages', 'LOCATION': "/tmp/testing.log",
@@ -151,7 +148,9 @@ def get_configuration(request):
     return request.param
 
 
-def test_configuration_out_format(get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_configuration_out_format(get_configuration, configure_environment, configure_local_internal_options_module,
+                                  restart_logcollector):
     """Check if the Wazuh out format field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid out format values.

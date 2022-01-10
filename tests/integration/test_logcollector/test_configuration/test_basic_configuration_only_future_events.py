@@ -5,14 +5,16 @@
 import os
 import pytest
 import sys
+import time
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
 from wazuh_testing.tools import get_service, LOG_FILE_PATH
 from tempfile import gettempdir
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+from wazuh_testing.tools.services import control_service
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 prefix = LOG_COLLECTOR_DETECTOR_PREFIX
@@ -26,6 +28,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 wazuh_component = get_service()
+first_macos_log_process=False
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -38,7 +41,7 @@ tcases = []
 
 
 if sys.platform == 'win32':
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
     log_format_list += ['eventchannel']
 elif sys.platform == 'darwin':
     log_format_list += ['macos']
@@ -111,6 +114,15 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size']}" + f"" if 'max-size' in x
                      else f"{x['log_format']}_{x['only-future-events']}" for x in metadata]
 
+@pytest.fixture(scope="module")
+def generate_macos_logs(get_configuration):
+    """Get configurations from the module."""
+    global first_macos_log_process
+    if not first_macos_log_process and sys.platform == 'darwin' and get_configuration['metadata']['log_format'] == 'macos':
+        control_service('restart', 'wazuh-logcollector')
+        time.sleep(10)
+        first_macos_log_process=True
+
 
 def check_only_future_events_valid(cfg):
     """Check if Wazuh runs correctly with the specified only future events field.
@@ -173,7 +185,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_only_future_events(get_configuration, configure_environment, restart_logcollector):
+def test_only_future_events(get_configuration, configure_environment, generate_macos_logs, restart_logcollector):
     """Check if Wazuh only future events field of logcollector works properly.
 
     Ensure Wazuh component fails in case of invalid values and works properly in case of valid
