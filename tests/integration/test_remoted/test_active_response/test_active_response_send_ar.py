@@ -5,11 +5,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
-       Specifically, these tests will check if an active response command is sent correctly
-       to the Wazuh agent. Active responses perform various countermeasures to address active
+brief: Active responses perform various countermeasures to address active
        threats, such as blocking access to an agent from the threat source when certain
-       criteria are met.
+       criteria are met. These tests will check if an active response command is sent
+       correctly to the Wazuh agent by `wazuh-remoted` daemon.
 
 tier: 1
 

@@ -5,7 +5,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Test if wazuh-remoted sends the #pong message
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, this test will check if 'wazuh-remoted' sends the #pong message.
 
 tier: 0
 
@@ -135,7 +136,7 @@ def get_configuration(request):
 
 def test_ping_pong_message(get_configuration, configure_environment, restart_remoted):
     '''
-    description: Test if wazuh-remoted sends the #pong message
+    description: Check if 'wazuh-remoted' sends the #pong message
     
     wazuh_min_version: 4.2.0
     
@@ -153,9 +154,13 @@ def test_ping_pong_message(get_configuration, configure_environment, restart_rem
     assertions:
         - Verify the #pong message is sent correctly.
     
-    input_description: 
+    input_description: A configuration template (test_ping_pong_message) is contained in an external YAML file,
+                       (wazuh_socket_communication.yaml). That template is combined with different test cases defined
+                       in the module. Those include configuration settings for the 'wazuh-remoted' daemon
+                       and agents info.
     
     expected_output:
+        - r'Started <pid>: .* Listening on port .*'
     '''
     config = get_configuration['metadata']
 

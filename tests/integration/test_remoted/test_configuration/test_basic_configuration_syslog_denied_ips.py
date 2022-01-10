@@ -6,10 +6,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
-       Specifically, these tests will check if the agent status appears as 'disconnected' after
-       just sending the 'start-up' event, sent by several agents using different protocols.
-       The 'disconnected' status is when the manager considers that the agent is disconnected
-       if it does not receive any keep alive messages.
+       Specifically, this test will check that specified 'denied-ips' connection is denied and
+       syslog produces a 'not allowed' message. 
 
 tier: 0
 
@@ -91,7 +89,7 @@ def get_configuration(request):
 
 def test_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
     '''
-    description: Check that 'wazuh-remoted' deniend connection to the specified 'denied-ips'.
+    description: Check that 'wazuh-remoted' denied connection to the specified 'denied-ips'.
                  For this purpose, it uses the configuration from test cases, check if the different errors are
                  logged correctly and check if the API retrieves the expected configuration.
     

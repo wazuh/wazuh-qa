@@ -5,7 +5,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Test if remoted can receive syslog messages through the socket.
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, this test will check if 'wazuh-remoted' can receive syslog messages through
+       the socket.
 
 tier: 0
 
@@ -119,7 +121,7 @@ def get_configuration(request):
 @pytest.mark.parametrize("message", syslog_messages.keys())
 def test_syslog_message(message, get_configuration, configure_environment, restart_wazuh):
     '''
-    description: Test if remoted can receive syslog messages through the socket.
+    description: Check if 'wazuh-remoted' can receive syslog messages through the socket.
     
     wazuh_min_version: 4.2.0
     
@@ -138,11 +140,16 @@ def test_syslog_message(message, get_configuration, configure_environment, resta
             brief: Restart 'wazuh-remoted' daemon in manager.
     
     assertions:
-        - Verify the syslog message is received by the manager.
+        - Verify the syslog message is received.
     
-    input_description: 
+    input_description: A configuration template (test_syslog_message) is contained in an external YAML file,
+                       (wazuh_syslog.yaml). That template is combined with different test cases defined
+                       in the module. Those include configuration settings for the 'wazuh-remoted' daemon
+                       and agents info.
     
     expected_output:
+        - r'Started <pid>: .* Listening on port .*'
+        - r'<.>.*'
     '''
     config = get_configuration['metadata']
     port, protocol = config['port'], config['protocol']

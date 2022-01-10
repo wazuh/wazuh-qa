@@ -6,10 +6,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
-       Specifically, these tests will check if the agent status appears as 'disconnected' after
-       just sending the 'start-up' event, sent by several agents using different protocols.
-       The 'disconnected' status is when the manager considers that the agent is disconnected
-       if it does not receive any keep alive messages.
+       Specifically, this test will check that remoted fails when 'local_ip' is configured with
+       an invalid value, searching the error message produced.
 
 tier: 0
 
@@ -96,7 +94,8 @@ def get_configuration(request):
 def test_local_ip_invalid(get_configuration, configure_environment, restart_remoted):
     '''
     description: Check if 'wazuh-remoted' fails when 'local_ip' is configured with invalid values.
-                 For this purpose, it uses the configuration from test cases and 
+                 For this purpose, it uses the configuration from test cases and monitor the logs
+                 to find the error message produced.
     
     wazuh_min_version: 4.2.0
     

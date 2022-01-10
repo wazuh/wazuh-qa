@@ -8,8 +8,8 @@ type: integration
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
        Specifically, these tests will check if the agent status appears as 'disconnected' after
        just sending the 'start-up' event, sent by several agents using different protocols.
-       The 'disconnected' status is when the manager considers that the agent is disconnected
-       if it does not receive any keep alive messages.
+       Agent's status should change from 'disconnected' to 'active' status after the manager
+       receives the agents' keep-alive message.
 
 tier: 2
 
@@ -111,11 +111,8 @@ def get_configuration(request):
 def test_agent_remote_configuration(agent_name, get_configuration, configure_environment, remove_shared_files,
                                     restart_remoted, create_agent_group):
     '''
-    description: Check if the agents correctly send their version, receive the shared configuration, and finally,
-                 the start-up message is received and processed by the manager.
-                 For this purpose, the test will establish a connection with simulated agents using
-                 different ports and transport protocols. Then, the manager will send shared configuration to the
-                 agents thru remoted and check for success.
+    description: Check if the manager sends the shared configuration to agents through remote,
+                 ensuring the agent version is correct.
     
     wazuh_min_version: 4.2.0
     

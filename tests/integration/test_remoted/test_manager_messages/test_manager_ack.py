@@ -5,8 +5,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Check if the manager sends the ACK message after receiving
-        the start-up message from the agent.
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, this test will check that the manager sends the ACK message after receiving
+       the start-up message from the agent.
 
 tier: 0
 
@@ -168,9 +169,13 @@ def test_manager_ack(get_configuration, configure_environment, restart_remoted):
     
     assertions:
     
-    input_description: 
+    input_description: A configuration template (test_manager_ack) is contained in an external YAML file,
+                       (wazuh_manager_ack.yaml). That template is combined with different test cases defined
+                       in the module. Those include configuration settings for the 'wazuh-remoted' daemon
+                       and agents info.
     
     expected_output:
+        - r'#!-agent ack'
     '''
     protocol = get_configuration['metadata']['protocol']
 

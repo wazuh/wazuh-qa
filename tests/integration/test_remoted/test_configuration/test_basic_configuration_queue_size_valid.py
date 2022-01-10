@@ -6,10 +6,8 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
-       Specifically, these tests will check if the agent status appears as 'disconnected' after
-       just sending the 'start-up' event, sent by several agents using different protocols.
-       The 'disconnected' status is when the manager considers that the agent is disconnected
-       if it does not receive any keep alive messages.
+       Specifically, this test will check that 'wazuh-remoted' starts correctly when queue size
+       is set with a valid value.
 
 tier: 0
 
