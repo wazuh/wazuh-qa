@@ -67,8 +67,7 @@ def register_agent():
                 'wazuh-worker2', command):
             break
         elif time() > timeout:
-            print("One of the agents is not 'Active' yet.")
-            break
+            raise TimeoutError("One of the agents is not 'Active' yet.")
         sleep(while_time)
     sleep(time_to_sync)
 
