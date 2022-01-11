@@ -254,6 +254,7 @@ predefined_values:
     - key_polling
     - limits
     - logcollector
+    - logcollector_configuration
     - logging
     - logs
     - logs
