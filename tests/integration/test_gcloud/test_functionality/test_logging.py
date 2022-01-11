@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#logging
 
 tags:
-    - gcloud_functionality
+    - logging
+    - logs
 '''
 import os
 import sys
@@ -80,10 +81,11 @@ logging = ['info', 'debug', 'warning', 'error', 'critical']
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -112,8 +114,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('publish_messages', [
     ['- DEBUG - GCP message' for _ in range(5)]
 ], indirect=True)
-def test_logging(get_configuration, configure_environment, publish_messages,
-                 restart_wazuh, wait_for_gcp_start):
+def test_logging(get_configuration, configure_environment, reset_ossec_log, publish_messages, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module generates logs according to the set type in the 'logging' tag.
                  For this purpose, the test will use different logging levels (depending on the test case) and
