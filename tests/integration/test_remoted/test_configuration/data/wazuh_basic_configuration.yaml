@@ -57,24 +57,6 @@
         value: UDP
 
 - tags:
-  - test_basic_configuration_ipv6
-  apply_to_modules:
-  - test_basic_configuration_ipv6
-  sections:
-  - section: remote
-    elements:
-    - connection:
-        value: CONNECTION
-    -  allowed-ips:
-         value: 127.0.0.0/24
-    - port:
-        value: 1514
-    - ipv6:
-        value: 'yes'
-    - protocol:
-        value: TCP
-
-- tags:
   - test_basic_configuration_local_ip
   apply_to_modules:
   - test_basic_configuration_local_ip
