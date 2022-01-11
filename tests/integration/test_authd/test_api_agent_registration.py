@@ -57,6 +57,7 @@ import re
 import requests
 import os
 import pytest
+import time
 
 from wazuh_testing.tools import API_LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.api import get_api_details_dict
@@ -72,9 +73,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 api_registration_requets_file = os.path.join(test_data_path, 'api_agent_registration_cases.yaml')
 daemons_handler_configuration = {'all_daemons': True}
 api_registration_requests = read_yaml(api_registration_requets_file)
-
 api_registration_requests_ids = [tcase['name'].replace(' ', '-').lower() for tcase in api_registration_requests]
-
+client_keys_update_timeout = 1
 
 def retrieve_client_key_entry(agent_parameters):
     with open(CLIENT_KEYS_PATH) as client_keys_file:
@@ -223,5 +223,6 @@ def test_agentd_server_configuration(truncate_api_log, clean_registered_agents, 
 
         # Ensure client keys is updated
         if response.json()['error'] == 0:
+            time.sleep(client_keys_update_timeout)
             assert retrieve_client_key_entry(expected_client_keys_entry),\
                 f"Client keys expected {expected_client_keys_entry} but no agent was found for that configuration"
