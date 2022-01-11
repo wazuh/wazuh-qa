@@ -40,7 +40,7 @@ metadata = [
     {'allowed-ips': '::1/512'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
+configurations = load_wazuh_configurations(configurations_path, "test_allowed_ips_invalid",
                                            params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ALLOWED']}" for x in parameters]
 

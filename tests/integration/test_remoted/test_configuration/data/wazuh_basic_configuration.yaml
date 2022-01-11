@@ -23,8 +23,10 @@
     elements:
     - connection:
         value: syslog
-    -  allowed-ips:
+    - allowed-ips:
          value: ALLOWED
+    - denied-ips:
+         value: DENIED
     - port:
         value: 514
     - protocol:
@@ -111,3 +113,19 @@
         value: TCP
     - rids_closing_time:
         value: RIDS_CLOSING_TIME
+
+- tags:
+  - test_allowed_ips_invalid
+  apply_to_modules:
+  - test_allowed_ips_invalid
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: syslog
+    -  allowed-ips:
+         value: ALLOWED
+    - port:
+        value: 514
+    - protocol:
+        value: UDP
