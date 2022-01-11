@@ -24,17 +24,11 @@
     - connection:
         value: syslog
     - allowed-ips:
-<<<<<<< HEAD
-         value: ALLOWED
-    - denied-ips:
-         value: DENIED
-=======
         value: ALLOWED
     - denied-ips:
         value: DENIED
     - ipv6:
         value: IPV6
->>>>>>> 5107d1e90a193065bb3e9cd9ec17a6db772c9f79
     - port:
         value: 514
     - protocol:
