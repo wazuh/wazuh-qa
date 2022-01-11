@@ -254,6 +254,13 @@ predefined_values:
     - key_polling
     - limits
     - logcollector
+    - logcollector_location
+    - logcollector_location_cust_sockets
+    - logcollector_log_format
+    - logcollector_only_future_events
+    - logcollector_options
+    - logcollector_reconnect_time
+    - logcollector_statistics
     - logging
     - logs
     - logs
