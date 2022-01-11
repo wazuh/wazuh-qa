@@ -10,7 +10,6 @@ class Logging:
         level (str): Logger level: DEBUG, INFO, WARNING, ERROR or CRITICAL
         stdout (boolean): True for add stodut stream handler False otherwise
         log_file (str): True for add file handler, False otherwise
-
     Attributes:
         logger_name (str): Logger name
         level (str): Logger level: DEBUG, INFO, WARNING, ERROR or CRITICAL
@@ -54,7 +53,6 @@ class Logging:
     @staticmethod
     def __logger_exists(logger_name):
         """Get if logger exists or not.
-
         Returns:
             boolean: True if logger exists, false otherwise
         """

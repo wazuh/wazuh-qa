@@ -16,6 +16,7 @@ class ManagerDeployment(WazuhDeployment):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
 
     Attributes:
         installation_files (string): Path where is located the Wazuh instalation files.
@@ -26,6 +27,7 @@ class ManagerDeployment(WazuhDeployment):
         hosts (string): Group of hosts to be deployed.
         server_ip (string): Manager IP to connect.
         qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
+        ansible_admin_user (str): User to launch the ansible task with admin privileges (ansible_become_user)
     """
 
     def install(self):
@@ -70,13 +72,15 @@ class ManagerDeployment(WazuhDeployment):
         super().health_check()
 
         tasks_list = []
-        tasks_list.append(AnsibleTask({'name': 'Extract service status',
-                                       'command': f'{self.install_dir_path}/bin/wazuh-control status',
-                                       'when': 'ansible_system != "Windows"',
-                                       'register': 'status',
-                                       'failed_when': ['"wazuh-analysisd is running" not in status.stdout or' +
-                                                       '"wazuh-db is running" not in status.stdout or' +
-                                                       '"wazuh-authd is running" not in status.stdout']}))
+        tasks_list.append(AnsibleTask({
+            'name': 'Extract service status',
+            'command': f'{self.install_dir_path}/bin/wazuh-control status',
+            'when': 'ansible_system != "Win32NT"',
+            'register': 'status',
+            'failed_when': ['"wazuh-analysisd is running" not in status.stdout or' +
+                            '"wazuh-db is running" not in status.stdout or' +
+                            '"wazuh-authd is running" not in status.stdout']
+        }))
 
         playbook_parameters = {'tasks_list': tasks_list, 'hosts': self.hosts, 'gather_facts': True, 'become': True}
 
