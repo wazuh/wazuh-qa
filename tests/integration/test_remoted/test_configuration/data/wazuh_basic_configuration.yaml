@@ -23,10 +23,10 @@
     elements:
     - connection:
         value: syslog
-    -  allowed-ips:
-         value: ALLOWED
-    -  denied-ips:
-         value: DENIED
+    - allowed-ips:
+        value: ALLOWED
+    - denied-ips:
+        value: DENIED
     - ipv6:
         value: IPV6
     - port:
@@ -35,22 +35,26 @@
         value: UDP
 
 - tags:
-  - test_basic_configuration_ipv6
+  - test_basic_configuration_multiple_allowed_denied_ips
   apply_to_modules:
-  - test_basic_configuration_ipv6
+  - test_basic_configuration_multiple_allowed_denied_ips
   sections:
   - section: remote
     elements:
     - connection:
-        value: CONNECTION
-    -  allowed-ips:
-         value: 127.0.0.0/24
-    - port:
-        value: 1514
+        value: syslog
+    - allowed-ips:
+        value: ALLOWED
+    - allowed-ips:
+        value: ALLOWED2
+    - denied-ips:
+        value: DENIED
     - ipv6:
-        value: 'yes'
+        value: IPV6
+    - port:
+        value: 514
     - protocol:
-        value: TCP
+        value: UDP
 
 - tags:
   - test_basic_configuration_local_ip
@@ -63,6 +67,8 @@
         value: secure
     - port:
         value: 1514
+    - ipv6:
+        value: IPV6
     - local_ip:
         value: LOCAL_IP
     - protocol:
@@ -115,3 +121,19 @@
         value: TCP
     - rids_closing_time:
         value: RIDS_CLOSING_TIME
+
+- tags:
+  - test_allowed_ips_invalid
+  apply_to_modules:
+  - test_allowed_ips_invalid
+  sections:
+  - section: remote
+    elements:
+    - connection:
+        value: syslog
+    -  allowed-ips:
+         value: ALLOWED
+    - port:
+        value: 514
+    - protocol:
+        value: UDP
