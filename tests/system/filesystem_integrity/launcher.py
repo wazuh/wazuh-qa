@@ -18,7 +18,7 @@ from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_check_files')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'check_file_system_integrity')
+CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'filesystem_integrity')
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
@@ -226,9 +226,7 @@ def generate_test_playbooks(parameters, local_checkfiles_pre_data_path, local_ch
     os_platform = 'linux'
     package_destination = '/tmp'
     check_files_tool_destination = '/bin/check_files.py'
-    ignore_check_files_path = ['/sys', '/proc', '/run', '/dev', '/var/ossec', '/bin/check_files.py',
-                               '/usr/lib/python3/dist-packages/ufw/__pycache__',
-                               '/var/cache/yum/x86_64/7/epel/metalink.xml']
+    ignore_check_files_path = ['/sys', '/proc', '/run', '/dev', '/var/ossec', '/bin/check_files.py']
     check_files_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
     pre_check_files_data_output_path = '/pre_check_files_data.json'
     post_check_files_data_output_path = '/post_check_files_data.json'
