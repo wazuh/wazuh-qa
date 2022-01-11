@@ -59,16 +59,12 @@ import os
 
 import pytest
 import requests
-from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
 
 pytestmark = pytest.mark.server
 
-# Variables
-
-test_directories = [os.path.join(PREFIX, 'test_cert')]
 
 # Configurations
 

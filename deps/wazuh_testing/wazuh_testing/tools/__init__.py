@@ -25,6 +25,7 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
 
 else:
 
@@ -58,7 +59,10 @@ else:
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
-
+    if sys.platform == 'sunos5':
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
+    else:
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
 
     try:
         import grp
@@ -100,7 +104,6 @@ _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fil
 LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
 LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
 

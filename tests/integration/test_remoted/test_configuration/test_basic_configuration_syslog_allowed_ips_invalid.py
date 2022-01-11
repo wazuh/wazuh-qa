@@ -19,22 +19,30 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = [
-    {'ALLOWED': '127.0.0.0.0', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': 'Testing', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1.1'}
+    {'ALLOWED': '127.0.0.0.0'},
+    {'ALLOWED': 'Testing'},
+    {'ALLOWED': '127.0.0.0/7890'},
+    {'ALLOWED': '127.0.0.0/7890'},
+    {'ALLOWED': '::1::1'},
+    {'ALLOWED': 'Testing'},
+    {'ALLOWED': '::1/512'},
+    {'ALLOWED': '::1/512'}
 ]
 
 metadata = [
-    {'allowed-ips': '127.0.0.0.0', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': 'Testing', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1.1'}
+    {'allowed-ips': '127.0.0.0.0'},
+    {'allowed-ips': 'Testing'},
+    {'allowed-ips': '127.0.0.0/7890'},
+    {'allowed-ips': '127.0.0.0/7890'},
+    {'allowed-ips': '::1::1'},
+    {'allowed-ips': 'Testing'},
+    {'allowed-ips': '::1/512'},
+    {'allowed-ips': '::1/512'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
+configurations = load_wazuh_configurations(configurations_path, "test_allowed_ips_invalid",
                                            params=parameters, metadata=metadata)
-configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
+configuration_ids = [f"{x['ALLOWED']}" for x in parameters]
 
 
 # fixtures
