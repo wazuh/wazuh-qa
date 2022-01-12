@@ -245,7 +245,7 @@ class SocketController:
         elif family == 'AF_INET6':
             self.family = socket.AF_INET6
         else:
-            raise TypeError(f"Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6")
+            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         # Set socket protocol
         if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
