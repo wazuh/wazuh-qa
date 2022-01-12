@@ -52,7 +52,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted):
+def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted, check_remoted_running):
     """Check that `rids_closing_time` option could be configured with valid values without errors.
 
     Check if the API answer for manager connection coincides with the option selected on `ossec.conf`.

@@ -50,7 +50,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_local_ip_valid(get_configuration, configure_environment, restart_remoted):
+def test_local_ip_valid(get_configuration, configure_environment, restart_remoted, check_remoted_running):
     """Check if the `local_ip` option could be configured using different valid IPs without errors.
 
     Check if the API answer for manager connection coincides with the option selected on `ossec.conf`.

@@ -42,7 +42,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_queue_size_valid(get_configuration, configure_environment, restart_remoted):
+def test_queue_size_valid(get_configuration, configure_environment, restart_remoted, check_remoted_running):
     """Check that `queue_size` option could be configured with valid values (any number between 1 and 262144) without
     errors.
 
