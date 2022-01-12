@@ -74,6 +74,7 @@ tags:
     - fim_file_limit
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -95,6 +96,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 NUM_FILES = 100000
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
@@ -118,6 +120,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     {'file_limit_default'}
 ])
+@mark_skip_agentWindows
 def test_file_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the maximum number of files monitored by the 'wazuh-syscheckd' daemon is set to default

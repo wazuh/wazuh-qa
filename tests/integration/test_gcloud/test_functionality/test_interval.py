@@ -54,7 +54,9 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#interval
 
 tags:
-    - gcloud_functionality
+    - scan
+    - scheduled
+    - interval
 '''
 import datetime
 import os
@@ -68,6 +70,7 @@ from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_d
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file
 
 # Marks
 
@@ -82,10 +85,11 @@ logging = "info"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -98,6 +102,9 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
+# Preparing
+
+truncate_file(LOG_FILE_PATH)
 
 # fixtures
 
@@ -110,8 +117,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_interval(get_configuration, configure_environment,
-                  restart_wazuh, wait_for_gcp_start):
+def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs at the periods set in the configuration
                  by the 'interval' tag. For this purpose, the test will use different intervals and check if
@@ -159,7 +165,6 @@ def test_interval(get_configuration, configure_environment,
     start_time = time.time()
     next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                                                  callback=callback_detect_start_gcp_sleep,
-                                                 accum_results=1,
                                                  error_message='Did not receive expected '
                                                                '"Sleeping until ..." event').result()
 
@@ -174,7 +179,6 @@ def test_interval(get_configuration, configure_environment,
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
                             callback=callback_detect_start_fetching_logs,
-                            accum_results=1,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event').result()
     end_time = time.time()

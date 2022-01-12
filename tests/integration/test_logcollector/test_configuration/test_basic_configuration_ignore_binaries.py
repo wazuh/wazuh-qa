@@ -13,7 +13,7 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor
 
 import subprocess as sb
 
@@ -32,7 +32,7 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
-    prefix = AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
@@ -68,6 +68,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=parameters,
                                            metadata=metadata)
 configuration_ids = [f"{x['location']}_{x['log_format']}_{x['ignore_binaries']}" for x in metadata]
+problematic_values = ['yesTesting', 'noTesting']
 
 
 # fixtures
@@ -131,6 +132,7 @@ def check_ignore_binaries_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_ignore_binaries(get_configuration, configure_environment):
     """Check if the Wazuh ignore_binaries field of logcollector works properly.
 
@@ -147,11 +149,16 @@ def test_ignore_binaries(get_configuration, configure_environment):
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
         check_ignore_binaries_valid(cfg)
     else:
-        if sys.platform == 'win32':
-            expected_exception = ValueError
+        if cfg['ignore_binaries'] in problematic_values:
+            pytest.xfail("Logcolector accepts invalid values. Issue: https://github.com/wazuh/wazuh/issues/8158")
         else:
-            expected_exception = sb.CalledProcessError
+            if sys.platform == 'win32':
+                pytest.xfail("Windows agent allows invalid localfile configuration:\
+                              https://github.com/wazuh/wazuh/issues/10890")
+                expected_exception = ValueError
+            else:
+                expected_exception = sb.CalledProcessError
 
-        with pytest.raises(expected_exception):
-            control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-            check_ignore_binaries_invalid(cfg)
+            with pytest.raises(expected_exception):
+                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
+                check_ignore_binaries_invalid(cfg)
