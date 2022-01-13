@@ -2,7 +2,9 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
+import re
 from time import sleep, time
 
 import pytest
@@ -11,7 +13,7 @@ from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 # Hosts
-testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-agent1']
+testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 master_host = 'wazuh-master'
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -21,6 +23,8 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 messages_deletion_path = os.path.join(local_path, 'data/messages_deletion.yml')
+script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
+
 tmp_path = os.path.join(local_path, 'tmp')
 global_db_path = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
@@ -32,9 +36,14 @@ while_time = 5
 time_to_sync = 21
 time_to_agent_reconnect = 180
 
+queries = ['global sql select id from agent where name=\"{agent}\"',
+           "global sql select id from labels where key='\\\"{label}\\\"'",
+           'global sql select name from agent']
+
 
 @pytest.fixture(scope='function')
 def clean_cluster_logs():
+    """Remove old logs from all the existent managers."""
     host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker2', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
@@ -59,14 +68,26 @@ def register_agent():
     yield
     host_manager.get_host(deleted_agent).ansible('command', 'service wazuh-agent restart', check=False)
     timeout = time() + time_to_agent_reconnect
-    command = f"{WAZUH_PATH}/bin/cluster_control -a | grep wazuh-agent3"
+
+    # Get the token
+    master_token = host_manager.get_api_token(master_host)
 
     while True:
-        if 'active' in host_manager.run_shell('wazuh-worker2', command) and 'wazuh-worker2' in host_manager.run_shell(
-                'wazuh-worker2', command):
-            break
+        response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
+                                              endpoint=f"/agents?name={deleted_agent}")
+        assert response['status'] == 200, f"Failed when trying obtain agent's information: {response}"
+
+        if int(response['json']['data']['total_affected_items']) == 1:
+            if response['json']['data']['affected_items'][0]['status'] == 'active':
+                assert response['json']['data']['affected_items'][0][
+                           'name'] == deleted_agent, f"The agent's name does not correspond to the deleted one: " \
+                                                     f"{response['json']['data']['affected_items'][0]['name']}"
+                assert response['json']['data']['affected_items'][0]['node_name'] == testinfra_hosts[2], \
+                    f"The agent's name does not correspond to the deleted one: " \
+                    f"{response['json']['data']['affected_items'][0]['node_name']}"
+                break
         elif time() > timeout:
-            raise TimeoutError("One of the agents is not 'Active' yet.")
+            raise TimeoutError(f"The agent '{deleted_agent}' is not 'Active' yet.")
         sleep(while_time)
     sleep(time_to_sync)
 
@@ -83,40 +104,62 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
                                    replace=f'<labels><label key="{label}">value</label></labels>')
     host_manager.get_host(modified_agent).ansible('command', 'service wazuh-agent restart', check=False)
 
+    # Obtain the modified agent ID.
+    modified_agent_id = host_manager.run_command(master_host,
+                                                 f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                                 f"{script_path} '{queries[0].format(agent=modified_agent)}'")
+
     # Check that the agent label is updated in the master's database.
-    for i in range(10):
-        if host_manager.run_command(
-                'wazuh-master',
-                'sqlite3 {0} "{1}"'.format(
-                    global_db_path,
-                    "SELECT id FROM labels WHERE key='{}'".format(f'\\"{label}\\"'))):
-            break
-        sleep(time_to_sync)
-    else:
-        pytest.fail(f"Label {label} couldn't be found in master's global.db database.")
+    sleep(time_to_sync)
+    result = host_manager.run_command(master_host,
+                                      f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                      f"{script_path} \"{queries[1].format(label=label)}\"")
+
+    assert modified_agent_id, \
+        f"The modified agent's ID could not be retrieved. Obtained output: {modified_agent_id}"
+    assert result, \
+        f"The agent's ID with label {label} could not be retrieved. Obtained output: {result}"
+    assert modified_agent_id == result, \
+        f"The ID obtained does not correspond to the modified agent's ID"
 
 
 def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
     """Check agent agent-info synchronization works as expected when removing an agent from the Master node."""
 
-    # Ensure the agent to be removed is present in the Worker's global.db before attempting the test
-    agent_list = host_manager.run_command('wazuh-worker2', f"sqlite3 {global_db_path} 'SELECT name FROM agent;'")
-    assert deleted_agent in agent_list, f"{deleted_agent} was NOT found in wazuh-worker2\'s global.db"
+    # Ensure the agent to be removed is present in the Worker's socket before attempting the test
+    agent_list = host_manager.run_command('wazuh-worker2',
+                                          f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                          f"{script_path} \"{queries[2]}\"")
+
+    assert deleted_agent in agent_list, f"{deleted_agent} was not found in wazuh-worker2\'s global.db"
+
+    # Obtain the deleted agent ID
+    deleted_agent_id = host_manager.run_command(master_host,
+                                                f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                                f"{script_path} '{queries[0].format(agent=deleted_agent)}'")
+    deleted_agent_id = json.loads(deleted_agent_id.replace('[', '').replace(']', '').replace("'", '"'))
 
     # Stop the agent to avoid agent auto-enrollment
     host_manager.get_host(deleted_agent).ansible('command', 'service wazuh-agent stop', check=False)
 
     # Get the ID of the agent
-    agent_id = host_manager.run_command('wazuh-master', f"grep {deleted_agent} {client_keys_path}")
-    assert agent_id and agent_id != "", f"{deleted_agent} was not found in Master\'s client.keys file."
+    agent_info = host_manager.run_command(master_host, f"grep {deleted_agent} {client_keys_path}").split(' ')
+
+    assert deleted_agent_id['id'] == int(agent_info[0]) and deleted_agent in agent_info[1], \
+        f"{deleted_agent} was not found in Master\'s client.keys file."
+
+    # Get the token
+    master_token = host_manager.get_api_token(master_host)
 
     # Remove the agent from Master node
-    host_manager.run_command('wazuh-master', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id[0:3]}")
+    response = host_manager.make_api_call(host=master_host, method='DELETE', token=master_token,
+                                          endpoint=f"/agents?agents_list={agent_info[0]}&status=active&older_than=0s")
+    assert response['status'] == 200, f"Failed when trying to remove the desired agent: {response}"
 
     # Check the Workers synchronize and the agent is removed from the nodes
     sleep(time_to_sync)
-    for host in testinfra_hosts:
-        assert not host_manager.run_command(host, f"grep {deleted_agent} {client_keys_path}"), \
-            f"{deleted_agent} was found in {host}\'s client.keys file."
+    for manager in testinfra_hosts:
+        assert not host_manager.run_command(manager, f"grep {deleted_agent} {client_keys_path}"), \
+            f"{deleted_agent} was found in {manager}\'s client.keys file."
 
     HostMonitor(inventory_path=inventory_path, messages_path=messages_deletion_path, tmp_path=tmp_path).run()
