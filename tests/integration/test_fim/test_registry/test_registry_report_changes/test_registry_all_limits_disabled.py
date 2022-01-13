@@ -76,8 +76,9 @@ key = WINDOWS_HKEY_LOCAL_MACHINE
 sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
-reg1 = os.path.join(key, sub_key_1)
-reg2 =  os.path.join(key, sub_key_2)
+test_regs = [os.path.join(key, sub_key_1),
+            os.path.join(key, sub_key_2)]
+reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = 10 * 1024

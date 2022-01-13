@@ -75,9 +75,9 @@ key = WINDOWS_HKEY_LOCAL_MACHINE
 sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
-reg1 = os.path.join(key, sub_key_1)
-reg2 = os.path.join(key, sub_key_2)
-
+test_regs = [os.path.join(key, sub_key_1),
+             os.path.join(key, sub_key_2)]
+reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = 10 * 1024
@@ -93,19 +93,6 @@ configurations_path = os.path.join(test_data_path, 'wazuh_registry_diff_size_lim
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
-# Functions
-
-def report_changes_validator_no_diff(event):
-    """Validate content_changes attribute exists in the event"""
-    assert event['data'].get('content_changes') is None, 'content_changes isn\'t empty'
-
-
-def report_changes_validator_diff(event, diff_file):
-    """Validate content_changes attribute exists in the event"""
-    assert os.path.exists(diff_file), '{diff_file} does not exist'
-    assert event['data'].get('content_changes') is not None, 'content_changes is empty'
-
-
 # Fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -116,7 +103,7 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('size', [(4 * 1024),(16 * 1024)])
 @pytest.mark.parametrize('key, subkey, arch, value_name' [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value" ),
+    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
 ])
@@ -184,6 +171,16 @@ def test_diff_size_limit_values(key, subkey, arch, value_name, size,
     values = {value_name: generate_string(size, '0')}
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
+
+    def report_changes_validator_no_diff(event):
+        """Validate content_changes attribute exists in the event"""
+        assert event['data'].get('content_changes') is None, 'content_changes isn\'t empty'
+
+
+    def report_changes_validator_diff(event):
+        """Validate content_changes attribute exists in the event"""
+        assert os.path.exists(diff_file), '{diff_file} does not exist'
+        assert event['data'].get('content_changes') is not None, 'content_changes is empty'
 
     if size > size_limit_configured:
         callback_test = report_changes_validator_no_diff
