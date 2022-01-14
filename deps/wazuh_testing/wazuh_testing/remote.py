@@ -234,7 +234,7 @@ def callback_active_response_sent(ar_message):
 
 
 def callback_start_up(agent_name):
-    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP"
+    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from 127.0.0.1"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
