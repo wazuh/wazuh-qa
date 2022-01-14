@@ -20,9 +20,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 442,
+            "line_number": 453,
             "line_range": [
-                442
+                453
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -100,7 +100,7 @@
             "test_name": "blacklist"
         },
         {
-            "code": " import os\n import subprocess\n from contextvars import ContextVar\n",
+            "code": " import os\n import subprocess\n from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n",
             "filename": "framework/wazuh/core/common.py",
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
@@ -187,44 +187,14 @@
             "test_name": "try_except_pass"
         },
         {
-            "code": " from os import remove, path as os_path\n from xml.etree.ElementTree import tostring\n \n from defusedxml.minidom import parseString\n",
-            "filename": "framework/wazuh/core/configuration.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Using tostring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace tostring with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-            "line_number": 15,
-            "line_range": [
-                15,
-                16
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
-            "test_id": "B405",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " from signal import signal, alarm, SIGALRM\n from xml.etree.ElementTree import ElementTree\n \n from cachetools import cached, TTLCache\n",
-            "filename": "framework/wazuh/core/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Using ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-            "line_number": 24,
-            "line_range": [
-                24,
-                25
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b405-import-xml-etree",
-            "test_id": "B405",
-            "test_name": "blacklist"
-        },
-        {
             "code": "     iv = InputValidator()\n     reservated_ips = {'localhost', 'NODE_IP', '0.0.0.0', '127.0.1.1'}\n \n",
             "filename": "framework/wazuh/core/cluster/cluster.py",
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible binding to all interfaces.",
-            "line_number": 67,
+            "line_number": 57,
             "line_range": [
-                67
+                57
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
