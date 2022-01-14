@@ -216,6 +216,8 @@
               value: 1515
           - use_source_ip:
               value: USE_SOURCE_IP
+          - ipv6:
+              value: 'yes'
           - force:
               elements:
               - enabled:

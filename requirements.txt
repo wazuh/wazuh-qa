@@ -13,7 +13,7 @@ kiwisolver>=1.0.1; platform_system == "Linux" or platform_system == "Darwin" or 
 lockfile==0.12.2
 matplotlib>=3.3.4; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 netifaces==0.10.9; platform_system == "Linux" or platform_system == "Darwin"
-numpy>=1.19.5
+numpy>=1.18.1
 pandas>=1.1.5
 pillow>=6.2.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 psutil>=5.6.6
