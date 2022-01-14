@@ -1026,6 +1026,11 @@ class HostMonitor:
         """Remove tmp files."""
         logger.debug(f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
+            if '.log.tmp' in file:
+                with open (os.path.join(self._tmp_path, file), 'r') as log:
+                    content=log.read()
+                with open (f"/tmp/{file.split('.')[0]}.txt", 'a') as failed_log:
+                    failed_log.write(content)
             os.remove(os.path.join(self._tmp_path, file))
 
 
