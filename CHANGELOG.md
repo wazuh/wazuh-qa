@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
+- Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
 
 ### Deleted
 
