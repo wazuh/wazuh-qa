@@ -288,15 +288,12 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
         - configure_agents:
             type: fixture
             brief: Configure all simulated agents.
-        
 
     assertions:
         - Verify that the first attemp is success
         - Verify the upgrade status matches the expected
         - Verify the upgrade status after restarting
         - Verify the upgrade response matches the expected
-
-    input_description: 
 
     expected_output:
         - r'Upgrade process result'

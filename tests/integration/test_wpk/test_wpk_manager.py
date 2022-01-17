@@ -48,12 +48,6 @@ os_version:
     - Red Hat 8
     - Red Hat 7
     - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
 
 references:
     - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
@@ -962,8 +956,6 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         - Verify that successful upgrade proccess
         - Verify the first attemp is successful
         - Verify the results are the expected
-
-    input_description: 
 
     expected_output:
         - r'Upgrade process result'

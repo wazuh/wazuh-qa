@@ -394,7 +394,7 @@ def prepare_agent_version(get_configuration):
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
     '''
-    description: Upgrade the agent  by WPK package, checking
+    description: Upgrade the agent by WPK package, checking
                  the expected messages are correct.
 
     wazuh_min_version: 4.2.0
@@ -422,8 +422,6 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
         - Verify the upgrade result code is the expected or the error message is the expected
         - Verify notification status was the expected
         - Verify the end version matches the expected
-
-    input_description: 
 
     expected_output:
         - r'Upgrade process result'
