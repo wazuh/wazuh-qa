@@ -84,7 +84,7 @@ def test_precoder_supported_formats(connect_to_sockets_function, test_case: list
     description: Check that the predecoder returns the correct fields when receives different sets of syslog formats.
                  To do this, it receives syslog format and checks that the predecoder JSON responses
                  are the same that the loaded ouput for each test case from the 'syslog_socket_input.yaml' file.
-    
+
     wazuh_min_version: 4.3.0
 
     parameters:
@@ -110,4 +110,6 @@ def test_precoder_supported_formats(connect_to_sockets_function, test_case: list
 
     result = json.loads(receiver_sockets[0].receive(size=True).rstrip(b'\x00').decode())
 
-    assert json.loads(stage['output']) == result["data"]["output"]["predecoder"],'Failed test case stage {}: the receved precoded is: {} but was expected to be {}'.format(test_case.index(stage) + 1, result["data"]["output"]["predecoder"], stage['output'])
+    assert json.loads(stage['output']) == result["data"]["output"]["predecoder"], \
+        'Failed test case stage {}: the receved precoded is: {} but was expected to be {}' \
+        .format(test_case.index(stage) + 1, result["data"]["output"]["predecoder"], stage['output'])
