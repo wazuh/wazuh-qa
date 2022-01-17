@@ -284,6 +284,8 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
             type: fixture
             brief: Configure all simulated agents.
 
+    input_description: Test case metadata
+
     assertions:
         - Verify that the first attemp is success
         - Verify the upgrade status matches the expected

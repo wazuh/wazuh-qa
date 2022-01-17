@@ -442,6 +442,8 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             type: fixture
             brief: Start the agent, as well as the remoted and authd simulators.
 
+    input_description: Test case metadata
+
     assertions:
         - Verify that initial agent version matches the expected
         - Verify the successful upgrade proccess

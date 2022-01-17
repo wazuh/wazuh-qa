@@ -955,7 +955,8 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
         - configure_agents:
             type: fixture
             brief: Configure all simulated agents.
-        
+
+    input_description: Test case metadata
 
     assertions:
         - Verify that version and HTTP are the expected
