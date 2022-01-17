@@ -11,8 +11,9 @@ from typing import List, Any, Set
 
 import pytest
 import yaml
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing import global_parameters, logger
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -227,10 +228,12 @@ def set_section_wazuh_conf(sections, template=None):
 
         Args:
             str_list (list or str): The content of the ossec.conf file in a list of str.
-            root_delimeter (str, optional: The expected string to identify when the first root element ends, by default "</ossec_config>"
+            root_delimeter (str, optional: The expected string to identify when the first root element ends,
+            by default "</ossec_config>"
 
         Returns:
-            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of the list will be ignored.
+            list of str : The first N lines of the specified str_list until the root_delimeter is found. The rest of
+            the list will be ignored.
         """
         line_counter = 0
         for line in str_list:
@@ -269,7 +272,7 @@ def set_section_wazuh_conf(sections, template=None):
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
-        """
+        r"""
         Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
         (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
         section but different attributes).
@@ -277,7 +280,8 @@ def set_section_wazuh_conf(sections, template=None):
         Args:
             wazuh_conf (ElementTree): An ElementTree object with all the data of the ossec.conf
             section (str): Name of the tag or configuration section to search for. For example: vulnerability_detector
-            attributes (list\<dict\> ): List with section attributes. Needed to check if the section exists with all the searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
+            attributes (list of dict): List with section attributes. Needed to check if the section exists with all the
+            searched attributes and values. For example (wodle section) [{'name': 'syscollector'}]
         Returns:
             ElementTree: An ElementTree object with the section data found in ossec.conf. None if nothing was found.
         """
@@ -360,7 +364,7 @@ def expand_placeholders(mutable_obj, placeholders=None):
 
 def add_metadata(dikt, metadata=None):
     """
-    Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
+    Create a new key 'metadata' in dict if not already exists and updates it with metadata content.
 
     Args:
         dikt (dict):  Target dict to update metadata in.
@@ -393,13 +397,14 @@ def process_configuration(config, placeholders=None, metadata=None):
 
 
 def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
-    """
+    r"""
     Load different configurations of Wazuh from a YAML file.
 
     Args:
         yaml_file_path (str): Full path of the YAML file to be loaded.
         test_name (str): Name of the file which contains the test that will be executed.
-        params (list, optional) : List of dicts where each dict represents a replacement MATCH -\> REPLACEMENT. Default `None`
+        params (list, optional) : List of dicts where each dict represents a replacement
+        MATCH/REPLACEMENT. Default `None`
         metadata (list, optional): Custom metadata to be inserted in the configuration. Default `None`
 
     Returns:
@@ -439,7 +444,8 @@ def set_correct_prefix(configurations, new_prefix):
         new_prefix (str): Prefix to be inserted before every path.
 
     Returns:
-        configurations (list): List of configurations with the correct prefix added in the directories and ignore sections.
+        configurations (list): List of configurations with the correct prefix added in the directories and
+        ignore sections.
     """
 
     def inserter(path):
@@ -510,9 +516,9 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def generate_syscheck_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
-    Every configuration is ready to be applied in the tag \<directories\>.
+    Every configuration is ready to be applied in the tag directories.
     """
     check_platform = 'check_attrs' if sys.platform == 'win32' else 'check_inode'
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
@@ -527,9 +533,9 @@ def generate_syscheck_config():
 
 
 def generate_syscheck_registry_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
 
-    Every configuration is ready to be applied in the tag \<directories\>.
+    Every configuration is ready to be applied in the tag directories.
     """
     check_names = ['check_all', 'check_sha1sum', 'check_md5sum', 'check_sha256sum', 'check_size', 'check_owner',
                    'check_group', 'check_perm', 'check_mtime', 'check_type', 'report_changes']
@@ -592,11 +598,47 @@ def local_internal_options_to_dict(local_internal_options):
     Args:
         local_internal_options (List of str): A list containing local internal options.
     """
-    dict_local_internal_options= {}
+    dict_local_internal_options = {}
     no_comments_options = [line.strip() for line in local_internal_options
                            if not (line.startswith('#') or line == '\n')]
-    for line in no_comments_options:
-        key, value = line.split('=')
-        dict_local_internal_options[key.rstrip("\n")] = value
+    try:
+        for line in no_comments_options:
+            key, value = line.split('=')
+            dict_local_internal_options[key.rstrip('\n')] = value
+    except ValueError:
+        raise ValueError('Invalid local_internal_options.conf file.')
 
     return dict_local_internal_options
+
+
+def get_local_internal_options_dict():
+    """Return the local internal options in a dictionary.
+
+    Returns:
+        dict: Local internal options.
+    """
+    local_internal_option_dict = {}
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
+        configuration_options = local_internal_option_file.readlines()
+        for configuration_option in configuration_options:
+            if not configuration_option.startswith('#') and not configuration_option == '\n':
+                try:
+                    option_name, option_value = configuration_option.split('=')
+                    local_internal_option_dict[option_name] = option_value
+                except ValueError:
+                    logger.error(f"Invalid local_internal_options value: {configuration_option}")
+                    raise ValueError('Invalid local_internal_option')
+
+    return local_internal_option_dict
+
+
+def set_local_internal_options_dict(dict_local_internal_options):
+    """Set the local internal options using a dictionary.
+
+    Args:
+        local_internal_options_dict (dict): A dictionary containing local internal options.
+    """
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w') as local_internal_option_file:
+        for option_name, option_value in dict_local_internal_options.items():
+            local_internal_configuration_string = f"{str(option_name)}={str(option_value)}\n"
+            local_internal_option_file.write(local_internal_configuration_string)

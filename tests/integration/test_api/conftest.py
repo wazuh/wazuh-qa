@@ -83,14 +83,16 @@ def restart_api(get_configuration, request):
     file_monitor = FileMonitor(API_LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
-    # Start Wazuh and Wazuh API
+    # Start Wazuh API
+    #for process_name in ['wazuh-apid', 'wazuh-modulesd', 'wazuh-analysisd', 'wazuh-execd', 'wazuh-db', 'wazuh-remoted']:
+    #    control_service('start', daemon=process_name)
     control_service('start')
 
 
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
     # Wait for API to start
-    file_monitor = getattr(request.module, 'wazuh_log_monitor')
+    file_monitor = FileMonitor(API_LOG_FILE_PATH)
     file_monitor.start(timeout=20, callback=callback_detect_api_start,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
 
@@ -98,3 +100,25 @@ def wait_for_start(get_configuration, request):
 @pytest.fixture(scope='module')
 def get_api_details():
     return get_api_details_dict
+
+
+@pytest.fixture(scope='module')
+def restart_api_module(request):
+    # Stop Wazuh and Wazuh API
+    control_service('stop')
+
+    # Reset api.log and start a new monitor
+    truncate_file(API_LOG_FILE_PATH)
+    file_monitor = FileMonitor(API_LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+    # Start Wazuh API
+    control_service('start')
+
+
+@pytest.fixture(scope='module')
+def wait_for_start_module(request):
+    # Wait for API to start
+    file_monitor = FileMonitor(API_LOG_FILE_PATH)
+    file_monitor.start(timeout=20, callback=callback_detect_api_start,
+                       error_message='Did not receive expected "INFO: Listening on ..." event')

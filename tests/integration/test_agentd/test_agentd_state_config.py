@@ -1,55 +1,61 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    The statistics files are documents that show real-time information about the Wazuh environment.
-    These tests will check if the configuration options related to the `wazuh-agentd`
-    statistics file are working properly.
+brief: The 'wazuh-agentd' program is the client-side daemon that communicates with the server.
+       These tests will check if the configuration options related to the statistics file of
+       the 'wazuh-agentd' daemon are working properly. The statistics files are documents that
+       show real-time information about the Wazuh environment.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    agent
-
-path:
-    tests/integration/test_agentd/
-
-daemons:
+modules:
     - agentd
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
-    - windows, 7
-    - windows, 8
-    - windows, 10
-    - windows, server 2003
-    - windows, server 2012
-    - windows, server 2016
+components:
+    - agent
 
-coverage:
+daemons:
+    - wazuh-agentd
 
-pytest_args:
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-agentd-state.html
 
 tags:
     - stats_file
@@ -87,6 +93,8 @@ with open(test_data_file) as f:
     test_cases = yaml.safe_load(f)
 
 # Variables
+wait_daemon_control = 1
+
 if sys.platform == 'win32':
     state_file_path = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     internal_options = os.path.join(WAZUH_PATH, 'internal_options.conf')
@@ -103,18 +111,25 @@ callbacks = {
 }
 
 
-# Functions
-def extra_configuration_before_yield():
-    change_internal_options('agent.debug', '2')
-
-
-def extra_configuration_after_yield():
-    # Set default values
-    change_internal_options('agent.debug', '0')
+# Fixture
+@pytest.fixture(scope='module')
+def set_local_internal_options():
+    """Set local internal options"""
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '2')
+    else:
+        change_internal_options('agent.debug', '2')
+        
+    yield
+    
+    if sys.platform == 'win32':
+        change_internal_options('windows.debug', '0')
+    else:
+        change_internal_options('agent.debug', '0')
+        
     set_state_interval(5, internal_options)
 
 
-# Fixture
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -124,41 +139,35 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state_config(configure_environment, test_case: list):
+@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by #1593 and wazuh/wazuh#8746.")
+def test_agentd_state_config(test_case, set_local_internal_options):
     '''
-    description:
-        Check that the statistics file `wazuh-agentd.state` is created automatically
-        and verify that the update intervals work properly.
+    description: Check that the 'wazuh-agentd.state' statistics file is created
+                 automatically and verify that it is updated at the set intervals.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - test_case:
             type: list
             brief: List of tests to be performed.
 
     assertions:
-        - Verify the creation of the statistics file.
-        - Check update intervals of the statistics file.
+        - Verify that the 'wazuh-agentd.state' statistics file has been created.
+        - Verify that the 'wazuh-agentd.state' statistics file is updated at the specified intervals.
 
-    test_input:
-        Different use cases that are contained in an external `YAML` file
-        that includes the parameters and expected responses.
+    input_description: An external YAML file (wazuh_conf.yaml) includes configuration settings for the agent.
+                       Different test cases that are contained in an external YAML file (wazuh_state_config_tests.yaml)
+                       that includes the parameters and their expected responses.
 
-    logging:
-        - ossec.log:
-            - r"interval_not_found"
-            - r"interval_not_valid"
-            - r"file_enabled"
-            - r"file_not_enabled"
-
-    tags:
-
+    expected_output:
+        - r'interval_not_found'
+        - r'interval_not_valid'
+        - r'file_enabled'
+        - r'file_not_enabled'
     '''
     control_service('stop', 'wazuh-agentd')
 
@@ -171,9 +180,23 @@ def test_agentd_state_config(configure_environment, test_case: list):
     # Set state interval value according to test case specs
     set_state_interval(test_case['interval'], internal_options)
 
-    control_service('start', 'wazuh-agentd')
-
-    # Check if test require checking state file existance
+    if sys.platform == 'win32':
+        if test_case['agentd_ends']:
+            with pytest.raises(ValueError):
+                control_service('start')
+            assert (test_case['agentd_ends']
+                    is not check_if_process_is_running('wazuh-agentd'))
+        else:
+            control_service('start')
+    else:
+        control_service('start', 'wazuh-agentd')
+        # Sleep enough time to Wazuh load agent.state_interval configuration and
+        # boot wazuh-agentd
+        time.sleep(wait_daemon_control) 
+        assert (test_case['agentd_ends']
+                    is not check_if_process_is_running('wazuh-agentd'))
+    
+    # Check if the test requires checking state file existence
     if 'state_file_exist' in test_case:
         if test_case['state_file_exist']:
             # Wait until state file was dumped
@@ -186,8 +209,3 @@ def test_agentd_state_config(configure_environment, test_case: list):
                             callback=callbacks.get(test_case['log_expect']),
                             error_message='Event not found')
     assert wazuh_log_monitor.result()
-
-    # Check if test require checking agentd status
-    if 'agentd_ends' in test_case:
-        assert (test_case['agentd_ends']
-                is not check_if_process_is_running('wazuh-agentd'))

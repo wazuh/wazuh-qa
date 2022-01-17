@@ -68,9 +68,6 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
                                    replace=f'<labels><label key="{label}">value</label></labels>')
     host_manager.get_host(modified_agent).ansible('command', f'service wazuh-agent restart', check=False)
 
-    # Run the callback checks for the Master and Worker nodes
-    HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
-
     # Check that the agent label is updated in the master's database.
     for i in range(10):
         if host_manager.run_command(
@@ -79,7 +76,7 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
                 global_db_path,
                 "SELECT id FROM labels WHERE key='{}'".format(f'\\"{label}\\"'))):
             break
-        sleep(10)
+        sleep(21)
     else:
         pytest.fail(f"Label {label} couldn't be found in master's global.db database.")
 

@@ -1,52 +1,56 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    These tests will check if the `analysisd` daemon handles correctly the invalid events it receives.
+brief: The 'wazuh-analysisd' daemon receives the log messages and compares them to the rules.
+       It then creates an alert when a log message matches an applicable rule.
+       Specifically, these tests will check if the 'wazuh-analysisd' daemon handles correctly
+       the invalid events it receives.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    manager
+modules:
+    - analysisd
 
-path:
-    tests/integration/test_analysisd/test_error_messages/
+components:
+    - manager
 
 daemons:
-    - analysisd
-    - syscheckd
+    - wazuh-analysisd
     - wazuh-db
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
 
 tags:
-
+    - events
 '''
 import os
 
@@ -95,43 +99,39 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def test_error_messages(configure_sockets_environment, connect_to_sockets_module, wait_for_analysisd_startup,
                         test_case: list):
     '''
-    description:
-        Check if when the `analysisd` socket receives a message with an invalid event,
-        it generates the corresponding error that sends to the `wazuh-db` socket.
+    description: Check if when the 'wazuh-analysisd' daemon socket receives a message with an invalid event,
+                 it generates the corresponding error that sends to the 'wazuh-db' daemon socket.
 
-    wazuh_min_version:
-        3.12
+    wazuh_min_version: 4.2.0
 
     parameters:
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
-
         - connect_to_sockets_module:
             type: fixture
-            brief: Module scope version of `connect_to_sockets` fixture.
-
+            brief: Module scope version of 'connect_to_sockets' fixture.
         - wait_for_analysisd_startup:
             type: fixture
-            brief: Wait until analysisd has begun and alerts.json is created.
-
+            brief: Wait until the 'wazuh-analysisd' has begun and the 'alerts.json' file is created.
         - test_case:
             type: list
             brief: List of tests to be performed.
 
     assertions:
-        - Check that the error messages generated are consistent with the events received.
+        - Verify that the errors messages generated are consistent with the events received.
 
-    test_input:
-        Different test cases that are contained in an external `YAML` file (error_messages.yaml)
-        that includes `syscheck` events data and the expected output.
+    input_description: Different test cases that are contained in an external YAML file (error_messages.yaml)
+                       that includes 'syscheck' events data and the expected output.
 
-    logging:
-        - ossec.log:
-            - "Multiple values located in the `error_messages.yaml` file."
+    expected_output:
+        - Multiple messages (error logs) corresponding to each test case,
+          located in the external input data file.
 
     tags:
-
+        - errors
+        - man_in_the_middle
+        - wdb_socket
     '''
     for stage in test_case:
         receiver_sockets[0].send(stage['input'])

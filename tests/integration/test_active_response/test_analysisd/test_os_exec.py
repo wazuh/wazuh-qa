@@ -1,51 +1,54 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-description:
-    These tests will check if the `analysisd` daemon processes `Active Response` messages correctly.
+brief: Active responses perform various countermeasures to address active threats, such as blocking access
+       to an agent from the threat source when certain criteria are met. These tests will check if
+       the 'wazuh-analysisd' daemon processes 'active response' messages correctly.
 
-tiers:
-    - 0
+tier: 0
 
-component:
-    manager
+modules:
+    - active_response
 
-path:
-    tests/integration/test_active_response/test_analysisd/
+components:
+    - manager
 
 daemons:
-    - analysisd
-    - execd
+    - wazuh-analysisd
 
-os_support:
-    - linux, rhel5
-    - linux, rhel6
-    - linux, rhel7
-    - linux, rhel8
-    - linux, amazon linux 1
-    - linux, amazon linux 2
-    - linux, debian buster
-    - linux, debian stretch
-    - linux, debian wheezy
-    - linux, ubuntu bionic
-    - linux, ubuntu xenial
-    - linux, ubuntu trusty
-    - linux, arch linux
+os_platform:
+    - linux
 
-coverage:
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
 
-pytest_args:
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
 
 tags:
-    - active_response
+    - ar_analysisd
 '''
 import json
 import os
@@ -236,7 +239,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope="function")
 def restart_service():
-    """Restart Wazuh manager service and clean log file"""
+    """Restart the Wazuh manager and clean the ossec.log file."""
     control_service('stop')
     clean_logs()
     control_service('start')
@@ -396,43 +399,44 @@ def validate_ar_message(message, ids, log_monitor, agent, extra_args, timeout, a
 # TESTS
 def test_os_exec(set_debug_mode, get_configuration, configure_environment, restart_service, configure_agents):
     '''
-    description:
-        Check if `Active Response` message is sent in correct format depending on agent version.
+    description: Check if 'active response' messages are sent in the correct format
+                 depending on the agent version used. For this purpose, simulated agents
+                 with different properties are created, and messages in two formats
+                 (string and JSON) are sent to the socket of the 'wazuh-analisysd' daemon,
+                 which should process them correctly.
 
-    wazuh_min_version:
-        4.2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - set_debug_mode:
             type: fixture
             brief: Set execd daemon in debug mode.
-
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-
         - restart_service:
             type: fixture
-            brief: Restart Wazuh manager service and clean the ossec.log file.
-
+            brief: Restart the Wazuh manager and clean the 'ossec.log' file.
         - configure_agents:
             type: fixture
             brief: Create simulated agents for testing.
 
     assertions:
-        - Validate Active Response messages in old string format.
-        - Validate Active Response messages in new `JSON` format.
+        - Verify that 'active response' messages in the old string format are valid.
+        - Verify that 'active response' messages in the new JSON format are valid.
 
-    test_input:
-        Different `Active Response` messages sent to Debian and Ubuntu simulated agents.
+    input_description: Different use cases are found in the test module and include parameters
+                       for 'active response' messages and metadata to configure the testing environment.
 
-    logging:
-        - ossec.log:
-            - r"Active response request received "
+    expected_output:
+        - r'Active response request received'
+        - Active response message with the structure defined in the
+          validate_new_ar_message function (for Wazuh versions >= 4.2).
+        - Active response message with the structure defined in the
+          validate_old_ar_message function (for Wazuh versions < 4.2).
 
     tags:
         - simulator

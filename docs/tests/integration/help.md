@@ -12,6 +12,7 @@ Our newest integration tests are located in `wazuh-qa/tests/integration/`. They 
 - _test_sca_
 - _test_vulnerability_detector_
 - _test_wazuh_db_
+- _test_logtest_
 
 Every group will have the following structure:
 
@@ -125,7 +126,7 @@ This will be our python module with all the needed code to test everything.
 To run them, we need to install all these Python dependencies:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml==5.4 pandas pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install distro freezegun jq jsonschema psutil pytest pyyaml==5.3 pandas pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
