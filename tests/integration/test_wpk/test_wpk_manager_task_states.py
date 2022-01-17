@@ -29,7 +29,6 @@ daemons:
 
 os_platform:
     - linux
-    - windows
 
 os_version:
     - Arch Linux
@@ -49,12 +48,6 @@ os_version:
     - Red Hat 8
     - Red Hat 7
     - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
 
 references:
     - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
