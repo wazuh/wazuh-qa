@@ -129,6 +129,7 @@ def modify_ip_address_conf(test_case):
     address_ip = ''
     message_ip_manager = ''
     message_ip_agent = ''
+    message_dns_manager = ''
     final_message = ''
 
     if test_case['ip_type'] == 'ipv4':
@@ -141,15 +142,16 @@ def modify_ip_address_conf(test_case):
         message_ip_agent = network['agent_network'][1]
     else:
         address_ip = 'wazuh-manager'
+        message_dns_manager = f"{address_ip}/"
         if test_case['ipv6_enabled'] == 'yes':
             if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
-                message_ip_manager = f"{address_ip}/{network['manager_network'][0]}"
+                message_ip_manager = f"{network['manager_network'][0]}"
                 message_ip_agent = message_ip_agent = network['agent_network'][0]
             else:
-                message_ip_manager = f"{address_ip}/{network['manager_network'][1]}"
+                message_ip_manager = f"{network['manager_network'][1]}"
                 message_ip_agent = message_ip_agent = network['agent_network'][1]
         else:
-            message_ip_manager = f"{address_ip}/{network['manager_network'][0]}"
+            message_ip_manager = f"{network['manager_network'][0]}"
             message_ip_agent = message_ip_agent = network['agent_network'][0]
 
     new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
@@ -157,7 +159,8 @@ def modify_ip_address_conf(test_case):
     host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
                                      content=new_configuration)
 
-    message_with_manager_ip = messages.replace('MANAGER_IP', message_ip_manager)
+    message_with_manager_dns = messages.replace('MANAGER_DNS/', message_dns_manager)
+    message_with_manager_ip = message_with_manager_dns.replace('MANAGER_IP', message_ip_manager)
     final_message = message_with_manager_ip.replace('AGENT_IP', message_ip_agent)
     write_file(messages_path, final_message)
 
