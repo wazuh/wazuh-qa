@@ -95,4 +95,4 @@ test_cluster_logs/test_cluster_connection/test_cluster_connection.py:46: Failed
 ## Expected behavior
 
 - Fail if any node could not connect to the master.
-- Fail if any node disconnected after a successful connection.
+- Fail if any node is disconnected after a successful connection.

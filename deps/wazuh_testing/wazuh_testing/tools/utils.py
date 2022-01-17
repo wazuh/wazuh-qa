@@ -72,8 +72,7 @@ class Node:
         """
         if self.parent_node:
             return self.parent_node.get_root()
-        else:
-            return self
+        return self
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
