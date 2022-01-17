@@ -18,11 +18,15 @@ nodes_with_errors = {}
 
 # Functions
 def error_in_white_list(error_str):
-    for line in white_list:
-        if line in error_str:
-            return True
+    """Check if error message is whitelisted.
 
-    return False
+    Args:
+        error_str (str): Error message to be searched in the white list.
+
+    Returns:
+        bool: Whether the message is whitelisted or not.
+    """
+    return any(line in error_str for line in white_list)
 
 
 def test_cluster_error_logs(artifacts_path):

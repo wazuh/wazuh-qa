@@ -111,4 +111,4 @@ New logs can be added inside the test itself. The content must be added as an in
 
 ## Expected behavior
 
-- Fail if the any log is printed when it shouldn't.
+- Fail if any log is printed when it shouldn't.
