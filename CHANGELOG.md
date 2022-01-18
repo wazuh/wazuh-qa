@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.0.0]
 ### Added
-
+- Add a test to check the pre-decoding stage of analysisd [#2406](https://github.com/wazuh/wazuh-qa/pull/2406)
 ### Changed
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
 
