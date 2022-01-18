@@ -60,7 +60,7 @@ import os
 import pytest
 from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
+from wazuh_testing.fim import LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
     calculate_registry_diff_paths
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -170,7 +170,7 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         - scheduled
         - time_travel
     '''
-    value_content = generate_string(4 * 1024 * 1024, '0')
+    value_content = generate_string(4 * 1024 * 50, '0')
     values = {value_name: value_content}
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
@@ -179,7 +179,9 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         """Validate content_changes attribute exists in the event"""
         assert os.path.exists(diff_file), '{diff_file} does not exist'
         assert event['data'].get('content_changes') is not None, 'content_changes is empty'
-
-    registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, time_travel=True,
-                       min_timeout=global_parameters.default_timeout, triggers_event=True,
+    
+    registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+    registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True, 
                        validators_after_update=[report_changes_validator_diff])
