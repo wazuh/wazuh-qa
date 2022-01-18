@@ -35,6 +35,7 @@ from wazuh_testing.tools.system import HostManager
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
 AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
+WINDOWS_AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
 WAZUH_DB_PREFIX = r'.*wazuh-db.*'
@@ -197,7 +198,7 @@ class FileMonitor:
 
             monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
             self._result = monitor.start(timeout=timeout, callback=callback, accum_results=accum_results,
-                                         update_position=update_position, timeout_extra=timeout_extra,
+                                         update_position=True, timeout_extra=timeout_extra,
                                          error_message=error_message).result()
         finally:
             tailer.shutdown()

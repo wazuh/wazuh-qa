@@ -54,7 +54,10 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#pull-on-start
 
 tags:
-    - gcloud_functionality
+    - pull
+    - config
+    - on_start
+    - scan
 '''
 import os
 import sys
@@ -80,10 +83,11 @@ logging = "info"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -109,7 +113,7 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_pull_on_start(get_configuration, configure_environment,
-                       restart_wazuh, wait_for_gcp_start):
+                       daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls messages when starting if the 'pull_on_start' is
                  set to 'yes', or sleeps up to the next interval if that one is set to 'no'. For this

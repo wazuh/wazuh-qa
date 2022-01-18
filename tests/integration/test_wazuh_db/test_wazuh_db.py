@@ -1,7 +1,57 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh persistent information, exposing a socket
+       to receive requests and provide information. The Wazuh core uses list-based databases to store information
+       related to agent keys, and FIM/Rootcheck event data.
+       Wazuh-db confirms that is able to save, update and erase the necessary information into the corresponding
+       databases, using the proper commands and response strings.
+
+tier: 0
+
+modules:
+    - wazuh_db
+
+components:
+    - manager
+
+daemons:
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-db.html
+
+tags:
+    - wazuh_db
+'''
 import os
 import re
 import time
@@ -122,7 +172,7 @@ def prepare_range_checksum_data():
 
 @pytest.fixture(scope='function')
 def pre_insert_agents():
-    """Insert agents. Only used for the global queries"""
+    """Insert agents. Only used for the global queries."""
     AGENTS_CANT = 14000
     AGENTS_OFFSET = 20
     for id in range(AGENTS_OFFSET, AGENTS_OFFSET + AGENTS_CANT):
@@ -137,7 +187,7 @@ def pre_insert_agents():
 @pytest.fixture(scope='function')
 def insert_agents_test():
     """Insert agents. Only used for the agent queries"""
-    agent_list = [1, 2]
+    agent_list = [1, 2, 3]
     for agent in agent_list:
         insert_agent(agent)
 
@@ -158,6 +208,7 @@ def restart_wazuh(request):
 
 def execute_wazuh_db_query(command, single_response=True):
     """Function to send a command to the wazuh-db socket.
+
     Args:
         command(str): Message to send to the socket.
         single_response(bool): If set to False, all the 'due' responses
@@ -182,9 +233,11 @@ def execute_wazuh_db_query(command, single_response=True):
 
 def validate_wazuh_db_response(expected_output, response):
     """ Method to validate the Wazuh-DB response.
+
     Args:
         expected_output(str/list): the desired response from the test case
         response(str/list): the actual response from the socket
+
     Returns:
         bool: The result fo comparing the expected output with the actual response
     """
@@ -203,8 +256,10 @@ def validate_wazuh_db_response(expected_output, response):
 
 def insert_agent(agent_id, agent_name='TestName'):
     """Function that wraps the needed queries to register an agent.
+
     Args:
-        agent_id(int): Unique identifier of an agent
+        agent_id(int): Unique identifier of an agent.
+
     Raises:
         AssertionError: If the agent couldn't be inserted in the DB
     """
@@ -229,6 +284,7 @@ def insert_agent(agent_id, agent_name='TestName'):
 
 def remove_agent(agent_id):
     """Function that wraps the needed queries to remove an agent.
+
     Args:
         agent_id(int): Unique identifier of an agent
     """
@@ -274,11 +330,52 @@ def pre_insert_packages():
                          )
 def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configure_sockets_environment,
                                  connect_to_sockets_module, insert_agents_test, test_case):
-    """Check that every input agent message in wazuh-db socket generates the adequate output to wazuh-db socket.
+    '''
+    description: Check that every input agent message in wazuh-db socket generates the proper output to wazuh-db
+                 socket. To do this, it performs a query to the socket with a command taken from the input list of
+                 stages (test_case, input field) and compare the result with the input list of stages (test_case,
+                 output field).
 
-    Args:
-        test_case(list): List of test_case stages (dicts with input, output and stage keys).
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - clean_registered_agents:
+            type: fixture
+            brief: Remove all agents of wazuhdb.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - insert_agents_test:
+            type: fixture
+            brief: Insert agents. Only used for the agent queries.
+        - test_case:
+            type: fixture
+            brief: List of test_case stages (dicts with input, output and stage keys).
+
+    assertions:
+        - Verify that the socket response matches the expected output.
+
+    input_description:
+        - Test cases are defined in the agent_messages.yaml file. This file contains the command to insert and clear
+          information of registered agents in the database. Also, it contains a case to check messages from not
+          registered agents.
+
+    expected_output:
+        - r'Failed test case stage .*'
+        - r'Error when executing .* in daemon'
+        - 'Unable to add agent'
+        - 'Unable to upgrade agent'
+
+    tags:
+        - wazuh_db
+        - wdb_socket
+    '''
     for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
@@ -303,11 +400,41 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
                               for case in module_data]
                          )
 def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test_case):
-    """Check that every input global message in wazuh-db socket generates the adequate output to wazuh-db socket.
+    '''
+    description: Check that every global input message in wazuh-db socket generates the proper output to wazuh-db
+                 socket. To do this, it performs a query to the socket with a command taken from the input list of
+                 stages (test_case, input field) and compare the result with the input list of stages (test_case,
+                 output field).
 
-    Args:
-        test_case(list): List of test_case stages (dicts with input, output and stage keys).
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - test_case:
+            type: fixture
+            brief: List of test_case stages (dicts with input, output and stage keys).
+
+    assertions:
+        - Verify that the socket response matches the expected output of the yaml input file.
+
+    input_description:
+        - Test cases are defined in the global_messages.yaml file. This file contains cases to insert, upgrade, label,
+          select, get-all-agents, sync-agent-info-get, sync-agent-info-set, belongs table, reset connection status,
+          get-agents-by-connection-status, disconnect-agents, delete and keepalive commands in global database.
+
+    expected_output:
+        - r'Failed test case stage .*'
+        - r'Error when executing * in daemon'
+
+    tags:
+        - wazuh_db
+        - wdb_socket
+    '''
     for index, stage in enumerate(test_case):
         if 'ignore' in stage and stage['ignore'] == 'yes':
             continue
@@ -328,7 +455,44 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
 @pytest.mark.skip(reason="It will be blocked by #2217, when it is solved we can enable again this test")
 def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_registered_agents,
                          connect_to_sockets_module, pre_insert_agents):
-    """Check that commands by chunks work properly when agents amount exceed the response maximum size"""
+    '''
+    description: Check that commands by chunks work properly when the agents' amount exceeds the response maximum size.
+                 To do this, it sends a command to the wazuh-db socket and checks the response from the socket.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - clean_registered_agents:
+            type: fixture
+            brief: Remove all agents of wazuhdb.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - pre_insert_agents:
+            type: fixture
+            brief: Insert agents. Only used for the global queries.
+
+    assertions:
+        - Verify that the socket status response matches with 'due' to fail.
+
+    input_description:
+        - Test cases are defined in the global_messages.yaml file. Status response is expected from 'global
+          get-all-agents last_id 0', 'global sync-agent-info-get last_id 0', 'global get-agents-by-connection-status 0
+          active' and r'global disconnect-agents 0 .* syncreq' commands.
+
+    expected_output:
+        - r'Failed chunks check on .*'
+
+    tags:
+        - wazuh_db
+        - wdb_socket
+    '''
     def send_chunk_command(command):
         response = execute_wazuh_db_query(command)
         status = response.split()[0]
@@ -348,7 +512,50 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
 
 def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, connect_to_sockets_module,
                                  prepare_range_checksum_data, file_monitoring, request):
-    """Check the checksum range during the synchroniation of the DBs"""
+    '''
+    description: Calculates the checksum range during the synchronization of the DBs the first time and avoids the
+                 checksum range the next time. To do this, it performs a query to the database with the command that
+                 contains agent checksum information and calculates the checksum range.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - prepare_range_checksum_data:
+            type: fixture
+            brief: Execute syscheck command with a specific payload to query the database.
+        - file_monitoring:
+            type: fixture
+            brief:  Handle the monitoring of a specified file.
+        - request:
+            type: fixture
+            brief:  Provide information of the requesting test function.
+
+    assertions:
+        - Verify that the checksum range can be calculated the first time and the checksum range was avoid the second
+          time.
+
+    input_description:
+        - The input of this test is the agent payload defined in the prepare_range_checksum_data fixture.
+
+    expected_output:
+        - r'range checksum Time:  .*'
+        - 'Checksum Range wasn´t calculated the first time'
+        - 'range checksum avoided'
+        - 'Checksum Range wasn´t avoided the second time'
+
+    tags:
+        - wazuh_db
+        - wdb_socket
+    '''
     command = """agent 1 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",
                  \"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"""
     log_monitor = request.module.log_monitor

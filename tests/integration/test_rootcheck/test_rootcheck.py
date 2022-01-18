@@ -1,13 +1,52 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: integration
+brief: The 'rootcheck' tool allows to define policies in order to check if the agents
+       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is 
+       present and if the content of a file contains a pattern, 
+       or if a Windows registry key contains a string or is simply present.
+tier: 0
+modules:
+    - rootcheck
+components:
+    - manager
+daemons:
+    - wazuh-analysisd
+os_platform:
+    - linux
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/policy-monitoring/rootcheck
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+tags:
+    - rootcheck
+'''
 
 import json
 import os
 import sqlite3
 import time
-
 import pytest
+
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.agent_simulator import Sender, Injector, create_agents
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -119,6 +158,51 @@ def send_delete_table_request(agent_id):
 
 def test_rootcheck(get_configuration, configure_environment, restart_service,
                    clean_alert_logs):
+    '''
+    description: Check if the 'rootcheck' modules is working properly, that is, by checking if the created logs
+                 are added, updated and deleted correctly.
+                 For this purpose, the test will create a specific number of agents, and will check if they have
+                 the rootcheck module enabled. Once this check is proven, it lets the rootcheck events to be sent
+                 for 60 seconds. After the time has passed, the rootcheck module gets disabled and the test then
+                 checks if the logs have been added to the database. After this first procedure, the test restarts
+                 the service and let the rootcheck events to be sent for 60 seconds for checking after that time if
+                 the logs have been updated with the new entries.
+                 Lastly, the tests also checks if the logs are deleted from the database when sending the delete
+                 table request.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: restart the services
+        - clean_alert_logs:
+            - type: fixture
+            - brief: reset the content of the alert logs
+    assertions:
+        - Verify that rootcheck events are added into the database
+        - Verify that the rootcheck events are updated on the database
+        - Verify that the rootcheck events are deletet from the database
+    input_description: Different test cases are contained in an external YAML file (wazuh_manager_conf.yaml)
+                       which includes configuration settings for the 'rootcheck' module.
+    expected_output:
+        - r'.*not found in Database'
+        - r'.*not found in alerts file'
+        - r'.*not found in Database'
+        - First time in log was updated after insertion
+        - Updated time in log was not updated
+        - Wazuh DB returned an error trying to delete the agent
+        - Rootcheck events were not deleted
+
+    tags:
+        - rootcheck
+    '''
     metadata = get_configuration.get('metadata')
     agents_number = metadata['agents_number']
     check_updates = metadata['check_updates']
