@@ -44,13 +44,15 @@ queries = ['global sql select id from agent where name=\"{agent}\"',
 @pytest.fixture(scope='function')
 def clean_cluster_logs():
     """Remove old logs from all the existent managers."""
-    host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
-    host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
-    host_manager.clear_file(host='wazuh-worker2', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
-    # Its required to restart each node after clearing the log files
-    host_manager.get_host('wazuh-master').ansible('command', 'service wazuh-manager restart', check=False)
-    host_manager.get_host('wazuh-worker1').ansible('command', 'service wazuh-manager restart', check=False)
-    host_manager.get_host('wazuh-worker2').ansible('command', 'service wazuh-manager restart', check=False)
+    for host in testinfra_hosts:
+        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+
+        # Its required to restart each node after clearing the log files
+        host_manager.get_host(host).ansible('command', 'service wazuh-manager restart', check=False)
+
+    host_manager.clear_file(host='wazuh-agent3', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+    host_manager.get_host('wazuh-agent3').ansible('command', 'service wazuh-agent restart', check=False)
 
 
 @pytest.fixture(scope='function')
@@ -62,32 +64,26 @@ def remove_labels():
     host_manager.get_host(modified_agent).ansible('command', 'service wazuh-agent restart', check=False)
 
 
-@pytest.fixture(scope='function')
-def register_agent():
+def check_agent_status(status, master_token, agent):
     """Restart the removed agent to trigger auto-enrollment."""
-    yield
-    host_manager.get_host(deleted_agent).ansible('command', 'service wazuh-agent restart', check=False)
     timeout = time() + time_to_agent_reconnect
-
-    # Get the token
-    master_token = host_manager.get_api_token(master_host)
 
     while True:
         response = host_manager.make_api_call(host=master_host, method='GET', token=master_token,
-                                              endpoint=f"/agents?name={deleted_agent}")
+                                              endpoint=f"/agents?name={agent}")
         assert response['status'] == 200, f"Failed when trying obtain agent's information: {response}"
 
         if int(response['json']['data']['total_affected_items']) == 1:
-            if response['json']['data']['affected_items'][0]['status'] == 'active':
+            if response['json']['data']['affected_items'][0]['status'] == status:
                 assert response['json']['data']['affected_items'][0][
-                           'name'] == deleted_agent, f"The agent's name does not correspond to the deleted one: " \
-                                                     f"{response['json']['data']['affected_items'][0]['name']}"
-                assert response['json']['data']['affected_items'][0]['node_name'] == testinfra_hosts[2], \
-                    f"The agent's name does not correspond to the deleted one: " \
+                           'name'] == agent, f"The agent's name does not correspond to the deleted one: " \
+                                             f"{response['json']['data']['affected_items'][0]['name']}"
+                assert response['json']['data']['affected_items'][0]['node_name'] in testinfra_hosts, \
+                    f"The agent is reporting to an unknown manager: " \
                     f"{response['json']['data']['affected_items'][0]['node_name']}"
                 break
         elif time() > timeout:
-            raise TimeoutError(f"The agent '{deleted_agent}' is not 'Active' yet.")
+            raise TimeoutError(f"The agent '{agent}' is not '{status}' yet.")
         sleep(while_time)
     sleep(time_to_sync)
 
@@ -97,6 +93,12 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
 
     This test will wait for the expected agent-info messages declared in data/messages.yml. Additionally, it will
     ensure agent-info synchronization is working by modifying one agent."""
+
+    # Get the token
+    master_token = host_manager.get_api_token(master_host)
+
+    # Make sure that the agent is registered and active
+    check_agent_status('active', master_token, modified_agent)
 
     # Add a label to one of the agents and restart it to apply the change
     host_manager.add_block_to_file(host=modified_agent, path=f"{WAZUH_PATH}/etc/ossec.conf",
@@ -123,8 +125,14 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
         f"The ID obtained does not correspond to the modified agent's ID"
 
 
-def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
+def test_agent_info_sync_remove_agent(clean_cluster_logs):
     """Check agent agent-info synchronization works as expected when removing an agent from the Master node."""
+
+    # Get the token
+    master_token = host_manager.get_api_token(master_host)
+
+    # Make sure that the agent is registered and active
+    check_agent_status('active', master_token, deleted_agent)
 
     # Ensure the agent to be removed is present in the Worker's socket before attempting the test
     agent_list = host_manager.run_command('wazuh-worker2',
@@ -142,24 +150,30 @@ def test_agent_info_sync_remove_agent(clean_cluster_logs, register_agent):
     # Stop the agent to avoid agent auto-enrollment
     host_manager.get_host(deleted_agent).ansible('command', 'service wazuh-agent stop', check=False)
 
+    # Check if the agent is disconnected
+    check_agent_status('disconnected', master_token, deleted_agent)
+
     # Get the ID of the agent
     agent_info = host_manager.run_command(master_host, f"grep {deleted_agent} {client_keys_path}").split(' ')
 
     assert deleted_agent_id['id'] == int(agent_info[0]) and deleted_agent in agent_info[1], \
         f"{deleted_agent} was not found in Master\'s client.keys file."
 
-    # Get the token
-    master_token = host_manager.get_api_token(master_host)
-
     # Remove the agent from Master node
     response = host_manager.make_api_call(host=master_host, method='DELETE', token=master_token,
-                                          endpoint=f"/agents?agents_list={agent_info[0]}&status=active&older_than=0s")
-    assert response['status'] == 200, f"Failed when trying to remove the desired agent: {response}"
+                                          endpoint=f"/agents?agents_list={agent_info[0]}&status=disconnected"
+                                                   f"&older_than=0s")
+
+    assert response['status'] == 200, f"API failure: {response}"
+    assert response['json']['data']['total_affected_items'] == 1, 'Failed while trying to delete the desired agent.'
 
     # Check the Workers synchronize and the agent is removed from the nodes
     sleep(time_to_sync)
     for manager in testinfra_hosts:
         assert not host_manager.run_command(manager, f"grep {deleted_agent} {client_keys_path}"), \
             f"{deleted_agent} was found in {manager}\'s client.keys file."
+
+    host_manager.get_host(deleted_agent).ansible('command', 'service wazuh-agent restart', check=False)
+    check_agent_status('active', master_token, deleted_agent)
 
     HostMonitor(inventory_path=inventory_path, messages_path=messages_deletion_path, tmp_path=tmp_path).run()
