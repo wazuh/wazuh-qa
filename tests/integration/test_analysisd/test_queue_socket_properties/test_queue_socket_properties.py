@@ -8,7 +8,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-analysisd' daemon refreshes the queue socket file every time the configuration test is executed
-       Specifically, this test will check if after running the configuration test of 'wazuh-analysisd' the properties 
+       Specifically, this test will check if after running the configuration test of 'wazuh-analysisd' the properties
        of the queue socket file are changed.
 
 tier: 0
@@ -61,34 +61,36 @@ from wazuh_testing.tools.services import control_service, check_daemon_status
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# variables
+# Variables
 
 ANALYSISD_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'queue')
-analysisd_path =  os.path.join(WAZUH_PATH,'bin', 'wazuh-analysisd')
+analysisd_path = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
 command_exec = f'{analysisd_path} -t'
 
 # Fixtures
+
 
 @pytest.fixture(scope="function")
 def socket_file_properties():
     """Get the inode and modification time values of the 'queue' socket of 'wazuh-analysisd'"""
     return os.stat(ANALYSISD_SOCKET).st_ino, os.path.getmtime(ANALYSISD_SOCKET)
 
+
 @pytest.fixture(scope="function")
 def run_analysisd_test_config():
     """Run the daemon configuration test mode of 'wazuh-analysisd'"""
-     # restart analysisd daemon
+    # restart analysisd daemon
     control_service('restart', daemon='wazuh-analysisd')
     check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
 
     # run analysisd test configuration mode
     run = subprocess.Popen(['/bin/bash', '-c', command_exec])
     run.communicate()
-    
+
 
 def test_queue_socket_properties(socket_file_properties, run_analysisd_test_config):
     '''
-    description: check if after running the configuration test of 'wazuh-analysisd' the properties 
+    description: check if after running the configuration test of 'wazuh-analysisd' the properties
                  of the queue socket file are changed.
 
     wazuh_min_version: 4.2.0
@@ -100,14 +102,14 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
         - run_analysisd_test_config:
             type: fixture
             brief: Run the daemon configuration test mode of 'wazuh-analysisd'
-        
+
 
     assertions:
         - Verify that the Inode value of the socket file does not change its value after running the
           configuration test of 'wazuh-analysisd'
         - Verify that the File time value of the socket file does not change its value after running the
           configuration test of 'wazuh-analysisd'
-    
+
     input_description: The test gets the current properties of the socket file and some parameters
                        to run the daemon configuration test of 'wazuh-analysisd'.
 
@@ -117,7 +119,7 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     tags:
         - errors
     '''
-    # Check if analysisd daemon is running 
+    # Check if analysisd daemon is running
     check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
 
     current_inode_file, current_status_time = socket_file_properties
@@ -125,7 +127,7 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     run_analysisd_test_config
 
     assert current_inode_file == os.stat(ANALYSISD_SOCKET).st_ino, \
-            f"The inode value for the socket  {ANALYSISD_SOCKET} has changed"
+        f"The inode value for the socket  {ANALYSISD_SOCKET} has changed"
 
     assert current_status_time == os.path.getmtime(ANALYSISD_SOCKET), \
-            f"The modification time property value for the socket {ANALYSISD_SOCKET} has changed"
+        f"The modification time property value for the socket {ANALYSISD_SOCKET} has changed"
