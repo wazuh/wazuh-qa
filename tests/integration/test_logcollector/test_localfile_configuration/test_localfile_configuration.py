@@ -63,6 +63,7 @@ tags:
 '''
 import os
 import re
+from typing import List
 import pytest
 import sys
 from wazuh_testing.fim import callback_configuration_error
@@ -84,8 +85,6 @@ pytestmark = pytest.mark.tier(level=0)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_wrong_configuration.yaml')
 conf_path = os.path.join(WAZUH_PATH, 'ossec.conf') if sys.platform == 'win32' else \
     os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 agent_conf = os.path.join(WAZUH_PATH, 'shared', 'agent.conf') if sys.platform == 'win32' else \
@@ -98,18 +97,32 @@ invalid_config = {
 }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", params=[invalid_config])
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 @pytest.fixture(scope="function")
 def restore_configuration_file():
     write_wazuh_conf(backup_configuration_file)
-    
+
+
+def restore_agent_configuration(state_config, restore_backup=''):
+    backup = restore_backup
+    if state_config == 'read':
+        with open(agent_conf, 'r') as f:
+            for lines in f.readlines():
+                backup += lines
+
+    elif state_config == 'write':
+        with open(agent_conf, 'w') as f:
+            f.write(backup)
+    return backup
+
 
 def add_localfile_conf(get_configuration):
-    """Add agent.conf with a new configuration"""
+    """Edit ossec.conf with a new configuration"""
     option, values = [get_configuration["option"], get_configuration["values"]]
     section_spaces = '  '
     option_spaces = '    '
@@ -131,7 +144,6 @@ def edit_agent_config(get_configuration):
     option, values = [get_configuration["option"], get_configuration["values"]]
     option_spaces = '    '
 
-
     with open(agent_conf, "r") as sources:
         lines = sources.readlines()
 
@@ -144,10 +156,10 @@ def edit_agent_config(get_configuration):
                 stop_search = True
 
 
-def test_invalid_configuration_logcollector(get_configuration, restart_wazuh, restore_configuration_file):
+def test_invalid_configuration_logcollector(get_configuration, restore_configuration_file):
     '''
     description: -EDITAR-Check if the 'wazuh-logcollector' daemon detects invalid configurations. For this purpose, the test
-                 will configure 'ossec.conf' using invalid configuration settings. Finally,
+                 will configure 'ossec.conf' for the manager, and agent.conf for the agent using invalid configuration settings. Finally,
                  it will verify that error events are generated indicating the source of the errors.
 
     wazuh_min_version: 4.3.0
@@ -156,16 +168,13 @@ def test_invalid_configuration_logcollector(get_configuration, restart_wazuh, re
         - get_configuration:
             type: fixture
             brief: Get configuration from the module.
-        - restart_wazuh:
-            - type: fixture
-            - brief: Restart the wazuh tool
         - restore_configuration_file:
             - type: fixture
             - brief: Restore the wazuh configuration file to its default value
 
     assertions:
 
-    input_description: 
+    input_description:
 
     expected_output:
         - 'Did not receive expected "ERROR: ...: Configuration error at event'
@@ -181,6 +190,7 @@ def test_invalid_configuration_logcollector(get_configuration, restart_wazuh, re
 
     # add invalid configuration to agent.conf
     elif wazuh_component == 'wazuh-agent':
+        backup = restore_agent_configuration('read')
         edit_agent_config(get_configuration)
 
     # check daemons status without restart
@@ -209,9 +219,11 @@ def test_invalid_configuration_logcollector(get_configuration, restart_wazuh, re
             raise ValueError('Unexpected Daemon restarted')
 
     elif wazuh_component == 'wazuh-agent':
-        restart_wazuh
+        control_service('restart', 'wazuh-logcollector')
         check_daemon_status(target_daemon='wazuh-agentd', running_condition=True)
+
         # check logs
         wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error,
                                 error_message='Did not receive expected '
                                               '"ERROR: ...: Configuration error at" event')
+        backup = restore_agent_configuration('write', backup)
