@@ -129,7 +129,7 @@ def get_configuration(request):
 
 # Tests
 
-pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh-qa#2174 - Refactor required")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh-qa#2174 - Refactor required")
 @pytest.mark.parametrize('key, subkey, key_attr, value_attr, triggers_key_modification, triggers_value_modification',
                          params_list)
 def test_check_others(key, subkey, key_attr, value_attr, triggers_key_modification, triggers_value_modification,
