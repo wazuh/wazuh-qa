@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- Skip FIM tests that need refactor: `test_registry_check_others.py`, `test_basic_usage_baseline_generation.py`,`test_basic_usage_create_scheduled.py`, `test_basic_usage_registry_changes.py` ([#2421](https://github.com/wazuh/wazuh-qa/pull/2421))
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
 - Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
 

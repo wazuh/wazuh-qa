@@ -74,6 +74,7 @@ tags:
 '''
 import os
 from time import time
+import sys
 
 import pytest
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_detect_event, callback_detect_end_scan, create_file,
@@ -130,7 +131,7 @@ def extra_configuration_before_yield():
         create_file(REGULAR, testdir1, f'test_{int(round(time() * 10 ** 6))}', content='')
         create_file(REGULAR, testdir2, f'test_{int(round(time() * 10 ** 6))}', content='')
 
-
+pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh-qa#2174 - Refactor required")
 def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if FIM events are appearing after the 'baseline'. The log message
