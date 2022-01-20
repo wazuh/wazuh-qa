@@ -28,8 +28,7 @@ parameters = [
 metadata = [
     {'allowed-ips': '127.0.0.0/24', 'denied-ips': '127.0.0.1', 'ipv6': 'no'},
     {'allowed-ips': '0000:0000:0000:0000:0000:0000:0000:0001/64', 'denied-ips': '::1', 'ipv6': 'yes'},
-    {'allowed-ips': '::1/64',
-        'denied-ips': '::1', 'ipv6': 'yes'}
+    {'allowed-ips': '::1/64', 'denied-ips': '::1', 'ipv6': 'yes'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, 'test_basic_configuration_allowed_denied_ips',
