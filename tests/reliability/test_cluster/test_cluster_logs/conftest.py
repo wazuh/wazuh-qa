@@ -16,19 +16,6 @@ def pytest_addoption(parser):
         type=str,
         help="Path where information of all cluster nodes can be found (logs, stats CSVs, etc)."
     )
-    parser.addoption(
-        "--n_workers",
-        action="store",
-        type=int,
-        help="Number of expected worker folders inside the artifacts_path. If less folders are found, test will fail."
-    )
-    parser.addoption(
-        "--n_agents",
-        action="store",
-        type=int,
-        help="Expected number of agents connected to the cluster."
-    )
-
 
 # Fixtures
 @pytest.fixture()
@@ -65,7 +52,7 @@ class HTMLStyle(html):
 
 
 def pytest_html_report_title(report):
-    report.title = 'Wazuh cluster performance tests'
+    report.title = 'Wazuh cluster reliability tests'
 
 
 def pytest_html_results_table_header(cells):
@@ -104,14 +91,38 @@ def pytest_runtest_makereport(item, call):
     report.description = '. '.join(documentation["Summary"])
 
     if report.when == 'teardown':
-        # Add a table with all exceeded thresholds.
-        if report.head_line == 'test_cluster_performance' and item.module.exceeded_thresholds:
-            extra.append(pytest_html.extras.html("<table>"))
-            extra.append(
-                pytest_html.extras.html(f"<tr><th>{'</th><th>'.join(item.module.exceeded_thresholds[0].keys())}</tr>"))
-            for exc_th in item.module.exceeded_thresholds:
-                extra.append(pytest_html.extras.html(
-                    f"<tr><th>{'</th><th>'.join(str(value) for value in exc_th.values())}</tr>"))
-            extra.append(pytest_html.extras.html("</table>"))
+        # Attach error logs per each node in the 'test_cluster_error_logs' test.
+        if report.head_line == 'test_cluster_error_logs' and item.module.nodes_with_errors:
+            extra.append(pytest_html.extras.html("<h2>Error logs</h2>"))
+            # Keys are human/natural sorted.
+            for node, logs in sorted(item.module.nodes_with_errors.items(),
+                                     key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d[0])]):
+                extra.append(pytest_html.extras.html(f'<p><b>{node}:</b>\n' + '\n'.join(
+                    log_line.decode() for log_line in logs) + '</p>'))
+            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
+
+        # Attach wrong order logs per each node in the 'test_check_logs_order_workers' test.
+        elif report.head_line == 'test_check_logs_order_workers' and item.module.incorrect_order:
+            extra.append(pytest_html.extras.html("<h2>Wrong logs order</h2>"))
+            # Keys are human/natural sorted.
+            for item in sorted(item.module.incorrect_order,
+                               key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d['node'])]):
+                extra.append(pytest_html.extras.html('<p><b>{node}:</b>\n'
+                                                     '<b> - Log type:</b> {log_type}\n'
+                                                     '<b> - Expected logs:</b> {expected_logs}\n'
+                                                     '<b> - Found log:</b> {found_log}</p>'.format(**item)))
+            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
+
+        # Attach repeated Integrity synchronizations per each node in the 'test_cluster_sync' test.
+        elif report.head_line == 'test_cluster_sync' and item.module.repeated_syncs:
+            extra.append(pytest_html.extras.html("<h2>Repeated Integrity synchronizations</h2>"))
+            output = []
+            # Keys are human/natural sorted.
+            for worker, values in sorted(item.module.repeated_syncs.items(),
+                                         key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d[0])]):
+                output.append('<b>{worker} - Log found {repeat_counter} times in a row:</b>\n'
+                              '{log}'.format(**values, worker=worker))
+            extra.append(pytest_html.extras.html('<p>' + '\n\n'.join(output) + '</p>'))
+            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         report.extra = extra

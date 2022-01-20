@@ -13,9 +13,8 @@ To verify that:
 
 ## General info
 ### Parameters
-The test needs to receive one parameter in order to be run. If said parameter is not specified, the test will fail. The required parameter is:
+The test needs to receive one parameter (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
 - `--artifacts_path`: Path where cluster logs can be found inside each worker folder. It should follow the structure below:
-- 
     ```.
     ├── worker_x
     │   └── logs
@@ -30,7 +29,7 @@ The test needs to receive one parameter in order to be run. If said parameter is
 
 #### Example output
 ```shell
-python3 -m pytest test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py --artifacts_path='/home/selu/Descargas/cluster_performance/57' --n_agents=50000 --n_workers=25 --html=report.html --self-contained-html
+python3 -m pytest test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py --artifacts_path='/tmp/artifacts/cluster_performance/57' --html=report.html --self-contained-html
 ============================================================================================ test session starts ============================================================================================
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
@@ -42,7 +41,7 @@ test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py F          
 ================================================================================================= FAILURES ==================================================================================================
 __________________________________________________________________________________________ test_cluster_error_logs __________________________________________________________________________________________
 
-artifacts_path = '/home/selu/Descargas/cluster_performance/57'
+artifacts_path = '/tmp/artifacts/cluster_performance/57'
 
     def test_cluster_error_logs(artifacts_path):
         """Look for any error messages in the logs of the cluster nodes.

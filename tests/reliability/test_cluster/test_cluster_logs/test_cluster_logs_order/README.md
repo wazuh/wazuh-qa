@@ -15,9 +15,8 @@ To verify that:
 
 ## General info
 ### Parameters
-The test needs to receive one parameter in order to be run. If said parameter is not specified, the test will fail. The required parameter is:
+The test needs to receive one parameter (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
 - `--artifacts_path`: Path where cluster logs can be found inside each worker folder. It should follow the structure below:
-- 
     ```.
     ├── worker_x
     │   └── logs
@@ -32,7 +31,7 @@ The test needs to receive one parameter in order to be run. If said parameter is
 
 #### Example output
 ```shell
-python3 -m pytest test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py --artifacts_path='/home/selu/Descargas/cluster_performance/59' --html=report.html --self-contained-html
+python3 -m pytest test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py --artifacts_path='/tmp/artifacts/cluster_performance/59' --html=report.html --self-contained-html
 ============================================== test session starts ==============================================
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
@@ -44,7 +43,7 @@ test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py F          
 =================================================== FAILURES ====================================================
 _________________________________________ test_check_logs_order_workers _________________________________________
 
-artifacts_path = '/home/selu/Descargas/cluster_performance/59'
+artifacts_path = '/tmp/artifacts/cluster_performance/59'
 
     def test_check_logs_order_workers(artifacts_path):
         """Check that cluster logs appear in the expected order.
@@ -101,7 +100,7 @@ test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py:131: Assert
 ```
 
 ### Adding or modifying logs order
-New logs can be added inside the test itself. The content must be added as an instance of `Node` class, following a tree structure. Therefore, each log/node can have multiple children but only one parent.
+New logs can be added inside the data folder. The content must be added as a list of dicts, following a tree structure. Therefore, each log/node can have multiple children but only one parent. If a new file is created, make sure to use the same name as the name of the task as it appears in the `cluster.log` file, replacing any ` ` (space) by `_`.
 
 ### Tests information
 

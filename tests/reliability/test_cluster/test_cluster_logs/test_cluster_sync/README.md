@@ -19,9 +19,8 @@ To verify that:
 
 ## General info
 ### Parameters
-The test needs to receive one parameter in order to be run. If said parameter is not specified, the test will fail. The required parameter is:
+The test needs to receive one parameter  (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
 - `--artifacts_path`: Path where cluster logs can be found inside each worker folder. It should follow the structure below:
-- 
     ```.
     ├── worker_x
     │   └── logs
@@ -36,7 +35,7 @@ The test needs to receive one parameter in order to be run. If said parameter is
 
 #### Example output
 ```shell
-python3 -m pytest test_cluster_logs/test_cluster_sync/test_cluster_sync.py --artifacts_path='/home/selu/Descargas/cluster_performance/59' --html=report.html --self-contained-html
+python3 -m pytest test_cluster_logs/test_cluster_sync/test_cluster_sync.py --artifacts_path='/tmp/artifacts/cluster_performance/59' --html=report.html --self-contained-html
 ============================================================================================ test session starts ============================================================================================
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
@@ -48,7 +47,7 @@ test_cluster_logs/test_cluster_sync/test_cluster_sync.py F                      
 ================================================================================================= FAILURES ==================================================================================================
 _____________________________________________________________________________________________ test_cluster_sync _____________________________________________________________________________________________
 
-artifacts_path = '/home/selu/Descargas/cluster_performance/59'
+artifacts_path = '/tmp/artifacts/cluster_performance/59'
 
     def test_cluster_sync(artifacts_path):
         """Check that the number of files synced is not identical multiple times in a row.
