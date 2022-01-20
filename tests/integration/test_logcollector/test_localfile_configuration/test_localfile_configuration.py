@@ -63,21 +63,18 @@ tags:
 '''
 import os
 import re
-from typing import List
-import pytest
 import sys
+import pytest
 from wazuh_testing.fim import callback_configuration_error
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import check_daemon_status, check_if_process_is_running, control_service
+from wazuh_testing.tools.services import check_daemon_status, control_service
 from wazuh_testing.tools import WAZUH_PATH
 
 # Variables
 backup_configuration_file = get_wazuh_conf()
-tested_daemon = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -135,7 +132,8 @@ def add_localfile_conf(get_configuration):
         for line in lines:
             sources.write(line)
             if re.search(r'<\/localfile>', line) and not stop_search:
-                sources.write(f'\n{section_spaces}<localfile>\n{option_spaces}<{option}>{values}</{option}>\n{section_spaces}</localfile>\n')
+                sources.write(f'\n{section_spaces}<localfile>\n{option_spaces}<{option}>{values}</{option}>\n \
+                              {section_spaces}</localfile>\n')
                 stop_search = True
 
 
@@ -158,9 +156,9 @@ def edit_agent_config(get_configuration):
 
 def test_invalid_configuration_logcollector(get_configuration, restore_configuration_file):
     '''
-    description: -EDITAR-Check if the 'wazuh-logcollector' daemon detects invalid configurations. For this purpose, the test
-                 will configure 'ossec.conf' for the manager, and agent.conf for the agent using invalid configuration settings. Finally,
-                 it will verify that error events are generated indicating the source of the errors.
+    description: -Check if the 'wazuh-logcollector' daemon detects invalid configurations. For this purpose, the test
+                will configure 'ossec.conf' for the manager, and agent.conf for the agent using invalid configuration
+                settings. Finally, it will verify that error events are generated indicating the source of the errors.
 
     wazuh_min_version: 4.3.0
 
@@ -174,7 +172,7 @@ def test_invalid_configuration_logcollector(get_configuration, restore_configura
 
     assertions:
 
-    input_description:
+    input_description: The 'invalid_configuration' includes the wrong configuration for the ossec.conf.
 
     expected_output:
         - 'Did not receive expected "ERROR: ...: Configuration error at event'
@@ -214,7 +212,7 @@ def test_invalid_configuration_logcollector(get_configuration, restore_configura
                                                   '"CRITICAL: ...: Configuration error at" event')
             restore_configuration_file
             control_service('restart', 'wazuh-logcollector')
-        if restart == True:
+        if restart is True:
             restore_configuration_file
             raise ValueError('Unexpected Daemon restarted')
 
