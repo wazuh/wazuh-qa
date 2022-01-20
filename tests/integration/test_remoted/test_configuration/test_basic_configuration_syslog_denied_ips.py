@@ -58,13 +58,13 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
     cfg = get_configuration['metadata']
 
     allowed_ips = cfg['allowed-ips'].split('/')
-    allowed_ips_mask = allowed_ips[0]
-    allowed_ips_address = allowed_ips[1]
+    allowed_ips_mask = allowed_ips[1]
+    allowed_ips_address = allowed_ips[0]
     expected_allowed_ips = format_ipv6_long(allowed_ips_address) + '/' + allowed_ips_mask
 
     denied_ips = cfg['denied-ips'].split('/')
-    denied_ips_mask = denied_ips[0]
-    denied_ips_address = denied_ips[1]
+    denied_ips_mask = denied_ips[1]
+    denied_ips_address = denied_ips[0]
     expected_denied_ips = format_ipv6_long(denied_ips_address) + '/' + denied_ips_mask
 
     log_callback = remote.callback_detect_syslog_allowed_ips(expected_allowed_ips)
