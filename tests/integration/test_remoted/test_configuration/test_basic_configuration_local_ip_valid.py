@@ -14,7 +14,7 @@ from urllib3.exceptions import InsecureRequestWarning
 import requests
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
