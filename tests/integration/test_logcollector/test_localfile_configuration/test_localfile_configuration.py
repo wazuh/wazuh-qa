@@ -180,7 +180,7 @@ def test_invalid_configuration_logcollector(get_configuration, restore_configura
         - 'Unexpected Daemon restarted'
 
     tags:
-    - logcollector_configuration
+        - logcollector_configuration
     '''
     # add invalid configuration to ossec.conf
     if wazuh_component == 'wazuh-manager':
