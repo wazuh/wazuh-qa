@@ -207,5 +207,5 @@ def test_regular_file_changes(folder, name, encoding, checkers, tags_to_apply,
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=[name],
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout * mult, options=checkers, encoding=encoding,
+                     min_timeout=10 * mult, options=checkers, encoding=encoding,
                      triggers_event=True)
