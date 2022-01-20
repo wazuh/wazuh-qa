@@ -5,13 +5,14 @@
 import os
 import pytest
 import ipaddress
+import requests
+from urllib3.exceptions import InsecureRequestWarning
 
 import wazuh_testing.remote as remote
 from wazuh_testing.api import compare_config_api_response
-
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from urllib3.exceptions import InsecureRequestWarning
-import requests
+from wazuh_testing.tools.utils import format_ipv6_long
+
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
@@ -94,7 +95,7 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
 
     address = cfg['allowed-ips'][:-3]
     netmask = cfg['allowed-ips'][-3:]
-    allowed_ips = ipaddress.ip_address(address).exploded + netmask
+    allowed_ips = format_ipv6_long(address) + netmask
     log_callback = remote.callback_detect_syslog_allowed_ips(allowed_ips)
     wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message="Wazuh remoted didn't start as expected.")
@@ -103,7 +104,7 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
         pytest.xfail(f"Expected error: https://github.com/wazuh/wazuh/issues/11643")
         address2 = cfg['allowed-ips2'][:-3]
         netmask2 = cfg['allowed-ips2'][-3:]
-        allowed_ips2 = ipaddress.ip_address(address2).exploded + netmask2
+        allowed_ips2 = format_ipv6_long(address2) + netmask2
         log_callback = remote.callback_detect_syslog_allowed_ips(allowed_ips2)
         wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                                 error_message="Wazuh remoted didn't start as expected.")

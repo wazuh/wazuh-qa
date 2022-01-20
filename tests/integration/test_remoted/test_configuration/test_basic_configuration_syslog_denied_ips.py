@@ -4,13 +4,13 @@
 
 import os
 import pytest
+import requests
+from urllib3.exceptions import InsecureRequestWarning
 
 import wazuh_testing.remote as remote
 import wazuh_testing.api as api
-
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from urllib3.exceptions import InsecureRequestWarning
-import requests
+from wazuh_testing.tools.utils import format_ipv6_long
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
@@ -21,15 +21,19 @@ configurations_path = os.path.join(test_data_path, 'data', 'wazuh_basic_configur
 
 parameters = [
     {'ALLOWED': '127.0.0.0/24', 'DENIED': '127.0.0.1', 'IPV6': 'no'},
-    {'ALLOWED': '0000:0000:0000:0000:0000:0000:0000:0001/64', 'DENIED': '::1', 'IPV6': 'yes'}
+    {'ALLOWED': '0000:0000:0000:0000:0000:0000:0000:0001/64', 'DENIED': '::1', 'IPV6': 'yes'},
+    {'ALLOWED': '::1/64', 'DENIED': '::1', 'IPV6': 'yes'}
 ]
 
 metadata = [
     {'allowed-ips': '127.0.0.0/24', 'denied-ips': '127.0.0.1', 'ipv6': 'no'},
-    {'allowed-ips': '0000:0000:0000:0000:0000:0000:0000:0001/64', 'denied-ips': '::1', 'ipv6': 'yes'}
+    {'allowed-ips': '0000:0000:0000:0000:0000:0000:0000:0001/64', 'denied-ips': '::1', 'ipv6': 'yes'},
+    {'allowed-ips': '0000:0000:0000:0000:0000:0000:0000:0001/64',
+     'denied-ips': '0000:0000:0000:0000:0000:0000:0000:0001', 'ipv6': 'yes'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, 'test_basic_configuration_allowed_denied_ips' , params=parameters, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, 'test_basic_configuration_allowed_denied_ips',
+                                           params=parameters, metadata=metadata)
 configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
 
 
@@ -50,18 +54,30 @@ def test_denied_ips_syslog(get_configuration, configure_environment, restart_rem
         of expected configuration.
     """
     requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
     cfg = get_configuration['metadata']
 
-    log_callback = remote.callback_detect_syslog_allowed_ips(cfg['allowed-ips'])
+    allowed_ips = cfg['allowed-ips'].split('/')
+    allowed_ips_mask = allowed_ips[0]
+    allowed_ips_address = allowed_ips[1]
+    expected_allowed_ips = format_ipv6_long(allowed_ips_address) + '/' + allowed_ips_mask
 
-    wazuh_log_monitor.start(timeout=5, callback=log_callback, error_message="Wazuh remoted didn't start as expected.")
+    denied_ips = cfg['denied-ips'].split('/')
+    denied_ips_mask = denied_ips[0]
+    denied_ips_address = denied_ips[1]
+    expected_denied_ips = format_ipv6_long(denied_ips_address) + '/' + denied_ips_mask
+
+    log_callback = remote.callback_detect_syslog_allowed_ips(expected_allowed_ips)
+
+    wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
+                            error_message="Wazuh remoted didn't start as expected.")
 
     remote.send_syslog_message(message='Feb 22 13:08:48 Remoted Syslog Denied testing', port=514, protocol=remote.UDP,
-        manager_address=cfg['denied-ips'])
+                               manager_address=cfg['denied-ips'])
 
-    log_callback = remote.callback_detect_syslog_denied_ips(cfg['denied-ips'])
+    log_callback = remote.callback_detect_syslog_denied_ips(expected_denied_ips)
 
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+    wazuh_log_monitor.start(timeout=remote.REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message="The expected output for denied-ips has not been produced")
 
     # Check that API query return the selected configuration
