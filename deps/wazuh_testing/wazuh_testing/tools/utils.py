@@ -13,68 +13,6 @@ import json
 import socket
 
 
-class Node:
-    """Class to create a tree data structure.
-
-    Args:
-        data (str): string to be stored in this node.
-        parent_node (Node): parent Node instance of this node.
-
-    Attributes:
-        data (str): string that is stored in this node.
-        parent_node (Node): parent Node instance of this node.
-        children (list): list of Node instances that are added to this node.
-    """
-
-    def __init__(self, data, parent_node=None):
-        self.data = data
-        self.children = []
-        self.parent_node = parent_node
-
-    def __str__(self):
-        """Define how the class object is to be displayed."""
-        return self.data
-
-    def add_node(self, data):
-        """Append a Node instance as a child of the current node.
-
-        Args:
-            data (str): string to be stored in the child node.
-
-        Returns:
-            child (Node): Node instance that was appended as a child of this node.
-        """
-        self.children.append(child := Node(data, self))
-        return child
-
-    def get_children(self):
-        """Get child Node instances of this node.
-
-        Returns:
-            child (Node): child Node instance of the current node.
-        """
-        for child in self.children:
-            yield child
-
-    def is_leaf(self):
-        """Check if current Node instance is a leaf (if it has no children).
-
-        Returns:
-            bool: Whether the current node has children.
-        """
-        return not self.children
-
-    def get_root(self):
-        """Get root node of current Node instance (the first node which has no parent).
-
-        Returns:
-            Node: root node of the current Node instance.
-        """
-        if self.parent_node:
-            return self.parent_node.get_root()
-        return self
-
-
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
     """Decorator used to retry functions.
 

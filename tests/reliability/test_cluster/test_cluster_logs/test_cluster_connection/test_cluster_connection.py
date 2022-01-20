@@ -3,12 +3,10 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import re
+import pytest
 from glob import glob
 from mmap import mmap, ACCESS_READ
 from os.path import join
-
-import pytest
-
 
 disconnected_nodes = []
 node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
