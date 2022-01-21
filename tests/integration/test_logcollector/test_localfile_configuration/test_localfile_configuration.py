@@ -217,7 +217,7 @@ def test_invalid_configuration_logcollector(get_configuration):
         try:
             control_service('restart', 'wazuh-logcollector')
 
-        except:
+        except ValueError:
             restart = False
             check_daemon_status(target_daemon='wazuh-logcollector', running_condition=False)
             # check logs
