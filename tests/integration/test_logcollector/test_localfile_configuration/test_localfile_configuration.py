@@ -225,7 +225,7 @@ def test_invalid_configuration_logcollector(get_configuration):
                                     error_message='Did not receive expected '
                                                   '"CRITICAL: ...: Configuration error at" event')
             backup = restore_manager_configuration('write', backup)
-            # control_service('restart', 'wazuh-logcollector')
+            control_service('restart', 'wazuh-logcollector')
         if restart is True:
             backup = restore_manager_configuration('write', backup)
             raise ValueError('Unexpected Daemon restarted')
