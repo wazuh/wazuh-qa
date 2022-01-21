@@ -101,9 +101,21 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope="function")
-def restore_configuration_file():
-    write_wazuh_conf(backup_configuration_file)
+# @pytest.fixture(scope="function")
+# def restore_configuration_file():
+#     write_wazuh_conf(backup_configuration_file)
+
+def restore_manager_configuration(state_config, restore_backup=''):
+    backup = restore_backup
+    if state_config == 'read':
+        with open(conf_path, 'r') as f:
+            for lines in f.readlines():
+                backup += lines
+
+    elif state_config == 'write':
+        with open(conf_path, 'w') as f:
+            f.write(backup)
+    return backup
 
 
 def restore_agent_configuration(state_config, restore_backup=''):
@@ -133,8 +145,8 @@ def add_localfile_conf(get_configuration):
         for line in lines:
             sources.write(line)
             if re.search(r'<\/localfile>', line) and not stop_search:
-                sources.write(f'\n{section_spaces}<localfile>\n{option_spaces}<{option}>{values}</{option}>\n \
-                              {section_spaces}</localfile>\n')
+                sources.write(f'\n{section_spaces}<localfile>\n{option_spaces}<{option}>{values}</{option}>\n'
+                              f'</localfile>\n')
                 stop_search = True
 
 
@@ -155,7 +167,7 @@ def edit_agent_config(get_configuration):
                 stop_search = True
 
 
-def test_invalid_configuration_logcollector(get_configuration, restore_configuration_file):
+def test_invalid_configuration_logcollector(get_configuration):
     '''
     description: -Check if the 'wazuh-logcollector' daemon detects invalid configurations. For this purpose, the test
                 will configure 'ossec.conf' for the manager, and agent.conf for the agent using invalid configuration
@@ -185,6 +197,7 @@ def test_invalid_configuration_logcollector(get_configuration, restore_configura
     '''
     # add invalid configuration to ossec.conf
     if wazuh_component == 'wazuh-manager':
+        backup = restore_manager_configuration('read')
         add_localfile_conf(get_configuration)
 
     # add invalid configuration to agent.conf
@@ -211,10 +224,10 @@ def test_invalid_configuration_logcollector(get_configuration, restore_configura
             wazuh_log_monitor.start(timeout=3, callback=callback_configuration_error,
                                     error_message='Did not receive expected '
                                                   '"CRITICAL: ...: Configuration error at" event')
-            restore_configuration_file
-            control_service('restart', 'wazuh-logcollector')
+            backup = restore_manager_configuration('write', backup)
+            # control_service('restart', 'wazuh-logcollector')
         if restart is True:
-            restore_configuration_file
+            backup = restore_manager_configuration('write', backup)
             raise ValueError('Unexpected Daemon restarted')
 
     elif wazuh_component == 'wazuh-agent':
