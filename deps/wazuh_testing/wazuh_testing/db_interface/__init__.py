@@ -10,6 +10,9 @@ import wazuh_testing
 QUEUE_DB_PATH = os.path.join(wazuh_testing.WAZUH_PATH, 'queue', 'db')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 
+CVE_DB_PATH = os.path.join(wazuh_testing.WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
+
+
 
 def query_wdb(command):
     """Make queries to wazuh-db using the wdb socket.
