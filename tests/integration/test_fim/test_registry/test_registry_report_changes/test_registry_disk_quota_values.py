@@ -57,13 +57,12 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_cud, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-    calculate_registry_diff_paths, create_registry, delete_registry, registry_parser, \
-    check_time_travel
+from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, 
+                             calculate_registry_diff_paths, registry_value_create, registry_value_update, 
+                             registry_value_delete, registry_parser, create_values_content)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2)
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -111,9 +110,8 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
 ])
-def test_disk_quota_values(key, subkey, arch, value_name, size,
-                           get_configuration, configure_environment, restart_syscheckd,
-                           wait_for_fim_start):
+def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
+                            restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used
                  to perform the 'diff' operations is stored when the 'disk_quota' limit is set. For this
@@ -137,9 +135,6 @@ def test_disk_quota_values(key, subkey, arch, value_name, size,
         - value_name:
             type: str
             brief: Name of the testing value that will be created
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - size:
             type: int
             brief: Size of the content to write in the testing value.
@@ -174,8 +169,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size,
         - scheduled
         - time_travel
     '''
-    value_content = generate_string(size, '0')
-    values = {value_name: value_content}
+    values = create_values_content(value_name, size)
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
@@ -193,12 +187,10 @@ def test_disk_quota_values(key, subkey, arch, value_name, size,
     else:
         callback_test = report_changes_validator_diff
 
-    create_registry(registry_parser[key], subkey, arch)
-
-    registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                       min_timeout=global_parameters.default_timeout, triggers_event=True,
+    registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+    registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True, 
                        validators_after_update=[callback_test])
-
-    delete_registry(registry_parser[key], subkey, arch)
-    check_time_travel(True, monitor=wazuh_log_monitor)
+    registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)

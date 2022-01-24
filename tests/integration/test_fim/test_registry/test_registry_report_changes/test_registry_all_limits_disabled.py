@@ -58,10 +58,9 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, registry_value_create, registry_value_update, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-    calculate_registry_diff_paths
+from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, KEY_WOW64_32KEY, 
+                                KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths, create_values_content)
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -82,6 +81,7 @@ reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = 10 * 1024
+value_content_size = 4*1024*50
 
 # Configurations
 
@@ -135,9 +135,6 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         - value_name:
             type: str
             brief: Name of the testing value that will be created
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -163,14 +160,13 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
                        in this module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', and 'modified', events)
+        - r'.*Sending FIM event: (.+)$' ('added', and 'modified' events)
 
     tags:
         - scheduled
         - time_travel
     '''
-    value_content = generate_string(4 * 1024 * 50, '0')
-    values = {value_name: value_content}
+    values = create_values_content(value_name, value_content_size)
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
