@@ -21,7 +21,7 @@ def query_wdb(command):
         command (str): wazuh-db command alias. For example `global get-agent-info 000`.
 
     Returns:
-        list: Query response data
+        list: Query response data.
     """
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(WAZUH_DB_SOCKET_PATH)
@@ -49,10 +49,14 @@ def query_wdb(command):
 
 
 def load_sqlite_db(db_path):
-    """Load a sqlite database
+    """Load a sqlite database.
 
     Args:
         db_path (str): Path where is located the DB.
+
+    Returns:
+        Connection: connection to the database.
+        Cursor: cursor to the database.
     """
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -81,10 +85,10 @@ def get_sqlite_query_result(db_path, query):
 
     Args:
         db_path (str): Path where is located the DB.
-        query (str): SQL query. e.g(SELECT * ..)
+        query (str): SQL query. e.g(SELECT * ..).
 
     Returns:
-        result (List[list]): Each row is the query result row and each column is the query field value
+        result (List[list]): Each row is the query result row and each column is the query field value.
     """
     try:
         db, cursor = load_sqlite_db(db_path)

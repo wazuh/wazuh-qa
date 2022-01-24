@@ -9,7 +9,7 @@ def clean_table(agent_id, table):
 
     Args:
         agent_id (str): Agent ID.
-        table (str): table from the agent DB.
+        table (str): Table from the agent DB.
     """
     query_string = f"agent {agent_id} sql DELETE FROM {table}"
     query_wdb(query_string)
@@ -19,8 +19,8 @@ def update_last_full_scan(last_scan=0, agent_id='000'):
     """Update the last scan of an agent.
 
     Args:
-        last_scan (int): Last scan ID. This is compute by casting to int the result of time()
-        agent_id (str): Agent ID
+        last_scan (int): Last scan ID. This is compute by casting to int the result of time().
+        agent_id (str): Agent ID.
     """
     query_string = f"agent {agent_id} sql UPDATE vuln_metadata SET LAST_FULL_SCAN={last_scan}"
     query_wdb(query_string)
@@ -33,9 +33,9 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
     Args:
         agent_id (str): Agent ID.
         scan_id (int): Last scan ID.
-        scan_time (str): Scan date ("%Y/%m/%d %H:%M:%S")
+        scan_time (str): Scan date ("%Y/%m/%d %H:%M:%S").
         hotfix (str): ID of the hotfix value.
-        checksum (str): Hotfix checksum
+        checksum (str): Hotfix checksum.
     """
     query_string = f"agent {agent_id} sql INSERT INTO sys_hotfixes (scan_id, scan_time, hotfix, checksum) VALUES " \
                    f"({scan_id}, '{scan_time}', '{hotfix}', '{checksum}')"
@@ -49,21 +49,21 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
     """Insert the OS information in the agent database.
 
     Args:
-        agent_id (str): id of the agent
-        scan_id (int): id of the last scan
-        scan_time (str): date of the scan with this format "%Y/%m/%d %H:%M:%S"
-        hostname (str): name of the host
-        architecture (str): architecture of the host
-        os_name (str): complete name of the OS
-        os_version (str): version of the OS
-        os_major (str): major version of the OS
-        os_minor (str): minor version of the OS
-        os_build (str): build id of the OS
-        version (str): version of the OS
-        os_release (str): release of the OS
-        os_patch (str): current patch of the OS
-        release (str): release of the OS
-        checksum (str): checksum of the OS
+        agent_id (str): Agent ID.
+        scan_id (int): Id of the last scan.
+        scan_time (str): Date of the scan with this format "%Y/%m/%d %H:%M:%S".
+        hostname (str): Name of the host.
+        architecture (str): Architecture of the host.
+        os_name (str): Complete name of the OS.
+        os_version (str): Version of the OS.
+        os_major (str): Major version of the OS.
+        os_minor (str): Minor version of the OS.
+        os_build (str): Build id of the OS.
+        version (str): Version of the OS.
+        os_release (str): Release of the OS.
+        os_patch (str): Current patch of the OS.
+        release (str): Release of the OS.
+        checksum (str): Checksum of the OS.
     """
     query_string = f"agent {agent_id} sql INSERT OR REPLACE INTO sys_osinfo (scan_id, scan_time, hostname, " \
                    'architecture, os_name, os_version, os_major, os_minor, os_patch, os_build, release, version, ' \
@@ -80,13 +80,13 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=vd.DE
                    install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), checksum='dummychecksum',
                    item_id='dummyitemid'):
-    """Insert a package in the agent DB
+    """Insert a package in the agent DB.
 
     Args:
         agent_id (str): Agent ID.
         scan_id (int): Last scan ID.
-        format (str): Package format (deb, rpm, ...)
-        name (str): Package name
+        format (str): Package format (deb, rpm, ...).
+        name (str): Package name.
         priority (str): Released package priority.
         section (str): Package section.
         size (int): Package size.
@@ -96,10 +96,10 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=vd.DE
         multiarch (str): Define if a package may be installed in different architectures.
         description (str): Package description.
         source (str): Package source.
-        location (str): Package location
+        location (str): Package location.
         triaged (int): Times that the package has been installed.
-        install_time (str): Installation timestamp
-        scan_time (str): Scan timestamp
+        install_time (str): Installation timestamp.
+        scan_time (str): Scan timestamp.
         checksum (str): Package checksum.
         item_id (str): Package ID.
     """
@@ -121,7 +121,17 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=vd.DE
 
 def update_sync_info(agent_id='000', component='syscollector-packages', last_attempt=1, last_completion=1,
                      n_attempts=0, n_completions=0, last_agent_checksum=''):
-    """Update the sync_info table of the specified agent for the selected component."""
+    """Update the sync_info table of the specified agent for the selected component.
+
+    Args:
+        agent_id (str): Agent ID.
+        component (str): Name of the component package.
+        last_attempt (int): Last attempt of query
+        last_completion (int): Last completion package
+        n_attempts (int): Number of attempt.
+        n_completions (int): Number of completion packets.
+        last_agent_checksum (str): Checksum of the last agent registered.
+    """
     query_wdb(f"agent {agent_id} sql UPDATE sync_info SET last_attempt = {last_attempt},"
               f"last_completion = {last_completion}, n_attempts = {n_attempts}, n_completions = {n_completions},"
               f"last_agent_checksum = '{last_agent_checksum}' where component = '{component}'")
@@ -147,8 +157,8 @@ def delete_package(package, agent_id='000'):
     Used to simulate uninstall of the package given.
 
     Args:
-        package (str): Package name
-        agent_id (str): agent ID.
+        package (str): Package name.
+        agent_id (str): Agent ID.
     """
     delete_query_string = f'agent {agent_id} sql DELETE FROM sys_programs WHERE name="{package}"'
     query_wdb(delete_query_string)
@@ -177,7 +187,7 @@ def modify_agent_scan_timestamp(agent_id='000', timestamp=0, full_scan=True):
 
 
 def delete_os_info_data(agent_id='000'):
-    """Delete the sys_osinfo data from a specific agent
+    """Delete the sys_osinfo data from a specific agent.
 
     Args:
         agent_id (str): Agent ID.
