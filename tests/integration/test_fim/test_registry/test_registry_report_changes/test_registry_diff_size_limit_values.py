@@ -170,6 +170,7 @@ def test_diff_size_limit_values(key, subkey, arch, value_name, size, get_configu
 
     def report_changes_validator_no_diff(event):
         """Validate content_changes attribute exists in the event"""
+        assert not os.path.exists(diff_file), '{diff_file} exist, it shouldn\'t'
         assert event['data'].get('content_changes') is None, 'content_changes isn\'t empty'
 
     def report_changes_validator_diff(event):

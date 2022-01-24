@@ -54,8 +54,8 @@ pytest_args:
 tags:
     - fim_registry_file_limit
 '''
-from logging import Logger
-import os
+
+import os, sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
@@ -103,16 +103,13 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    file_limit = get_configuration['metadata']['file_limit']
     reg1_handle = create_registry(registry_parser[KEY], sub_key_1, KEY_WOW64_64KEY)
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-    for i in range(0, int(file_limit) + 10):         # Refactor this to add correct file_limit +10
-        modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
     RegCloseKey(reg1_handle)
 
 
 # Tests
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by issue wazuh/wazuh #11819")
 def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
@@ -152,6 +149,10 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     tags:
         - scheduled
     '''
+    file_limit = get_configuration['metadata']['file_limit']
+    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    for i in range(0, int(file_limit) + 10):
+        modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
