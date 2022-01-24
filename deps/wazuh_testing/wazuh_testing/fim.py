@@ -27,6 +27,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.file import generate_string
 
 if sys.platform == 'win32':
     import win32con
@@ -2001,10 +2002,16 @@ if sys.platform == 'win32':
 
 
     def set_check_options(options):
+        """ Return set of check options. If options given is none, it will return check_all"""
         options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
         if options is not None:
             options_set = options_set.intersection(options)
+        return options_set
 
+
+    def create_values_content(value_name, size):
+        """ Create a string of data content of a given size for a specific key value"""
+        return {value_name: generate_string(size, '0')}
 
     def registry_value_create(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                            min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True, encoding=None,
