@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.0.0]
 ### Added
-
+- Add system test to check synchronization between agent and manager. ([#2443](https://github.com/wazuh/wazuh-qa/pull/2443))
 ### Changed
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
 

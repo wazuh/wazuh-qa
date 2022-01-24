@@ -902,6 +902,7 @@ class HostMonitor:
                 break
             time.sleep(self._time_step)
         self.check_result()
+        return self.result()
 
     @new_process
     def file_composer(self, host, path, output_path):
