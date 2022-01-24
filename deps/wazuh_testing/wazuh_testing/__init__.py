@@ -6,6 +6,7 @@ import logging
 import sys
 import os
 import yaml
+import platform
 from collections import defaultdict
 
 
@@ -16,6 +17,9 @@ else:
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
     else:
         WAZUH_PATH = os.path.join("/var", "ossec")
+
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
+DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 
 UDP = 'UDP'
 TCP = 'TCP'
