@@ -62,11 +62,6 @@ tmp_path = os.path.join(local_path, 'tmp')
 scheduled_mode = 'testdir1'
 
 
-# def clean_logs():
-#     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-#     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-
-
 @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
 def test_Synchronization_add_file(folder_path):
     '''
@@ -140,10 +135,8 @@ def test_Synchronization_delete_file(folder_path):
     # Delete folder
     host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
 
-    try:
-        # Run the callback checks for the ossec.log
-        HostMonitor(inventory_path=inventory_path,
-                    messages_path=messages_path[0],
-                    tmp_path=tmp_path).run()
-    finally:
-        host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
+
+    # Run the callback checks for the ossec.log
+    HostMonitor(inventory_path=inventory_path,
+                messages_path=messages_path[0],
+                tmp_path=tmp_path).run()
