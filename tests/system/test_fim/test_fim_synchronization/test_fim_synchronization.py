@@ -138,5 +138,5 @@ def test_Synchronization_delete_file(folder_path):
 
     # Run the callback checks for the ossec.log
     HostMonitor(inventory_path=inventory_path,
-                messages_path=messages_path[0],
+                messages_path=messages_path[1],
                 tmp_path=tmp_path).run()
