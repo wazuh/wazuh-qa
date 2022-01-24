@@ -1,7 +1,44 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+"""
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: system
+brief: Check that when FIM is activated, and the agent is running, the agent and manager are synchronization when
+a change is performed in a monitored folder.
+tier: 1
+modules:
+    - fim
+components:
+    - manager
+    - agent
+path: tests/system/test_fim/test_fim_synchronization/test_fim_synchronization.py
+daemons:
+    - wazuh-syscheckd
+os_platform:
+    - linux
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+references:
+    - https://github.com/wazuh/wazuh-qa/issues/2389
+tags:
+    - fim_synchronization
+"""
 
 import os
 
