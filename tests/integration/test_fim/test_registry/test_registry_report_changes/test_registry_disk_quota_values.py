@@ -1,4 +1,4 @@
-'''
+"""
 copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
@@ -53,15 +53,15 @@ pytest_args:
 
 tags:
     - fim_registry_report_changes
-'''
+"""
 import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, 
-                             calculate_registry_diff_paths, registry_value_create, registry_value_update, 
-                             registry_value_delete, registry_parser, create_values_content)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2)
+from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
+                               calculate_registry_diff_paths, registry_value_create, registry_value_update,
+                               registry_value_delete, registry_parser, create_values_content,)
+from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -75,44 +75,48 @@ key = WINDOWS_HKEY_LOCAL_MACHINE
 sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
-test_regs = [os.path.join(key, sub_key_1), 
-             os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(key, sub_key_1), os.path.join(key, sub_key_2)]
 reg1, reg2 = test_regs
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = 10 * 1024
 
 # Configurations
 
-p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
-                                                          'WINDOWS_REGISTRY_2': reg2,
-                                                          'FILE_SIZE_ENABLED': 'no',
-                                                          'FILE_SIZE_LIMIT': '10KB',
-                                                          'DISK_QUOTA_ENABLED': 'yes',
-                                                          'DISK_QUOTA_LIMIT': '1KB'})
+p, m = generate_params(modes=["scheduled"], extra_params={
+                                                        "WINDOWS_REGISTRY_1": reg1,
+                                                        "WINDOWS_REGISTRY_2": reg2,
+                                                        "FILE_SIZE_ENABLED": "no",
+                                                        "FILE_SIZE_LIMIT": "10KB",
+                                                        "DISK_QUOTA_ENABLED": "yes",
+                                                        "DISK_QUOTA_LIMIT": "1KB",
+                                                    })
 
-configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
+configurations_path = os.path.join(test_data_path, "wazuh_registry_report_changes_limits_quota.yaml")
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # Fixtures
 
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.mark.parametrize('size', [(4 * 1024),(32 * 1024)])
-@pytest.mark.parametrize('key, subkey, arch, value_name', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
-])
+@pytest.mark.parametrize("size", [(4 * 1024), (32 * 1024)])
+@pytest.mark.parametrize(
+    "key, subkey, arch, value_name",
+    [
+        (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
+        (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
+        (key, sub_key_2, KEY_WOW64_64KEY, "some_value"),
+    ],
+)
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_fim_start):
-    '''
+                           restart_syscheckd, wait_for_fim_start):
+    """
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used
                  to perform the 'diff' operations is stored when the 'disk_quota' limit is set. For this
                  purpose, the test will monitor a key, create a testing value smaller than the 'disk_quota'
@@ -167,20 +171,19 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
 
     tags:
         - scheduled
-        - time_travel
-    '''
+    """
     values = create_values_content(value_name, size)
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_no_diff(event):
         """Validate content_changes attribute exists in the event"""
-        assert event['data'].get('content_changes') is None, 'content_changes isn\'t empty'
+        assert event["data"].get("content_changes") is None, "content_changes isn't empty"
 
     def report_changes_validator_diff(event):
         """Validate content_changes attribute exists in the event"""
-        assert os.path.exists(diff_file), '{diff_file} does not exist'
-        assert event['data'].get('content_changes') is not None, 'content_changes is empty'
+        assert os.path.exists(diff_file), "{diff_file} does not exist"
+        assert event["data"].get("content_changes") is not None, "content_changes is empty"
 
     if size > size_limit_configured:
         callback_test = report_changes_validator_no_diff
@@ -188,9 +191,9 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
         callback_test = report_changes_validator_diff
 
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True, 
-                       validators_after_update=[callback_test])
+                          scan_delay=2, min_timeout=global_parameters.default_timeout,   triggers_event=True,
+                          validators_after_update=[callback_test])
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)

@@ -58,10 +58,11 @@ from logging import Logger
 import os
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, \
-    KEY_WOW64_64KEY, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey,create_registry
-from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE, \
-    ERR_MSG_FILE_LIMIT_VALUES, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES
+from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
+                               REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
+from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE,
+                                                    ERR_MSG_FILE_LIMIT_VALUES, CB_COUNT_REGISTRY_FIM_ENTRIES,
+                                                    ERR_MSG_FIM_INODE_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -80,7 +81,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-file_limit_list = ['1','10','100','1000']
+file_limit_list = ['1', '10', '100', '1000']
 conf_params = {'WINDOWS_REGISTRY': reg1, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
@@ -105,7 +106,7 @@ def extra_configuration_before_yield():
     file_limit = get_configuration['metadata']['file_limit']
     reg1_handle = create_registry(registry_parser[KEY], sub_key_1, KEY_WOW64_64KEY)
     reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-    for i in range(0, int(file_limit) + 10):          ### Refactor this to add correct file_limit +10
+    for i in range(0, int(file_limit) + 10):         # Refactor this to add correct file_limit +10
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
     RegCloseKey(reg1_handle)
@@ -154,8 +155,8 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     '''
 
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
-                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
+                                               callback=callback_generator(CB_FILE_LIMIT_VALUE),
+                                               error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
 
     assert file_limit_value == get_configuration['metadata']['file_limit'], 'Wrong value for file_limit.'
 

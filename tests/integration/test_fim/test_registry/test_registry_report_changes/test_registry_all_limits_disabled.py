@@ -59,8 +59,9 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, KEY_WOW64_32KEY, 
-                                KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths, create_values_content)
+from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete,
+                               KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
+                               create_values_content)
 from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -76,7 +77,7 @@ sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
 test_regs = [os.path.join(key, sub_key_1),
-            os.path.join(key, sub_key_2)]
+             os.path.join(key, sub_key_2)]
 reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -164,7 +165,6 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
 
     tags:
         - scheduled
-        - time_travel
     '''
     values = create_values_content(value_name, value_content_size)
 
@@ -174,9 +174,11 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         """Validate content_changes attribute exists in the event"""
         assert os.path.exists(diff_file), '{diff_file} does not exist'
         assert event['data'].get('content_changes') is not None, 'content_changes is empty'
-    
+
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                       scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True, 
-                       validators_after_update=[report_changes_validator_diff])
+                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True,
+                          validators_after_update=[report_changes_validator_diff])
+    registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
+                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)

@@ -108,7 +108,7 @@ def get_configuration(request):
 # Tests
 
 
-@pytest.mark.parametrize('percentage', [(80), (90),(0)])
+@pytest.mark.parametrize('percentage', [(80), (90), (0)])
 def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment,
                                    restart_syscheckd, wait_for_fim_start):
     '''
