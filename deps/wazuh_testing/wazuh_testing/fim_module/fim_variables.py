@@ -8,6 +8,7 @@ maintain if one of them changes in the future.
 '''
 
 # Variables
+SIZE_LIMIT_CONFIGURED_VALUE = 10 * 1024
 
 # Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'

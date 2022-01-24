@@ -61,7 +61,8 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete,
                                KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
                                create_values_content)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2)
+from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                                    SIZE_LIMIT_CONFIGURED_VALUE)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -80,7 +81,7 @@ test_regs = [os.path.join(key, sub_key_1),
 reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-size_limit_configured = 10 * 1024
+size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
 
 # Configurations
 
@@ -105,10 +106,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('size', [
-    (4 * 1024),
-    (16 * 1024),
-])
+@pytest.mark.parametrize('size', [(4 * 1024), (16 * 1024)])
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
@@ -172,7 +170,6 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
 
     tags:
         - scheduled
-        - time_travel
     '''
     values = create_values_content(value_name, size)
 
