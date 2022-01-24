@@ -193,3 +193,40 @@ def delete_os_info_data(agent_id='000'):
         agent_id (str): Agent ID.
     """
     query_wdb(f"agent {agent_id} sql DELETE FROM sys_osinfo")
+
+
+def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, condition, severity='-', cvss2=0,
+                                       cvss3=0):
+    """Check the existence or lack of a vulnerability in the agent's DB.
+
+    Args:
+        agent_id (str): Agent ID.
+        package (str): Package name.
+        version (str): Package version.
+        arch (str): Package architecture.
+        cve (str): Vulnerability ID associated to the vulnerable package.
+        condition (str): This parameter is used to check if the vulnerability exists ('inserted') or
+                         not ('removed') in the inventory.
+        severity (str): Vulnerability severity.
+        cvss2 (str): CVSS2 score of the vulnerable package.
+        cvss3 (str): CVSS3 score of the vulnerable package.
+
+    Raises:
+        Exception: If the condition has unexpected value.
+    """
+    if condition != 'inserted' and condition != 'removed':
+        raise Exception(f'The "condition" parameter has an unexpected value: {condition}')
+
+    if condition == 'inserted':
+        query = f"agent {agent_id} sql SELECT CASE WHEN EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' AND " \
+                f"name = '{package}' AND version = '{version}' AND architecture = '{arch} AND severity = ' " \
+                f"'{severity}' AND cvss2_score = {cvss2} AND cvss3_score = {cvss3}) THEN 'true' ELSE 'false' END " \
+                "as 'result'"
+    else:
+        query = f"agent {agent_id} sql SELECT CASE WHEN NOT EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' " \
+                f"AND name = '{package}' AND version = '{version}' AND architecture = '{arch}')  THEN 'true' " \
+                f"ELSE 'false' END as 'result'"
+
+    result = query_wdb(query)[0]['result']
+
+    return result
