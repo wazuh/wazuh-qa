@@ -8,6 +8,15 @@ import os
 import yaml
 from collections import defaultdict
 
+
+if sys.platform == 'win32':
+    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+else:
+    if sys.platform == 'darwin':
+        WAZUH_PATH = os.path.join("/", "Library", "Ossec")
+    else:
+        WAZUH_PATH = os.path.join("/var", "ossec")
+
 UDP = 'UDP'
 TCP = 'TCP'
 TCP_UDP = 'TCP,UDP'
