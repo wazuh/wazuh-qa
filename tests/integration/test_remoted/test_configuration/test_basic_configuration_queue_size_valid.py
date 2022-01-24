@@ -11,7 +11,7 @@ from urllib3.exceptions import InsecureRequestWarning
 import requests
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -42,7 +42,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_queue_size_valid(get_configuration, configure_environment, restart_remoted):
+def test_queue_size_valid(get_configuration, configure_environment, restart_remoted, check_remoted_running):
     """Check that `queue_size` option could be configured with valid values (any number between 1 and 262144) without
     errors.
 

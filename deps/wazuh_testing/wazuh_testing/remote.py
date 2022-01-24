@@ -4,6 +4,7 @@
 import os
 import re
 import socket
+import ipaddress
 import subprocess as sb
 import time
 
@@ -233,8 +234,8 @@ def callback_active_response_sent(ar_message):
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
-def callback_start_up(agent_name):
-    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from 127.0.0.1"
+def callback_start_up(agent_name, agent_ip='127.0.0.1'):
+    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from '{agent_ip}'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
 
 
@@ -296,10 +297,17 @@ def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
     Raises:
         ConnectionRefusedError: if there's a problem while sending messages to the manager.
     """
+    ip = ipaddress.ip_address(manager_address)
     if protocol.upper() == UDP:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if isinstance(ip, ipaddress.IPv4Address):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        elif isinstance(ip, ipaddress.IPv6Address):
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
     else:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if isinstance(ip, ipaddress.IPv4Address):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        elif isinstance(ip, ipaddress.IPv6Address):
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
     if not message.endswith("\n"):
         message += "\n"
