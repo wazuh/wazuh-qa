@@ -59,7 +59,37 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                         manager_host='centos-8', node_name='node01', date_add='1612942494',
                         last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
                         client_key_secret=None):
-    """Mock a new agent creating a new client keys entry, adding it to the global db and creating a new agent id DB."""
+    """Mock a new agent creating a new client keys entry, adding it to the global db and creating a new agent id DB.
+
+    Args:
+        name (str): Agent name.
+        ip (str): Agent IP.
+        register_ip (str): IP of the registered agent.
+        internal_key (str): Internal key of the agent.
+        os_name (str): Name of the OS.
+        os_version (str): Version of the OS.
+        os_major (str): Major version of the OS supported.
+        os_minor (str): Minor version of the OS supported.
+        os_codename (str): Codename of the OS.
+        os_build (str): Build id of the OS.
+        os_platform (str): Platform version of the OS.
+        os_uname (str): Version and architecture of the OS.
+        os_arch (str): Architecture of the OS.
+        version (str): Version of the agent.
+        config_sum (str): .
+        merged_sum (str): .
+        manager_host (str): Name of the manager.
+        node_name (str): Name of the node.
+        date_add (str): Date of the added/updated agent.
+        last_keepalive (str): Last keep alive timestamp reported.
+        group (str): Group of the agent.
+        sync_status (str): Status of the syncronization.
+        connection_status (str): Status of the connection.
+        client_key_secret (str): Client secret key.
+
+    Return:
+        str: Agent ID.
+    """
 
     # Get new agent_id
     last_id = global_db.get_last_agent_id()

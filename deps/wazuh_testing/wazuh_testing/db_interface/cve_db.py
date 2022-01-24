@@ -26,7 +26,7 @@ def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', targ
     """Insert a vulnerability in CVE database.
 
     Args:
-        cveid (str): Vulnerability ID
+        cveid (str): Vulnerability ID.
         target (str): OS target.
         target_minor (str): OS target minor version.
         package (str): Package name.
@@ -36,15 +36,15 @@ def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', targ
         severity (str): Vulnerability severity.
         published (str): Date when the vulnerability was published.
         updated (str): Contain if the package was updated.
-        reference (str): URL referencing the vulnerability
+        reference (str): URL referencing the vulnerability.
         target_v (str): OS target family.
-        cvss (str): Common vulnerability scoring system
+        cvss (str): Common vulnerability scoring system.
         cvss_vector (str): Representation of the values used to derive the score.
         rationale (str): Reasons to describe the vulnerability.
-        cvss3 (str): Common vulnerability scoring system version 3
-        bugzilla_reference (str): URL referencing to bugzilla
-        cwe (str): CWE ID
-        advisory (str): advisory ID
+        cvss3 (str): Common vulnerability scoring system version 3.
+        bugzilla_reference (str): URL referencing to bugzilla.
+        cwe (str): CWE ID.
+        advisory (str): Advisory ID.
         ref_target (str): OS target ID.
     """
     queries = [
@@ -88,7 +88,7 @@ def get_num_vulnerabilities():
     """Get the number of vulnerabilities inserted in VULNERABILITIES table of CVE DB.
 
     Returns:
-        int: total number of vulnerabilities in the VULNERABILITIES table.
+        int: Total number of vulnerabilities in the VULNERABILITIES table.
     """
     query_string = 'SELECT count(*) from VULNERABILITIES'
     query_result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
