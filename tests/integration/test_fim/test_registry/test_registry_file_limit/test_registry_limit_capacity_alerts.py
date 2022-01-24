@@ -109,8 +109,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('percentage', [(80), (90), (0)])
-def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment,
-                                   restart_syscheckd, wait_for_fim_start):
+def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
+                                   wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a key in which
