@@ -2,6 +2,7 @@ import datetime
 from time import time
 
 from wazuh_testing.db_interface import query_wdb
+from wazuh_testing.modules.vulnerability_detector import DEFAULT_PACKAGE_NAME
 
 
 def clean_table(agent_id, table):
@@ -73,7 +74,7 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
     query_wdb(query_string)
 
 
-def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=vd.DEFAULT_PACKAGE_NAME,
+def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=DEFAULT_PACKAGE_NAME,
                    priority='', section='Unspecified', size=99, vendor='wazuhintegrationtests', version='1.0.0-1.el7',
                    architecture='x86_64', multiarch='', description='Wazuh Integration tests mock package',
                    source='Wazuh Integration tests mock package', location='', triaged=0,
