@@ -154,7 +154,6 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
 
     tags:
         - scheduled
-        - time_travel
     '''
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_generator(CB_FILE_LIMIT_CAPACITY),

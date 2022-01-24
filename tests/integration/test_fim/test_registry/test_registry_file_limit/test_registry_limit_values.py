@@ -151,7 +151,6 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
 
     tags:
         - scheduled
-        - time_travel
     '''
 
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
