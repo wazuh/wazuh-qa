@@ -62,7 +62,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_v
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE,
                                                     ERR_MSG_FILE_LIMIT_VALUES, CB_COUNT_REGISTRY_FIM_ENTRIES,
-                                                    ERR_MSG_FIM_INODE_ENTRIES)
+                                                    ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
+                                                    ERR_MSG_WRONG_FILE_LIMIT_VALUE)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -158,10 +159,10 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
 
-    assert file_limit_value == get_configuration['metadata']['file_limit'], 'Wrong value for file_limit.'
+    assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
     entries = wazuh_log_monitor.start(timeout=40,
                                       callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
-    assert entries == str(get_configuration['metadata']['file_limit']), 'Wrong number of entries count.'
+    assert entries == str(get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

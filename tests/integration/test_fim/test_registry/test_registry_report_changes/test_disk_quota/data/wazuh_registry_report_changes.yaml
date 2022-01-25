@@ -1,12 +1,12 @@
+---
+# Test report changes
 - tags:
-  - test_limits
+  - test_report_changes
   apply_to_modules:
-  - test_registry_all_limits_disabled
+  - test_registry_disk_quota_default
   sections:
   - section: syscheck
     elements:
-      - frequency:
-          value: '2'
       - disabled:
           value: 'no'
       - windows_registry:
@@ -19,20 +19,6 @@
           attributes:
             - arch: '64bit'
             - report_changes: 'yes'
-      - diff:
-          elements:
-          - file_size:
-              elements:
-              - enabled:
-                  value: FILE_SIZE_ENABLED
-              - limit:
-                  value: FILE_SIZE_LIMIT
-          - disk_quota:
-              elements:
-              - enabled:
-                  value: DISK_QUOTA_ENABLED
-              - limit:
-                  value: DISK_QUOTA_LIMIT
   - section: sca
     elements:
     - enabled:

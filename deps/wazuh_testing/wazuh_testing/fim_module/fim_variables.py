@@ -45,12 +45,19 @@ CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
+CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA = r".*Setting 'disk_quota' to (\d+), 'disk_quota' must be greater than 'file_size'"
 
 #Error Messages
 ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
 ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., path count: ..." event'
 ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ...: Sending DB back to normal alert." event'
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
+ERR_MSG_WRONG_FILE_LIMIT_VALUE ='Wrong value for file_limit.'
+ERR_MSG_WRONG_DISK_QUOTA_VALUE ='Wrong value for disk_quota'
 ERR_MSG_DATABASE_FULL_ALERT_EVENT = 'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
 ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
 ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
+ERR_MSG_DISK_QUOTA_MUST_BE_GREATER = "Did not receive expected 'DEBUG: ... disk_quota must be greater than file_size message'"
+ERR_MSG_CONTENT_CHANGES_EMPTY = "content_changes is empty"
+ERR_MSG_CONTENT_CHANGES_NOT_EMPTY = "content_changes isn't empty"

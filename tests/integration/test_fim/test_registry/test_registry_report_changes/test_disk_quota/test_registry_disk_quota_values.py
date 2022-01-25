@@ -62,7 +62,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, 
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
                                registry_value_delete, registry_parser, create_values_content)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE)
+                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
+                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -124,6 +125,10 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  limit, and increase its size on each test case. Finally, the test will verify that the
                  compressed file has been created, and the related FIM event includes the 'content_changes'
                  field if the value size does not exceed the specified limit and vice versa.
+                 - Case 1: small file - when compressed it will be less than the disk_quota. The file is generated 
+                 and the logs have content_changes data.
+                 - Case 2: big size - when compressed the file would be bigger than the disk_quota. The file is not
+                 generated and the logs should nave have content_changes data.
 
     wazuh_min_version: 4.2.0
 
@@ -179,12 +184,12 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
 
     def report_changes_validator_no_diff(event):
         """Validate content_changes attribute exists in the event"""
-        assert event["data"].get("content_changes") is None, "content_changes isn't empty"
+        assert event["data"].get("content_changes") is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 
     def report_changes_validator_diff(event):
         """Validate content_changes attribute exists in the event"""
         assert os.path.exists(diff_file), "{diff_file} does not exist"
-        assert event["data"].get("content_changes") is not None, "content_changes is empty"
+        assert event["data"].get("content_changes") is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
     if size > size_limit_configured:
         callback_test = report_changes_validator_no_diff

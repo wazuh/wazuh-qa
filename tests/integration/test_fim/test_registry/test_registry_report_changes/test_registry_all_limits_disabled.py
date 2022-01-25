@@ -63,7 +63,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_va
                                KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
                                create_values_content)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE)
+                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -174,7 +174,7 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
     def report_changes_validator_diff(event):
         """Validate content_changes attribute exists in the event"""
         assert os.path.exists(diff_file), '{diff_file} does not exist'
-        assert event['data'].get('content_changes') is not None, 'content_changes is empty'
+        assert event['data'].get('content_changes') is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
