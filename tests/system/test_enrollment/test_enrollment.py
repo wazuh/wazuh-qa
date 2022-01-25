@@ -146,13 +146,13 @@ def modify_ip_address_conf(test_case):
         if test_case['ipv6_enabled'] == 'yes':
             if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
                 message_ip_manager = f"{network['manager_network'][0]}"
-                message_ip_agent = message_ip_agent = network['agent_network'][0]
+                message_ip_agent = network['agent_network'][0]
             else:
                 message_ip_manager = f"{network['manager_network'][1]}"
-                message_ip_agent = message_ip_agent = network['agent_network'][1]
+                message_ip_agent = network['agent_network'][1]
         else:
             message_ip_manager = f"{network['manager_network'][0]}"
-            message_ip_agent = message_ip_agent = network['agent_network'][0]
+            message_ip_agent = network['agent_network'][0]
 
     new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                         f"<address>{address_ip}</address>")
