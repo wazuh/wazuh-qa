@@ -34,7 +34,7 @@ from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
-AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*' if sys.platform == 'win32' else r'.*wazuh-agentd.*'
 WINDOWS_AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
@@ -245,7 +245,7 @@ class SocketController:
         elif family == 'AF_INET6':
             self.family = socket.AF_INET6
         else:
-            raise TypeError(f"Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6")
+            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         # Set socket protocol
         if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
