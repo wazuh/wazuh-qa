@@ -28,7 +28,6 @@ tags:
 '''
 
 import os
-import ipaddress
 from time import sleep
 
 import pytest
@@ -159,9 +158,6 @@ def modify_ip_address_conf(test_case):
                                                         f"<address>{address_ip}</address>")
     host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
                                      content=new_configuration)
-
-    message_ip_manager = str(ipaddress.ip_address(message_ip_manager).exploded).upper()
-    message_ip_agent = str(ipaddress.ip_address(message_ip_agent).exploded).upper()
 
     message_with_manager_dns = messages.replace('MANAGER_DNS/', message_dns_manager)
     message_with_manager_ip = message_with_manager_dns.replace('MANAGER_IP', message_ip_manager)
