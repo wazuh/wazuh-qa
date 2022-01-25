@@ -62,81 +62,36 @@ tmp_path = os.path.join(local_path, 'tmp')
 scheduled_mode = 'testdir1'
 
 
+@pytest.mark.parametrize('case', ['add', 'modify', 'delete'])
 @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
-def test_Synchronization_add_file(folder_path):
+def test_cud_file(folder_path, case):
     '''
     The test will monitor a directory.
     Finally, it will verify that the FIM event is generated
     in agent and manager side.
     '''
+    messages = messages_path[0]
     clean_logs(host_manager)
-    create_folder_file(host_manager,folder_path)
+    create_folder_file(host_manager, folder_path)
 
     # Restart Wazuh agent
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="restarted")
 
     # Check if the scan monitors end
     if (folder_path == scheduled_mode):
-        wait_for_fim_scan_end(HostMonitor,inventory_path,messages_path[2],tmp_path)
+        wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path[2], tmp_path)
+
+    if (case == 'modify'):
+        host_manager.modify_file_content(host='wazuh-agent1', path=folder_path, content=folder_path)
+
+    elif(case == 'delete'):
+        host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
+        messages = messages_path[1]
 
     try:
         # Run the callback checks for the ossec.log
         HostMonitor(inventory_path=inventory_path,
-                    messages_path=messages_path[0],
+                    messages_path=messages,
                     tmp_path=tmp_path).run()
     finally:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
-
-
-# @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
-# def test_Synchronization_modify_file(folder_path):
-#     '''
-#     The test will monitor a directory and modify file.
-#     Finally, it will verify that the FIM event is generated
-#     in agent and manager side.
-#     '''
-#     # Clear logs, create folder to monitored and restart the service
-#     clean_logs(host_manager)
-#     create_folder_file(host_manager,folder_path)
-#     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="restarted")
-
-#     # Check if the scan monitors end
-#     if (folder_path == scheduled_mode):
-#         wait_for_fim_scan_end(HostMonitor,inventory_path,messages_path[2],tmp_path)
-
-#     # Modify file
-#     host_manager.modify_file_content(host='wazuh-agent1', path=folder_path, content=folder_path)
-
-#     try:
-#         # Run the callback checks for the ossec.log
-#         HostMonitor(inventory_path=inventory_path,
-#                     messages_path=messages_path[0],
-#                     tmp_path=tmp_path).run()
-#     finally:
-#         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
-
-
-# @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
-# def test_Synchronization_delete_file(folder_path):
-#     '''
-#     The test will monitor a directory and modify file.
-#     Finally, it will verify that the FIM 'Synchronization' event is generated
-#     in agent and manager side.
-#     '''
-#     # Clear logs, create folder to monitored and restart the service
-#     clean_logs(host_manager)
-#     create_folder_file(host_manager,folder_path)
-#     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="restarted")
-
-#     # Check if the scan monitors end in module scheduled
-#     if (folder_path == scheduled_mode):
-#         wait_for_fim_scan_end(HostMonitor,inventory_path,messages_path[2],tmp_path)
-
-#     # Delete folder
-#     host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
-
-
-#     # Run the callback checks for the ossec.log
-#     HostMonitor(inventory_path=inventory_path,
-#                 messages_path=messages_path[1],
-#                 tmp_path=tmp_path).run()
