@@ -1,0 +1,4 @@
+wazuh-manager:
+  - regex: ".*Global query: update-agent-data (.+)$"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60
