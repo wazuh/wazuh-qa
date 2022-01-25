@@ -199,21 +199,5 @@
             "test_name": "hardcoded_bind_all_interfaces"
         }
     ],
-    "to_fix": [
-        {
-            "code": "             child.kill()\n         except Exception:\n             pass\n \n",
-            "filename": "framework/scripts/wazuh-clusterd.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Try, Except, Pass detected.",
-            "line_number": 46,
-            "line_range": [
-                46,
-                47
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html",
-            "test_id": "B110",
-            "test_name": "try_except_pass"
-        }
-    ]
+    "to_fix": []
 }
