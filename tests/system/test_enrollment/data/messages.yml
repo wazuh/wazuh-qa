@@ -18,7 +18,7 @@ wazuh-agent1:
   - regex: ".*Requesting a key from server: MANAGER_DNS/MANAGER_IP"
     path: "/var/ossec/logs/ossec.log"
     timeout: 20
-  - regex: ".*Connected to enrollment service at 'MANAGER_IP:1515'.*"
+  - regex: ".*Connected to enrollment service at '[MANAGER_IP]:1515'.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 20
   - regex: ".*Registering agent to unverified manager"
