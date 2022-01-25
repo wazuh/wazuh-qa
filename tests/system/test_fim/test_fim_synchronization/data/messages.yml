@@ -1,9 +1,0 @@
-wazuh-agent1:
-  - regex: ".*Sending integrity control message: (.+)$"
-    path: "/var/ossec/logs/ossec.log"
-    timeout: 60
-
-wazuh-manager:
-  - regex: ".*Agent 001 query: (.+) save2"
-    path: "/var/ossec/logs/ossec.log"
-    timeout: 60
