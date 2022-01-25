@@ -68,14 +68,11 @@ import sys
 import pytest
 from wazuh_testing.fim import callback_configuration_error
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.configuration import get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import check_daemon_status, control_service
 from wazuh_testing.tools import WAZUH_PATH
 
-# Variables
-backup_configuration_file = get_wazuh_conf()
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
@@ -100,10 +97,6 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
-# @pytest.fixture(scope="function")
-# def restore_configuration_file():
-#     write_wazuh_conf(backup_configuration_file)
 
 def restore_manager_configuration(state_config, restore_backup=''):
     backup = restore_backup
