@@ -134,25 +134,25 @@ def modify_ip_address_conf(test_case):
 
     if test_case['ip_type'] == 'ipv4':
         address_ip = network['manager_network'][0]
-        message_ip_manager = address_ip
+        message_ip_manager = f"[{address_ip}]"
         message_ip_agent = network['agent_network'][0]
     elif test_case['ip_type'] == 'ipv6':
         address_ip = network['manager_network'][1]
-        message_ip_manager = address_ip
+        message_ip_manager = f"[{address_ip}]"
         message_ip_agent = network['agent_network'][1]
     else:
         address_ip = 'wazuh-manager'
         message_dns_manager = f"{address_ip}/"
         if test_case['ipv6_enabled'] == 'yes':
             if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
-                message_ip_manager = f"{network['manager_network'][0]}"
-                message_ip_agent = message_ip_agent = network['agent_network'][0]
+                message_ip_manager = f"[{network['manager_network'][0]}]"
+                message_ip_agent = network['agent_network'][0]
             else:
-                message_ip_manager = f"{network['manager_network'][1]}"
-                message_ip_agent = message_ip_agent = network['agent_network'][1]
+                message_ip_manager = f"[{network['manager_network'][1]}]"
+                message_ip_agent = network['agent_network'][1]
         else:
-            message_ip_manager = f"{network['manager_network'][0]}"
-            message_ip_agent = message_ip_agent = network['agent_network'][0]
+            message_ip_manager = f"[{network['manager_network'][0]}]"
+            message_ip_agent = network['agent_network'][0]
 
     new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                         f"<address>{address_ip}</address>")
