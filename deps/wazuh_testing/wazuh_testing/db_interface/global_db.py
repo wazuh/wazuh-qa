@@ -60,11 +60,11 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
 
     query = 'global sql INSERT OR REPLACE INTO AGENT  (id, name, ip, register_ip, internal_key, os_name, os_version, ' \
             'os_major, os_minor, os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, ' \
-            'manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status) VALUES ' \
-            f"('{agent_id}', '{name}', '{ip}', '{register_ip}', '{internal_key}', '{os_name}', '{os_version}', " \
-            f"'{os_major}', '{os_minor}', '{os_codename}', '{os_build}', '{os_platform}', '{os_uname}', '{os_arch}', " \
-            f"'{version}', '{config_sum}', '{merged_sum}', '{manager_host}', '{node_name}', '{date_add}', " \
-            f"'{last_keepalive}', '{group}', '{sync_status}', '{connection_status}')"
+            'merged_sum, manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status) ' \
+            f"VALUES  ('{agent_id}', '{name}', '{ip}', '{register_ip}', '{internal_key}', '{os_name}', " \
+            f"'{os_version}', '{os_major}', '{os_minor}', '{os_codename}', '{os_build}', '{os_platform}', " \
+            f"'{os_uname}', '{os_arch}', '{version}', '{config_sum}', '{merged_sum}', '{manager_host}', " \
+            f"'{node_name}', '{date_add}', '{last_keepalive}', '{group}', '{sync_status}', '{connection_status}')"
     query_wdb(query)
 
 
