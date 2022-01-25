@@ -85,4 +85,3 @@ def delete_agent(agent_id):
         agent_id (str): Agent ID.
     """
     query_wdb(f"global sql DELETE FROM agent where id={int(agent_id)}")
-
