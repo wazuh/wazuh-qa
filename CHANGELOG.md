@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
-- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2353](https://github.com/wazuh/wazuh-qa/pull/2353))
+- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
 
 ### Deleted
 
