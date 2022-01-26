@@ -1,7 +1,8 @@
 - tags:
   - test_limits
   apply_to_modules:
-  - test_registry_all_limits_disabled
+  - test_registry_disk_quota_values
+  - test_registry_disk_quota_bigger_file_limit
   sections:
   - section: syscheck
     elements:

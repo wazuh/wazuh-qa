@@ -29,6 +29,10 @@
     elements:
     - disabled:
         value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
   - section: wodle
     attributes:
       - name: 'syscollector'

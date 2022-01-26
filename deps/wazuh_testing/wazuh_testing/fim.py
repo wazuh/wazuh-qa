@@ -27,6 +27,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.file import generate_string
 
 if sys.platform == 'win32':
     import win32con
@@ -1386,6 +1387,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
+
 def callback_configuration_warning(line):
     match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
@@ -1687,10 +1689,8 @@ if sys.platform == 'win32':
             try:
                 result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
                                                             min_timeout),
-                                                callback=self.callback,
-                                                accum_results=len(self.registry_dict),
-                                                timeout_extra=extra_timeout,
-                                                encoding=self.encoding,
+                                                callback=self.callback, accum_results=len(self.registry_dict),
+                                                timeout_extra=extra_timeout, encoding=self.encoding,
                                                 error_message=error_message).result()
 
                 assert triggers_event, 'No events should be detected.'
@@ -1944,6 +1944,254 @@ if sys.platform == 'win32':
                               update_position=True,
                               error_message=f'End of scheduled scan not detected after '
                               f"{global_parameters.default_timeout} seconds")
+
+
+    def transform_registry_list(value_list=['test_value'], value_type=win32con.REG_SZ, callback=callback_value_event):
+
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_default_content = ''
+        else:
+            value_default_content = 1
+    
+        aux_dict = {}
+        if isinstance(value_list, list):
+            for elem in value_list:
+                aux_dict[elem] = (value_default_content, callback)
+
+        elif isinstance(value_list, dict):
+            for key, elem in value_list.items():
+                aux_dict[key] = (elem, callback)
+
+        else:
+            raise ValueError('It can only be a list or dictionary')
+        
+        return aux_dict
+
+
+    def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
+                        timeout=global_parameters.default_timeout):
+        """Checks if the conditions for waiting for a new scheduled scan.
+
+        Optionally, a monitor may be used to check if a scheduled scan has been performed.
+
+        This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
+
+        Args:
+            wait_scan (boolean): True if we need to update time. False otherwise.
+            interval (timedelta, optional): time interval that will be waited for the scheduled scan to start. Default: 20 seconds.
+            monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
+                scheduled scan. The `monitor` will not consume any log line. Default `None`.
+            timeout (int, optional): If a monitor is provided, this parameter sets how long to wait for the end of scan.
+        Raises
+            TimeoutError: if `monitor` is not `None` and the scan has not ended in the
+                default timeout specified in `global_parameters`.
+        """
+
+        if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+            mode = global_parameters.current_configuration['metadata']['fim_mode']
+            if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+                return
+
+        if wait_for_scan:
+            logger.info(f"waiting for scheduled scan to start for {interval} seconds")
+            time.sleep(interval)
+            if monitor:
+                monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+                            update_position=False,
+                            error_message=f"End of scheduled scan not detected after {timeout} seconds")
+
+
+    def set_check_options(options):
+        """ Return set of check options. If options given is none, it will return check_all"""
+        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+        return options_set
+
+
+    def create_values_content(value_name, size):
+        """ Create a string of data content of a given size for a specific key value"""
+        return {value_name: generate_string(size, '0')}
+
+    def registry_value_create(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_create=None, value_type=win32con.REG_SZ):
+        """Check if creation of registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            wait_for_scan (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_create (list, optional): List of functions that validates an event triggered when a new
+                registry value is created. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list)
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_added_content = 'added'
+        else:
+            value_added_content = 0
+ 
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(validators_after_create, None, None, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+
+        # Open the desired key
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+            modify_registry_value(key_handle, name, value_type, value_added_content)
+    
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+
+    def registry_value_update(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_update=None, value_type=win32con.REG_SZ):
+        """Check if update registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_update (list, optional): List of functions that validates an event triggered
+                when a new registry value is modified. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list=value_list, value_type=value_type, callback=callback)
+
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(None, validators_after_update, None, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+        
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+        
+        # Modify previous registry values
+        for name, content in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, content[0])
+
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_delete=None, value_type=win32con.REG_SZ):
+        """Check if delete registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_delete (list, optional): List of functions that validates an event triggered
+                when a new registry value is deleted. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list=value_list, value_type=value_type, callback=callback)
+
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(None, None, validators_after_delete, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+        
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+             
+        # Delete previous registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+            delete_registry_value(key_handle, name)
+
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
 
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,

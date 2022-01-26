@@ -1,4 +1,4 @@
-'''
+"""
 copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
@@ -9,8 +9,8 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
        these files are modified. Specifically, these tests will check if FIM limits the size of
-       the monitored value to generate 'diff' information to the limit set in the 'file_size' tag
-       when the 'report_changes' option is enabled.
+       the 'queue/diff/local' folder where Wazuh stores the compressed files used to perform
+       the 'diff' operation when the 'disk_quota' limit is set.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
@@ -40,7 +40,7 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#file-size
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#disk-quota
 
 pytest_args:
     - fim_mode:
@@ -53,19 +53,21 @@ pytest_args:
 
 tags:
     - fim_registry_report_changes
-'''
+"""
 import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete,
-                               KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
-                               create_values_content)
+from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
+                               calculate_registry_diff_paths, registry_value_create, registry_value_update,
+                               registry_value_delete, registry_parser, create_values_content)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                                    ERR_MSG_DISK_QUOTA_MUST_BE_GREATER, ERR_MSG_WRONG_DISK_QUOTA_VALUE,
+                                                    CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA, 
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
 # Marks
 
@@ -77,50 +79,58 @@ key = WINDOWS_HKEY_LOCAL_MACHINE
 sub_key_1 = MONITORED_KEY
 sub_key_2 = MONITORED_KEY_2
 
-test_regs = [os.path.join(key, sub_key_1),
-             os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(key, sub_key_1), os.path.join(key, sub_key_2)]
 reg1, reg2 = test_regs
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
 
 # Configurations
 
-p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
-                                                          'WINDOWS_REGISTRY_2': reg2,
-                                                          'FILE_SIZE_ENABLED': 'yes',
-                                                          'FILE_SIZE_LIMIT': '10KB'
+p, m = generate_params(modes=["scheduled"], extra_params={
+                                                        "WINDOWS_REGISTRY_1": reg1,
+                                                        "WINDOWS_REGISTRY_2": reg2,
+                                                        "FILE_SIZE_ENABLED": "yes",
+                                                        "FILE_SIZE_LIMIT": "10KB",
+                                                        "DISK_QUOTA_ENABLED": "yes",
+                                                        "DISK_QUOTA_LIMIT": "1KB",
                                                         })
 
-configurations_path = os.path.join(test_data_path, 'wazuh_registry_file_size_values.yaml')
-
+configurations_path = os.path.join(test_data_path, "wazuh_registry_report_changes_limits_quota.yaml")
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
 # Fixtures
 
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-@pytest.mark.parametrize('size', [(4 * 1024), (16 * 1024)])
-@pytest.mark.parametrize('key, subkey, arch, value_name', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
-])
-def test_file_size_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
-                          restart_syscheckd, wait_for_fim_start):
-    '''
-    description: Check if the 'wazuh-syscheckd' daemon limits the size of the monitored value to generate
-                 'diff' information from the limit set in the 'file_size' tag. For this purpose, the test
-                 will monitor a key, create a testing value smaller than the 'file_size' and increase
-                 its size on each test case. Finally, the test will verify that the compressed 'diff' file
-                 has been created, and the related FIM event includes the 'content_changes' field if the
-                 value size does not exceed the specified limit and vice versa.
+@pytest.mark.parametrize("size", [(8 * 1024), (32 * 1024)])
+@pytest.mark.parametrize(
+    "key, subkey, arch, value_name",
+    [
+        (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
+        (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
+        (key, sub_key_2, KEY_WOW64_64KEY, "some_value"),
+    ],
+)
+def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
+                           restart_syscheckd, wait_for_fim_start):
+    """
+    description: Check if the 'wazuh-syscheckd' daemon sets the 'disk_quotap' limit to be equal to the
+                 'file_size' limit when it is enabled and it is bigger than the value given to 'disk_quota'
+                 For this purpose, the test will monitor a key, create a testing value smaller than the
+                 'disk_quota' limit, and increase its size on each test case. Finally, the test will verify
+                 that the compressed diff file has been created, and the related FIM event includes the
+                 'content_changes' field if the value size does not exceed the specified limit.
+                 - Case 1: File size smaller than size_limit - tests that disk_quota is higher than the one originally
+                   configured.
+                 - Case 2: File size bigger than size_limit - tests that disk_quota does not allow for compressed files
+                   bigger than size_limit (that is the value actually applied to disk_quota as well).
 
     wazuh_min_version: 4.2.0
 
@@ -154,48 +164,44 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
-        - Verify that a 'diff' file is created when a monitored value does not exceed the 'file_size' limit.
-        - Verify that no 'diff' file is created when a monitored value exceeds the 'file_size' limit.
+        - Verify that a 'diff' file is created when a monitored value does not exceed the size limit.
+        - Verify that no 'diff' file is created when a monitored value exceeds the size limit.
         - Verify that FIM events include the 'content_changes' field when the monitored value
-          does not exceed the 'file_size' limit.
+          does not exceed the size limit.
 
     input_description: A test case (test_limits) is contained in external YAML file
-                       (wazuh_registry_report_changes_limits_quota.yaml) which includes
-                       configuration settings for the 'wazuh-syscheckd' daemon. That is
-                       combined with the testing registry keys to be monitored defined
-                       in this module.
+                       (wazuh_registry_report_changes_limits_quota.yaml) which includes configuration
+                       settings for the 'wazuh-syscheckd' daemon. That is combined with
+                       the testing registry keys to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
 
     tags:
         - scheduled
-    '''
+    """
     values = create_values_content(value_name, size)
 
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_no_diff(event):
         """Validate content_changes attribute exists in the event"""
-        assert not os.path.exists(diff_file), '{diff_file} exist, it shouldn\'t'
-        assert event['data'].get('content_changes') is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
+        assert event["data"].get("content_changes") is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 
     def report_changes_validator_diff(event):
         """Validate content_changes attribute exists in the event"""
-        assert os.path.exists(diff_file), '{diff_file} does not exist'
-        assert event['data'].get('content_changes') is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
+        assert os.path.exists(diff_file), "{diff_file} does not exist"
+        assert event["data"].get("content_changes") is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
     if size > size_limit_configured:
-        callback_test = report_changes_validator_no_diff
+        test_callback = report_changes_validator_no_diff
     else:
-        callback_test = report_changes_validator_diff
+        test_callback = report_changes_validator_diff
 
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
-
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True,
-                          validators_after_update=[callback_test])
-
+                          scan_delay=2, min_timeout=global_parameters.default_timeout,   triggers_event=True,
+                          validators_after_update=[test_callback])
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
