@@ -36,6 +36,7 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.file import read_file, read_yaml, write_file
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.utils import format_ipv6_long
 
 
 # Hosts
@@ -138,8 +139,8 @@ def modify_ip_address_conf(test_case):
         message_ip_agent = network['agent_network'][0]
     elif test_case['ip_type'] == 'ipv6':
         address_ip = network['manager_network'][1]
-        message_ip_manager = address_ip
-        message_ip_agent = network['agent_network'][1]
+        message_ip_manager = format_ipv6_long(address_ip)
+        message_ip_agent = format_ipv6_long(network['agent_network'][1])
     else:
         address_ip = 'wazuh-manager'
         message_dns_manager = f"{address_ip}/"
@@ -148,8 +149,8 @@ def modify_ip_address_conf(test_case):
                 message_ip_manager = f"{network['manager_network'][0]}"
                 message_ip_agent = network['agent_network'][0]
             else:
-                message_ip_manager = f"{network['manager_network'][1]}"
-                message_ip_agent = network['agent_network'][1]
+                message_ip_manager = format_ipv6_long(network['manager_network'][1])
+                message_ip_agent = format_ipv6_long(network['agent_network'][1])
         else:
             message_ip_manager = f"{network['manager_network'][0]}"
             message_ip_agent = network['agent_network'][0]
