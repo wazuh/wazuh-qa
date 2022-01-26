@@ -11,7 +11,7 @@ modules:
 components:
     - manager
     - agent
-path: tests/system/test_fim/test_fim_synchronization/test_fim_synchronization.py
+path: tests/system/test_fim/test_fim_synchronization/test_files_cud.py
 daemons:
     - wazuh-syscheckd
 os_platform:
@@ -37,7 +37,7 @@ os_version:
 references:
     - https://github.com/wazuh/wazuh-qa/issues/2389
 tags:
-    - fim_synchronization
+    - fim_basic_usage
 """
 
 import os
@@ -45,7 +45,7 @@ import os
 import pytest
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
-from common import create_folder_file, wait_for_fim_scan_end, clean_logs
+from test_fim import create_folder_file, wait_for_fim_scan_end, clean_logs
 
 
 # Hosts
