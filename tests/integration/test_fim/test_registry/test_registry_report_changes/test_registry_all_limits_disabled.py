@@ -75,15 +75,15 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
-reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+scan_delay = 2
 value_content_size = 4*1024*50
 
 # Configurations
 
-params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
-                                                          'WINDOWS_REGISTRY_2': reg2,
+params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': test_regs[0],
+                                                          'WINDOWS_REGISTRY_2': test_regs[1],
                                                           'FILE_SIZE_ENABLED': 'no',
                                                           'FILE_SIZE_LIMIT': '10KB',
                                                           'DISK_QUOTA_ENABLED': 'no',
@@ -172,9 +172,9 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         assert event['data'].get('content_changes') is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[report_changes_validator_diff])
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

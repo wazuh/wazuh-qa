@@ -78,13 +78,13 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-reg1 = test_regs[0]
+scan_delay = 5
 
 # Configurations
 
 file_limit_list = ['100']
 
-conf_params = {'WINDOWS_REGISTRY': reg1}
+conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
                        modes=['scheduled'])
@@ -172,7 +172,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
         for i in range(limit - 10):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 
-        wait_for_scheduled_scan(wait_for_scan=True, interval=5, monitor=wazuh_log_monitor)
+        wait_for_scheduled_scan(wait_for_scan=True, interval=scan_delay, monitor=wazuh_log_monitor)
 
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_end_scan,
@@ -188,7 +188,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
     RegCloseKey(reg1_handle)
 
-    wait_for_scheduled_scan(wait_for_scan=True, interval=5, monitor=wazuh_log_monitor)
+    wait_for_scheduled_scan(wait_for_scan=True, interval=scan_delay, monitor=wazuh_log_monitor)
 
     if percentage >= 80:  # Percentages 80 and 90
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

@@ -75,15 +75,16 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
-reg1, reg2 = test_regs
+registry1, registry2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
+scan_delay = 2
 
 # Configurations
 
-params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
-                                                          'WINDOWS_REGISTRY_2': reg2,
+params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': registry1,
+                                                          'WINDOWS_REGISTRY_2': registry2,
                                                           'FILE_SIZE_ENABLED': 'yes',
                                                           'FILE_SIZE_LIMIT': '10KB'
                                                         })
@@ -187,11 +188,11 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
         callback_test = report_changes_validator_diff
 
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
 
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[callback_test])
 
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=2, min_timeout=global_parameters.default_timeout, triggers_event=True)
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

@@ -75,14 +75,13 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 # Variables
 
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
-reg1 = test_regs[0]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
 file_limit_list = ['1', '10', '100', '1000']
-conf_params = {'WINDOWS_REGISTRY': reg1}
+conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
                        modes=['scheduled'])
