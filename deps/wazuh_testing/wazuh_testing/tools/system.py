@@ -63,6 +63,13 @@ class HostManager:
                                     check=check)
 
     def modify_file_content(self, host: str, path: str = None, content: str = ''):
+        """Create a file with a specified content and copies it to a path.
+
+        Args:
+            host (str): Hostname
+            path (str): path for the file to create and modify
+            content (str): content to write into the file
+        """
         tmp_file = tempfile.NamedTemporaryFile()
         tmp_file.write(content.encode())
         tmp_file.seek(0)
@@ -244,3 +251,14 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+
+def clean_environment(host_manager, target_files):
+    """Clears a series of files on target hosts managed by a host manager
+    Args:
+        host_manager (object): a host manager object with not None inventory_path
+        target_files (dict): a dictionary of tuples, each with the host and the path of the file to clear.
+    """
+    for target in target_files:
+        host_manager.clear_file(host=target[0], file_path=target[1])
+    

@@ -1046,6 +1046,20 @@ def callback_detect_modified_event(line):
         logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
+def callback_detect_delete_event(line):
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['type'] == 'event' and json_event['data']['type'] == 'deleted':
+            return json_event
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
 def callback_detect_modified_event_with_inode_mtime(line):
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
@@ -1357,13 +1371,6 @@ def callback_detect_max_files_per_second(line):
     match = re.match(msg, line)
 
     return match is not None
-
-
-def callback_dbsync_no_data(line):
-    match = re.match(r'.*#!-fim_registry dbsync no_data (.+)', line)
-    if match:
-        return match.group(1)
-    return None
 
 
 def callback_detect_end_runtime_wildcards(line):
