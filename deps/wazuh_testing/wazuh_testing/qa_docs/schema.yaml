@@ -254,7 +254,10 @@ predefined_values:
     - key_polling
     - limits
     - logcollector
+    - logcollector_age
+    - logcollector_cmd_exec
     - logcollector_configuration
+    - logcollector_keep_running
     - logging
     - logs
     - logs
