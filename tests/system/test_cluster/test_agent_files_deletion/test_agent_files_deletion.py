@@ -16,7 +16,7 @@ worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
-script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), 'data/get_wdb_agent.py')
+script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
 
 tmp_path = os.path.join(local_path, 'tmp')
 managers_hosts = [master_host, worker_host]
@@ -51,8 +51,7 @@ def agent_healthcheck(master_token):
                 if item['name'] == agent_host and item['manager'] == worker_host:
                     healthy = True
         elif time() > timeout:
-            print("The agent 'wazuh-agent3' is not 'Active' yet.")
-            break
+            raise TimeoutError("The agent 'wazuh-agent3' is not 'Active' yet.")
         sleep(while_time)
     sleep(time_to_sync)
 
