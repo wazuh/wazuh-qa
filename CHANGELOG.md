@@ -8,11 +8,27 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+- Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
+- Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
+- Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
+- CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
+- Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
+- Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
 
 ### Changed
+- Adapt logtest ITs given the rules skipping ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
+- Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454))
+- Migrate test_age, test_command_monitoring, and test_keep_running of test_logcollector documentation to qa-docs ([#2162](https://github.com/wazuh/wazuh-qa/pull/2162))
+- Migrate test_configuration (1/2) of test_logcollector documentation to qa-docs ([#2163](https://github.com/wazuh/wazuh-qa/pull/2163))
+- Migrate test_configuration (2/2) of test_logcollector documentation to qa-docs ([#2165](https://github.com/wazuh/wazuh-qa/pull/2165))
+- Migrate test_macos of test_logcollector documentation to qa-docs ([#2175](https://github.com/wazuh/wazuh-qa/pull/2175))
+- Migrate several test groups of test_logcollector documentation to qa-docs ([#2180](https://github.com/wazuh/wazuh-qa/pull/2180))
+- Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
+- Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
+
 
 ### Deleted
-
+- Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
 
 ## Rev 430031
 
