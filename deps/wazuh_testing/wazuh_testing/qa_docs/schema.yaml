@@ -256,6 +256,10 @@ predefined_values:
     - limits
     - logcollector
     - logcollector_macos
+    - logcollector_age
+    - logcollector_cmd_exec
+    - logcollector_configuration
+    - logcollector_keep_running
     - logging
     - logs
     - logs

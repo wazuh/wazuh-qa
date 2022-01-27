@@ -217,3 +217,65 @@ def validate_analysis_integrity_state(event):
         event (dict): Candidate event to be validated against the state integrity schema
     """
     validate(schema=state_integrity_analysis_schema, instance=event)
+
+
+class CallbackWithContext(object):
+    """Class to handle file_monitoring callbacks with variable arguments.
+
+    Args:
+        function (function): callback function.
+        ctxt (*args): callback function non-keyword variable arguments.
+
+    Attributes:
+        function (function): callback function.
+        ctxt (*args): callback function non-keyword variable arguments.
+    """
+    def __init__(self, function, *ctxt):
+        self.ctxt = ctxt
+        self.function = function
+
+    def __call__(self, param):
+        return self.function(param, *self.ctxt)
+
+
+def callback_check_syscollector_alert(alert, expected_alert):
+    """Check if an alert meet certain criteria and values.
+    Args:
+        line (str): alert (json) to check.
+        expected_alert (dict): values to check.
+    Returns:
+        True if line match the criteria. None otherwise
+    """
+    try:
+        alert = json.loads(alert)
+    except Exception:
+        return None
+
+    def dotget(dotdict, k):
+        """Get value from dict using dot notation keys
+
+        Args:
+            dotdict (dict): dict to get value from
+            k (str): dot-separated key.
+
+        Returns:
+            value of specified key. None otherwise
+        """
+        if '.' in k:
+            key = k.split('.', 1)
+            return dotget(dotdict[key[0]], key[1])
+        else:
+            return dotdict.get(k)
+
+    for field in expected_alert.keys():
+        current_value = dotget(alert, field)
+        try:
+            expected_value = json.loads(expected_alert[field])
+            expected_value = expected_value if type(expected_value) is dict else str(expected_value)
+        except ValueError as e:
+            expected_value = str(expected_alert[field])
+
+        if current_value != expected_value:
+            return None
+
+    return True
