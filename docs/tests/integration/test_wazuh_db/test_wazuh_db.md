@@ -29,7 +29,7 @@ Confirm that `wazuh-db` is able to save, update and erase the necessary informat
 
 |Tier | Number of tests | Time spent |
 |:--:|:--:|:--:|
-| 0 | 30 | 45s |
+| 0 | 37 | 60s |
 
 ## Expected behavior
 
@@ -84,6 +84,16 @@ The different commands to the Global DataBase are tested:
 - disconnect-agents command
 - Delete commands
 - Manager keepalive command
+### Checks Syscollector delta messages
+
+The tests cover different operations against agent's inventory tables product of incoming information deltas:
+
+- Operations against invalid DB tables
+- Invalid Syscollector operations against DB
+- Valid INSERTED, CREATE, and MODIFIED operations to valid tables
+- Invalid MODIFIED operations: nonexistent data, wrong number or arguments, invalid type
+- Invalid INSERTED operations: duplicated entry, wrong number or arguments, invalid types
+- Invalid DELETED operations: nonexistent data, wrong number of arguments, invalid type
 
 ### Checks chunks
 
