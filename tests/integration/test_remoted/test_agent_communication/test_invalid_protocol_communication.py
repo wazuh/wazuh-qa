@@ -77,7 +77,7 @@ def validate_agent_manager_protocol_communication(protocol=TCP, manager_port=151
     # Wait until remoted has loaded the new agent key
     rd.wait_to_remoted_key_update(wazuh_log_monitor)
 
-     # Generate a custom event
+    # Generate a custom event
     search_pattern = f"test message from agent {agent.id}"
     agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {search_pattern}"
     event = agent.create_event(agent_custom_message)

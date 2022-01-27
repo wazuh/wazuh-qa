@@ -7,12 +7,9 @@ import logging
 import socket
 import sqlite3
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
-
-GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
-
 
 def callback_wazuhdb_response(item):
     if isinstance(item, tuple):
@@ -36,9 +33,7 @@ def mock_db(func):
     @functools.wraps(func)
     def magic(*args, **kwargs):
         control_service('stop', daemon='wazuh-modulesd')
-        control_service('stop', daemon='wazuh-db')
         func(*args, **kwargs)
-        control_service('start', daemon='wazuh-db')
         control_service('start', daemon='wazuh-modulesd')
 
     return magic
@@ -53,7 +48,7 @@ def mock_agent(
         last_keepalive="253402300799", group="", sync_status="synced", connection_status="active",
         client_key_secret=None):
 
-    create_agent_query = f'''INSERT INTO AGENT
+    create_agent_query = f'''global sql INSERT OR REPLACE INTO AGENT
                    (id, name, ip, register_ip, internal_key, os_name, os_version, os_major, os_minor,
                     os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, merged_sum,
                     manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status)
@@ -64,7 +59,7 @@ def mock_agent(
                      "{date_add}", "{last_keepalive}", "{group}", "{sync_status}", "{connection_status}")
                    '''
     try:
-        run_query(create_agent_query, GLOBAL_DB_PATH)
+        query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
         logging.error("Failed to mock agent in database!")
 
@@ -153,7 +148,7 @@ def query_wdb(command):
 
             # Remove response header and cast str to list of dictionaries
             # From --> 'ok [ {data1}, {data2}...]' To--> [ {data1}, data2}...]
-            if len(data.split(' ')) > 1:
+            if len(data.split()) > 1 and data.split()[0] == 'ok':
                 data = json.loads(' '.join(data.split(' ')[1:]))
     finally:
         sock.close()
