@@ -1,3 +1,54 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, these tests will check that the manager receives an event from a protocol
+       that is not allowed.
+
+tier: 0
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html
+
+tags:
+    - remoted
+'''
 import pytest
 import os
 
@@ -77,7 +128,7 @@ def validate_agent_manager_protocol_communication(protocol=TCP, manager_port=151
     # Wait until remoted has loaded the new agent key
     rd.wait_to_remoted_key_update(wazuh_log_monitor)
 
-     # Generate a custom event
+    # Generate a custom event
     search_pattern = f"test message from agent {agent.id}"
     agent_custom_message = f"1:/test.log:Feb 23 17:18:20 manager sshd[40657]: {search_pattern}"
     event = agent.create_event(agent_custom_message)
@@ -111,7 +162,43 @@ def get_configuration(request):
 
 
 def test_invalid_protocol_communication(get_configuration, configure_environment, restart_remoted):
-    """Check that the manager does not receive any event from an unallowed protocol."""
+    '''
+    description: Check that the manager receive any event from a protocol that is not allowed.
+                 For this purpose, the test will swap the expected protocol before create the simulated agents. Then,
+                 an event will be created and a message sent using a protocol not allowed. Finally, it will raise an
+                 error based in the protocol used.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - restart_remoted:
+            type: fixture
+            brief: Reset ossec.log and start a new monitor.
+    
+    assertions:
+        - Verify that the manager-agent connection is not established
+        - Verify that manager establish a connection using a protocol not allowed.
+        - Verify that no event is received in the socket queue.
+    
+    input_description: A configuration template (test_invalid_protocol_communication) is contained in an external YAML
+                       file, (wazuh_invalid_protocol_communication.yaml). That template is combined with different test
+                       cases defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon
+                       and agents info.
+                        
+    expected_output:
+        - The manager has established a TCP connection when only UDP is allowed.
+        - The manager has received an event from a protocol not allowed.
+    
+    tags:
+        - simulator
+        - remoted
+    '''
     manager_protocol = get_configuration['metadata']['protocol']
     manager_port = get_configuration['metadata']['port']
     # Swap protocols to send from an invalid protocol

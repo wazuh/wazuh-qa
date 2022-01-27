@@ -37,6 +37,7 @@ Wazuh commit: https://github.com/wazuh/wazuh/commit/3a833c142983b83081d8208a6cbb
 Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 
 ### Added
+
 - Added specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
 - Make `simulate-api-load` CLI run tasks simultaneously. ([#2392](https://github.com/wazuh/wazuh-qa/pull/2392))
 - Add `qa-ctl` `v0.3`. ([#2307](https://github.com/wazuh/wazuh-qa/pull/2307))
