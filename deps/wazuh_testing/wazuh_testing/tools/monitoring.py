@@ -832,9 +832,16 @@ def new_process(fn):
     return wrapper
 
 
-def callback_generator(regex):
+def generate_monitoring_callback(regex):
+    """
+    Generates a new callback that searches for a specific pattern on a line passed.
+    If it finds a match, it returns the whole line that matched.
+    Args:
+        regex (str): regex to use to look for a match.
+    """
     def new_callback(line):
-        match = re.match(regex, line)
+        match = re.search(regex, line)
+        logger.debug(line)
         if match:
             return line
 
@@ -955,7 +962,7 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=callback_generator(case['regex']),
+                                                         callback=generate_monitoring_callback(case['regex']),
                                                          update_position=False
                                                          ).result().strip('\n')})
                 except TimeoutError:
