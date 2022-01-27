@@ -61,13 +61,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
                                registry_value_delete, registry_parser, create_values_content)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    ERR_MSG_DISK_QUOTA_MUST_BE_GREATER, ERR_MSG_WRONG_DISK_QUOTA_VALUE,
-                                                    CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA, 
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -110,8 +108,7 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize("size", [(8 * 1024), (32 * 1024)])
-@pytest.mark.parametrize(
-    "key, subkey, arch, value_name",
+@pytest.mark.parametrize("key, subkey, arch, value_name",
     [
         (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
         (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),

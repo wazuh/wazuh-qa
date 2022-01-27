@@ -59,7 +59,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
     ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT,
     CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
     ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
