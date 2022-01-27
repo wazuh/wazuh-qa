@@ -46,7 +46,6 @@ os_version:
 tags:
     - enrollment
 '''
-
 import os
 import subprocess
 
