@@ -56,6 +56,7 @@ tags:
 '''
 
 import os, sys
+from winreg import HKEY_LOCAL_MACHINE
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
@@ -73,9 +74,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-KEY = WINDOWS_HKEY_LOCAL_MACHINE
-sub_key_1 = MONITORED_KEY
-test_regs = [os.path.join(KEY, sub_key_1)]
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
 reg1 = test_regs[0]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -83,13 +82,13 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # Configurations
 
 file_limit_list = ['1', '10', '100', '1000']
-conf_params = {'WINDOWS_REGISTRY': reg1, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params,
+conf_params = {'WINDOWS_REGISTRY': reg1}
+params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
                        modes=['scheduled'])
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -104,7 +103,7 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    reg1_handle = create_registry(registry_parser[KEY], sub_key_1, KEY_WOW64_64KEY)
+    reg1_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
 
     RegCloseKey(reg1_handle)
 
@@ -133,7 +132,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM event 'maximum number of entries' has the correct value
@@ -151,7 +150,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
         - scheduled
     '''
     file_limit = get_configuration['metadata']['file_limit']
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
     for i in range(0, int(file_limit) + 10):
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
 

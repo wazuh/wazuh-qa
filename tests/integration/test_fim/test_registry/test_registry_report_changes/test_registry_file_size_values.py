@@ -73,12 +73,8 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-key = WINDOWS_HKEY_LOCAL_MACHINE
-sub_key_1 = MONITORED_KEY
-sub_key_2 = MONITORED_KEY_2
-
-test_regs = [os.path.join(key, sub_key_1),
-             os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
+             os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -86,7 +82,7 @@ size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
 
 # Configurations
 
-p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
+params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
                                                           'WINDOWS_REGISTRY_2': reg2,
                                                           'FILE_SIZE_ENABLED': 'yes',
                                                           'FILE_SIZE_LIMIT': '10KB'
@@ -94,7 +90,7 @@ p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': 
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_file_size_values.yaml')
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -108,9 +104,9 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('size', [(4 * 1024), (16 * 1024)])
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
-    (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
-    (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
-    (key, sub_key_2, KEY_WOW64_64KEY, "some_value")
+    (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+    (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+    (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value")
 ])
 def test_file_size_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
                           restart_syscheckd, wait_for_fim_start):
@@ -148,7 +144,7 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
         - wait_for_fim_start:
             type: fixture
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.

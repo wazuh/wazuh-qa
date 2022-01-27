@@ -71,10 +71,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
-KEY = WINDOWS_HKEY_LOCAL_MACHINE
-sub_key_1 = MONITORED_KEY
-
-test_reg = os.path.join(KEY, sub_key_1)
+test_reg = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 10
@@ -82,13 +79,13 @@ NUM_REGS = 10
 # Configurations
 
 file_limit_list = ['10']
-conf_params = {'WINDOWS_REGISTRY': test_reg, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params,
+conf_params = {'WINDOWS_REGISTRY': test_reg}
+params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
                        modes=['scheduled'])
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -103,8 +100,8 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    reg1_handle = create_registry(registry_parser[KEY], sub_key_1, KEY_WOW64_64KEY)
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg1_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     for i in range(0, NUM_REGS):
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
@@ -136,7 +133,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM database is in 'full database alert' mode
@@ -162,7 +159,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
 
     assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     modify_registry_value(reg1_handle, 'value_full', REG_SZ, 'added')
 

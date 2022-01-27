@@ -73,19 +73,14 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-key = WINDOWS_HKEY_LOCAL_MACHINE
-sub_key_1 = MONITORED_KEY
-sub_key_2 = MONITORED_KEY_2
-
-test_regs = [os.path.join(key, sub_key_1), os.path.join(key, sub_key_2)]
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 reg1, reg2 = test_regs
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
 
 # Configurations
 
-p, m = generate_params(modes=["scheduled"], extra_params={
+params, metadata = generate_params(modes=["scheduled"], extra_params={
                                                         "WINDOWS_REGISTRY_1": reg1,
                                                         "WINDOWS_REGISTRY_2": reg2,
                                                         "FILE_SIZE_ENABLED": "no",
@@ -95,7 +90,7 @@ p, m = generate_params(modes=["scheduled"], extra_params={
                                                         })
 
 configurations_path = os.path.join(test_data_path, "wazuh_registry_report_changes_limits_quota.yaml")
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -108,12 +103,11 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize("size", [(4 * 1024), (32 * 1024)])
-@pytest.mark.parametrize(
-    "key, subkey, arch, value_name",
+@pytest.mark.parametrize("key, subkey, arch, value_name",
     [
-        (key, sub_key_1, KEY_WOW64_64KEY, "some_value"),
-        (key, sub_key_1, KEY_WOW64_32KEY, "some_value"),
-        (key, sub_key_2, KEY_WOW64_64KEY, "some_value"),
+        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
     ],
 )
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
@@ -124,7 +118,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  purpose, the test will monitor a key, create a testing value smaller than the 'disk_quota'
                  limit, and increase its size on each test case. Finally, the test will verify that the
                  compressed file has been created, and the related FIM event includes the 'content_changes'
-                 field if the value size does not exceed the specified limit and vice versa.
+                 field if the value size does not exceed the specified limit and viceversa.
                  - Case 1: small file - when compressed it will be less than the disk_quota. The file is generated 
                  and the logs have content_changes data.
                  - Case 2: big size - when compressed the file would be bigger than the disk_quota. The file is not
@@ -156,7 +150,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
         - wait_for_fim_start:
             type: fixture
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
@@ -191,7 +185,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
         assert os.path.exists(diff_file), "{diff_file} does not exist"
         assert event["data"].get("content_changes") is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
-    if size > size_limit_configured:
+    if size > SIZE_LIMIT_CONFIGURED_VALUE:
         callback_test = report_changes_validator_no_diff
     else:
         callback_test = report_changes_validator_diff

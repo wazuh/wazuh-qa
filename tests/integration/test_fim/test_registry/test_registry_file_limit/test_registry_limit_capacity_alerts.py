@@ -133,7 +133,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the wazuh logs file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
         - wait_for_fim_start:
             type: fixture
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
