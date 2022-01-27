@@ -4,17 +4,36 @@
 
 import pytest
 from py.xml import html
+import re
+from numpydoc.docscrape import FunctionDoc
 
 
 def pytest_addoption(parser):
     # Get command line options
-    parser.addoption("--artifacts_path", action="store")
-    parser.addoption("--n_workers", action="store")
-    parser.addoption("--n_agents", action="store")
+    parser.addoption(
+        "--artifacts_path",
+        action="store",
+        type=str,
+        help="Path where information of all cluster nodes can be found (logs, stats CSVs, etc)."
+    )
+    parser.addoption(
+        "--n_workers",
+        action="store",
+        type=int,
+        help="Number of expected worker folders inside the artifacts_path. If less folders are found, test will fail."
+    )
+    parser.addoption(
+        "--n_agents",
+        action="store",
+        type=int,
+        help="Expected number of agents connected to the cluster."
+    )
 
 
-def pytest_html_report_title(report):
-    report.title = 'Wazuh Cluster performance tests'
+# Fixtures
+@pytest.fixture()
+def artifacts_path(pytestconfig):
+    return pytestconfig.getoption("artifacts_path")
 
 
 # HTML report
@@ -44,22 +63,28 @@ class HTMLStyle(html):
     class h2(html.h2):
         style = html.Style(color='#0094ce')
 
-    class h3(html.h3):
-        style = html.Style(color='#0094ce')
+
+def pytest_html_report_title(report):
+    report.title = 'Wazuh cluster performance tests'
 
 
 def pytest_html_results_table_header(cells):
-    # Remove links header
+    cells.insert(2, html.th('Description'))
     cells.pop()
 
 
 def pytest_html_results_table_row(report, cells):
-    # Remove links column
-    cells.pop()
-
+    try:
+        cells.insert(2, html.td(report.description))
+        cells.pop()
+    except AttributeError:
+        pass
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
+    def atoi(text):
+        return int(text) if text.isdigit() else text
+
     # Define HTML style
     pytest_html = item.config.pluginmanager.getplugin('html')
     pytest_html.html.body = HTMLStyle.body
@@ -69,14 +94,18 @@ def pytest_runtest_makereport(item, call):
     pytest_html.html.h1 = HTMLStyle.h1
     pytest_html.html.h2 = HTMLStyle.h2
     pytest_html.html.h3 = HTMLStyle.h3
+    pytest_html.html.p = HTMLStyle.b
+
+    documentation = FunctionDoc(item.function)
 
     outcome = yield
     report = outcome.get_result()
     extra = getattr(report, 'extra', [])
+    report.description = '. '.join(documentation["Summary"])
 
     if report.when == 'teardown':
-        # Create table with data of exceeded thresholds
-        if item.module.exceeded_thresholds:
+        # Add a table with all exceeded thresholds.
+        if report.head_line == 'test_cluster_performance' and item.module.exceeded_thresholds:
             extra.append(pytest_html.extras.html("<table>"))
             extra.append(
                 pytest_html.extras.html(f"<tr><th>{'</th><th>'.join(item.module.exceeded_thresholds[0].keys())}</tr>"))
@@ -84,4 +113,5 @@ def pytest_runtest_makereport(item, call):
                 extra.append(pytest_html.extras.html(
                     f"<tr><th>{'</th><th>'.join(str(value) for value in exc_th.values())}</tr>"))
             extra.append(pytest_html.extras.html("</table>"))
+
         report.extra = extra
