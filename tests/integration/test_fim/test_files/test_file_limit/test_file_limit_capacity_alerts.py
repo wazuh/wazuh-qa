@@ -83,7 +83,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGU
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
-from wazuh_testing.fim_module import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, 
+from wazuh_testing.fim_module import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT,
     ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
     CB_FILE_LIMIT_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL, ERR_MSG_FIM_INODE_ENTRIES)
 from wazuh_testing.fim_module.event_monitor import callback_entries_path_count
@@ -126,7 +126,7 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('percentage', [(80), (90), (0)])
-def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd, 
+def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when

@@ -80,7 +80,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.fim_module import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
 

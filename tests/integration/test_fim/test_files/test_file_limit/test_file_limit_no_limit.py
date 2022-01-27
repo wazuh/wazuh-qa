@@ -151,6 +151,6 @@ def test_file_limit_no_limit(get_configuration, configure_environment, restart_s
         - whoadata
     '''
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, 
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_generator(CB_FILE_LIMIT_DISABLED),
                             error_message=ERR_MSG_FILE_LIMIT_DISABLED)
