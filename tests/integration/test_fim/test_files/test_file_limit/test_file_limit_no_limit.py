@@ -77,10 +77,11 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_file_limit_zero, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.fim_module import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
 
 # Marks
 
@@ -94,13 +95,13 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+
 
 # Configurations
 
-p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
+params, metadata = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -114,12 +115,8 @@ def get_configuration(request):
 
 # Tests
 
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'no_file_limit'}
-])
-@mark_skip_agentWindows
-def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh #11162")
+def test_file_limit_no_limit(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the 'file_limit' feature of FIM is disabled.
                  For this purpose, the test will monitor a testing directory, and finally, it will verify
@@ -128,9 +125,6 @@ def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environ
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -153,10 +147,10 @@ def test_file_limit_no_limit(tags_to_apply, get_configuration, configure_environ
 
     tags:
         - scheduled
-        - time_travel
+        - realtime
+        - whoadata
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_limit_zero,
-                            error_message='Did not receive expected "DEBUG: ...: '
-                                          'No limit set to maximum number of entries to be monitored" event')
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, 
+                            callback=callback_generator(CB_FILE_LIMIT_DISABLED),
+                            error_message=ERR_MSG_FILE_LIMIT_DISABLED)
