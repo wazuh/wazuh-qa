@@ -156,6 +156,17 @@ def write_yaml_file(file_path, data, allow_unicode=True, sort_keys=False):
     write_file(file_path, yaml.dump(data, allow_unicode=allow_unicode, sort_keys=sort_keys))
 
 
+def rename_file(file_path, new_path):
+    """
+    Renames a file
+    Args:
+        file_path (str): File path of the file to rename.
+        new_path (str): New file path after rename.
+    """
+    if os.path.exists(file_path):
+        os.rename(file_path, new_path)
+
+
 def delete_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -412,6 +423,25 @@ def count_file_lines(filepath):
         return sum(1 for line in file if line.strip())
 
 
+def create_large_file(directory, file_path):
+    """ Create a large file
+    Args:
+         directory(str): directory where the file will be genarated
+         file_path(str): absolute path of the file
+    """
+    # If path exists delete it
+    if os.path.exists(directory):
+        delete_path_recursively(directory)
+    # create directory
+    os.mkdir(directory)
+    file_size = 1024 * 1024 * 960  # 968 MB
+    chunksize = 1024 * 768
+    # create file and write to it.
+    with open(file_path, "a") as f:
+        while os.stat(file_path).st_size < file_size:
+            f.write(random.choice(string.printable) * chunksize)
+
+            
 def download_text_file(file_url, local_destination_path):
     """Download a remote file with text/plain content type.
 
