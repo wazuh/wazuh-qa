@@ -1387,7 +1387,6 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
-
 def callback_configuration_warning(line):
     match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
