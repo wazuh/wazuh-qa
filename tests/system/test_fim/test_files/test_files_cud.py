@@ -44,8 +44,10 @@ import os
 
 import pytest
 from wazuh_testing.tools.monitoring import HostMonitor
-from wazuh_testing.tools.system import HostManager
-from test_fim import create_folder_file, wait_for_fim_scan_end, clean_logs
+from wazuh_testing.tools.system import HostManager, clean_environment
+from wazuh_testing.tools import WAZUH_LOGS_PATH
+from test_fim import create_folder_file, wait_for_fim_scan_end
+
 
 
 # Hosts
@@ -71,7 +73,9 @@ def test_file_cud(folder_path, case):
     in agent and manager side.
     '''
     messages = messages_path[0]
-    clean_logs(host_manager)
+    enviroment_files = [('wazuh-manager', os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
+                        ('wazuh-agent1', os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))]
+    clean_environment(host_manager, enviroment_files)
     create_folder_file(host_manager, folder_path)
 
     # Restart Wazuh agent

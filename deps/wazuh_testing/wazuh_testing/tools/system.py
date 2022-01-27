@@ -244,3 +244,13 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+
+def clean_environment(host_manager, target_files):
+    """Clears a series of files on target hosts managed by a host manager
+    Args:
+        host_manager (object): a host manager object with not None inventory_path
+        target_files (dict): a dictionary of tuples, each with the host and the path of the file to clear.
+    """
+    for target in target_files:
+        host_manager.clear_file(host=target[0], file_path=target[1])

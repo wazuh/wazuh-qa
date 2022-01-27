@@ -18,7 +18,3 @@ def wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path, tmp_path):
                 messages_path=messages_path,
                 tmp_path=tmp_path).run()
 
-
-def clean_logs(host_manager):
-    host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
