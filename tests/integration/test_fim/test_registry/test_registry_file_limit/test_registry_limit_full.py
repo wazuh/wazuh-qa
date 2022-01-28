@@ -75,6 +75,7 @@ test_reg = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 10
+EXPECTED_DATABES_STATE = 100
 
 # Configurations
 
@@ -157,7 +158,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
                                              callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
-    assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
+    assert database_state == EXPECTED_DATABES_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
     reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 

@@ -80,7 +80,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-file_limit_list = ['1', '10', '100', '1000']
+file_limit_list = ['1', '1000']
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
@@ -150,15 +150,18 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     '''
     file_limit = get_configuration['metadata']['file_limit']
     reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    # Add values to registry plus 10 values over the file limit
     for i in range(0, int(file_limit) + 10):
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
-
+    
+    # Look for the file limit value has been configured
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
-
+    # Compare that the value configured is correct
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
+    # Get the ammount of entries monitored and Assert they are the same as the limit and not over
     entries = wazuh_log_monitor.start(timeout=40,
                                       callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()

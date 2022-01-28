@@ -164,7 +164,8 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
         NUM_REGS = 0
 
     reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-
+    
+    # Add registry values to fill the database up to alert generating percentage
     if percentage >= 80:  # Percentages 80 and 90
         for i in range(NUM_REGS):
             modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
