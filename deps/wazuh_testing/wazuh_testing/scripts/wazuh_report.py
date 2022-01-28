@@ -1,0 +1,31 @@
+import os
+import argparse
+import json
+from wazuh_testing.tools.sources.data_parser import LogAnalyzer
+
+
+def get_script_arguments():
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh data sources generator",
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-p', '--path', dest='artifact_path', default=None,
+                        help='Artifact path.', action='store')
+
+    parser.add_argument('-r', '--report', dest='report_path', default=None,
+                        help='Report path.', action='store')
+    return parser.parse_args()
+
+
+def main():
+    options = get_script_arguments()
+    if not os.path.isdir(options.artifact_path):
+        raise ValueError
+
+    parser = LogAnalyzer(options.artifact_path)
+
+    json_report = parser.make_report()
+
+    with open(f"{options.report_path}", "w") as report:
+        report.write(json.dumps(json_report))
+
+if __name__ == '__main__':
+    main()

@@ -32,6 +32,7 @@ package_data_list = [
 scripts_list = [
     'simulate-agents=wazuh_testing.scripts.simulate_agents:main',
     'wazuh-metrics=wazuh_testing.scripts.wazuh_metrics:main',
+    'wazuh-report=wazuh_testing.scripts.wazuh_report:main',
     'wazuh-statistics=wazuh_testing.scripts.wazuh_statistics:main',
     'data-visualizer=wazuh_testing.scripts.data_visualizations:main',
     'simulate-api-load=wazuh_testing.scripts.simulate_api_load:main',
@@ -67,4 +68,3 @@ setup(name='wazuh_testing',
       include_package_data=True,
       zip_safe=False
       )
-
