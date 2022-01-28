@@ -100,7 +100,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 NUM_FILES = 10
-monitor_timeout = 20
+monitor_timeout = 40
 
 # Configurations
 
