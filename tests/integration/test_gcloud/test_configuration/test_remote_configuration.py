@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
 
 tags:
-    - gcloud_configuration
+    - config
+    - remote
 '''
 import os
 import pytest
@@ -90,6 +91,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_remote_conf.yaml')
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -100,7 +102,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 
 # fixtures
@@ -147,8 +149,7 @@ def get_remote_configuration(component_name, config):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_remote_configuration(get_configuration, configure_environment,
-                              restart_wazuh, wait_for_gcp_start):
+def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the remote configuration matches the local configuration of the 'gcp-pubsub' module.
                  For this purpose, the test will use different settings and get the remote configuration applied.
