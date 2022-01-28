@@ -135,7 +135,7 @@ def test_file_limit_default(get_configuration, configure_environment, restart_sy
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that an FIM event is generated indicating the maximum number of files
@@ -153,10 +153,9 @@ def test_file_limit_default(get_configuration, configure_environment, restart_sy
         - realtime
         - whodata
     '''
-
+    #Check the file limit configured and that it matches expected value (100000)
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
 
-    if file_limit_value:
-        assert file_limit_value == str(NUM_FILES), ERR_MSG_WRONG_FILE_LIMIT_VALUE
+    assert file_limit_value == str(NUM_FILES), ERR_MSG_WRONG_FILE_LIMIT_VALUE

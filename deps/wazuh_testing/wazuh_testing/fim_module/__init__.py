@@ -8,8 +8,7 @@ maintain if one of them changes in the future.
 '''
 
 # Variables
-SIZE_LIMIT_CONFIGURED_VALUE = 10 * 1024
-
+SIZE_LIMIT_CONFIGURED_VALUE = 10240
 # Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
 MONITORED_KEY = 'SOFTWARE\\random_key'

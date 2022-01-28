@@ -133,7 +133,7 @@ def test_file_limit_no_limit(get_configuration, configure_environment, restart_s
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM event 'no limit' is generated when the 'file_limit' feature is disabled.

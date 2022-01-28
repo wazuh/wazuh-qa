@@ -100,6 +100,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 NUM_FILES = 10
+monitor_timeout = 20
 
 # Configurations
 
@@ -155,7 +156,7 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM database is in 'full database alert' mode
@@ -177,18 +178,21 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
         - whodata
         - realtime
     '''
-
+    #Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
     assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
-
+    
+    # Create a file with the database being full - Should not generate events
     create_file(REGULAR, testdir1, 'file_full', content='content')
 
-    wazuh_log_monitor.start(timeout=20, callback=callback_generator(CB_DATABASE_FULL_COULD_NOT_INSERT),
+    # Check new file could not be added to DB
+    wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_generator(CB_DATABASE_FULL_COULD_NOT_INSERT),
                             error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
-    entries, path_count = wazuh_log_monitor.start(timeout=20, callback=callback_entries_path_count,
+    # Check number of entries and paths in DB and assert the value matches the expected count
+    entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     if sys.platform != 'win32':

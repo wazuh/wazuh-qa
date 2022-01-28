@@ -99,10 +99,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+monitor_timeout= 40
 
 # Configurations
 
-file_limit_list = ['1', '10', '100', '1000']
+file_limit_list = ['1', '1000']
 conf_params = {'TEST_DIRECTORIES': testdir1}
 
 params, metadata = generate_params(extra_params=conf_params,
@@ -151,7 +152,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM event 'maximum number of entries' has the correct value
@@ -167,14 +168,16 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     tags:
         - scheduled
     '''
-
+    # Get the file_limit value configured from the wazuh logs
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=callback_generator(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
-
+    # assert it matches the expected value
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
-    entries, path_count = wazuh_log_monitor.start(timeout=40, callback=callback_entries_path_count,
+    
+    # Check number of entries and paths in DB and assert the value matches the expected count
+    entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     if sys.platform != 'win32':

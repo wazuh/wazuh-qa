@@ -164,7 +164,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM database is in 'full database alert' mode
@@ -186,25 +186,29 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - realtime
         - who-data
     '''
-
+    #Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
     assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
+    # Create a file with the database being full - Should not generate events
     create_file(REGULAR, testdir1, file_name)
     sleep(sleep_time)
-
+    # Delete the file created - Should not generate events
     delete_file(folder, file_name)
 
+    # Check no Creation or Deleted event has been  generated
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
         assert event is None, ERR_MSG_NO_EVENTS_EXPECTED
 
+    # Delete the first file that was created (It is included in DB)
     delete_file(folder, f'{file_name}{0}')
 
+    #Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
