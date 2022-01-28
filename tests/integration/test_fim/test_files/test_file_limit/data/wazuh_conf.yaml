@@ -72,7 +72,7 @@
     - disabled:
         value: 'no'
     - frequency:
-        value: 10
+        value: 5
     - directories:
         value: TEST_DIRECTORIES
         attributes:
