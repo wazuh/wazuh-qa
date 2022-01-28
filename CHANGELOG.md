@@ -38,7 +38,6 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 
 ### Added
 
-
 - Added specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
 - Add system test to check synchronization between agent and manager. ([#2443](https://github.com/wazuh/wazuh-qa/pull/2443))
 - Make `simulate-api-load` CLI run tasks simultaneously. ([#2392](https://github.com/wazuh/wazuh-qa/pull/2392))
@@ -64,7 +63,6 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Add tests for invalid config of github and office365 modules. ([#1460](https://github.com/wazuh/wazuh-qa/pull/1460))
 - Add test to check the behavior of test_max_fd_win_rt option.. ([#1387](https://github.com/wazuh/wazuh-qa/pull/1387))
 - Add FIM Windows 4659 events tests. ([#648](https://github.com/wazuh/wazuh-qa/pull/648))
-
 
 ### Changed
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
