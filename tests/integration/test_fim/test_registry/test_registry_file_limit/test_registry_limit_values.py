@@ -77,6 +77,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+monitor_timeout = 40
 
 # Configurations
 
@@ -162,7 +163,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
     # Get the ammount of entries monitored and Assert they are the same as the limit and not over
-    entries = wazuh_log_monitor.start(timeout=40,
+    entries = wazuh_log_monitor.start(timeout=monitor_timeout,
                                       callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
