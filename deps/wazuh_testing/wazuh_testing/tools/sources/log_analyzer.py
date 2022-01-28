@@ -27,12 +27,13 @@ class LogAnalyzer:
         }
 
         if os.path.isdir(worker_path):
-            self.n_workers = os.listdir(worker_path)
+            self.n_workers = len(os.listdir(worker_path))
             self.cluster_environment = True
         else:
+            self.n_workers = 0
             self.cluster_environment = False
 
-        self.n_agents = os.listdir(agents_path)
+        self.n_agents = len(os.listdir(agents_path))
 
     def get_instances_artifacts(self, component="agents", hosts_regex=".*"):
         # Get list of agents (directories), get all agents that fit that regex
@@ -92,9 +93,9 @@ class LogAnalyzer:
     def make_report(self):
         report = {}
         # Logs analysis
+        report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
         report['agents'] = self.analyze_errors_logs(log='all', component='agents')
         report['managers'] = self.analyze_errors_logs(log='all', component='managers')
-
         report['agents']['wazuh-agentd'] = self.analyze_agentd()
         return report
 

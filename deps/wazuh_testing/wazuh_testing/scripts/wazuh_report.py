@@ -1,7 +1,7 @@
 import os
 import argparse
 import json
-from wazuh_testing.tools.sources.data_parser import LogAnalyzer
+from wazuh_testing.tools.sources.log_analyzer import LogAnalyzer
 
 
 def get_script_arguments():
@@ -21,7 +21,6 @@ def main():
         raise ValueError
 
     parser = LogAnalyzer(options.artifact_path)
-
     json_report = parser.make_report()
 
     with open(f"{options.report_path}", "w") as report:
