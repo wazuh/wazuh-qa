@@ -54,7 +54,8 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
 
 tags:
-    - gcloud_configuration
+    - invalid
+    - config
 '''
 import os
 import sys
@@ -79,10 +80,11 @@ pytestmark = pytest.mark.tier(level=1)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'invalid_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -99,11 +101,10 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_invalid(get_configuration, configure_environment, reset_ossec_log):
+def test_invalid(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
     '''
     description: Check if the 'gcp-pubsub' module detects invalid configurations. For this purpose, the test
                  will configure 'gcp-pubsub' using invalid configuration settings with different attributes.
@@ -121,6 +122,9 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
         - reset_ossec_log:
             type: fixture
             brief: Reset the 'ossec.log' file and start a new monitor.
+        - daemons_handler:
+            type: fixture
+            brief: Handler of Wazuh daemons.
 
     assertions:
         - Verify that the 'gcp-pubsub' module generates error events when invalid configurations are used.
@@ -138,33 +142,25 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log):
     tags:
         - invalid_settings
     '''
-    # Configuration error -> ValueError raised
-    with pytest.raises(ValueError):
-        control_service('restart')
-
     tags_to_apply = get_configuration['tags'][0]
 
     if tags_to_apply == 'invalid_gcp_wmodule':
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_gcp_wmodule_err,
-                                accum_results=1,
                                 error_message='Did not receive expected '
                                               'Invalid element in the configuration').result()
     elif tags_to_apply == 'invalid_day_wday':
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_schedule_validate_parameters_err,
-                                accum_results=1,
                                 error_message='Did not receive expected '
                                               'sched_scan_validate_parameters(): ERROR').result()
     elif tags_to_apply == 'invalid_schedule':
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_schedule_read_err,
-                                accum_results=1,
                                 error_message='Did not receive expected '
                                               'sched_scan_validate_parameters(): ERROR').result()
     else:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_gcp_read_err,
-                                accum_results=1,
                                 error_message='Did not receive expected '
                                               'wm_gcp_read(): ERROR:').result()

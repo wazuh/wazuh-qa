@@ -9,9 +9,8 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime
-
 import pytest
+from datetime import datetime
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 

@@ -46,20 +46,14 @@ os_version:
 tags:
     - enrollment
 '''
-
 import os
 import subprocess
 
 import pytest
-import yaml
-import time
 
-from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.wazuh_db import query_wdb
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_yaml, truncate_file
-from wazuh_testing.authd import insert_pre_existent_agents
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 

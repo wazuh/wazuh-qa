@@ -1,6 +1,56 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, these tests will check if the agent status appears as 'disconnected' after
+       just sending the 'start-up' event, sent by several agents using different protocols.
+       Agent's status should change from 'disconnected' to 'active' status after the manager
+       receives the agents' keep-alive message.
+
+tier: 2
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html?highlight=status#agent-status
+
+tags:
+    - remoted
+'''
 import os
 from time import sleep
 
@@ -60,14 +110,50 @@ def get_configuration(request):
 @pytest.mark.parametrize("agent_name", agent_info.keys())
 def test_agent_remote_configuration(agent_name, get_configuration, configure_environment, remove_shared_files,
                                     restart_remoted, create_agent_group):
-    """Check if the agents correctly send their version, receive the shared configuration, and finally,
-        the start-up message is received and processed by the manager.
-
-    Raises:
-        AssertionError: if `wazuh-db` returns a wrong agent version, agents do not receive shared configuration or
-        startup message after agent restart is not received.
-    """
-
+    '''
+    description: Check if the manager sends the shared configuration to agents through remote,
+                 ensuring the agent version is correct.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - agent_name:
+            type: dict_keys
+            brief: Number of agents to create and check their status.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - remove_shared_files:
+            type: fixture
+            brief: Temporary removes txt files from default agent group shared files.
+        - restart_remoted:
+            type: fixture
+            brief: Reset ossec.log and start a new monitor.
+        - create_agent_group:
+            type: fixture
+            brief: Temporary creates a new agent group for testing purpose, must be run only on Managers.
+    
+    assertions:
+        - Verify that the shared configuration was sent, checking the agent version retrieved by 'wazuh_bd'
+        - Verify the startup message was received.
+    
+    input_description: A configuration template (test_agent_version_shared_configuration_startup_message) is contained
+                       in an external YAML file (wazuh_agent_version_shared_configuration_startup_message.yaml). 
+                       That template is combined with different test cases defined in the module. Those include 
+                       configuration settings for the 'wazuh-remoted' daemon and agents info.
+    
+    expected_output:
+        - fr"DEBUG: Agent <agent_name> sent HC_STARTUP from 127.0.0.1"
+        - The start up message has not been found in the logs
+    
+    tags:
+        - simulator
+        - wazuh_db
+        - remoted
+    '''
     protocols = get_configuration['metadata']['protocol']
 
     for protocol in protocols.split(","):

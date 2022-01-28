@@ -1,3 +1,54 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, these tests will check that the manager communicates with several agents
+       simultaneously with different protocols.
+
+tier: 2
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html
+
+tags:
+    - remoted
+'''
 import os
 import pytest
 
@@ -127,8 +178,42 @@ def get_configuration(request):
     return request.param
 
 
-def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_wazuh):
-    """Validate agent-manager communication with several agents using different protocols and ports"""
+def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_remoted):
+    '''
+    description: Check agent-manager communication with several agents simultaneously via TCP, UDP or both.
+                 For this purpose, the test will create all the agents and select the protocol using Round-Robin. Then,
+                 an event and a message will be created for each agent created. Finally, it will search for
+                 those events within the messages sent to the manager.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - restart_wazuh:
+            type: fixture
+            brief: Stop Wazuh, reset ossec.log and start a new monitor. Then start Wazuh.
+    
+    assertions:
+        - Verify that the custom events created has been logged correctly.
+    
+    input_description: A configuration template (test_multi_agent_protocols_communication) is contained in an external
+                       YAML file, (wazuh_multi_agent_protocols_communication.yaml). That template is combined with
+                       different test cases defined in the module. Those include configuration settings for the
+                       'wazuh-remoted' daemon and agents info.
+                        
+    expected_output:
+        - r".* test message from agent .*"
+        - Agent message was not received or took too much time.
+    
+    tags:
+        - simulator
+        - remoted
+    '''
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
 
