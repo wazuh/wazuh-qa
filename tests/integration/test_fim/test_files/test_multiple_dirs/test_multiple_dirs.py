@@ -130,7 +130,7 @@ def wait_for_event():
 # tests
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by issue wazuh-qa#2174, when it is solved we can enable this test again")
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('dir_list, tags_to_apply', [
     (test_directories, {'multiple_dirs'})
 ])

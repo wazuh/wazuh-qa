@@ -121,7 +121,7 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by issue wazuh/wazuh-qa #2174. Refactor required.")
 @pytest.mark.parametrize('folder', [
     testdir1,
     testdir2

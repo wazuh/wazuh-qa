@@ -53,7 +53,7 @@ pytest_args:
 tags:
     - fim_registry_basic_usage
 '''
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -101,7 +101,7 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by issue wazuh/wazuh-qa #2174. Refactor required.")
 @pytest.mark.parametrize('value_type', [
     REG_SZ,
     REG_MULTI_SZ,
