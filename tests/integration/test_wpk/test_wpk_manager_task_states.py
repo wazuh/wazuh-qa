@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+        the WPK upgrade on the manager side, in case of the manager stopped before finishing
+        the upgrade.
+
+tier: 0
+
+modules:
+    - wpk
+
+components:
+    - manager
+
+daemons:
+    - wazuh-monitord
+    - wazuh-remoted
+    - wazuh-modulesd
+    - wazuh-db
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import json
 import os
 import socket
@@ -204,6 +261,43 @@ def overwrite_node_name(value):
 @pytest.mark.skip(reason="Blocked by issue wazuh-qa#2203, when is fixed we can enable this test again")
 def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
+    '''
+    description: Agents can be upgraded remotely. This upgrade is performed by the manager which
+                  sends each registered agent a WPK (Wazuh signed package) file that contains the files
+                  needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+                  the WPK upgrade on the manager side, in case of the manager stopped before finishing
+                  the upgrade.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: Restart Wazuh manager.
+        - configure_agents:
+            type: fixture
+            brief: Configure all simulated agents.
+
+    input_description: Test case metadata
+
+    assertions:
+        - Verify that the first attemp is success
+        - Verify the upgrade status matches the expected
+        - Verify the upgrade status after restarting
+        - Verify the upgrade response matches the expected
+
+    expected_output:
+        - r'Upgrade process result'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     first_status = metadata['first_status']

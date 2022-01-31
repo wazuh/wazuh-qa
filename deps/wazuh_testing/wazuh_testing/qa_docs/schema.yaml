@@ -105,6 +105,7 @@ predefined_values:
     - Ubuntu Xenial
     - Ubuntu Focal
     - macOS Server
+    - macOS Sierra
     - macOS Catalina
     - Windows XP
     - Windows 7
@@ -254,6 +255,17 @@ predefined_values:
     - key_polling
     - limits
     - logcollector
+    - logcollector_location
+    - logcollector_log_format
+    - logcollector_only_future_events
+    - logcollector_options
+    - logcollector_reconnect_time
+    - logcollector_statistics
+    - logcollector_macos
+    - logcollector_age
+    - logcollector_cmd_exec
+    - logcollector_configuration
+    - logcollector_keep_running
     - logging
     - logs
     - logs
