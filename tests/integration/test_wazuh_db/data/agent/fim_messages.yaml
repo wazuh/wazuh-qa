@@ -108,6 +108,10 @@
     output: "ok no_data"
     stage: "Syscheck integrity_check_global success - no data"
   -
+    input: "agent 001 syscheck load /home/test/f1"
+    output: "ok "
+    stage: "Syscheck Integrity_check_global load success"
+  -
     input: "agent 001 syscheck integrity_check_global {\"begin\":\"/home/test/file1\",\"end\":\"/home/test/file2\",\"checksum\":\"2a41be94762b4dc57d98e8262e85f0b90917d6be\",\"id\":1}"
     output: "ok no_data"
     stage: "Syscheck integrity_check_global success - no data"

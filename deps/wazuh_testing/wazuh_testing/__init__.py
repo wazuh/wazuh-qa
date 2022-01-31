@@ -6,7 +6,20 @@ import logging
 import sys
 import os
 import yaml
+import platform
 from collections import defaultdict
+
+
+if sys.platform == 'win32':
+    WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+else:
+    if sys.platform == 'darwin':
+        WAZUH_PATH = os.path.join("/", "Library", "Ossec")
+    else:
+        WAZUH_PATH = os.path.join("/var", "ossec")
+
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
+DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 
 UDP = 'UDP'
 TCP = 'TCP'
