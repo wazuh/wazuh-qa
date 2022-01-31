@@ -2,8 +2,34 @@ from datetime import datetime
 from time import sleep
 from sqlite3 import OperationalError
 
-from wazuh_testing.db_interface import make_sqlite_query, get_sqlite_query_result, CVE_DB_PATH
+from wazuh_testing import CVE_DB_PATH
+from wazuh_testing.db_interface import make_sqlite_query, get_sqlite_query_result
 from wazuh_testing.modules import vulnerability_detector as vd
+
+
+def _get_rows_number(cve_table):
+    """Get the rows number of a specific table from the CVE database
+
+    Args:
+        cve_table (str): CVE table name.
+
+    Returns
+        int: Number of rows.
+    """
+    query_string = f"SELECT count(*) from {cve_table}"
+    query_result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+    rows_number = int(query_result[0])
+
+    return rows_number
+
+
+def get_tables():
+    """Get all the table names from the CVE database.
+
+    Returns:
+        list(str): Table names.
+    """
+    return get_sqlite_query_result(vd.CVE_DB_PATH, "SELECT name FROM sqlite_master WHERE type='table';")
 
 
 def clean_table(table):
@@ -13,6 +39,14 @@ def clean_table(table):
         table (str): DB table.
     """
     make_sqlite_query(CVE_DB_PATH, [f"DELETE FROM {table}"])
+
+
+def clean_all_tables():
+    """Clean all tables from CVE database."""
+    query = [f"DELETE FROM {table}" for table in get_tables()]
+
+    # Send all queries in the same batch (instead of calling clean_table method) to avoid so many restarts of wazuh-db
+    make_sqlite_query(CVE_DB_PATH, query)
 
 
 def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', target_minor='',
@@ -84,17 +118,31 @@ def delete_vulnerability(cveid):
     make_sqlite_query(vd.CVE_DB_PATH, queries)
 
 
-def get_num_vulnerabilities():
-    """Get the number of vulnerabilities inserted in VULNERABILITIES table of CVE DB.
+def get_provider_feeds_number():
+    """Get the number of feeds inserted in VULNERABILITIES table of CVE DB.
 
     Returns:
-        int: Total number of vulnerabilities in the VULNERABILITIES table.
+        int: Total number of feeds in the VULNERABILITIES table.
     """
-    query_string = 'SELECT count(*) from VULNERABILITIES'
-    query_result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
-    vulnerabilities_number = int(query_result[0])
+    return _get_rows_number('VULNERABILITIES')
 
-    return vulnerabilities_number
+
+def get_NVD_feeds_number():
+    """Get the number of feeds inserted in NVD_CVE table of CVE DB.
+
+    Returns:
+        int: Total number of feeds in the NVD_CVE table.
+    """
+    return _get_rows_number('NVD_CVE')
+
+
+def get_MSU_feeds_number():
+    """Get the number of feeds inserted in MSU table of CVE DB.
+
+    Returns:
+        int: Total number of feeds in the MSU table.
+    """
+    return _get_rows_number('MSU')
 
 
 def modify_metadata_vuldet_feed(feed, timestamp):
