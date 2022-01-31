@@ -1,7 +1,70 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages.
+       Specifically, these tests will check if the logcollector accepts only allowed values for
+       the 'log_format' tag, and the log file to monitor has compatible content with those values.
+       Log data collection is the real-time process of making sense out of the records generated
+       by servers or devices. This component can receive logs through text files or Windows
+       event logs. It can also directly receive logs via remote syslog which is useful
+       for firewalls and other such devices.
+
+tier: 0
+
+modules:
+    - logcollector
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-logcollector
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
+
+tags:
+    - logcollector_log_format
+'''
 import os
 import pytest
 import sys
@@ -381,18 +444,53 @@ def check_log_format_values(conf):
 
 
 def test_log_format(configure_local_internal_options_module, get_configuration, configure_environment):
-    """Check if Wazuh log format field of logcollector works properly.
-    Ensure Wazuh component fails in case of invalid content file and works properly in case of valid log format values.
+    '''
+    description: Check if the 'wazuh-logcollector' accepts only allowed values for the 'log_format' tag, and the content
+                 of the log file to monitor is compatible with those values. For this purpose, the test will create a
+                 testing log file, configure a 'localfile' section to monitor it, and set the 'log_format' tag with
+                 valid/invalid values. Then, it will check if an error event is triggered when the value used is
+                 invalid. Finally, the test will verify that an 'analyzing' event is generated if the content of
+                 the monitored log file is compatible with the log format, or an error event is generated if not.
 
-    Args:
-        configure_local_internal_options_module (fixture): Set internal configuration.
-        get_configuration (fixture): Get configurations from the module.
-        configure_environment (fixture): Configure a custom environment for testing.
+    wazuh_min_version: 4.2.0
 
-    Raises:
-        TimeoutError: If expected callbacks are not generated.
-    """
+    parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set internal configuration for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
 
+    assertions:
+        - Verify that the logcollector accepts only valid values for the 'log_format' tag.
+        - Verify that the logcollector generates error events when using valid values for the 'log_format' tag
+          but the log file has invalid content.
+        - Verify that the logcollector monitors log files when using valid values for the 'log_format' tag and
+          the log file has valid content.
+
+    input_description: A configuration template (test_log_format_values) is contained in an external YAML
+                       file (wazuh_conf.yaml). That template is combined with different test cases defined
+                       in the module. Those include configuration settings for the 'wazuh-logcollector' daemon.
+
+    expected_output:
+        - r'Analyzing event log.*'
+        - r'Analyzing file.*'
+        - r'lines from .*'
+        - r'Reading json message.*'
+        - r'Reading syslog message.*'
+        - r'Reading message.*'
+        - r'Line .* read from .* is not a JSON object.'
+        - r'Discarding audit message because of invalid syntax.'
+        - r'Bad formated nmap grepable file.'
+        - r'Invalid DJB log.*'
+
+    tags:
+        - logs
+    '''
     conf = get_configuration['metadata']
 
     control_service('stop')

@@ -1,7 +1,56 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, this test will check if 'wazuh-remoted' fails when 'queue_size' tag is used
+       at the same time as a syslog connection.
+
+tier: 0
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/agent-key-polling.html
+
+tags:
+    - remoted
+'''
 import os
 import pytest
 
@@ -39,11 +88,40 @@ def get_configuration(request):
 
 
 def test_queue_size_syslog(get_configuration, configure_environment, restart_remoted):
-    """Test if `wazuh-remoted` fails when `queue_size` tag is used at the same time that `syslog` connection.
-
-    Raises:
-        AssertionError: if `wazuh-remoted` doesn't respond error message.
-    """
+    '''
+    description: Check if 'wazuh-remoted' fails when 'queue_size' tag is used at the same time as a syslog connection.
+                 For this purpose, it uses the configuration from test cases and check if the error has ben logged.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - restart_remoted:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+    
+    assertions:
+        - Verify that remoted starts correctly.
+        - Verify that the errors are caught.
+    
+    input_description: A configuration template (test_basic_configuration_queue_size) is contained in an external YAML
+                       file, (wazuh_basic_configuration.yaml). That template is combined with different test cases
+                       defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon and
+                       agents info.
+    
+    expected_output:
+        - r'Started <pid>: .* Listening on port .*'
+        - The expected error output has not been produced
+        - 'ERROR: Invalid option queue_size for Syslog remote connection'
+    
+    tags:
+        - simulator
+    '''
     log_callback = remote.callback_error_queue_size_syslog()
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message="The expected error output has not been produced")
