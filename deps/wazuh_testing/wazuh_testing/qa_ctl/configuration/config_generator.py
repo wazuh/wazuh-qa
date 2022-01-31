@@ -231,7 +231,7 @@ class QACTLConfigGenerator:
         # Validate version requirements
         if parse(str(test_info['tests'][0]['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
-                            f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
+                            f"{test_info['tests'][0]['wazuh_min_version']} and you are using {self.wazuh_version}"
             raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         return True

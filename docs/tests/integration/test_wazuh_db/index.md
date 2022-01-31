@@ -16,4 +16,5 @@ The test case `test_wazuh_db_create_agent`, checks the correct creation of a new
 
 The test case `test_wazuh_db_chunks`, checks that commands by chunks work properly when agents amount exceed the response maximum size.
 
-The test case `test_wazuh_db_range_checksum`, checks the checksum range correct behavior during the synchroniation of the DB.
+The test case `test_wazuh_db_range_checksum`, checks the checksum range correct behavior during the synchronization of the DB.
+- **syscollector_deltas_messages.yaml**: tests for agents DB, Syscollector deltas (dbsync) commands

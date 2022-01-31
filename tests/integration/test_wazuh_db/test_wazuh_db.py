@@ -58,6 +58,7 @@ import time
 import pytest
 import yaml
 import json
+import random
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import make_callback, WAZUH_DB_PREFIX
 from wazuh_testing.wazuh_db import query_wdb
@@ -116,7 +117,7 @@ def regex_match(regex, string):
     return re.match(regex, string)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def clean_registered_agents():
     remove_all_agents('wazuhdb')
     time.sleep(5)
@@ -137,11 +138,11 @@ def wait_range_checksum_calculated(line):
     return None
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def prepare_range_checksum_data():
     AGENT_ID = 1
     insert_agent(AGENT_ID)
-    command = f'agent {AGENT_ID} syscheck save2 '
+    command = f"agent {AGENT_ID} syscheck save2 "
     payload = {'path': "file",
                'timestamp': 1575421292,
                'attributes': {
@@ -169,7 +170,7 @@ def prepare_range_checksum_data():
     remove_agent(AGENT_ID)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def pre_insert_agents():
     """Insert agents. Only used for the global queries."""
     AGENTS_CANT = 14000
@@ -210,7 +211,8 @@ def execute_wazuh_db_query(command, single_response=True):
 
     Args:
         command(str): Message to send to the socket.
-
+        single_response(bool): If set to False, all the 'due' responses
+                               will be appended to a response array
     Returns:
         str: A response from the socket
     """
@@ -230,6 +232,15 @@ def execute_wazuh_db_query(command, single_response=True):
 
 
 def validate_wazuh_db_response(expected_output, response):
+    """ Method to validate the Wazuh-DB response.
+
+    Args:
+        expected_output(str/list): the desired response from the test case
+        response(str/list): the actual response from the socket
+
+    Returns:
+        bool: The result fo comparing the expected output with the actual response
+    """
     if isinstance(response, list):
         if len(expected_output) != len(response):
             return False
@@ -263,11 +274,11 @@ def insert_agent(agent_id, agent_name='TestName'):
                               })
 
     command = f"global insert-agent {insert_data}"
-    data = execute_wazuh_db_query(command).split(' ', 1)
+    data = execute_wazuh_db_query(command).split()
     assert data[0] == 'ok', f"Unable to add agent {agent_id} - {data[1]}"
 
     command = f"global update-keepalive {update_data}"
-    data = execute_wazuh_db_query(command).split(' ', 1)
+    data = execute_wazuh_db_query(command).split()
     assert data[0] == 'ok', f"Unable to update agent {agent_id} - {data[1]}"
 
 
@@ -277,11 +288,39 @@ def remove_agent(agent_id):
     Args:
         agent_id(int): Unique identifier of an agent
     """
-    data = execute_wazuh_db_query(f"global delete-agent {agent_id}").split(' ', 1)
+    data = execute_wazuh_db_query(f"global delete-agent {agent_id}").split()
     assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
 
 
-# Tests
+@pytest.fixture(scope='function')
+def pre_set_sync_info():
+    """Assign the last_attempt value to last_completion in sync_info table to force the synced status"""
+
+    command = "agent 000 sql UPDATE sync_info SET last_completion = 10, last_attempt = 10 " \
+              "where component = 'syscollector-packages'"
+    receiver_sockets[0].send(command, size=True)
+    response = receiver_sockets[0].receive(size=True).decode()
+    data = response.split()
+    assert data[0] == 'ok', 'Unable to set sync_info table'
+
+
+@pytest.fixture(scope='function')
+def pre_insert_packages():
+    """Insert a set of dummy packages into sys_programs table"""
+
+    PACKAGES_NUMBER = 20000
+    for pkg_n in range(PACKAGES_NUMBER):
+        command = f"agent 000 sql INSERT OR REPLACE INTO sys_programs \
+        (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,\
+        architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)\
+        VALUES(0,'2021/04/07 22:00:00','deb','test_package_{pkg_n}','optional','utils',{random.randint(200,1000)},\
+        'Wazuh wazuh@wazuh.com',NULL,'{random.randint(1,10)}.0.0','all',NULL,NULL,'Test package {pkg_n}',\
+        NULL,0,NULL,NULL,'{random.getrandbits(128)}','{random.getrandbits(128)}')"
+        receiver_sockets[0].send(command, size=True)
+        response = receiver_sockets[0].receive(size=True).decode()
+        data = response.split()
+        assert data[0] == 'ok', f"Unable to insert package {pkg_n}"
+
 
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in agent_module_tests for case in module_data[0]],
@@ -413,6 +452,7 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
             .format(index + 1, stage['stage'], expected_output, response)
 
 
+@pytest.mark.skip(reason="It will be blocked by #2217, when it is solved we can enable again this test")
 def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_registered_agents,
                          connect_to_sockets_module, pre_insert_agents):
     '''
@@ -455,7 +495,7 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
     '''
     def send_chunk_command(command):
         response = execute_wazuh_db_query(command)
-        status = response.split(' ', 1)[0]
+        status = response.split()[0]
 
         assert status == 'due', 'Failed chunks check on < {} >. Expected: {}. Response: {}' \
             .format(command, 'due', status)
@@ -532,3 +572,29 @@ def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, c
                       callback=make_callback('range checksum avoided', prefix=WAZUH_DB_PREFIX,
                                              escape=True),
                       error_message='Checksum Range wasn´t avoided the second time')
+
+
+def test_wazuh_db_timeout(configure_sockets_environment,
+                          connect_to_sockets_module,
+                          pre_insert_packages,
+                          pre_set_sync_info):
+    """Check that effectively the socket is closed after timeout is reached"""
+    wazuh_db_send_sleep = 2
+    command = 'agent 000 package get'
+    receiver_sockets[0].send(command, size=True)
+
+    # Waiting Wazuh-DB to process command
+    time.sleep(wazuh_db_send_sleep)
+
+    socket_closed = False
+    cmd_counter = 0
+    status = 'due'
+    while not socket_closed and status == 'due':
+        cmd_counter += 1
+        response = receiver_sockets[0].receive(size=True).decode()
+        if response == '':
+            socket_closed = True
+        else:
+            status = response.split()[0]
+
+    assert socket_closed, f"Socket never closed. Received {cmd_counter} commands. Last command: {response}"
