@@ -1,30 +1,40 @@
-"""
-brief: Wazuh DocGenerator code parser.
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-date: August 02, 2021
-license: This program is free software; you can redistribute it
-         and/or modify it under the terms of the GNU General Public
-         License (version 2) as published by the FSF - Free Software Foundation.
-"""
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import ast
 import os
 import re
 import yaml
+
 from wazuh_testing.qa_docs.lib.pytest_wrap import PytestWrap
 from wazuh_testing.qa_docs.lib.utils import remove_inexistent
-import warnings
-import logging
+from wazuh_testing.qa_docs import QADOCS_LOGGER
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 INTERNAL_FIELDS = ['id', 'group_id', 'name']
 STOP_FIELDS = ['tests', 'test_cases']
 
 
 class CodeParser:
+    """Class that parses the content of the test files.
+
+    Attributes:
+        conf (Config): A `Config` instance with the loaded configuration.
+        pytest (PytestWrap): A `PytestWrap` instance to wrap the pytest execution.
+        function_regexes (list): A list of regular expressions used to find test functions.
     """
-    brief: Class that parses the content of the test files.
-    """
+    LOGGER = Logging.get_logger(QADOCS_LOGGER)
+
     def __init__(self, config):
+        """Class constructor
+
+        Initialize every attribute.
+
+        Args:
+            config (Config): A `Config` instance with the loaded configuration.
+        """
         self.conf = config
         self.pytest = PytestWrap()
         self.function_regexes = []
@@ -32,11 +42,13 @@ class CodeParser:
             self.function_regexes.append(re.compile(regex))
 
     def is_documentable_function(self, function):
-        """
-        brief: Checks if a specific method matches with the regexes to be documented.
-        args:
-            -"function (_ast.FunctionDef): Function class with all the information of the method"
-        returns: "boolean: True if the method should be documentd. False otherwise"
+        """Check if a specific method matches with the regexes to be documented.
+
+        Args:
+            function (_ast.FunctionDef): Function class with all the information of the method.
+
+        Returns:
+            boolean: A boolean with True if the method should be documented. False otherwise
         """
         for regex in self.function_regexes:
             if regex.match(function.name):
@@ -44,81 +56,172 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        """
-        brief: Removes the fields from a parsed test file to delete the fields that are not mandatory or optional.
-        args:
-            -"doc (dict): The parsed documentation block"
+        """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
+
+        Args:
+            doc (dict): A dict that contains the parsed documentation block"
         """
         allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
+
         if 'tests' in doc:
             allowed_fields = self.conf.test_fields.mandatory + self.conf.test_fields.optional + INTERNAL_FIELDS
+
             for test in doc['tests']:
                 remove_inexistent(test, allowed_fields, STOP_FIELDS)
 
-    def parse_comment(self, function):
+    def check_fields(self, doc, doc_type, path):
+        """Check if the fields that a documentation block has, are valids.
+        
+        You can check them in the `schema.yaml` file.
+
+        Args:
+            doc (dict): A dict with the documentation block parsed.
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
         """
-        brief: Parses one self-contained documentation block.
-        args:
-            -"function (_ast.FunctionDef): Function class with all the information of the method"
+        if doc_type == 'module':
+            expected_fields = self.conf.module_fields
+        elif doc_type == 'test':
+            expected_fields = self.conf.test_fields
+
+        # check that mandatory fields are documented
+        for field in expected_fields.mandatory:
+            if field not in doc.keys():
+                CodeParser.LOGGER.error(f"{field} mandatory field is missing.")
+                raise QAValueError(f"{field} mandatory field is missing.", CodeParser.LOGGER.error)
+
+        # check that only schema fields are documented
+        for field in doc.keys():
+            if field not in expected_fields.mandatory and field not in expected_fields.optional and field != 'name':
+                CodeParser.LOGGER.error(f"{field} is not specified in qa-docs schema.")
+                raise QAValueError(f"{field} is not specified in qa-docs schema.", CodeParser.LOGGER.error)
+
+    def check_predefined_values(self, doc, doc_type, path):
+        """Check if the documentation block follows the predefined values.
+
+        It iterates through the predefined values and checks if the documentation fields contain correct values.
+        If the field does not exist or does not contain a predefined value, it would log it.
+
+        The predefined values are stored in
+        https://github.com/wazuh/wazuh-qa/wiki/Documenting-tests-using-the-qadocs-schema#pre-defined-values.
+
+        Args:
+            doc (dict): A dict with the documentation block parsed.
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
+        """
+        for field in self.conf.predefined_values[f"{doc_type}_fields"]:
+            try:
+                doc_field = doc[field]
+            except KeyError:
+                doc_field = None
+
+            # If the field is a list, iterate thru predefined values
+            if isinstance(doc_field, list):
+                for value in doc_field:
+                    if value not in self.conf.predefined_values[field]:
+                        CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block has "
+                                                f"an invalid value: {value}."
+                                                f"Follow the predefined values: {self.conf.predefined_values[field]}. "
+                                                "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                                "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                        raise QAValueError(f"{field} field in {path} {doc_type} documentation block has "
+                                           f"an invalid value: {value}.", CodeParser.LOGGER.error)
+            else:
+                if doc_field not in self.conf.predefined_values[field] and doc_field is not None:
+                    CodeParser.LOGGER.error(f"{field} field in {path} {doc_type} documentation block "
+                                            f"has an invalid value: {doc_field}. "
+                                            f"Follow the predefined values: {self.conf.predefined_values[field]} "
+                                            "If you want more info, visit https://github.com/wazuh/wazuh-qa/wiki/"
+                                            "Documenting-tests-using-the-qadocs-schema#pre-defined-values.")
+                    raise QAValueError(f"{field} field in {path} {doc_type} documentation block "
+                                       f"has an invalid value: {doc_field}.", CodeParser.LOGGER.error)
+
+    def parse_comment(self, function, doc_type, path):
+        """Parse one self-contained documentation block.
+
+        Args:
+            function (_ast.FunctionDef): Function class with all the information of the method"
+            doc_type (str): A string that specifies which type of documentation block is.
+            path (str): A string with the file path.
+
+        Returns:
+            doc (dict): A dictionary with the documentation block parsed.
         """
         docstring = ast.get_docstring(function)
+        if not docstring:
+            CodeParser.LOGGER.error(f"Documentation block not found in {path}")
+            raise QAValueError(f"Documentation block not found in {path}", CodeParser.LOGGER.error)
+
         try:
             doc = yaml.safe_load(docstring)
+
             if hasattr(function, 'name'):
                 doc['name'] = function.name
 
         except Exception as inst:
             if hasattr(function, 'name'):
-                warnings.warn(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}. \
-                              Error: {inst}", stacklevel=2)
-                logging.warning(f"Failed to parse comment of function '{function.name}'' from module {self.scan_file}. \
-                                Error: {inst}")
+                CodeParser.LOGGER.error(f"Failed to parse test documentation in {function.name} "
+                                        "from module {self.scan_file}. Error: {inst}")
+                raise QAValueError(f"Failed to parse test documentation in {function.name} "
+                                   "from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
             else:
-                warnings.warn(f"Failed to parse comment of module {self.scan_file}. Error: {inst}", stacklevel=2)
-                logging.warning(f"Failed to parse comment of module {self.scan_file}. Error: {inst}")
-            doc = None
+                CodeParser.LOGGER.error(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
+                raise QAValueError(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}",
+                                   CodeParser.LOGGER.error)
+
+        CodeParser.LOGGER.debug(f"Checking that the documentation block within {path} follow the predefined values.")
+        self.check_predefined_values(doc, doc_type, path)
+        self.check_fields(doc, doc_type, path)
 
         return doc
 
-    def parse_test(self, code_file, id, group_id):
+    def parse_test(self, path, id, group_id):
+        """Parse the content of a test file.
+
+        Args:
+            path (str): A string with the path of the test file to be parsed.
+            id (str): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            module_doc (dict): A dictionary with the documentation block parsed with module and tests fields.
         """
-        brief: Parses the content of a test file.
-        args:
-            -"code_file (string): Path of the test file to be parsed."
-            -"id (integer): Id of the new test document"
-            -"group_id (integer): Id of the group where the new test document belongs."
-        """
-        logging.debug(f"Parsing test file '{code_file}'")
-        self.scan_file = code_file
-        with open(code_file) as fd:
+        CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
+        self.scan_file = path
+        with open(path) as fd:
             file_content = fd.read()
         module = ast.parse(file_content)
         functions = [node for node in module.body if isinstance(node, ast.FunctionDef)]
 
-        module_doc = self.parse_comment(module)
+        module_doc = self.parse_comment(module, 'module', path)
         if module_doc:
-            module_doc['name'] = os.path.basename(code_file)
+            module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
             module_doc['group_id'] = group_id
+            module_doc['path'] = re.sub(r'.*wazuh-qa\/', '', path)
 
             test_cases = None
             if self.conf.test_cases_field:
-                test_cases = self.pytest.collect_test_cases(code_file)
+                test_cases = self.pytest.collect_test_cases(path)
 
             functions_doc = []
             for function in functions:
                 if self.is_documentable_function(function):
-                    function_doc = self.parse_comment(function)
+                    function_doc = self.parse_comment(function, 'test', path)
+
                     if function_doc:
                         if test_cases and not (self.conf.test_cases_field in function_doc) \
                            and test_cases[function.name]:
                             function_doc[self.conf.test_cases_field] = test_cases[function.name]
+
                         functions_doc.append(function_doc)
 
             if not functions_doc:
-                warnings.warn(f"Module '{module_doc['name']}' doesn´t contain any test function", stacklevel=2)
-                logging.warning(f"Module '{module_doc['name']}' doesn´t contain any test function")
+                CodeParser.LOGGER.error(f"Module '{module_doc['name']}' doesn´t contain any test function")
+                raise QAValueError(f"Module '{module_doc['name']}' doesn´t contain any test function",
+                                   CodeParser.LOGGER.error)
             else:
                 module_doc['tests'] = functions_doc
 
@@ -127,22 +230,24 @@ class CodeParser:
         return module_doc
 
     def parse_group(self, group_file, id, group_id):
-        """
-        brief: Parses the content of a group file.
-        args:
-            -"group_file (string): Path of the group file to be parsed."
-            -"id (integer): Id of the new group document"
-            -"group_id (integer): Id of the group where the new group document belongs."
+        """Parse the content of a group file.
+
+        Args:
+            group_file (str): A string with the path of the group file to be parsed.
+            id (int): An integer with the ID of the new test document.
+            group_id (int): An integer with the ID of the group where the new test document belongs.
+
+        Returns:
+            group_doc (dict): A dictionary with the parsed information from `group_file`.
         """
         MD_HEADER = "# "
-        logging.debug(f"Parsing group file '{group_file}'")
+        CodeParser.LOGGER.debug(f"Parsing group file '{group_file}'")
         with open(group_file) as fd:
             file_header = fd.readline()
             file_content = fd.read()
 
         if not file_header.startswith(MD_HEADER):
-            warnings.warn(f"Group file '{group_file}' doesn´t contain a valid header", stacklevel=2)
-            logging.warning(f"Group file '{group_file}' doesn´t contain a valid header")
+            CodeParser.LOGGER.warning(f"Group file '{group_file}' doesn´t contain a valid header")
             return None
 
         group_doc = {}

@@ -25,6 +25,7 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
 
 else:
 
@@ -43,7 +44,7 @@ else:
         PREFIX = os.sep
 
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
-    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
+    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
@@ -58,7 +59,11 @@ else:
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
-
+    if sys.platform == 'sunos5':
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
+    else:
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
     try:
         import grp
@@ -97,10 +102,10 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
-LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
+CUSTOM_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules')
+LOCAL_RULES_PATH = os.path.join(CUSTOM_RULES_PATH, 'local_rules.xml')
 LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
 
@@ -109,6 +114,7 @@ CLIENT_CUSTOM_CERT_PATH = os.path.join(_data_path, 'sslmanager.cert')
 
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
+ALERT_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.log')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 QUEUE_ALERTS_PATH = os.path.join(WAZUH_PATH, 'queue', 'alerts')

@@ -94,6 +94,7 @@ test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir4')
                     ]
 dir1, dir2, dir3, dir4 = test_directories
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Check big environment variables ending with backslash
 if sys.platform == 'win32':
@@ -129,6 +130,7 @@ def get_configuration(request):
     dir3,
     dir4
 ])
+@mark_skip_agentWindows
 def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
     '''

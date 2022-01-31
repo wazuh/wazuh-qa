@@ -15,6 +15,7 @@ components:
     - agent
 daemons:
     - wazuh-authd
+    - wazuh-agentd
 os_platform:
     - linux
 os_version:
@@ -23,6 +24,7 @@ references:
     - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
 tags:
     - authd
+    - agentd
 '''
 
 import os
@@ -31,13 +33,14 @@ from time import sleep
 import pytest
 
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.file import read_file, read_yaml, write_file
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.utils import format_ipv6_long
 
 
 # Hosts
-testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
+testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'basic_environment', 'inventory.yml')
@@ -58,10 +61,12 @@ network = {}
 @pytest.fixture(scope='function')
 def clean_environment():
     yield
-    agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
-    host_manager.get_host('wazuh-manager').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                   check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
+
+    agent_ids = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys').split()
+    for agent_id in agent_ids:
+        host_manager.run_command('wazuh-manager', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id}")
+
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
@@ -71,8 +76,8 @@ def clean_environment():
 def get_ip_directions():
     global network
 
-    manager_network = host_manager.get_host_ip('wazuh-manager')
-    agent_network = host_manager.get_host_ip('wazuh-agent1')
+    manager_network = host_manager.get_host_ip('wazuh-manager', 'eth0')
+    agent_network = host_manager.get_host_ip('wazuh-agent1', 'eth0')
 
     network['manager_network'] = manager_network
     network['agent_network'] = agent_network
@@ -81,112 +86,93 @@ def get_ip_directions():
 @pytest.fixture(scope='function')
 def configure_network(test_case):
 
-    for configuration in test_case['test_case']:
-        # Manager network configuration
-        if 'ipv6' in configuration['manager_network']:
-            host_manager.run_command('wazuh-manager', 'ip -4 addr flush dev eth0')
-        elif 'ipv4' in configuration['manager_network']:
-            host_manager.run_command('wazuh-manager', 'ip -6 addr flush dev eth0')
-
-        # Agent network configuration
-        if 'ipv6' in configuration['agent_network']:
-            host_manager.run_command('wazuh-agent1', 'ip -4 addr flush dev eth0')
-
-        elif 'ipv4' in configuration['agent_network']:
-            host_manager.run_command('wazuh-agent1', 'ip -6 addr flush dev eth0')
+    # Manager network configuration
+    if 'ipv6' in test_case['manager_network']:
+        host_manager.run_command('wazuh-manager', 'ip -4 addr flush dev eth0')
+    elif 'ipv4' in test_case['manager_network']:
+        host_manager.run_command('wazuh-manager', 'ip -6 addr flush dev eth0')
+    # Agent network configuration
+    if 'ipv6' in test_case['agent_network']:
+        host_manager.run_command('wazuh-agent1', 'ip -4 addr flush dev eth0')
+    elif 'ipv4' in test_case['agent_network']:
+        host_manager.run_command('wazuh-agent1', 'ip -6 addr flush dev eth0')
 
     yield
 
-    for configuration in test_case['test_case']:
-        # Restore manager network configuration
-        if 'ipv6' in configuration['manager_network']:
-            host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][0]} dev eth0")
-            host_manager.run_command('wazuh-manager', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
-        elif 'ipv4' in configuration['manager_network']:
-            host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][1]} dev eth0")
-
-        # Restore agent network configuration
-        if 'ipv6' in configuration['agent_network']:
-            host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][0]} dev eth0")
-            host_manager.run_command('wazuh-agent1', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
-        elif 'ipv4' in configuration['agent_network']:
-            host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
+    # Restore manager network configuration
+    if 'ipv6' in test_case['manager_network']:
+        host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][0]} dev eth0")
+        host_manager.run_command('wazuh-manager', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
+    elif 'ipv4' in test_case['manager_network']:
+        host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][1]} dev eth0")
+        host_manager.run_command('wazuh-manager', f"ip addr add {network['manager_network'][2]} dev eth0")
+    # Restore agent network configuration
+    if 'ipv6' in test_case['agent_network']:
+        host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][0]} dev eth0")
+        host_manager.run_command('wazuh-agent1', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
+    elif 'ipv4' in test_case['agent_network']:
+        host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
+        host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][2]} dev eth0")
 
 
 @pytest.fixture(scope='function')
 def modify_ip_address_conf(test_case):
 
-    with open(agent_conf_file, 'r') as file:
-        old_agent_configuration = file.read()
+    old_agent_configuration = read_file(agent_conf_file)
 
-    with open(messages_path, 'r') as file:
-        messages = file.read()
+    messages = read_file(messages_path)
 
-    with open(manager_conf_file, 'r') as file:
-        old_manager_configuration = file.read()
-
-    for configuration in test_case['test_case']:
-        if 'yes' in configuration['ipv6_enabled']:
-            new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'yes'")
-        else:
-            new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'no'")
-
-        if 'ipv4' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>{network['manager_network'][0]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][0]}")
-        elif 'ipv6' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>{network['manager_network'][1]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][1]}")
-        elif 'dns' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>wazuh-manager</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            if 'yes' in configuration['ipv6_enabled']:
-                if 'ipv4' in configuration['manager_network'] or 'ipv4' in configuration['agent_network']:
-                    messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][0]}")
-                else:
-                    messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][1]}")
-            else:
-                messages_with_ip = messages.replace('MANAGER_IP', f"wazuh-manager/{network['manager_network'][0]}")
-
-        if 'ipv4' in configuration['ip_type']:
-            messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-        elif 'ipv6' in configuration['ip_type']:
-            messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
-        elif 'dns' in configuration['ip_type']:
-            if 'yes' in configuration['ipv6_enabled']:
-                if 'ipv4' in configuration['agent_network']:
-                    messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-                else:
-                    messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
-            else:
-                messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
-
-    with open(manager_conf_file, 'w') as file:
-        file.write(new_manager_configuration)
-
+    old_manager_configuration = read_file(manager_conf_file)
+    new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', f"'{test_case['ipv6_enabled']}'")
+    write_file(manager_conf_file, new_manager_configuration)
     host_manager.apply_config(manager_conf_file)
 
-    with open(messages_path, 'w') as file:
-        file.write(messages_with_ip)
+    address_ip = ''
+    message_ip_manager = ''
+    message_ip_agent = ''
+    message_dns_manager = ''
+    final_message = ''
+
+    if test_case['ip_type'] == 'ipv4':
+        address_ip = network['manager_network'][0]
+        message_ip_manager = address_ip
+        message_ip_agent = network['agent_network'][0]
+    elif test_case['ip_type'] == 'ipv6':
+        address_ip = network['manager_network'][1]
+        message_ip_manager = format_ipv6_long(address_ip)
+        message_ip_agent = format_ipv6_long(network['agent_network'][1])
+    else:
+        address_ip = 'wazuh-manager'
+        message_dns_manager = f"{address_ip}/"
+        if test_case['ipv6_enabled'] == 'yes':
+            if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
+                message_ip_manager = f"{network['manager_network'][0]}"
+                message_ip_agent = network['agent_network'][0]
+            else:
+                message_ip_manager = format_ipv6_long(network['manager_network'][1])
+                message_ip_agent = format_ipv6_long(network['agent_network'][1])
+        else:
+            message_ip_manager = f"{network['manager_network'][0]}"
+            message_ip_agent = network['agent_network'][0]
+
+    new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
+                                                        f"<address>{address_ip}</address>")
+    host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
+                                     content=new_configuration)
+
+    message_with_manager_dns = messages.replace('MANAGER_DNS/', message_dns_manager)
+    message_with_manager_ip = message_with_manager_dns.replace('MANAGER_IP', message_ip_manager)
+    final_message = message_with_manager_ip.replace('AGENT_IP', message_ip_agent)
+    write_file(messages_path, final_message)
 
     yield
 
-    with open(messages_path, 'w') as file:
-        file.write(messages)
+    write_file(messages_path, messages)
 
-    with open(manager_conf_file, 'w') as file:
-        file.write(old_manager_configuration)
+    write_file(manager_conf_file, old_manager_configuration)
 
 
-@pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
+@pytest.mark.parametrize('test_case', [cases['test_case'] for cases in test_cases_yaml], ids=[cases['name']
                          for cases in test_cases_yaml])
 def test_agent_enrollment(test_case, get_ip_directions, configure_network, modify_ip_address_conf, clean_environment):
     '''
@@ -227,6 +213,7 @@ def test_agent_enrollment(test_case, get_ip_directions, configure_network, modif
         - '.*Waiting .* seconds before server connection'
     tags:
         - authd
+        - agentd
     '''
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
