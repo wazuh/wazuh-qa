@@ -60,14 +60,12 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, registry_parser, create_values_content)
+                               registry_value_delete, create_values_content, create_registry, registry_parser, delete_registry_value)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    ERR_MSG_DISK_QUOTA_MUST_BE_GREATER, ERR_MSG_WRONG_DISK_QUOTA_VALUE,
-                                                    CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA, 
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
@@ -76,11 +74,10 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 # Variables
 
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), 
-             os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)
-            ]
+             os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-scan_delay = 2
+scan_delay = 10
 
 # Configurations
 
@@ -97,6 +94,7 @@ configurations_path = os.path.join(test_data_path, "wazuh_registry_report_change
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
+
 # Fixtures
 
 
@@ -106,7 +104,8 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize("size", [(8 * 1024), (32 * 1024)])
+
+@pytest.mark.parametrize("size", [(8192), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
     [
         (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
@@ -181,7 +180,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_no_diff(event):
-        """Validate content_changes attribute exists in the event"""
+        """Validate content_changes attribute does not exist in the event"""
         assert event["data"].get("content_changes") is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 
     def report_changes_validator_diff(event):
@@ -194,10 +193,13 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     else:
         test_callback = report_changes_validator_diff
 
+    # Create the value inside the key - we do it here because it key or arch is not known before the test launches
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
+    # Modify the value to check if the diff file is generated or not, as expected
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout,   triggers_event=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[test_callback])
+    # Delete the vaue created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

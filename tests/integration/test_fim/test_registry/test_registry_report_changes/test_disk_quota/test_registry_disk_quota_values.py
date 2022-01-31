@@ -103,7 +103,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize("size", [(4 * 1024), (32 * 1024)])
+@pytest.mark.parametrize("size", [(4096), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
     [
         (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
@@ -178,7 +178,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_no_diff(event):
-        """Validate content_changes attribute exists in the event"""
+        """Validate content_changes attribute does not exist in the event"""
         assert event["data"].get("content_changes") is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 
     def report_changes_validator_diff(event):
@@ -191,10 +191,14 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     else:
         callback_test = report_changes_validator_diff
 
+    # Create the value inside the key - we do it here because it key or arch is not known before the test launches
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
+    # Modify the value to check if the diff file is generated or not, as expected
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout,   triggers_event=True,
                           validators_after_update=[callback_test])
+    # Delete the vaue created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
+

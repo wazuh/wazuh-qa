@@ -7,7 +7,7 @@
   - section: syscheck
     elements:
       - frequency:
-          value: '2'
+          value: 10
       - disabled:
           value: 'no'
       - windows_registry:

@@ -78,7 +78,7 @@ test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 scan_delay = 2
-value_content_size = 4*1024*50
+value_content_size = 204800
 
 # Configurations
 
@@ -171,10 +171,13 @@ def test_all_limits_disabled(key, subkey, arch, value_name, get_configuration, c
         assert os.path.exists(diff_file), '{diff_file} does not exist'
         assert event['data'].get('content_changes') is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
+    # Create the value inside the key - we do it here because it key or arch is not known before the test launches
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
+    # Modify the value to check if the diff file is generated or not, as expected
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[report_changes_validator_diff])
+    # Delete the vaue created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

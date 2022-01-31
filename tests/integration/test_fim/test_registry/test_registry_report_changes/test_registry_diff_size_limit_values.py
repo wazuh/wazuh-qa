@@ -100,7 +100,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.parametrize('size', [(4 * 1024), (16 * 1024)])
+@pytest.mark.parametrize('size', [(4096), (16384)])
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
     (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, 'some_value'),
     (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, 'some_value'),
@@ -167,7 +167,7 @@ def test_diff_size_limit_values(key, subkey, arch, value_name, size, get_configu
     _, diff_file = calculate_registry_diff_paths(key, subkey, arch, value_name)
 
     def report_changes_validator_no_diff(event):
-        """Validate content_changes attribute exists in the event"""
+        """Validate content_changes attribute does not exist in the event"""
         assert not os.path.exists(diff_file), '{diff_file} exist, it shouldn\'t'
         assert event['data'].get('content_changes') is None, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 
@@ -181,12 +181,13 @@ def test_diff_size_limit_values(key, subkey, arch, value_name, size, get_configu
     else:
         callback_test = report_changes_validator_diff
 
+    # Create the value inside the key - we do it here because it key or arch is not known before the test launches
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
-
+    # Modify the value to check if the diff file is generated or not, as expected
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[callback_test])
-
+    # Delete the vaue created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
