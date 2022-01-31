@@ -201,4 +201,3 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     # Delete the vaue created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)
-
