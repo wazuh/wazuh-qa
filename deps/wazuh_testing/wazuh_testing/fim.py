@@ -176,7 +176,15 @@ else:
 
     def registry_key_cud():
         pass
+    
+    def registry_value_create():
+        pass
 
+    def registry_value_update():
+        pass
+    
+    def registry_value_delete():
+        pass
 
     def validate_registry_event():
         pass
@@ -1655,6 +1663,39 @@ class EventChecker:
         return result_list
 
 
+def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
+                        timeout=global_parameters.default_timeout):
+    """Checks if the conditions for waiting for a new scheduled scan.
+
+    Optionally, a monitor may be used to check if a scheduled scan has been performed.
+
+    This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
+
+    Args:
+        wait_scan (boolean): True if we need to update time. False otherwise.
+        interval (timedelta, optional): time interval that will be waited for the scheduled scan to start. Default: 20 seconds.
+        monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
+            scheduled scan. The `monitor` will not consume any log line. Default `None`.
+        timeout (int, optional): If a monitor is provided, this parameter sets how long to wait for the end of scan.
+    Raises
+        TimeoutError: if `monitor` is not `None` and the scan has not ended in the
+            default timeout specified in `global_parameters`.
+    """
+
+    if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+        mode = global_parameters.current_configuration['metadata']['fim_mode']
+        if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+            return
+
+    if wait_for_scan:
+        logger.info(f"waiting for scheduled scan to start for {interval} seconds")
+        time.sleep(interval)
+        if monitor:
+            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+                        update_position=False,
+                        error_message=f"End of scheduled scan not detected after {timeout} seconds")
+
+
 if sys.platform == 'win32':
     class RegistryEventChecker:
         """Utility to allow fetch events and validate them."""
@@ -1992,39 +2033,6 @@ if sys.platform == 'win32':
             raise ValueError('It can only be a list or dictionary')
         
         return aux_dict
-
-
-    def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
-                        timeout=global_parameters.default_timeout):
-        """Checks if the conditions for waiting for a new scheduled scan.
-
-        Optionally, a monitor may be used to check if a scheduled scan has been performed.
-
-        This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
-
-        Args:
-            wait_scan (boolean): True if we need to update time. False otherwise.
-            interval (timedelta, optional): time interval that will be waited for the scheduled scan to start. Default: 20 seconds.
-            monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
-                scheduled scan. The `monitor` will not consume any log line. Default `None`.
-            timeout (int, optional): If a monitor is provided, this parameter sets how long to wait for the end of scan.
-        Raises
-            TimeoutError: if `monitor` is not `None` and the scan has not ended in the
-                default timeout specified in `global_parameters`.
-        """
-
-        if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
-            mode = global_parameters.current_configuration['metadata']['fim_mode']
-            if mode != 'scheduled' or mode not in global_parameters.fim_mode:
-                return
-
-        if wait_for_scan:
-            logger.info(f"waiting for scheduled scan to start for {interval} seconds")
-            time.sleep(interval)
-            if monitor:
-                monitor.start(timeout=timeout, callback=callback_detect_end_scan,
-                            update_position=False,
-                            error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
     def set_check_options(options):
