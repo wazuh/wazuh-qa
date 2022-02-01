@@ -26,6 +26,7 @@ if sys.platform == 'win32':
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
     HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
+    GLOBAL_DB_PATH = None
 
 else:
 
