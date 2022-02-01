@@ -22,3 +22,7 @@ def wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path, tmp_path):
 def clean_logs(host_manager):
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+
+
+def query_db(host_manager, script, db_path, query):
+    return host_manager.run_command('wazuh-manager', "python {} --db_path {} --query {}".format(script, db_path, query))
