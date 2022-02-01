@@ -1,10 +1,13 @@
 import sqlite3
-import sys
+import argparse
 
-db_path = sys.argv[1]
-query = " ".join(sys.argv[2:])
+parser = argparse.ArgumentParser()
 
-conn = sqlite3.connect(db_path)
+parser.add_argument('--db_path', type=str, required=True)
+parser.add_argument('--query', type=str, required=True)
+
+args = parser.parse_args()
+conn = sqlite3.connect(args.db_path)
 cursor = conn.cursor()
-cursor.execute(query)
+cursor.execute(args.query)
 print(cursor.fetchall())
