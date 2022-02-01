@@ -81,7 +81,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.fim_module import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
 # Marks
@@ -155,7 +155,7 @@ def test_file_limit_default(get_configuration, configure_environment, restart_sy
     '''
     #Check the file limit configured and that it matches expected value (100000)
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_generator(CB_FILE_LIMIT_VALUE),
+                                               callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
 
     assert file_limit_value == str(NUM_FILES), ERR_MSG_WRONG_FILE_LIMIT_VALUE

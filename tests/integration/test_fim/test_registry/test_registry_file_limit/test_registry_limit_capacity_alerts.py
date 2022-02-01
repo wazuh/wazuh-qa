@@ -65,7 +65,7 @@ from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
     ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, 
     ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 if platform == 'win32':
     import pywintypes
 
@@ -196,16 +196,16 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
     if percentage >= 80:  # Percentages 80 and 90
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
+                                callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                 error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
 
     else:  # Database back to normal
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=callback_generator(CB_FILE_LIMIT_BACK_TO_NORMAL),
+                                callback=generate_monitoring_callback(CB_FILE_LIMIT_BACK_TO_NORMAL),
                                 error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=callback_generator(CB_COUNT_REGISTRY_FIM_ENTRIES),
+                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     # We add 1 because of the key created to hold the values

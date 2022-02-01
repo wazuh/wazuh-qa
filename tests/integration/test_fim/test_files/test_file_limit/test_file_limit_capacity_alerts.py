@@ -82,7 +82,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGULAR, delete_file, wait_for_scheduled_scan)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.fim_module import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT,
     ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
     CB_FILE_LIMIT_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL, ERR_MSG_FIM_INODE_ENTRIES)
@@ -193,14 +193,14 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
     #Look for file_limit percentage alert configure value and check it matches with the expected percentage
     if percentage >= 80:  
         file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                      callback=callback_generator(CB_FILE_LIMIT_CAPACITY),
+                                                      callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                                       error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
 
         assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT
     # Check the is back on normal levels
     else:  
         event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                              callback=callback_generator(CB_FILE_LIMIT_BACK_TO_NORMAL),
+                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_BACK_TO_NORMAL),
                                               error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     # Get entries and path counts and check they match the expected values

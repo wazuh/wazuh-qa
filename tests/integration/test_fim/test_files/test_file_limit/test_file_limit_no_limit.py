@@ -80,7 +80,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.fim_module import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
 
 # Marks
@@ -152,5 +152,5 @@ def test_file_limit_no_limit(get_configuration, configure_environment, restart_s
     '''
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_generator(CB_FILE_LIMIT_DISABLED),
+                            callback=generate_monitoring_callback(CB_FILE_LIMIT_DISABLED),
                             error_message=ERR_MSG_FILE_LIMIT_DISABLED)
