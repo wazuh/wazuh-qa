@@ -60,7 +60,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, create_values_content, create_registry, registry_parser, delete_registry_value)
+                               registry_value_delete, create_values_content)
 from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
