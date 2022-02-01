@@ -176,3 +176,18 @@ def modify_nvd_metadata_vuldet(timestamp):
             sleep(1)
     else:
         raise OperationalError
+
+
+def check_inserted_value_exists(table, column, value):
+    """Function to check if a value exists in a specific column of a specific table.
+
+    Args:
+        table (str): Table of cve.db.
+        column (str): Column of the table.
+        value (str): Value to be checked.
+    """
+    query_string = f"SELECT EXISTS(SELECT 1 FROM {table} WHERE {column}='{value}');"
+    result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+    sleep(1)
+
+    return result[0]
