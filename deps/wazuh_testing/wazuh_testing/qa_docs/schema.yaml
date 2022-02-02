@@ -105,6 +105,7 @@ predefined_values:
     - Ubuntu Xenial
     - Ubuntu Focal
     - macOS Server
+    - macOS Sierra
     - macOS Catalina
     - Windows XP
     - Windows 7
@@ -173,11 +174,14 @@ predefined_values:
   tags:
     - active_response
     - agentd
+    - alas_feeds
     - alerts
     - analysisd
     - api
     - ar_analysisd
     - ar_execd
+    - archlinux
+    - archlinux_feeds
     - auditd
     - audit_keys
     - audit_rules
@@ -185,9 +189,15 @@ predefined_values:
     - aws
     - brute_force_attack
     - cache
+    - canonical
+    - canonical_feeds
     - cluster
+    - config
+    - config
     - cors
     - cpe
+    - debian
+    - debian_feeds
     - dos_attack
     - download
     - enrollment
@@ -214,60 +224,90 @@ predefined_values:
     - fim_multiple_dirs
     - fim_nodiff
     - fim_prefilter_cmd
-    - fim_report_changes
     - fim_process_priority
     - fim_recursion_level
+    - fim_registry_ambiguous_confs
+    - fim_registry_basic_usage
+    - fim_registry_checks
+    - fim_registry_file_limit
+    - fim_registry_ignore
+    - fim_registry_multiple_registries
+    - fim_registry_nodiff
+    - fim_registry_recursion_level
+    - fim_registry_restrict
+    - fim_report_changes
     - fim_restrict
     - fim_scan
     - fim_skip
     - fim_stats_integrity_sync
+    - fim_synchronization
     - fim_tags
     - fim_timezone_changes
     - fim_wildcards_complex
     - fim_windows_audit_interval
-    - fim_registry_ambiguous_confs
-    - fim_registry_basic_usage
-    - fim_registry_checks
-    - fim_registry_ignore
-    - fim_registry_nodiff
-    - fim_registry_file_limit
-    - fim_registry_multiple_registries
-    - fim_registry_recursion_level
-    - fim_registry_restrict
-    - fim_synchronization
     - gcloud
+    - general_settings
     - github
     - integrity
+    - interval
+    - invalid
     - keys
     - key_polling
+    - limits
     - logcollector
+    - logcollector_location
+    - logcollector_log_format
+    - logcollector_only_future_events
+    - logcollector_options
+    - logcollector_reconnect_time
+    - logcollector_statistics
+    - logcollector_macos
+    - logcollector_age
+    - logcollector_cmd_exec
+    - logcollector_configuration
+    - logcollector_keep_running
+    - logging
+    - logs
     - logs
     - logtest
     - man_in_the_middle
     - master
+    - maximum
     - mitre
     - msu
+    - msu_feeds
     - nvd
     - office365
+    - on start
     - oval
+    - providers
+    - pull
     - rbac
     - realtime
+    - redhat
+    - redhat_feeds
+    - remote
     - remoted
     - rids
     - rootcheck
     - rules
     - scan
+    - scan_results
+    - schedule
     - scheduled
     - settings
     - simulator
     - ssl
     - stats_file
+    - system_inventory
     - time_travel
     - token
     - vulnerability
     - vulnerability_detector
     - wazuh_db
     - wdb_socket
+    - week_day
     - who_data
+    - windows
     - worker
     - wpk

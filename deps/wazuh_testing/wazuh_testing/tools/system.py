@@ -63,6 +63,13 @@ class HostManager:
                                     check=check)
 
     def modify_file_content(self, host: str, path: str = None, content: str = ''):
+        """Create a file with a specified content and copies it to a path.
+
+        Args:
+            host (str): Hostname
+            path (str): path for the file to create and modify
+            content (str): content to write into the file
+        """
         tmp_file = tempfile.NamedTemporaryFile()
         tmp_file.write(content.encode())
         tmp_file.seek(0)
