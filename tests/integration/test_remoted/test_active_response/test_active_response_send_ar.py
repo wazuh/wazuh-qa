@@ -1,7 +1,56 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+type: integration
+
+brief: Active responses perform various countermeasures to address active
+       threats, such as blocking access to an agent from the threat source when certain
+       criteria are met. These tests will check if an active response command is sent
+       correctly to the Wazuh agent by `wazuh-remoted` daemon.
+
+tier: 1
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+    - wazuh-execd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+
+tags:
+    - remoted
+    - active_response
+'''
 import os
 import pytest
 import time
@@ -55,14 +104,44 @@ def get_configuration(request):
                          "Sometimes it doesn't work properly when it sends keepalives "
                          "messages causing the agent to never being in active status.")
 def test_active_response_ar_sending(get_configuration, configure_environment, restart_remoted):
-    """Test if `wazuh-remoted` sends active response commands to the agent.
-
-    Check if execd sends active response command to the remoted module in the manager. Then, it
-    ensures that the agent receives the active command message from the manager.
-
-    Raises:
-        AssertionError: if `wazuh-remoted` does not send the active response command to the agent.
-    """
+    '''
+    description: Check if the 'wazuh-remoted' daemon sends active response commands to the Wazuh agent.
+                 For this purpose, the test will establish a connection with a simulated agent using
+                 different ports and transport protocols. Then, it will send an active response to that
+                 agent, and finally, the test will verify that the events indicating that the active
+                 response has been sent by the manager and received it by the agent are generated.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_remoted:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+    
+    assertions:
+        - Verify that the 'wazuh-execd' daemon sends the active response to the 'wazuh-remoted' daemon.
+        - Verify that the 'wazuh-remoted' daemon receives the active response from the 'wazuh-execd' daemon.
+        - Verify that the Wazuh agent receives an active response message.
+    
+    input_description: A configuration template (test_active_response_send_ar) is contained in an external YAML
+                       file (wazuh_test_active_response.yaml). That template is combined with different
+                       test cases defined in the module. Those include configuration settings for
+                       the 'wazuh-remoted' daemon.
+    
+    expected_output:
+        - r'.*Active response request received.*'
+        - r'.*Active response sent.*'
+    
+    tags:
+        - active_response
+        - simulator
+    '''
     protocol_array = (get_configuration['metadata']['protocol']).split(',')
     manager_port = get_configuration['metadata']['port']
 
