@@ -118,7 +118,6 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-@pytest.mark.skip(reason="It will be blocked by #1602, when it is resolved will could enable again this test")
 @pytest.mark.parametrize('folder, filename, content, hidden_content, tags_to_apply', [
     (testdir1, 'testfile', "Sample content", False, {'valid_regex', 'valid_no_regex'}),
     (testdir1, 'btestfile', b"Sample content", False, {'valid_regex', 'valid_no_regex'}),
