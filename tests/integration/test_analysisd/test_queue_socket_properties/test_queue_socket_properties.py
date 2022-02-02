@@ -92,7 +92,7 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     description: check if after running the configuration test of 'wazuh-analysisd' the properties
                  of the queue socket file are changed.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.2.2
 
     parameters:
         - socket_file_properties:
