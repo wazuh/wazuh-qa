@@ -54,7 +54,6 @@ tags:
     - fim_registry_file_limit
 '''
 import os
-
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
@@ -75,7 +74,7 @@ test_reg = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 10
-EXPECTED_DATABES_STATE = 100
+EXPECTED_DATABES_STATE = "100"
 
 # Configurations
 

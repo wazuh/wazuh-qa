@@ -185,6 +185,9 @@ else:
     
     def registry_value_delete():
         pass
+    
+    def create_values_content():
+        pass
 
     def validate_registry_event():
         pass
