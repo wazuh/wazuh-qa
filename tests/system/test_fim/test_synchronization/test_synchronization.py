@@ -75,9 +75,35 @@ db_script = '/var/system_query_db.py'
 @pytest.mark.parametrize('folder_path', ['testdir1'])
 def test_Synchronization_create_file_agent_stopped(folder_path, case, host):
     '''
-    The test will monitor a directory and apply changes when agent is stopped.
+    Description: The test will monitor a directory and apply changes when agent is stopped.
     Finally, it will verify that the FIM 'Synchronization' event is generated
     in agent and manager side.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - folder_path:
+            type: str
+            brief: Name of the folder that will be created in the test.
+        - case:
+            type: str
+            brief: Name of the test case that will be created in the test.
+        - host:
+            type: str
+            brief: Name of the endpoint  that will be use in the test.
+
+    assertions:
+        - Verify that FIM sync events are generated correctly on the manager and agent sides.
+    
+    input_description: Different test cases are included with Pytest parametrize.
+                       The test cases are: add, modify and delete files.
+   
+    expected_output:
+        - Different test cases are contained in external YAML file 
+          (agent_initializing_synchronization.yml and manager_initializing_synchronization.yml)
+    tags:
+        - fim_basic_usage
+        - scheduled
     '''
     message_path = messages_path[3]
     # Clear logs, create folder to monitored and restart the service
