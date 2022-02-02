@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [v4.3.0]
 ### Added
+- Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
+- Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
+- Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
+- CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
+- Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
+- Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
+- Analysisd - add new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 
 ### Changed
 
