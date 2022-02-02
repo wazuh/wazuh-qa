@@ -251,7 +251,6 @@ def write_csv(data):
     df.to_csv(metrics_path, sep='\t', mode='a', index=False, header=(not os.path.exists(metrics_path)))
 
 
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 @pytest.mark.benchmark
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
