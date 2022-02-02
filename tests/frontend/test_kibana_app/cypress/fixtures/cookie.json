@@ -1,0 +1,120 @@
+ [
+    {
+        "name": "currentApi",
+        "value": "%257B%2522name%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522id%2522%3A%2522default%2522%257D",
+        "path": "/app/wazuh/",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675352981,
+        "domain": "localhost"
+    },
+    {
+        "name": "currentPattern",
+        "value": "wazuh-alerts-*",
+        "path": "/app/wazuh/",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675352981,
+        "domain": "localhost"
+    },
+    {
+        "name": "clusterInfo",
+        "value": "%257B%2522status%2522%3A%2522enabled%2522%2C%2522manager%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522node%2522%3A%2522master-node%2522%2C%2522cluster%2522%3A%2522wazuh%2522%257D",
+        "path": "/app/wazuh/",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675352995,
+        "domain": "localhost"
+    },
+    {
+        "name": "currentApi",
+        "value": "%257B%2522name%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522id%2522%3A%2522default%2522%257D",
+        "path": "/app/wazuh",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675353002,
+        "domain": "localhost"
+    },
+    {
+        "name": "currentPattern",
+        "value": "wazuh-alerts-*",
+        "path": "/app/wazuh",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675353004,
+        "domain": "localhost"
+    },
+    {
+        "name": "clusterInfo",
+        "value": "%257B%2522status%2522%3A%2522enabled%2522%2C%2522manager%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522node%2522%3A%2522master-node%2522%2C%2522cluster%2522%3A%2522wazuh%2522%257D",
+        "path": "/app/wazuh",
+        "secure": false,
+        "httpOnly": false,
+        "expiry": 1675353004,
+        "domain": "localhost"
+    },
+    {
+        "name": "appName",
+        "value": "wazuh",
+        "path": "/app/wazuh/",
+        "secure": false,
+        "httpOnly": false,
+        "domain": "localhost"
+    },
+    {
+        "name": "patternSelector",
+        "value": "true",
+        "path": "/app/wazuh/",
+        "secure": false,
+        "httpOnly": false,
+        "domain": "localhost"
+    },
+    {
+        "name": "appName",
+        "value": "wazuh",
+        "path": "/app/wazuh",
+        "secure": false,
+        "httpOnly": false,
+        "domain": "localhost"
+    },
+    {
+        "name": "patternSelector",
+        "value": "true",
+        "path": "/app/wazuh",
+        "secure": false,
+        "httpOnly": false,
+        "domain": "localhost"
+    },
+    {
+        "name": "sid",
+        "value": "Fe26.2**ca72d7ee4d18715ee718cfb62fab12e40a5c6626cc4fa90809ee87bc39d33500*-8pU35_lRCb29DF6Ozcf6g*63ae84YN4Lqm4sc7CT1iLqtDhi7EC2690jazmTKgJoA1LnpBRonnHegvY-4876-fh3DmVtn_EDx80CGDrkYS3Y-jvp-kQKLvZLrSgLD22-sFDtYOUr9oxnJF_OgzFQMOWPtqu_1xtVGHDDFj_VJI6RZLxIlAVAvzy8icWvlDISQM-zNwbQR0ouTxs8FSHA4xOwtthakuM2o25USmfCUi-_TjohJ-uSeDQEz76bLz4KA**20c2f15d10f6a71d9b6d6d6cd108a33f5e304cc58bc1911b256294f460523ac7*u5v2oGcjFFPp0KzVSIwKmqX4TB5uASGMU11awolOdgQ",
+        "path": "/",
+        "secure": true,
+        "httpOnly": true,
+        "domain": "localhost"
+    },
+    {
+        "name": "wz-user",
+        "value": "elastic",
+        "path": "/",
+        "secure": true,
+        "httpOnly": true,
+        "domain": "localhost"
+    },
+    {
+        "name": "wz-api",
+        "value": "default",
+        "path": "/",
+        "secure": false,
+        "httpOnly": true,
+        "domain": "localhost"
+    },
+    {
+        "name": "wz-token",
+        "value": "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3YXp1aCIsImF1ZCI6IldhenVoIEFQSSBSRVNUIiwibmJmIjoxNjQzODE2OTgyLCJleHAiOjE2NDM4MTc4ODIsInN1YiI6IndhenVoLXd1aSIsInJ1bl9hcyI6ZmFsc2UsInJiYWNfcm9sZXMiOlsxXSwicmJhY19tb2RlIjoid2hpdGUifQ.AX8V6RlPO_uXlzStNR8Twowd1posXc34LzWKfNC81EuQ4H8u-TWZsVOonUEUe6O_TKGFvWp7Pa8-muWjGzA2noD-AZiGGdp2LzNazV1C-BHwx-88I7CWok3nKCgadbdpuzY99BKqROeY3spUTekQHaSewdisrVzqM9SF31lEFYTR4gcz",
+        "path": "/",
+        "secure": true,
+        "httpOnly": true,
+        "domain": "localhost"
+    }
+]

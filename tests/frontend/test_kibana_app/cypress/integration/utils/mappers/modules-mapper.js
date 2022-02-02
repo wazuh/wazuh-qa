@@ -8,6 +8,7 @@ import {
   openSCAPToggleButton,
   osqueryToggleButton,
   tSCToggleButton,
+  gitHubCardToggleButton,
   virusTotalToggleButton
 } from '../../pageobjects/settings/modules.page';
 import {
@@ -20,12 +21,14 @@ import {
   openSCAPCard,
   osqueryCard,
   tSCCard,
+  gitHubCard,
   virusTotalCard
 } from '../../pageobjects/modules-directory.page';
 
 export const MODULES_CARDS = {
   'Amazon AWS': amazonAWSCard,
   'Google Cloud Platform': gCPCard,
+  GitHub: gitHubCard,
   OpenSCAP: openSCAPCard,
   'CIS-CAT': cisCatCard,
   VirusTotal: virusTotalCard,
@@ -39,6 +42,7 @@ export const MODULES_CARDS = {
 export const MODULES_SETTINGS = {
   'Amazon AWS': amazonAWSToggleButton,
   'Google Cloud Platform': gCPToggleButton,
+  GitHub: gitHubCardToggleButton,
   OpenSCAP: openSCAPToggleButton,
   'CIS-CAT': cisCatToggleButton,
   VirusTotal: virusTotalToggleButton,
