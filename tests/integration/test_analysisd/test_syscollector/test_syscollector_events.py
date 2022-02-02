@@ -54,14 +54,13 @@ os_version:
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html#using-syscollector-information-to-trigger-alerts
 '''
-import json
 import os
-
-import pytest
 import yaml
+import pytest
 
 from wazuh_testing.tools import (ANALYSISD_QUEUE_SOCKET_PATH, ALERT_FILE_PATH)
 from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollector_alert
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -104,7 +103,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent_module, co
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-        - mock_agent:
+        - mock_agent_module:
             type: fixture
             brief: Create mock agent and get agent_id
         - configure_custom_rules:
@@ -140,7 +139,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent_module, co
     '''
 
     # Get mock agent_id to create syscollector header
-    agent_id = mock_agent
+    agent_id = mock_agent_module
     event_header = f"d:[{agent_id}] {test_case['event_header']}"
 
     for stage in test_case['test_case']:
