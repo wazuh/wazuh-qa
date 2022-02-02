@@ -91,7 +91,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
-def test_syscollector_events(test_case, get_configuration, mock_agent, configure_custom_rules, restart_analysisd,
+def test_syscollector_events(test_case, get_configuration, mock_agent_module, configure_custom_rules, restart_analysisd,
                              wait_for_analysisd_startup, connect_to_sockets_function, file_monitoring):
     '''
     description:
