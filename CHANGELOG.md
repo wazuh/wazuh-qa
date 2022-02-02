@@ -29,6 +29,10 @@ Release report: TBD
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
 - Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2353-refactor-registry-file-limit
 ### Deleted
 - Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
 

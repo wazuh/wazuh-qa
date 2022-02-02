@@ -56,13 +56,18 @@ SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 # Callbacks message
 CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
+<<<<<<< HEAD
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
+=======
+>>>>>>> 2353-refactor-registry-file-limit
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
 CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
 CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA = r".*Setting 'disk_quota' to (\d+), 'disk_quota' must be greater than 'file_size'"
+CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
+
 
 #Error Messages
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
@@ -80,3 +85,8 @@ ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
 ERR_MSG_DISK_QUOTA_MUST_BE_GREATER = "Did not receive expected 'DEBUG: ... disk_quota must be greater than file_size message'"
 ERR_MSG_CONTENT_CHANGES_EMPTY = "content_changes is empty"
 ERR_MSG_CONTENT_CHANGES_NOT_EMPTY = "content_changes isn't empty"
+<<<<<<< HEAD
+=======
+ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
+ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
+>>>>>>> 2353-refactor-registry-file-limit

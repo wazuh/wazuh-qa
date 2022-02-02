@@ -176,7 +176,18 @@ else:
 
     def registry_key_cud():
         pass
+    
+    def registry_value_create():
+        pass
 
+    def registry_value_update():
+        pass
+    
+    def registry_value_delete():
+        pass
+    
+    def create_values_content():
+        pass
 
     def validate_registry_event():
         pass
@@ -1414,7 +1425,6 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
-
 def callback_configuration_warning(line):
     match = re.match(r'.*WARNING: \(\d+\): Invalid value for element', line)
     if match:
@@ -1609,7 +1619,7 @@ class EventChecker:
 
 
 def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
-                    timeout=global_parameters.default_timeout):
+                            timeout=global_parameters.default_timeout):
     """Checks if the conditions for waiting for a new scheduled scan.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
