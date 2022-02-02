@@ -17,11 +17,11 @@
   "license": "ISC",
   "dependencies": {
     "cosmiconfig": "^4.0.0",
-    "cypress": "^7.3.0",
     "mocha": "^5.2.0",
     "prettier": "^2.3.0"
   },
   "devDependencies": {
+    "cypress": "^9.4.1",
     "cypress-cucumber-preprocessor": "^4.0.3",
     "eslint-plugin-cypress": "^2.11.3",
     "mochawesome": "^6.2.2",

@@ -6,7 +6,7 @@ Feature: Run health checks
 
   @miscellaneous
   Scenario: Run health check
-    Given The kibana admin user is logged in using basic authentication
+    Given The kibana admin user is logged in using xpack authentication
     When The user navigates to Miscellaneous settings
     And The user runs the health checks
     Then The application navigates to the health checks page

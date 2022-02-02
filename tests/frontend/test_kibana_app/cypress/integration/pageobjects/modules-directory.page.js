@@ -8,3 +8,4 @@ export const dockerListenerCard = '[data-test-subj="overviewWelcomeDocker"]';
 export const gDPRCard = '[data-test-subj="overviewWelcomeGdpr"]';
 export const hIPAACard = '[data-test-subj="overviewWelcomeHipaa"]';
 export const tSCCard = '[data-test-subj="overviewWelcomeTsc"]';
+export const gitHubCard = '[data-test-subj="overviewWelcomeGithub"]'

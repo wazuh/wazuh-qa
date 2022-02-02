@@ -38,3 +38,15 @@ export const navigate = (url) => {
 export const validateURLIncludes = (include) => {
   cy.url().should('include', include);
 };
+
+export const clearSession = () => {
+  cy.clearLocalStorage();
+  cy.clearCookies();
+};
+
+export const setCookies = (cookieObj) => {
+  cookieObj.forEach((element) => {
+    cy.setCookie(element.name, element.value);
+  });
+
+}

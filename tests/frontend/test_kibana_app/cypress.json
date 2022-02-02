@@ -13,5 +13,6 @@
     "mochaFile": "cypress/report/output.html"
   },
   "videosFolder": "cypress/report/video",
-  "screenshotsFolder": "cypress/report/screenshots"
+  "screenshotsFolder": "cypress/report/screenshots",
+  "experimentalSessionSupport": true
 }
