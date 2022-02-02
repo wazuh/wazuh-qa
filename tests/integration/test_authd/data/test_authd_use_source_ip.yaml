@@ -43,7 +43,7 @@
       output:
         status: 'success'
         name: 'user1'
-        ip: '::1'
+        ip: '0000:0000:0000:0000:0000:0000:0000:0001'
   -
     name: 'Not specific IPv6'
     description: 'Not specific IPv6'
