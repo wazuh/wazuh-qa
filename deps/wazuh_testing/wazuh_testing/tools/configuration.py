@@ -714,10 +714,9 @@ def update_configuration_template(configurations, old_values, new_values):
     if len(configurations) != len(old_values) != len(new_values):
         raise ValueError(f"The number of configuration and values items should be the same.")
 
-    for i in range(len(configurations)):
+    configurations_to_update = json.dumps(configurations)
 
-        if len(old_values[i]) != len(new_values[i]):
-            raise ValueError(f"The number of values to be modified should be the same as their new values.")
+    for old_value, new_value in zip(old_values, new_values):
+        configurations_to_update = configurations_to_update.replace(old_value, new_value)
 
-        for old_value, new_value in zip(old_values[i], new_values[i]):
-            configurations[i] = json.loads(json.dumps(configurations[i]).replace(old_value, new_value))
+    return json.loads(configurations_to_update)

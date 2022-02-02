@@ -186,8 +186,9 @@ def check_inserted_value_exists(table, column, value):
         column (str): Column of the table.
         value (str): Value to be checked.
     """
-    query_string = f"SELECT EXISTS(SELECT 1 FROM {table} WHERE {column}='{value}');"
+    custom_value = f"'{value}'" if type(value) == str else value
+    query_string = f"SELECT count(*) FROM {table} WHERE {column}={custom_value}"
     result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
-    sleep(1)
+    rows_number = int(result[0])
 
-    return result[0]
+    return rows_number > 0
