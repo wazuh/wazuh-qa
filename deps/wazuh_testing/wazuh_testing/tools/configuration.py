@@ -704,8 +704,8 @@ def update_configuration_template(configurations, old_values, new_values):
 
     Args:
         configurations (list(dict)): Actual configurations from the template.
-        old_values (list(list(item_to_replace))): Values to be replace.
-        new_values (list(list(item))): New values.
+        old_values (list)): Values to be replace.
+        new_values (list): New values.
 
     Raises:
         ValueError: If the number of configurations are not the same as the number of values items to replace.
