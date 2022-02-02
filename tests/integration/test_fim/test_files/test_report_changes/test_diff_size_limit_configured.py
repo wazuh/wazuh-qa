@@ -92,7 +92,7 @@ from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, YAML_CONF_DIFF, 
                                                     REPORT_CHANGES, TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
                                                     ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 from wazuh_testing.wazuh_variables import DATA, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
 # Marks
@@ -178,7 +178,7 @@ def test_diff_size_limit_configured(configure_local_internal_options_module, get
 
     diff_size_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callback_generator(CB_MAXIMUM_FILE_SIZE),
+        callback=generate_monitoring_callback(CB_MAXIMUM_FILE_SIZE),
         error_message=ERR_MSG_MAXIMUM_FILE_SIZE).result()
 
     assert diff_size_value == str(DIFF_LIMIT_VALUE), ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE
