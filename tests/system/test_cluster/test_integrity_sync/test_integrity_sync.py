@@ -16,7 +16,7 @@ worker_hosts = test_hosts[1:]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
 
-time_to_sync = 10
+time_to_sync = 21
 host_manager = HostManager(inventory_path)
 client_keys_path = os.path.join(WAZUH_PATH, "etc", "client.keys")
 
@@ -28,7 +28,8 @@ directories_to_create = [os.path.join(WAZUH_PATH, "etc", "shared", "test_group")
 files_to_sync = [os.path.join(WAZUH_PATH, "etc", "lists", "test_file"),
                  os.path.join(WAZUH_PATH, "etc", "rules", "test_file"),
                  os.path.join(WAZUH_PATH, "etc", "decoders", "test_file"),
-                 os.path.join(directories_to_create[1], 'merged.mg')]
+                 os.path.join(directories_to_create[1], 'merged.mg'),
+                 os.path.join(directories_to_create[0], 'test_file')]
 
 # Files inside directories where not 'all' files have to be synchronized, according to cluster.json.
 files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
@@ -37,7 +38,6 @@ files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.tmp'),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.lock'),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.swp'),
-                     os.path.join(directories_to_create[0], 'test_file'),
                      os.path.join(directories_to_create[1], 'test_file')]
 
 # merged.mg and agent.conf files that must be created after creating a group folder.
@@ -84,7 +84,7 @@ def test_missing_file(clean_files):
             assert perm == '660', f"{file} permissions were expected to be '660' in {host}, but they are {perm}."
         # Check that files which should not be synchronized are not sent to the workers. For example, only
         # merged.mg file inside /var/ossec/etc/shared/ directory should be synchronized, but nothing else.
-        for file in files_not_to_sync + [agent_conf_file]:
+        for file in files_not_to_sync:
             result = host_manager.run_command(host, f'ls {file}')
             assert result == '', f"File {file} was expected not to be copied in {host}, but it was."
 
@@ -122,6 +122,13 @@ def test_shared_files():
         result = host_manager.run_command(host, f'cat {merged_mg_file}')
         # The agent.conf content will be before the !0 test_file line in merged.mg.
         assert agent_conf_content in result, f'File {merged_mg_file} inside {host} should contain ' \
+                                             f'{agent_conf_content}, but it has: {result} '
+
+    # Check whether the agent.conf file is correctly updated in master and synchronized in workers or not.
+    agent_conf_content = host_manager.run_command(test_hosts[0], f'cat {agent_conf_file}')
+    for host in test_hosts:
+        result = host_manager.run_command(host, f'cat {agent_conf_file}')
+        assert agent_conf_content in result, f'File {agent_conf_file} inside {host} should contain ' \
                                              f'{agent_conf_content}, but it has: {result} '
 
     # Update the content of files in the worker node.
@@ -187,7 +194,7 @@ def test_extra_valid_files(clean_files):
         # Check the client.keys files is correctly updated in the workers.
         worker_client_keys = host_manager.run_command(host, f'cat {client_keys_path}')
         assert master_client_keys == worker_client_keys, f'The client.keys file is not the same in the master and' \
-                                                         f'ind the {host} ->' \
+                                                         f'in the {host} ->' \
                                                          f'\nMaster client keys:\n{master_client_keys}' \
                                                          f'\nWorker client keys:\n{worker_client_keys}'
 

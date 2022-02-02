@@ -1,7 +1,60 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'github' module allows you to collect all the 'audit logs' from GitHub using its API.
+       Specifically, these tests will check if that module detects invalid configurations and indicates
+       the location of the errors detected. The 'audit log' allows organization admins to quickly review
+       the actions performed by members of your organization. It includes details such as who performed
+       the action, what the action was, and when it was performed.
+
+tier: 0
+
+modules:
+    - github
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://github.com/wazuh/wazuh-documentation/blob/develop/source/github/monitoring-github-activity.rst
+
+tags:
+    - github_configuration
+'''
 import os
 import sys
 
@@ -200,19 +253,44 @@ def get_local_internal_options():
 
 def test_invalid(get_local_internal_options, configure_local_internal_options,
                  get_configuration, configure_environment, reset_ossec_log):
-    """
-    Checks if an invalid configuration is detected
+    '''
+    description: Check if the 'github' module detects invalid configurations. For this purpose, the test
+                 will configure that module using invalid configuration settings with different attributes.
+                 Finally, it will verify that error events are generated indicating the source of the errors.
 
-    Using invalid configurations with different attributes,
-    expect an error message and github unable to start.
+    wazuh_min_version: 4.3.0
 
-    Args:
-        get_local_internal_options (fixture): Get internal configuration.
-        configure_local_internal_options (fixture): Set internal configuration for testing.
-        get_configuration (fixture): Get configurations from the module.
-        configure_environment (fixture): Configure a custom environment for testing.
-        reset_ossec_log (fixture): Reset ossec.log and start a new monitor
-    """
+    parameters:
+        - get_local_internal_options:
+            type: fixture
+            brief: Get internal configuration.
+        - configure_local_internal_options:
+            type: fixture
+            brief: Set internal configuration for testing.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - reset_ossec_log:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that the 'github' module generates error events when invalid configurations are used.
+
+    input_description: A configuration template (github_integration) is contained in an external YAML file
+                       (wazuh_conf.yaml). That template is combined with different test cases defined in
+                       the module. Those include configuration settings for the 'github' module.
+
+    expected_output:
+        - r'wm_github_read(): ERROR.* Invalid content for tag .*'
+        - r'wm_github_read(): ERROR.* Empty content for tag .*'
+
+    tags:
+        - invalid_settings
+    '''
     # Configuration error -> ValueError raised
     try:
         control_service('restart')

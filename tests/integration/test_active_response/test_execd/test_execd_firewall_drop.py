@@ -1,7 +1,56 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Active responses execute a script in response to the triggering of specific alerts
+       based on the alert level or rule group. These tests will check if the 'active responses',
+       which are executed by the 'wazuh-execd' daemon via scripts, run correctly.
+
+tier: 0
+
+modules:
+    - active_response
+
+components:
+    - agent
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-execd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
+
+tags:
+    - ar_execd
+'''
 import json
 import os
 import platform
@@ -102,7 +151,7 @@ def start_agent(request, get_configuration):
 
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
-    """Remove the test IP from iptables if it exist.
+    """Remove the testing IP address from `iptables` if it exists.
 
     Args:
         get_configuration (fixture): Get configurations from the module.
@@ -189,15 +238,54 @@ def build_message(metadata, expected):
 
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
                              remove_ip_from_iptables, start_agent, set_ar_conf_mode):
-    """Check if firewall-drop Active Response is executed correctly.
+    '''
+    description: Check if 'firewall-drop' command of 'active response' is executed correctly.
+                 For this purpose, a simulated agent is used and the 'active response'
+                 is sent to it. This response includes an IP address that must be added
+                 and removed from 'iptables', the Linux firewall.
 
-    Args:
-        set_debug_mode (fixture): Set execd daemon in debug mode.
-        test_version (fixture): Validate Wazuh version.
-        set_ar_conf_mode (fixture): Configure Active Responses used in tests.
-        start_agent (fixture): Create Remoted and Authd simulators, register agent and start it.
-        remove_ip_from_iptables (fixture): Remove the test IP from iptables if it exist
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Set the 'wazuh-execd' daemon in debug mode.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - test_version:
+            type: fixture
+            brief: Validate the Wazuh version.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - remove_ip_from_iptables:
+            type: fixture
+            brief: Remove the testing IP address from 'iptables' if it exists.
+        - start_agent:
+            type: fixture
+            brief: Create 'wazuh-remoted' and 'wazuh-authd' simulators, register agent and start it.
+        - set_ar_conf_mode:
+            type: fixture
+            brief: Configure the 'active responses' used in the test.
+
+    assertions:
+        - Verify that the testing IP address is added to 'iptables'.
+        - Verify that the testing IP address is removed from 'iptables'.
+
+    input_description: Different use cases are found in the test module and include
+                       parameters for 'firewall-drop' command and the expected result.
+
+    expected_output:
+        - r'DEBUG: Received message'
+        - r'Starting'
+        - r'active-response/bin/firewall-drop'
+        - r'Ended'
+        - r'Cannot read 'srcip' from data' (If the 'active response' fails)
+
+    tags:
+        - simulator
+    '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)

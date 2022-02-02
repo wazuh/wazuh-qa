@@ -1,6 +1,70 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files
+       are modified. Specifically, these tests will check if FIM automatically removes the 'audit' rule
+       from the target of a monitored 'symbolic link' when the target of that link is replaced.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#whodata
+    - https://man7.org/linux/man-pages/man8/auditd.8.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_follow_symbolic_link
+    - audit_rules
+'''
 import os
 import subprocess
 
@@ -77,23 +141,61 @@ def get_configuration(request):
 def test_audit_rules_removed_after_change_link(replaced_target, new_target, file_name, tags_to_apply,
                                                get_configuration, configure_environment,
                                                restart_syscheckd, wait_for_fim_start):
-    """Test that checks if the audit rules are removed when the symlink target's is changed.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon removes the 'audit' rules when the target of
+                 a monitored symlink is changed. For this purpose, the test will monitor a 'symbolic link'
+                 pointing to a directory using the 'whodata' monitoring mode. Once FIM starts, it will create
+                 and expect events inside the pointed folder. After the events are processed, the test
+                 will change the target of the link to another folder and wait until the thread that checks
+                 the 'symbolic links' updates the link's target. Finally, it will generate some events inside
+                 the new target and verify that the audit rule of the previous target folder has been
+                 removed (via 'auditctl -l').
 
-    Args:
-        replaced_target (str): Directory where the link is pointing.
-        new_target (str): Directory where the link will be pointed after it's updated.
-        file_name (str): Name of the file that will be created inside the folders.
-        tags_to_apply (set): Run test if matches with a configuration identifier, skip otherwise.
-        get_configuration (fixture): Gets the current configuration of the test.
-        configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
-        wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
+    wazuh_min_version: 4.2.0
 
-    Raises:
-        TimeoutError: If an expected event couldn't be captured.
-        ValueError: If the event type isn't added or if the audit rule for ``replaced_target`` isn't removed.
+    parameters:
+        - replaced_target:
+            type: str
+            brief: Directory where the 'symbolic link' is pointing.
+        - new_target:
+            type: str
+            brief: Directory where the 'symbolic link' will be pointed after it is updated.
+        - file_name:
+            type: str
+            brief: Name of the testing file that will be created inside the folders.
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
-    """
+    assertions:
+        - Verify that FIM events 'added' are generated when creating the testing files.
+        - Verify that FIM automatically removes the 'audit' rule from the target of a monitored 'symbolic link'
+          when the target of that link is replaced.
+
+    input_description: A test case (check_audit_removed_rules) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it is
+                       combined with the testing directory to be monitored defined in the 'common.py' module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' events)
+        - The 'auditctl -l' command should return the path where the symbolic link finally points.
+
+    tags:
+        - realtime
+        - who_data
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     fim.create_file(fim.REGULAR, replaced_target, file_name)
     ev = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,

@@ -107,13 +107,15 @@ our [testing environment guide](#setting-up-a-test-environment).
 Our cluster system tests are located in `wazuh-qa/tests/system/`. They are organized by functionalities and each one may
 required an specific testing environment located in `wazuh-qa/tests/system/provisioning`:
 
-| Functionality                       | Required environment |
-|-------------------------------------|----------------------|
-| test_cluster/test_agent_enrollment  | enrollment_cluster   |
-| test_cluster/test_agent_info_sync   | basic_cluster        |
-| test_cluster/test_agent_key_polling | basic_cluster        |
-| test_cluster/test_integrity_sync    | agentless_cluster    |
-| test_jwt_invalidation               | agentless_cluster    |
+| Functionality                          | Required environment |
+|----------------------------------------|----------------------|
+| test_cluster/test_agent_enrollment     | enrollment_cluster   |
+| test_cluster/test_agent_info_sync      | basic_cluster        |
+| test_cluster/test_agent_key_polling    | basic_cluster        |
+| test_cluster/test_agent_files_deletion | basic_cluster        |
+| test_cluster/test_integrity_sync       | agentless_cluster    |
+| test_jwt_invalidation                  | agentless_cluster    |
+| test_active_response_log_format        | manager_agent        |
 
 ### Test structure
 
@@ -188,6 +190,15 @@ in `system/provisioning/<specified_cluster_environment>` path:
 
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml
+```
+
+If you want to specify a particular branch of the Wazuh repository, you will need to include:
+```shell script
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1"}'
+```
+In the **basic cluster**, you also have to specify a branch from the Wazuh QA repository.
+```shell script
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1", "wazuh_qa_branch":"master"}'
 ```
 
 We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our cluster system tests. Pytest will

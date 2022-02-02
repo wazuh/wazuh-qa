@@ -1,7 +1,59 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM limits the size of
+       the 'queue/diff/local' folder where Wazuh stores the compressed files used to perform
+       the 'diff' operation when the 'disk_quota' limit is set.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - windows
+
+os_version:
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#disk-quota
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_registry_report_changes
+'''
 import os
 
 import pytest
@@ -66,24 +118,66 @@ def get_configuration(request):
 def test_disk_quota_values(key, subkey, arch, value_name, tags_to_apply, size,
                            get_configuration, configure_environment, restart_syscheckd,
                            wait_for_fim_start):
-    """
-    Check that no events are sent when the disk_quota exceeded
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used
+                 to perform the 'diff' operations is stored when the 'disk_quota' limit is set. For this
+                 purpose, the test will monitor a key, create a testing value smaller than the 'disk_quota'
+                 limit, and increase its size on each test case. Finally, the test will verify that the
+                 compressed file has been created, and the related FIM event includes the 'content_changes'
+                 field if the value size does not exceed the specified limit and vice versa.
 
-    Parameters
-    ----------
-    key : str
-        Root key (HKEY_*)
-    subkey : str
-        path of the registry.
-    arch : str
-        Architecture of the registry.
-    value_name : str
-        Name of the value that will be created
-    tags_to_apply : set
-        Run test if match with a configuration identifier, skip otherwise.
-    size : int
-        Size of the content to write in value
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - key:
+            type: str
+            brief: Path of the registry root key (HKEY_* constants).
+        - subkey:
+            type: str
+            brief: The registry key being monitored by syscheck.
+        - arch:
+            type: str
+            brief: Architecture of the registry.
+        - value_name:
+            type: str
+            brief: Name of the testing value that will be created
+        - tags_to_apply:
+            type: set
+            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - size:
+            type: int
+            brief: Size of the content to write in the testing value.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that a 'diff' file is created when a monitored value does not exceed the size limit.
+        - Verify that no 'diff' file is created when a monitored value exceeds the size limit.
+        - Verify that FIM events include the 'content_changes' field when the monitored value
+          does not exceed the size limit.
+
+    input_description: A test case (test_limits) is contained in external YAML file
+                       (wazuh_registry_report_changes_limits_quota.yaml) which includes configuration
+                       settings for the 'wazuh-syscheckd' daemon. That is combined with
+                       the testing registry keys to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     value_content = generate_string(size, '0')
     values = {value_name: value_content}

@@ -1,7 +1,61 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-logtest' tool allows the testing and verification of rules and decoders against provided log examples
+       remotely inside a sandbox in 'wazuh-analysisd'. This functionality is provided by the manager, whose work
+       parameters are configured in the ossec.conf file in the XML rule_test section. Test logs can be evaluated through
+       the 'wazuh-logtest' tool or by making requests via RESTful API. These tests will check if the logtest
+       configuration is valid. Also checks rules, decoders, decoders, alerts matching logs correctly.
+
+tier: 0
+
+modules:
+    - logtest
+
+components:
+    - manager
+
+daemons:
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/tools/wazuh-logtest.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/wazuh-logtest/index.html
+    - https://documentation.wazuh.com/current/user-manual/ruleset/testing.html?highlight=logtest
+    - https://documentation.wazuh.com/current/user-manual/capabilities/wazuh-logtest/logtest-configuration.html
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+
+tags:
+    - logtest_configuration
+'''
 import json
 import os
 
@@ -49,14 +103,41 @@ def create_session():
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_remove_session(connect_to_sockets_function, test_case: list):
-    """Check that every input message in logtest socket generates the adequate output
+def test_remove_session(restart_required_logtest_daemons, wait_for_logtest_startup, connect_to_sockets_function,
+                        test_case: list):
+    '''
+    description: Check if 'wazuh-logtest' correctly detects and removes the sessions under pre-defined scenarios.
+                 To do this, the session input is sent and the output is received, then it checks if the received data
+                 within the logtest socket is the same that the test case expected output.
 
-    Parameters
-    ----------
-    test_case : list
-        List of test_case stages (dicts with input, output and stage keys)
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - restart_required_logtest_daemons:
+            type: fixture
+            brief: Wazuh logtests daemons handler.
+        - wait_for_logtest_startup:
+            type: fixture
+            brief: Wait until logtest has begun.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Function scope version of 'connect_to_sockets' which connects to the specified sockets for the test.
+        - test_case:
+            type: list
+            brief: List of test_case stages. (dicts with input, output and stage keys)
+
+    assertions:
+        - Verify that every test case output matches with the actual received.
+
+    input_description: Some test cases are defined in the module. These include some input configurations stored in
+                       the 'remove_session.yaml' and the session creation data from the module.
+
+    expected_output:
+        - r'Failed test case stage <test_case_index>: .*'
+
+    tags:
+        - analysisd
+    '''
     stage = test_case[0]
 
     if stage["stage"] != 'Remove session OK':

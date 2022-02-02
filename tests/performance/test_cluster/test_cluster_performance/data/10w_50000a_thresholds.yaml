@@ -1,0 +1,103 @@
+tasks:
+  setup_phase:
+    agent-info_sync:
+      time_spent(s):
+        master:
+          max: 30
+          mean: 5
+        workers:
+          max: 40
+          mean: 10
+    integrity_check:
+      time_spent(s):
+        master:
+          max: 50
+          mean: 10
+        workers:
+          max: 50
+          mean: 15
+    integrity_sync:
+      time_spent(s):
+        master:
+          max: 80
+          mean: 30
+        workers:
+          max: 50
+          mean: 20
+  stable_phase:
+    agent-info_sync:
+      time_spent(s):
+        master:
+          max: 10
+          mean: 0.5242
+        workers:
+          max: 10
+          mean: 1.43406
+    integrity_check:
+      time_spent(s):
+        master:
+          max: 9
+          mean: 1.45237
+        workers:
+          max: 9
+          mean: 3.32689
+
+resources:
+  setup_phase:
+    wazuh-clusterd:
+      CPU(%):
+        master:
+          max: 110
+          mean: 60
+          reg_cof: 1.5
+        workers:
+          max: 110
+          mean: 10
+          reg_cof: 0.5
+      FD:
+        master:
+          max: 200
+          mean: 100
+          reg_cof: 5
+        workers:
+          max: 150
+          mean: 30
+          reg_cof: 1
+      USS(KB):
+        master:
+          max: 2097152            # (2 GB)
+          mean: 1048576           # (1 GB)
+          reg_cof: 102400         # (100 MB)
+        workers:
+          max: 307200             # (300 MB)
+          mean: 153600            # (150 MB)
+          reg_cof: 1024           # (1 MB)
+  stable_phase:
+    wazuh-clusterd:
+      CPU(%):
+        master:
+          max: 70
+          mean: 47
+          reg_cof: 0.05
+        workers:
+          max: 50
+          mean: 15
+          reg_cof: 0.05
+      FD:
+        master:
+          max: 65
+          mean: 26.77512
+          reg_cof: 0.001
+        workers:
+          max: 20
+          mean: 16
+          reg_cof: 0.0040
+      USS(KB):
+        master:
+          max: 309394.8
+          mean: 240663.67742
+          reg_cof: 30
+        workers:
+          max: 189895.2
+          mean: 117506.60276
+          reg_cof: 30

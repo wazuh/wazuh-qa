@@ -17,9 +17,10 @@ GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL = "The expected analyzing eventcha
 GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
-LOG_COLLECTOR_GLOBAL_TIMEOUT = 20
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
+
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 40
 
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
@@ -68,7 +69,7 @@ if sys.platform == 'win32':
         'windows.debug': '2',
         'agent.debug': '2'
     }
-    prefix = monitoring.AGENT_DETECTOR_PREFIX
+    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'logcollector.debug': '2',
@@ -76,6 +77,10 @@ else:
         'agent.debug': '0',
     }
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
+
+def callback_read_macos_message(msg):
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
 def callback_analyzing_file(file):
@@ -87,6 +92,16 @@ def callback_analyzing_file(file):
     """
     msg = fr"Analyzing file: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_macos_log(msg):
+    """Create a callback to detect macos log.
+    Args:
+        msg (str): macOS message.
+    Returns:
+        callable: callback to detect this event.
+    """
+    return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
 def callback_removed_file(file):
@@ -108,7 +123,7 @@ def callback_ignored_removed_file(file):
     Returns:
         callable: Callback to detect this event.
     """
-    msg = fr"File not available, ignoring it: '{file}'."
+    msg = f"File not available, ignoring it: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -275,7 +290,7 @@ def callback_reading_syslog_message(message):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"DEBUG: Reading syslog message: '{message}'"
+    msg = f"DEBUG: Reading syslog message: '{message}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -338,7 +353,7 @@ def callback_event_log_service_down(location, severity='WARNING'):
         callable: callback to detect this event.
     """
     log_format_message = f"{severity}: The eventlog service is down. Unable to collect logs from '{location}' channel."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_trying_to_reconnect(location, reconnect_time):
@@ -350,7 +365,17 @@ def callback_trying_to_reconnect(location, reconnect_time):
         callable: callback to detect this event.
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
+
+
+def callback_log_stream_exited_error():
+    """Create a callback to detect if `log stream` process exited.
+
+    Returns:
+        callable: callback to detect this event.
+    """
+    log_format_message = "ERROR: \(\d+\): macOS 'log stream' process exited"
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_reconnect_eventchannel(location):
@@ -361,7 +386,7 @@ def callback_reconnect_eventchannel(location):
         callable: callback to detect this event.
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_match_pattern_file(file_pattern, file):
@@ -372,7 +397,7 @@ def callback_match_pattern_file(file_pattern, file):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"New file that matches the '{file_pattern}' pattern: '{file}'."
+    msg = f"New file that matches the '{file_pattern}' pattern: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -632,23 +657,31 @@ def create_file_structure(get_files_list):
         get_files_list(dict):  Files to create.
     """
     for file in get_files_list:
-        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        for name in file['filename']:
+        file_folder_path = file['folder_path']
+        files_list = file['filename']
+        age = file['age'] if 'age' in file else None
+        size = file['size'] if 'size' in file else None
+        content = file['content'] if 'content' in file else None
+        size_kib = file['size_kib'] if 'size_kib' in file else None
+
+        os.makedirs(file_folder_path, exist_ok=True, mode=0o777)
+        for filename in files_list:
             for i in range(0, 5):
                 try:
-                    with open(os.path.join(file['folder_path'], name), mode='w'):
+                    with open(os.path.join(file_folder_path, filename), mode='w'):
                         pass
-                except:
-                    continue
-                break
+                    break
+                except Exception as e:
+                    print(f"Error creating file structure {e}")
+                    sleep(1)
 
-            if 'age' in file:
-                fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
-                os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
-                                                                      fileinfo.st_mtime - file['age']))
-            elif 'size' in file:
-                add_log_data(log_path=os.path.join(file['folder_path'], name),
-                             log_line_message=file['content'], size_kib=file['size_kib'])
+            if age:
+                fileinfo = os.stat(os.path.join(file_folder_path, filename))
+                os.utime(os.path.join(file_folder_path, filename), (fileinfo.st_atime - age,
+                                                                      fileinfo.st_mtime - age))
+            elif size:
+                add_log_data(log_path=os.path.join(file_folder_path, filename),
+                             log_line_message=content, size_kib=size_kib)
 
 
 def delete_file_structure(get_files_list):
@@ -688,6 +721,37 @@ def callback_invalid_state_interval(interval):
     """
     msg = fr"Invalid definition for logcollector.state_interval: '{interval}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
+
+
+def callback_logcollector_started():
+    """Check if logcollector started."""
+    return monitoring.make_callback(pattern='Started', prefix=prefix)
+
+
+def callback_log_bad_predicate():
+    """Check for the macOS ULS bad predicate message."""
+    return monitoring.make_callback(pattern="Execution error 'log:", prefix=prefix)
+
+
+def callback_macos_uls_log(expected_message):
+    """Callback function to wait for a macOS' ULS log, collected by logcollector."""
+    return monitoring.make_callback(pattern=expected_message, prefix=prefix, escape=False)
+
+
+def callback_logcollector_log_stream_log():
+    """Check for logcollector's macOS ULS module start message."""
+    return monitoring.make_callback(pattern='Monitoring macOS logs with:(.+?)log stream',
+                                    prefix=prefix, escape=False)
+
+
+def callback_file_status_macos_key():
+    """Check for 'macos' key."""
+    return monitoring.make_callback(pattern='"macos"', prefix='.*', escape=False)
+
+
+def callback_log_macos_stream_exit():
+    """Check for the macOS ULS log stream exit message."""
+    return monitoring.make_callback(pattern="macOS 'log stream' process exited, pid:", prefix=prefix)
 
 
 def wait_statistics_file(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT):
@@ -765,3 +829,38 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
     assert macos_message is not None, 'Wrong type or process name selected for macos message pattern format.'
 
     return macos_message
+
+
+def compose_macos_log_command(type='', level='', predicate='', is_sierra=False):
+    """
+    This function replicates how the command 'log' will be called from the Wazuh agent given the query parameters
+
+    Args:
+        type (str): < activity | log | trace > Limit streaming to a given event type.
+        level (str): < default | info | debug > Include events at, and below, the given level.
+        predicate (str): Filter events using the given predicate.
+        is_sierra (boolean): True if running on macOS Sierra, False otherwise.
+
+    Returns:
+        string: Full log command composed with the given parameters.
+    """
+
+    settings_str = ''
+
+    if (is_sierra):
+        settings_str = '/usr/bin/script -q /dev/null '
+
+    settings_str += '/usr/bin/log stream --style syslog '
+
+    if (type):
+        for t in type.split(','):
+            settings_str += '--type ' + t + ' '
+
+    if (level):
+        level = level.replace(' ', '')
+        settings_str += '--level ' + level + ' '
+
+    if(predicate):
+        settings_str += '--predicate ' + predicate
+
+    return settings_str

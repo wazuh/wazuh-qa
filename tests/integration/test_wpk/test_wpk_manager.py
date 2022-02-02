@@ -1,35 +1,85 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
-import json
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, on the manager side,
+        that the WPK upgrade works correctly.
+
+tier: 0
+
+modules:
+    - wpk
+
+components:
+    - manager
+
+daemons:
+    - wazuh-monitord
+    - wazuh-remoted
+    - wazuh-modulesd
+    - wazuh-db
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import os
 import pytest
-import socket
-import subprocess
-import struct
-import threading
 import time
 import hashlib
 import requests
-import platform
 
-from configobj import ConfigObj
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, get_version
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, UPGRADE_PATH, get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters
+from wazuh_testing.tools.sockets import WazuhSocket
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
-UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
 SERVER_ADDRESS = 'localhost'
-WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
+WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0]
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
@@ -37,8 +87,19 @@ TASK_TIMEOUT = '15m'
 global valid_sha1_list
 valid_sha1_list = {}
 
+
+upgrade_socket = WazuhSocket(UPGRADE_SOCKET)
+task_socket = WazuhSocket(TASK_SOCKET)
+time_until_registration_key_avaible = 40
+time_until_ask_upgrade_result = 30
+max_upgrade_result_status_retries = 30
+
+
 if global_parameters.wpk_version is None:
     raise ValueError("The WPK package version must be defined by parameter. See README.md")
+if global_parameters.wpk_package_path is None:
+    raise ValueError("The WPK package path must be defined by parameter. See README.md")
+
 version_to_upgrade = global_parameters.wpk_version[0]
 
 MANAGER_VERSION = get_version()
@@ -225,7 +286,7 @@ cases = [
             'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['mojave'],
+            'agents_os': ['solaris11'],
             'agents_version': ['v3.11.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
@@ -350,7 +411,7 @@ cases = [
             'upgrade_exec_result': ['0'],
             'upgrade_script_result': [0],
             'status': ['Legacy upgrade:' + \
-                       'check the result manually since the agent cannot report the result of the task'],
+                       ' check the result manually since the agent cannot report the result of the task'],
             'upgrade_notification': [False],
             'message_params': {'version': 'v3.13.1'},
             'expected_response': 'Success'
@@ -577,16 +638,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -603,16 +664,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -629,16 +690,16 @@ cases = [
     {
         'params': {
             'PROTOCOL': 'tcp',
-            'WPK_REPOSITORY': WPK_REPOSITORY_3x,
+            'WPK_REPOSITORY': WPK_REPOSITORY_4x,
             'CHUNK_SIZE': CHUNK_SIZE,
             'TASK_TIMEOUT': TASK_TIMEOUT
         },
         'metadata': {
-            'wpk_repository': WPK_REPOSITORY_3x,
+            'wpk_repository': WPK_REPOSITORY_4x,
             'agents_number': 1,
             'protocol': 'tcp',
-            'agents_os': ['debian7'],
-            'agents_version': ['v3.12.0'],
+            'agents_os': ['mojave'],
+            'agents_version': ['v4.3.0'],
             'stage_disconnect': [None],
             'sha_list': ['NOT_NEED'],
             'upgrade_exec_result': ['0'],
@@ -728,7 +789,6 @@ cases = [
     }
 ]
 
-
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
 
@@ -767,16 +827,6 @@ def restart_service():
     yield
 
 
-def send_message(data_object, socket_path):
-    upgrade_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    upgrade_sock.connect(socket_path)
-    msg_bytes = json.dumps(data_object).encode()
-    upgrade_sock.send(struct.pack("<I", len(msg_bytes)) + msg_bytes)
-    size = struct.unpack("<I", upgrade_sock.recv(4, socket.MSG_WAITALL))[0]
-    response = upgrade_sock.recv(size, socket.MSG_WAITALL)
-    return json.loads(response.decode())
-
-
 def clean_logs():
     truncate_file(LOG_FILE_PATH)
 
@@ -794,13 +844,13 @@ def wait_downloaded(line):
 
 
 def wait_chunk_size(line):
-    if ('Sending message to agent:' in line) and ('com write ' in line):
+    if ('Sending message to agent:' in line) and (('com write ' in line) or ('"command":"write"' in line)):
         return line
     return None
 
 
 def wait_wpk_custom(line):
-    if ('Sending message to agent:' in line) and ('com upgrade ' in line):
+    if ('Sending message to agent:' in line) and (('com upgrade ' in line) or ('"command":"upgrade"' in line)):
         return line
     return None
 
@@ -867,8 +917,59 @@ def get_sha_list(metadata):
     return sha_list
 
 
-def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
+@pytest.fixture(scope="function")
+def remove_current_wpk():
+    downloaded_wpk_path = '/var/ossec/var/upgrade/'
+    for filename in os.listdir(downloaded_wpk_path):
+        file_path = os.path.join(downloaded_wpk_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception:
+            raise Exception(f'Failed to remove {filename} file')
+
+
+@pytest.mark.skip(reason="Blocked by issue wazuh-qa#2203, when is fixed we can enable this test again")
+def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, configure_environment,
                      restart_service, configure_agents):
+    '''
+    description: Prepare an environment with different agents to test WPK upgrade,
+                 with different scenarios containing agents already updated, agents that
+                 can not be updated, repository not reachable, disconnected agents, etc.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - set_debug_mode:
+            type: fixture
+            brief: Set the debug mode in the manager.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_service:
+            type: fixture
+            brief: Restart Wazuh manager.
+        - configure_agents:
+            type: fixture
+            brief: Configure all simulated agents.
+
+    input_description: Test case metadata
+
+    assertions:
+        - Verify that version and HTTP are the expected
+        - Verify that successful upgrade proccess
+        - Verify the first attemp is successful
+        - Verify the results are the expected
+
+    expected_output:
+        - r'Upgrade process result'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     expected_status = metadata['status']
@@ -925,16 +1026,16 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         remove_wpk_package()
 
     # Give time for registration key to be available and send a few heartbeats
-    time.sleep(40)
+    time.sleep(time_until_registration_key_avaible)
 
     # Send upgrade request
-    response = send_message(data, UPGRADE_SOCKET)
+    response = upgrade_socket.send(data)
 
     if metadata.get('checks') and (('use_http' in metadata.get('checks')) or ('version' in metadata.get('checks'))):
         # Checking version or http in logs
         try:
             log_monitor.start(timeout=60, callback=wait_download)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Download wpk log took too much!")
 
         last_log = log_monitor.result()
@@ -958,32 +1059,32 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
         # let time to download wpk
         try:
             log_monitor.start(timeout=600, callback=wait_downloaded)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Finish download wpk log took too much!")
-        # time.sleep(60)
 
     if metadata.get('checks') and ('chunk_size' in metadata.get('checks')):
         # Checking version in logs
         try:
             log_monitor.start(timeout=60, callback=wait_chunk_size)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Chunk size log tooks too much!")
         chunk = metadata.get('chunk_size')
         last_log = log_monitor.result()
-        assert f'com write {chunk}' in last_log, \
+        assert f'{chunk}' in last_log, \
             f'Chunk size did not match expected! Expected {chunk} obtained {last_log}'
 
     if metadata.get('checks') and ('wpk_name' in metadata.get('checks')):
         # Checking version in logs
         try:
             log_monitor.start(timeout=180, callback=wait_wpk_custom)
-        except TimeoutError as err:
+        except TimeoutError:
             raise AssertionError("Custom wpk log tooks too much!")
 
         last_log = log_monitor.result()
-        assert f'com upgrade {file_name} {installer}' in last_log, \
+        assert f'{file_name}' in last_log and f'{installer}' in last_log, \
             f'Wpk custom package did not match expected! ' \
-            f'Expected {metadata.get("message_params").get("file_path")} obtained {last_log}'
+            f'Expected {metadata.get("message_params").get("file_path")} '\
+            f'{metadata.get("message_params").get("installer")} obtained {last_log}'
 
     if metadata.get('first_attempt'):
         # Chech that result of first attempt is Success
@@ -1004,20 +1105,22 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                     "agents": [agent_id]
                 }
             }
-            time.sleep(30)
-            response = send_message(data, TASK_SOCKET)
+
+            time.sleep(time_until_ask_upgrade_result)
+
+            response = task_socket.send(data)
             retries = 0
             while (response['data'][0]['status'] != metadata.get('first_attempt')) \
                     and (retries < 10):
-                time.sleep(30)
-                response = send_message(data, TASK_SOCKET)
+                time.sleep(time_until_ask_upgrade_result)
+                response = task_socket.send(data)
                 retries += 1
             assert metadata.get('first_attempt') == response['data'][0]['status'], \
                 f'First upgrade status did not match expected! ' \
                 f'Expected {metadata.get("first_attempt")} obtained {response["data"][0]["status"]}'
 
         # send upgrade request again
-        response = send_message(repeat_message, UPGRADE_SOCKET)
+        response = upgrade_socket.send(repeat_message)
 
     if metadata.get('expected_response') == 'Success':
         # Chech that result is expected
@@ -1027,6 +1130,7 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
 
         # Continue with the test validations
         task_ids = [item.get('agent') for item in response['data']]
+        task_ids.sort()
         for index, agent_id in enumerate(task_ids):
             data = {
                 "origin": {
@@ -1037,14 +1141,16 @@ def test_wpk_manager(set_debug_mode, get_configuration, configure_environment,
                     "agents": [agent_id]
                 }
             }
-            time.sleep(30)
-            response = send_message(data, TASK_SOCKET)
+            time.sleep(time_until_ask_upgrade_result)
+            response = task_socket.send((data))
             retries = 0
-            while response['data'][0]['status'] == 'Updating' and retries < 30 and \
+
+            while response['data'][0]['status'] == 'Updating' and retries < max_upgrade_result_status_retries and \
                     response['data'][0]['status'] != expected_status[index]:
-                time.sleep(30)
-                response = send_message(data, TASK_SOCKET)
+                time.sleep(time_until_ask_upgrade_result)
+                response = task_socket.send(data)
                 retries += 1
+
             assert expected_status[index] == response['data'][0]['status'], \
                 f'Upgrade status did not match expected! ' \
                 f'Expected {expected_status[index]} obtained {response["data"][0]["status"]} at index {index}'
