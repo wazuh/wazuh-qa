@@ -113,6 +113,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('sleep, tags_to_apply', [
     (0.25, {'ossec_conf'}),
     (0.5, {'ossec_conf'}),

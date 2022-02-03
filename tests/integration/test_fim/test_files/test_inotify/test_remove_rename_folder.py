@@ -143,7 +143,7 @@ def get_configuration(request):
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('removed, renamed', [
     (True, False),
     (False, True)

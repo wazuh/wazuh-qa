@@ -111,6 +111,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_report_changes'}),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_report_changes'}),
