@@ -108,7 +108,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by issue wazuh/wazuh #11819")
+@pytest.mark.skip(reason="Blocked by issue wazuh/wazuh #11819")
 def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
