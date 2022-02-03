@@ -120,7 +120,7 @@ def test_synchronization(folder_path, case, host):
 
     clean_logs(host_manager)
 
-    # Stop agent
+    # Stop host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control stop')
 
     if (case == 'add'):
@@ -134,7 +134,7 @@ def test_synchronization(folder_path, case, host):
         folder_path = f"'/{folder_path}/{folder_path}.txt'"
         query = " select * from fim_entry where full_path='\"{}\"'".format(folder_path)
 
-    # Start agent
+    # Start host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control start')
 
     if (host == 'wazuh-manager'):
