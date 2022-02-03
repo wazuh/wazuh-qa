@@ -12,7 +12,7 @@ from wazuh_testing.tools import (ALERT_FILE_PATH, LOG_FILE_PATH,
                                  CUSTOM_RULES_PATH)
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.vulnerability_detector import create_mocked_agent, delete_mocked_agent
+from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
