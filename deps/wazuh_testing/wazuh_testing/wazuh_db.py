@@ -7,12 +7,9 @@ import logging
 import socket
 import sqlite3
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
-
-GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
-
 
 def callback_wazuhdb_response(item):
     if isinstance(item, tuple):
@@ -36,9 +33,7 @@ def mock_db(func):
     @functools.wraps(func)
     def magic(*args, **kwargs):
         control_service('stop', daemon='wazuh-modulesd')
-        control_service('stop', daemon='wazuh-db')
         func(*args, **kwargs)
-        control_service('start', daemon='wazuh-db')
         control_service('start', daemon='wazuh-modulesd')
 
     return magic
@@ -53,7 +48,7 @@ def mock_agent(
         last_keepalive="253402300799", group="", sync_status="synced", connection_status="active",
         client_key_secret=None):
 
-    create_agent_query = f'''INSERT INTO AGENT
+    create_agent_query = f'''global sql INSERT OR REPLACE INTO AGENT
                    (id, name, ip, register_ip, internal_key, os_name, os_version, os_major, os_minor,
                     os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, merged_sum,
                     manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status)
@@ -64,7 +59,7 @@ def mock_agent(
                      "{date_add}", "{last_keepalive}", "{group}", "{sync_status}", "{connection_status}")
                    '''
     try:
-        run_query(create_agent_query, GLOBAL_DB_PATH)
+        query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
         logging.error("Failed to mock agent in database!")
 
@@ -153,9 +148,35 @@ def query_wdb(command):
 
             # Remove response header and cast str to list of dictionaries
             # From --> 'ok [ {data1}, {data2}...]' To--> [ {data1}, data2}...]
-            if len(data.split(' ')) > 1:
+            if len(data.split()) > 1 and data.split()[0] == 'ok':
                 data = json.loads(' '.join(data.split(' ')[1:]))
     finally:
         sock.close()
 
     return data
+
+
+def clean_agents_from_db():
+    """
+    Clean agents from DB
+    """
+    command = 'global sql DELETE FROM agent WHERE id != 0'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean agents')
+
+
+def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
+                       disconnection_time=0):
+    """
+    Write agent in global.db
+    """
+    insert_command = f'global insert-agent {{"id":{id},"name":"{name}","ip":"{ip}","date_add":{registration_time}}}'
+    update_command = f'global sql UPDATE agent SET connection_status = "{connection_status}",\
+                       disconnection_time = "{disconnection_time}" WHERE id = {id};'
+    try:
+        query_wdb(insert_command)
+        query_wdb(update_command)
+    except Exception:
+        raise Exception(f"Unable to add agent {id}")
