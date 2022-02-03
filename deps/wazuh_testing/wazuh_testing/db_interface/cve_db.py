@@ -179,7 +179,7 @@ def modify_nvd_metadata_vuldet(timestamp):
 
 
 def check_inserted_value_exists(table, column, value):
-    """Function to check if a value exists in a specific column of a specific table.
+    """Check if a value exists in a specific table column.
 
     Args:
         table (str): Table of cve.db.
