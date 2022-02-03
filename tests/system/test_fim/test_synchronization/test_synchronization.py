@@ -47,8 +47,9 @@ from time import sleep
 
 
 from wazuh_testing.tools.monitoring import HostMonitor
-from wazuh_testing.tools.system import HostManager
-from test_fim import create_folder_file, clean_logs, query_db
+from wazuh_testing.tools.system import HostManager, clean_environment
+from wazuh_testing.tools import WAZUH_LOGS_PATH
+from test_fim import create_folder_file, query_db
 
 
 # Hosts
@@ -66,6 +67,8 @@ tmp_path = os.path.join(local_path, 'tmp')
 scheduled_mode = 'testdir1'
 db_path = '/var/ossec/queue/db/001.db'
 db_script = '/var/system_query_db.py'
+enviroment_files = [('wazuh-manager', os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
+                    ('wazuh-agent1', os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))]
 
 
 @pytest.mark.parametrize('host', ['wazuh-agent1', 'wazuh-manager'])
@@ -116,7 +119,7 @@ def test_synchronization(folder_path, case, host):
     except:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
 
-    clean_logs(host_manager)
+    clean_environment(host_manager, enviroment_files)
 
     # Stop host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control stop')

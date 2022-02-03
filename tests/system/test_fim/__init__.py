@@ -5,6 +5,7 @@ import os
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 
 
+# Create folder and file inside 
 def create_folder_file(host_manager, folder_path):
     # Create folder
     host_manager.run_command('wazuh-agent1', f'mkdir {folder_path}')
@@ -13,16 +14,12 @@ def create_folder_file(host_manager, folder_path):
     host_manager.run_command('wazuh-agent1', f'touch {folder_path}/{folder_path}.txt')
 
 
+# Check that fim scan end
 def wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path, tmp_path):
     HostMonitor(inventory_path=inventory_path,
                 messages_path=messages_path,
                 tmp_path=tmp_path).run()
 
-
-def clean_logs(host_manager):
-    host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-
-
+# Function that use to run a script inside remote host to execute queries to DB 
 def query_db(host_manager, script, db_path, query):
     return host_manager.run_command('wazuh-manager', "python {} --db_path {} --query {}".format(script, db_path, query))
