@@ -20,6 +20,7 @@ API_PORT = '55000'
 API_USER = 'wazuh'
 API_PASS = 'wazuh'
 API_LOGIN_ENDPOINT = '/security/user/authenticate'
+API_LOGIN_RUN_AS_ENDPOINT = '/security/user/authenticate/run_as'
 
 
 # Callbacks
@@ -50,13 +51,22 @@ def get_login_headers(user, password):
             'Authorization': f'Basic {b64encode(basic_auth).decode()}'}
 
 
-def get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, login_attempts, sleep_time):
+def get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, login_attempts, sleep_time,
+                        request_body=None):
     """Get API login token"""
+    if login_endpoint == API_LOGIN_ENDPOINT:
+        request_method = 'get'
+        request_body = {'json': request_body} if request_body is not None else {}
+    else:
+        request_method = 'post'
+        # One of the default admin rules. Only 'wazuh-wui' will work
+        request_body = {'json': request_body} if request_body is not None else {'json': {'username': 'elastic'}}
 
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
 
     for _ in range(login_attempts):
-        response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
+        response = getattr(requests, request_method)(login_url, headers=get_login_headers(user, password),
+                                                     verify=False, timeout=timeout, **request_body)
 
         if response.status_code == 200:
             return json.loads(response.content.decode())['data']['token']
