@@ -73,7 +73,7 @@ db_script = '/var/system_query_db.py'
 @pytest.mark.parametrize('host', ['wazuh-agent1', 'wazuh-manager'])
 @pytest.mark.parametrize('case', ['add', 'modify', 'delete'])
 @pytest.mark.parametrize('folder_path', ['testdir1'])
-def test_Synchronization_create_file_agent_stopped(folder_path, case, host):
+def test_synchronization(folder_path, case, host):
     '''
     Description: The test will monitor a directory and apply changes when agent/manager is stopped.
     Finally, it will verify that the FIM 'Synchronization' event is generated
