@@ -52,8 +52,6 @@ from test_fim import create_folder_file, clean_logs, query_db
 
 
 # Hosts
-testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
-
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'one_manager_agent', 'inventory.yml')
 host_manager = HostManager(inventory_path)
