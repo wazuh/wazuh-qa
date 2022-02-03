@@ -75,6 +75,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 10
 EXPECTED_DATABES_STATE = "100"
+monitor_timeout = 40
 
 # Configurations
 
@@ -165,7 +166,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
 
     RegCloseKey(reg1_handle)
 
-    wazuh_log_monitor.start(timeout=40, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
+    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
                             error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
