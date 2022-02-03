@@ -5,6 +5,9 @@
 '''
 The purpose of this file is to contain all the variables necessary for FIM in order to be easier to
 maintain if one of them changes in the future.
+
+UPDATE: This file is deprecated. Add new variables to de fim_module/__init__.py file. If this is used
+in a test, refactor the imports to adhere to the new standard.
 '''
 
 # Variables
@@ -83,4 +86,3 @@ ERR_MSG_DISK_QUOTA_MUST_BE_GREATER = "Did not receive expected 'DEBUG: ... disk_
 ERR_MSG_CONTENT_CHANGES_EMPTY = "content_changes is empty"
 ERR_MSG_CONTENT_CHANGES_NOT_EMPTY = "content_changes isn't empty"
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
-ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
