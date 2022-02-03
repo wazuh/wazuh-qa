@@ -5,7 +5,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: system
 brief: Check that when FIM is activated, and the agent is running, the agent and manager are synchronization when
 a change is performed in a monitored folder.
-tier: 1
+tier: 0
 modules:
     - fim
 components:
