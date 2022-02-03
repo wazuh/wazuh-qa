@@ -41,7 +41,6 @@ tags:
 """
 
 import os
-
 import pytest
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
