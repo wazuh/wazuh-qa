@@ -62,6 +62,8 @@ from wazuh_testing.api import compare_config_api_response
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.utils import format_ipv6_long
 
+from urllib3.exceptions import InsecureRequestWarning
+import requests
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
@@ -138,9 +140,9 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
     description: Check that 'allowed-ips' and 'denied-ips' could be configured without errors for syslog connection.
                  For this purpose, it uses the configuration from test cases, check if the warning has been logged and
                  the configuration is the same as the API reponse.
-    
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -151,27 +153,28 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that remoted starts correctly.
         - Verify that the API query matches correctly with the configuration that ossec.conf contains.
         - Verify that the selected configuration is the same as the API response.
-    
+
     input_description: A configuration template (test_basic_configuration_allowed_denied_ips) is contained in an
                        external YAML file, (wazuh_basic_configuration.yaml). That template is combined with different
                        test cases defined in the module. Those include configuration settings for the 'wazuh-remoted'
                        daemon and agents info.
-    
+
     expected_output:
         - r'Started <pid>: .* Listening on port .*'
-        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the 
+        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the
           introduced configuration on ossec.conf.'
         - Wazuh remoted didn't start as expected.
         - r'Remote syslog allowed from: .*'
-    
+
     tags:
         - remoted
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     address = cfg['allowed-ips'][:-3]

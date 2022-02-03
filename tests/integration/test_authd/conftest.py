@@ -153,7 +153,6 @@ def override_authd_force_conf(format_configuration):
     write_wazuh_conf(backup_config)
 
 
-<<<<<<< HEAD
 @pytest.fixture(scope='module')
 def get_api_details():
     return get_api_details_dict
@@ -173,7 +172,8 @@ def wait_for_start_module():
     file_monitor = FileMonitor(API_LOG_FILE_PATH)
     file_monitor.start(timeout=20, callback=callback_detect_api_start,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
-=======
+
+
 @pytest.fixture(scope='function')
 def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
     agents = get_current_test_case.get('pre_existent_agents', [])
@@ -211,4 +211,3 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
 
     keys_file.close()
->>>>>>> 99406ef53071e5c56bbb5ad9ad22547ad449c383

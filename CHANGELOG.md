@@ -25,6 +25,7 @@ Release report: TBD
 - Migrate several test groups of test_logcollector documentation to qa-docs ([#2180](https://github.com/wazuh/wazuh-qa/pull/2180))
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
 - Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
+- Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
 
 
 ### Deleted
@@ -66,6 +67,7 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 ### Changed
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
+- Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))
 - Fix `wazuh-metrics` CLI bug when child processes restart. ([#2416](https://github.com/wazuh/wazuh-qa/pull/2416))
 - IT Solaris Jenkins: Fix requirements. ([#2415](https://github.com/wazuh/wazuh-qa/pull/2415))
 - Fix the `agent_info_sync` test according to new changes. ([#2411](https://github.com/wazuh/wazuh-qa/pull/2411))
@@ -126,6 +128,7 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Rework of simulate agents script. Add new balance mode to distribute EPS between agents. ([#1491](https://github.com/wazuh/wazuh-qa/pull/1491))
 - Fix missing argument in test_macos_format_basic IT. ([#1478](https://github.com/wazuh/wazuh-qa/pull/1478))
 - Check if scheduled mode is set when realtime is not available. ([#1474](https://github.com/wazuh/wazuh-qa/pull/1474))
+
 
 ### Deleted
 - Delete unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
