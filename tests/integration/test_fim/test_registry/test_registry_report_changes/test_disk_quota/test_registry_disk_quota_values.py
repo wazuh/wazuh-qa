@@ -123,7 +123,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  - Case 1: small file - when compressed it will be less than the disk_quota. The file is generated 
                  and the logs have content_changes data.
                  - Case 2: big size - when compressed the file would be bigger than the disk_quota. The file is not
-                 generated and the logs should nave have content_changes data.
+                 generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
 

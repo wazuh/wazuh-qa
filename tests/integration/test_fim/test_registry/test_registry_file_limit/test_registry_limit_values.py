@@ -108,7 +108,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by issue wazuh/wazuh #11819")
+@pytest.mark.skip(reason="Blocked by issue wazuh/wazuh #11819")
 def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
@@ -161,7 +161,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     # Compare that the value configured is correct
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
-    # Get the ammount of entries monitored and Assert they are the same as the limit and not over
+    # Get the ammount of entries monitored and assert they are the same as the limit and not over
     entries = wazuh_log_monitor.start(timeout=monitor_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
