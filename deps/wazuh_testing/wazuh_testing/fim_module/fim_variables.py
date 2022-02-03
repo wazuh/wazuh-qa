@@ -10,25 +10,25 @@ maintain if one of them changes in the future.
 # Variables
 SIZE_LIMIT_CONFIGURED_VALUE = 10 * 1024
 
-# Key variables
+# Key Variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
 MONITORED_KEY = 'SOFTWARE\\random_key'
 MONITORED_KEY_2 = "SOFTWARE\\Classes\\random_key_2"
 WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 
-# Value key
+# Value Key
 SYNC_INTERVAL = 'SYNC_INTERVAL'
 SYNC_INTERVAL_VALUE = MAX_EVENTS_VALUE = 20
 
 
-# Folders variables
+# Folder Variables
 TEST_DIR_1 = 'testdir1'
 TEST_DIRECTORIES = 'TEST_DIRECTORIES'
 TEST_REGISTRIES = 'TEST_REGISTRIES'
 
 
-# Syscheck attributes
+# Syscheck Attributes
 REPORT_CHANGES = 'report_changes'
 DIFF_SIZE_LIMIT = 'diff_size_limit'
 FILE_SIZE_ENABLED = 'FILE_SIZE_ENABLED'
@@ -36,12 +36,12 @@ FILE_SIZE_LIMIT = 'FILE_SIZE_LIMIT'
 DISK_QUOTA_ENABLED = 'DISK_QUOTA_ENABLED'
 DISK_QUOTA_LIMIT = 'DISK_QUOTA_LIMIT'
 
-# Syscheck values
+# Syscheck Values
 DIFF_LIMIT_VALUE = 2
 DIFF_DEFAULT_LIMIT_VALUE = 51200
 
 
-# FIM modules
+# FIM Modes
 SCHEDULE_MODE = 'scheduled'
 
 # Yaml Configuration
@@ -49,11 +49,11 @@ YAML_CONF_REGISTRY_RESPONSE = 'wazuh_conf_registry_responses_win32.yaml'
 YAML_CONF_SYNC_WIN32 = 'wazuh_sync_conf_win32.yaml'
 YAML_CONF_DIFF = 'wazuh_conf_diff.yaml'
 
-# Synchronization options
+# Synchronization Options
 SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
-# Callbacks message
+# Callback Messages
 CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."

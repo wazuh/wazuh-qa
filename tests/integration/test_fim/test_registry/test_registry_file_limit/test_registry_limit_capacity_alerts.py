@@ -55,8 +55,8 @@ tags:
     - fim_registry_file_limit
 '''
 import os
-from sys import platform
 import pytest
+from sys import platform
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
