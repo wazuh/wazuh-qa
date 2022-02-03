@@ -186,7 +186,7 @@ def test_authd_use_source_ip(get_configuration, configure_environment, get_curre
                 raise ConnectionResetError('Manager did not respond to sent message!')
         if metadata['use_source_ip'] == 'yes' and get_current_test_case['ip_specified'] == 'no':
             if 'ipv6' in get_current_test_case:
-                expected = {"status": "success", "name": "user1", "ip": "::1"}
+                expected = {"status": "success", "name": "user1", "ip": "0000:0000:0000:0000:0000:0000:0000:0001"}
             else:
                 expected = {"status": "success", "name": "user1", "ip": "127.0.0.1"}
         else:

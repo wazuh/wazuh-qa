@@ -106,10 +106,10 @@ def test_connection_valid(get_configuration, configure_environment, restart_remo
     description: Check if 'wazuh-remoted' sets 'connection' as 'secure' or 'syslog' properly.
                  For this purpose, it loads the configuration from test cases cfg(For a syslog connection if more than
                  one protocol is provided, only TCP should be used), checks if remoted is properly started and if the
-                 configuration is the same as the API reponse. 
-    
+                 configuration is the same as the API reponse.
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -120,27 +120,28 @@ def test_connection_valid(get_configuration, configure_environment, restart_remo
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that a proper protocol is used.
         - Verify that invalid procotol selection warning message appears in ossec.log.
         - Verify that remoted starts correctly.
         - Verify that the selected configuration is the same that API response.
-    
+
     input_description: A configuration template (test_basic_configuration_connection) is contained in an external YAML
                        file, (wazuh_basic_configuration.yaml). That template is combined with different test cases
                        defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon and
                        agents info.
-    
+
     expected_output:
         - The expected error output has not been produced
         - r'WARNING: .* Only secure connection supports TCP and UDP at the same time.'
         - Default value TCP will be used.
         - r'Started <pid>: .* Listening on port .*'
-    
+
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     used_protocol = cfg['protocol']
