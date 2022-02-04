@@ -244,3 +244,12 @@ def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, co
     result = query_wdb(query)[0]['result']
 
     return result
+
+
+def clean_sys_programs(agent_id='000'):
+    """Clean all the agent packages data from the DB
+
+      Args:
+        agent_id (str): Agent ID.
+    """
+    clean_table(agent_id, 'sys_programs')
