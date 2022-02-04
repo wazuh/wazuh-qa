@@ -8,14 +8,14 @@ brief: This module verifies the correct behavior of Wazuh Agentd during the enro
 tier:
     0
 modules:
-    - Agentd
+    - agentd
 components:
     - agent
 daemons:
-    - Agentd
+    - wazuh-agentd
 path:
     /tests/integration/test_enrollment/test_agentd_enrollment.py
-os_platform
+os_platform:
     - linux
     - windows
 os_version:
@@ -42,7 +42,7 @@ os_version:
     - Windows Server 2012
     - Windows Server 2016
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import pytest
@@ -114,7 +114,7 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
         wazuh_min_version:
-            4.2
+            4.2.0
         parameters:
             - configure_environment:
                 type: fixture
