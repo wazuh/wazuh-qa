@@ -731,6 +731,7 @@ def create_file_structure_function(get_files_list):
 
     delete_file_structure(get_files_list)
 
+
 @pytest.fixture(scope='module')
 def daemons_handler(get_configuration, request):
     """Handler of Wazuh daemons.
@@ -850,3 +851,39 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def set_wazuh_configuration(configuration):
+    """Set wazuh configuration
+
+    Args:
+        configuration (dict): Configuration template data to write in the ossec.conf
+    """
+    # Save current configuration
+    backup_config = conf.get_wazuh_conf()
+
+    # Configuration for testing
+    test_config = conf.set_section_wazuh_conf(configuration.get('sections'))
+
+    # Set new configuration
+    conf.write_wazuh_conf(test_config)
+
+    # Set current configuration
+    global_parameters.current_configuration = configuration
+
+    yield
+
+    # Restore previous configuration
+    conf.write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='function')
+def truncate_log_files():
+    """Truncate all the log files after the test execution"""
+    yield
+
+    log_files = [LOG_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
