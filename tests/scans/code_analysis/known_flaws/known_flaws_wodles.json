@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 309,
+            "line_number": 315,
             "line_range": [
-                309
+                315
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -20,23 +20,23 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 482,
+            "line_number": 488,
             "line_range": [
-                482
+                488
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
         },
         {
-            "code": "         for container in containers:\n             md5_hash = md5(name.encode()).hexdigest()\n             offset = args.storage_time_offset\n",
+            "code": "     for container in containers:\n         md5_hash = md5(name.encode()).hexdigest()\n         # check if the hash was already present in the last_dates file\n",
             "filename": "wodles/azure/azure-logs.py",
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 616,
+            "line_number": 644,
             "line_range": [
-                616
+                644
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
