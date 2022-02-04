@@ -8,10 +8,9 @@ import subprocess as sb
 import time
 
 import pytest
-import wazuh_testing.tools as tools
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import TCP, UDP
-from wazuh_testing.tools import file, monitoring
+import wazuh_testing.tools as tools
+from wazuh_testing import UDP, TCP
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 

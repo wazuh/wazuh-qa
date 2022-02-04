@@ -1,3 +1,54 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, these tests will check that the status of multiple agents is active after
+       sending start-up and keep-alive events to each of them.
+
+tier: 2
+
+modules:
+    - remoted
+
+components:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html
+
+tags:
+    - remoted
+'''
 import os
 import pytest
 
@@ -119,7 +170,40 @@ def get_configuration(request):
                          "Sometimes it doesn't work properly when it sends keepalives "
                          "messages causing the agent to never being in active status.")
 def test_protocols_communication(get_configuration, configure_environment, restart_remoted):
-    """Validate agent status after sending the start-up and keep-alive events"""
+    '''
+    description: Check multiple agents status after sending the start-up and keep-alive events via TCP, UDP or both.
+                 For this purpose, the test will create all the agents and select the protocol using Round-Robin. Then,
+                 every agent uses a sender and it waits until 'active' status appears after an startup and keep-alive
+                 events, for each one.
+                 It requires review and a rework for the agent simulator. Sometimes it does not work properly when it
+                 sends keep-alives messages causing the agent to never being in active status.
+    
+    wazuh_min_version: 4.2.0
+    
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - restart_remoted:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+    
+    assertions:
+        - Verify that agent status is 'active' after the startup and keep-alive events.
+    
+    input_description: A configuration template (test_multi_agent_status) is contained in an external YAML file,
+                       (wazuh_multi_agent_status.yaml). That template is combined with different test cases defined in
+                       the module. Those include configuration settings for the 'wazuh-remoted' daemon and agents info.
+                        
+    expected_output:
+        - agent.status = active
+    
+    tags:
+        - simulator
+    '''
     manager_port = get_configuration['metadata']['port']
     protocol = get_configuration['metadata']['protocol']
 
