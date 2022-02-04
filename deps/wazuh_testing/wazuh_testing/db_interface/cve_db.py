@@ -87,7 +87,7 @@ def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', targ
 
         'INSERT INTO VULNERABILITIES_INFO (ID, title, severity, published, updated, target, rationale, cvss, '
         f"cvss_vector, CVSS3, cwe) VALUES ('{cveid}', '{title}', '{severity}', '{published}', '{updated}', "
-        f"'{target_v}', {rationale}', '{cvss}', '{cvss_vector}', '{cvss3}', '{cwe}')",
+        f"'{target_v}', '{rationale}', '{cvss}', '{cvss_vector}', '{cvss3}', '{cwe}')",
 
         f"INSERT INTO REFERENCES_INFO (id, target, reference) VALUES ('{cveid}', '{ref_target}', "
         f"'{bugzilla_reference}')",
