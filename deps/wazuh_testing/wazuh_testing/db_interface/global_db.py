@@ -85,3 +85,16 @@ def delete_agent(agent_id):
         agent_id (str): Agent ID.
     """
     query_wdb(f"global sql DELETE FROM agent where id={int(agent_id)}")
+
+
+def get_agent_ids(agent_name):
+    """Get the agent ids from a specific name.
+
+    Args:
+        agent_name (str): Agent names to get their ids.
+
+    Returns:
+        list(str): list of ids matching that name. e.g ['001', '005', ...] or [] if there is none.
+    """
+    return [str(item['id']).zfill(3) for item in query_wdb(f"global sql SELECT id FROM agent WHERE "
+                                                           f"name='{agent_name}'")]
