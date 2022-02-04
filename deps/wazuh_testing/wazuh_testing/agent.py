@@ -311,12 +311,12 @@ def callback_exit_cleaning():
 
 
 def callback_invalid_server_address(server_ip):
-    msg = f"ERROR: \(\d+\): Invalid server address found: '{server_ip}'"
+    msg = fr"ERROR: \(\d+\): Invalid server address found: '{server_ip}'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 
 def callback_unable_to_connect(server_ip, port='1515'):
-    msg = f"ERROR: \(\d+\): Unable to connect to enrollment service at '[{server_ip}]:{port}'"
+    msg = fr"ERROR: \(\d+\): Unable to connect to enrollment service at '\[{server_ip}\]:{port}'"
     return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
 
 
