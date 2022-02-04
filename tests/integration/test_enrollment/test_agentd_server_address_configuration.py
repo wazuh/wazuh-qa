@@ -25,8 +25,6 @@ daemons:
 os_platform:
     - linux
     - windows
-    - macOS
-    - solaris
 
 os_version:
     - Arch Linux
@@ -54,29 +52,23 @@ os_version:
     - Windows Server 2012
     - Windows Server 2003
     - Windows XP
-    - Solaris 11
-    - Solaris 10
-    - macOS Catalina
-    - macOS Sierra
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/client.html#address
 
 tags:
-    - server_address
     - agentd
 '''
 import os
 import sys
 import pytest
-from time import sleep
 
+from wazuh_testing.agent import callback_connected_to_manager_ip, callback_invalid_server_address, \
+                                callback_unable_to_connect, CLIENT_KEYS_PATH
 from wazuh_testing.tools import HOSTS_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, DEFAULT_WAIT_FILE_TIMEOUT
-from wazuh_testing import agent
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.agent import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_PATH
+from wazuh_testing.tools.monitoring import DEFAULT_WAIT_FILE_TIMEOUT
 
 
 # Marks
@@ -188,14 +180,14 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
                        for the environment setup using the TCP  protocols.
 
     tags:
-        - server_address
+        - agentd
     '''
 
     cfg = get_configuration['metadata']
     manager_address = cfg['server_address']
 
     if manager_address == 'MANAGER_IP':
-        callback = agent.callback_invalid_server_address(cfg['server_address'])
+        callback = callback_invalid_server_address(cfg['server_address'])
         log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
                           error_message="The expected 'Invalid server address found' message has not been produced")
     else:
@@ -210,10 +202,12 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
                         break
 
         if 'expected_connection' in cfg:
-            callback = agent.callback_connected_to_manager_ip(final_manager_address)
+            callback = callback_connected_to_manager_ip(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                              error_message="The expected 'Connected to the server' message has not been produced")
+                              error_message="The expected 'Connected to enrollment service' message has not been \
+                                             produced")
         else:
-            callback = agent.callback_unable_to_connect(final_manager_address)
+            callback = callback_unable_to_connect(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                              error_message="The expected 'Unable to connect to' message has not been produced")
+                              error_message="The expected 'Unable to connect to enrollment service' message has not \
+                                             been produced")
