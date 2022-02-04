@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 628,
+            "line_number": 627,
             "line_range": [
-                628
+                627
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -66,20 +66,6 @@
             "line_number": 9,
             "line_range": [
                 9
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " import os\n import subprocess\n from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n",
-            "filename": "framework/wazuh/core/common.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 7,
-            "line_range": [
-                7
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
             "test_id": "B404",
