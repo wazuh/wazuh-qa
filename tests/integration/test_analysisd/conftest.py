@@ -3,9 +3,16 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import shutil
+import os
 
 import pytest
-from wazuh_testing.tools import LOG_FILE_PATH
+
+from wazuh_testing.tools import (ALERT_FILE_PATH, LOG_FILE_PATH,
+                                 WAZUH_UNIX_USER, WAZUH_UNIX_GROUP,
+                                 CUSTOM_RULES_PATH)
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
@@ -38,3 +45,53 @@ def wait_for_analysisd_startup(request):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_analysisd_startup)
+
+
+@pytest.fixture(scope='module')
+def configure_custom_rules(request, get_configuration):
+    """Configure a syscollector custom rules for testing.
+    Restarting wazuh-analysisd is required to apply this changes.
+    """
+    data_dir = getattr(request.module, 'data_dir')
+    source_rule = os.path.join(data_dir, get_configuration['rule_file'])
+    target_rule = os.path.join(CUSTOM_RULES_PATH, get_configuration['rule_file'])
+
+    # copy custom rule with specific privileges
+    shutil.copy(source_rule, target_rule)
+    shutil.chown(target_rule, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
+
+    yield
+
+    # remove custom rule
+    os.remove(target_rule)
+
+
+@pytest.fixture(scope='module')
+def restart_analysisd():
+    """wazuh-analysisd restart and log truncation"""
+    required_logtest_daemons = ['wazuh-analysisd']
+
+    truncate_file(ALERT_FILE_PATH)
+    truncate_file(LOG_FILE_PATH)
+
+    for daemon in required_logtest_daemons:
+        control_service('restart', daemon=daemon)
+
+    yield
+
+    for daemon in required_logtest_daemons:
+        control_service('stop', daemon=daemon)
+
+
+@pytest.fixture(scope='module')
+def mock_agent():
+    """Fixture to create a mocked agent in wazuh databases"""
+    control_service('stop', daemon='wazuh-db')
+    agent_id = create_mocked_agent(name="mocked_agent")
+    control_service('start', daemon='wazuh-db')
+
+    yield agent_id
+
+    control_service('stop', daemon='wazuh-db')
+    delete_mocked_agent(agent_id)
+    control_service('start', daemon='wazuh-db')
