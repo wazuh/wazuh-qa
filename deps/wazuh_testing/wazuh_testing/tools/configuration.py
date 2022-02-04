@@ -6,6 +6,7 @@ import os
 import sys
 import xml.etree.ElementTree as ET
 import yaml
+import json
 import pytest
 from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
@@ -696,3 +697,26 @@ def get_test_cases_data(data_file_path):
         test_cases_ids.append(test_case['name'])
 
     return configuration_parameters, configuration_metadata, test_cases_ids
+
+
+def update_configuration_template(configurations, old_values, new_values):
+    """Update the configuration_template with specific values.
+
+    Args:
+        configurations (list(dict)): Actual configurations from the template.
+        old_values (list(list(item_to_replace))): Values to be replace.
+        new_values (list(list(item))): New values.
+
+    Raises:
+        ValueError: If the number of configurations are not the same as the number of values items to replace.
+        ValueError: If the number of values to replace are not the same.
+    """
+    if len(configurations) != len(old_values) != len(new_values):
+        raise ValueError(f"The number of configuration and values items should be the same.")
+
+    configurations_to_update = json.dumps(configurations)
+
+    for old_value, new_value in zip(old_values, new_values):
+        configurations_to_update = configurations_to_update.replace(old_value, new_value)
+
+    return json.loads(configurations_to_update)
