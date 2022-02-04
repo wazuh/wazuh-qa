@@ -8,14 +8,14 @@ brief: This module verifies the correct behavior of the agent-auth enrollment to
 tier:
     0
 modules:
-    - agent-auth
+    - authd
 components:
     - agent
 daemons:
-    - agent-auth
+    - wazuh-authd
 path:
     /tests/integration/test_enrollment/test_agent_auth_enrollment.py
-os_platform
+os_platform:
     - linux
     - windows
 os_version:
@@ -42,7 +42,7 @@ os_version:
     - Windows Server 2012
     - Windows Server 2016
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import pytest
@@ -98,7 +98,7 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
     wazuh_min_version:
-        4.2
+        4.2.0
     parameters:
         - configure_environment:
             type: fixture
