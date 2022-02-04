@@ -10,11 +10,12 @@ It obtains various statistics (mean, max, regression coefficient) from CSVs with
 To confirm that a cluster environment does not exceed certain thresholds in:
 - Duration of tasks (agent-info sync, integrity check and integrity sync).
 - Usage of resources (RAM, File descriptors, CPU).
+- Trends in the use of resources (any leak).
 
 ## General info
 ### Parameters
-The test needs to receive three parameters in order to be run. If said parameters are not specified, the test will fail. The required parameters are:
-- `--n_workers`: Number of workers node in the cluster environment. 
+The test needs to receive three parameters in order to be run. If these parameters are not specified, the test will fail. The required parameters are:
+- `--n_workers`: Number of workers nodes in the cluster environment. 
 - `--n_agents`: Number of agents in the cluster environment.
 - `--artifacts_path`: Path where CSVs with cluster information can be found. It should follow the structure below:
     ```.
@@ -41,7 +42,7 @@ The test needs to receive three parameters in order to be run. If said parameter
 
 #### Example output
 ```shell
-python3 -m pytest test_cluster_performance.py --artifacts_path='/home/selu/Descargas/cluster_performance/74' --n_workers=10 --n_agents=50000 --html=report.html --self-contained-html
+python3 -m pytest test_cluster_performance.py --artifacts_path='/tmp/artifacts/cluster_performance/74' --n_workers=10 --n_agents=50000 --html=report.html --self-contained-html
 ============================================================================================ test session starts ============================================================================================
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
@@ -53,7 +54,7 @@ test_cluster_performance.py F                                                   
 ================================================================================================= FAILURES ==================================================================================================
 _________________________________________________________________________________________ test_cluster_performance __________________________________________________________________________________________
 
-artifacts_path = '/home/selu/Descargas/cluster_performance/74', n_workers = '10', n_agents = '50000'
+artifacts_path = '/tmp/artifacts/cluster_performance/74', n_workers = '10', n_agents = '50000'
 
     def test_cluster_performance(artifacts_path, n_workers, n_agents):
         """Check that a cluster environment did not exceed certain thresholds.
