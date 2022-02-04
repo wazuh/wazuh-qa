@@ -76,18 +76,26 @@ def socket_file_properties():
 
 
 @pytest.fixture(scope="function")
-def run_analysisd_test_config():
-    """Run the daemon configuration test mode of 'wazuh-analysisd'"""
+def restart_analysisd():
+    """Restart and wait 'wazuh-analysisd' startup"""
     # restart analysisd daemon
     control_service('restart', daemon='wazuh-analysisd')
     check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
 
-    # run analysisd test configuration mode
+
+@pytest.fixture(scope="function")
+def run_analysisd_test_config():
+    """Run the daemon configuration test mode of 'wazuh-analysisd'"""
     run = subprocess.Popen(['/bin/bash', '-c', command_exec])
     run.communicate()
 
 
-def test_queue_socket_properties(socket_file_properties, run_analysisd_test_config):
+before_socket_properties = socket_file_properties
+after_socket_properties = socket_file_properties
+
+
+def test_queue_socket_properties(restart_analysisd, before_socket_properties, run_analysisd_test_config,
+                                 after_socket_properties):
     '''
     description: check if after running the configuration test of 'wazuh-analysisd' the properties
                  of the queue socket file are changed.
@@ -95,13 +103,18 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     wazuh_min_version: 4.2.2
 
     parameters:
-        - socket_file_properties:
+        - restart_analysisd:
             type: fixture
-            brief: Obtain the current properties of the 'queue' socket.
+            brief: Restart wazuh-analyisd.
+        - before_socket_properties:
+            type: fixture
+            brief: Obtain the previous properties of the 'queue' socket.
         - run_analysisd_test_config:
             type: fixture
             brief: Run the daemon configuration test mode of 'wazuh-analysisd'
-
+        - after_socket_properties:
+            type: fixture
+            brief: Obtain the later properties of the 'queue' socket.
 
     assertions:
         - Verify that the Inode value of the socket file does not change its value after running the
@@ -118,15 +131,11 @@ def test_queue_socket_properties(socket_file_properties, run_analysisd_test_conf
     tags:
         - errors
     '''
-    # Check if analysisd daemon is running
-    check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
+    before_inode_file, before_status_time = before_socket_properties
+    after_inode_file, after_status_time = after_socket_properties
 
-    current_inode_file, current_status_time = socket_file_properties
-
-    run_analysisd_test_config
-
-    assert current_inode_file == os.stat(ANALYSISD_QUEUE_SOCKET_PATH).st_ino, \
+    assert before_inode_file == after_inode_file, \
         f"The inode value for the socket  {ANALYSISD_QUEUE_SOCKET_PATH} has changed"
 
-    assert current_status_time == os.path.getmtime(ANALYSISD_QUEUE_SOCKET_PATH), \
+    assert before_status_time == after_status_time, \
         f"The modification time property value for the socket {ANALYSISD_QUEUE_SOCKET_PATH} has changed"
