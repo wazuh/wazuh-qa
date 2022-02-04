@@ -13,19 +13,29 @@ from deps.wazuh_testing.wazuh_testing.tools.logging import Logging
 from deps.wazuh_testing.wazuh_testing.tools.time import get_current_timestamp
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
-# /tmp/wazuh_auditing_commands
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-# /tmp/wazuh_auditing_commands/wazuh-qa
 CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_auditing_user_commands')
-# /tmp/wazuh_auditing_commands/tests/system/test_auditing_user_commands -> created test
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
+check_auditd_status = {
+    'command': 'systemctl status auditd.service',
+    'expected': 'active (running)'
+}
 user_command = {
     'command': 'ping www.google.com',
-    'data_audit_exe': '/user/bin/ping'
+    'expected': '/user/bin/ping'
 }
-
+check_agent_audit_config = {
+    'command': 'grep -Pzoc "(?s) +<localfile>\n +<log_format>audit.+?(?=localfile)localfile>\n" /var/ossec/etc/ossec.conf',
+    'expected': '1'
+}
+store_rule_1 = 'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"'
+store_rule_2 = 'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"'
+merge_rules = 'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
+create_rules = 'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules'
+delete_old_rules = 'auditctl -D'
+load_rules_from_file = 'auditctl -R /etc/audit/rules.d/wazuh.rules'
 
 def get_parameters():
     """
