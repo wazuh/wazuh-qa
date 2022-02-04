@@ -890,7 +890,7 @@ def truncate_log_files():
 
 
 @pytest.fixture(scope='function')
-def stop_modules_function():
+def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield
     control_service('stop')
