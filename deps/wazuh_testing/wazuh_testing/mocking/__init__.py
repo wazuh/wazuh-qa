@@ -6,6 +6,7 @@ from wazuh_testing.db_interface import global_db
 from wazuh_testing.db_interface import agent_db
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import client_keys
+from wazuh_testing.tools.file import remove_file
 
 
 SYSTEM_DATA = {
@@ -126,8 +127,47 @@ def delete_mocked_agent(agent_id):
     # Remove from global db
     global_db.delete_agent(agent_id)
 
-    # Remove agent id DB file
-    os.remove(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
+    # Remove agent id DB file if exists
+    remove_file(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
 
     # Remove entry from client keys
     client_keys.delete_client_keys_entry(agent_id)
+
+
+def insert_mocked_packages(agent_id='000'):
+    """Insert 10 mocked packages in the agent DB (package_1, package2 ...).
+
+    Args:
+        agent_id (str): Agent ID.
+
+    Returns:
+        list(str): List of package names.
+    """
+    package_names = [f"package_{number}" for number in range(1, 11)]
+
+    for package_name in package_names:
+        agent_db.insert_package(agent_id=agent_id, name=package_name, version='1.0.0')
+
+    return package_names
+
+
+def delete_mocked_packages(agent_id='000'):
+    """Delete the mocked packages in the agent DB.
+
+    Args:
+        agent_id (str): Agent ID.
+    """
+    package_names = [f"package_{number}" for number in range(1, 11)]
+
+    for package_name in package_names:
+        agent_db.delete_package(package=package_name, agent_id=agent_id)
+
+
+def delete_all_mocked_agents(name='mocked_agent'):
+    """Delete all mocked agents.
+
+    Args:
+        name (str): Name of mocked agents to delete.
+    """
+    for agent_id in global_db.get_agent_ids(name):
+        delete_mocked_agent(agent_id)
