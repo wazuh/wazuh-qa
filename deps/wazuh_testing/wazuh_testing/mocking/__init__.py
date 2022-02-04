@@ -43,14 +43,19 @@ SYSTEM_DATA = {
 }
 
 
-def set_system(system):
+def set_system(system, agent_id='000'):
     """Set custom system in global DB Agent info.
 
     Args:
         system (str): System to set. Available systems in SYSTEM_DATA variable.
     """
-    global_db.modify_system(os_name=SYSTEM_DATA[system]['os_name'], os_major=SYSTEM_DATA[system]['os_major'],
-                            os_minor=SYSTEM_DATA[system]['os_minor'], name=SYSTEM_DATA[system]['name'])
+    global_db.modify_system(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
+                            os_major=SYSTEM_DATA[system]['os_major'],os_minor=SYSTEM_DATA[system]['os_minor'],
+                            name=SYSTEM_DATA[system]['name'])
+
+    agent_db.update_os_info(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
+                            os_major=SYSTEM_DATA[system]['os_major'], os_minor=SYSTEM_DATA[system]['os_minor'],
+                            hostname=SYSTEM_DATA[system]['name'])
 
 
 def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0.0.1', internal_key='',
@@ -99,8 +104,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
 
     client_keys.add_client_keys_entry(agent_id_str, name, ip, client_key_secret)
 
-    # Delete sys_osinfo data and create the new agent
-    agent_db.delete_os_info_data(agent_id)
+    # Create the new agent
     global_db.create_or_update_agent(agent_id=agent_id_str, name=name, ip=ip, register_ip=register_ip,
                                      internal_key=internal_key, os_name=os_name, os_version=os_version,
                                      os_major=os_major, os_minor=os_minor, os_codename=os_codename, os_build=os_build,
@@ -108,6 +112,10 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                                      config_sum=config_sum, merged_sum=merged_sum, manager_host=manager_host,
                                      node_name=node_name, date_add=date_add, last_keepalive=last_keepalive, group=group,
                                      sync_status=sync_status, connection_status=connection_status)
+
+    # Add or update os_info related to the new created agent
+    agent_db.update_os_info(agent_id=agent_id_str, os_name=os_name, os_version=os_version, os_major=os_major,
+                            os_minor=os_minor, os_build=os_build, version=version)
 
     # Restart Wazuh-DB before creating new DB
     control_service('restart', daemon='wazuh-db')
