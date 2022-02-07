@@ -41,9 +41,7 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
-        }
-    ],
-    "to_fix": [
+        },
         {
             "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
             "filename": "wodles/utils.py",
@@ -72,5 +70,6 @@
             "test_id": "B404",
             "test_name": "blacklist"
         }
-    ]
+    ],
+    "to_fix": []
 }
