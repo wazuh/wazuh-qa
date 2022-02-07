@@ -24,6 +24,9 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.mocking import set_system as update_agent_system
+from wazuh_testing import mocking
+
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
@@ -894,3 +897,33 @@ def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield
     control_service('stop')
+
+
+def set_system(system):
+    """Update the agent system in the global DB.
+
+    Args:
+        system (str): System to set. Available systems in SYSTEM_DATA variable from mocking module.
+    """
+    update_agent_system(system)
+    yield
+
+
+@pytest.fixture(scope='function')
+def mock_agent_packages():
+    """Add 10 mocked packages to the agent 000 DB"""
+    package_names = mocking.insert_mocked_packages()
+
+    yield package_names
+
+    mocking.delete_mocked_packages()
+
+
+@pytest.fixture(scope='function')
+def clean_mocked_agents():
+    """Clean all mocked agents"""
+    mocking.delete_all_mocked_agents()
+
+    yield
+
+    mocking.delete_all_mocked_agents()

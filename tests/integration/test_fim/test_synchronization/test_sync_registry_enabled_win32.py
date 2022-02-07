@@ -62,11 +62,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.wazuh_variables import DATA
 from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                                     YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE,
+                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
                                                     SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
@@ -145,5 +145,5 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     # The file synchronization event shouldn't be triggered
     with pytest.raises(TimeoutError):
         event = (wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                         callback=callback_generator(INTEGRITY_CONTROL_MESSAGE),
+                                         callback=generate_monitoring_callback(CB_INTEGRITY_CONTROL_MESSAGE),
                                          update_position=True).result())

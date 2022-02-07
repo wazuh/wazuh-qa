@@ -51,11 +51,9 @@ import subprocess
 import time
 
 import pytest
-from wazuh_testing.tools import CLIENT_KEYS_PATH, LOG_FILE_PATH, WAZUH_DB_SOCKET_PATH
+from wazuh_testing.tools import WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import read_yaml, truncate_file
-from wazuh_testing.authd import DAEMON_NAME, insert_pre_existent_agents
+from wazuh_testing.tools.file import read_yaml
 
 # Marks
 

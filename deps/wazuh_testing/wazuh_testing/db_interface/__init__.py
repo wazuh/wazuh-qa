@@ -20,9 +20,9 @@ def query_wdb(command):
     """
     # If the wdb socket is not yet up, then wait or restart wazuh-db
     if not os.path.exists(WAZUH_DB_SOCKET_PATH):
-        retry = 0
         max_retries = 6
         for _ in range(2):
+            retry = 0
             # Wait if the wdb socket is not still alive (due to wazuh-db restarts). Max 3 seconds
             while not os.path.exists(WAZUH_DB_SOCKET_PATH) and retry < max_retries:
                 print("Retrying ...")
