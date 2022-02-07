@@ -46,15 +46,16 @@ os_version:
 
 tags:
     - enrollment
+    - authd
 '''
 import os
 import time
 import pytest
-from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.authd import create_authd_request, validate_authd_response, validate_authd_logs, \
-                                insert_pre_existent_agents, AUTHD_KEY_REQUEST_TIMEOUT
+                                AUTHD_KEY_REQUEST_TIMEOUT
 
 
 # Data paths
@@ -70,7 +71,7 @@ local_internal_options = {'authd.debug': '2'}
 tests = []
 test_case_ids = []
 for file in os.listdir(tests_path):
-    group_name = file.split(".")[0]
+    group_name = file.split('.')[0]
     file_tests = read_yaml(os.path.join(tests_path, file))
     tests = tests + file_tests
     test_case_ids = test_case_ids + [f"{group_name} {test_case['name']}" for test_case in file_tests]
@@ -78,7 +79,7 @@ for file in os.listdir(tests_path):
 # Variables
 log_monitor_paths = []
 
-receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+receiver_sockets_params = [(('localhost', 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-authd', None, True), ('wazuh-db', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 

@@ -700,19 +700,18 @@ def get_test_cases_data(data_file_path):
 
 
 def update_configuration_template(configurations, old_values, new_values):
-    """Update the configuration_template with specific values.
+    """Update the configuration templates with specific values. Useful for setting the configuration dynamically.
 
     Args:
-        configurations (list(dict)): Actual configurations from the template.
-        old_values (list(list(item_to_replace))): Values to be replace.
-        new_values (list(list(item))): New values.
+        configurations (list(dict)): Configuration templates.
+        old_values (list)): Values to be replace.
+        new_values (list): New values.
 
     Raises:
-        ValueError: If the number of configurations are not the same as the number of values items to replace.
         ValueError: If the number of values to replace are not the same.
     """
     if len(configurations) != len(old_values) != len(new_values):
-        raise ValueError(f"The number of configuration and values items should be the same.")
+        raise ValueError('The number of configuration and values items should be the same.')
 
     configurations_to_update = json.dumps(configurations)
 
