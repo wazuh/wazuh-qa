@@ -205,6 +205,14 @@ def validate_json_file(file_path):
         return False
 
 
+def validate_yaml_file(file_path):
+    try:
+        read_yaml(file_path)
+        return True
+    except yaml.composer.ComposerError:
+        return False
+
+
 def validate_xml_file(file_path):
     try:
         ET.parse(file_path)
@@ -459,3 +467,8 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
+
+
+def get_file_lines(path):
+    with open(path, "r+") as file_to_read:
+        return file_to_read.readlines()
