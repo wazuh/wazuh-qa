@@ -69,6 +69,7 @@ from wazuh_testing.tools import HOSTS_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import DEFAULT_WAIT_FILE_TIMEOUT
+from wazuh_testing.tools.utils import format_ipv6_long
 
 
 # Marks
@@ -88,7 +89,7 @@ parameters = [
     {'SERVER_ADDRESS': '127.0.0.1'},                  # Server address Ipv4
     {'SERVER_ADDRESS': '::1'},                        # Server address ipv6
     {'SERVER_ADDRESS': '172.28.128.hello'},           # Could not resolve hostname
-    {'SERVER_ADDRESS': '::ffff:ac1c::::::::800c'},    # Valid IP, unable to connect (IPv6 compressed)
+    {'SERVER_ADDRESS': '::ffff:ac1c::::::::800c'},    # Invalid IP, unable to connect (IPv6 compressed)
     {'SERVER_ADDRESS': 'wazuh-manager-ipv4'},         # Resolve hostname, valid IP, unable to connect (IPv4)
     {'SERVER_ADDRESS': 'wazuh-manager-ipv6'},         # Resolve hostname, valid IP, unable to connect (IPv6 compressed)
 ]
@@ -186,21 +187,24 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
     cfg = get_configuration['metadata']
     manager_address = cfg['server_address']
 
+    final_manager_address = ''
+    if 'valid_ip' in cfg:
+        final_manager_address = manager_address
+    elif 'host_ip' in cfg:
+        with open(HOSTS_FILE_PATH) as hosts:
+            for host in hosts:
+                if manager_address in host:
+                    final_manager_address = host.split()[0]
+                    break
+
+    if 'ipv6' in cfg:
+        final_manager_address = format_ipv6_long(final_manager_address)
+
     if manager_address == 'MANAGER_IP':
         callback = callback_invalid_server_address(cfg['server_address'])
         log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
                           error_message="The expected 'Invalid server address found' message has not been produced")
     else:
-        final_manager_address = ''
-        if 'valid_ip' in cfg:
-            final_manager_address = manager_address
-        else:
-            with open(HOSTS_FILE_PATH) as hosts:
-                for host in hosts:
-                    if manager_address in host:
-                        final_manager_address = host.split()[0]
-                        break
-
         if 'expected_connection' in cfg:
             callback = callback_connected_to_manager_ip(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
