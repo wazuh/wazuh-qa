@@ -185,6 +185,9 @@ def check_inserted_value_exists(table, column, value):
         table (str): Table of cve.db.
         column (str): Column of the table.
         value (str): Value to be checked.
+
+    Returns:
+        boolean: True if the specified value exists, False otherwise.
     """
     custom_value = f"'{value}'" if type(value) == str else value
     query_string = f"SELECT count(*) FROM {table} WHERE {column}={custom_value}"
