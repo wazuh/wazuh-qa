@@ -6,6 +6,7 @@ from wazuh_testing.db_interface import global_db
 from wazuh_testing.db_interface import agent_db
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import client_keys
+from wazuh_testing.tools.file import remove_file
 
 
 SYSTEM_DATA = {
@@ -42,14 +43,19 @@ SYSTEM_DATA = {
 }
 
 
-def set_system(system):
+def set_system(system, agent_id='000'):
     """Set custom system in global DB Agent info.
 
     Args:
         system (str): System to set. Available systems in SYSTEM_DATA variable.
     """
-    global_db.modify_system(os_name=SYSTEM_DATA[system]['os_name'], os_major=SYSTEM_DATA[system]['os_major'],
-                            os_minor=SYSTEM_DATA[system]['os_minor'], name=SYSTEM_DATA[system]['name'])
+    global_db.modify_system(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
+                            os_major=SYSTEM_DATA[system]['os_major'],os_minor=SYSTEM_DATA[system]['os_minor'],
+                            name=SYSTEM_DATA[system]['name'])
+
+    agent_db.update_os_info(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
+                            os_major=SYSTEM_DATA[system]['os_major'], os_minor=SYSTEM_DATA[system]['os_minor'],
+                            hostname=SYSTEM_DATA[system]['name'])
 
 
 def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0.0.1', internal_key='',
@@ -98,8 +104,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
 
     client_keys.add_client_keys_entry(agent_id_str, name, ip, client_key_secret)
 
-    # Delete sys_osinfo data and create the new agent
-    agent_db.delete_os_info_data(agent_id)
+    # Create the new agent
     global_db.create_or_update_agent(agent_id=agent_id_str, name=name, ip=ip, register_ip=register_ip,
                                      internal_key=internal_key, os_name=os_name, os_version=os_version,
                                      os_major=os_major, os_minor=os_minor, os_codename=os_codename, os_build=os_build,
@@ -107,6 +112,10 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                                      config_sum=config_sum, merged_sum=merged_sum, manager_host=manager_host,
                                      node_name=node_name, date_add=date_add, last_keepalive=last_keepalive, group=group,
                                      sync_status=sync_status, connection_status=connection_status)
+
+    # Add or update os_info related to the new created agent
+    agent_db.update_os_info(agent_id=agent_id_str, os_name=os_name, os_version=os_version, os_major=os_major,
+                            os_minor=os_minor, os_build=os_build, version=version)
 
     # Restart Wazuh-DB before creating new DB
     control_service('restart', daemon='wazuh-db')
@@ -126,8 +135,48 @@ def delete_mocked_agent(agent_id):
     # Remove from global db
     global_db.delete_agent(agent_id)
 
-    # Remove agent id DB file
-    os.remove(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
+    # Remove agent id DB file if exists
+    remove_file(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
 
     # Remove entry from client keys
     client_keys.delete_client_keys_entry(agent_id)
+
+
+def insert_mocked_packages(agent_id='000', num_packages=10):
+    """Insert a specific number of mocked packages in the agent DB (package_1, package2 ...).
+
+    Args:
+        agent_id (str): Agent ID.
+        num_packages (int): Number of packages to generate.
+
+    Returns:
+        list(str): List of package names.
+    """
+    package_names = [f"package_{number}" for number in range(1, num_packages + 1)]
+
+    for package_name in package_names:
+        agent_db.insert_package(agent_id=agent_id, name=package_name, version='1.0.0')
+
+    return package_names
+
+
+def delete_mocked_packages(agent_id='000'):
+    """Delete the mocked packages in the agent DB.
+
+    Args:
+        agent_id (str): Agent ID.
+    """
+    package_names = [f"package_{number}" for number in range(1, 11)]
+
+    for package_name in package_names:
+        agent_db.delete_package(package=package_name, agent_id=agent_id)
+
+
+def delete_all_mocked_agents(name='mocked_agent'):
+    """Delete all mocked agents.
+
+    Args:
+        name (str): Name of mocked agents to delete.
+    """
+    for agent_id in global_db.get_agent_ids(name):
+        delete_mocked_agent(agent_id)

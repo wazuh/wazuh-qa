@@ -41,7 +41,7 @@ def clean_table(table):
     make_sqlite_query(CVE_DB_PATH, [f"DELETE FROM {table}"])
 
 
-def clean_all_tables():
+def clean_all_cve_tables():
     """Clean all tables from CVE database."""
     query = [f"DELETE FROM {table}" for table in get_tables()]
 
