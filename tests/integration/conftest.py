@@ -24,6 +24,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
+
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
@@ -850,3 +852,15 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='module')
+def mock_agent_module():
+    """
+    Fixture to create a mocked agent in wazuh databases
+    """
+    agent_id = create_mocked_agent(name="mocked_agent")
+
+    yield agent_id
+
+    delete_mocked_agent(agent_id)
