@@ -142,34 +142,28 @@ def generate_test_playbooks(parameters):
     Args:
         parameters (argparse.Namespace): Object with the user parameters.
     """
-    playbooks_info = {}
+    manager_playbooks_info = {}
+    agent_playbooks_info = {}
     manager_package_url = get_production_package_url('manager', parameters.os_system, parameters.wazuh_version) \
         if parameters.wazuh_version else get_last_production_package_url('manager', parameters.os_system)
     manager_package_name = os.path.split(manager_package_url)[1]
     agent_package_url = get_production_package_url('agent', parameters.os_system, parameters.wazuh_version) \
-        if parameters.wazuh_version else get_last_production_package_url(parameters.wazuh_target, parameters.os_system)
+        if parameters.wazuh_version else get_last_production_package_url('agent', parameters.os_system)
     agent_package_name = os.path.split(agent_package_url)[1]
 
     os_platform = 'linux'
     package_destination = '/tmp'
-    check_auditd_status = {
-    'command': 'systemctl status auditd.service',
-    'expected': 'active (running)'
-    }
-    user_command = {
-        'command': 'ping www.google.com',
-        'expected': '/user/bin/ping'
-    }
-    check_agent_audit_config = {
-        'command': 'grep -Pzoc "(?s) +<localfile>\n +<log_format>audit.+?(?=localfile)localfile>\n" /var/ossec/etc/ossec.conf',
-        'expected': '1'
-    }
-    store_rule_1 = 'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"'
-    store_rule_2 = 'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"'
-    merge_rules = 'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
-    create_rules = 'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules'
-    delete_old_rules = 'auditctl -D'
-    load_rules_from_file = 'auditctl -R /etc/audit/rules.d/wazuh.rules'
+    user_command = 'ping -c 4 www.google.com'
+    prepare_auditd_rules_commands = [
+        'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"',
+        'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"',
+        'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
+    ]
+    create_rules_commands = [
+        'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules',
+        'auditctl -D',
+        'auditctl -R /etc/audit/rules.d/wazuh.rules'
+    ]
 
     manager_install_playbook_parameters = {
         'wazuh_target': 'manager', 'package_name': manager_package_name,
@@ -183,8 +177,33 @@ def generate_test_playbooks(parameters):
         'os_system': parameters.os_system, 'os_platform': os_platform
     }
 
+    prepare_auditd_rules_playbook_parameters = {
+        'commands': prepare_auditd_rules_commands
+    }
 
-    return playbooks_info
+    create_rules_playbook_parameters = {
+        'commands': create_rules_commands,
+        'playbook_parameters': {'become': True}
+    }
+
+    user_command_playbook_parameters = {
+        'commands': [user_command]
+    }
+
+    
+    manager_playbooks_info.update({'install_manager': playbook_generator.install_wazuh(**manager_install_playbook_parameters)})
+    agent_playbooks_info.update({'install_agent': playbook_generator.install_wazuh(**agent_install_playbook_parameters)})
+
+    agent_playbooks_info.update({'prepare_auditd_rules':
+                           playbook_generator.run_linux_commands(**prepare_auditd_rules_playbook_parameters)})
+
+    agent_playbooks_info.update({'create_auditd_rules': playbook_generator.run_linux_commands(**create_rules_playbook_parameters)})
+
+    agent_playbooks_info.update({'execute_user_command':
+                           playbook_generator.run_linux_commands(**user_command_playbook_parameters)})
+
+
+    return manager_playbooks_info, agent_playbooks_info
 
 
 def main():
@@ -199,8 +218,9 @@ def main():
     set_environment(parameters)
 
     try:
-        playbooks_info = generate_test_playbooks(parameters)
-        test_build_files.extend([playbook_path for playbook_path in playbooks_info.values()])
+        manager_playbooks_info, agent_playbooks_info = generate_test_playbooks(parameters)
+        test_build_files.extend([playbook_path for playbook_path in manager_playbooks_info.values()])
+        test_build_files.extend([playbook_path for playbook_path in agent_playbooks_info.values()])
     finally:
         if parameters and not parameters.persistent:
             logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
