@@ -892,7 +892,6 @@ def truncate_log_files():
         truncate_file(log_file)
 
 
-@pytest.fixture(scope='function')
 def set_system(system):
     """Update the agent system in the global DB.
 
