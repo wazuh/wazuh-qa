@@ -142,16 +142,17 @@ def delete_mocked_agent(agent_id):
     client_keys.delete_client_keys_entry(agent_id)
 
 
-def insert_mocked_packages(agent_id='000'):
-    """Insert 10 mocked packages in the agent DB (package_1, package2 ...).
+def insert_mocked_packages(agent_id='000', num_packages=10):
+    """Insert a specific number of mocked packages in the agent DB (package_1, package2 ...).
 
     Args:
         agent_id (str): Agent ID.
+        num_packages (int): Number of packages to generate.
 
     Returns:
         list(str): List of package names.
     """
-    package_names = [f"package_{number}" for number in range(1, 11)]
+    package_names = [f"package_{number}" for number in range(1, num_packages + 1)]
 
     for package_name in package_names:
         agent_db.insert_package(agent_id=agent_id, name=package_name, version='1.0.0')
