@@ -11,6 +11,8 @@ from deps.wazuh_testing.wazuh_testing.tools.exceptions import QAValueError
 from deps.wazuh_testing.wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 from deps.wazuh_testing.wazuh_testing.tools.logging import Logging
 from deps.wazuh_testing.wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.tools.s3_package import get_production_package_url, get_last_production_package_url
+from wazuh_testing.qa_ctl.provisioning.ansible import playbook_generator
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
@@ -18,24 +20,7 @@ CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_au
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
-check_auditd_status = {
-    'command': 'systemctl status auditd.service',
-    'expected': 'active (running)'
-}
-user_command = {
-    'command': 'ping www.google.com',
-    'expected': '/user/bin/ping'
-}
-check_agent_audit_config = {
-    'command': 'grep -Pzoc "(?s) +<localfile>\n +<log_format>audit.+?(?=localfile)localfile>\n" /var/ossec/etc/ossec.conf',
-    'expected': '1'
-}
-store_rule_1 = 'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"'
-store_rule_2 = 'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"'
-merge_rules = 'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
-create_rules = 'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules'
-delete_old_rules = 'auditctl -D'
-load_rules_from_file = 'auditctl -R /etc/audit/rules.d/wazuh.rules'
+
 
 def get_parameters():
     """
@@ -58,6 +43,10 @@ def get_parameters():
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch', default='master',
                         help='Set a custom wazuh-qa branch to download and run the tests files')
+
+    parser.add_argument('--deployment-info', type=str, action='store', required=False, dest='deployment_info',
+                        help='Path to the file that contains the deployment information. If specified, local instances '
+                             'will not be deployed')
 
     parser.add_argument('--output-file-path', type=str, action='store', required=False, dest='output_file_path',
                         help='Path to store all test results')
@@ -148,9 +137,60 @@ def validate_parameters(parameters):
     logger.info('Input parameters validation has passed successfully')
 
 
+def generate_test_playbooks(parameters):
+    """Generate the necessary playbooks to run the test.
+    Args:
+        parameters (argparse.Namespace): Object with the user parameters.
+    """
+    playbooks_info = {}
+    manager_package_url = get_production_package_url('manager', parameters.os_system, parameters.wazuh_version) \
+        if parameters.wazuh_version else get_last_production_package_url('manager', parameters.os_system)
+    manager_package_name = os.path.split(manager_package_url)[1]
+    agent_package_url = get_production_package_url('agent', parameters.os_system, parameters.wazuh_version) \
+        if parameters.wazuh_version else get_last_production_package_url(parameters.wazuh_target, parameters.os_system)
+    agent_package_name = os.path.split(agent_package_url)[1]
+
+    os_platform = 'linux'
+    package_destination = '/tmp'
+    check_auditd_status = {
+    'command': 'systemctl status auditd.service',
+    'expected': 'active (running)'
+    }
+    user_command = {
+        'command': 'ping www.google.com',
+        'expected': '/user/bin/ping'
+    }
+    check_agent_audit_config = {
+        'command': 'grep -Pzoc "(?s) +<localfile>\n +<log_format>audit.+?(?=localfile)localfile>\n" /var/ossec/etc/ossec.conf',
+        'expected': '1'
+    }
+    store_rule_1 = 'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"'
+    store_rule_2 = 'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"'
+    merge_rules = 'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
+    create_rules = 'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules'
+    delete_old_rules = 'auditctl -D'
+    load_rules_from_file = 'auditctl -R /etc/audit/rules.d/wazuh.rules'
+
+    manager_install_playbook_parameters = {
+        'wazuh_target': 'manager', 'package_name': manager_package_name,
+        'package_url': manager_package_url, 'package_destination': package_destination,
+        'os_system': parameters.os_system, 'os_platform': os_platform
+    }
+
+    agent_install_playbook_parameters = {
+        'wazuh_target': 'agent', 'package_name': agent_package_name,
+        'package_url': agent_package_url, 'package_destination': package_destination,
+        'os_system': parameters.os_system, 'os_platform': os_platform
+    }
+
+
+    return playbooks_info
+
+
 def main():
     """Run the check-files test according to the script parameters."""
     parameters = get_parameters()
+    validate_parameters(parameters)
     qa_ctl_config_generator = QACTLConfigGenerator()
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
     test_output_path = parameters.output_file_path if parameters.output_file_path else \
@@ -158,13 +198,14 @@ def main():
 
     set_environment(parameters)
 
-    if not parameters.no_validation:
-        validate_parameters(parameters)
-
-    if parameters and not parameters.persistent:
-        logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
-        for file_to_remove in test_build_files:
-            file.remove_file(file_to_remove)
+    try:
+        playbooks_info = generate_test_playbooks(parameters)
+        test_build_files.extend([playbook_path for playbook_path in playbooks_info.values()])
+    finally:
+        if parameters and not parameters.persistent:
+            logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
+            for file_to_remove in test_build_files:
+                file.remove_file(file_to_remove)
 
 
 if __name__ == '__main__':
