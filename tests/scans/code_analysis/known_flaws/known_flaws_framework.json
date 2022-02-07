@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 649,
+            "line_number": 627,
             "line_range": [
-                649
+                627
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -44,34 +44,6 @@
             "test_name": "subprocess_without_shell_equals_true"
         },
         {
-            "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/wazuh/core/common.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 63,
-            "line_range": [
-                63
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": "     \"\"\"\n     return set(str(check_output(['hostname', '--all-ip-addresses']).decode()).split(\" \")[:-1])\n \n",
-            "filename": "framework/wazuh/core/cluster/cluster.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 42,
-            "line_range": [
-                42
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
             "code": " import struct\n import subprocess\n import sys\n",
             "filename": "framework/scripts/wazuh-logtest.py",
             "issue_confidence": "HIGH",
@@ -94,34 +66,6 @@
             "line_number": 9,
             "line_range": [
                 9
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " import os\n import subprocess\n from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n",
-            "filename": "framework/wazuh/core/common.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 7,
-            "line_range": [
-                7
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " from shutil import rmtree\n from subprocess import check_output\n from time import time\n",
-            "filename": "framework/wazuh/core/cluster/cluster.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with check_output module.",
-            "line_number": 15,
-            "line_range": [
-                15
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
             "test_id": "B404",
@@ -175,24 +119,24 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible binding to all interfaces.",
-            "line_number": 57,
+            "line_number": 58,
             "line_range": [
-                57
+                58
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
             "test_name": "hardcoded_bind_all_interfaces"
         },
         {
-            "code": "         'port': 1516,\n         'bind_addr': '0.0.0.0',\n         'nodes': ['NODE_IP'],\n         'hidden': 'no'\n     }\n \n     try:\n         config_cluster = get_ossec_conf(section='cluster', conf_file=config_file, from_import=from_import)['cluster']\n     except WazuhException as e:\n63         if e.code == 1106:\n64             # If no cluster configuration is present in ossec.conf, return default configuration but disabling it.\n65             cluster_default_configuration['disabled'] = True\n",
+            "code": "         'port': 1516,\n         'bind_addr': '0.0.0.0',\n         'nodes': ['NODE_IP'],\n         'hidden': 'no'\n     }\n \n     try:\n         config_cluster = get_ossec_conf(section='cluster', conf_file=config_file, from_import=from_import)['cluster']\n     except WazuhException as e:\n65         if e.code == 1106:\n66             # If no cluster configuration is present in ossec.conf, return default configuration but disabling it.\n67             cluster_default_configuration['disabled'] = True\n",
             "filename": "framework/wazuh/core/cluster/utils.py",
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible binding to all interfaces.",
-            "line_number": 55,
+            "line_number": 57,
             "line_range": [
-                48,
-                57
+                50,
+                59
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
