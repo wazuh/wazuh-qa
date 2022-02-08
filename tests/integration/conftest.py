@@ -24,8 +24,8 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.mocking import set_system as update_agent_system
 from wazuh_testing import mocking
+from wazuh_testing.mocking import set_system as update_agent_system
 
 
 if sys.platform == 'win32':
@@ -930,3 +930,15 @@ def clean_mocked_agents():
     yield
 
     mocking.delete_all_mocked_agents()
+
+
+@pytest.fixture(scope='module')
+def mock_agent_module():
+    """
+    Fixture to create a mocked agent in wazuh databases
+    """
+    agent_id = mocking.create_mocked_agent(name="mocked_agent")
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
