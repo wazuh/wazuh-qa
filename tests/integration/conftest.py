@@ -883,10 +883,13 @@ def set_wazuh_configuration(configuration):
 
 @pytest.fixture(scope='function')
 def truncate_log_files():
-    """Truncate all the log files after the test execution"""
-    yield
-
+    """Truncate all the log files before and after the test execution"""
     log_files = [LOG_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
 
     for log_file in log_files:
         truncate_file(log_file)
