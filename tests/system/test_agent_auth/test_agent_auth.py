@@ -32,6 +32,8 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.utils import format_ipv6_long
+
 
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
@@ -123,6 +125,9 @@ def modify_ip_address_conf(test_case):
     with open(manager_conf_file, 'r') as file:
         old_manager_configuration = file.read()
 
+    expected_message_agent_ip = ''
+    expected_message_manager_ip = ''
+
     for configuration in test_case['test_case']:
         if 'yes' in configuration['ipv6_enabled']:
             new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'yes'")
@@ -130,36 +135,42 @@ def modify_ip_address_conf(test_case):
             new_manager_configuration = old_manager_configuration.replace('IPV6_ENABLED', "'no'")
 
         if 'ipv4' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>{network['manager_network'][0]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][0]}")
+            expected_message_manager_ip = network['manager_network'][0]
+
         elif 'ipv6' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>{network['manager_network'][1]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            messages_with_ip = messages.replace('MANAGER_IP', f"{network['manager_network'][1]}")
+            expected_message_manager_ip = format_ipv6_long(network['manager_network'][1])
+
         elif 'dns' in configuration['ip_type']:
-            new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>wazuh-manager</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
-            messages_with_ip = messages.replace('MANAGER_IP', 'wazuh-manager')
+            expected_message_manager_ip = 'wazuh-manager'
+
+        new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
+                                                            f"<address>{expected_message_manager_ip}</address>")
+        host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
+                                         content=new_configuration)
+
+        formatted_regex_ip = expected_message_manager_ip.replace(r'-', r'\\-')
+        formatted_regex_ip = formatted_regex_ip.replace(r'.', r'\\.')
+
+        messages_with_ip = messages.replace('MANAGER_IP', f"{formatted_regex_ip}")
 
         if 'ipv4' in configuration['ip_type']:
-            messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
+            expected_message_agent_ip = network['agent_network'][0]
         elif 'ipv6' in configuration['ip_type']:
-            messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
+            expected_message_agent_ip = format_ipv6_long(network['agent_network'][1])
+
         elif 'dns' in configuration['ip_type']:
             if 'yes' in configuration['ipv6_enabled']:
                 if 'ipv4' in configuration['agent_network'] or 'ipv4' in configuration['manager_network']:
-                    messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
+                    expected_message_agent_ip = network['agent_network'][0]
                 else:
-                    messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][1]}")
+                    expected_message_agent_ip = format_ipv6_long(network['agent_network'][1])
             else:
-                messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{network['agent_network'][0]}")
+                expected_message_agent_ip = network['agent_network'][0]
+
+        formatted_regex_ip = expected_message_agent_ip.replace('-', r'\\-')
+        formatted_regex_ip = formatted_regex_ip.replace('.', r'\\.')
+
+        messages_with_ip = messages_with_ip.replace('AGENT_IP', f"{formatted_regex_ip}")
 
     with open(manager_conf_file, 'w') as file:
         file.write(new_manager_configuration)

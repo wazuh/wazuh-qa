@@ -866,8 +866,10 @@ def generate_monitoring_callback(regex):
     def new_callback(line):
         match = re.search(regex, line)
         logger.debug(line)
-        if match:
+        try:
             return match.group(1)
+        except Exception:
+            return line
 
     return new_callback
 
