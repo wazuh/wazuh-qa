@@ -3,16 +3,17 @@ import os
 import sys
 from tempfile import gettempdir
 
-from deps.wazuh_testing.wazuh_testing.qa_ctl import QACTL_LOGGER
-from deps.wazuh_testing.wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
-from deps.wazuh_testing.wazuh_testing.qa_ctl.provisioning import local_actions
-from deps.wazuh_testing.wazuh_testing.tools import file, github_checks
-from deps.wazuh_testing.wazuh_testing.tools.exceptions import QAValueError
-from deps.wazuh_testing.wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
-from deps.wazuh_testing.wazuh_testing.tools.logging import Logging
-from deps.wazuh_testing.wazuh_testing.tools.time import get_current_timestamp
+from wazuh_testing.qa_ctl import QACTL_LOGGER
+from wazuh_testing.qa_ctl.configuration.config_generator import QACTLConfigGenerator
+from wazuh_testing.qa_ctl.provisioning import local_actions
+from wazuh_testing.tools import file, github_checks
+from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
+from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.tools.s3_package import get_production_package_url, get_last_production_package_url
 from wazuh_testing.qa_ctl.provisioning.ansible import playbook_generator
+from wazuh_testing.qa_ctl.configuration.config_instance import ConfigInstance
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
@@ -43,10 +44,6 @@ def get_parameters():
 
     parser.add_argument('--qa-branch', type=str, action='store', required=False, dest='qa_branch', default='master',
                         help='Set a custom wazuh-qa branch to download and run the tests files')
-
-    parser.add_argument('--deployment-info', type=str, action='store', required=False, dest='deployment_info',
-                        help='Path to the file that contains the deployment information. If specified, local instances '
-                             'will not be deployed')
 
     parser.add_argument('--output-file-path', type=str, action='store', required=False, dest='output_file_path',
                         help='Path to store all test results')
@@ -91,6 +88,7 @@ def validate_parameters(parameters):
     Raises:
         QAValueError: If a script parameters has a invalid value.
     """
+
     def validate_deployment_info_data(data):
         """Check that all deployment data required parameters has been specified"""
         required_data = ['ansible_connection', 'ansible_user', 'ansible_port', 'ansible_python_interpreter', 'host',
@@ -118,23 +116,42 @@ def validate_parameters(parameters):
         raise QAValueError(f"The wazuh {parameters.wazuh_version} version has not been released. Enter a right "
                            'version.', logger.error, QACTL_LOGGER)
 
-    if parameters.deployment_info:
-        if not os.path.isfile(parameters.deployment_info) or not os.path.exists(parameters.deployment_info):
-            raise QAValueError('The specified deployment-info file does not exist.', logger.error, QACTL_LOGGER)
-
-        if not file.validate_yaml_file(parameters.deployment_info):
-            raise QAValueError(f"The deployment-info {parameters.deployment_info} is not in YAML format, or it has "
-                               'wrong syntax', logger.error, QACTL_LOGGER)
-        deployment_data = file.read_yaml(parameters.deployment_info)
-
-        for item in deployment_data:
-            if not validate_deployment_info_data(item):
-                raise QAValueError('Some necessary field is missing in the deployment-info file. The necessary one '
-                                   'are as follows: [ansible_connection, ansible_user, ansible_port, '
-                                   'ansible_python_interpreter, host, system] and (ansible_password | '
-                                   'ansible_ssh_private_key_file)')
-
     logger.info('Input parameters validation has passed successfully')
+
+
+def generate_qa_ctl_configuration(parameters, playbooks_paths, qa_ctl_config_generator):
+    """Generate the qa-ctl configuration according to the script parameters and write it into a file.
+    Args:
+        parameters (argparse.Namespace): Object with the user parameters.
+        playbooks_paths (list(list)): List with the playbooks paths to run with qa-ctl for each instance
+        qa_ctl_config_generator (QACTLConfigGenerator): qa-ctl config generator object.
+    Returns:
+        str: Configuration file path where the qa-ctl configuration has been saved.
+    """
+
+    logger.info('Generating qa-ctl configuration')
+
+    current_timestamp = str(get_current_timestamp()).replace('.', '_')
+    config_file_path = os.path.join(TMP_FILES, f"auditing_commands_config_{current_timestamp}.yaml")
+    os_system = parameters.os_system
+
+    manager_instance_name = f"manager_auditing_commands_{os_system}_{current_timestamp}"
+    agent_instance_name = f"agent_auditing_commands_{os_system}_{current_timestamp}"
+    manager_instance = ConfigInstance(manager_instance_name, os_system)
+    agent_instance = ConfigInstance(agent_instance_name, os_system)
+    instances = [manager_instance, agent_instance]
+
+    deployment_configuration = qa_ctl_config_generator.get_deployment_configuration(instances)
+    tasks_configuration = qa_ctl_config_generator.get_tasks_configuration(playbooks_paths, instances=instances)
+
+    qa_ctl_configuration = {**deployment_configuration, **tasks_configuration}
+
+    file.write_yaml_file(config_file_path, qa_ctl_configuration)
+    test_build_files.append(config_file_path)
+
+    logger.info(f"The qa-ctl configuration has been created successfully in {config_file_path}")
+
+    return config_file_path
 
 
 def generate_test_playbooks(parameters):
@@ -190,24 +207,25 @@ def generate_test_playbooks(parameters):
         'commands': [user_command]
     }
 
-    
-    manager_playbooks_info.update({'install_manager': playbook_generator.install_wazuh(**manager_install_playbook_parameters)})
-    agent_playbooks_info.update({'install_agent': playbook_generator.install_wazuh(**agent_install_playbook_parameters)})
+    manager_playbooks_info.update({'install_manager': playbook_generator.install_wazuh(
+        **manager_install_playbook_parameters)})
+
+    agent_playbooks_info.update({'install_agent': playbook_generator.install_wazuh(
+        **agent_install_playbook_parameters)})
 
     agent_playbooks_info.update({'prepare_auditd_rules':
-                           playbook_generator.run_linux_commands(**prepare_auditd_rules_playbook_parameters)})
+                                 playbook_generator.run_linux_commands(**prepare_auditd_rules_playbook_parameters)})
 
-    agent_playbooks_info.update({'create_auditd_rules': playbook_generator.run_linux_commands(**create_rules_playbook_parameters)})
+    agent_playbooks_info.update({'create_auditd_rules': playbook_generator.run_linux_commands(
+        **create_rules_playbook_parameters)})
 
     agent_playbooks_info.update({'execute_user_command':
-                           playbook_generator.run_linux_commands(**user_command_playbook_parameters)})
-
+                                 playbook_generator.run_linux_commands(**user_command_playbook_parameters)})
 
     return manager_playbooks_info, agent_playbooks_info
 
 
 def main():
-    """Run the check-files test according to the script parameters."""
     parameters = get_parameters()
     validate_parameters(parameters)
     qa_ctl_config_generator = QACTLConfigGenerator()
@@ -221,6 +239,15 @@ def main():
         manager_playbooks_info, agent_playbooks_info = generate_test_playbooks(parameters)
         test_build_files.extend([playbook_path for playbook_path in manager_playbooks_info.values()])
         test_build_files.extend([playbook_path for playbook_path in agent_playbooks_info.values()])
+
+        qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
+        qa_ctl_extra_args += ' -p' if parameters.persistent else ''
+
+        qa_ctl_config_file_path = generate_qa_ctl_configuration(
+            parameters, [manager_playbooks_info, agent_playbooks_info], qa_ctl_config_generator
+        )
+
+        local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
     finally:
         if parameters and not parameters.persistent:
             logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
