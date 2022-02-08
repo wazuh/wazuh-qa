@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -63,6 +63,8 @@ pytest_args:
     - fim_mode:
         realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled: Implies scheduled scan
+
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -70,43 +72,41 @@ pytest_args:
 
 tags:
     - fim_max_eps
+    - fim_max_eps_sync
 '''
 import os
 import shutil
 import sys
-from collections import Counter
-
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_integrity_message, \
-    callback_connection_message
+
+from collections import Counter
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params 
+
+from wazuh_testing.modules import (DATA, TIER1, AGENT, WINDOWS, LINUX)
+from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC, ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE, ERR_MSG_INTEGRITY_CONTROL_MSG)
+from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
+
 
 # Marks
-
-pytestmark = [pytest.mark.tier(level=1), pytest.mark.agent]
+pytestmark = [TIER1, AGENT, WINDOWS, LINUX]
 
 # Variables
-test_directories_no_delete = [os.path.join(PREFIX, 'testdir1')]
-
-directory_str = ','.join(test_directories_no_delete)
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_synchro.yaml')
-testdir1 = os.path.join(PREFIX, 'testdir1')
+
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
+configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
+
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+conf_params = {TEST_DIRECTORIES: test_directories[0]}
 
 # Configurations
-conf_params = {'TEST_DIRECTORIES': directory_str,
-               'MODULE_NAME': __name__}
-
 eps_values = ['50', '10']
-test_modes = ['realtime'] if sys.platform == 'linux' or sys.platform == 'win32' else ['scheduled']
-
-p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
-                       modes=test_modes)
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+#eps_values = ['0', '1', '50', '499','1000', '2000']
+parameters, metadata = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
 # Fixtures
@@ -120,17 +120,17 @@ def get_configuration(request):
 @pytest.fixture(scope='module')
 def create_files(get_configuration):
     max_eps = get_configuration['metadata']['max_eps']
-    mode = get_configuration['metadata']['fim_mode']
     for i in range(int(max_eps) * 5):
-        create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
+        create_file(REGULAR, test_directories[0], f'test{i}_{max_eps}', content='')
 
 
 @pytest.fixture(scope='function')
 def delete_files():
     yield
-    for test_dir in test_directories_no_delete:
+    for test_dir in test_directories:
         shutil.rmtree(test_dir, ignore_errors=True)
 
+# Tests
 
 def test_max_eps_on_start(get_configuration, create_files, configure_environment, restart_wazuh, delete_files):
     '''
@@ -177,19 +177,19 @@ def test_max_eps_on_start(get_configuration, create_files, configure_environment
     tags:
         - realtime
         - scheduled
+
     '''
-    check_apply_test({'max_eps_synchronization'}, get_configuration['tags'])
     max_eps = int(get_configuration['metadata']['max_eps'])
 
     # Wait until the agent connects to the manager.
     wazuh_log_monitor.start(timeout=90,
                             callback=callback_connection_message,
-                            error_message="Agent couldn't connect to server.").result()
+                            error_message=ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE).result()
 
     #  Find integrity start before attempting to read max_eps
     wazuh_log_monitor.start(timeout=30,
                             callback=callback_integrity_message,
-                            error_message="Didn't receive integrity_check_global").result()
+                            error_message=ERR_MSG_INTEGRITY_CONTROL_MSG).result()
 
     n_results = max_eps * 5
     result = wazuh_log_monitor.start(timeout=120,
