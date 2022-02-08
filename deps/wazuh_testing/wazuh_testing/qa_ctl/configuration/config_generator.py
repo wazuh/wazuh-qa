@@ -635,7 +635,8 @@ class QACTLConfigGenerator:
 
         return deployment_configuration
 
-    def get_tasks_configuration(self, playbooks_info, instances=None, playbook_type='local', remote_hosts_info=None):
+    def get_tasks_configuration(self, playbooks_info: list, instances=None, playbook_type='local',
+                                remote_hosts_info=None) -> dict:
         """Generate the qa-ctl configuration required for running ansible tasks.
 
         Args:
