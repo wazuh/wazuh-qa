@@ -190,6 +190,7 @@ def _test_recursion_cud(ini, fin, path, recursion_subdir, scheduled,
 
 
 # tests
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_restrict'})
 ])
@@ -256,7 +257,7 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
                      time_travel=scheduled,
                      min_timeout=global_parameters.default_timeout, triggers_event=True)
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_report_changes'})
 ])
@@ -348,7 +349,7 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
                      min_timeout=global_parameters.default_timeout, triggers_event=True,
                      validators_after_update=[no_report_changes_validator])
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folders, tags_to_apply', [
     ([testdir, subdir], {'ambiguous_tags'})
 ])
@@ -413,7 +414,7 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
                      time_travel=scheduled,
                      min_timeout=global_parameters.default_timeout, validators_after_cud=[tag_validator])
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('dirname, recursion_level, tags_to_apply', [
     (testdir_recursion, 1, {'ambiguous_recursion_over'}),
     (testdir_recursion, 4, {'ambiguous_recursion'})
@@ -487,7 +488,7 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_config
                         scheduled=scheduled,
                         min_timeout=global_parameters.default_timeout, triggers_event=False)
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('dirnames, recursion_level, triggers_event, tags_to_apply', [
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, True, {'ambiguous_recursion_tag'}),
     ([testdir_recursion_tag, testdir_recursion_no_tag], 2, False, {'ambiguous_no_recursion_tag'})
@@ -564,7 +565,7 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
                         scheduled=scheduled, min_timeout=global_parameters.default_timeout,
                         triggers_event=triggers_event, validators_after_cud=[no_tag_validator])
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     {'ambiguous_check'}
 ])

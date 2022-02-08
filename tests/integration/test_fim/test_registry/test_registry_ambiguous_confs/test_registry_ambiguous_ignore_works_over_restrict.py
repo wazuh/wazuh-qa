@@ -111,6 +111,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, subkey, arch, key_name', [
     (key, subkey_1, KEY_WOW64_64KEY, 'restrict_key'),
     (key, subkey_1, KEY_WOW64_64KEY, 'key_restrict'),
@@ -177,7 +178,7 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
     registry_key_cud(key, subkey, wazuh_log_monitor, arch=arch, key_list=[key_name],
                      min_timeout=global_parameters.default_timeout, time_travel=True, triggers_event=False)
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
     (key, subkey_1, KEY_WOW64_64KEY, 'restrict_value'),
     (key, subkey_1, KEY_WOW64_64KEY, 'value_restrict'),

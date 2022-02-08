@@ -135,7 +135,7 @@ def get_configuration(request):
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, subkey, arch, value_name, enabled, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", True, {'test_report_changes'}),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", True, {'test_report_changes'}),
@@ -242,7 +242,7 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
 
     assert not os.path.exists(folder_path), f'{folder_path} exists'
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon removes the 'diff' directories when disabling

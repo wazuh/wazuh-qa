@@ -126,7 +126,7 @@ def extra_configuration_before_yield():
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('root_key, registry, arch, edge_limit, ignored_levels', [
     (key, registry_no_recursion, KEY_WOW64_64KEY, 2, 1),
     (key, registry_recursion_1, KEY_WOW64_64KEY, 2, 1),
