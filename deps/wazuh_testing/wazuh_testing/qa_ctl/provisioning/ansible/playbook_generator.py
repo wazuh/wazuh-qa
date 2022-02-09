@@ -594,6 +594,7 @@ def _uninstall_wazuh_deb(wazuh_target):
         })
     ]
 
+
 def _configurate_manager_ip(manager_ip):
     """Ansible tasks to configurate the manager ip in the agent endpoint
 
@@ -629,7 +630,8 @@ def _run_linux_commands(commands):
     """
     return [
        AnsibleTask({
-           'name': f"Run Command {command}",
+           # command(str) is sliced to avoid adding the character '\n' after position 60
+           'name': f"Run Command {command[:60]}",
            'shell': command
         }) for command in commands
     ]
