@@ -154,10 +154,11 @@ def generate_qa_ctl_configuration(parameters, playbooks_paths, qa_ctl_config_gen
     return config_file_path
 
 
-def generate_test_playbooks(parameters):
+def generate_test_playbooks(parameters, qa_ctl_config_generator):
     """Generate the necessary playbooks to run the test.
     Args:
         parameters (argparse.Namespace): Object with the user parameters.
+        qa_ctl_config_generator (QACTLConfigGenerator): qa-ctl config generator object.
     """
     manager_playbooks_info = {}
     agent_playbooks_info = {}
@@ -174,7 +175,7 @@ def generate_test_playbooks(parameters):
     prepare_auditd_rules_commands = [
         'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"',
         'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"',
-        'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
+        r'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
     ]
     create_rules_commands = [
         'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules',
@@ -188,10 +189,13 @@ def generate_test_playbooks(parameters):
         'os_system': parameters.os_system, 'os_platform': os_platform
     }
 
+    manager_ip = qa_ctl_config_generator.get_host_ip()
+    qa_ctl_config_generator.delete_ip_entry(manager_ip)
+
     agent_install_playbook_parameters = {
         'wazuh_target': 'agent', 'package_name': agent_package_name,
         'package_url': agent_package_url, 'package_destination': package_destination,
-        'os_system': parameters.os_system, 'os_platform': os_platform
+        'os_system': parameters.os_system, 'os_platform': os_platform, 'manager_ip': manager_ip
     }
 
     prepare_auditd_rules_playbook_parameters = {
@@ -236,7 +240,7 @@ def main():
     set_environment(parameters)
 
     try:
-        manager_playbooks_info, agent_playbooks_info = generate_test_playbooks(parameters)
+        manager_playbooks_info, agent_playbooks_info = generate_test_playbooks(parameters, qa_ctl_config_generator)
         test_build_files.extend([playbook_path for playbook_path in manager_playbooks_info.values()])
         test_build_files.extend([playbook_path for playbook_path in agent_playbooks_info.values()])
 
