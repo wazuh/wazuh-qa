@@ -237,7 +237,7 @@ class QACTLConfigGenerator:
 
         return True
 
-    def __get_host_IP(self):
+    def get_host_ip(self):
         """Get an unused ip dinamically and in the range of 10.150.50.x. The ip is generated automatically
         by checking in the IPs used file which IPs are already being used in order to avoid re-using them.
 
@@ -273,7 +273,7 @@ class QACTLConfigGenerator:
 
         return host_ip
 
-    def __delete_ip_entry(self, host_ip):
+    def delete_ip_entry(self, host_ip):
         """Delete an IP entry in the file that contains all the IPs that are currently being used.
 
         Args:
@@ -309,7 +309,7 @@ class QACTLConfigGenerator:
             vm_cpu = self.DEFAULT_BOX_RESOURCES[box]['cpu']
             vm_memory = self.DEFAULT_BOX_RESOURCES[box]['memory']
 
-        instance_ip = self.__get_host_IP()
+        instance_ip = self.get_host_ip()
         instance = {
             'enabled': True,
             'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
@@ -588,7 +588,7 @@ class QACTLConfigGenerator:
     def destroy(self):
         """Destroy the instance created by deleting its ip entry in the used IPs file and its configuration file."""
         for host_ip in self.hosts:
-            self.__delete_ip_entry(host_ip)
+            self.delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
 
@@ -613,7 +613,7 @@ class QACTLConfigGenerator:
                 raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
                                    QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
 
-            instance_ip = self.__get_host_IP()
+            instance_ip = self.get_host_ip()
             # Assign the IP to the instance object (Needed later to generate host config data)
             instance.ip = instance_ip
 
