@@ -5,7 +5,7 @@
 import time
 
 from wazuh_testing.tools import WAZUH_PATH
-from system import get_agent_id
+from system import get_agent_id, get_id_from_agent
 
 def register_agent(agent, agent_manager, host_manager):
     agent_ip = host_manager.run_command(agent, f'hostname -i')
@@ -20,6 +20,6 @@ def register_agent(agent, agent_manager, host_manager):
     host_manager.run_command(agent, 
                              f'{WAZUH_PATH}/bin/agent-auth -m {manager_ip} -A {agent_name} -I {agent_ip}')
 
-    agent_id = get_agent_id(host_manager)
+    agent_id = get_id_from_agent(host_manager)
     
     return [agent_ip, agent_id, agent_name, manager_ip]

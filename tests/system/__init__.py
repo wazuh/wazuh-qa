@@ -10,6 +10,8 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 def get_agent_id(host_manager):
     return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
+def get_id_from_agent(agent, host_manager):
+    return host_manager.run_command(agent, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
 def restart_cluster(hosts_list, host_manager):
     # Restart the cluster's hosts
