@@ -966,7 +966,7 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=generate_monitoring_callback(case['regex']),
+                                                         callback=make_callback(pattern=case['regex'], prefix=None),
                                                          update_position=False
                                                          ).result().strip('\n')})
                 except TimeoutError:
