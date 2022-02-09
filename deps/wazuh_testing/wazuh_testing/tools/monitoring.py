@@ -847,10 +847,7 @@ def generate_monitoring_callback(regex):
         match = re.search(regex, line)
         logger.debug(line)
         if match:
-            try:
-                return match.group(1)
-            except IndexError:
-                return line
+            return match.group(1)
 
     return new_callback
 
