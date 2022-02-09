@@ -20,6 +20,6 @@ def register_agent(agent, agent_manager, host_manager):
     host_manager.run_command(agent, 
                              f'{WAZUH_PATH}/bin/agent-auth -m {manager_ip} -A {agent_name} -I {agent_ip}')
 
-    agent_id = get_id_from_agent(host_manager)
+    agent_id = get_id_from_agent(agent, host_manager)
     
     return [agent_ip, agent_id, agent_name, manager_ip]
