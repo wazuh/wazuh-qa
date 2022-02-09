@@ -159,7 +159,7 @@ def modify_ip_address_conf(test_case):
                                                         f"<address>{address_ip}</address>")
     host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
                                      content=new_configuration)
-
+    message_dns_manager = message_dns_manager.replace(r'-', r'\\-')
     message_with_manager_dns = messages.replace('MANAGER_DNS/', message_dns_manager)
     message_with_manager_ip = message_with_manager_dns.replace('MANAGER_IP', message_ip_manager)
     final_message = message_with_manager_ip.replace('AGENT_IP', message_ip_agent)
