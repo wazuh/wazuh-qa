@@ -651,6 +651,7 @@ class QACTLConfigGenerator:
         Raises:
             QAValueError: If the number of instances does not match with the number of playbooks.
         """
+        # Check if each instance has its own 'playbooks_info' dictionary
         if len(playbooks_info) != len(instances):
             raise QAValueError('The number of instances does not match with the number of playbooks.',
                                QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
@@ -669,7 +670,7 @@ class QACTLConfigGenerator:
         if instances:  # Build task configuration for local instances host
             for index, instance in enumerate(instances):
                 instance_box = self.BOX_MAPPING[instance.os_version]
-                host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+                host_info = deepcopy(QACTLConfigGenerator.BOX_INFO[instance_box])
                 host_info['host'] = instance.ip
                 tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info,
                                                                                             playbooks_info[index],
