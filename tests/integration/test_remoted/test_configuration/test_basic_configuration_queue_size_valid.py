@@ -128,6 +128,7 @@ def test_queue_size_valid(get_configuration, configure_environment, restart_remo
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     compare_config_api_response([cfg], 'remote')

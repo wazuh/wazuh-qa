@@ -127,6 +127,7 @@ def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     if cfg['connection'] == 'secure':

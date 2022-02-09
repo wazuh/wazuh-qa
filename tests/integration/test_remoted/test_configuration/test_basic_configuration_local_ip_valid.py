@@ -137,6 +137,7 @@ def test_local_ip_valid(get_configuration, configure_environment, restart_remote
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration

@@ -138,6 +138,7 @@ def test_rids_closing_time_valid(get_configuration, configure_environment, resta
         - simulator
         - rids
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
