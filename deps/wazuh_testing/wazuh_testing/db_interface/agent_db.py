@@ -209,8 +209,8 @@ def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
     insert_os_info(**locals())
 
 
-def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, condition, severity='-', cvss2=0,
-                                       cvss3=0):
+def check_vulnerability_scan_inventory(package, version, arch, cve, condition, severity='-', cvss2=0,
+                                       cvss3=0, agent_id='000'):
     """Check the existence or lack of a vulnerability in the agent's DB.
 
     Args:
@@ -253,3 +253,39 @@ def clean_sys_programs(agent_id='000'):
         agent_id (str): Agent ID.
     """
     clean_table(agent_id, 'sys_programs')
+
+
+def insert_osinfo(agent_id="000", scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                  hostname="centos8", architecture="x86_64",
+                  os_name="CentOS Linux",
+                  os_version="8.4", os_major="8", os_minor="4", os_build="", version="",
+                  os_release="", os_patch="", release="", checksum="dummychecksum"):
+    """Inserts the OS information in the agent database.
+
+    Args:
+        agent_id (str): id of the agent
+        scan_id (int): id of the last scan
+        scan_time (str): date of the scan with this format "%Y/%m/%d %H:%M:%S"
+        hostname (str): name of the host
+        architecture (str): architecture of the host
+        os_name (str): complete name of the OS
+        os_version (str): version of the OS
+        os_major (str): major version of the OS
+        os_minor (str): minor version of the OS
+        os_build (str): build id of the OS
+        version (str): version of the OS
+        os_release (str): release of the OS
+        os_patch (str): current patch of the OS
+        release (str): release of the OS
+        checksum (str): checksum of the OS
+    """
+
+    query_string = f'''agent {agent_id} sql INSERT OR REPLACE INTO sys_osinfo
+        (scan_id, scan_time, hostname, architecture, os_name, os_version, os_major, os_minor, os_patch, os_build,
+        release, version, os_release, checksum)
+        VALUES
+        ("{scan_id}", "{scan_time}", "{hostname}", "{architecture}", "{os_name}", "{os_version}", "{os_major}",
+        "{os_minor}", "{os_patch}", "{os_build}", "{release}", "{version}", "{os_release}", "{checksum}")
+        '''
+
+    query_wdb(query_string)

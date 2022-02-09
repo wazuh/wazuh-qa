@@ -942,3 +942,17 @@ def mock_agent_module():
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='module')
+def truncate_json_alerts():
+    """Truncate all the json files alerts before and after the test execution"""
+    json_files = [ALERT_FILE_PATH]
+
+    for json_file in json_files:
+        truncate_file(json_file)
+
+    yield
+
+    for json_file in json_files:
+        truncate_file(json_file)
