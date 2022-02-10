@@ -47,7 +47,6 @@ tags:
     - key request
 '''
 import os
-import shutil
 
 import pytest
 from wazuh_testing.cluster import FERNET_KEY, CLUSTER_DATA_HEADER_SIZE, cluster_msg_build
@@ -94,15 +93,13 @@ class WorkerMID(ManInTheMiddle):
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-fetch_keys_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
 message_tests = read_yaml(os.path.join(test_data_path, 'key_request_worker_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 params = [{'FERNET_KEY': FERNET_KEY}]
 metadata = [{'fernet_key': FERNET_KEY}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
-filename = "fetch_keys.py"
-
-shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
+script_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
+script_filename = 'fetch_keys.py'
 
 # Variables
 log_monitor_paths = [CLUSTER_LOGS_PATH]
@@ -122,22 +119,18 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 @pytest.fixture(scope='module', params=configurations, ids=['Worker'])
 def get_configuration(request):
-    """
-    Get configurations from the module
-    """
+    """Get configurations from the module"""
     yield request.param
 
 
 @pytest.fixture(scope='function', params=message_tests, ids=test_case_ids)
 def get_current_test_case(request):
-    """
-    Get current test case from the module
-    """
+    """Get current test case from the module"""
     return request.param
 
 
 # Tests
-def test_authd_key_request_worker(configure_environment, configure_sockets_environment,
+def test_authd_key_request_worker(configure_environment, configure_sockets_environment, copy_tmp_script,
                                   connect_to_sockets_module, get_current_test_case):
     '''
     description:
@@ -157,6 +150,9 @@ def test_authd_key_request_worker(configure_environment, configure_sockets_envir
         - configure_sockets_environment:
             type: fixture
             brief: Configure the socket listener to receive and send messages on the sockets.
+        - copy_tmp_script:
+            type: fixture
+            brief: Copy the script to a temporary folder for testing.
         - connect_to_sockets_module:
             type: fixture
             brief: Bind to the configured sockets at module scope.
@@ -165,7 +161,7 @@ def test_authd_key_request_worker(configure_environment, configure_sockets_envir
             brief: gets the current test case from the tests' list
 
     assertions:
-        - The 'port_input' from agent is formatted to 'cluster_input' for master
+        - The 'request_input' from agent is formatted to 'cluster_input' for master
         - The 'cluster_output' response from master is correctly parsed to 'port_output' for agent
 
     input_description:
@@ -181,10 +177,8 @@ def test_authd_key_request_worker(configure_environment, configure_sockets_envir
     for stage in get_current_test_case['test_case']:
         # Push expected info to mitm queue
         mitm_master.set_cluster_messages(stage['cluster_input'], stage['cluster_output'])
-        # Reopen socket (socket is closed by manager after sending message with client key)
         mitm_master.restart()
-        key_request_sock.open()
-        message = stage['port_input']
+        message = stage['request_input']
         key_request_sock.send(message, size=False)
         # callback lambda function takes out tcp header and decodes binary to string
         results = clusterd_queue.get_results(callback=(lambda y: [x[CLUSTER_DATA_HEADER_SIZE:].decode() for x in y]),

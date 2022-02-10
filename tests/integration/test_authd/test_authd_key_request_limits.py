@@ -50,14 +50,13 @@ tags:
     - key_request
 '''
 import os
-import shutil
 
 import pytest
 from wazuh_testing.fim import generate_params
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.authd import validate_authd_logs, override_wazuh_conf
+from wazuh_testing.authd import validate_authd_logs
 
 # Marks
 
@@ -67,13 +66,11 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-fetch_keys_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
 message_tests = read_yaml(os.path.join(test_data_path, 'test_key_request_limits.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 local_internal_options = {'authd.debug': '2'}
-filename = "fetch_keys_sleep.py"
-
-shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
+script_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
+script_filename = 'fetch_keys_sleep.py'
 
 DEFAULT_QUEUE_SIZE = '1024'
 DEFAULT_TIMEOUT = '60'
@@ -95,36 +92,22 @@ test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case 
 monitored_sockets_params = [('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
-# Tests
-test_index = 0
 
-
-def get_current_test():
-    """
-    Get the current test case.
-    """
-    global test_index
-    current = test_index
-    test_index += 1
-    return current
-
-
-@pytest.fixture(scope="module", params=configurations, ids=test_case_ids)
+@pytest.fixture(scope='module', params=configurations, ids=test_case_ids)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
 
 
-@pytest.fixture(scope='function', params=message_tests)
-def get_current_test_case(request):
-    """
-    Get current test case from the module
-    """
-    return request.param
+@pytest.fixture(scope='function')
+def get_current_test_case():
+    """Get current test case from the module"""
+    return message_tests.pop(0)
 
 
-def test_key_request_limits(get_configuration, configure_local_internal_options_module, configure_environment,
-                            configure_sockets_environment, connect_to_sockets_function, tear_down):
+def test_key_request_limits(configure_environment, get_current_test_case, copy_tmp_script,
+                            configure_local_internal_options_module, restart_authd_function,
+                            wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
     '''
     description:
         Checks that every input message on the key request port with different limits 'timeout' and 'queue_size'
@@ -139,12 +122,21 @@ def test_key_request_limits(get_configuration, configure_local_internal_options_
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - get_current_test_case:
+            type: fixture
+            brief: Gets the current test case from the tests' list.
+        - copy_tmp_script:
+            type: fixture
+            brief: Copy the script to a temporary folder for testing.
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - configure_sockets_environment_function:
+        - restart_authd_function:
             type: fixture
-            brief: Configure the socket listener to receive and send messages on the sockets at function scope.
+            brief: Stops the wazuh-authd daemon.
+        - wait_for_authd_startup_function:
+            type: fixture
+            brief: Waits until Authd is accepting connections.
         - connect_to_sockets_function:
             type: fixture
             brief: Bind to the configured sockets at function scope.
@@ -164,18 +156,12 @@ def test_key_request_limits(get_configuration, configure_local_internal_options_
         - Key request responses on 'authd' logs.
     '''
 
-    current_test = get_current_test()
-    case = message_tests[current_test]['test_case']
-    # Overwrites the configuration with the values ​​set in the YAML file
-    override_wazuh_conf(get_configuration)
     key_request_sock = receiver_sockets[0]
 
-    for stage in case:
+    for stage in get_current_test_case['test_case']:
         messages = stage.get('input', [])
         response = stage.get('log', [])
 
-        # Reopen socket (socket is closed by manager after sending message with client key)
-        key_request_sock.open()
         for input in messages:
             key_request_sock.send(input, size=False)
         # Monitor expected log messages

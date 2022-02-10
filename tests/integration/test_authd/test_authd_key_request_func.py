@@ -51,7 +51,6 @@ tags:
     - key_request
 '''
 import os
-import shutil
 
 import pytest
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
@@ -67,13 +66,11 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-fetch_keys_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
 message_tests = read_yaml(os.path.join(test_data_path, 'test_key_request_messages.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
-filename = "fetch_keys.py"
-
-shutil.copy(os.path.join(fetch_keys_path, filename), os.path.join("/tmp", filename))
+script_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'files')
+script_filename = 'fetch_keys.py'
 
 # Variables
 kreq_sock_path = os.path.join(WAZUH_PATH, 'queue', 'sockets', 'krequest')
@@ -87,7 +84,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 # Tests
 
 
-@pytest.fixture(scope="module", params=configurations, ids=['key_request'])
+@pytest.fixture(scope='module', params=configurations, ids=['key_request'])
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
@@ -95,14 +92,12 @@ def get_configuration(request):
 
 @pytest.fixture(scope='function', params=message_tests, ids=test_case_ids)
 def get_current_test_case(request):
-    """
-    Get current test case from the module
-    """
+    """Get current test case from the module"""
     return request.param
 
 
-def test_key_request_func(configure_environment, configure_sockets_environment, connect_to_sockets_function,
-                          get_current_test_case, tear_down):
+def test_key_request_func(configure_environment, connect_to_sockets_function,
+                          get_current_test_case, tear_down, copy_tmp_script):
     '''
     description:
         Checks that every input message on the key request port generates the appropiate response to the manager.
@@ -116,18 +111,18 @@ def test_key_request_func(configure_environment, configure_sockets_environment, 
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - configure_sockets_environment_function:
-            type: fixture
-            brief: Configure the socket listener to receive and send messages on the sockets at function scope.
         - connect_to_sockets_function:
             type: fixture
             brief: Bind to the configured sockets at function scope.
         - get_current_test_case:
             type: fixture
-            brief: gets the current test case from the tests' list
+            brief: Gets the current test case from the tests' list.
         - tear_down:
             type: fixture
-            brief: cleans the client.keys file
+            brief: Cleans the client.keys file.
+        - copy_tmp_script:
+            type: fixture
+            brief: Copy the script to a temporary folder for testing.
 
     assertions:
         - The exec_path must be configured correctly
@@ -147,8 +142,6 @@ def test_key_request_func(configure_environment, configure_sockets_environment, 
         message = stage['input']
         response = stage.get('log', [])
 
-        # Reopen socket (socket is closed by manager after sending message with client key)
-        key_request_sock.open()
         key_request_sock.send(message, size=False)
         # Monitor expected log messages
         validate_authd_logs(response)

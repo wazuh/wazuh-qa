@@ -1,8 +1,10 @@
+import shutil
 import pytest
 import time
 import os
 import yaml
 
+from wazuh_testing import logger
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.wazuh_db import insert_agent_in_db, clean_agents_from_db
 from wazuh_testing.tools.file import truncate_file
@@ -188,3 +190,23 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
 
     keys_file.close()
+
+
+@pytest.fixture(scope='function')
+def copy_tmp_script(request):
+    """
+    Copy the script named 'script_filename' and found in 'script_path' to a temporary folder for use in the test.
+    """
+    try:
+        script_filename = getattr(request.module, 'script_filename')
+    except AttributeError as script_filename_not_set:
+        logger.debug('script_filename is not set')
+        raise script_filename_not_set
+
+    try:
+        script_path = getattr(request.module, 'script_path')
+    except AttributeError as script_path_not_set:
+        logger.debug('script_path is not set')
+        raise script_path_not_set
+
+    shutil.copy(os.path.join(script_path, script_filename), os.path.join("/tmp", script_filename))
