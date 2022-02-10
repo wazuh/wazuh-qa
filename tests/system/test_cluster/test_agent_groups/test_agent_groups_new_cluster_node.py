@@ -116,7 +116,7 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_new_nodes)
     check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], "active", host_manager, test_infra_new_nodes)
     
-    # Check that agent has group set to default in new node
+    # Check that agent has the correct group set in new node
     check_agent_groups(agent1_data[1], agent_groups[0], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
     check_agent_groups(agent2_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
     check_agent_groups(agent3_data[1], agent_groups[2], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
@@ -162,6 +162,6 @@ def test_agent_groups_sync_from_worker_new_node(clean_cluster_environment):
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_new_nodes)
     
     
-    # Check that agent has group set to default in new node
+    # Check that agent has the correct group set in new node
     check_agent_groups(agent1_data[1], agent_groups[0], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
     check_agent_groups(agent2_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
