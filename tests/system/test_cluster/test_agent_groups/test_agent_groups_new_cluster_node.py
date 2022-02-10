@@ -43,10 +43,8 @@ tags:
     - wazuh-db
 '''
 import os
-import time
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from system import (create_new_agent_group, check_agent_groups, check_agent_status,
                     remove_cluster_agents, restart_cluster, clean_cluster_logs, delete_group_of_agents)
@@ -62,7 +60,6 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
                               'provisioning', 'four_manager_disconnected_node', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-tmp_path = os.path.join(local_path, 'tmp')
 
 
 @pytest.fixture(scope='function')
