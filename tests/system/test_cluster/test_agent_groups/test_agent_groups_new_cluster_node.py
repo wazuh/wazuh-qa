@@ -148,6 +148,7 @@ def test_agent_groups_sync_from_worker_new_node(clean_cluster_environment):
                          f"{agent2_data[1]}  {agent2_data[2]}  {agent2_data[0]}  active"]
 
     restart_cluster(test_infra_agents[0:2], host_manager)
+
     # Check that agent status is active in cluster
     for host in test_infra_managers:
         check_agents_status_in_node(agent_status_list, host, host_manager)
