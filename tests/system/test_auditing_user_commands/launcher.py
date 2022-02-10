@@ -88,20 +88,6 @@ def validate_parameters(parameters):
     Raises:
         QAValueError: If a script parameters has a invalid value.
     """
-
-    def validate_deployment_info_data(data):
-        """Check that all deployment data required parameters has been specified"""
-        required_data = ['ansible_connection', 'ansible_user', 'ansible_port', 'ansible_python_interpreter', 'host',
-                         'system']
-        for key_data in required_data:
-            if key_data not in data.keys():
-                return False
-
-        if 'ansible_password' not in data.keys() and 'ansible_ssh_private_key_file' not in data.keys():
-            return False
-
-        return True
-
     logger.info('Validating input parameters')
 
     if not github_checks.branch_exists(parameters.qa_branch, repository=WAZUH_QA_REPO):
