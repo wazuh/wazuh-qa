@@ -139,9 +139,9 @@ def generate_qa_ctl_configuration(parameters, playbooks_paths, qa_ctl_config_gen
     agent_instance_name = f"agent_auditing_commands_{os_system}_{current_timestamp}"
     manager_instance = ConfigInstance(manager_instance_name, os_system)
     agent_instance = ConfigInstance(agent_instance_name, os_system)
-    instances = [manager_instance, agent_instance]
+    instances = [manager_instance, agent_instance, manager_instance]
 
-    deployment_configuration = qa_ctl_config_generator.get_deployment_configuration(instances)
+    deployment_configuration = qa_ctl_config_generator.get_deployment_configuration(instances[:2])
     tasks_configuration = qa_ctl_config_generator.get_tasks_configuration(playbooks_paths, instances=instances)
 
     qa_ctl_configuration = {**deployment_configuration, **tasks_configuration}
@@ -154,14 +154,20 @@ def generate_qa_ctl_configuration(parameters, playbooks_paths, qa_ctl_config_gen
     return config_file_path
 
 
-def generate_test_playbooks(parameters, qa_ctl_config_generator):
+def generate_test_playbooks(parameters, qa_ctl_config_generator, alerts_local_destination):
     """Generate the necessary playbooks to run the test.
     Args:
         parameters (argparse.Namespace): Object with the user parameters.
-        qa_ctl_config_generator (QACTLConfigGenerator): qa-ctl config generator object.
+        qa_ctl_config_generator (QACTLConfigGenerator): QACTLConfigGenerator object.
+        alerts_local_destination (str): The local path where the alerts log will be stored.
+
+    Returns:
+        list(dict): List of dictionaries with information about playbooks.
     """
     manager_playbooks_info = {}
+    secondary_manager_playbooks_info = {}
     agent_playbooks_info = {}
+
     manager_package_url = get_production_package_url('manager', parameters.os_system, parameters.wazuh_version) \
         if parameters.wazuh_version else get_last_production_package_url('manager', parameters.os_system)
     manager_package_name = os.path.split(manager_package_url)[1]
@@ -170,22 +176,25 @@ def generate_test_playbooks(parameters, qa_ctl_config_generator):
     agent_package_name = os.path.split(agent_package_url)[1]
 
     os_platform = 'linux'
-    package_destination = '/tmp'
-    user_command = 'ping -c 4 www.google.com'
-    prepare_auditd_rules_commands = [
-        'RULE_1_WAZUH="-a exit,always -F euid=$EUID -F arch=b32 -S execve -k audit-wazuh-c"',
-        'RULE_2_WAZUH="-a exit,always -F euid=$EUID -F arch=b64 -S execve -k audit-wazuh-c"',
-        r'RULES_WAZUH="${RULE_1_WAZUH}\n${RULE_2_WAZUH}"'
-    ]
-    create_rules_commands = [
-        'echo -e "${RULES_WAZUH}" >> /etc/audit/rules.d/wazuh.rules',
+    vm_package_destination = '/tmp'
+    alerts_vm_output_path = '/alerts_data_output.json'
+    save_alerts_command = f'cp -v /var/ossec/logs/alerts/alerts.json {alerts_vm_output_path}'
+    wazuh_rules_vm_path = '/etc/audit/rules.d/wazuh.rules'
+    generate_auditd_rule_commands = [
+        f'echo "-a exit,always -F euid=$(id -u vagrant) -F arch=b32 -S execve -k audit-wazuh-c" >>'
+        f' {wazuh_rules_vm_path}',
+        f'echo "-a exit,always -F euid=$(id -u vagrant) -F arch=b64 -S execve -k audit-wazuh-c" >>'
+        f' {wazuh_rules_vm_path}',
         'auditctl -D',
-        'auditctl -R /etc/audit/rules.d/wazuh.rules'
+        f'auditctl -R {wazuh_rules_vm_path}',
     ]
+    audited_user_command = 'ping -c 4 www.google.com'
+
+    # Playbooks parameters
 
     manager_install_playbook_parameters = {
         'wazuh_target': 'manager', 'package_name': manager_package_name,
-        'package_url': manager_package_url, 'package_destination': package_destination,
+        'package_url': manager_package_url, 'package_destination': vm_package_destination,
         'os_system': parameters.os_system, 'os_platform': os_platform
     }
 
@@ -194,22 +203,30 @@ def generate_test_playbooks(parameters, qa_ctl_config_generator):
 
     agent_install_playbook_parameters = {
         'wazuh_target': 'agent', 'package_name': agent_package_name,
-        'package_url': agent_package_url, 'package_destination': package_destination,
+        'package_url': agent_package_url, 'package_destination': vm_package_destination,
         'os_system': parameters.os_system, 'os_platform': os_platform, 'manager_ip': manager_ip
     }
 
-    prepare_auditd_rules_playbook_parameters = {
-        'commands': prepare_auditd_rules_commands
-    }
-
-    create_rules_playbook_parameters = {
-        'commands': create_rules_commands,
+    generate_auditd_alert_playbook_parameters = {
+        'commands': generate_auditd_rule_commands,
         'playbook_parameters': {'become': True}
     }
 
     user_command_playbook_parameters = {
-        'commands': [user_command]
+        'commands': [audited_user_command]
     }
+
+    save_alerts_command_playbook_parameters = {
+        'commands': [save_alerts_command],
+        'playbook_parameters': {'become': True}
+    }
+
+    fetch_files_playbooks_parameters = {
+        'files_data': {alerts_vm_output_path: alerts_local_destination},
+        'playbook_parameters': {'become': True}
+    }
+
+    # Playbooks generation
 
     manager_playbooks_info.update({'install_manager': playbook_generator.install_wazuh(
         **manager_install_playbook_parameters)})
@@ -217,16 +234,24 @@ def generate_test_playbooks(parameters, qa_ctl_config_generator):
     agent_playbooks_info.update({'install_agent': playbook_generator.install_wazuh(
         **agent_install_playbook_parameters)})
 
-    agent_playbooks_info.update({'prepare_auditd_rules':
-                                 playbook_generator.run_linux_commands(**prepare_auditd_rules_playbook_parameters)})
+    agent_playbooks_info.update({'waiting_time_before_generate_alerts': playbook_generator.wait_seconds(30)})
 
-    agent_playbooks_info.update({'create_auditd_rules': playbook_generator.run_linux_commands(
-        **create_rules_playbook_parameters)})
+    agent_playbooks_info.update({'generate_auditd_rules': playbook_generator.run_linux_commands(
+        **generate_auditd_alert_playbook_parameters)})
 
     agent_playbooks_info.update({'execute_user_command':
                                  playbook_generator.run_linux_commands(**user_command_playbook_parameters)})
 
-    return manager_playbooks_info, agent_playbooks_info
+    secondary_manager_playbooks_info.update({'waiting_time_before_fetch_alerts_file': playbook_generator.wait_seconds(
+        10)})
+
+    secondary_manager_playbooks_info.update({'copy_alerts_log': playbook_generator.run_linux_commands(
+        **save_alerts_command_playbook_parameters)})
+
+    secondary_manager_playbooks_info.update({'fetch_alerts_file': playbook_generator.fetch_files(
+        **fetch_files_playbooks_parameters)})
+
+    return manager_playbooks_info, agent_playbooks_info, secondary_manager_playbooks_info
 
 
 def main():
@@ -234,21 +259,37 @@ def main():
     validate_parameters(parameters)
     qa_ctl_config_generator = QACTLConfigGenerator()
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
+    alerts_data_path = os.path.join(TMP_FILES, f"alerts_data_{current_timestamp}.json")
+    expected_alert_data = {
+        'audit': {
+            'exe': '/usr/bin/ping',
+            "execve": {
+                "a0": "ping",
+                "a1": "-c",
+                "a2": "4",
+                "a3": "www.google.com"
+            }
+        }
+    }
     test_output_path = parameters.output_file_path if parameters.output_file_path else \
         os.path.join(TMP_FILES, f"test_auditing_commands_result_{current_timestamp}")
+    if os.path.exists(test_output_path) and not os.path.isdir(test_output_path):
+        raise ValueError(f"The given output path {test_output_path} already exists and is not a directory.")
+    elif not os.path.exists(test_output_path):
+        os.makedirs(test_output_path)
 
     set_environment(parameters)
 
     try:
-        manager_playbooks_info, agent_playbooks_info = generate_test_playbooks(parameters, qa_ctl_config_generator)
-        test_build_files.extend([playbook_path for playbook_path in manager_playbooks_info.values()])
-        test_build_files.extend([playbook_path for playbook_path in agent_playbooks_info.values()])
+        list_of_playbooks_info = generate_test_playbooks(parameters, qa_ctl_config_generator, alerts_data_path)
+        for playbooks_info in list_of_playbooks_info:
+            test_build_files.extend([playbook_path for playbook_path in playbooks_info.values()])
 
         qa_ctl_extra_args = '' if parameters.debug == 0 else ('-d' if parameters.debug == 1 else '-dd')
         qa_ctl_extra_args += ' -p' if parameters.persistent else ''
 
         qa_ctl_config_file_path = generate_qa_ctl_configuration(
-            parameters, [manager_playbooks_info, agent_playbooks_info], qa_ctl_config_generator
+            parameters, list_of_playbooks_info, qa_ctl_config_generator
         )
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
