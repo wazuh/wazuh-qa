@@ -42,5 +42,5 @@
   -
     input: "id:001"
     log:
-      - Duplicate ID, rejecting enrollment. Failed to get agent-info for agent '001'
-      - '{"error":9012,"message":"Duplicate ID"}'
+      - "Duplicate ID. Removing old agent 'wazuh_agent1' (id '001')."
+      - '{"error":0,"data":{"id":"001","name":"wazuh_agent1","ip":"any","key":"675aaf366e6827ee7a77b2f7b4d89e603a21333c09afbb02c40191f199d7c911"}}'
