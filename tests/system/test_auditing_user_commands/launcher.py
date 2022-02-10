@@ -17,7 +17,7 @@ from wazuh_testing.qa_ctl.configuration.config_instance import ConfigInstance
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-CHECK_FILES_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_auditing_user_commands')
+AUDITING_USER_COMMANDS_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_auditing_commands_run_by_user')
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
@@ -108,7 +108,7 @@ def validate_parameters(parameters):
         raise QAValueError(f"{parameters.qa_branch} branch does not exist in Wazuh QA repository.",
                            logger.error, QACTL_LOGGER)
 
-    if parameters.wazuh_version and len((parameters.wazuh_version).split('.')) != 3:
+    if parameters.wazuh_version and len(parameters.wazuh_version.split('.')) != 3:
         raise QAValueError(f"Version parameter has to be in format x.y.z. You entered {parameters.wazuh_version}",
                            logger.error, QACTL_LOGGER)
 
@@ -293,6 +293,22 @@ def main():
         )
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
+
+        pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest . --alerts-file " \
+                         f"{alerts_data_path} --expected-data {expected_alert_data}"
+
+        try:
+            # Run the pytest
+            test_result = local_actions.run_local_command_returning_output(pytest_command)
+
+            # Check the test result
+            assert 'AssertionError' not in test_result, "The 'auditing_commands_run_by_user' test has failed"
+
+        finally:
+            # Save pytest result if the pytest has been launched
+            file.write_file(os.path.join(test_output_path, 'pytest_result.txt'), test_result)
+            logger.info(f"The test results have been stored in {test_output_path}")
+            print(test_result)
     finally:
         if parameters and not parameters.persistent:
             logger.info('Deleting all test artifacts files of this build (config files, playbooks, data results ...)')
