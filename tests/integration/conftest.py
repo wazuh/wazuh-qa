@@ -25,7 +25,7 @@ from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketCont
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
-from wazuh_testing.mocking import set_system as update_agent_system
+from wazuh_testing.mocking import set_system
 
 
 if sys.platform == 'win32':
@@ -902,13 +902,22 @@ def stop_modules_function_after_execution():
     control_service('stop')
 
 
-def set_system(system):
-    """Update the agent system in the global DB.
+@pytest.fixture(scope='function')
+def mock_system(request):
+    """Update the agent system in the global DB using the `mocked_system` variable defined in the test module."""
+    system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+    set_system(system)
+    yield
+
+
+@pytest.fixture(scope='function')
+def mock_system_parametrized(system):
+    """Update the agent system in the global DB using the `system` variable defined in the parametrized function.
 
     Args:
         system (str): System to set. Available systems in SYSTEM_DATA variable from mocking module.
     """
-    update_agent_system(system)
+    set_system(system)
     yield
 
 
