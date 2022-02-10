@@ -90,3 +90,9 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
     data = get_agents_in_cluster(host, host_manager)
     for status in agent_expected_status_list:
         assert status in data
+
+def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
+    # Uses wdb commands to change the group of an agent
+    query = f'{"id":{agent_id}, "group":"{new_group}"}'
+    group_data = host_manager.run_command(host, f"{WAZUH_PATH}/bin/query-wdb global 'update-agent-group {query}'")
+    return group_data
