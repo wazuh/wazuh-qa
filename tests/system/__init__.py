@@ -66,6 +66,8 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
+        print("------GROUP DATA----------" + host)
+        print(group_data)
         assert group_to_check in group_data
 
 
@@ -73,4 +75,6 @@ def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hos
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
     for host in hosts_list:
         data= get_agents_in_cluster(host, host_manager)
+        print("-------------------")
+        print(data)
         assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data

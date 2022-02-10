@@ -54,11 +54,11 @@ from system.test_cluster.test_agent_groups.common import register_agent
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_new_nodes = ["wazuh-worker3"]
-test_infra_agents = ["wazuh-agent1","wazuh-agent2","wazuh-agent3"]
+test_infra_agents = ["wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 agent_groups = ["Group1", "Group2", "Group3"]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                              'provisioning', 'enrollment_cluster', 'inventory.yml')
+                              'provisioning', 'four_manager_disconnected_node', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
@@ -66,10 +66,11 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 @pytest.fixture(scope='function')
 def clean_cluster_environment():
-    clean_cluster_logs(test_infra_managers + test_infra_agents, host_manager)
+    clean_cluster_logs(test_infra_managers + test_infra_agents + test_infra_new_nodes, host_manager)
     yield
     # Remove the agent once the test has finished
     remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
+    host_manager.control_service(host=test_infra_new_nodes[0], service='wazuh', state="stopped")
 
 
 def test_agent_groups_new_cluster_node(clean_cluster_environment):
@@ -91,14 +92,14 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
 
     agent1_data = register_agent(test_infra_agents[0], test_infra_managers[0], host_manager)
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[0], host_manager)
-    agent3_data = register_agent(test_infra_agents[3], test_infra_managers[0], host_manager)
+    agent3_data = register_agent(test_infra_agents[2], test_infra_managers[0], host_manager)
     
-    for agent in test_infra_agents:
-        assign_agent_to_new_group(test_infra_managers[0], agent, "Group_1", host_manager)
+    for index, agent in enumerate(test_infra_agents):
+        assign_agent_to_new_group(test_infra_managers[0], agent_groups[index], agent, host_manager)
     
     # Start the enrollment process by restarting cluster
     restart_cluster(test_infra_agents, host_manager)
-
+    time.sleep(10)
     # Check that agent status is active in cluster
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_managers)
