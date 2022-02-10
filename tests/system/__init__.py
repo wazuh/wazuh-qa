@@ -31,7 +31,7 @@ def remove_cluster_agents(wazuh_master, agents_list, host_manager):
     agent_id = get_agent_id(host_manager)
     while (agent_id != ''):
         host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                  check=False)
+                                                    check=False)
         agent_id = get_agent_id(host_manager)
     for agent in agents_list:
         host_manager.control_service(host=agent, service='wazuh', state="stopped")
@@ -70,5 +70,5 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
     for host in hosts_list:
-        data= get_agents_in_cluster(host, host_manager)
+        data = get_agents_in_cluster(host, host_manager)
         assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data
