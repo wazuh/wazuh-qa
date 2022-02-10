@@ -22,7 +22,8 @@ from wazuh_testing.qa_ctl.configuration.config_instance import ConfigInstance
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-AUDITING_USER_COMMANDS_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_auditing_commands_run_by_user')
+AUDITING_USER_COMMANDS_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system',
+                                                'test_auditing_commands_run_by_user', 'test')
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
