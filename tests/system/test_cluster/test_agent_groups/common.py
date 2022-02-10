@@ -10,7 +10,7 @@ from system import get_id_from_agent
 
 def register_agent(agent, agent_manager, host_manager, id_group=''):
     agent_ip = host_manager.run_command(agent, f'hostname -i')
-    agent_name = "Agent-" + str(time.time())
+    agent_name = "Agent-" + str(round(time.time()))
 
     # Set the IP for the agent to point to host where enrollment will be done
     manager_ip = host_manager.run_command(agent_manager, f'hostname -i')
