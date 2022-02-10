@@ -10,6 +10,8 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 def get_agent_id(host_manager):
     return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
+def get_id_from_agent(agent, host_manager):
+    return host_manager.run_command(agent, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
 def restart_cluster(hosts_list, host_manager):
     # Restart the cluster's hosts
@@ -45,6 +47,8 @@ def get_agents_in_cluster(host, host_manager):
 def check_keys_file(host, host_manager):
     return host_manager.get_file_content(host, os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
+def create_new_agent_group(host, group_name, host_manager):
+    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {group_name}")
 
 # Create new group and assing agent
 def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
