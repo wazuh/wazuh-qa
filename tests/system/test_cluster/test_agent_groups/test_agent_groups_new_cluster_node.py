@@ -101,7 +101,6 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     
 
     restart_cluster(test_infra_agents, host_manager)
-    time.sleep(10)
     # Check that agent status is active in cluster
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_managers)
@@ -114,7 +113,6 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     check_agent_groups(agent3_data[1], agent_groups[2], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
 
     restart_cluster(test_infra_new_nodes, host_manager)
-    time.sleep(10)
 
     # Check that agent status is active in new node
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_new_nodes)
@@ -150,7 +148,6 @@ def test_agent_groups_sync_from_worker_new_node(clean_cluster_environment):
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[2], host_manager, agent_groups[1])
     
     restart_cluster(test_infra_agents[0:2], host_manager)
-    time.sleep(10)
     # Check that agent status is active in cluster
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_managers)
@@ -162,7 +159,6 @@ def test_agent_groups_sync_from_worker_new_node(clean_cluster_environment):
     
 
     restart_cluster(test_infra_new_nodes, host_manager)
-    time.sleep(10)
 
     # Check that agent status is active in new node
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_new_nodes)
