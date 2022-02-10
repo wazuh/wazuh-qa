@@ -22,6 +22,18 @@ def modify_system(os_name='CentOS Linux', os_major='7', name='centos7', agent_id
     query_wdb(query_string)
 
 
+def get_system(agent_id='000'):
+    """Get current system info.
+
+    Returns:
+        dict: A dict with the AGENT and SYS_OSINFO tables content.
+    """
+    global_query = f"global sql SELECT * from agent where id='{int(agent_id)}'"
+    agent_query = f"agent {agent_id} sql SELECT * FROM sys_osinfo"
+
+    return {'agent_query': query_wdb(global_query)[0], 'osinfo_query': query_wdb(agent_query)[0]}
+
+
 def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1', register_ip='127.0.0.1',
                            internal_key='', os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4',
                            os_codename='centos-8', os_build='4.18.0-147.8.1.el8_1.x86_64',
@@ -57,7 +69,6 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
         sync_status (str): Status of the syncronization.
         connection_status (str): Status of the connection.
     """
-
     query = 'global sql INSERT OR REPLACE INTO AGENT  (id, name, ip, register_ip, internal_key, os_name, os_version, ' \
             'os_major, os_minor, os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, ' \
             'merged_sum, manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status) ' \

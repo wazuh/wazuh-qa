@@ -26,6 +26,8 @@ from wazuh_testing.tools.services import control_service, check_daemon_status, d
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
 from wazuh_testing.mocking import set_system
+from wazuh_testing.db_interface.agent_db import update_os_info
+from wazuh_testing.db_interface.global_db import get_system, modify_system
 
 
 if sys.platform == 'win32':
@@ -904,10 +906,29 @@ def stop_modules_function_after_execution():
 
 @pytest.fixture(scope='function')
 def mock_system(request):
-    """Update the agent system in the global DB using the `mocked_system` variable defined in the test module."""
+    """Update the agent system in the global DB using the `mocked_system` variable defined in the test module.
+
+    Then, it restore the system databases to its previous state.
+    """
     system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+    sys_info = get_system()
+
     set_system(system)
+
     yield
+
+    modify_system(os_name=sys_info['agent_query']['os_name'], os_major=sys_info['agent_query']['os_major'],
+                  name=sys_info['agent_query']['name'], os_minor=sys_info['agent_query']['os_minor'],
+                  os_arch=sys_info['agent_query']['os_arch'], os_version=sys_info['agent_query']['os_version'],
+                  os_platform=sys_info['agent_query']['os_platform'], version=sys_info['agent_query']['version'])
+
+    update_os_info(scan_id=sys_info['osinfo_query']['scan_id'], scan_time=sys_info['osinfo_query']['scan_time'],
+                   hostname=sys_info['osinfo_query']['hostname'], architecture=sys_info['osinfo_query']['architecture'],
+                   os_name=sys_info['osinfo_query']['os_name'], os_version=sys_info['osinfo_query']['os_version'],
+                   os_major=sys_info['osinfo_query']['os_major'], os_minor=sys_info['osinfo_query']['os_minor'],
+                   os_build=sys_info['osinfo_query']['os_build'], version=sys_info['osinfo_query']['version'],
+                   os_release=sys_info['osinfo_query']['os_release'], os_patch=sys_info['osinfo_query']['os_patch'],
+                   release=sys_info['osinfo_query']['release'], checksum=sys_info['osinfo_query']['checksum'])
 
 
 @pytest.fixture(scope='function')
