@@ -49,7 +49,7 @@ import pytest
 
 @pytest.fixture
 def get_alerts_log(request):
-    """Allow to use the ---alerts-json parameter to get the lines of the alerts.json file in a string.
+    """Allow to use the --alerts-json parameter to get the lines of the alerts.json file in a string.
     Args:
         request (fixture): Provide information on the executing test function.
     """

@@ -293,7 +293,7 @@ def main():
         alerts_file_serialized = json.dumps(lines_list)
 
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
-                         f"test_auditing_commands_run_by_user/ --alerts-file " \
+                         f"test_auditing_commands_run_by_user/ --alerts-json " \
                          f"'{alerts_file_serialized}' --expected-data '{json.dumps(expected_alert_data)}'"
         print(pytest_command)
 

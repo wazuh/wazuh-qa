@@ -8,7 +8,7 @@ def pytest_addoption(parser):
     Args:
         parser (argparse.ArgumentParser): Parser object to add the options.
     """
-    parser.addoption('--alerts-file', action='store', dest='alerts_file')
+    parser.addoption('--alerts-json', action='store', dest='alerts_json')
     parser.addoption('--expected-data', action='store', dest='expected_data')
 
 
@@ -18,9 +18,9 @@ def pytest_generate_tests(metafunc):
     Args:
         metafunc (Metafunc): Object with the requesting test context.
     """
-    option_value = metafunc.config.option.alerts_file
-    if 'alerts-file' in metafunc.fixturenames and option_value is not None:
-        metafunc.parametrize('--alerts-file', [option_value])
+    option_value = metafunc.config.option.alerts_json
+    if 'alerts-json' in metafunc.fixturenames and option_value is not None:
+        metafunc.parametrize('--alerts-json', [option_value])
 
     option_value = metafunc.config.option.expected_data
     if 'expected-data' in metafunc.fixturenames and option_value is not None:
