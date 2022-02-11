@@ -43,7 +43,7 @@ tags:
     - analysisd
     - logcollector
 '''
-
+import json
 import pytest
 
 from wazuh_testing.tools.file import validate_json_file, read_json_file
@@ -109,7 +109,7 @@ def test_commands_run_by_user(get_alerts_log, get_expected_data):
         - logcollector
     '''
     alerts_data = validate_and_read_json(get_alerts_log)
-    expected_alert_data = get_expected_data
+    expected_alert_data = json.loads(get_expected_data)
 
     alert_found = False
     for alert in alerts_data:

@@ -4,6 +4,7 @@
 
 
 import argparse
+import json
 import os
 import sys
 from tempfile import gettempdir
@@ -252,8 +253,8 @@ def main():
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
     alerts_data_path = os.path.join(TMP_FILES, f"alerts_data_{current_timestamp}.json")
     expected_alert_data = {
-        'audit': {
-            'exe': '/usr/bin/ping',
+        "audit": {
+            "exe": "/usr/bin/ping",
             "execve": {
                 "a0": "ping",
                 "a1": "-c",
@@ -287,7 +288,8 @@ def main():
 
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
                          f"test_auditing_commands_run_by_user/ --alerts-file " \
-                         f"{alerts_data_path} --expected-data {expected_alert_data}"
+                         f"{alerts_data_path} --expected-data {json.dumps(expected_alert_data)}"
+        print(pytest_command)
 
         try:
             # Run the pytest
