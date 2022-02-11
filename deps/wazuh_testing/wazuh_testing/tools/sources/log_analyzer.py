@@ -3,7 +3,9 @@ import os
 import re
 from itertools import groupby
 from mmap import mmap, ACCESS_READ
-
+import numpy as np
+from re import compile, MULTILINE
+from datetime import datetime
 
 class LogAnalyzer:
     """
@@ -97,6 +99,9 @@ class LogAnalyzer:
         report['agents'] = self.analyze_errors_logs(log='all', component='agents')
         report['managers'] = self.analyze_errors_logs(log='all', component='managers')
         report['agents']['wazuh-agentd'] = self.analyze_agentd()
+        report['managers']['wazuh-remoted'] = self.analyze_remoted_statistics()
+        report['managers']['wazuh-remoted'] = {**report['managers']['wazuh-remoted'], **self.keep_alive_log_parser()}
+
         return report
 
     def check_errors(self, log_path, type='error'):
@@ -105,7 +110,8 @@ class LogAnalyzer:
             try:
                 s = mmap(f.fileno(), 0, access=ACCESS_READ)
                 regex_line = bytes(f"(^.*?{type}.*?$)", encoding='utf8')
-                if error_lines := re.findall(regex_line, s, flags=re.MULTILINE | re.IGNORECASE):
+                error_lines = re.findall(regex_line, s, flags=re.MULTILINE | re.IGNORECASE)
+                if error_lines:
                     error_lines = [error.decode(encoding='utf8') for error in error_lines]
             except Exception as e:
                 pass
@@ -126,7 +132,8 @@ class LogAnalyzer:
                         agent_error = self.check_errors(path, type)
                         if agent_error:
                             error_list_host += [f"[{name}] " + agent_error_line for agent_error_line in agent_error]
-                error_dict[type+'s'] += [{"name": host['name'], type + 's':  error_list_host}]
+                if error_list_host:
+                    error_dict[type+'s'] += [{host['name']:  error_list_host}]
         return error_dict
 
     def analyze_remote_logs(self, log, component='master', hosts_regex='.*'):
@@ -140,13 +147,57 @@ class LogAnalyzer:
         agentd_report['metrics'] = self.analyze_metric(process='wazuh-agentd', component=component)
         return agentd_report
 
+
+    def calculate_values(self, stat, fields, component, hosts_regex='.*'):
+        stats = self.get_instances_stats(stat=stat, component=component, hosts_regex=hosts_regex)
+        n_stats = len(stats)
+        mean_fields = {}
+
+        for field in fields:
+            mean_fields['mean_' + field] = 0
+            mean_fields['max_mean_' + field] = 0
+            mean_fields['min_mean_' + field] = 0
+
+            mean_fields['min_' + field] = None
+            mean_fields['max_' + field] = None
+
+            mean_fields['mean_reg_cof_' + field] = 0
+            mean_fields['max_reg_cof_' + field] = None
+            mean_fields['min_reg_cof_' + field] = None
+
+        dataframe = pd.DataFrame()
+
+        for statistic in stats:
+            for field in fields:
+                dataframe = pd.read_csv(statistic['path'])
+                mean = dataframe[field].mean()
+
+                max = dataframe[field].max()
+                min = dataframe[field].min()
+
+                mean_fields['max_' + field] = int(max) if not mean_fields['max_' + field] or max >  mean_fields['max_' + field] else int(mean_fields['max_' + field])
+                mean_fields['min_' + field] = int(min) if  not mean_fields['min_' + field] or  min <  mean_fields['min_' + field] else int(mean_fields['min_' + field])
+
+                mean_fields['max_mean_' + field] = int(mean) if mean >  mean_fields['max_mean_' + field] else int(mean_fields['max_mean_' + field])
+                mean_fields['min_mean_' + field] = int(mean) if mean <  mean_fields['min_mean_' + field] else int(mean_fields['min_mean_' + field])
+
+                mean_fields['mean_' + field] += int(mean)
+
+
+                reg_cof = int(np.polyfit(range(len(dataframe)), list(dataframe[field]), 1)[0])
+                mean_fields['mean_reg_cof_' + field] += reg_cof
+                mean_fields['max_reg_cof_' + field] = int(reg_cof) if not mean_fields['max_reg_cof_' + field] or reg_cof >  mean_fields['max_reg_cof_' + field] else int(mean_fields['max_reg_cof_' + field])
+                mean_fields['min_reg_cof_' + field] = int(reg_cof) if  not mean_fields['min_reg_cof_' + field] or reg_cof <  mean_fields['min_reg_cof_' + field] else int(mean_fields['min_reg_cof_' + field])
+
+        for field in fields:
+            mean_fields['mean_' + field] = mean_fields['mean_' + field] / n_stats
+            mean_fields['mean_reg_cof_' + field] = mean_fields['mean_reg_cof_' + field] / n_stats
+        return mean_fields
+
+
     def analyze_agentd_statistics(self, component='agents', hosts_regex='.*'):
         # Status
         agentd_stats = self.get_instances_stats(stat='wazuh-agentd', component=component, hosts_regex='.*')
-
-        # Begin and end changes according if there is one or 
-        # if len(agentd_stats) == 1:
-        # else:
         n_stats = len(agentd_stats)
         agentd_report = {
             "begin_status": {"connected": 0, "pending": 0, "disconnected": 0},
@@ -154,13 +205,12 @@ class LogAnalyzer:
             "ever_disconnected": 0,
             "ever_connected": 0,
             "ever_pending": 0,
+
             "mean_status_change_count": 0,
             "max_status_change_count": 0,
+
             "max_diff_ack_keep_alive": 0,
             "mean_diff_ack_keep_alive": 0,
-            "mean_msg_count": 0,
-            "mean_msg_sent": 0,
-            "mean_msg_buffer": 0,
             "metrics": {}
         }
         if n_stats == 1:
@@ -195,11 +245,6 @@ class LogAnalyzer:
             if status_change_count > agentd_report['max_status_change_count']:
                 agentd_report['max_status_change_count'] = status_change_count
 
-            # MSG
-            agentd_report["mean_msg_count"] += agent_dataframe['msg_count'].mean()
-            agentd_report["mean_msg_sent"] += agent_dataframe['msg_sent'].mean()
-            agentd_report["mean_msg_buffer"] += agent_dataframe['msg_buffer'].mean()
-
             # ACK - KEEP ALIVE
             diff = (abs(pd.to_datetime(agent_dataframe['last_keepalive']) -
                     pd.to_datetime(agent_dataframe['last_ack']))).astype('timedelta64[s]')
@@ -210,8 +255,55 @@ class LogAnalyzer:
             if max > agentd_report["max_diff_ack_keep_alive"]:
                 agentd_report["max_diff_ack_keep_alive"] = max
         agentd_report['mean_status_change_count'] /= n_stats
-        agentd_report["mean_msg_count"] /= n_stats
-        agentd_report["mean_msg_sent"] /= n_stats
-        agentd_report["mean_msg_buffer"] /= n_stats
 
+        agentd_report = {**agentd_report, **(self.calculate_values('wazuh-agentd', 
+                                         ['msg_sent','msg_count', 'msg_buffer'], 'agents'))}
         return agentd_report
+
+    def analyze_remoted_statistics(self, component='managers', hosts_regex='.*'):
+
+        remoted_report = self.calculate_values('wazuh-remoted', 
+                                         ['queue_size', 'total_queue_size', 'tcp_sessions', 'evt_count', 
+                                         'ctrl_msg_count', 'discarded_count', 'queued_msgs', 'sent_bytes', 
+                                         'recv_bytes', 'dequeued_after_close'], 'managers')
+        return remoted_report
+        
+    def keep_alive_log_parser(self, component='master', hosts_regex='.*'):
+        logs_files = self.get_instances_logs(component=component, hosts_regex=hosts_regex)
+        keep_alives= {}
+        for log_file in logs_files:
+            regex = compile(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading '(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)", MULTILINE)
+            print(log_file)
+            with open(log_file['logs']['ossec.log']) as log:
+                for match in regex.finditer(log.read()):
+                    if match.group(3) not in keep_alives:
+                        keep_alives[match.group(3)] = {"n_keep_alive": 1, "max_difference": 0, "mean_difference": 0, "last_keep_alive": match.group(1), "first_keep_alive": match.group(1) }
+                    else:
+                        keep_alives[match.group(3)]["n_keep_alive"] += 1
+
+                        last_keep_alive_datetime = datetime.strptime(keep_alives[match.group(3)]["last_keep_alive"], '%Y/%m/%d %H:%M:%S')
+                        recent_keep_alive_datetime = datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
+                        if keep_alives[match.group(3)]["max_difference"] < abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds:
+                            keep_alives[match.group(3)]["max_difference"] = abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds
+                        keep_alives[match.group(3)]["mean_difference"] +=  abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds
+                        keep_alives[match.group(3)]["last_keep_alive"] = match.group(1)
+
+                keep_alives[match.group(3)]["mean_difference"] = keep_alives[match.group(3)]["mean_difference"]/keep_alives[match.group(3)]["n_keep_alive"]
+            print(keep_alives)
+            remainder = None
+            with open(log_file['logs']['ossec.log']) as log:
+                log_lines = log.readlines()
+                for line in reversed(log_lines):
+                    last_log_line = line
+                    remainder = re.match(r"^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", last_log_line)
+                    if remainder:
+                        remainder = remainder.group(1)
+                        break
+            last_message = datetime.strptime(remainder, '%Y/%m/%d %H:%M:%S')
+
+            for agent in keep_alives.keys():
+                last_keep_alive = datetime.strptime(keep_alives[agent]['last_keep_alive'], '%Y/%m/%d %H:%M:%S')
+                keep_alives[agent] =  {**keep_alives[agent], **{'remainder': abs(last_message - last_keep_alive ).seconds }}
+
+        ret = {'keep_alives': keep_alives}
+        return ret

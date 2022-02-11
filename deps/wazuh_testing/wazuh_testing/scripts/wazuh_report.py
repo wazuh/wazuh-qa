@@ -22,7 +22,6 @@ def main():
 
     parser = LogAnalyzer(options.artifact_path)
     json_report = parser.make_report()
-
     with open(f"{options.report_path}", "w") as report:
         report.write(json.dumps(json_report))
 
