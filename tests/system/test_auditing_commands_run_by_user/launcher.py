@@ -285,7 +285,8 @@ def main():
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
 
-        pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest . --alerts-file " \
+        pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
+                         f"test_auditing_commands_run_by_user/ --alerts-file " \
                          f"{alerts_data_path} --expected-data {expected_alert_data}"
 
         try:
