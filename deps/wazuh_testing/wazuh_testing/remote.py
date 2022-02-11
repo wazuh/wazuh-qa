@@ -612,7 +612,7 @@ def check_push_shared_config(agent, sender, injector=None):
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
-        check_agent_received_message(agent, r'#!-up file \w+ merged.mg', timeout=10,
+        check_agent_received_message(agent, r'#!-up file .+ merged.mg', timeout=10,
                                      error_message="initial up file message not received")
 
         # Check agent.conf message
