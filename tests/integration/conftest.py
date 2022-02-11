@@ -6,10 +6,14 @@ import json
 import os
 import re
 import shutil
+import inspect
 import subprocess
 import sys
 import uuid
 from datetime import datetime
+
+import logging
+from wazuh_testing import LOGGING_LEVELS
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
@@ -24,7 +28,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
+
 
 
 if sys.platform == 'win32':
@@ -379,6 +383,16 @@ def pytest_runtest_makereport(item, call):
                 with open(filepath, mode='r', errors='replace') as f:
                     content = f.read()
                     extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
+
+        log_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logs')
+        test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
+
+        test_case_data = re.search(r"(.*)\[([A-Za-z0-9_]+)\]", item.name)
+        test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
+        test_case_log_folder = os.path.join(test_log_folder, test_case_folder)
+        for file in os.listdir(test_case_log_folder):
+            with open(os.path.join(test_case_log_folder, file)) as f:
+                extra.append(pytest_html.extras.text(f.read(), name=file))
 
         if not report.passed and not report.skipped:
             report.extra = extra
@@ -864,3 +878,60 @@ def mock_agent_module():
     yield agent_id
 
     delete_mocked_agent(agent_id)
+
+
+def getLevelNameQA(level):
+    """
+    Return the textual or numeric representation of logging level 'level'.
+
+    If the level is one of the predefined levels (CRITICAL, ERROR, WARNING,
+    INFO, DEBUG) then you get the corresponding string. If you have
+    associated levels with names using addLevelName then the name you have
+    associated with 'level' is returned.
+
+    If a numeric value corresponding to one of the defined levels is passed
+    in, the corresponding string representation is returned.
+
+    If a string representation of the level is passed in, the corresponding
+    numeric value is returned.
+
+    If no matching numeric or string value is passed in, the string
+    'Level %s' % level is returned.
+    """
+    for key, values in LOGGING_LEVELS.items():
+        if level == values:
+            return key
+    else:
+        return "Level %s" % level
+
+
+class QAFormatter(logging.Formatter):
+    def __init__(self, fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt=None, style="%",
+                 validate=True):
+        """
+        Initialize the formatter with specified format strings.
+
+        Initialize the formatter either with the specified format string, or a
+        default as described above. Allow for specialized date formatting with
+        the optional datefmt argument. If datefmt is omitted, you get an
+        ISO8601-like (or RFC 3339-like) format.
+
+        Use a style parameter of '%', '{' or '$' to specify that you want to
+        use one of %-formatting, :meth:`str.format` (``{}``) formatting or
+        :class:`string.Template` formatting in your format string.
+
+        .. versionchanged:: 3.2
+        Added the ``style`` parameter.
+        """
+        super().__init__(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
+def pytest_logger_config(logger_config):
+    logger_config.add_loggers(['test', 'function', 'monitoring', 'callback', 'external', 'simulator'])
+    logger_config.set_log_option_default('test')
+    logging.getLevelName = getLevelNameQA
+    logger_config.set_formatter_class(QAFormatter)
+
+
+def pytest_logger_logdirlink(config):
+    return os.path.join(os.path.dirname(__file__), 'logs')

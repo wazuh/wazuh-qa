@@ -256,6 +256,12 @@ class Parameters:
         self._fim_mode = value
 
 
+LOGGING_LEVELS = {
+    'BASIC': 3,
+    'MEDIUM': 2,
+    'VERBOSE': 1
+}
+
 global_parameters = Parameters()
 logger = logging.getLogger('wazuh_testing')
 logger.setLevel(logging.DEBUG)

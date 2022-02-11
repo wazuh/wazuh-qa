@@ -3,13 +3,21 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import re
+from wazuh_testing import LOGGING_LEVELS
+import logging
+
+callback_logging = logging.getLogger('callback')
 
 
 # Callbacks
-
 def callback_logtest_started(line):
-    match = re.match(r'.*INFO: \(\d+\): Logtest started', line)
+
+    regex = r'.*INFO: \(\d+\): Logtest started'
+    match = re.match(regex, line)
+    callback_logging.log(LOGGING_LEVELS['VERBOSE'], f"LINE: {line}")
+    callback_logging.log(LOGGING_LEVELS['VERBOSE'], f"REGEX: {regex}")
     if match:
+        callback_logging.log(LOGGING_LEVELS['MEDIUM'], f"MATCH: {line} - REGEX: {regex}")
         return True
     return None
 
