@@ -92,15 +92,16 @@ def test_commands_run_by_user(get_alerts_log, get_expected_data):
     alerts_data = json.loads(get_alerts_log)
     expected_alert_data = json.loads(get_expected_data)
 
-    alert_found = False
+    alert_found = None
     for alert in alerts_data:
+        alert = json.loads(alert)
         if 'audit' in alert['data']:
-            alert_found = True
+            alert_found = alert
     if not alert_found:
         assert False, "No alert was generated in the manager."
     for key in expected_alert_data['audit']:
-        if key in alert['data']['audit']:
-            assert alert[key] == expected_alert_data[key], f"The value of data -> audit -> {key} was not the " \
-                                                           "expected.\n" \
-                                                           f"Expected result: {expected_alert_data[key]}\n" \
-                                                           f"Actual result: {alert[key]}"
+        if key in alert_found['data']['audit']:
+            assert alert_found[key] == expected_alert_data[key], f"The value of data -> audit -> {key} was not the " \
+                                                                 "expected.\n" \
+                                                                 f"Expected result: {expected_alert_data[key]}\n" \
+                                                                 f"Actual result: {alert_found[key]}"
