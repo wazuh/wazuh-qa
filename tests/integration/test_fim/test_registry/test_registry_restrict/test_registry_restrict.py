@@ -112,7 +112,6 @@ def get_configuration(request):
     (key, sub_key_2, KEY_WOW64_32KEY, no_valid_value_name, False, {'value_restrict'}),
     (key, sub_key_2, KEY_WOW64_64KEY, no_valid_value_name, False, {'value_restrict'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_restrict_value(key, subkey, arch, value_name, triggers_event, tags_to_apply,
                         get_configuration, configure_environment, restart_syscheckd,
                         wait_for_fim_start):

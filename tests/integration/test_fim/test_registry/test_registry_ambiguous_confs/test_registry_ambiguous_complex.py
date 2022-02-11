@@ -136,7 +136,6 @@ def get_configuration(request):
     (subkey_2, checkers_subkey2),
     (subkey_3, checkers_subkey3)
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_ambiguous_complex_checks(key, subkey, key_checkers,
                                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''

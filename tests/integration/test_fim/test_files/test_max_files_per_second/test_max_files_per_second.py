@@ -109,6 +109,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('inode_collision', [
                          (False),
                          pytest.param(True, marks=(pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5))

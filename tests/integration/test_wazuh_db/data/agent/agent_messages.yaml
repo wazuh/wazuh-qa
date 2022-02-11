@@ -1,7 +1,7 @@
 ---
 -
   name: "Agents' CVEs table: vuln_cves"
-  description: "It checks the commands insert/update, update_status, remove and clear"
+  description: "Checks the commands insert and clear"
   test_case:
   -
     input: 'agent 000 vuln_cves insert {"name":"test_name",
@@ -226,7 +226,7 @@
   description: 'Check messages from not registered agents.'
   test_case:
   -
-    input: 'agent 003 syscheck delete '
+    input: 'agent 004 syscheck delete '
     output: 'err Agent not found'
     stage: 'Syscheck query to a non-existing agent'
 -
@@ -270,64 +270,64 @@
   description: "It checks the commands get packages and get hotfixes"
   test_case:
   -
-    input: 'agent 001 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
+    input: 'agent 003 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
     output: 'ok'
     stage: "agent sys_programs adding dummy package"
   -
-    input: 'agent 001 package save 0|2021/04/07 22:00:00|rpm|test_rpm_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
+    input: 'agent 003 package save 0|2021/04/07 22:00:00|rpm|test_rpm_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1'
     output: 'ok'
     stage: "agent sys_programs adding dummy package"
   -
-    input: 'agent 001 sql select count(*) from sys_programs'
+    input: 'agent 003 sql select count(*) from sys_programs'
     output: 'ok [{"count(*)":2}]'
     stage: "agent sys_programs count packages added"
   -
-    input: 'agent 001 package get'
+    input: 'agent 003 package get'
     output: 'ok {"status":"NOT_SYNCED"}'
     stage: "agent sys_programs getting not synced packages attempt"
   -
-    input: 'agent 001 hotfix save 0|0|KB2980293|legacy'
+    input: 'agent 003 hotfix save 0|0|KB2980293|legacy'
     output: 'ok'
     stage: "agent sys_hotfixes adding dummy hotfix"
   -
-    input: 'agent 001 hotfix save 0|0|KB2980294|legacy'
+    input: 'agent 003 hotfix save 0|0|KB2980294|legacy'
     output: 'ok'
     stage: "agent sys_hotfixes adding dummy hotfix"
   -
-    input: 'agent 001 hotfix save 0|0|KB2980295|legacy'
+    input: 'agent 003 hotfix save 0|0|KB2980295|legacy'
     output: 'ok'
     stage: "agent sys_hotfixes adding dummy hotfix"
   -
-    input: 'agent 001 sql SELECT count(*) FROM sys_hotfixes'
+    input: 'agent 003 sql SELECT count(*) FROM sys_hotfixes'
     output: 'ok [{"count(*)":3}]'
     stage: "agent sys_hotfixes count hotfixes added"
   -
-    input: 'agent 001 hotfix get'
+    input: 'agent 003 hotfix get'
     output: 'ok {"status":"NOT_SYNCED"}'
     stage: "agent sys_programs getting not synced packages attempt"
   -
-    input: 'agent 001 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-hotfixes"'
+    input: 'agent 003 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-hotfixes"'
     output: 'ok []'
     stage: "agent sync_info set synced"
   -
-    input: 'agent 001 hotfix get'
+    input: 'agent 003 hotfix get'
     output: ['due {"hotfix":"KB2980293"}','due {"hotfix":"KB2980294"}','due {"hotfix":"KB2980295"}','ok {"status":"SUCCESS"}']
     stage: "agent sys_hotfixes getting hotfixes"
   -
-    input: 'agent 001 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-packages"'
+    input: 'agent 003 sql UPDATE sync_info SET last_attempt = 1, last_completion = 1 where component = "syscollector-packages"'
     output: 'ok []'
     stage: "agent sync_info set synced"
   -
-    input: 'agent 001 sql UPDATE sys_programs SET triaged = 1  WHERE name = "test_rpm_pkg"'
+    input: 'agent 003 sql UPDATE sys_programs SET triaged = 1  WHERE name = "test_rpm_pkg"'
     output: 'ok []'
     stage: "agent sys_programs set package as triaged"
   -
-    input: 'agent 001 package get not_triaged'
+    input: 'agent 003 package get not_triaged'
     output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'ok {"status":"SUCCESS"}']
     stage: "agent sys_programs getting not triaged packages"
   -
-    input: 'agent 001 package get'
+    input: 'agent 003 package get'
     output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","item_id":"1"}',
              'ok {"status":"SUCCESS"}']

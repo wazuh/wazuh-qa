@@ -27,6 +27,9 @@ if sys.platform == 'win32':
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
     HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
     GLOBAL_DB_PATH = None
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
 else:
 

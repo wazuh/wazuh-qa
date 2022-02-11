@@ -111,6 +111,7 @@ def create_and_delete_file(request):
 
 
 # Tests
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize("tags_to_apply", [({"ossec_conf"})])
 def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, configure_environment, 
                                         create_and_delete_file, restart_syscheckd_function, wait_for_scan_start):
@@ -163,7 +164,7 @@ def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, confi
     scan_timestamp = get_scan_timestamp(wazuh_log_monitor)
     assert modify_time < scan_timestamp
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize("tags_to_apply", [({"ossec_conf"})])
 def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, configure_environment,
                                         create_and_delete_file, restart_syscheckd_function, wait_for_scan_start):
