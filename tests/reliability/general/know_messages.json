@@ -1,6 +1,6 @@
 {
     "warnings": [
-
+        ".*WARNING: Mitre Technique ID 'T(\\d+)' not found in database.*",
     ],
     "errors": [
 
