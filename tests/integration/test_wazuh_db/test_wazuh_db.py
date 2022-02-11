@@ -78,7 +78,7 @@ global_message_files = os.path.join(test_data_path, 'global')
 agent_module_tests = []
 global_module_tests = []
 
-for file in os.listdir(agent_message_files):
+for file in ['agent_messages.yaml', 'fim_messages.yaml']:  # os.listdir(agent_message_files):
     with open(os.path.join(agent_message_files, file)) as f:
         agent_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 

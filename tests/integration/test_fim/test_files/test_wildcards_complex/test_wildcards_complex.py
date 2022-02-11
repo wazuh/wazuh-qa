@@ -106,7 +106,6 @@ test_subdirectories = matched_dirs + no_match_dirs
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards.yml')
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
@@ -130,11 +129,10 @@ def get_configuration(request):
 
 
 # Test
-
+@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh-qa#2174 - Needs Refactor")
 @pytest.mark.parametrize('subfolder', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1', '*.*'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards'}])
-@mark_skip_agentWindows
 def test_wildcards_complex(subfolder, file_name, tags_to_apply,
                            get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):

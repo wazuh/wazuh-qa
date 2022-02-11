@@ -55,6 +55,7 @@ tags:
     - fim_registry_file_limit
 '''
 
+
 import os, sys
 import pytest
 from wazuh_testing import global_parameters

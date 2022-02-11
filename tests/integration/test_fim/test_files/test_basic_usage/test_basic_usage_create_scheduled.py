@@ -121,36 +121,36 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folder', [
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('name, filetype, content, checkers, tags_to_apply, encoding', [
-    ('file', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('socketfile', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file3', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('fifofile', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file4', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file-ñ', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, None),
-    pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, 'cp950', marks=(pytest.mark.linux,
+@pytest.mark.parametrize('name, filetype, content, checkers, encoding', [
+    ('file', REGULAR, 'Sample content', {CHECK_ALL}, None),
+    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, None),
+    ('socketfile', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, None),
+    ('file3', REGULAR, 'Sample content', {CHECK_ALL}, None),
+    ('fifofile', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, None),
+    ('file4', REGULAR, '', {CHECK_ALL}, None),
+    ('file-ñ', REGULAR, b'', {CHECK_ALL}, None),
+    pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, 'cp950', marks=(pytest.mark.linux,
                                                                                   pytest.mark.darwin,
                                                                                   pytest.mark.sunos5)),
-    pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'koi8-r', marks=(pytest.mark.linux,
+    pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, 'koi8-r', marks=(pytest.mark.linux,
                                                                                              pytest.mark.darwin,
                                                                                              pytest.mark.sunos5)),
-    pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp737', marks=(pytest.mark.linux,
+    pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, 'cp737', marks=(pytest.mark.linux,
                                                                                              pytest.mark.darwin,
                                                                                              pytest.mark.sunos5)),
-    pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp720', marks=(pytest.mark.linux,
+    pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, 'cp720', marks=(pytest.mark.linux,
                                                                                      pytest.mark.darwin,
                                                                                      pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None,
+    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, None,
                  marks=(pytest.mark.win32,
                         pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
 ])
-def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
+def test_create_file_scheduled(folder, name, filetype, content, checkers, encoding, get_configuration,
                                configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if a special or regular file creation is detected by the 'wazuh-syscheckd' daemon using
@@ -212,7 +212,6 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
     if encoding is not None:
