@@ -99,7 +99,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_local_ip_valid(get_configuration, configure_environment, restart_remoted):
+def test_local_ip_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' can set 'local_ip' using different IPs without errors.
                  For this purpose, it uses the configuration from test cases and check if the cfg in ossec.conf matches

@@ -91,7 +91,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_queue_size_valid(get_configuration, configure_environment, restart_remoted):
+def test_queue_size_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that when 'wazuh-remoted' sets a valid queue size. For this purpose, it uses the configuration 
                  from test cases, check if the warning has been logged and the configuration is the same as the API
