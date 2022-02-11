@@ -84,7 +84,7 @@ def validate_and_read_json(file_path):
     return file_data
 
 
-def test_auditing_commands_run_by_user(get_alerts_log, get_expected_data):
+def test_commands_run_by_user(get_alerts_log, get_expected_data):
     '''
     description: This test aims to check if a specific alert is triggered when the agent is configured to monitor
                  the commands run by certain user.
