@@ -128,7 +128,7 @@ def write_file_without_close(file_path, data=''):
     Args:
         file_path: File path where the file will create.
         data: Data to write.
-        
+
     """
     file = open(file_path, "w")
     file.write(data)
@@ -441,7 +441,7 @@ def create_large_file(directory, file_path):
         while os.stat(file_path).st_size < file_size:
             f.write(random.choice(string.printable) * chunksize)
 
-            
+
 def download_text_file(file_url, local_destination_path):
     """Download a remote file with text/plain content type.
 

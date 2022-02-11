@@ -41,6 +41,14 @@ def clean_table(table):
     make_sqlite_query(CVE_DB_PATH, [f"DELETE FROM {table}"])
 
 
+def clean_nvd_tables():
+    """Clean the NVD tables data"""
+    query = [f"DELETE FROM {table}" for table in ['NVD_CVE']]
+
+    # Send all queries in the same batch (instead of calling clean_table method) to avoid so many restarts of wazuh-db
+    make_sqlite_query(CVE_DB_PATH, query)
+
+
 def clean_all_cve_tables():
     """Clean all tables from CVE database."""
     query = [f"DELETE FROM {table}" for table in get_tables()]
