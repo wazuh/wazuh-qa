@@ -247,7 +247,7 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     # Run the callback checks for the ossec.log
     HostMonitor(inventory_path=inventory_path,
                 messages_path=messages_path,
-                tmp_path=tmp_path).run()
+                tmp_path=tmp_path).run(update_position=True)
 
     # Start the agent and the manager to connect them
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="started")

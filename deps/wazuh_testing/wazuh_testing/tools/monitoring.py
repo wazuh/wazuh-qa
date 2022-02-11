@@ -909,7 +909,7 @@ class HostMonitor:
         with open(messages_path, 'r') as f:
             self.test_cases = yaml.safe_load(f)
 
-    def run(self):
+    def run(self, update_position=False):
         """This method creates and destroy the needed processes for the messages founded in messages_path.
         It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
@@ -967,7 +967,7 @@ class HostMonitor:
                 time.sleep(self._time_step)
 
     @new_process
-    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None):
+    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None, update_position=False):
         """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
 
         Args:
@@ -989,7 +989,7 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=generate_monitoring_callback(case['regex']),
+                                                         callback=make_callback(pattern=case['regex'], prefix=None),
                                                          update_position=False
                                                          ).result().strip('\n')})
                 except TimeoutError:

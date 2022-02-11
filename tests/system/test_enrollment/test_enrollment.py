@@ -141,7 +141,7 @@ def modify_ip_address_conf(test_case):
         address_ip = network['manager_network'][1]
         message_ip_manager = format_ipv6_long(address_ip)
         message_ip_agent = format_ipv6_long(network['agent_network'][1])
-    else:
+    elif test_case['ip_type'] == 'dns':
         address_ip = 'wazuh-manager'
         message_dns_manager = f"{address_ip}/"
         if test_case['ipv6_enabled'] == 'yes':
@@ -160,7 +160,7 @@ def modify_ip_address_conf(test_case):
     host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
                                      content=new_configuration)
     message_dns_manager = message_dns_manager.replace(r'-', r'\\-')
-    message_with_manager_dns = messages.replace('MANAGER_DNS/', message_dns_manager)
+    message_with_manager_dns = messages.replace(r'MANAGER_DNS\\/', message_dns_manager)
     message_with_manager_ip = message_with_manager_dns.replace('MANAGER_IP', message_ip_manager)
     final_message = message_with_manager_ip.replace('AGENT_IP', message_ip_agent)
     write_file(messages_path, final_message)

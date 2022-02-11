@@ -102,7 +102,6 @@
     manager_network: 'both'
     agent_network: 'ipv6'
     ipv6_enabled: 'yes'
-    agent_network: 'ipv6'
     ip_type: 'ipv6'
 -
   name: 'manager_both_agent_ipv6-dns-yes'
