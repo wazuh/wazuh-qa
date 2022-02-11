@@ -261,4 +261,3 @@ def clean_environment(host_manager, target_files):
     """
     for target in target_files:
         host_manager.clear_file(host=target[0], file_path=target[1])
-    
