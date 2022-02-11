@@ -108,7 +108,6 @@ def get_configuration(request):
 @pytest.mark.parametrize('tags_to_apply', [
     ({'multiple_reg_entries'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_multiple_entries(tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_fim_start):
     '''

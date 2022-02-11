@@ -113,6 +113,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('sleep, tags_to_apply', [
     (0.25, {'ossec_conf'}),
     (0.5, {'ossec_conf'}),
@@ -123,7 +124,6 @@ def get_configuration(request):
     (1.75, {'ossec_conf'}),
     (2, {'ossec_conf'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                               wait_for_fim_start):
     '''

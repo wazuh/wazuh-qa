@@ -138,7 +138,6 @@ def get_configuration(request):
     ('testing_regex', 'w', "", False,
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
                   get_configuration, configure_environment, restart_syscheckd,
                   wait_for_fim_start):

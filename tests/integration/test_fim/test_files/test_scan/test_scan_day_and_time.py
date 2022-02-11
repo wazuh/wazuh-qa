@@ -132,6 +132,8 @@ def replace_date(date, days):
     if today.day + days > max_days_in_month:
         new_day = (today.day + days) % max_days_in_month
         new_month = today.month + 1
+        if new_month > 12:
+            new_month = 1
     else:
         new_day = today.day + days
         new_month = today.month

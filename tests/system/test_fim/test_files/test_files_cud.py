@@ -5,7 +5,7 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: system
 brief: Check that when FIM is activated, and the agent is running, the agent and manager are synchronization when
 a change is performed in a monitored folder.
-tier: 1
+tier: 0
 modules:
     - fim
 components:
@@ -44,8 +44,9 @@ import os
 
 import pytest
 from wazuh_testing.tools.monitoring import HostMonitor
-from wazuh_testing.tools.system import HostManager
-from test_fim import create_folder_file, wait_for_fim_scan_end, clean_logs
+from wazuh_testing.tools.system import HostManager, clean_environment
+from wazuh_testing.tools import WAZUH_LOGS_PATH
+from test_fim import create_folder_file, wait_for_fim_scan_end
 
 
 # Hosts
@@ -66,12 +67,40 @@ scheduled_mode = 'testdir1'
 @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
 def test_file_cud(folder_path, case):
     '''
-    The test will monitor a directory.
-    Finally, it will verify that the FIM event is generated
-    in agent and manager side.
+    
+    description:  The test will monitor a directory.
+                  Finally, it will verify that the FIM event is generated
+                  in agent and manager side.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - folder_path:
+            type: str
+            brief: Name of the folder that will be created in the test.
+        - case:
+            type: str
+            brief: Name of the test case that will be created in the test.
+
+    assertions:
+        - Verify that FIM events are generated correctly on the manager and agent sides.
+    
+    input_description: Different test cases are included with Pytest parametrize.
+                       The test cases are: add, modify and delete files.
+   
+    expected_output:
+        - Different test cases are contained in external YAML file (delete_message.yml and messages.yml)
+
+    tags:
+        - fim_basic_usage
+        - scheduled
+        - realtime
+        - who_data
     '''
     messages = messages_path[0]
-    clean_logs(host_manager)
+    enviroment_files = [('wazuh-manager', os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
+                        ('wazuh-agent1', os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))]
+    clean_environment(host_manager, enviroment_files)
     create_folder_file(host_manager, folder_path)
 
     # Restart Wazuh agent

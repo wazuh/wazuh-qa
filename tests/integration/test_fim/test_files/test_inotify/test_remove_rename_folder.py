@@ -143,12 +143,11 @@ def get_configuration(request):
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('removed, renamed', [
     (True, False),
     (False, True)
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_readded_watches(removed, renamed, get_configuration, configure_environment, restart_syscheckd_each_time):
     '''
     description: Check if the 'wazuh-syscheckd' daemon deletes an 'inotify watch' when renaming or deleting

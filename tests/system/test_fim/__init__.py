@@ -13,12 +13,13 @@ def create_folder_file(host_manager, folder_path):
     # Create file
     host_manager.run_command('wazuh-agent1', f'touch {folder_path}/{folder_path}.txt')
 
-
+    
 # Check that fim scan end
 def wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path, tmp_path):
     HostMonitor(inventory_path=inventory_path,
                 messages_path=messages_path,
                 tmp_path=tmp_path).run()
+
 
 # Function that use to run a script inside remote host to execute queries to DB 
 def query_db(host_manager, script, db_path, query):
