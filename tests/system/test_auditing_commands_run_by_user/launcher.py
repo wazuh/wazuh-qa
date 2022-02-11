@@ -286,9 +286,15 @@ def main():
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
 
+        # Select the last 20 alerts and serialize them to a JSON formatted str
+        with open(alerts_data_path) as f:
+            lines_list = f.read().splitlines()
+            lines_list = lines_list[-20:]
+        alerts_file_serialized = json.dumps(lines_list)
+
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
                          f"test_auditing_commands_run_by_user/ --alerts-file " \
-                         f"{alerts_data_path} --expected-data {json.dumps(expected_alert_data)}"
+                         f"'{alerts_file_serialized}' --expected-data '{json.dumps(expected_alert_data)}'"
         print(pytest_command)
 
         try:
