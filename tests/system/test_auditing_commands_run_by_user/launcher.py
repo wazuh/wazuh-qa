@@ -22,8 +22,7 @@ from wazuh_testing.qa_ctl.configuration.config_instance import ConfigInstance
 
 TMP_FILES = os.path.join(gettempdir(), 'wazuh_auditing_commands')
 WAZUH_QA_FILES = os.path.join(TMP_FILES, 'wazuh-qa')
-AUDITING_USER_COMMANDS_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system',
-                                                'test_auditing_commands_run_by_user', 'test')
+AUDITING_USER_COMMANDS_TEST_PATH = os.path.join(WAZUH_QA_FILES, 'tests', 'system', 'test_auditing_commands_run_by_user')
 
 logger = Logging(QACTL_LOGGER)
 test_build_files = []
@@ -286,7 +285,7 @@ def main():
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
 
-        pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest ./test --alerts-file " \
+        pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest . --alerts-file " \
                          f"{alerts_data_path} --expected-data {expected_alert_data}"
 
         try:

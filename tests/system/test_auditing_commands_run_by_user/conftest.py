@@ -18,10 +18,10 @@ def pytest_generate_tests(metafunc):
     Args:
         metafunc (Metafunc): Object with the requesting test context.
     """
-    option_value = metafunc.config.option.before_results
+    option_value = metafunc.config.option.alerts_file
     if 'alerts-file' in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize('--alerts-file', [option_value])
 
-    option_value = metafunc.config.option.after_results
+    option_value = metafunc.config.option.expected_data
     if 'expected-data' in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize('--expected-data', [option_value])
