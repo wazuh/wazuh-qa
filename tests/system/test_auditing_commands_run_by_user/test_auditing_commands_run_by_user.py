@@ -43,8 +43,10 @@ tags:
     - analysisd
     - logcollector
 '''
+
 import json
 import pytest
+from deepdiff import DeepDiff
 
 
 @pytest.fixture
@@ -89,19 +91,25 @@ def test_commands_run_by_user(get_alerts_log, get_expected_data):
         - analysisd
         - logcollector
     '''
+
     alerts_data = json.loads(get_alerts_log)
+    alerts_data = [json.loads(alert) for alert in alerts_data]
     expected_alert_data = json.loads(get_expected_data)
 
-    alert_found = None
+    alerts_found = []
+    match_alert = []
     for alert in alerts_data:
-        alert = json.loads(alert)
         if 'audit' in alert['data']:
-            alert_found = alert
-    if not alert_found:
+            alerts_found.append({'execve': alert['data']['audit']['execve']})
+    if not alerts_found:
         assert False, "No alert was generated in the manager."
-    for key in expected_alert_data['audit']:
-        if key in alert_found['data']['audit']:
-            assert alert_found[key] == expected_alert_data[key], f"The value of data -> audit -> {key} was not the " \
-                                                                 "expected.\n" \
-                                                                 f"Expected result: {expected_alert_data[key]}\n" \
-                                                                 f"Actual result: {alert_found[key]}"
+    else:
+        for alert in alerts_found:
+            ddiff = DeepDiff(expected_alert_data['execve'], alert['execve'], ignore_order=True)
+            if ddiff == {}:
+                match_alert.append(alert)
+    assert len(match_alert) != 0, f"The expected alert was no generated."
+
+    assert len(match_alert) == 1, "More than 1 alert was generated.\n" \
+                                  "Only 1 alert was expected.\n" \
+                                  f"Actual result: {match_alert}"

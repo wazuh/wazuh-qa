@@ -253,14 +253,11 @@ def main():
     current_timestamp = str(get_current_timestamp()).replace('.', '_')
     alerts_data_path = os.path.join(TMP_FILES, f"alerts_data_{current_timestamp}.json")
     expected_alert_data = {
-        "audit": {
-            "exe": "/usr/bin/ping",
-            "execve": {
-                "a0": "ping",
-                "a1": "-c",
-                "a2": "4",
-                "a3": "www.google.com"
-            }
+        "execve": {
+            "a0": "ping",
+            "a1": "-c",
+            "a2": "4",
+            "a3": "www.google.com"
         }
     }
     test_output_path = parameters.output_file_path if parameters.output_file_path else \
