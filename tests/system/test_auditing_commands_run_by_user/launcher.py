@@ -283,17 +283,9 @@ def main():
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
 
-        # If the file has more than 80 alerts: Select the last 80 alerts, else store all the generated alerts.
-        with open(alerts_data_path) as f:
-            lines_list = f.read().splitlines()
-        assert len(lines_list) != 0, 'No alerts were generated.'
-        if len(lines_list) >= 80:
-            lines_list = lines_list[-80:]
-        alerts_file_serialized = json.dumps(lines_list)
-
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
-                         f"test_auditing_commands_run_by_user/ --alerts-json " \
-                         f"'{alerts_file_serialized}' --expected-data '{json.dumps(expected_alert_data)}'"
+                         f"test_auditing_commands_run_by_user/ --alerts-file " \
+                         f"'{alerts_data_path}' --expected-data '{json.dumps(expected_alert_data)}'"
         print(pytest_command)
 
         try:
