@@ -235,7 +235,7 @@ def generate_test_playbooks(parameters, qa_ctl_config_generator, alerts_local_de
                                  playbook_generator.run_linux_commands(**user_command_playbook_parameters)})
 
     secondary_manager_playbooks_info.update({'waiting_time_before_fetch_alerts_file': playbook_generator.wait_seconds(
-        10)})
+        5)})
 
     secondary_manager_playbooks_info.update({'copy_alerts_log': playbook_generator.run_linux_commands(
         **save_alerts_command_playbook_parameters)})
@@ -283,10 +283,12 @@ def main():
 
         local_actions.run_local_command_printing_output(f"qa-ctl -c {qa_ctl_config_file_path} {qa_ctl_extra_args}")
 
-        # Select the last 20 alerts and serialize them to a JSON formatted str
+        # If the file has more than 80 alerts: Select the last 80 alerts, else store all the generated alerts.
         with open(alerts_data_path) as f:
             lines_list = f.read().splitlines()
-            lines_list = lines_list[-20:]
+        assert len(lines_list) != 0, 'No alerts were generated.'
+        if len(lines_list) >= 80:
+            lines_list = lines_list[-80:]
         alerts_file_serialized = json.dumps(lines_list)
 
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
