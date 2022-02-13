@@ -93,10 +93,9 @@ def test_commands_run_by_user(get_alerts_log, get_expected_data):
         - logcollector
     '''
 
-    alerts_file = read_json_file(get_alerts_log)
     expected_alert_data = json.loads(get_expected_data)
 
-    with open(alerts_file) as f:
+    with open(get_alerts_log) as f:
         alerts_data = f.read().splitlines()
 
     assert len(alerts_data) != 0, 'No alerts were generated.'
