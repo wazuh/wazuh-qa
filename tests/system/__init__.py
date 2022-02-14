@@ -93,6 +93,8 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
 
 def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     # Uses wdb commands to change the group of an agent
-    query = f'{"id":{agent_id}, "group":"{new_group}"}'
-    group_data = host_manager.run_command(host, f"{WAZUH_PATH}/bin/query-wdb global 'update-agent-group {query}'")
+    command = '/bin/wdb-query.py global "set-agent-groups '
+    params = '{\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":'
+    agent_data = '[{\"id\":' + agent_id+ ',\"groups\":[\"' + new_group + '\"]}]}'
+    group_data = host_manager.run_command(host, f"{WAZUH_PATH}{command}{params}{agent_data}")
     return group_data
