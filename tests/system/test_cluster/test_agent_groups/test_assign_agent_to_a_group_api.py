@@ -1,6 +1,45 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+"""
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: system
+brief: Check that when an agent with status active/disconnected, pointing to a master/worker node is
+       registered using agent-auth and when asignn a group ussing  API the change is sync with the cluster.
+tier: 0
+modules:
+    - cluster
+components:
+    - manager
+    - agent
+path: /tests/system/test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py
+daemons:
+    - wazuh-db
+    - wazuh-clusterd
+os_platform:
+    - linux
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+references:
+    - https://github.com/wazuh/wazuh-qa/issues/2506
+tags:
+    - cluster
+"""
 
 import os
 
@@ -34,18 +73,18 @@ def clean_environment():
 
 
 @pytest.mark.parametrize("initial_status", ['active', 'disconnected'])
-@pytest.mark.parametrize("agent_target", ["wazuh-master"])
+@pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker"])
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
-                 Check that when an agent pointing to a master/worker node is registered using API, and when 
-                 it's assigned to a new group the change is sync with the cluster.
+                 Check that when an agent pointing to a master/worker node is registered, and when
+                 it's assigned to a new group using API the change is sync with the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
             type: string
             brief: name of the host where the agent will register
-        - initial_status: 
+        - initial_status:
             type: string
             brief: status of the agent when the assign the new group
         - clean_enviroment:
@@ -55,6 +94,7 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before starting the agent, it has no groups assigned.
         - Verify that after registering the agent appears as active/disconnected in all nodes.
+        - Verify that the response of API query is 200.
         - Verify that after registering and after starting the agent, it has the 'group_test' group assigned.
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
@@ -82,16 +122,14 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
 
     token = host_manager.get_api_token('wazuh-master')
 
-    response = host_manager.make_api_call('wazuh-master', method='POST', endpoint='/agents?pretty=true',
-                                          request_body={'name': agent_name, 'ip': agent_ip},
+    response = host_manager.make_api_call('wazuh-master', method='PUT',
+                                          endpoint=f'/agents/{agent_id}/group/group_test?pretty=true',
                                           token=token)
     print(response)
-    #assert response['status'] == 200, 'Failed when trying to set agent group'
-
+    assert response['status'] == 200, 'Failed when trying to set agent group'
 
     # Check that agent has group set to group_test on Managers
     check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
-
 
     # Delete group of agent
     delete_group_of_agents('wazuh-master', 'group_test', host_manager)
