@@ -298,7 +298,7 @@ def main():
         finally:
             # Save pytest result if the pytest has been launched
             file.write_file(os.path.join(test_output_path, 'pytest_result.txt'), test_result)
-            logger.info(f"The test results have been stored in {test_output_path}")
+            logger.info(f"The test results have been stored in {test_output_path}/pytest_result.txt")
             print(test_result)
     finally:
         if parameters and not parameters.persistent:
