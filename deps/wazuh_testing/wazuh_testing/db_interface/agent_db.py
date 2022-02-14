@@ -255,7 +255,7 @@ def clean_sys_programs(agent_id='000'):
     clean_table(agent_id, 'sys_programs')
 
 
-def check_vulnerability_status(agent_id='000', package=''):
+def get_vulnerability_status(agent_id='000', package=''):
     """Check the status of a vulnerability in the agent database table.
 
     Args:
@@ -269,7 +269,7 @@ def check_vulnerability_status(agent_id='000', package=''):
     return result
 
 
-def check_vulnerability_number_of_package(agent_id='000', package=''):
+def get_packages_number(agent_id='000', package=''):
     """Check the number of packages in the agent database table.
 
     Args:
