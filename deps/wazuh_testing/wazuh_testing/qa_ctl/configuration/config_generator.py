@@ -237,7 +237,7 @@ class QACTLConfigGenerator:
 
         return True
 
-    def __get_host_IP(self):
+    def get_host_ip(self):
         """Get an unused ip dinamically and in the range of 10.150.50.x. The ip is generated automatically
         by checking in the IPs used file which IPs are already being used in order to avoid re-using them.
 
@@ -273,7 +273,7 @@ class QACTLConfigGenerator:
 
         return host_ip
 
-    def __delete_ip_entry(self, host_ip):
+    def delete_ip_entry(self, host_ip):
         """Delete an IP entry in the file that contains all the IPs that are currently being used.
 
         Args:
@@ -309,7 +309,7 @@ class QACTLConfigGenerator:
             vm_cpu = self.DEFAULT_BOX_RESOURCES[box]['cpu']
             vm_memory = self.DEFAULT_BOX_RESOURCES[box]['memory']
 
-        instance_ip = self.__get_host_IP()
+        instance_ip = self.get_host_ip()
         instance = {
             'enabled': True,
             'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
@@ -588,7 +588,7 @@ class QACTLConfigGenerator:
     def destroy(self):
         """Destroy the instance created by deleting its ip entry in the used IPs file and its configuration file."""
         for host_ip in self.hosts:
-            self.__delete_ip_entry(host_ip)
+            self.delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
 
@@ -613,7 +613,7 @@ class QACTLConfigGenerator:
                 raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
                                    QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
 
-            instance_ip = self.__get_host_IP()
+            instance_ip = self.get_host_ip()
             # Assign the IP to the instance object (Needed later to generate host config data)
             instance.ip = instance_ip
 
@@ -635,18 +635,27 @@ class QACTLConfigGenerator:
 
         return deployment_configuration
 
-    def get_tasks_configuration(self, playbook_info, instances=None, playbook_type='local', remote_hosts_info=None):
+    def get_tasks_configuration(self, playbooks_info: list, instances=None, playbook_type='local',
+                                remote_hosts_info=None) -> dict:
         """Generate the qa-ctl configuration required for running ansible tasks.
 
         Args:
             instances (list(ConfigInstance)): List of config-instances to deploy.
-            playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
+            playbooks_info (list(dict)): List with all the info of playbooks. [{playbook_name: playbook_path}, {...}]
             playbook_type (str): Playbook path configuration [local or remote_url].
             remote_hosts_info (list(dict)): List with all the information of the remote hosts.
 
         Returns:
             dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
+
+        Raises:
+            QAValueError: If the number of instances does not match with the number of playbooks.
         """
+        # Check if each instance has its own 'playbooks_info' dictionary
+        if len(playbooks_info) != len(instances):
+            raise QAValueError('The number of instances does not match with the number of playbooks.',
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
+
         def get_tasks_configuration(host_info, playbook_info, playbook_type):
             playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
                               {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
@@ -661,13 +670,15 @@ class QACTLConfigGenerator:
         if instances:  # Build task configuration for local instances host
             for index, instance in enumerate(instances):
                 instance_box = self.BOX_MAPPING[instance.os_version]
-                host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+                host_info = deepcopy(QACTLConfigGenerator.BOX_INFO[instance_box])
                 host_info['host'] = instance.ip
-                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info,
+                                                                                            playbooks_info[index],
                                                                                             playbook_type)
         elif remote_hosts_info:  # Build task configuration for remote AWS hosts
             for index, custom_host_info in enumerate(remote_hosts_info):
                 host_info = deepcopy(custom_host_info)
-                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info,
+                                                                                            playbooks_info[index],
                                                                                             playbook_type)
         return tasks_configuration

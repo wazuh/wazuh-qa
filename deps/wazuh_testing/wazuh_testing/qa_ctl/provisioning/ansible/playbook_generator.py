@@ -24,7 +24,7 @@ def validate_playbook_parameters(parameters):
             raise ValueError(f"{required_parameter} is a required parameter to generate the playbook.")
 
 
-def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform,
+def install_wazuh(wazuh_target, package_name, package_url, package_destination, os_system, os_platform, manager_ip=None,
                   playbook_parameters=None):
     """Generate the playbook to install Wazuh.
 
@@ -36,6 +36,7 @@ def install_wazuh(wazuh_target, package_name, package_url, package_destination, 
         os_system (str): Operating system where the test will be launched.
         os_platform (str): Platform where the package will be installed.
         playbook_parameters (dict): Extra non-tasks playbook parameters.
+        manager_ip (str): IP of the manager, to be configured if the target is an agent.
 
     Raises:
         ValueError: If os_system or os_platform has not an expected value.
@@ -48,9 +49,9 @@ def install_wazuh(wazuh_target, package_name, package_url, package_destination, 
 
     if os_platform == 'linux':
         if PACKAGE_MANAGER[_os_system] == 'RPM':
-            tasks = _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target)
+            tasks = _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target, manager_ip)
         elif PACKAGE_MANAGER[_os_system] == 'DEB':
-            tasks = _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target)
+            tasks = _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target, manager_ip)
         else:
             raise ValueError(f"{os_system} is not supported in PlaybookGenerator")
     else:
@@ -410,7 +411,7 @@ def _stop_wazuh_control_service(wazuh_target):
     ]
 
 
-def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target):
+def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_target, manager_ip):
     """Ansible tasks to install a wazuh RPM package.
 
     Args:
@@ -418,6 +419,7 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
         package_url (str): URL of the package to be installed.
         package_destination (str): Destination folder where the package will be downloaded.
         wazuh_target (str): Wazuh target [manager or agent].
+        manager_ip (str): IP of the manager, to be configured if the target is an agent.
 
     Returns:
         list(AnsibleTask): Ansible tasks.
@@ -442,12 +444,13 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
+        tasks.extend(_configurate_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
 
 
-def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target):
+def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_target, manager_ip):
     """Ansible tasks to install a wazuh DEB package.
 
     Args:
@@ -455,6 +458,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
         package_url (str): URL of the package to be installed.
         package_destination (str): Destination folder where the package will be downloaded.
         wazuh_target (str): Wazuh target [manager or agent].
+        manager_ip (str): IP of the manager, to be configured if the target is an agent.
 
     Returns:
         list(AnsibleTask): Ansible tasks.
@@ -476,6 +480,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
+        tasks.extend(_configurate_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
@@ -590,6 +595,30 @@ def _uninstall_wazuh_deb(wazuh_target):
     ]
 
 
+def _configurate_manager_ip(manager_ip):
+    """Ansible tasks to configurate the manager ip in the agent endpoint
+
+        Args:
+            manager_ip (str): IP of the manager
+
+        Returns:
+            list(AnsibleTask): Ansible tasks.
+    """
+
+    return [
+        AnsibleTask({
+            'name': 'Configurate the IP of the manager in Agent',
+            'become': True,
+            'lineinfile': {
+                'path': '/var/ossec/etc/ossec.conf',
+                'regexp': '<address>MANAGER_IP</address>',
+                'line': f'      <address>{manager_ip}</address>',
+                'state': 'present'
+            }
+        })
+    ]
+
+
 def _run_linux_commands(commands):
     """Ansible tasks to run linux commands.
 
@@ -601,7 +630,8 @@ def _run_linux_commands(commands):
     """
     return [
        AnsibleTask({
-           'name': f"Run Command {command}",
+           # command(str) is sliced to avoid adding the character '\n' after position 60
+           'name': f"Run Command {command[:60]}",
            'shell': command
         }) for command in commands
     ]
