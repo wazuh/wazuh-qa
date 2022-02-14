@@ -31,3 +31,6 @@ WINDOWS = pytest.mark.win32
 LINUX = pytest.mark.linux
 MACOS = pytest.mark.darwin
 SOLARIS = pytest.mark.sunos5
+
+AGENT = pytest.mark.agent
+SERVER = pytest.mark.server

@@ -10,7 +10,23 @@
         value: 'no'
     - directories:
         value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
     - synchronization:
         elements:
         - max_eps:
             value: MAX_EPS
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes' 
