@@ -883,9 +883,9 @@ def set_wazuh_configuration(configuration):
 
 
 @pytest.fixture(scope='function')
-def truncate_log_files():
-    """Truncate all the log files before and after the test execution"""
-    log_files = [LOG_FILE_PATH]
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)
@@ -985,3 +985,11 @@ def mock_agent_function(request):
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def setup_log_monitor():
+    """Create the log monitor"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
