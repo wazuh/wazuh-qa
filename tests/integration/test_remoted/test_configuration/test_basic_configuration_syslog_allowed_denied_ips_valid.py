@@ -96,7 +96,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_allowed_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
+def test_allowed_denied_ips_syslog(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that 'allowed-ips' and 'denied-ips' could be configured without errors for syslog connection.
                  For this purpose, it uses the configuration from test cases, check if the warning has been logged and

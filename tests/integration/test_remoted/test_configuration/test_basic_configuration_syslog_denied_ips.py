@@ -87,7 +87,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_denied_ips_syslog(get_configuration, configure_environment, restart_remoted):
+def test_denied_ips_syslog(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that 'wazuh-remoted' denied connection to the specified 'denied-ips'.
                  For this purpose, it uses the configuration from test cases, check if the different errors are
