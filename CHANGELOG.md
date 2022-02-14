@@ -14,6 +14,7 @@ Release report: TBD
 - CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
 - Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
 - Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
+- Add E2E test: Auditing commands run by user ([#2571](https://github.com/wazuh/wazuh-qa/pull/2571))
 
 ### Changed
 - Adapt logtest ITs given the rules skipping ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
