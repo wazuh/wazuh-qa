@@ -985,3 +985,16 @@ def mock_agent_function(request):
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def mock_agent_with_custom_system(agent_system):
+    """Fixture to create a mocked agent with custom system specified as parameter"""
+    if agent_system not in mocking.SYSTEM_DATA:
+        raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
+
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
