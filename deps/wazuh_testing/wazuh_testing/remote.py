@@ -616,7 +616,7 @@ def check_push_shared_config(agent, sender, injector=None):
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
-        check_agent_received_message(agent, r'#!-up file .+ merged.mg', timeout=10,
+        check_agent_received_message(agent, r'#!-up file \w+ merged.mg', timeout=10,
                                      error_message="initial up file message not received")
 
         # Check agent.conf message
@@ -644,7 +644,7 @@ def check_push_shared_config(agent, sender, injector=None):
         log_monitor = FileMonitor(LOG_FILE_PATH)
         log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                           error_message="New shared configuration was not sent")
-        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=5,
+        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=REMOTED_GLOBAL_TIMEOUT,
                                      error_message="New group shared config not received")
 
     finally:
