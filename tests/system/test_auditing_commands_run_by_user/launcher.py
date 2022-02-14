@@ -286,7 +286,6 @@ def main():
         pytest_command = f"cd {AUDITING_USER_COMMANDS_TEST_PATH} && python3 -m pytest " \
                          f"test_auditing_commands_run_by_user/ --alerts-file " \
                          f"'{alerts_data_path}' --expected-data '{json.dumps(expected_alert_data)}'"
-        print(pytest_command)
 
         try:
             # Run the pytest
