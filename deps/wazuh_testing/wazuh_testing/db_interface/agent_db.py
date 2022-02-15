@@ -75,10 +75,9 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
 
 
 def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=DEFAULT_PACKAGE_NAME,
-                   priority='', section='Unspecified', size=99, vendor='wazuhintegrationtests', version='1.0.0-1.el7',
-                   architecture='x86_64', multiarch='', description='Wazuh Integration tests mock package',
-                   source='Wazuh Integration tests mock package', location='', triaged=0,
-                   install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                   priority='', section='Unspecified', size=99, vendor='wazuh-mocking', version='1.0.0-1.el7',
+                   architecture='x64', multiarch='', description='Wazuh mocking packages', source='Wazuh QA tests',
+                   location='', triaged=0, install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), checksum='dummychecksum',
                    item_id='dummyitemid'):
     """Insert a package in the agent DB.
