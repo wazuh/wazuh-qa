@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
@@ -18,6 +18,8 @@ import zipfile
 import filetype
 import requests
 import yaml
+from wazuh_testing import logger
+
 
 
 def read_json(file_path):
@@ -441,7 +443,7 @@ def create_large_file(directory, file_path):
         while os.stat(file_path).st_size < file_size:
             f.write(random.choice(string.printable) * chunksize)
 
-            
+
 def download_text_file(file_url, local_destination_path):
     """Download a remote file with text/plain content type.
 
@@ -459,3 +461,19 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
+
+
+def create_regular_file(path, name, content=''):
+    """Create a regular file.
+
+    Args:
+        path (str): path where the regular file will be created.
+        name (str): file name.
+        content (str, optional): content of the created file. Default `''`
+    """
+    regular_path = os.path.join(path, name)
+    try:
+        logger.info("Creating file " + str(os.path.join(path, name)) + " type")
+        write_file(regular_path, content)
+    except OSError:
+        logger.info("File " + str(os.path.join(path, name)) + " could not be created.")
