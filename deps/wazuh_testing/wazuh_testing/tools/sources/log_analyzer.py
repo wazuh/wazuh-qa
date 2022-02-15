@@ -270,10 +270,9 @@ class LogAnalyzer:
         
     def keep_alive_log_parser(self, component='master', hosts_regex='.*'):
         logs_files = self.get_instances_logs(component=component, hosts_regex=hosts_regex)
-        keep_alives= {}
+        keep_alives = {}
         for log_file in logs_files:
             regex = compile(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading '(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)", MULTILINE)
-            print(log_file)
             with open(log_file['logs']['ossec.log']) as log:
                 for match in regex.finditer(log.read()):
                     if match.group(3) not in keep_alives:
@@ -285,11 +284,11 @@ class LogAnalyzer:
                         recent_keep_alive_datetime = datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
                         if keep_alives[match.group(3)]["max_difference"] < abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds:
                             keep_alives[match.group(3)]["max_difference"] = abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds
-                        keep_alives[match.group(3)]["mean_difference"] +=  abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds
+                        keep_alives[match.group(3)]["mean_difference"] += abs(recent_keep_alive_datetime - last_keep_alive_datetime).seconds
                         keep_alives[match.group(3)]["last_keep_alive"] = match.group(1)
 
-                keep_alives[match.group(3)]["mean_difference"] = keep_alives[match.group(3)]["mean_difference"]/keep_alives[match.group(3)]["n_keep_alive"]
-            print(keep_alives)
+            for key in keep_alives.keys():
+                keep_alives[key]["mean_difference"] = keep_alives[key]["mean_difference"]/keep_alives[key]["n_keep_alive"]
             remainder = None
             with open(log_file['logs']['ossec.log']) as log:
                 log_lines = log.readlines()
@@ -303,7 +302,6 @@ class LogAnalyzer:
 
             for agent in keep_alives.keys():
                 last_keep_alive = datetime.strptime(keep_alives[agent]['last_keep_alive'], '%Y/%m/%d %H:%M:%S')
-                keep_alives[agent] =  {**keep_alives[agent], **{'remainder': abs(last_message - last_keep_alive ).seconds }}
-
+                keep_alives[agent] = {**keep_alives[agent], **{'remainder': abs(last_message - last_keep_alive ).seconds }}
         ret = {'keep_alives': keep_alives}
         return ret
