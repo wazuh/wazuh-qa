@@ -2,8 +2,10 @@ import json
 import socket
 import os
 import sqlite3
+from time import sleep
 
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
+from wazuh_testing.tools.services import control_service
 import wazuh_testing
 
 
@@ -22,12 +24,33 @@ def query_wdb(command):
     Returns:
         list: Query response data.
     """
+    # If the wdb socket is not yet up, then wait or restart wazuh-db
+    if not os.path.exists(WAZUH_DB_SOCKET_PATH):
+        max_retries = 6
+        for _ in range(2):
+            retry = 0
+            # Wait if the wdb socket is not still alive (due to wazuh-db restarts). Max 3 seconds
+            while not os.path.exists(WAZUH_DB_SOCKET_PATH) and retry < max_retries:
+                print("Retrying ...")
+                sleep(0.5)
+                retry += 1
+
+            # Restart wazuh-db in case of wdb socket is not yet up.
+            if not os.path.exists(WAZUH_DB_SOCKET_PATH):
+                print("Restarting wazuh-db ...")
+                control_service('restart', daemon='wazuh-db')
+
+        # Raise custom exception if the socket is not up in the expected time, even restarting wazuh-db
+        if not os.path.exists(WAZUH_DB_SOCKET_PATH):
+            raise Exception('The wdb socket is not up. wazuh-db was restarted but the socket was not found')
+
+    # Create and open the socket connection with wazuh-db socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(WAZUH_DB_SOCKET_PATH)
-
     data = []
 
     try:
+        # Send the query request
         sock.send(wazuh_pack(len(command)) + command.encode())
 
         rcv = sock.recv(4)

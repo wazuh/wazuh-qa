@@ -134,7 +134,7 @@ def extra_configuration_before_yield():
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folder, file_name, tags_to_apply', [
     (testdir1, f'{base_file_name}{1}', {'tags_delete_full'})
 ])

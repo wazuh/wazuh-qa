@@ -124,7 +124,6 @@ def extra_configuration_before_yield():
 @pytest.mark.parametrize('tags_to_apply', [
     {'file_limit_registry_conf'}
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_file_limit_full(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in

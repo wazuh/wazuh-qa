@@ -81,17 +81,3 @@ def restart_analysisd():
 
     for daemon in required_logtest_daemons:
         control_service('stop', daemon=daemon)
-
-
-@pytest.fixture(scope='module')
-def mock_agent():
-    """Fixture to create a mocked agent in wazuh databases"""
-    control_service('stop', daemon='wazuh-db')
-    agent_id = create_mocked_agent(name="mocked_agent")
-    control_service('start', daemon='wazuh-db')
-
-    yield agent_id
-
-    control_service('stop', daemon='wazuh-db')
-    delete_mocked_agent(agent_id)
-    control_service('start', daemon='wazuh-db')

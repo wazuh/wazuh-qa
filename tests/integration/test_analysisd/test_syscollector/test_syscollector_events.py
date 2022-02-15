@@ -54,14 +54,13 @@ os_version:
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html#using-syscollector-information-to-trigger-alerts
 '''
-import json
 import os
-
-import pytest
 import yaml
+import pytest
 
 from wazuh_testing.tools import (ANALYSISD_QUEUE_SOCKET_PATH, ALERT_FILE_PATH)
 from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollector_alert
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -88,10 +87,11 @@ def get_configuration(request):
 
 
 # Tests
+@pytest.mark.skip(reason='Temporarily disabled until merge this PR https://github.com/wazuh/wazuh/pull/10843')
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
-def test_syscollector_events(test_case, get_configuration, mock_agent, configure_custom_rules, restart_analysisd,
+def test_syscollector_events(test_case, get_configuration, mock_agent_module, configure_custom_rules, restart_analysisd,
                              wait_for_analysisd_startup, connect_to_sockets_function, file_monitoring):
     '''
     description:
@@ -104,7 +104,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-        - mock_agent:
+        - mock_agent_module:
             type: fixture
             brief: Create mock agent and get agent_id
         - configure_custom_rules:
@@ -140,7 +140,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
     '''
 
     # Get mock agent_id to create syscollector header
-    agent_id = mock_agent
+    agent_id = mock_agent_module
     event_header = f"d:[{agent_id}] {test_case['event_header']}"
 
     for stage in test_case['test_case']:
