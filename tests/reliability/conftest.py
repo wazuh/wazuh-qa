@@ -25,6 +25,6 @@ def pytest_configure(config):
 def get_report():
     try:
         with open(global_parameters.report_path) as report:
-            global_parameters.report = json.loads(report.read())
+            yield json.loads(report.read())
     except Exception:
         raise ValueError("Not provided a valid report path")

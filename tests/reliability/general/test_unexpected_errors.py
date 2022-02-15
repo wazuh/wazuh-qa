@@ -1,24 +1,24 @@
 import pytest
 import json
-from wazuh_testing import global_parameters
+import os
 import re
 
 codes = ['criticals', 'errors', 'warnings']
 default_targets = ['agents', 'managers']
 
+known_messages_filename = 'know_messages.json'
+known_messages_path = os.path.join(os.path.dirname(__file__), known_messages_filename)
+
+
 @pytest.mark.parametrize('code', codes)
 @pytest.mark.parametrize('target', default_targets)
 def test_unexpected_errors(get_report, code, target):
-    """Check remoted does not have any non expected error
-    """
-    report = global_parameters.report
-    list = report[target]
     unexpected_errors = []
 
-    for hosts in report[target][code]:
+    for hosts in get_report[target][code]:
         for messages in hosts.values():
             for message in messages:
-                with open('tests/reliability/general/know_messages.json') as f:
+                with open(known_messages_path) as f:
                     expected = json.loads(f.read())
                     combined = "(" + ")|(".join(expected[code]) + ")"
                     if not re.match(combined, message):
