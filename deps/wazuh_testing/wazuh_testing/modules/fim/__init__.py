@@ -7,6 +7,8 @@ The purpose of this file is to contain all the variables necessary for FIM in or
 maintain if one of them changes in the future.
 '''
 
+import sys
+
 # Variables
 
 # Key variables
@@ -61,8 +63,24 @@ CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
 CB_AGENT_CONNECT = r'.* Connected to the server .*'
 
-#Error message
+# Error message
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
+
+# Setting Local_internal_option file
+
+if sys.platform == 'win32':
+    FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'windows.debug': '2',
+        'syscheck.debug': '2',
+        'agent.debug': '2',
+        'monitord.rotate_log': '0'
+    }
+else:
+    FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
+        'syscheck.debug': '2',
+        'agent.debug': '2',
+        'monitord.rotate_log': '0'
+    }

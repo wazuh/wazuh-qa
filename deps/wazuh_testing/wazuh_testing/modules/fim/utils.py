@@ -17,7 +17,7 @@ def create_regular_file(path, name, content=''):
     """
     regular_path = os.path.join(path, name)
     mode = 'w+'
-    try:      
+    try:
         logger.info("Creating file " + str(os.path.join(path, name)) + " type")
         with open(regular_path, mode) as file:
             file.write(content)

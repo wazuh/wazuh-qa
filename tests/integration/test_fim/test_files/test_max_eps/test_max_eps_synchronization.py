@@ -86,7 +86,9 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.modules.fim.utils import create_regular_file
 from wazuh_testing.modules import (DATA, TIER1, AGENT, WINDOWS, LINUX)
-from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC, ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG)
+from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC, \
+                                        FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, ERR_MSG_AGENT_DISCONNECT, \
+                                        ERR_MSG_INTEGRITY_CONTROL_MSG)
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
 
 # Marks
@@ -105,15 +107,20 @@ ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
 
 # Configurations
+
+# Test with the minimum, and the default value
 eps_values = ['1', '100']
 
-parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled','realtime', 'whodata'], apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
+parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled','realtime', 'whodata'], \
+                                        apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
+configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
 
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configurations)
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -141,24 +148,29 @@ def delete_files():
 
 
 # Tests
-def test_max_eps_enable_valid_sync(get_configuration, create_multiple_files, configure_environment, restart_wazuh, delete_files):
+def test_max_eps_sync_valid_within_range(configure_local_internal_options_module, get_configuration, \
+                                        create_multiple_files, configure_environment, restart_wazuh, \
+                                        delete_files):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
                  a lot of synchronization events are generated. For this purpose, the test will monitor
                  a folder and create multiple testing files in it. Once FIM is started, it will wait for
                  the agent to connect to the manager and generate an integrity message, for that reason
                  this test applies to scheduled mode. Then, the test will collect FIM 'integrity' events
-                 generated and check if the number of events matches the testing files created. 
+                 generated and check if the number of events matches the testing files created.
                  Finally, it will verify the limit of events per second (eps)
                  is not exceeded by checking the creation time of the testing files.
 
     wazuh_min_version: 4.2.0
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the Wazuh local internal options.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-        - create_files:
+        - create_multiple_file:
             type: fixture
             brief: Create the testing files to be monitored.
         - configure_environment:
@@ -185,6 +197,8 @@ def test_max_eps_enable_valid_sync(get_configuration, create_multiple_files, con
 
     tags:
         - scheduled
+        - realtime
+        - whodata
     '''
     max_eps = int(get_configuration['metadata']['max_eps'])
 
@@ -200,13 +214,13 @@ def test_max_eps_enable_valid_sync(get_configuration, create_multiple_files, con
 
     # Find integrity message for each file created after read max_eps.
     n_results = max_eps + 5
-    result = wazuh_log_monitor.start(timeout=30,
+    result = wazuh_log_monitor.start(timeout=60,
                                      accum_results=n_results,
                                      callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({max_eps})').result()
-    # collect by time received the messages.                                 
+    # Collect by time received the messages.
     counter = Counter([date_time for date_time, _ in result])
 
-    # Check the number of occurrences of received messages by time.  
+    # Check the number of occurrences of received messages by time.
     for _, total_occurrences in counter.items():
         assert total_occurrences <= max_eps, f'Sent {total_occurrences} but a maximum of {max_eps} was set'
