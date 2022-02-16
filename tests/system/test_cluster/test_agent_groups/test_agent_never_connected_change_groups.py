@@ -109,7 +109,6 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     # Check that agent status is never_connected in cluster
     check_agent_status(agent_id, agent_name, agent_ip, 'never_connected', host_manager, test_infra_managers)
 
-    
     # Check that agent has group set to Null on Managers
     check_agent_groups(agent_id, 'Null', test_infra_managers, host_manager)
 
@@ -120,7 +119,6 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
         time.sleep(10)
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
-
 
     finally:
         # Delete group of agent
