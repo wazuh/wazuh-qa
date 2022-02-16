@@ -60,7 +60,7 @@ from wazuh_testing.tools import WAZUH_CONF_RELATIVE
 import wazuh_testing.generic_callbacks as gc
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

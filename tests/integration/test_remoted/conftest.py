@@ -9,7 +9,7 @@ from wazuh_testing.remote import remove_agent_group, new_agent_group
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import check_daemon_status, control_service
 
 DAEMON_NAME = "wazuh-remoted"
 
@@ -60,3 +60,9 @@ def remove_shared_files():
             shutil.move(os.path.join(target_dir, file_name), source_dir)
 
     os.removedirs(target_dir)
+
+
+@pytest.fixture(scope='module')
+def check_remoted_running(get_configuration):
+    """Check if wazuh-remoted is running"""
+    check_daemon_status(DAEMON_NAME)
