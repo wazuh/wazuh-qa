@@ -3,6 +3,6 @@ wazuh-agent1:
   - regex: (wazuh-agent1).*(\\\"\\'\\\$token\\'\\\" \\\[01\\\]\\\(02\\\)\\{symbols\\:\\'\\\|\\!\\#\\\*\\\\\\'\\&\\})
     path: "/var/ossec/logs/ossec.log"
     timeout: 60
-  - regex: "(\/var\/ossec\/active-response\/bin\/firewall-drop.sh add).*(5710)"
+  - regex: "(\/var\/ossec\/active-response\/bin\/firewall-drop.sh add).*(5760)"
     path: "/var/ossec/logs/active-responses.log"
     timeout: 60
