@@ -197,12 +197,6 @@ API_DAEMONS_REQUIREMENTS = [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_D
 DISABLE_MONITORD_ROTATE_LOG_OPTION = {'monitord.rotate_log': '0'}
 ANALYSISD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 AGENTD_LOCAL_INTERNAL_OPTIONS = {'agent.debug': '2', 'execd': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_MANAGER = {'syscheck.debug': '2',
-                                      'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_UNIX = {'syscheck.debug': '2',
-                                         'agent.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_WINDOWS = {'syscheck.debug': '2',
-                                            'windows.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 GCLOUD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2',
                                  'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 LOGTEST_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}

@@ -6,7 +6,7 @@ import re
 import json
 
 from datetime import datetime
-from wazuh_testing.modules.fim import (CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_MESSAGE)
+from wazuh_testing.modules.fim import CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_MESSAGE
 
 
 def callback_connection_message(line):

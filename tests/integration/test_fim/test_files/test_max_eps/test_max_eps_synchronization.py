@@ -85,11 +85,11 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.modules.fim.utils import create_regular_file
-from wazuh_testing.modules import (DATA, TIER1, AGENT, WINDOWS, LINUX)
+from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, ERR_MSG_AGENT_DISCONNECT,
-                                       ERR_MSG_INTEGRITY_CONTROL_MSG)
+                                       ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG)
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca_internal_options
 
 # Marks
 pytestmark = [TIER1, AGENT, WINDOWS, LINUX]
@@ -105,6 +105,10 @@ conf_params = {TEST_DIRECTORIES: test_directories[0]}
 
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
+TIMEOUT_CHECK_AGENT_CONNECT = 10
+TIMEOUT_CHECK_INTEGRATY_START = 30
+TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 60
+
 
 # Configurations
 
@@ -117,7 +121,6 @@ parameters, metadata = generate_params(extra_params=conf_params,
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
 
-local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 # Fixtures
 
@@ -129,7 +132,7 @@ def get_configuration(request):
 
 @pytest.fixture(scope='module')
 def create_multiple_files(get_configuration):
-    """Create multiple files of a spectific type."""
+    """Create multiple files of a specific type."""
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
     os.makedirs(test_directories[0], exist_ok=True, mode=0o777)
@@ -204,19 +207,19 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
     max_eps = int(get_configuration['metadata']['max_eps'])
 
     # Wait until the agent connects to the manager.
-    wazuh_log_monitor.start(timeout=10,
+    wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_AGENT_CONNECT,
                             callback=callback_connection_message,
                             error_message=ERR_MSG_AGENT_DISCONNECT).result()
 
     # Find integrity start before attempting to read max_eps.
-    wazuh_log_monitor.start(timeout=30,
+    wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START,
                             callback=callback_integrity_message,
                             error_message=ERR_MSG_INTEGRITY_CONTROL_MSG).result()
 
     # Find integrity message for each file created after read max_eps.
-    n_results = max_eps + 5
-    result = wazuh_log_monitor.start(timeout=60,
-                                     accum_results=n_results,
+    total_file_created = max_eps + 5
+    result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG,
+                                     accum_results=total_file_created,
                                      callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({max_eps})').result()
 
