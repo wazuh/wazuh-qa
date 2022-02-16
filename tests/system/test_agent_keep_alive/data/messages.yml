@@ -44,7 +44,7 @@ wazuh-agent1:
   - regex: ".*Sending agent notification."
     path: "/var/ossec/logs/ossec.log"
     timeout: 20
-  - regex: ".*Sending keep alive: #!-Linux |wazuh-agent1 |.*"
+  - regex: ".*Sending keep alive: #!-Linux \\|wazuh-agent1 \\|.*"
     path: "/var/ossec/logs/ossec.log"
     timeout: 20
   - regex: ".*merged.mg"

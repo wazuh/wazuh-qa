@@ -168,7 +168,7 @@ def clean_environment():
 def enrollment():
     # Start the agent enrollment process by restarting the wazuh-agent
     host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
-    host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent restart', check=False)
+    host_manager.get_host('wazuh-agent1').ansible('command', 'service wazuh-agent restart', check=False)
 
     # Get agent's client.keys
     agent_client_keys = host_manager.get_file_content('wazuh-agent1', os.path.join(WAZUH_PATH, 'etc',
@@ -182,8 +182,8 @@ def enrollment():
 def get_ip_directions():
     global network
 
-    manager_network = host_manager.get_host_ip('wazuh-manager')
-    agent_network = host_manager.get_host_ip('wazuh-agent1')
+    manager_network = host_manager.get_host_ip('wazuh-manager', 'eth0')
+    agent_network = host_manager.get_host_ip('wazuh-agent1', 'eth0')
 
     network['manager_network'] = manager_network
     network['agent_network'] = agent_network
@@ -253,7 +253,7 @@ def modify_ip_address_conf(test_case):
                                              content=new_configuration)
         elif 'dns' in configuration['ip_type']:
             new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                                f"<address>wazuh-manager</address>")
+                                                                '<address>wazuh-manager</address>')
             host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
                                              content=new_configuration)
 

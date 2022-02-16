@@ -261,6 +261,19 @@ class HostManager:
         """
         return self.get_host(host).interface(interface).addresses
 
+    def run_db_query(self, host: str, query: str, db_path: str, check: bool = False):
+        """Run a sqlite query on the specified host and return its stdout.
+        Args:
+            host (str) : Hostname
+            query (str): sqlite query to execute
+            db_path (str): Database path
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+        Returns:
+            stdout (str): The output of the command execution.
+        """
+        cmd = f"sqlite3 {db_path} '{query}'"
+        return self.get_host(host).ansible('command', cmd, check=check)['stdout']
+
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager
     Args:
