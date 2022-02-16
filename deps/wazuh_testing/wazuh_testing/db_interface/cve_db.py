@@ -176,7 +176,7 @@ def modify_nvd_metadata_vuldet(timestamp):
     """
     query_string = f"UPDATE NVD_METADATA SET LAST_UPDATE={timestamp};"
 
-    for _ in range(vd.VULN_DETECTOR_GLOBAL_TIMEOUT):
+    for _ in range(vd.T_20):
         try:
             make_sqlite_query(vd.CVE_DB_PATH, [query_string])
             break
