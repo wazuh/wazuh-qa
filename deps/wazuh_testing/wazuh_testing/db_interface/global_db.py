@@ -38,9 +38,9 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
                            internal_key='', os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4',
                            os_codename='centos-8', os_build='4.18.0-147.8.1.el8_1.x86_64',
                            os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020', os_uname='x86_64', os_arch='x86_64',
-                           version='4.2', config_sum='', merged_sum='', manager_host='centos-8', node_name='node01',
-                           date_add='1612942494', last_keepalive='253402300799', group='', sync_status='synced',
-                           connection_status='active'):
+                           version='Wazuh v4.3.0', config_sum='', merged_sum='', manager_host='centos-8',
+                           node_name='node01', date_add='1612942494', last_keepalive='253402300799', group='',
+                           sync_status='synced', connection_status='active'):
     """Create an agent or update its info if it already exists (checking agent_id).
 
     Args:
@@ -109,3 +109,12 @@ def get_agent_ids(agent_name):
     """
     return [str(item['id']).zfill(3) for item in query_wdb(f"global sql SELECT id FROM agent WHERE "
                                                            f"name='{agent_name}'")]
+
+
+def get_all_agent_ids():
+    """Get all agent ids except the 000
+
+    Returns:
+        list(str): list of ids e.g ['001', '002', ...] or [] if there is none.
+    """
+    return [str(item['id']).zfill(3) for item in query_wdb("global sql SELECT id FROM agent WHERE id!='000'")]

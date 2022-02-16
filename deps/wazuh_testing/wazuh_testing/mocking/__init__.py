@@ -10,36 +10,38 @@ from wazuh_testing.tools.file import remove_file
 
 
 SYSTEM_DATA = {
-    'WINDOWS10': {'os_name': 'Microsoft Windows Server 2016 Datacenter Evaluation',
-                  'os_major': '10', 'os_minor': '0', 'os_platform': 'windows', 'name': 'windows'},
+    'WINDOWS10': {'os_name': 'Microsoft Windows Server 2016 Datacenter Evaluation', 'os_major': '10', 'os_minor': '0',
+                  'os_platform': 'windows', 'name': 'windows'},
     'MAC': {'os_name': 'Mac OS X', 'os_major': '10', 'os_minor': '15', 'os_platform': 'darwin',
             'name': 'macos-catalina'},
     'MACS': {'os_name': 'Mac OS X Server', 'os_major': '5', 'os_minor': '10', 'os_platform': 'darwin',
-             "name": "macos-server"},
-    'ARCH': {'os_name': 'Arch Linux', 'os_major': '', 'os_minor': '', 'os_platform': '',
-             'name': 'archlinux'},
-    'ALAS': {'target': 'Amazon-Linux', 'os_name': 'Amazon Linux AMI', 'os_major': '2018', 'os_minor': '03',
-             'os_platform': 'amzn', 'name': 'amazonlinux'},
-    'ALAS2': {'target': 'Amazon-Linux-2', 'os_name': 'Amazon Linux', 'os_major': '2', 'os_minor': '',
-              'os_platform': 'amzn', 'name': 'amazonlinux2'},
+             'name': 'macos-server'},
+    'ARCH': {'os_name': 'Arch Linux', 'os_major': '', 'os_minor': '', 'os_platform': '', 'name': 'archlinux'},
+    'ALAS': {'os_name': 'Amazon Linux AMI', 'os_major': '2018', 'os_minor': '03', 'os_platform': 'amzn',
+             'name': 'amazonlinux'},
+    'ALAS2': {'os_name': 'Amazon Linux', 'os_major': '2', 'os_minor': '', 'os_platform': 'amzn',
+              'name': 'amazonlinux2'},
     'RHEL8': {'os_name': 'CentOS Linux', 'os_major': '8', 'os_minor': '1', 'os_platform': 'centos',
-              'os_version': '8.1', 'name': 'centos8'},
-    'RHEL7': {'os_name': 'CentOS Linux', 'os_major': '7', 'os_minor': '1', 'os_platform': 'centos',
+              'name': 'centos8'},
+    'RHEL7': {'os_name': 'CentOS Linux', 'os_major': '7', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '7.0',
               'name': 'centos7'},
-    'RHEL6': {'os_name': 'CentOS Linux', 'os_major': '6', 'os_minor': '1', 'os_platform': 'centos',
+    'RHEL6': {'os_name': 'CentOS Linux', 'os_major': '6', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '6.0',
               'name': 'centos6'},
-    'RHEL5': {'os_name': 'CentOS Linux', 'os_major': '5', 'os_minor': '1', 'os_platform': 'centos',
+    'RHEL5': {'os_name': 'CentOS Linux', 'os_major': '5', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '5.0',
               'name': 'centos5'},
+    'FOCAL': {'os_name': 'Ubuntu', 'os_major': '20', 'os_minor': '04', 'os_platform': 'ubuntu', 'name': 'Ubuntu-focal'},
     'BIONIC': {'os_name': 'Ubuntu', 'os_major': '18', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-bionic'},
     'XENIAL': {'os_name': 'Ubuntu', 'os_major': '16', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-xenial'},
     'TRUSTY': {'os_name': 'Ubuntu', 'os_major': '14', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-trusty'},
-    'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0',
-               'os_platform': 'debian', 'name': 'debian10'},
-    'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0',
-                'os_platform': 'debian', 'name': 'debian9'}
+    'BULLSEYE': {'os_name': 'Debian GNU/Linux', 'os_major': '11', 'os_minor': '0', 'os_platform': 'debian',
+                 'name': 'debian11'},
+    'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
+               'name': 'debian10'},
+    'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
+                'name': 'debian9'}
 }
 
 
@@ -50,7 +52,7 @@ def set_system(system, agent_id='000'):
         system (str): System to set. Available systems in SYSTEM_DATA variable.
     """
     global_db.modify_system(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
-                            os_major=SYSTEM_DATA[system]['os_major'],os_minor=SYSTEM_DATA[system]['os_minor'],
+                            os_major=SYSTEM_DATA[system]['os_major'], os_minor=SYSTEM_DATA[system]['os_minor'],
                             name=SYSTEM_DATA[system]['name'])
 
     agent_db.update_os_info(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
@@ -61,7 +63,7 @@ def set_system(system, agent_id='000'):
 def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0.0.1', internal_key='',
                         os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4', os_codename='centos-8',
                         os_build='4.18.0-147.8.1.el8_1.x86_64', os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020',
-                        os_uname='x86_64', os_arch='x86_64', version='4.2', config_sum='', merged_sum='',
+                        os_uname='x64', os_arch='x64', version='Wazuh v4.3.0', config_sum='', merged_sum='',
                         manager_host='centos-8', node_name='node01', date_add='1612942494',
                         last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
                         client_key_secret=None):
@@ -173,10 +175,16 @@ def delete_mocked_packages(agent_id='000'):
 
 
 def delete_all_mocked_agents(name='mocked_agent'):
-    """Delete all mocked agents.
+    """Delete all mocked agents by name.
 
     Args:
         name (str): Name of mocked agents to delete.
     """
     for agent_id in global_db.get_agent_ids(name):
+        delete_mocked_agent(agent_id)
+
+
+def delete_all_agents():
+    """Delete all mocked agents except id 000."""
+    for agent_id in global_db.get_all_agent_ids():
         delete_mocked_agent(agent_id)
