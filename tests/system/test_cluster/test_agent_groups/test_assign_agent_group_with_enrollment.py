@@ -93,11 +93,13 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
-        - Verify that after registering and before starting the agent, it has the 'default' group assigned.
-        - Verify that after registering and after starting the agent, it has the 'group_test' group assigned.
+        - Verify that after registering and before receiving agent group info, it has the 'default' group assigned.
+        - Verify that after registering and after receiving agent group info, it has the 'group_test' group assigned.
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
+
+    # Add modify file wazuh/framework/wazuh/core/cluster/cluster.json - "sync_agent_groups" 
 
     # Create new group
     host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
@@ -113,18 +115,16 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     restart_cluster(test_infra_agents, host_manager)
     agent_id = get_id_from_agent(test_infra_agents[0], host_manager)
 
-    # Check that agent has group set to group_test
-    try:
-        check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
-    
-    # Check that agent has group set to dafault and then override group info
-    # Validar luego de que este agents groups disponible en workers
-    except: 
-        check_agent_groups(agent_id, 'default', test_infra_managers, host_manager)
-        check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
-
-     # Check that agent has client key file
+    # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager)
 
-    # Delete group of agent
-    delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+    try:
+        check_agent_groups(agent_id, 'default', test_infra_managers, host_manager)
+
+        # Check that agent has group set to dafault and then override group info
+        check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
+    
+
+    finally:
+        # Delete group of agent
+        delete_group_of_agents('wazuh-master', id_group, host_manager)
