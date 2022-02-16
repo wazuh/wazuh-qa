@@ -81,15 +81,10 @@ from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
-from wazuh_testing.tools.file import delete_path_recursively, create_regular_file
+from wazuh_testing.tools.file import delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-<<<<<<< HEAD
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.modules.fim.utils import create_regular_file
-=======
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
                                        ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG)
@@ -105,21 +100,14 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
 
-test_directories = os.path.join(PREFIX, TEST_DIR_1)
-conf_params = {TEST_DIRECTORIES: test_directories}
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+conf_params = {TEST_DIRECTORIES: test_directories[0]}
 
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
-<<<<<<< HEAD
 
 TIMEOUT_CHECK_AGENT_CONNECT = 10
 TIMEOUT_CHECK_INTEGRATY_START = 30
 TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 60
-
-=======
-TIMEOUT_CHECK_CONNECTION = 10
-TIMEOUT_CHECK_INTEGRITY_START = 30
-TIMEOUT_CHECK_INTEGRITY_FILE_CREATED = 60
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
 
 # Configurations
 
@@ -132,10 +120,6 @@ parameters, metadata = generate_params(extra_params=conf_params,
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
 # Fixtures
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
@@ -149,11 +133,11 @@ def create_multiple_files(get_configuration):
     """Create multiple files of a specific type."""
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
-    os.makedirs(test_directories, exist_ok=True, mode=0o777)
+    os.makedirs(test_directories[0], exist_ok=True, mode=0o777)
     try:
         for i in range(int(max_eps) + 5):
             file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode'
-            create_regular_file(test_directories, file_name, content='')
+            create_regular_file(test_directories[0], file_name, content='')
     except OSError:
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
@@ -161,7 +145,7 @@ def create_multiple_files(get_configuration):
 @pytest.fixture(scope='module')
 def delete_files():
     yield
-    for test_dir in test_directories:
+    for test_dir in test_directories[0]:
         delete_path_recursively(test_dir)
 
 
@@ -221,33 +205,19 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
     max_eps = int(get_configuration['metadata']['max_eps'])
 
     # Wait until the agent connects to the manager.
-<<<<<<< HEAD
     wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_AGENT_CONNECT,
-=======
-    wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_CONNECTION,
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
                             callback=callback_connection_message,
                             error_message=ERR_MSG_AGENT_DISCONNECT).result()
 
     # Find integrity start before attempting to read max_eps.
-<<<<<<< HEAD
     wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START,
-=======
-    wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRITY_START,
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
                             callback=callback_integrity_message,
                             error_message=ERR_MSG_INTEGRITY_CONTROL_MSG).result()
 
     # Find integrity message for each file created after read max_eps.
-<<<<<<< HEAD
     total_file_created = max_eps + 5
     result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG,
                                      accum_results=total_file_created,
-=======
-    total_file_create = max_eps + 5
-    result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRITY_FILE_CREATED,
-                                     accum_results=total_file_create,
->>>>>>> 5705798e2f22f602e21d6d10ed141a6de936b9c5
                                      callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({max_eps})').result()
 
