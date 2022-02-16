@@ -59,6 +59,8 @@ import os
 import time
 
 import pytest
+
+from wazuh_testing.api import API_LOGIN_ENDPOINT, API_LOGIN_RUN_AS_ENDPOINT
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 
 # Marks
@@ -86,20 +88,33 @@ def get_configuration(request):
     {'config1'},
     {'config2'}
 ])
+@pytest.mark.parametrize('user, password, endpoint', [
+    ('wazuh', 'wazuh', API_LOGIN_ENDPOINT),
+    ('wazuh-wui', 'wazuh-wui', API_LOGIN_RUN_AS_ENDPOINT)
+])
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_api_environment, restart_api,
-                                    wait_for_start, get_api_details):
+def test_bruteforce_blocking_system(tags_to_apply, user, password, endpoint, get_configuration,
+                                    configure_api_environment, restart_api, wait_for_start, get_api_details):
     '''
     description: Check if the blocking time for IP addresses detected as brute-force attack works.
                  For this purpose, the test causes an IP blocking, make a request before
                  the blocking time finishes and one after the blocking time.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.3.0
 
     parameters:
         - tags_to_apply:
             type: set
             brief: Run test if match with a configuration identifier, skip otherwise.
+        - user:
+            type: str
+            brief: Allowed user to use to obtain a token.
+        - password:
+            type: str
+            brief: Allowed password to use to obtain a token.
+        - endpoint:
+            type: str
+            brief: Login endpoint to use.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -136,11 +151,12 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
 
     # Provoke a block from an unknown IP ('max_login_attempts' attempts with incorrect credentials).
     with pytest.raises(RuntimeError):
-        get_api_details(user='wrong', password='wrong', login_attempts=max_login_attempts, sleep_time=0)
+        get_api_details(user='wrong', password='wrong', login_endpoint=endpoint, login_attempts=max_login_attempts,
+                        sleep_time=0)
 
     # Request with correct credentials before blocking time expires.
     with pytest.raises(RuntimeError) as login_exc:
-        get_api_details()
+        get_api_details(user=user, password=password, login_endpoint=endpoint)
     assert 'Error obtaining login token' in login_exc.value.args[0], f'An error getting the token was expected, but ' \
                                                                      f'it was not obtained. \nFull response: ' \
                                                                      f'{login_exc.value}'
