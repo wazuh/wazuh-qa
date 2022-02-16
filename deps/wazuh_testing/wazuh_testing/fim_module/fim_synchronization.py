@@ -4,16 +4,19 @@
 
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_registry_integrity_state_event
 from wazuh_testing import global_parameters
-from wazuh_testing.fim_module.fim_variables import MAX_EVENTS_VALUE, REGISTRY_DBSYNC_NO_DATA
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.fim_module.fim_variables import MAX_EVENTS_VALUE, CB_REGISTRY_DBSYNC_NO_DATA
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
 def get_sync_msgs(tout, new_data=True):
     """Look for as many synchronization events as possible.
+
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
-    Params:
+
+    Args:
         tout (int): Timeout that will be used to get the dbsync_no_data message.
-        new_data (bool): Specifies if the test will wait the event `dbsync_no_data`
+        new_data (bool): Specifies if the test will wait the event `dbsync_no_data`.
+
     Returns:
         A list with all the events in json format.
     """
@@ -21,7 +24,7 @@ def get_sync_msgs(tout, new_data=True):
     events = []
     if new_data:
         wazuh_log_monitor.start(timeout=tout,
-                                callback=callback_generator(REGISTRY_DBSYNC_NO_DATA),
+                                callback=generate_monitoring_callback(CB_REGISTRY_DBSYNC_NO_DATA),
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
     for _ in range(0, MAX_EVENTS_VALUE):
@@ -41,10 +44,12 @@ def get_sync_msgs(tout, new_data=True):
 
 def find_value_in_event_list(key_path, value_name, event_list):
     """Function that looks for a key path and value_name in a list of json events.
-    Params:
+
+    Args:
         path (str): Path of the registry key.
-        value_name (str): Name of the value
+        value_name (str): Name of the value.
         event_list (list): List containing the events in JSON format.
+
     Returns:
         The event that matches the specified path. None if no event was found.
     """

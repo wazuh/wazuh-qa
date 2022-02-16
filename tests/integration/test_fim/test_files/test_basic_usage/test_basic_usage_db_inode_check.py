@@ -131,7 +131,7 @@ def wait_for_fim_start_function(get_configuration, request):
 
 
 # tests
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('test_cases', [0, 1, 2])
 def test_db_inode_check(test_cases, get_configuration, configure_environment, restart_syscheck_function,
                         wait_for_fim_start_function):

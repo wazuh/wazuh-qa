@@ -13,7 +13,7 @@ kiwisolver>=1.0.1; platform_system == "Linux" or platform_system == "Darwin" or 
 lockfile==0.12.2
 matplotlib>=3.3.4; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 netifaces==0.10.9; platform_system == "Linux" or platform_system == "Darwin"
-numpy>=1.19.5
+numpy>=1.18.1
 pandas>=1.1.5
 pillow>=6.2.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 psutil>=5.6.6
@@ -42,3 +42,5 @@ bandit==1.7.0
 git-repo==1.10.3
 pywinrm>=0.4.2 ; platform_system == "Linux" or platform_system=='Windows'
 wmi>=1.5.1; platform_system=='Windows'
+libcst==0.3.23 ; python_version <= '3.6'
+treelib==1.6.1
