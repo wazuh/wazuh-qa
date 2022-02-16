@@ -81,7 +81,7 @@ from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
-from wazuh_testing.tools.file import delete_path_recursively
+from wazuh_testing.tools.file import delete_path_recursively, create_regular_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules.fim.utils import create_regular_file
