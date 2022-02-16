@@ -76,20 +76,20 @@ tags:
 '''
 import os
 import pytest
+import shutil
 
 from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
-from wazuh_testing.tools.file import delete_path_recursively, create_regular_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules.fim.utils import create_regular_file
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG)
+                                       ERR_MSG_AGENT_DISCONNECT, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS,
+                                       ERR_MSG_INTEGRITY_CONTROL_MSG)
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca_internal_options
 
 # Marks
 pytestmark = [TIER1, AGENT, WINDOWS, LINUX]
@@ -102,6 +102,8 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
 
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
 conf_params = {TEST_DIRECTORIES: test_directories[0]}
+
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
@@ -142,11 +144,11 @@ def create_multiple_files(get_configuration):
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def delete_files():
     yield
     for test_dir in test_directories[0]:
-        delete_path_recursively(test_dir)
+        shutil.rmtree(test_dir, ignore_errors=True)
 
 
 # Tests
