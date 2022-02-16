@@ -38,9 +38,9 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
                            internal_key='', os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4',
                            os_codename='centos-8', os_build='4.18.0-147.8.1.el8_1.x86_64',
                            os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020', os_uname='x86_64', os_arch='x86_64',
-                           version='Wazuh v4.3.0', config_sum='', merged_sum='', manager_host='centos-8', node_name='node01',
-                           date_add='1612942494', last_keepalive='253402300799', group='', sync_status='synced',
-                           connection_status='active'):
+                           version='Wazuh v4.3.0', config_sum='', merged_sum='', manager_host='centos-8',
+                           node_name='node01', date_add='1612942494', last_keepalive='253402300799', group='',
+                           sync_status='synced', connection_status='active'):
     """Create an agent or update its info if it already exists (checking agent_id).
 
     Args:

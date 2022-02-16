@@ -39,7 +39,7 @@ SYSTEM_DATA = {
     'BULLSEYE': {'os_name': 'Debian GNU/Linux', 'os_major': '11', 'os_minor': '0', 'os_platform': 'debian',
                  'name': 'debian11'},
     'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
-                'name': 'debian10'},
+               'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
                 'name': 'debian9'}
 }
@@ -52,7 +52,7 @@ def set_system(system, agent_id='000'):
         system (str): System to set. Available systems in SYSTEM_DATA variable.
     """
     global_db.modify_system(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
-                            os_major=SYSTEM_DATA[system]['os_major'],os_minor=SYSTEM_DATA[system]['os_minor'],
+                            os_major=SYSTEM_DATA[system]['os_major'], os_minor=SYSTEM_DATA[system]['os_minor'],
                             name=SYSTEM_DATA[system]['name'])
 
     agent_db.update_os_info(agent_id=agent_id, os_name=SYSTEM_DATA[system]['os_name'],
