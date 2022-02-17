@@ -28,25 +28,17 @@
     dest: /wazuh
     version: "{{ wazuh_branch }}"
 
-- name: Install master
-  args:
-    chdir: /wazuh
-    creates: /var/ossec
-  environment:
-    USER_LANGUAGE: "en"
-    USER_NO_STOP: "y"
-    USER_INSTALL_TYPE: "server"
-    USER_DIR: "/var/ossec"
-    USER_ENABLE_EMAIL: "n"
-    USER_ENABLE_SYSCHECK: "n"
-    USER_ENABLE_ROOTCHECK: "n"
-    USER_ENABLE_OPENSCAP: "n"
-    USER_WHITE_LIST: "n"
-    USER_ENABLE_SYSLOG: "y"
-    USER_ENABLE_AUTHD: "y"
-    USER_AUTO_START: "y"
-    USER_UPDATE: "n"
-  shell: "./install.sh"
+- name: Copy agent file
+  copy:
+    src: ../files/wazuh-manager_4.4.0-2514.deb
+    dest: /wazuh-manager.deb
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install agent
+  apt:
+    deb: /wazuh-manager.deb
 
 - name: Copy ossec.conf file
   copy:
