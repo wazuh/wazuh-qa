@@ -118,7 +118,7 @@ def read_file(file_path):
     return data
 
 
-def write_file(file_path, data):
+def write_file(file_path, data=''):
     with open(file_path, 'w') as f:
         f.write(data)
 
@@ -176,7 +176,7 @@ def delete_file(file_path):
 
 def delete_path_recursively(path):
     if os.path.exists(path):
-        shutil.rmtree(path, ignore_errors=True)
+        shutil.rmtree(path)
 
 
 def download_file(source_url, dest_path):
@@ -461,19 +461,3 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
-
-
-def create_regular_file(path, name, content=''):
-    """Create a regular file.
-
-    Args:
-        path (str): path where the regular file will be created.
-        name (str): file name.
-        content (str, optional): content of the created file. Default `''`
-    """
-    regular_path = os.path.join(path, name)
-    try:
-        logger.info("Creating file " + str(regular_path) + " type")
-        write_file(regular_path, content)
-    except OSError:
-        logger.info("File " + str(regular_path) + " could not be created.")
