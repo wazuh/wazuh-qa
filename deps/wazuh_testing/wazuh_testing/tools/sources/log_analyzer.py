@@ -1,25 +1,92 @@
-import pandas as pd
 import os
 import re
+
+import pandas as pd
+import numpy as np
+
 from itertools import groupby
 from mmap import mmap, ACCESS_READ
-import numpy as np
 from re import compile, MULTILINE
 from datetime import datetime
 
+
 class LogAnalyzer:
-    """
-    """
+    error_codes = ['warning', 'error', 'critical']
+
+    @staticmethod
+    def findall_regex_line(lines, regex, flags):
+        error_lines = re.findall(regex, fr"{lines}", flags=flags)
+        error_lines = [error.decode(encoding='utf8') for error in error_lines] if error_lines else []
+        return error_lines
+
+    @staticmethod
+    def get_error_log_file(log_path, type='error'):
+        error_lines = []
+        if os.path.getsize(log_path) != 0:
+            with open(log_path) as f:
+                log_file_content = mmap(f.fileno(), 0, access=ACCESS_READ)
+
+                error_lines = LogAnalyzer.findall_regex_line(lines=log_file_content, regex=f"(^.*?{type}\:.*?$)",
+                                                             flags=re.MULTILINE | re.IGNORECASE)
+        return error_lines
+
+    @staticmethod
+    def get_error_logs_hosts(log_dict):
+        error_dict = {'critical': [], 'error': [], 'warning': []}
+        for type in LogAnalyzer.error_codes:
+            for host_log in log_dict:
+                error_list_host = []
+                for host_name, log_path in host_log['logs'].items():
+                    if os.path.exists(log_path):
+                        agent_error = LogAnalyzer.get_error_log_file(log_path, type)
+                        if agent_error:
+                            error_list_host += \
+                                              [f"[{host_name}] " + agent_error_line for agent_error_line in agent_error]
+                if error_list_host:
+                    error_dict[type] += [{host_log['name']:  error_list_host}]
+        return error_dict
+
+
+class StatisticsAnalyzer:
+    pass
+
+
+class ReportGenerator:
     def __init__(self, artifact_path):
-        if not os.path.isdir(artifact_path):
-            raise ValueError
 
-        self.artifact_path = artifact_path
+        if os.path.isdir(artifact_path):
+            self.artifact_path = artifact_path
 
-        agents_path = os.path.join(artifact_path, 'agents')
-        managers_path = os.path.join(artifact_path, 'managers')
-        master_path = os.path.join(artifact_path, 'managers', 'master')
-        worker_path = os.path.join(artifact_path, 'managers', 'worker')
+            agents_path = os.path.join(artifact_path, 'agents')
+            managers_path = os.path.join(artifact_path, 'managers')
+
+            master_path = os.path.join(artifact_path, 'managers', 'master')
+            worker_path = os.path.join(artifact_path, 'managers', 'worker')
+
+            if not (os.path.isdir(agents_path) or os.path.isdir(managers_path) or os.path.isdir(master_path)):
+                print("ERROR: The artifact file structure should follow this scheme")
+                print("""
+                ├── agents
+                │   └── agent1
+                │       ├── data
+                │       │   ├── binaries
+                │       │   └── stats
+                │       └── logs
+                └── managers
+                    ├── master
+                    │   └── master-instance
+                    │       ├── data
+                    │       │   ├── binaries
+                    │       │   └── stats
+                    │       └── logs
+                    └── workers
+                        └── worker1
+                            ├── data
+                            │   ├── binaries
+                            │   └── stats
+                            └── logs
+                """)
+                raise ValueError
 
         self.component_path = {
             'agents': agents_path,
@@ -37,119 +104,57 @@ class LogAnalyzer:
 
         self.n_agents = len(os.listdir(agents_path))
 
-    def get_instances_artifacts(self, component="agents", hosts_regex=".*"):
-        # Get list of agents (directories), get all agents that fit that regex
+    def get_instances_artifacts(self, component, hosts_regex=".*"):
         artifacts_files = []
         if component == 'all':
             artifacts_files += self.get_instances_artifacts('managers', hosts_regex)
             artifacts_files += self.get_instances_artifacts('agents', hosts_regex)
-
         elif component == 'managers':
             artifacts_files += self.get_instances_artifacts('master', hosts_regex)
-            artifacts_files += self.get_instances_artifacts('workers', hosts_regex)
+            if self.cluster_environment:
+                artifacts_files += self.get_instances_artifacts('workers', hosts_regex)
         else:
-            try:
-                artifact_path = self.component_path[component]
-                artifacts_files = [{"name": f, "path": os.path.join(artifact_path, f)} for f in os.listdir(artifact_path) if
-                    re.match(rf'{hosts_regex}', f)]
-            except Exception as e:
-                pass
-                # print("ERROR:" + str(e))
-                # print(f"Ignoring {component} - Artifact not found")
+            artifact_path = self.component_path[component]
+            artifacts_files = [{"name": f, "path": os.path.join(artifact_path, f)}
+                               for f in os.listdir(artifact_path) if re.match(rf'{hosts_regex}', f)]
         return artifacts_files
 
-    def get_instances_logs(self, log='ossec.log', component="agents", hosts_regex=".*"):
-        # Get list of agents (directories), get all agents that fit that regex
-        files = self.get_instances_artifacts(component, hosts_regex)
-        for file in files:
-            file['logs'] = {}
-            if log == 'all':
-                log_files_to_get = self.get_instance_all_log_files(file['name'])
-            else:
-                log_files_to_get = [log]
-            for log_get in log_files_to_get:
-                general_path = os.path.join(file['path'], 'logs')
-                file['logs'][log_get] = os.path.join(general_path, log_get)
-            del file['path']
-        return files
-
     def get_instance_all_log_files(self, hostname):
-        # Get list of agents (directories), get all agents that fit that regex
-        files = self.get_instances_artifacts('all', hostname)
-        files = os.path.join(files[0]['path'], 'logs')
+        files = os.path.join(self.get_instances_artifacts('all', hostname)[0]['path'], 'logs')
         host_log_list = [log for log in os.listdir(files)]
         return host_log_list
 
-    def get_instances_process_metrics(self, process='wazuh-agentd', component="agent", hosts_regex='.*'):
+    def get_instances_logs(self, log, component, hosts_regex=".*"):
+        artifacts_paths = self.get_instances_artifacts(component, hosts_regex)
+        for host_artifact_path in artifacts_paths:
+            host_artifact_path['logs'] = {}
+            log_files = self.get_instance_all_log_files(host_artifact_path['name']) if log == 'all' else [log]
+
+            for log_file in log_files:
+                general_path = os.path.join(host_artifact_path['path'], 'logs')
+                host_artifact_path['logs'][log_file] = os.path.join(general_path, log_file)
+            del host_artifact_path['path']
+
+        return artifacts_paths
+
+    def get_instances_process_metrics(self, process, component, hosts_regex='.*'):
         files = self.get_instances_artifacts(component, hosts_regex=hosts_regex)
         for file in files:
             file.update((k, os.path.join(v, 'data', 'binaries', process + '.csv')) for k, v in file.items())
         return files
 
-    def get_instances_stats(self, stat='wazuh-agentd', component="agent", hosts_regex='.*'):
+    def get_instances_stats(self, statistic, component, hosts_regex='.*'):
         files = self.get_instances_artifacts(component, hosts_regex)
         for file in files:
-            file['path'] = os.path.join(file['path'], 'data', 'stats', stat + '_stats.csv')
+            file['path'] = os.path.join(file['path'], 'data', 'stats', statistic + '_stats.csv')
         return files
-
-    def make_report(self):
-        report = {}
-        # Logs analysis
-        report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
-        report['agents'] = self.analyze_errors_logs(log='all', component='agents')
-        report['managers'] = self.analyze_errors_logs(log='all', component='managers')
-        report['agents']['wazuh-agentd'] = self.analyze_agentd()
-        report['managers']['wazuh-remoted'] = self.analyze_remoted_statistics()
-        report['managers']['wazuh-remoted'] = {**report['managers']['wazuh-remoted'], **self.keep_alive_log_parser()}
-
-        return report
-
-    def check_errors(self, log_path, type='error'):
-        with open(log_path) as f:
-            error_lines = []
-            try:
-                s = mmap(f.fileno(), 0, access=ACCESS_READ)
-                regex_line = bytes(f"(^.*?{type}.*?$)", encoding='utf8')
-                error_lines = re.findall(regex_line, s, flags=re.MULTILINE | re.IGNORECASE)
-                if error_lines:
-                    error_lines = [error.decode(encoding='utf8') for error in error_lines]
-            except Exception as e:
-                pass
-                #print(f"Error reading {log_path} - Ignored")
-
-            return error_lines
-
-    def analyze_errors_logs(self, log, component='agents', hosts_regex='.*'):
-        error_codes = ['warning', 'error', 'critical']
-        error_dict = {'criticals': [], 'errors': [], 'warnings': []}
-
-        log_list = self.get_instances_logs(log, component, hosts_regex)
-        for type in error_codes:
-            for host in log_list:
-                error_list_host = []
-                for name, path in host['logs'].items():
-                    if os.path.exists(path):
-                        agent_error = self.check_errors(path, type)
-                        if agent_error:
-                            error_list_host += [f"[{name}] " + agent_error_line for agent_error_line in agent_error]
-                if error_list_host:
-                    error_dict[type+'s'] += [{host['name']:  error_list_host}]
-        return error_dict
-
-    def analyze_remote_logs(self, log, component='master', hosts_regex='.*'):
-        pass
-
-    def analyze_metric(self, process, component, hosts_regex='.*'):
-        return {}
 
     def analyze_agentd(self, component='agents', hosts_regex='.*'):
         agentd_report = self.analyze_agentd_statistics(component, hosts_regex)
-        agentd_report['metrics'] = self.analyze_metric(process='wazuh-agentd', component=component)
         return agentd_report
 
-
-    def calculate_values(self, stat, fields, component, hosts_regex='.*'):
-        stats = self.get_instances_stats(stat=stat, component=component, hosts_regex=hosts_regex)
+    def calculate_values(self, statistic, fields, component, hosts_regex='.*'):
+        stats = self.get_instances_stats(statistic=statistic, component=component, hosts_regex=hosts_regex)
         n_stats = len(stats)
         mean_fields = {}
 
@@ -175,29 +180,30 @@ class LogAnalyzer:
                 max = dataframe[field].max()
                 min = dataframe[field].min()
 
-                mean_fields['max_' + field] = int(max) if not mean_fields['max_' + field] or max >  mean_fields['max_' + field] else int(mean_fields['max_' + field])
-                mean_fields['min_' + field] = int(min) if  not mean_fields['min_' + field] or  min <  mean_fields['min_' + field] else int(mean_fields['min_' + field])
+                mean_fields['max_' + field] = int(max) if not mean_fields['max_' + field] or max > \
+                                                              mean_fields['max_' + field] else int(mean_fields['max_' + field])
 
-                mean_fields['max_mean_' + field] = int(mean) if mean >  mean_fields['max_mean_' + field] else int(mean_fields['max_mean_' + field])
-                mean_fields['min_mean_' + field] = int(mean) if mean <  mean_fields['min_mean_' + field] else int(mean_fields['min_mean_' + field])
+                mean_fields['min_' + field] = int(min) if not mean_fields['min_' + field] or min < \
+                                                              mean_fields['min_' + field] else int(mean_fields['min_' + field])
+
+                mean_fields['max_mean_' + field] = int(mean) if mean > mean_fields['max_mean_' + field] else int(mean_fields['max_mean_' + field])
+                mean_fields['min_mean_' + field] = int(mean) if mean < mean_fields['min_mean_' + field] else int(mean_fields['min_mean_' + field])
 
                 mean_fields['mean_' + field] += int(mean)
-
 
                 reg_cof = int(np.polyfit(range(len(dataframe)), list(dataframe[field]), 1)[0])
                 mean_fields['mean_reg_cof_' + field] += reg_cof
                 mean_fields['max_reg_cof_' + field] = int(reg_cof) if not mean_fields['max_reg_cof_' + field] or reg_cof >  mean_fields['max_reg_cof_' + field] else int(mean_fields['max_reg_cof_' + field])
-                mean_fields['min_reg_cof_' + field] = int(reg_cof) if  not mean_fields['min_reg_cof_' + field] or reg_cof <  mean_fields['min_reg_cof_' + field] else int(mean_fields['min_reg_cof_' + field])
+                mean_fields['min_reg_cof_' + field] = int(reg_cof) if not mean_fields['min_reg_cof_' + field] or reg_cof <  mean_fields['min_reg_cof_' + field] else int(mean_fields['min_reg_cof_' + field])
 
         for field in fields:
             mean_fields['mean_' + field] = mean_fields['mean_' + field] / n_stats
             mean_fields['mean_reg_cof_' + field] = mean_fields['mean_reg_cof_' + field] / n_stats
         return mean_fields
 
-
     def analyze_agentd_statistics(self, component='agents', hosts_regex='.*'):
         # Status
-        agentd_stats = self.get_instances_stats(stat='wazuh-agentd', component=component, hosts_regex='.*')
+        agentd_stats = self.get_instances_stats(statistic='wazuh-agentd', component=component, hosts_regex='.*')
         n_stats = len(agentd_stats)
         agentd_report = {
             "begin_status": {"connected": 0, "pending": 0, "disconnected": 0},
@@ -267,9 +273,9 @@ class LogAnalyzer:
                                          'ctrl_msg_count', 'discarded_count', 'queued_msgs', 'sent_bytes', 
                                          'recv_bytes', 'dequeued_after_close'], 'managers')
         return remoted_report
-        
+
     def keep_alive_log_parser(self, component='master', hosts_regex='.*'):
-        logs_files = self.get_instances_logs(component=component, hosts_regex=hosts_regex)
+        logs_files = self.get_instances_logs(log='ossec.log', component=component, hosts_regex=hosts_regex)
         keep_alives = {}
         for log_file in logs_files:
             regex = compile(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading '(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)", MULTILINE)
@@ -301,7 +307,22 @@ class LogAnalyzer:
             last_message = datetime.strptime(remainder, '%Y/%m/%d %H:%M:%S')
 
             for agent in keep_alives.keys():
+                print(agent)
                 last_keep_alive = datetime.strptime(keep_alives[agent]['last_keep_alive'], '%Y/%m/%d %H:%M:%S')
                 keep_alives[agent] = {**keep_alives[agent], **{'remainder': abs(last_message - last_keep_alive ).seconds }}
         ret = {'keep_alives': keep_alives}
         return ret
+
+    def make_report(self):
+        report = {}
+
+        report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
+
+        report['agents'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all', component='agents'))
+        report['managers'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all', component='managers'))
+
+        report['agents']['wazuh-agentd'] = self.analyze_agentd()
+        report['managers']['wazuh-remoted'] = self.analyze_remoted_statistics()
+        report['managers']['wazuh-remoted'] = {**report['managers']['wazuh-remoted'], **self.keep_alive_log_parser()}
+
+        return report
