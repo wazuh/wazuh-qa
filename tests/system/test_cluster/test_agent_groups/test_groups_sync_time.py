@@ -53,14 +53,19 @@ from system.test_cluster.test_agent_groups.common import register_agent
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
-test_infra_agents = ["wazuh-agent1", "wazuh-agent2"]
-agent_groups = ["Group1", "Group2"]
+agents_in_cluster = 40
+test_infra_agents=[]
+agent_groups=[]
+for x in range(agents_in_cluster): 
+    test_infra_agents.append("wazuh-agent" + str(x+1))
+    agent_groups.append("Group" + str(x+1))
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-test_time = 220
+test_time = 200
+sync_delay = 40
 
 @pytest.fixture(scope='function')
 def clean_cluster_environment():
@@ -90,28 +95,31 @@ def test_agent_groups_sync_time(agent_host, clean_cluster_environment):
     expected_output:
         - The 'Agent_name' with ID 'Agent_id' belongs to groups: 'group_name'.
     '''
+    
+    # Create al groups
     for group in agent_groups:
         create_new_agent_group(test_infra_managers[0], group, host_manager)
-
+    
+    # Register agents with their groups in manager    
+    agent_data=[]
+    for index, agent in enumerate(test_infra_agents):
+        data = register_agent(agent, agent_host, host_manager, agent_groups[index])
+        agent_data.append(data)
+    
     # get the time before all the process is started
     time_before = time.time()
+    end_time = time_before + test_time
+    acive_agent = 0
+    while time.time < end_time:
+        host_manager.get_host(test_infra_agents[acive_agent]).ansible('command', f'service wazuh-agent restart', check=False)
+        active_agent=+1
     
-    # Register Agent1 with Group1 and restart it to generate enrollment
-    agent1_data = register_agent(test_infra_agents[0], agent_host, host_manager, agent_groups[0])
-    restart_cluster(["wazuh-agent1"], host_manager)
+    time.sleep(sync_delay)
     
-    # Register Agent2 with Group2 and restart it to generate enrollment
-    agent2_data = register_agent(test_infra_agents[1], agent_host, host_manager, agent_groups[1])
-    restart_cluster(["wazuh-agent2"], host_manager)
-        
     # Check that agent has the expected group assigned in all nodes
-    check_agent_groups(agent1_data[1], agent_groups[0], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
-    check_agent_groups(agent2_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+    for index, agent in enumerate(agent_data):
+        data = agent_data[index]
+        check_agent_groups(data[1], agent_groups[index], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers    
     
-    # Get the time after enrollment has been completed and the groups have been checked.
-    time_after = time.time()
-    time_diff = time_after - time_before
-
-    # Check that all the register + Enrollment + Synch process took less than the expected test_time
-    assert time_diff < test_time, f"Test took more time than expected: {test_time}"
-
+    # Check that the  Enrollment + Synch process took less than the expected test_time
+    assert time.time() >= end_time+sync_delay, f"Registering took less than expected time: {test_time}"
