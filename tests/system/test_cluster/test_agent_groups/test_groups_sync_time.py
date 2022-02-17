@@ -61,7 +61,7 @@ for x in range(agents_in_cluster):
     agent_groups.append("Group" + str(x+1))
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                              'provisioning', 'basic_cluster', 'inventory.yml')
+                              'provisioning', 'big_cluster_40_agents', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 test_time = 200
