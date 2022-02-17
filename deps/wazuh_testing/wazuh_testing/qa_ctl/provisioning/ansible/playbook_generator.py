@@ -444,7 +444,7 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
-        tasks.extend(_configurate_manager_ip(manager_ip))
+        tasks.extend(_configure_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
@@ -480,7 +480,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
-        tasks.extend(_configurate_manager_ip(manager_ip))
+        tasks.extend(_configure_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
@@ -595,7 +595,7 @@ def _uninstall_wazuh_deb(wazuh_target):
     ]
 
 
-def _configurate_manager_ip(manager_ip):
+def _configure_manager_ip(manager_ip):
     """Ansible tasks to configurate the manager ip in the agent endpoint
 
         Args:
@@ -611,7 +611,7 @@ def _configurate_manager_ip(manager_ip):
             'become': True,
             'lineinfile': {
                 'path': '/var/ossec/etc/ossec.conf',
-                'regexp': '<address>MANAGER_IP</address>',
+                'regexp': '<address>.*</address>',
                 'line': f'      <address>{manager_ip}</address>',
                 'state': 'present'
             }
