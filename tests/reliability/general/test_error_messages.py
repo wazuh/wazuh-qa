@@ -10,6 +10,9 @@ known_messages_filename = 'know_messages.json'
 known_messages_path = os.path.join(os.path.dirname(__file__), known_messages_filename)
 
 
+target = ["agents", "managers"] if not global_parameters.target_hosts else global_parameters.target_hosts
+
+
 def get_log_daemon(log_line):
     pattern = re.compile(".*\d+\/\d+\/\d+ \d+:\d+:\d+ (.*?):")
     if pattern.match(log_line):
@@ -20,7 +23,7 @@ def get_log_daemon(log_line):
 
 
 @pytest.mark.parametrize('code', error_codes)
-@pytest.mark.parametrize('target', global_parameters.target_hosts)
+@pytest.mark.parametrize('target', target)
 def test_error_messages(get_report, code, target):
     unexpected_errors = []
     with open(known_messages_path) as f:

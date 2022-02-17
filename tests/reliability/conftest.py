@@ -38,7 +38,7 @@ def pytest_configure(config):
 
     targets_hosts = config.getoption("--target-hosts")
     if targets_hosts:
-        global_parameters.target_hosts = targets_hosts.split(',')
+        global_parameters.target_hosts = []
 
     targets_daemons = config.getoption("--target-daemons")
     if targets_daemons:
