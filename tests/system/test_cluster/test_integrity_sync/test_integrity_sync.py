@@ -2,19 +2,29 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import os
 import time
+from copy import deepcopy
 from secrets import token_hex
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
+import yaml
+
+from wazuh_testing.tools import WAZUH_PATH, PYTHON_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 # Hosts
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 worker_hosts = test_hosts[1:]
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+configuration = yaml.safe_load(open(os.path.join(test_data_path, 'cluster_json.yml')))
+messages_path = os.path.join(test_data_path, 'messages.yml')
+tmp_path = os.path.join(test_data_path, 'tmp')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
+
 
 time_to_sync = 21
 host_manager = HostManager(inventory_path)
@@ -40,17 +50,73 @@ files_not_to_sync = [os.path.join(WAZUH_PATH, "etc", "test_file"),
                      os.path.join(WAZUH_PATH, "etc", "lists", 'test.swp'),
                      os.path.join(directories_to_create[1], 'test_file')]
 
+# Directories where to create big files.
+tmp_size_test_path = os.path.join(WAZUH_PATH, 'tmp')
+dst_size_test_path = os.path.join(WAZUH_PATH, "etc", "rules")
+big_file_name = 'test_file_too_big'
+file_prefix = 'test_file_big_'
+
 # merged.mg and agent.conf files that must be created after creating a group folder.
 merged_mg_file = os.path.join(directories_to_create[0], "merged.mg")
 agent_conf_file = os.path.join(directories_to_create[0], 'agent.conf')
 
 
+# Functions
+
+def create_file(host, path, size):
+    """Create file of fixed size.
+
+    Args:
+        host (str): Host where the file should be created.
+        path (str): Path and name where to create the file.
+        size (int, str): Size of the file (if nothing specified, in bytes)
+    """
+    host_manager.run_command(host, f'fallocate -l {size} {path}')
+    host_manager.run_command(host, f'chown wazuh:wazuh {path}')
+
+
+# Fixtures
+
 @pytest.fixture(scope='function')
 def clean_files():
-    for file in files_to_sync + files_not_to_sync + directories_to_create:
-        host_manager.run_command(test_hosts[0], f'rm -rf {file}')
+    """Remove all files that the test will create, in case they exist before starting."""
+    for file in (files_to_sync + files_not_to_sync + directories_to_create +
+                 [tmp_size_test_path, os.path.join(dst_size_test_path, "test_*")]):
+        host_manager.run_shell(test_hosts[0], f'rm -rf {file}')
     time.sleep(time_to_sync)
 
+
+@pytest.fixture(scope='function')
+def update_cluster_json():
+    """Update cluster.json file and restart managers."""
+    backup_json = {}
+
+    for host in test_hosts:
+        # Find cluster.json path.
+        cluster_json = host_manager.find_file(host, path=PYTHON_PATH, recurse=True, pattern='cluster.json'
+                                              )['files'][0]['path']
+        cluster_conf = json.loads(host_manager.run_command(host, f'cat {cluster_json}'))
+        # Store its original content and update the file.
+        backup_json[host] = {'path': cluster_json, 'content': deepcopy(cluster_conf)}
+        cluster_conf['intervals']['communication'].update(configuration)
+        host_manager.modify_file_content(host=host, path=cluster_json, content=json.dumps(cluster_conf, indent=4))
+        # Clear log and restart manager.
+        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+        host_manager.control_service(host=host, service='wazuh', state='restarted')
+
+    yield
+
+    # Restore cluster.json and restart.
+    for host in backup_json:
+        host_manager.modify_file_content(host=host, path=backup_json[host]['path'],
+                                         content=json.dumps(backup_json[host]['content'], indent=4))
+        # Remove created files
+        for file in [tmp_size_test_path, os.path.join(dst_size_test_path, "test_*")]:
+            host_manager.run_shell(host, f'rm -rf {file}')
+        host_manager.control_service(host=host, service='wazuh-manager', state='restarted')
+
+
+# Tests
 
 def test_missing_file(clean_files):
     """Check if missing files are copied to each node.
@@ -69,22 +135,29 @@ def test_missing_file(clean_files):
 
     # Create all specified files inside the master node.
     for file in files_to_sync + files_not_to_sync + [agent_conf_file]:
-        host_manager.run_command(test_hosts[0], f'touch {file}')
+        host_manager.run_command(test_hosts[0], f'dd if=/dev/urandom of={file} bs=1M count=2')
         host_manager.run_command(test_hosts[0], f'chown wazuh:wazuh {file}')
 
     # Wait until synchronization is completed. Master -> worker1 & worker2.
     time.sleep(time_to_sync)
 
-    for host in worker_hosts:
-        # Check whether files are correctly synchronized and if correct permissions are applied.
-        for file in files_to_sync:
+    # Check whether files are correctly synchronized and if correct permissions are applied.
+    for file in files_to_sync:
+        m_content = host_manager.run_command(test_hosts[0], f'cat {file}')
+
+        for host in worker_hosts:
             ls_result = host_manager.run_command(host, f'ls {file}')
             assert ls_result == file, f"File {file} was expected to be copied in {host}, but it was not."
             perm = host_manager.run_command(host, f'stat -c "%a" {file}')
             assert perm == '660', f"{file} permissions were expected to be '660' in {host}, but they are {perm}."
-        # Check that files which should not be synchronized are not sent to the workers. For example, only
-        # merged.mg file inside /var/ossec/etc/shared/ directory should be synchronized, but nothing else.
-        for file in files_not_to_sync:
+            # Make sure the content of files in worker nodes is the same that in master node.
+            w_content = host_manager.run_command(host, f'cat {file}')
+            assert w_content == m_content, f'The content of {file} is different in worker {host} and in master.'
+
+    # Check that files which should not be synchronized are not sent to the workers. For example, only
+    # merged.mg file inside /var/ossec/etc/shared/ directory should be synchronized, but nothing else.
+    for file in files_not_to_sync:
+        for host in worker_hosts:
             result = host_manager.run_command(host, f'ls {file}')
             assert result == '', f"File {file} was expected not to be copied in {host}, but it was."
 
@@ -219,3 +292,45 @@ def test_extra_valid_files(clean_files):
         host_manager.run_command(test_hosts[0], f'rm -rf {os.path.join(WAZUH_PATH, "queue", "agent-groups", id_)}')
     # Wait until they are deleted in all nodes.
     time.sleep(time_to_sync)
+
+
+@pytest.mark.parametrize('n_small_files', [5])
+def test_zip_size_limit(n_small_files, clean_files, update_cluster_json):
+    """Check if zip size limit works and if it is dynamically adapted.
+
+    Create several large files on the master. The time needed to send them all together
+    should exceed the maximum time allowed and a timeout should be generated on the workers.
+    The test verifies that:
+        - Workers notify the master to cancel the file being sent.
+        - The master reduces the zip size limit.
+        - The master warns that a file that is too large will not be synchronized.
+        - The master warns that not all the files could be synchronized since they did not fit in the zip.
+        - Eventually the zip size limit is increased again.
+        - The workers end up receiving all the files that do not exceed the maximum size.
+
+    Args:
+        n_small_files (int): Number of files that should be able to synchronize.
+    """
+    small_size = configuration['min_zip_size'] - 1024
+    big_size = configuration['max_zip_size'] + 1024
+
+    # Create a tmp folder and all files inside in the master node.
+    host_manager.run_command(test_hosts[0], f'mkdir {tmp_size_test_path}')
+    create_file(test_hosts[0], os.path.join(tmp_size_test_path, big_file_name), big_size)
+    for i in range(n_small_files):
+        create_file(test_hosts[0], os.path.join(tmp_size_test_path, file_prefix + str(i)), small_size)
+
+    # Move files from tmp folder to destination folder. This way, all files are synced at the same time.
+    host_manager.run_shell(test_hosts[0], f'mv {os.path.join(tmp_size_test_path, "test_*")} {dst_size_test_path}')
+
+    # Check whether zip size limit changed, big files are rejected, etc.
+    HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
+
+    for host in worker_hosts:
+        # Make sure that smaller files were synced.
+        ls_count = host_manager.run_shell(host, f'ls {os.path.join(dst_size_test_path, file_prefix + "*")} | wc -l')
+        assert int(ls_count) == n_small_files, f'Less files in {host} ({ls_count}) than expected ({n_small_files}).'
+
+        # While too big files were rejected.
+        ls_big = host_manager.run_shell(host, f'ls {os.path.join(dst_size_test_path, big_file_name)}')
+        assert ls_big == '', f"File {big_file_name}' was expected not to be copied in {host}, but it was."
