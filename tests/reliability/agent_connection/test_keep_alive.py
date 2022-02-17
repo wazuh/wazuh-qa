@@ -12,4 +12,5 @@ def test_keep_alives(get_report):
     keep_alives = get_report['managers']['wazuh-remoted']['keep_alives']
 
     max_differences = [keep_alives[agent]['max_difference'] for agent in keep_alives.keys()]
-    assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE
+    assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, "Some agents keep alive interval surpassed " + \
+                                                                 f"{MAX_DIFFERENCE_ACK_KEEP_ALIVE} maximun"
