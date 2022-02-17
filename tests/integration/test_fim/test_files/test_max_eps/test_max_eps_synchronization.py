@@ -89,7 +89,7 @@ from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_M
                                        SCHEDULE_MODE, REALTIME_MODE, WHODATA_MODE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
-from wazuh_testing.modules.tools.file import delete_path_recursively, create_regular_file
+from wazuh_testing.tools.file import delete_path_recursively, create_regular_file
 
 # Marks
 pytestmark = [TIER1, AGENT, WINDOWS, LINUX]
