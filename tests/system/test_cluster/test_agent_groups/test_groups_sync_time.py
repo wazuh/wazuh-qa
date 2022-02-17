@@ -48,7 +48,7 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
-                    restart_cluster, clean_cluster_logs, delete_group_of_agents)
+                    clean_cluster_logs, delete_group_of_agents)
 from system.test_cluster.test_agent_groups.common import register_agent
 
 # Hosts
@@ -109,9 +109,9 @@ def test_agent_groups_sync_time(agent_host, clean_cluster_environment):
     # get the time before all the process is started
     time_before = time.time()
     end_time = time_before + test_time
-    acive_agent = 0
+    active_agent = 0
     while time.time < end_time:
-        host_manager.get_host(test_infra_agents[acive_agent]).ansible('command', f'service wazuh-agent restart', check=False)
+        host_manager.get_host(test_infra_agents[active_agent]).ansible('command', f'service wazuh-agent restart', check=False)
         active_agent=+1
     
     time.sleep(sync_delay)
