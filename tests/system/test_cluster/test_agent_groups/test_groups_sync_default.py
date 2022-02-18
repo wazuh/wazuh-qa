@@ -3,8 +3,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-brief: This tests check that when a cluster has a series of agents with groups assigned, when an agent has it's
-        group changed by a Wazuh-DB command, the cluster updates it's information.
+brief: This tests check that when a cluster has a series of agents registered and connecting one after the other,
+        and it is unable to do a Sync, that after a expected time, a Sync is forced and the DB is Synched.
 tier: 2
 modules:
     - cluster
