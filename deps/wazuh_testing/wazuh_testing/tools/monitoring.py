@@ -992,7 +992,7 @@ class HostMonitor:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
                                                          callback=make_callback(pattern=case['regex'], prefix=None),
                                                          update_position=False
-                                                         ).result().strip('\n')})
+                                                         ).result()})
                 except TimeoutError:
                     try:
                         self._queue.put({host: error_messages_per_host[host]})
