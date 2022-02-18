@@ -5,7 +5,7 @@ import re
 
 from wazuh_testing import global_parameters
 
-error_codes = ["warnings", "errors", "criticals"]
+error_codes = ["warning", "error", "critical"]
 known_messages_filename = 'know_messages.json'
 known_messages_path = os.path.join(os.path.dirname(__file__), known_messages_filename)
 
