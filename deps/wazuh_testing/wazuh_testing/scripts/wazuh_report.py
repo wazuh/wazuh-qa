@@ -1,7 +1,7 @@
 import os
 import argparse
 import json
-from wazuh_testing.tools.sources.log_analyzer import ReportGenerator
+from wazuh_testing.tools.sources.report_generator import ReportGenerator
 
 
 def get_script_arguments():
@@ -10,7 +10,7 @@ def get_script_arguments():
     parser.add_argument('-p', '--path', dest='artifact_path', default=None,
                         help='Artifact path.', action='store')
 
-    parser.add_argument('-r', '--report', dest='report_path', default=None,
+    parser.add_argument('-r', '--report', dest='report_path', default='report.json',
                         help='Report path.', action='store')
     return parser.parse_args()
 
@@ -18,9 +18,12 @@ def get_script_arguments():
 def main():
     options = get_script_arguments()
     parser = ReportGenerator(options.artifact_path)
+
     json_report = parser.make_report()
+
     with open(f"{options.report_path}", "w") as report:
-        report.write(json.dumps(json_report))
+        report.write(json.dumps(json_report, sort_keys=True, indent=4))
+
 
 if __name__ == '__main__':
     main()
