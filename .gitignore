@@ -61,3 +61,6 @@ deps/wazuh_testing/wazuh_testing/qa_docs/Search-UI/package-lock.json
 
 # GCP tests configuration file
 tests/integration/test_gcloud/data/configuration.yaml
+
+# System test
+ansible.log
