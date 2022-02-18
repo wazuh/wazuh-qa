@@ -90,7 +90,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_big_queue_size(get_configuration, configure_environment, restart_remoted):
+def test_big_queue_size(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that when 'wazuh-remoted' sets the queue size too big(greater than 262144), a warning message
                  appears. For this purpose, it uses the configuration from test cases, check if the warning has been

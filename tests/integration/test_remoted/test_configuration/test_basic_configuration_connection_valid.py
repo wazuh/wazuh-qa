@@ -101,7 +101,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_connection_valid(get_configuration, configure_environment, restart_remoted):
+def test_connection_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' sets 'connection' as 'secure' or 'syslog' properly.
                  For this purpose, it loads the configuration from test cases cfg(For a syslog connection if more than

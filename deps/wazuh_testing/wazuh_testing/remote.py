@@ -7,7 +7,7 @@ import socket
 import ipaddress
 import subprocess as sb
 import time
-
+import multiprocessing
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP
@@ -544,7 +544,7 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
 
     # Intercept queue sockets events
     mitm = ManInTheMiddle(address=QUEUE_SOCKET_PATH, family='AF_UNIX', connection_protocol=UDP,
-                                     func=intercept_socket_data)
+                          func=intercept_socket_data)
     mitm.start()
 
     # Monitor MITM queue
@@ -578,7 +578,6 @@ def check_agent_received_message(agent, search_pattern, timeout=5, update_positi
 
     """
     queue_monitor = QueueMonitor(agent.rcv_msg_queue)
-
     queue_monitor.start(timeout=timeout, callback=make_callback(search_pattern, '.*', escape),
                         update_position=update_position, error_message=error_message)
 
@@ -599,6 +598,11 @@ def check_push_shared_config(agent, sender, injector=None):
     """
 
     # Activate receives_messages modules in simulated agent.
+    def keep_alive_until_group_configuration_sent(sender, interval=1, timeout=20):
+        for i in range(timeout):
+            sender.send_event(agent.keep_alive_event)
+            time.sleep(interval)
+
     agent.set_module_status('receive_messages', 'enabled')
 
     # Run injector with only receive messages module enabled
@@ -640,14 +644,18 @@ def check_push_shared_config(agent, sender, injector=None):
         # Add agent to group and check if the configuration is pushed.
         add_agent_to_group(DEFAULT_TESTING_GROUP_NAME, agent.id)
 
-        for _ in range(5):
-            # send some keep alive messages until manager push the new group configuration
-            sender.send_event(agent.keep_alive_event)
-            time.sleep(1)
+        keep_alive_agent = multiprocessing.Process(target=keep_alive_until_group_configuration_sent,
+                                                   args=(sender,))
+        keep_alive_agent.start()
 
-        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=10,
+        log_callback = make_callback(pattern=".*End sending file '.+' to agent '\d+'\.", prefix='.*wazuh-remoted.*')
+        log_monitor = FileMonitor(LOG_FILE_PATH)
+        log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
+                          error_message="New shared configuration was not sent")
+        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=REMOTED_GLOBAL_TIMEOUT,
                                      error_message="New group shared config not received")
 
     finally:
         if stop_injector:
             injector.stop_receive()
+            keep_alive_agent.terminate()
