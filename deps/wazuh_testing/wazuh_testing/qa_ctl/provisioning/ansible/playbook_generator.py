@@ -133,6 +133,125 @@ def uninstall_wazuh(wazuh_target, os_system, os_platform, playbook_parameters=No
     return _build_playbook(parameters)
 
 
+def restart_wazuh(wazuh_target, playbook_parameters=None):
+    """Generate a playbook to restart wazuh.
+
+    Args:
+        wazuh_target (str): Wazuh target [manager or agent].
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = _restart_wazuh_systemd_service(wazuh_target)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'restart_wazuh_{wazuh_target}', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def start_wazuh(wazuh_target, playbook_parameters=None):
+    """Generate a playbook to start wazuh.
+
+    Args:
+        wazuh_target (str): Wazuh target [manager or agent].
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = []
+    if 'manager' in wazuh_target:
+        tasks.extend(_start_wazuh_manager_systemd_service())
+    if 'agent' in wazuh_target:
+        tasks.extend(_start_wazuh_agent_systemd_service())
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'start_wazuh_{wazuh_target}', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def stop_wazuh(wazuh_target, playbook_parameters=None):
+    """Generate a playbook to stop wazuh.
+
+    Args:
+        wazuh_target (str): Wazuh target [manager or agent].
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = []
+
+    if 'manager' in wazuh_target:
+        tasks.extend(_stop_wazuh_manager_systemd_service())
+    if 'agent' in wazuh_target:
+        tasks.extend(_stop_wazuh_agent_systemd_service())
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'stop_wazuh_{wazuh_target}', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def configure_agent_disconnection_time(time, playbook_parameters=None):
+    """Generate a playbook to configure agent_disconnection_time.
+
+    Args:
+        time (str): Time after which the manager considers an agent as disconnected since its last keepalive. A
+                    positive number that should end with a character indicating a time unit, such as: s (seconds),
+                    m (minutes), h (hours), d (days). The minimum allowed is 1s.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = _configure_agent_disconnection_time(time)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'configure_agent_disconnection_time', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def configure_time_reconnect(time, playbook_parameters=None):
+    """Generate a playbook to configure time-reconnect.
+
+    Args:
+        time (str): Specifies the time in seconds before a reconnection is attempted.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = _configure_time_reconnect(time)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'configure_time_reconnect', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def configure_manager_ip(manager_ip, playbook_parameters=None):
+    """Generate a playbook to configure manager ip in the agent.
+
+    Args:
+        manager_ip (str): IP of the manager node.
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = _configure_manager_ip(manager_ip)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': f'configure_manager_ip', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
 def run_linux_commands(commands, playbook_parameters=None):
     """Generate a playbook to run linux commands.
 
@@ -183,6 +302,33 @@ def fetch_files(files_data, playbook_parameters=None):
 
     parameters = dict(**playbook_parameters) if playbook_parameters else {}
     parameters.update({'name': 'fetch_files', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def copy_files(files_data, playbook_parameters=None):
+    """Generate a playbook to copy files from the control machine to a managed node.
+
+    Args:
+        files_data (list(dict)): Local source and remote destination data [{local_source: node_destination},...]
+        playbook_parameters (dict): Extra non-tasks playbook parameters.
+
+    Returns:
+        str: Playbook file path generated.
+    """
+    tasks = _copy_files(files_data)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': 'copy_files', 'tasks_list': tasks})
+
+    return _build_playbook(parameters)
+
+
+def toggle_agent_enrollment(alternator, playbook_parameters=None):
+    tasks = _toggle_agent_enrollment(alternator)
+
+    parameters = dict(**playbook_parameters) if playbook_parameters else {}
+    parameters.update({'name': 'toggle_agent_enrollment', 'tasks_list': tasks})
 
     return _build_playbook(parameters)
 
@@ -303,8 +449,29 @@ def _download_wazuh_package(package_url, package_destination):
     ]
 
 
+def _restart_wazuh_systemd_service(wazuh_target):
+    """Ansible tasks to restart the wazuh-manager service with systemd.
+
+    Args:
+        wazuh_target (str): Wazuh target [manager or agent].
+
+    Returns:
+        list(AnsibleTask): Ansible tasks.
+    """
+    tasks = []
+
+    if 'manager' in wazuh_target:
+        tasks.extend(_stop_wazuh_manager_systemd_service())
+        tasks.extend(_start_wazuh_manager_systemd_service())
+    if 'agent' in wazuh_target:
+        tasks.extend(_stop_wazuh_agent_systemd_service())
+        tasks.extend(_start_wazuh_agent_systemd_service())
+
+    return tasks
+
+
 def _start_wazuh_manager_systemd_service():
-    """"Ansible tasks to start the wazuh-manager service with systemd.
+    """Ansible tasks to start the wazuh-manager service with systemd.
 
     Returns:
         list(AnsibleTask): Ansible tasks.
@@ -347,7 +514,7 @@ def _stop_wazuh_manager_systemd_service():
     """
     return [
         AnsibleTask({
-            'name': 'Start Wazuh Manager service with systemd',
+            'name': 'Stop Wazuh Manager service with systemd',
             'become': True,
             'ansible.builtin.systemd': {
               'state': 'stopped',
@@ -365,7 +532,7 @@ def _stop_wazuh_agent_systemd_service():
     """
     return [
         AnsibleTask({
-            'name': 'Start Wazuh Agent service with systemd',
+            'name': 'Stop Wazuh Agent service with systemd',
             'become': True,
             'ansible.builtin.systemd': {
               'state': 'stopped',
@@ -444,7 +611,7 @@ def _install_wazuh_rpm(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
-        tasks.extend(_configurate_manager_ip(manager_ip))
+        tasks.extend(_configure_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
@@ -480,7 +647,7 @@ def _install_wazuh_deb(package_name, package_url, package_destination, wazuh_tar
     if 'manager' in wazuh_target:
         tasks.extend(_start_wazuh_manager_systemd_service())
     elif 'agent' in wazuh_target:
-        tasks.extend(_configurate_manager_ip(manager_ip))
+        tasks.extend(_configure_manager_ip(manager_ip))
         tasks.extend(_start_wazuh_agent_systemd_service())
 
     return tasks
@@ -595,7 +762,54 @@ def _uninstall_wazuh_deb(wazuh_target):
     ]
 
 
-def _configurate_manager_ip(manager_ip):
+def _toggle_agent_enrollment(alternator):
+
+    return [
+        AnsibleTask({
+            'name': 'Insert a block of multi-line text',
+            'blockinfile': {
+                'path': '/var/ossec/etc/ossec.conf',
+                'insertafter': '</client>',
+                'block': f"\n  <client>\n    <enrollment>\n        <enabled>"
+                         f"{'yes' if alternator else 'no'}</enabled>\n    </enrollment>\n"
+                         f"  </client>\n",
+                'state': 'present'
+            }
+        })
+    ]
+
+
+def _configure_agent_disconnection_time(time):
+
+    return [
+        AnsibleTask({
+            'name': 'Configurate the IP of the manager in Agent',
+            'lineinfile': {
+                'path': '/var/ossec/etc/ossec.conf',
+                'regexp': '<agents_disconnection_time>.*</agents_disconnection_time>',
+                'line': f'    <agents_disconnection_time>{time}</agents_disconnection_time>',
+                'state': 'present'
+            }
+        })
+    ]
+
+
+def _configure_time_reconnect(time):
+
+    return [
+        AnsibleTask({
+            'name': 'Configurate the time-reconnect option',
+            'lineinfile': {
+                'path': '/var/ossec/etc/ossec.conf',
+                'regexp': '<time-reconnect>.*</time-reconnect>',
+                'line': f'    <time-reconnect>{time}</time-reconnect>',
+                'state': 'present'
+            }
+        })
+    ]
+
+
+def _configure_manager_ip(manager_ip):
     """Ansible tasks to configurate the manager ip in the agent endpoint
 
         Args:
@@ -611,7 +825,7 @@ def _configurate_manager_ip(manager_ip):
             'become': True,
             'lineinfile': {
                 'path': '/var/ossec/etc/ossec.conf',
-                'regexp': '<address>MANAGER_IP</address>',
+                'regexp': '<address>.*</address>',
                 'line': f'      <address>{manager_ip}</address>',
                 'state': 'present'
             }
@@ -680,6 +894,29 @@ def _fetch_files(files_data):
                 'flat': 'yes'
             }
         }) for remote_file_path, local_file_path in files_data.items()
+    ]
+
+
+def _copy_files(files_data):
+    """Ansible tasks to copy files into a managed node
+
+    Args:
+        files_data (list(dict)): Local source and remote destination data [{local_source: node_destination},...]
+
+    Returns:
+        list(AnsibleTask): Ansible tasks.
+    """
+    return [
+        # ':10' added to prevent the \n character from being added
+        AnsibleTask({
+            'name': f"Copy {local_file_path[:10] + '...' if len(local_file_path) > 10 else local_file_path} from local "
+                    f"path to"
+                    f" {remote_file_path[:10] + '...' if len(remote_file_path) > 10 else remote_file_path} remote path",
+            'copy': {
+                'src': local_file_path,
+                'dest': remote_file_path
+            }
+        }) for local_file_path, remote_file_path in files_data.items()
     ]
 
 
