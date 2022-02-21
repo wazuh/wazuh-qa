@@ -103,7 +103,7 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
                  the first agent gets disconnected). When the auto-enrollment option is enabled, the manager must
                  assign a new key configuration to the new agent. This test aims to check those behaviors.
 
-    wazuh_min_version: 4.3.0
+    wazuh_min_version: 4.4.0
 
     parameters:
         - get_log_output:
