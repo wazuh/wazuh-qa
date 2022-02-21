@@ -18,8 +18,7 @@ from wazuh_testing.tools.exceptions import QAValueError
 from wazuh_testing.tools.github_api_requests import WAZUH_QA_REPO
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.time import get_current_timestamp
-from wazuh_testing.tools.s3_package import get_production_package_url, get_last_production_package_url, \
-    get_s3_package_url
+from wazuh_testing.tools.s3_package import get_production_package_url, get_last_production_package_url
 from wazuh_testing.qa_ctl.provisioning.ansible import playbook_generator
 from wazuh_testing.qa_ctl.configuration.config_instance import ConfigInstance
 
@@ -155,15 +154,12 @@ def generate_test_playbooks(parameters, qa_ctl_config_generator, local_client_ke
 
     list_of_playbooks_info = []
 
-    manager_package_url = get_s3_package_url('warehouse-test', 'manager', '4.4.0', 'duplicate.keys', 'rpm', 'x86_64')
-    agent_package_url = get_s3_package_url('warehouse-test', 'agent', '4.4.0', 'duplicate.keys', 'rpm', 'x86_64')
+    manager_package_url = get_production_package_url('manager', parameters.os_system, parameters.wazuh_version) \
+        if parameters.wazuh_version else get_last_production_package_url('manager', parameters.os_system)
+    agent_package_url = get_production_package_url('agent', parameters.os_system, parameters.wazuh_version) \
+        if parameters.wazuh_version else get_last_production_package_url('agent', parameters.os_system)
     manager_package_name = os.path.split(manager_package_url)[1]
     agent_package_name = os.path.split(agent_package_url)[1]
-
-    # manager_package_url = get_production_package_url('manager', parameters.os_system, parameters.wazuh_version) \
-    #    if parameters.wazuh_version else get_last_production_package_url('manager', parameters.os_system)
-    # agent_package_url = get_production_package_url('agent', parameters.os_system, parameters.wazuh_version) \
-    #    if parameters.wazuh_version else get_last_production_package_url('agent', parameters.os_system)
 
     # Playbooks parameters
 
