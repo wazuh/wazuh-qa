@@ -101,7 +101,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_invalid_protocol(get_configuration, configure_environment, restart_remoted):
+def test_invalid_protocol(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' sets properly prococol values.
                  First of all, it selects a valid protocol to be used. If a pair of protocols is provided, in case one

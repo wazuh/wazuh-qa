@@ -101,7 +101,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted, check_remoted_running):
+def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that 'rids_closing_time' can be set with no errors. For this purpose,
                  it uses the configuration from test cases and check if the selected cfg matches with the API response.
