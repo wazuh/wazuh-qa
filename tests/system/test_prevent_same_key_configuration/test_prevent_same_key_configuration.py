@@ -7,7 +7,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: system
 
-brief:
+brief: When the manager receives the same key configuration from a new agent (with a different socket number) the new
+       connection must be rejected by the manager if the auto-enrollment option is disabled (until the first agent
+       gets disconnected). When the auto-enrollment option is enabled, the manager must assign a new key
+       configuration to the new agent.
 
 tier: 0
 
@@ -16,6 +19,7 @@ modules:
 
 components:
     - manager
+    - agent
 
 daemons:
     - wazuh-remoted
@@ -43,7 +47,9 @@ os_version:
     - Red Hat 6
 
 references:
-    -
+    - https://documentation.wazuh.com/current/user-manual/registering/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/client.html#enrollment
+    - https://documentation.wazuh.com/current/user-manual/agents/agent-life-cycle.html
 
 tags:
     - remoted
@@ -92,35 +98,35 @@ def get_only_agents_info(file_path):
 
 def test_prevent_same_key_config(get_log_output, get_control_output):
     '''
-    description: This test aims to compare the average of dropped events before and after
-                 the upgrade of the manager, and checks if the ingestion rate does
-                 not decrease.
+    description: When the manager receives the same key configuration from a new agent (with a different socket number)
+                 the new connection must be rejected by the manager if the auto-enrollment option is disabled (until
+                 the first agent gets disconnected). When the auto-enrollment option is enabled, the manager must
+                 assign a new key configuration to the new agent. This test aims to check those behaviors.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.3.0
 
     parameters:
-        - get_first_result:
+        - get_log_output:
             type: fixture
-            brief: Get the file path of the results before upgrading Wazuh.
-        - get_second_result:
+            brief: Allow getting the last lines of the ossec.log file.
+        - get_control_output:
             type: fixture
-            brief: Get the file path of the results after upgrading Wazuh.
+            brief: Allow getting the agent_control output file.
 
     assertions:
-        - Verify that the ingestion rate does not decreased after upgrading
-          Wazuh.
+        - Check that the rejected message is present in the log file
+        - Check that the status of the agents are the expected.
+        - Check that the id of the agents are the expected.
 
-    input_description: The results of stress analysisd, before and after
-                       upgrading Wazuh, are stored in 2 files. They contain
-                       the necessary data for the test to compare them.
+    input_description: The last lines of the ossec.log file and the agent_control output in JSON format.
 
     expected_output:
-        - A JSON with the result of the test.
-        - The ingestion rate decreased after the upgrade,
-          check the results within /path/to/result/file
+        - The actual behavior was not the expected.
+        - Both agents must be active.
+        - Agents ID`s must be different.
 
     tags:
-        - analysisd
+        - remoted
     '''
 
     agents_info = get_only_agents_info(get_control_output)
