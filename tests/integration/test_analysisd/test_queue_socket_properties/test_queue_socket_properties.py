@@ -105,7 +105,7 @@ def test_queue_socket_properties(restart_analysisd, before_socket_properties, ru
     parameters:
         - restart_analysisd:
             type: fixture
-            brief: Restart wazuh-analyisd.
+            brief: Restart wazuh-analysisd.
         - before_socket_properties:
             type: fixture
             brief: Obtain the previous properties of the 'queue' socket.
