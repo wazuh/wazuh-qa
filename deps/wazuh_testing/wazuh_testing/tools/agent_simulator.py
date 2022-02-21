@@ -36,12 +36,16 @@ from wazuh_testing import is_udp, is_tcp
 from wazuh_testing.tools.monitoring import wazuh_unpack, Queue
 from wazuh_testing.tools.remoted_sim import Cipher
 from wazuh_testing.tools.utils import retry, get_random_ip, get_random_string
+from wazuh_testing import LOGGING_LEVELS
+
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
            "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave", "solaris11"]
 agent_count = 1
+
+simulator_logging = logging.getLogger('simulator')
 
 
 class Agent:
@@ -258,7 +262,8 @@ class Agent:
             ssl_socket.close()
             sock.close()
 
-        logging.debug(f"Registration - {self.name}({self.id}) in {self.registration_address}")
+        simulator_logging.log(LOGGING_LEVELS['V'], "Registration - " +
+                                                   f"{self.name}({self.id}) in {self.registration_address}")
 
     def register(self):
         """Request to register the agent in the manager.
@@ -427,7 +432,7 @@ class Agent:
                     else:
                         continue
                 except MemoryError:
-                    logging.critical(f"Memory error, trying to allocate {data_len}.")
+                    simulator_logging.log(LOGGING_LEVELS['V'], f"Memory error, trying to allocate {data_len}.")
                     return
                 except Exception:
                     return
@@ -455,7 +460,7 @@ class Agent:
                 msg_decoded = msg_decompress.decode('ISO-8859-1')
                 self.process_message(sender, msg_decoded)
             except zlib.error:
-                logging.error("Corrupted message from the manager. Continuing.")
+                simulator_logging.log(LOGGING_LEVELS['V'], "Corrupted message from the manager. Continuing.")
 
     def stop_receiver(self):
         """Stop Agent listener."""
@@ -526,8 +531,7 @@ class Agent:
             command = 'getstate'
         else:
             return
-
-        logging.debug(f"Processing command: {message_list}")
+        simulator_logging.log(LOGGING_LEVELS['V'], f"Processing command: {message_list}")
 
         if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
@@ -617,7 +621,8 @@ class Agent:
             msg = msg.replace("<VERSION>", self.long_version)
             msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         except UnboundLocalError:
-            logging.critical("Error creating keep alive for the agent. Check if the OS is in the keepalives.txt")
+            simulator_logging.log(LOGGING_LEVELS['V'], "Error creating keep alive for the agent. Check if " +
+                                                       "the OS is in the keepalives.txt")
 
         if self.labels:
             msg_as_list = msg.split('\n')
@@ -625,7 +630,7 @@ class Agent:
                 msg_as_list.insert(1, f'"{key}":{value}')
             msg = '\n'.join(msg_as_list)
 
-        logging.debug(f"Keep alive message = {msg}")
+        simulator_logging.log(LOGGING_LEVELS['VV'], f"Keep alive message = {msg}")
 
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
@@ -1000,12 +1005,11 @@ class Rootcheck:
         """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
-            logging.debug(f"Scan started - {self.agent_name}({self.agent_id}) "
-                          f"- rootcheck({self.rootcheck_path})")
+            simulator_logging.log(LOGGING_LEVELS['VV'], f"Scan started - {self.agent_name}({self.agent_id}) "
+                                                        f"- rootcheck({self.rootcheck_path})")
         if message == 'Ending rootcheck scan.':
-            logging.debug(f"Scan ended - {self.agent_name}({self.agent_id}) "
-                          f"- rootcheck({self.rootcheck_path})")
-
+            simulator_logging.log(LOGGING_LEVELS['VV'], f"Scan ended - {self.agent_name}({self.agent_id}) "
+                                                        f"- rootcheck({self.rootcheck_path})")
         return message
 
 
@@ -1503,13 +1507,15 @@ class Sender:
             try:
                 self.socket.send(length + event)
             except BrokenPipeError:
-                logging.warning(f"Broken Pipe error while sending event. Creating new socket...")
+                simulator_logging.log(LOGGING_LEVELS['V'], "Broken Pipe error while sending event. " +
+                                                           "Creating new socket...")
+
                 sleep(5)
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.manager_address, int(self.manager_port)))
                 self.socket.send(length + event)
             except ConnectionResetError:
-                logging.warning(f"Connection reset by peer. Continuing...")
+                simulator_logging.log(LOGGING_LEVELS['V'], "Connection reset by peer. Continuing...")
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
@@ -1590,7 +1596,7 @@ class InjectorThread(threading.Thread):
     def keep_alive(self):
         """Send a keep alive message from the agent to the manager."""
         sleep(10)
-        logging.debug("Startup - {}({})".format(self.agent.name, self.agent.id))
+        simulator_logging.log(LOGGING_LEVELS['VV'], "Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
         self.sender.send_event(self.agent.keep_alive_event)
         start_time = time()
@@ -1601,13 +1607,14 @@ class InjectorThread(threading.Thread):
             eps = self.agent.modules["keepalive"]["eps"]
         while self.stop_thread == 0:
             # Send agent keep alive
-            logging.debug(f"KeepAlive - {self.agent.name}({self.agent.id})")
+            simulator_logging.log(LOGGING_LEVELS['VV'], f"KeepAlive - {self.agent.name}({self.agent.id})")
+
             self.sender.send_event(self.agent.keep_alive_event)
             self.totalMessages += 1
             if frequency > 0:
                 sleep(frequency - ((time() - start_time) % frequency))
             else:
-                logging.debug('Merged checksum modified to force manager overload')
+                simulator_logging.log(LOGGING_LEVELS['VV'], 'Merged checksum modified to force manager overload')
                 new_checksum = str(getrandbits(128))
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
@@ -1682,7 +1689,8 @@ class InjectorThread(threading.Thread):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
-        logging.debug(f"Starting - {self.agent.name}({self.agent.id})({self.agent.os}) - {self.module}")
+        simulator_logging.log(LOGGING_LEVELS['VV'], f"Starting - {self.agent.name}({self.agent.id})" + 
+                                                    f"({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
         elif self.module == "receive_messages":

@@ -132,3 +132,14 @@ class Logging:
     def critical(self, message):
         """Log CRITICAL message"""
         self.logger.critical(message)
+
+
+LOGGING_LEVELS = {
+    'V': 1,
+    'VV': 2
+}
+
+
+def logging_message(logger, level, message):
+    target_logger = logging.getLogger(logger)
+    target_logger.log(message, LOGGING_LEVELS[level])

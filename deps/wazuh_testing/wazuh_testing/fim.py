@@ -12,6 +12,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import pytest
+
 from collections import Counter
 from copy import deepcopy
 from datetime import datetime
@@ -20,13 +22,14 @@ from hashlib import sha1
 from json import JSONDecodeError
 from stat import ST_ATIME, ST_MTIME
 from typing import Sequence, Union, Generator, Any
-
-import pytest
 from jsonschema import validate
-from wazuh_testing import global_parameters, logger
+
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.time import logging_message
+
 
 if sys.platform == 'win32':
     import win32con
@@ -38,6 +41,7 @@ elif sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
 
 FIFO = 'fifo'
 SYMLINK = 'sym_link'
@@ -411,7 +415,8 @@ def create_file(type_, path, name, **kwargs):
     """
 
     try:
-        logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
+        logging_message('function', 'VV', "Creating file " + str(os.path.join(path, name)) + " of " +
+                        str(type_) + " type")
         os.makedirs(path, exist_ok=True, mode=0o777)
         if type_ != REGULAR:
             try:
@@ -422,7 +427,7 @@ def create_file(type_, path, name, **kwargs):
             raise ValueError(f"'target' param is mandatory for type {type_}")
         getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
     except OSError:
-        logger.info("File could not be created.")
+        logging_message('function', 'VV', "File could not be created.")
         pytest.skip("OS does not allow creating this file.")
 
 
@@ -440,15 +445,14 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            logger.info("Creating registry key " + str(os.path.join(registry_class_name[key], subkey)))
+            logging_message('function', 'VV', "Creating registry key " +
+                            str(os.path.join(registry_class_name[key], subkey)))
 
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
 
             return key[0]  # Ignore the flag that RegCreateKeyEx returns
-        except OSError as e:
-            logger.warning(f"Registry could not be created: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Registry could not be created: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'V', f"Registry could not be created: {e}")
 
 
 def _create_fifo(path, name):
@@ -558,7 +562,7 @@ def delete_file(path, name):
         path (str): path to the file to be deleted.
         name (str): name of the file to be deleted.
     """
-    logger.info(f"Removing file {str(os.path.join(path, name))}")
+    logging_message('function', 'VV', f"Removing file {str(os.path.join(path, name))}")
     regular_path = os.path.join(path, name)
     if os.path.exists(regular_path):
         os.remove(regular_path)
@@ -574,16 +578,15 @@ def delete_registry(key, subkey, arch):
     """
     if sys.platform == 'win32':
         print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-        logger.info(f"Removing registry key {print_arch}{str(os.path.join(registry_class_name[key], subkey))}")
-
+        logging_message('function', 'VV', "Removing registry key" +
+                        f"{print_arch}{str(os.path.join(registry_class_name[key], subkey))}")
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
             win32api.RegDeleteTree(key_h, None)
             win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
-        except OSError as e:
-            logger.warning(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Couldn't remove registry key {str(os.path.join(registry_class_name[key], subkey))}: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'V', "Couldn't remove registry key " +
+                            f"{str(os.path.join(registry_class_name[key], subkey))}: {e}")
 
 
 def delete_registry_value(key_h, value_name):
@@ -594,14 +597,12 @@ def delete_registry_value(key_h, value_name):
         value_name (str): the value to be deleted.
     """
     if sys.platform == 'win32':
-        logger.info(f"Removing registry value {value_name}.")
+        logging_message('function', 'VV', f"Removing registry value {value_name}.")
 
         try:
             win32api.RegDeleteValue(key_h, value_name)
-        except OSError as e:
-            logger.warning(f"Couldn't remove registry value {value_name}: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Couldn't remove registry value {value_name}: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'V', f"Couldn't remove registry value {value_name}: {e}")
 
 
 def modify_registry_value(key_h, value_name, type, value):
@@ -616,12 +617,12 @@ def modify_registry_value(key_h, value_name, type, value):
     """
     if sys.platform == 'win32':
         try:
-            logger.info(f"Modifying value '{value_name}' of type {registry_value_type[type]} and value '{value}'")
+            logging_message('function', 'VV', f"Modifying value '{value_name}' of type" + 
+                            f"{registry_value_type[type]} and value '{value}'")
+
             win32api.RegSetValueEx(key_h, value_name, 0, type, value)
-        except OSError as e:
-            logger.warning(f"Could not modify registry value content: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Could not modify registry value content: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'V', f"Could not modify registry value content: {e}")
 
 
 def modify_key_perms(key, subkey, arch, user):
@@ -636,7 +637,8 @@ def modify_key_perms(key, subkey, arch, user):
     """
     if sys.platform == 'win32':
         print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-        logger.info(f"- Changing permissions of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+        logging_message('function', 'VV', f"- Changing permissions of" +
+                        "f{print_arch}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -646,10 +648,8 @@ def modify_key_perms(key, subkey, arch, user):
             sd.SetDacl(True, acl, False)
 
             win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
-        except OSError as e:
-            logger.warning(f"Registry permissions could not be modified: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Registry permissions could not be modified: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('fimction', 'V', f"Registry permissions could not be modified: {e}")
 
 
 def modify_registry_key_mtime(key, subkey, arch):
@@ -663,7 +663,8 @@ def modify_registry_key_mtime(key, subkey, arch):
 
     if sys.platform == 'win32':
         print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-        logger.info(f"- Changing mtime of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+        logging_message('function', 'VV', '- Changing mtime of ' +
+                        f"{print_arch}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -674,10 +675,8 @@ def modify_registry_key_mtime(key, subkey, arch):
 
             win32api.RegCloseKey(key_h)
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS)
-        except OSError as e:
-            logger.warning(f"Registry mtime could not be modified: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Registry mtime could not be modified: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'V', f"Registry mtime could not be modified: {e}")
 
 
 def modify_registry_owner(key, subkey, arch, user):
@@ -694,7 +693,8 @@ def modify_registry_owner(key, subkey, arch, user):
     """
     if sys.platform == 'win32':
         print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-        logger.info(f"- Changing owner of {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+        logging_message('function', 'VV', f'- Changing owner of' +
+                        f"{print_arch}{os.path.join(registry_class_name[key], subkey)}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -706,10 +706,8 @@ def modify_registry_owner(key, subkey, arch, user):
                                        desc)
 
             return key_h
-        except OSError as e:
-            logger.warning(f"Registry owner could not be modified: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Registry owner could not be modified: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('function', 'VV', f"Registry owner could not be modified: {e}")
 
 
 def modify_registry(key, subkey, arch):
@@ -721,7 +719,8 @@ def modify_registry(key, subkey, arch):
         arch (str): architecture of the system.
     """
     print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-    logger.info(f"Modifying registry key {print_arch}{os.path.join(registry_class_name[key], subkey)}")
+    logging_message('function', 'VV', 'Modifying registry key '
+                    f"{print_arch}{os.path.join(registry_class_name[key], subkey)}")
 
     modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
     modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
@@ -767,7 +766,7 @@ def modify_file_content(path, name, new_content=None, is_binary=False):
         is_binary (boolean, optional): True if the file's content is in binary format. False otherwise. Defaults `False`
     """
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing content of " + str(path_to_file))
+    logging_message('function', 'VV', "- Changing content of " + str(path_to_file))
     content = "1234567890qwertyu" if new_content is None else new_content
     with open(path_to_file, 'ab' if is_binary else 'a') as f:
         f.write(content.encode() if is_binary else content)
@@ -781,7 +780,7 @@ def modify_file_mtime(path, name):
         name (str): name of the file to be modified.
     """
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing mtime of " + str(path_to_file))
+    logging_message('function', 'VV', "- Changing mtime of " + str(path_to_file))
     stat = os.stat(path_to_file)
     access_time = stat[ST_ATIME]
     modification_time = stat[ST_MTIME]
@@ -807,7 +806,7 @@ def modify_file_owner(path, name):
         os.chown(path_to_file, 1, -1)
 
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing owner of " + str(path_to_file))
+    logging_message('function', 'VV', "- Changing owner of " + str(path_to_file))
 
     if sys.platform == 'win32':
         modify_file_owner_windows()
@@ -828,7 +827,7 @@ def modify_file_group(path, name):
         return
 
     path_to_file = os.path.join(path, name)
-    logger.info("- Changing group of " + str(path_to_file))
+    logging_message('function', 'VV', "- Changing group of " + str(path_to_file))
     os.chown(path_to_file, -1, 1)
 
 
@@ -857,7 +856,7 @@ def modify_file_permission(path, name):
 
     path_to_file = os.path.join(path, name)
 
-    logger.info("- Changing permission of " + str(path_to_file))
+    logging_message('function', 'VV', "- Changing permission of " + str(path_to_file))
 
     if sys.platform == 'win32':
         modify_file_permission_windows()
@@ -877,7 +876,7 @@ def modify_file_inode(path, name):
     if sys.platform == 'win32':
         return
 
-    logger.info("- Changing inode of " + str(os.path.join(path, name)))
+    logging_message('function', 'VV', "- Changing inode of " + str(os.path.join(path, name)))
     inode_file = 'inodetmp'
     path_to_file = os.path.join(path, name)
 
@@ -897,7 +896,8 @@ def modify_file_win_attributes(path, name):
     if sys.platform != 'win32':
         return
 
-    logger.info("- Changing win attributes of " + str(os.path.join(path, name)))
+    logging_message('function', 'VV', "- Changing win attributes of " + str(os.path.join(path, name)))
+
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
 
@@ -911,7 +911,8 @@ def modify_file(path, name, new_content=None, is_binary=False):
         new_content (str, optional): new content to add to the file. Defaults `None`.
         is_binary: (boolean, optional): True if the file is binary. False otherwise. Defaults `False`
     """
-    logger.info("Modifying file " + str(os.path.join(path, name)))
+    logging_message('function', 'VV', "Modifying file " + str(os.path.join(path, name)))
+
     modify_file_inode(path, name)
     modify_file_content(path, name, new_content, is_binary)
     modify_file_mtime(path, name)
@@ -981,7 +982,7 @@ def callback_detect_end_scan(line):
         if json.loads(match.group(1))['type'] == 'scan_end':
             return True
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_scan_start(line):
@@ -997,7 +998,7 @@ def callback_detect_scan_start(line):
         if json.loads(match.group(1))['type'] == 'scan_start':
             return True
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_get_scan_timestap(line):
@@ -1012,7 +1013,7 @@ def callback_get_scan_timestap(line):
         if json.loads(match.group(1))['type'] == 'scan_end':
             return json.loads(match.group(1))['data']['timestamp']
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_event(line):
@@ -1029,7 +1030,7 @@ def callback_detect_event(line):
         if json_event['type'] == 'event':
             return json_event
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_modified_event(line):
@@ -1043,7 +1044,7 @@ def callback_detect_modified_event(line):
         if json_event['type'] == 'event' and json_event['data']['type'] == 'modified':
             return json_event
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_delete_event(line):
@@ -1057,7 +1058,7 @@ def callback_detect_delete_event(line):
         if json_event['type'] == 'event' and json_event['data']['type'] == 'deleted':
             return json_event
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_modified_event_with_inode_mtime(line):
@@ -1074,7 +1075,7 @@ def callback_detect_modified_event_with_inode_mtime(line):
             if {'inode', 'mtime'}.symmetric_difference(set(json_event['data']['changed_attributes'])):
                 return json_event
     except (JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_integrity_event(line):
@@ -1405,7 +1406,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
     if time_travel:
         before = str(datetime.now())
         TimeMachine.travel_to_future(interval)
-        logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
+        logging_message('function', 'VV', f"Changing the system clock from {before} to {str(datetime.now())}")
 
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
@@ -1582,7 +1583,7 @@ class EventChecker:
         except TimeoutError:
             if triggers_event:
                 raise
-            logger.info("TimeoutError was expected and correctly caught.")
+            logging_message('function', 'VV', 'TimeoutError was expected and correctly caught.')
 
     def check_events(self, event_type, mode=None):
         """Check and validate all events in the 'events' list.
@@ -1617,8 +1618,8 @@ class EventChecker:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f"Not asserting {expected_path} in event.data.path. "
-                                f'Reason: using non-utf-8 encoding in darwin.')
+                    logging_message('function', 'VV', f"Not asserting {expected_path} in event.data.path. "
+                                    f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg
@@ -1725,7 +1726,7 @@ if sys.platform == 'win32':
             except TimeoutError:
                 if triggers_event:
                     raise
-                logger.info("TimeoutError was expected and correctly caught.")
+                logging_message('function', 'VV', "TimeoutError was expected and correctly caught.")
 
         def check_events(self, event_type, mode=None):
             """Check and validate all events in the 'events' list.
@@ -1922,7 +1923,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
 
         if triggers_event_add:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+            logging_message('function', 'VV', "'added' {} detected as expected.\n".format("events"
+                            if len(value_list) > 1 else "event"))
 
             # Update the position of the log to the end of the scan
             if time_travel:
@@ -1943,7 +1945,8 @@ if sys.platform == 'win32':
                                                triggers_event=triggers_event_modified)
 
         if triggers_event_modified:
-            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+            logging_message('function', 'VV', "'modified' {} detected as expected.\n".format("events"
+                            if len(value_list) > 1 else "event"))
 
             # Update the position of the log to the end of the scan
             if time_travel:
@@ -1963,8 +1966,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
 
         if triggers_event_delete:
-            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
+            logging_message('function', 'VV', "'deleted' {} detected as expected.\n".format("events"
+                            if len(value_list) > 1 else "event"))
         # Update the position of the log to the end of the scan
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
@@ -2063,8 +2066,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event_add)
 
         if triggers_event_add:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
-
+            logging_message('function', 'VV', "'added' {} detected as expected.\n".format("events"
+                            if len(key_list) > 1 else "event"))
             # Update the position of the log to the end of the scan
             if time_travel:
                 log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
@@ -2084,7 +2087,8 @@ if sys.platform == 'win32':
                                                triggers_event=triggers_event_modified)
 
         if triggers_event_modified:
-            logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+            logging_message('function', 'VV', "'modified' {} detected as expected.\n".format("events"
+                            if len(key_list) > 1 else "event"))
 
             # Update the position of the log to the end of the scan
             if time_travel:
@@ -2105,6 +2109,8 @@ if sys.platform == 'win32':
 
         if triggers_event_delete:
             logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
+            logging_message('function', 'VV', "'deleted' {} detected as expected.\n".format("events"
+                            if len(key_list) > 1 else "event"))
 
             # Update the position of the log to the end of the scan
             if time_travel:
@@ -2220,8 +2226,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
-        logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
+        logging_message('function', 'VV', "'added' {} detected as expected.\n".format("events" 
+                        if len(file_list) > 1 else "event"))
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                               update_position=True,
@@ -2237,7 +2243,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
-        logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+        logging_message('function', 'VV', "'modified' {} detected as expected.\n".format("events"
+                        if len(file_list) > 1 else "event"))
 
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
@@ -2254,8 +2261,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
-        logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
+        logging_message('function', 'VV', "'deleted' {} detected as expected.\n".format("events"
+                        if len(file_list) > 1 else "event"))
         if time_travel:
             log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
                               update_position=True,

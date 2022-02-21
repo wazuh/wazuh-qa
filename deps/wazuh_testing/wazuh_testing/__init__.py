@@ -2,7 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import logging
 import sys
 import os
 import yaml
@@ -256,19 +255,5 @@ class Parameters:
         self._fim_mode = value
 
 
-LOGGING_LEVELS = {
-    'BASIC': 3,
-    'MEDIUM': 2,
-    'VERBOSE': 1
-}
 
 global_parameters = Parameters()
-logger = logging.getLogger('wazuh_testing')
-logger.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler(sys.stderr)
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-logger.addHandler(handler)
