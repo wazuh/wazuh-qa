@@ -43,8 +43,16 @@ SYSTEM_DATA = {
     'MACS': {'os_name': 'Mac OS X Server', 'os_major': '5', 'os_minor': '10', 'os_platform': 'darwin',
              'name': 'macos-server'},
     'ARCH': {'os_name': 'Arch Linux', 'os_major': '', 'os_minor': '', 'os_platform': '', 'name': 'archlinux'},
-    'ALAS': {'os_name': 'Amazon Linux AMI', 'os_major': '2018', 'os_minor': '03', 'os_platform': 'amzn',
-             'name': 'amazonlinux'},
+    'ALAS': {'hostname': 'amz', 'architecture': 'x86_64', 'os_name': 'Amazon Linux AMI', 'os_version': '2018.03',
+            'os_codename': '', 'os_major': '2018', 'os_minor': '03', 'os_patch': '', 'os_build': '',
+            'os_platform': 'amzn', 'sysname': 'Linux', 'release': '4.14.97-74.72.amzn1.x86_64',
+            'version': 'Wazuh v4.3.0', 'os_release': '', 'checksum': '1645433796303855540', 'os_display_version': '',
+            'triaged': '0', 'reference': '0886f3023b131f5bf1ecbc33f651807114cb5a53', 'name': 'amz', 'ip': '127.0.0.1',
+            'register_ip': '127.0.0.1', 'internal_key': '',
+            'os_uname': 'Linux |amz |4.14.97-74.72.amzn1.x86_64 |#1 SMP Tue Feb 5 20:59:30 UTC 2019 |x86_64',
+            'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'amz', 'node_name': 'node01',
+            'date_add': '1645433793', 'last_keepalive': '253402300799', 'sync_status': 'synced',
+            'connection_status': 'active', 'disconnection_time': '0'},
     'ALAS2': {'os_name': 'Amazon Linux', 'os_major': '2', 'os_minor': '', 'os_platform': 'amzn',
               'name': 'amazonlinux2'},
     'RHEL8': {'os_name': 'CentOS Linux', 'os_major': '8', 'os_minor': '1', 'os_platform': 'centos',
@@ -90,9 +98,11 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                         os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4', os_codename='centos-8',
                         os_build='4.18.0-147.8.1.el8_1.x86_64', os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020',
                         os_uname='x64', os_arch='x64', version='Wazuh v4.3.0', config_sum='', merged_sum='',
-                        manager_host='centos-8', node_name='node01', date_add='1612942494',
+                        manager_host='centos-8', node_name='node01', date_add='1612942494', hostname='centos-8',
                         last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
-                        client_key_secret=None):
+                        client_key_secret=None, os_release='', os_patch='', release='', sysname='Linux',
+                        checksum='checksum', os_display_version='', triaged=0, reference='', disconnection_time='0'):
+
     """Mock a new agent creating a new client keys entry, adding it to the global db and creating a new agent id DB.
 
     Args:
@@ -115,11 +125,21 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
         manager_host (str): Name of the manager.
         node_name (str): Name of the node.
         date_add (str): Date of the added/updated agent.
+        hostname (str): Hostname.
         last_keepalive (str): Last keep alive timestamp reported.
         group (str): Group of the agent.
         sync_status (str): Status of the syncronization.
         connection_status (str): Status of the connection.
         client_key_secret (str): Client secret key.
+        os_release (str): Os release.
+        os_patch (str): Os patch.
+        release (str): Release.
+        sysname (str): System name.
+        checksum (str): Checksum.
+        os_display_version (str): OS displayed version.
+        triaged (int): Triaged.
+        reference (str): Reference.
+        disconnection_time (str): Last disconnection time.
 
     Return:
         str: Agent ID.
@@ -139,11 +159,15 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                                      os_platform=os_platform, os_uname=os_uname, os_arch=os_arch, version=version,
                                      config_sum=config_sum, merged_sum=merged_sum, manager_host=manager_host,
                                      node_name=node_name, date_add=date_add, last_keepalive=last_keepalive, group=group,
-                                     sync_status=sync_status, connection_status=connection_status)
+                                     sync_status=sync_status, connection_status=connection_status,
+                                     disconnection_time=disconnection_time)
 
     # Add or update os_info related to the new created agent
-    agent_db.update_os_info(agent_id=agent_id_str, os_name=os_name, os_version=os_version, os_major=os_major,
-                            os_minor=os_minor, os_build=os_build, version=version)
+    agent_db.update_os_info(agent_id=agent_id_str, hostname=hostname, architecture=os_arch, os_name=os_name,
+                            os_version=os_version, os_codename=os_codename, os_major=os_major, os_minor=os_minor,
+                            os_patch=os_patch, os_build=os_build, os_platform=os_platform, sysname=sysname,
+                            release=release, version=version, os_release=os_release, checksum=checksum,
+                            os_display_version=os_display_version, triaged=triaged, reference=reference)
 
     # Restart Wazuh-DB before creating new DB
     control_service('restart', daemon='wazuh-db')
