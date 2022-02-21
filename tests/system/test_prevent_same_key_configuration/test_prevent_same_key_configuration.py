@@ -136,7 +136,12 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
         agents_status.append(agent['status'])
         agents_ids.append(agent['id'])
 
-    if os.path.isfile(get_log_output):
+    if get_log_output is None:
+        assert enrollment_expected_status == agents_status, 'Both agents must be active.\n' \
+                                                            f'Actual result: {agents_status}\n'
+        assert agents_ids[0] != agents_ids[1], 'Agents ID`s must be different.\n' \
+                                               f'Actual result: {agents_ids}\n'
+    elif os.path.isfile(get_log_output):
         pattern = re.compile(expected_message_regex)
         line_found = False
         for line in open(get_log_output):
@@ -157,8 +162,3 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
                                                                                   f' {agents_ids}\n' \
                                                                                   f'Expected result: Connections' \
                                                                                   f' must have the same agent ID.\n'
-    else:
-        assert enrollment_expected_status == agents_status, 'Both agents must be active.\n' \
-                                                            f'Actual result: {agents_status}\n'
-        assert agents_ids[0] != agents_ids[1], 'Agents ID`s must be different.\n' \
-                                               f'Actual result: {agents_ids}\n'
