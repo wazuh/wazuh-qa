@@ -129,7 +129,7 @@ def test_queue_socket_properties(restart_analysisd, before_socket_properties, ru
         - f"The inode value for the socket  {ANALYSISD_QUEUE_SOCKET_PATH} has changed"
         - f"The modification time property for the socket {ANALYSISD_QUEUE_SOCKET_PATH} has changed"
     tags:
-        - errors
+        - analysisd
     '''
     before_inode_file, before_status_time = before_socket_properties
     after_inode_file, after_status_time = after_socket_properties
