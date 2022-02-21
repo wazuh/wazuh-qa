@@ -115,15 +115,15 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
 
     assertions:
         - Check that the rejected message is present in the log file
-        - Check that the status of the agents are the expected.
-        - Check that the id of the agents are the expected.
+        - Check that the status of the agents is the expected.
+        - Check that the id of the agents is the expected.
 
     input_description: The last lines of the ossec.log file and the agent_control output in JSON format.
 
     expected_output:
         - The actual behavior was not the expected.
         - Both agents must be active.
-        - Agents ID`s must be different.
+        - Agents IDs must be different.
 
     tags:
         - remoted
@@ -139,7 +139,7 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
     if get_log_output is None:
         assert enrollment_expected_status == agents_status, 'Both agents must be active.\n' \
                                                             f'Actual result: {agents_status}\n'
-        assert agents_ids[0] != agents_ids[1], 'Agents ID`s must be different.\n' \
+        assert agents_ids[0] != agents_ids[1], 'Agents IDs must be different.\n' \
                                                f'Actual result: {agents_ids}\n'
     elif os.path.isfile(get_log_output):
         pattern = re.compile(expected_message_regex)
@@ -150,13 +150,13 @@ def test_prevent_same_key_config(get_log_output, get_control_output):
                 break
         assert line_found, 'The expected message was not present in the ossec.log file.\n'
 
-        assert no_enrollment_expected_status == agents_status, 'The actual behavior was not the expected.\n' \
+        assert no_enrollment_expected_status == agents_status, 'The actual behavior was not expected.\n' \
                                                                f'Actual result: {agents_status}' \
                                                                'Expected result: When enrollment is disabled,' \
                                                                ' the second agent will only connect to the ' \
                                                                'manager when the first agent disconnects.\n'
 
-        assert agents_ids[0] == agents_ids[1] and agents_ids[0] == agents_ids[2], 'The actual behavior was not the ' \
+        assert agents_ids[0] == agents_ids[1] and agents_ids[0] == agents_ids[2], 'The actual behavior was not ' \
                                                                                   'expected.\n' \
                                                                                   'Actual result: The agents IDs are' \
                                                                                   f' {agents_ids}\n' \
