@@ -880,7 +880,7 @@ def mock_agent_module():
     delete_mocked_agent(agent_id)
 
 
-def getLevelNameQA(level):
+def getLoggingLevelNameQA(level):
     """
     Return the textual or numeric representation of logging level 'level'.
 
@@ -905,7 +905,7 @@ def getLevelNameQA(level):
         return "Level %s" % level
 
 
-class QAFormatter(logging.Formatter):
+class QALoggerFormatter(logging.Formatter):
     def __init__(self, fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt=None, style="%",
                  validate=True):
         """
@@ -927,10 +927,11 @@ class QAFormatter(logging.Formatter):
 
 
 def pytest_logger_config(logger_config):
-    logger_config.add_loggers(['test', 'function', 'monitoring', 'callback', 'external', 'simulator'])
+    logger_config.add_loggers(['test', 'function', 'monitoring', 'external', 'simulator'])
     logger_config.set_log_option_default('test')
-    logging.getLevelName = getLevelNameQA
-    logger_config.set_formatter_class(QAFormatter)
+
+    logging.getLevelName = getLoggingLevelNameQA
+    logger_config.set_formatter_class(QALoggerFormatter)
 
 
 def pytest_logger_logdirlink(config):

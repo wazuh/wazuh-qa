@@ -31,6 +31,7 @@ from lockfile import FileLock
 from wazuh_testing import logger
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing import LOGGING_LEVELS
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
@@ -42,6 +43,9 @@ WAZUH_DB_PREFIX = r'.*wazuh-db.*'
 
 DEFAULT_POLL_FILE_TIME = 1
 DEFAULT_WAIT_FILE_TIMEOUT = 30
+
+monitoring_logging = logging.getLogger('monitoring')
+
 
 def wazuh_unpack(data, format_: str = "<I"):
     """Unpack data with a given header. Using Wazuh header by default.
@@ -429,8 +433,9 @@ class QueueMonitor:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
                 item = callback(msg)
-                logging.debug(msg)
+                monitoring_logging.log(LOGGING_LEVELS['VV'], f"QueueMonitor Read: {msg}")
                 if item is not None and item:
+                    monitoring_logging.log(LOGGING_LEVELS['V'], f"QueueMonitor Match line: {msg}")
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
                         extra_timer_is_running = True

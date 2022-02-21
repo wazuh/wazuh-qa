@@ -4,13 +4,16 @@
 import logging
 import re
 import string
+import json
+import socket
+
 from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
-from random import randint, SystemRandom, choice
-import string
-import json
-import socket
+
+from wazuh_testing import LOGGING_LEVELS
+
+function_logging = logging.getLogger('function')
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -42,7 +45,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     attempt -= 1
                     msg = f'Exception: "{exception}". {attempt}/{attempts} remaining attempts. ' \
                           f'Waiting {wait_time} seconds.'
-                    logging.warning(msg)
+                    function_logging.log(LOGGING_LEVELS['V'], msg)
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator

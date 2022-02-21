@@ -3,13 +3,18 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import functools
 import json
-import logging
 import socket
 import sqlite3
+import logging
 
 from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
+from wazuh_testing import LOGGING_LEVELS
+
+
+test_logging = logging.getLogger('test')
+
 
 def callback_wazuhdb_response(item):
     if isinstance(item, tuple):
@@ -61,7 +66,7 @@ def mock_agent(
     try:
         query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
-        logging.error("Failed to mock agent in database!")
+        test_logging.error(LOGGING_LEVELS[LOGGING_LEVELS['BASIC']], "Failed to mock agent in database!")
 
 
 def load_db(db_path):

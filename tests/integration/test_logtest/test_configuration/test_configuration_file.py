@@ -56,8 +56,6 @@ tags:
 '''
 import os
 import pytest
-import logging
-from wazuh_testing import LOGGING_LEVELS
 
 from wazuh_testing import global_parameters
 from wazuh_testing.logtest import (callback_logtest_started, callback_logtest_disabled, callback_configuration_error)
@@ -75,9 +73,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-test_logging = logging.getLogger('test')
-functions_logging = logging.getLogger('functions')
 
 
 # Fixture
@@ -124,18 +119,13 @@ def test_configuration_file(get_configuration, configure_environment, restart_wa
         - settings
         - analysisd
     '''
-    test_logging.log(LOGGING_LEVELS['BASIC'], "Init test")
     callback = None
     if 'valid_conf' in get_configuration['tags']:
-        test_logging.log(LOGGING_LEVELS['BASIC'], "Valid configuration set")
         callback = callback_logtest_started
     elif 'disabled_conf' in get_configuration['tags']:
-        test_logging.log(LOGGING_LEVELS['BASIC'], "Disabled configuration set")
         callback = callback_logtest_disabled
     else:
-        test_logging.log(LOGGING_LEVELS['BASIC'], "Invalid configuration set")
         callback = callback_configuration_error
 
-    test_logging.log(LOGGING_LEVELS['BASIC'], f"Filemonitoring callback {callback}")
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback,
                             error_message='Event not found')
