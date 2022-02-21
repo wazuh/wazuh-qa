@@ -78,10 +78,11 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.fim_module import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
 # Marks
 
@@ -96,13 +97,12 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
 NUM_FILES = 100000
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # Configurations
 
-p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
+params, metadata = generate_params(extra_params={"TEST_DIRECTORIES": testdir1})
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -116,12 +116,8 @@ def get_configuration(request):
 
 # Tests
 
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'file_limit_default'}
-])
-@mark_skip_agentWindows
-def test_file_limit_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh#11819")
+def test_file_limit_default(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the maximum number of files monitored by the 'wazuh-syscheckd' daemon is set to default
                  when the 'file_limit' tag is missing in the configuration. For this purpose, the test will monitor
@@ -131,9 +127,6 @@ def test_file_limit_default(tags_to_apply, get_configuration, configure_environm
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -142,7 +135,7 @@ def test_file_limit_default(tags_to_apply, get_configuration, configure_environm
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that an FIM event is generated indicating the maximum number of files
@@ -157,17 +150,12 @@ def test_file_limit_default(tags_to_apply, get_configuration, configure_environm
 
     tags:
         - scheduled
-        - time_travel
+        - realtime
+        - whodata
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    #Check the file limit configured and that it matches expected value (100000)
+    file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                               callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
+                                               error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
 
-    file_limit_value = wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
-        callback=callback_value_file_limit,
-        error_message='Did not receive expected '
-                      '"DEBUG: ...: Maximum number of entries to be monitored: ..." event').result()
-
-    if file_limit_value:
-        assert file_limit_value == str(NUM_FILES), 'Wrong value for file_limit'
-    else:
-        raise AssertionError('Wrong value for file_limit')
+    assert file_limit_value == str(NUM_FILES), ERR_MSG_WRONG_FILE_LIMIT_VALUE
