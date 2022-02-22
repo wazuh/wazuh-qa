@@ -83,10 +83,6 @@ def clean_environment():
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
-    HostMonitor(inventory_path=inventory_path,
-                messages_path=messages_path,
-                tmp_path=tmp_path).clean_tmp_files()
-
 
 @pytest.fixture(scope='function')
 def enrollment():
@@ -192,9 +188,34 @@ def modify_ip_address_conf(test_case):
         file.write(old_manager_configuration)
 
 
+@pytest.fixture(scope='function')
+def monitor_logs():
+
+    host_manager.clear_file(host='wazuh-manager', file_path=WAZUH_LOGS_PATH)
+    host_manager.clear_file(host='wazuh-agent1', file_path=WAZUH_LOGS_PATH)
+    monitor = HostMonitor(inventory_path=inventory_path,
+                          messages_path=messages_path,
+                          tmp_path=tmp_path)
+
+    manager_file_composer = monitor.file_composer(host='wazuh-manager', path=WAZUH_LOGS_PATH,
+                                                  output_path='wazuh-manager_ossec.log.tmp')
+    agent_file_composer = monitor.file_composer(host='wazuh-agent1', path=WAZUH_LOGS_PATH,
+                                                output_path='wazuh-agent1_ossec.log.tmp')
+
+    yield
+
+    manager_file_composer.terminate()
+    manager_file_composer.join()
+    agent_file_composer.terminate()
+    agent_file_composer.join()
+    monitor.clean_tmp_files()
+    host_manager.clear_file(host='wazuh-manager', file_path=WAZUH_LOGS_PATH)
+    host_manager.clear_file(host='wazuh-agent1', file_path=WAZUH_LOGS_PATH)
+
+
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml],
                          ids=[cases['name'] for cases in test_cases_yaml])
-def test_agent_keep_alive(test_case, configure_network, get_ip_directions, modify_ip_address_conf, enrollment,
+def test_agent_keep_alive(test_case, configure_network, get_ip_directions, modify_ip_address_conf, monitor_logs, restart_agent_manager,
                           clean_environment):
     '''
     description: Check if keep alive messages are sent in the correct format
