@@ -844,10 +844,11 @@ def generate_monitoring_callback(regex):
         regex (str): regex to use to look for a match.
     """
     def new_callback(line):
-        match = re.search(regex, line)
-        logger.debug(line)
+        match = re.match(regex, line)
         if match:
-            return match.group(1)
+            if match.group(1) is not None:
+                return match.group(1)
+            return True
 
     return new_callback
 
@@ -967,9 +968,9 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=generate_monitoring_callback(case['regex']),
+                                                         callback=make_callback(pattern=case['regex'], prefix=None),
                                                          update_position=False
-                                                         ).result().strip('\n')})
+                                                         ).result()})
                 except TimeoutError:
                     try:
                         self._queue.put({host: error_messages_per_host[host]})

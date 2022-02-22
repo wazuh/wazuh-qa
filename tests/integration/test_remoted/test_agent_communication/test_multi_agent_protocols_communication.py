@@ -178,15 +178,15 @@ def get_configuration(request):
     return request.param
 
 
-def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_remoted):
+def test_multi_agents_protocols_communication(get_configuration, configure_environment, restart_wazuh):
     '''
     description: Check agent-manager communication with several agents simultaneously via TCP, UDP or both.
                  For this purpose, the test will create all the agents and select the protocol using Round-Robin. Then,
                  an event and a message will be created for each agent created. Finally, it will search for
                  those events within the messages sent to the manager.
-    
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -197,19 +197,19 @@ def test_multi_agents_protocols_communication(get_configuration, configure_envir
         - restart_wazuh:
             type: fixture
             brief: Stop Wazuh, reset ossec.log and start a new monitor. Then start Wazuh.
-    
+
     assertions:
         - Verify that the custom events created has been logged correctly.
-    
+
     input_description: A configuration template (test_multi_agent_protocols_communication) is contained in an external
                        YAML file, (wazuh_multi_agent_protocols_communication.yaml). That template is combined with
                        different test cases defined in the module. Those include configuration settings for the
                        'wazuh-remoted' daemon and agents info.
-                        
+
     expected_output:
         - r".* test message from agent .*"
         - Agent message was not received or took too much time.
-    
+
     tags:
         - simulator
         - remoted

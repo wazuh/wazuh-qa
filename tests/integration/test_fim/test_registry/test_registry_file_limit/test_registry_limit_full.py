@@ -58,8 +58,8 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
-    ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT,
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
+    ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
     CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
     ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -75,6 +75,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 10
 EXPECTED_DATABES_STATE = "100"
+monitor_timeout = 40
 
 # Configurations
 
@@ -165,7 +166,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
 
     RegCloseKey(reg1_handle)
 
-    wazuh_log_monitor.start(timeout=40, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
+    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE),
                             error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

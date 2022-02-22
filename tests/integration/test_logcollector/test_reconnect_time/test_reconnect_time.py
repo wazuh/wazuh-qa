@@ -73,6 +73,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_reconnect_time.yaml')
 
 timeout_callback_reconnect_time = 30
 timeout_eventlog_read = 5
+elapsed_time_after_eventlog_stop = 1
 
 parameters = [
     {'LOCATION': 'Application', 'LOG_FORMAT': 'eventchannel', 'RECONNECT_TIME': '5s'},
@@ -204,8 +205,7 @@ def test_reconnect_time(start_eventlog_process, get_local_internal_options, conf
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
 
     services.control_event_log_service('start')
-
-    time.sleep(1)
+    time.sleep(elapsed_time_after_eventlog_stop)
 
     if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
         before = str(datetime.now())

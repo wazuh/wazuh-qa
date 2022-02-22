@@ -61,7 +61,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete,
                                KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
                                create_values_content)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -115,10 +115,10 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
                  its size on each test case. Finally, the test will verify that the compressed 'diff' file
                  has been created, and the related FIM event includes the 'content_changes' field if the
                  value size does not exceed the specified limit and vice versa.
-                 - Case 1: small size - the size for the file is smaller than the file_size_limit. The diff_file 
-                 is generated and the logs have content_changes data.
-                 - Case 2: big size - when the size for the file is bigger than the file_size_limit. The diff_file 
-                 is not generated and the logs should not have content_changes data.
+                - Case 1: small size - The file is smaller than the file_limit configured, the diff_file is 
+                 generated and there is content_changes information
+                 - Case 2: big size - The file is smaller than the file_limit configured,sp the diff_file is 
+                 not generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
 

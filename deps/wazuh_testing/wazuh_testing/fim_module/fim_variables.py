@@ -5,6 +5,9 @@
 '''
 The purpose of this file is to contain all the variables necessary for FIM in order to be easier to
 maintain if one of them changes in the future.
+
+UPDATE: This file is deprecated. Add new variables to de fim_module/__init__.py file. If this is used
+in a test, refactor the imports to adhere to the new standard.
 '''
 
 # Variables
@@ -56,6 +59,13 @@ SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 # Callback Messages
 CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
+CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
+CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
+CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"
+CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*"
+CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
+CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA = r".*Setting 'disk_quota' to (\d+), 'disk_quota' must be greater than 'file_size'"
+CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
 CB_FILE_LIMIT_CAPACITY = r".*Sending DB (\d+)% full alert."
 CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_COUNT_REGISTRY_FIM_ENTRIES = r".*Fim registry entries: (\d+)"

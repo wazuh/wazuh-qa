@@ -60,8 +60,8 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, create_values_content)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                               registry_value_delete, registry_parser, create_values_content)
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                                     SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -123,7 +123,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  - Case 1: small file - when compressed it will be less than the disk_quota. The file is generated 
                  and the logs have content_changes data.
                  - Case 2: big size - when compressed the file would be bigger than the disk_quota. The file is not
-                 generated and the logs should nave have content_changes data.
+                 generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
 

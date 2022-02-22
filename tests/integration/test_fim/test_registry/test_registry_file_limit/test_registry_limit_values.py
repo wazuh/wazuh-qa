@@ -55,13 +55,12 @@ tags:
     - fim_registry_file_limit
 '''
 
-
 import os, sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
-from wazuh_testing.fim_module.fim_variables import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE,
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_VALUE,
                                                     ERR_MSG_FILE_LIMIT_VALUES, CB_COUNT_REGISTRY_FIM_ENTRIES,
                                                     ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
                                                     ERR_MSG_WRONG_FILE_LIMIT_VALUE)
@@ -162,7 +161,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     # Compare that the value configured is correct
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
-    # Get the ammount of entries monitored and Assert they are the same as the limit and not over
+    # Get the ammount of entries monitored and assert they are the same as the limit and not over
     entries = wazuh_log_monitor.start(timeout=monitor_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
                                       error_message=ERR_MSG_FIM_INODE_ENTRIES).result()

@@ -55,15 +55,15 @@ tags:
     - fim_registry_file_limit
 '''
 import os
-import pytest
 from sys import platform
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
-from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, \
-    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, \
-    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, 
+    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, 
+    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 if platform == 'win32':

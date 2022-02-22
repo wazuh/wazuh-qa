@@ -1272,12 +1272,6 @@ def callback_integrity_message(line):
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
 
 
-def callback_connection_message(line):
-    match = re.match(r'.* Connected to the server .*', line)
-    if match:
-        return True
-
-
 def callback_event_message(line):
     if callback_detect_event(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
@@ -1430,54 +1424,6 @@ def callback_configuration_warning(line):
     if match:
         return True
     return None
-
-
-def callback_value_file_limit(line):
-    match = re.match(r".*Maximum number of entries to be monitored: '(\d+)'", line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_file_limit_zero(line):
-    match = re.match(r".*No limit set to maximum number of entries to be monitored", line)
-
-    if match:
-        return True
-
-
-def callback_file_limit_capacity(line):
-    match = re.match(r".*Sending DB (\d+)% full alert.", line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_file_limit_back_to_normal(line):
-    match = re.match(r".*Sending DB back to normal alert.", line)
-
-    if match:
-        return True
-
-
-def callback_file_limit_full_database(line):
-    match = re.match(r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*", line)
-
-    if match:
-        return True
-
-
-def callback_entries_path_count(line):
-    if sys.platform != 'win32':
-        match = re.match(r".*Fim inode entries: (\d+), path count: (\d+)", line)
-    else:
-        match = re.match(r".*Fim entries: (\d+)", line)
-
-    if match:
-        if sys.platform != 'win32':
-            return match.group(1), match.group(2)
-        else:
-            return match.group(1), None
 
 
 def callback_warn_max_dir_monitored(line):
@@ -1667,7 +1613,7 @@ class EventChecker:
 
 
 def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
-                        timeout=global_parameters.default_timeout):
+                            timeout=global_parameters.default_timeout):
     """Checks if the conditions for waiting for a new scheduled scan.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
