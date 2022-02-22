@@ -164,18 +164,15 @@ def modify_ip_address_conf(test_case):
         if 'ipv4' in configuration['ip_type']:
             new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                                 f"<address>{network['manager_network'][0]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
         elif 'ipv6' in configuration['ip_type']:
             new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                                 f"<address>{network['manager_network'][1]}</address>")
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
         elif 'dns' in configuration['ip_type']:
             new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
                                                                 '<address>wazuh-manager</address>')
-            host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
-                                             content=new_configuration)
+
+    host_manager.modify_file_content(host='wazuh-agent1', path='/var/ossec/etc/ossec.conf',
+                                     content=new_configuration)
 
     with open(manager_conf_file, 'w') as file:
         file.write(new_manager_configuration)
