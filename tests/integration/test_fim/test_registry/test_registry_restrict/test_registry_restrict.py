@@ -112,7 +112,6 @@ def get_configuration(request):
     (key, sub_key_2, KEY_WOW64_32KEY, no_valid_value_name, False, {'value_restrict'}),
     (key, sub_key_2, KEY_WOW64_64KEY, no_valid_value_name, False, {'value_restrict'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_restrict_value(key, subkey, arch, value_name, triggers_event, tags_to_apply,
                         get_configuration, configure_environment, restart_syscheckd,
                         wait_for_fim_start):
@@ -311,7 +310,7 @@ def test_restrict_key(key, subkey, test_subkey, arch, triggers_event, tags_to_ap
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event).result()
+                                        callback=callback_detect_event, accum_results=1).result()
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(key, test_key), 'Event path not equal'
         assert event['data']['arch'] == '[x32]' if arch == KEY_WOW64_32KEY else '[x64]', 'Arch not equal'
@@ -331,7 +330,7 @@ def test_restrict_key(key, subkey, test_subkey, arch, triggers_event, tags_to_ap
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event).result()
+                                        callback=callback_detect_event, accum_results=1).result()
 
         assert event['data']['type'] == 'deleted', 'key event not equal'
         assert event['data']['path'] == os.path.join(key, test_key), 'Key event wrong path'

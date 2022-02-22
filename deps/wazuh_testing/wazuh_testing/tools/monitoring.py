@@ -322,7 +322,11 @@ class SocketController:
             bytes: Socket message.
         """
         if size:
-            size = wazuh_unpack(self.sock.recv(4, socket.MSG_WAITALL))
+            data = self.sock.recv(4, socket.MSG_WAITALL)
+            if not data:
+                output = bytes('', 'utf8')
+                return output
+            size = wazuh_unpack(data)
             output = self.sock.recv(size, socket.MSG_WAITALL)
         else:
             output = self.sock.recv(4096)
@@ -832,11 +836,19 @@ def new_process(fn):
     return wrapper
 
 
-def callback_generator(regex):
+def generate_monitoring_callback(regex):
+    """
+    Generates a new callback that searches for a specific pattern on a line passed.
+    If it finds a match, it returns the whole line that matched.
+    Args:
+        regex (str): regex to use to look for a match.
+    """
     def new_callback(line):
         match = re.match(regex, line)
         if match:
-            return line
+            if match.group(1) is not None:
+                return match.group(1)
+            return True
 
     return new_callback
 
@@ -902,6 +914,7 @@ class HostMonitor:
                 break
             time.sleep(self._time_step)
         self.check_result()
+        return self.result()
 
     @new_process
     def file_composer(self, host, path, output_path):
@@ -955,9 +968,9 @@ class HostMonitor:
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
-                                                         callback=callback_generator(case['regex']),
+                                                         callback=make_callback(pattern=case['regex'], prefix=None),
                                                          update_position=False
-                                                         ).result().strip('\n')})
+                                                         ).result()})
                 except TimeoutError:
                     try:
                         self._queue.put({host: error_messages_per_host[host]})

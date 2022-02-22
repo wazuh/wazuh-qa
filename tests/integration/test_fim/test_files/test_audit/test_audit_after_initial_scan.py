@@ -106,6 +106,7 @@ def get_configuration(request):
 
 # Test
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply, folder', [
     ({'config1'}, testdir1),
     ({'config1'}, testdir2),
@@ -173,6 +174,7 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                             error_message='Did not receive expected "added" event')
 
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     {'config1'}
 ])

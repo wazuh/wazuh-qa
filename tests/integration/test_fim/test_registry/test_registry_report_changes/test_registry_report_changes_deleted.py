@@ -244,6 +244,7 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
     assert not os.path.exists(folder_path), f'{folder_path} exists'
 
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon removes the 'diff' directories when disabling

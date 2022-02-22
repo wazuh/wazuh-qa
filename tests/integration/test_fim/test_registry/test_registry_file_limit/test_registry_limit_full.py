@@ -44,8 +44,7 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -55,48 +54,42 @@ tags:
     - fim_registry_file_limit
 '''
 import os
-
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, callback_file_limit_capacity, \
-    callback_registry_count_entries, callback_file_limit_full_database, registry_parser, KEY_WOW64_64KEY, REG_SZ, \
-    KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
+     REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
+from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
+    ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+    CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+    ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 # Marks
-
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
-
-
-KEY = "HKEY_LOCAL_MACHINE"
-sub_key_1 = "SOFTWARE\\test_key"
-
-test_regs = [os.path.join(KEY, sub_key_1)]
+test_reg = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-reg1 = test_regs[0]
 NUM_REGS = 10
+EXPECTED_DATABES_STATE = "100"
+monitor_timeout = 40
 
 # Configurations
 
-
 file_limit_list = ['10']
-
-conf_params = {'WINDOWS_REGISTRY': reg1, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params,
+conf_params = {'WINDOWS_REGISTRY': test_reg}
+params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
                        modes=['scheduled'])
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
-
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -106,11 +99,10 @@ def get_configuration(request):
 
 # Functions
 
-
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    reg1_handle = create_registry(registry_parser[KEY], sub_key_1, KEY_WOW64_64KEY)
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg1_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     for i in range(0, NUM_REGS):
         modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
@@ -119,13 +111,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'file_limit_registry_conf'}
-])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
-def test_file_limit_full(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'file_limit' tag.
@@ -148,7 +134,7 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM database is in 'full database alert' mode
@@ -167,39 +153,24 @@ def test_file_limit_full(tags_to_apply, get_configuration, configure_environment
 
     tags:
         - scheduled
-        - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                             callback=callback_file_limit_capacity,
-                                             error_message='Did not receive expected '
-                                                           '"DEBUG: ...: Sending DB 100% full alert." event').result()
+                                             callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
+                                             error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
-    if database_state:
-        assert database_state == '100', 'Wrong value for full database alert.'
-    else:
-        pytest.fail('Did not receive the value of the database state,')
+    assert database_state == EXPECTED_DATABES_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
-    reg1_handle = RegOpenKeyEx(registry_parser[KEY], sub_key_1, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     modify_registry_value(reg1_handle, 'value_full', REG_SZ, 'added')
 
     RegCloseKey(reg1_handle)
 
-    wazuh_log_monitor.start(
-        timeout=40,
-        callback=callback_file_limit_full_database,
-        error_message='Did not receive expected '
-                      '"DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event')
+    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE),
+                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=callback_registry_count_entries,
-                                      error_message='Did not receive expected '
-                                                    '"Fim inode entries: ..., path count: ..." event'
-                                      ).result()
+                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
+                                      error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
-    if entries:
-        assert entries == str(get_configuration['metadata']['file_limit']), 'Wrong number of entries count.'
-    else:
-        pytest.fail('Wrong number of entries count')
+    assert entries == str(get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
