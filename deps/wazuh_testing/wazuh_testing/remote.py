@@ -659,3 +659,39 @@ def check_push_shared_config(agent, sender, injector=None):
         if stop_injector:
             injector.stop_receive()
             keep_alive_agent.terminate()
+
+
+def callback_sending_keep_alive(line):
+    match = re.match(r'.*Sending keep alive.*', line)
+    if match:
+        return match.group(0)
+
+
+def callback_keep_alive_merged(line):
+    match = re.match(r'.*merged.mg', line)
+    if match:
+        return match.group(0)
+
+
+def callback_keep_alive_agent_ip(line):
+    match = re.match(r'.*agent_ip.*', line)
+    if match:
+        return match.group(0)
+
+
+def callback_inserting_keep_alive(line):
+    match = re.match(r'.*inserting.*', line)
+    if match:
+        return match.group(0)
+
+
+def callback_reading_keep_alive(line):
+    match = re.match(r'.*reading.*', line)
+    if match:
+        return match.group(0)
+
+
+def callback_ack(line):
+    match = re.match(r".*Received message: \'#!-agent ack \'", line)
+    if match:
+        return match.group(0)
