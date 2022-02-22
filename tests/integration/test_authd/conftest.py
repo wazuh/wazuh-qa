@@ -1,9 +1,16 @@
 import pytest
+import time
+import os
+import yaml
+
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH
+from wazuh_testing.wazuh_db import insert_agent_in_db, clean_agents_from_db
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
+from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, set_section_wazuh_conf,\
+                                              load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
-from authd import DAEMON_NAME
+from wazuh_testing.authd import DAEMON_NAME
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -54,6 +61,14 @@ def restart_authd_function():
     control_service("restart", daemon=DAEMON_NAME)
 
 
+@pytest.fixture(scope='function')
+def stop_authd_function():
+    """
+    Stop Authd.
+    """
+    control_service("stop", daemon=DAEMON_NAME)
+
+
 @pytest.fixture(scope='module')
 def wait_for_authd_startup_module(get_configuration):
     """Wait until authd has begun"""
@@ -83,3 +98,93 @@ def tear_down():
     # Stop Wazuh
     control_service('stop')
     truncate_file(CLIENT_KEYS_PATH)
+    control_service('start')
+
+
+def create_force_config_block(param, config_path):
+    """
+    Creates a temporal config file.
+    """
+    temp = os.path.join(os.path.dirname(config_path), 'temp.yaml')
+
+    with open(config_path, 'r') as conf_file:
+        temp_conf_file = yaml.safe_load(conf_file)
+        for elem in param:
+            temp_conf_file[0]['sections'][0]['elements'].append(elem)
+    with open(temp, 'w') as temp_file:
+        yaml.safe_dump(temp_conf_file, temp_file)
+    return temp
+
+
+@pytest.fixture(scope='function')
+def format_configuration(get_current_test_case, request):
+    """
+    Get configuration block from current test case
+    """
+    test_name = request.node.originalname
+    configuration = get_current_test_case.get('configuration', {})
+
+    # Configuration for testing
+    temp = create_force_config_block(configuration, request.module.configurations_path)
+    conf = load_wazuh_configurations(temp, test_name)
+    os.remove(temp)
+
+    test_config = set_section_wazuh_conf(conf[0]['sections'])
+
+    return test_config
+
+
+@pytest.fixture(scope='function')
+def override_authd_force_conf(format_configuration):
+    """
+    Re-writes Wazuh configuration file with new configurations from the test case.
+    """
+    # Save current configuration
+    backup_config = get_wazuh_conf()
+
+    # Set new configuration
+    write_wazuh_conf(format_configuration)
+
+    yield
+
+    # Restore previous configuration
+    write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='function')
+def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
+    agents = get_current_test_case.get('pre_existent_agents', [])
+    time_now = int(time.time())
+    try:
+        keys_file = open(CLIENT_KEYS_PATH, 'w')
+    except IOError as exception:
+        raise exception
+
+    clean_agents_from_db()
+
+    for agent in agents:
+        id = agent['id'] if 'id' in agent else '001'
+        name = agent['name'] if 'name' in agent else f"TestAgent{id}"
+        ip = agent['ip'] if 'ip' in agent else 'any'
+        key = agent['key'] if 'key' in agent else 'TopSecret'
+        connection_status = agent['connection_status'] if 'connection_status' in agent else 'never_connected'
+        if 'disconnection_time' in agent and 'delta' in agent['disconnection_time']:
+            disconnection_time = time_now + agent['disconnection_time']['delta']
+        elif 'disconnection_time' in agent and 'value' in agent['disconnection_time']:
+            disconnection_time = agent['disconnection_time']['value']
+        else:
+            disconnection_time = time_now
+        if 'registration_time' in agent and 'delta' in agent['registration_time']:
+            registration_time = time_now + agent['registration_time']['delta']
+        elif 'registration_time' in agent and 'value' in agent['registration_time']:
+            registration_time = agent['registration_time']['value']
+        else:
+            registration_time = time_now
+
+        # Write agent in client.keys
+        keys_file.write(f"{id} {name} {ip} {key}\n")
+
+        # Write agent in global.db
+        insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
+
+    keys_file.close()

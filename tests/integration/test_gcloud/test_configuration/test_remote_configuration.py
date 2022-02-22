@@ -1,7 +1,62 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
+       (Data access, Admin activity, System events, DNS queries, etc.) from the
+       Google Cloud infrastructure. Once events are collected, Wazuh processes
+       them using its threat detection rules. Specifically, these tests
+       will check if the remote configuration used by GCP matches
+       the local one set in the 'ossec.conf' file.
+
+tier: 1
+
+modules:
+    - gcloud
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
+
+tags:
+    - config
+    - remote
+'''
 import os
 import pytest
 import json
@@ -36,6 +91,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_remote_conf.yaml')
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -46,7 +102,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 
 # fixtures
@@ -93,13 +149,39 @@ def get_remote_configuration(component_name, config):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_remote_configuration(get_configuration, configure_environment,
-                              restart_wazuh, wait_for_gcp_start):
-    """
-    These tests verify remote configuration matches with the ossec_configuration.
-    The first test checks the default options. The second checks the configuration when it is completed.
-    The last one checks repeated options in ossec.conf, so the last value will be applied.
-    """
+def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+    '''
+    description: Check if the remote configuration matches the local configuration of the 'gcp-pubsub' module.
+                 For this purpose, the test will use different settings and get the remote configuration applied.
+                 Then, it will verify that the default and custom local options match. It will also verify that,
+                 when repeated options are used in the configuration, the last one detected is the one applied.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - wait_for_gcp_start:
+            type: fixture
+            brief: Wait for the 'gpc-pubsub' module to start.
+
+    assertions:
+        - Verify that the remote configuration used by GCP matches the local one set in the 'ossec.conf' file.
+
+    input_description: Different test cases are contained in an external YAML file (wazuh_remote_conf.yaml)
+                       which includes configuration settings for the 'gcp-pubsub' module. The GCP access
+                       credentials can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - The current configuration settings from GCP to compare them with the local ones.
+    '''
     tags_to_apply = get_configuration['tags'][0]
 
     # get xml configuration

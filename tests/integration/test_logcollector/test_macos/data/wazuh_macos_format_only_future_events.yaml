@@ -3,14 +3,6 @@
   apply_to_modules:
   - test_macos_format_only_future_events
   sections:
-  - section: client
-    elements:
-        - server:
-            elements:
-            - address:
-                value: '127.0.0.1'
-            - protocol:
-                value: 'tcp'
   - section: localfile
     elements:
       - location:
@@ -19,3 +11,5 @@
           value: 'macos'
       - only-future-events:
           value: ONLY_FUTURE_EVENTS
+      - query:
+          value: 'process = "logger"'

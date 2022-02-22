@@ -1,159 +1,46 @@
 {
-    "false_positives": [],
-    "to_fix": [
+    "false_positives": [
         {
-            "code": "         except:\n             agent_id = randrange(1, 9999)\n \n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-            "line_number": 164,
-            "line_range": [
-                164
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b311-random",
-            "test_id": "B311",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " \ttry:\n \t\tquery_md5 = hashlib.md5(la_format_query.encode()).hexdigest()\n \t\t# Differentiates the first execution of the script from the rest of the executions.\n",
+            "code": "     # Build the request\n     md5_hash = md5(args.la_query.encode()).hexdigest()\n     url = f\"{url_analytics}/v1/workspaces/{args.workspace}/query\"\n",
             "filename": "wodles/azure/azure-logs.py",
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 248,
+            "line_number": 315,
             "line_range": [
-                248
+                315
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
         },
         {
-            "code": " \t\ttry:\n \t\t\tgraph_md5 = hashlib.md5(graph_format_query.encode()).hexdigest()\n \t\t\t# first time for this query\n",
+            "code": "     logging.info(f\"Graph: Building the url.\")\n     md5_hash = md5(args.graph_query.encode()).hexdigest()\n     url = build_graph_url(offset=args.graph_time_offset, md5_hash=md5_hash)\n",
             "filename": "wodles/azure/azure-logs.py",
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 386,
+            "line_number": 488,
             "line_range": [
-                386
+                488
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
         },
         {
-            "code": " \n \t\tcontainer_md5 = hashlib.md5(name.encode()).hexdigest()\n \t\tnext_marker = None\n",
+            "code": "     for container in containers:\n         md5_hash = md5(name.encode()).hexdigest()\n         # check if the hash was already present in the last_dates file\n",
             "filename": "wodles/azure/azure-logs.py",
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 532,
+            "line_number": 644,
             "line_range": [
-                532
+                644
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
             "test_name": "blacklist"
-        },
-        {
-            "code": " from os import mkfifo, unlink, devnull\n from subprocess import CalledProcessError, STDOUT, Popen, PIPE\n from getopt import getopt, GetoptError\n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with CalledProcessError module.",
-            "line_number": 17,
-            "line_range": [
-                17
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": " \n     ps = Popen(arguments,shell=shell, stdin=None, stdout=PIPE, stderr=STDOUT)\n     cmd_output = ps.communicate()[0]\n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "HIGH",
-            "issue_text": "subprocess call with shell=True identified, security issue.",
-            "line_number": 36,
-            "line_range": [
-                36
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html",
-            "test_id": "B602",
-            "test_name": "subprocess_popen_with_shell_equals_true"
-        },
-        {
-            "code": "     try:\n         perm = eval('0666')\n     except SyntaxError:\n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 111,
-            "line_range": [
-                111
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
-            "test_id": "B307",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "     except SyntaxError:\n         perm = eval('0o666')\n \n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "MEDIUM",
-            "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 113,
-            "line_range": [
-                113
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
-            "test_id": "B307",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         DEVNULL = open(devnull, 'wb')\n         ps = Popen(cmd, shell=False, stdout=DEVNULL, stderr=None)\n \n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 140,
-            "line_range": [
-                140
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " \n             ps_xsltproc = Popen([XSLT_BIN, TEMPLATE_XCCDF, FIFO_PATH], stdin=None, stdout=PIPE, stderr=STDOUT)\n             ps.wait()\n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 170,
-            "line_range": [
-                170
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " \n             ps_xsltproc = Popen([XSLT_BIN, TEMPLATE_OVAL, FIFO_PATH], stdin=None, stdout=PIPE, stderr=STDOUT)\n             ps.wait()\n",
-            "filename": "wodles/oscap/oscap.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 200,
-            "line_range": [
-                200
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
         },
         {
             "code": "     try:\n         proc = subprocess.Popen([wazuh_control, option], stdout=subprocess.PIPE)\n         (stdout, stderr) = proc.communicate()\n",
@@ -161,9 +48,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 44,
+            "line_number": 61,
             "line_range": [
-                44
+                61
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -182,21 +69,7 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
             "test_id": "B404",
             "test_name": "blacklist"
-        },
-        {
-            "code": "         return stdout.decode()\n     except Exception:\n         pass\n \n",
-            "filename": "wodles/utils.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Try, Except, Pass detected.",
-            "line_number": 47,
-            "line_range": [
-                47,
-                48
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b110_try_except_pass.html",
-            "test_id": "B110",
-            "test_name": "try_except_pass"
         }
-    ]
+    ],
+    "to_fix": []
 }

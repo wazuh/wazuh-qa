@@ -1,5 +1,7 @@
+import sys
+import re
+import copy
 from os.path import join, exists
-
 from tempfile import gettempdir
 from packaging.version import parse
 
@@ -10,8 +12,7 @@ from wazuh_testing.qa_ctl import QACTL_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.s3_package import get_s3_package_url
 from wazuh_testing.qa_ctl.provisioning.wazuh_deployment.wazuh_s3_package import WazuhS3Package
-from wazuh_testing.tools.github_repository import get_last_wazuh_version
-from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_with_output
+from wazuh_testing.qa_ctl.provisioning.local_actions import run_local_command_returning_output
 
 
 class QACTLConfigGenerator:
@@ -23,6 +24,7 @@ class QACTLConfigGenerator:
     Args:
         tests (list): list with all the test that the user desires to run.
         wazuh_version (string): version of the wazuh packages that the user desires to install.
+        systems (list(str)): Systems with which the tests will be launched
         This parameter is set to None by default. In case that version parameter is not given, the
         wazuh package version will be taken from the documetation test information
 
@@ -39,42 +41,110 @@ class QACTLConfigGenerator:
 
     LOGGER = Logging.get_logger(QACTL_LOGGER)
     LINUX_TMP = '/tmp'
+    WINDOWS_TMP = 'C:\\Users\\vagrant\\AppData\\Local\\Temp'
+    WINDOWS_DEFAULT_WAZUH_INSTALL_PATH = 'C:\\Program Files (x86)\\ossec-agent'
+    LINUX_DEFAULT_WAZUH_INSTALL_PATH = '/var/ossec'
 
     BOX_MAPPING = {
+        'CentOS 7': 'qactl/centos_7',
+        'CentOS 8': 'qactl/centos_8',
         'Ubuntu Focal': 'qactl/ubuntu_20_04',
-        'CentOS 8': 'qactl/centos_8'
+        'Windows Server 2019': 'qactl/windows_2019'
+    }
+
+    SYSTEMS = {
+        'centos_7': {
+            'os_version': 'CentOS 7',
+            'os_platform': 'linux'
+        },
+        'centos_8': {
+            'os_version': 'CentOS 8',
+            'os_platform': 'linux'
+        },
+        'ubuntu_focal': {
+            'os_version': 'Ubuntu Focal',
+            'os_platform': 'linux'
+        },
+        'windows_2019': {
+            'os_version': 'Windows Server 2019',
+            'os_platform': 'windows'
+        }
+    }
+
+    DEFAULT_BOX_RESOURCES = {
+        'qactl/centos_7': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/centos_8': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/ubuntu_20_04': {
+            'cpu': 1,
+            'memory': 1024
+        },
+        'qactl/windows_2019': {
+            'cpu': 2,
+            'memory': 2048
+        }
     }
 
     BOX_INFO = {
         'qactl/ubuntu_20_04': {
-            'connection_method': 'ssh',
-            'user': 'vagrant',
-            'password': 'vagrant',
-            'connection_port': 22,
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'deb',
             'installation_files_path': LINUX_TMP
         },
+        'qactl/centos_7': {
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
+            'ansible_python_interpreter': '/usr/bin/python',
+            'system': 'rpm',
+            'installation_files_path': LINUX_TMP
+        },
         'qactl/centos_8': {
-            'connection_method': 'ssh',
-            'user': 'vagrant',
-            'password': 'vagrant',
-            'connection_port': 22,
+            'ansible_connection': 'ssh',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 22,
             'ansible_python_interpreter': '/usr/bin/python3',
             'system': 'rpm',
             'installation_files_path': LINUX_TMP
+        },
+        'qactl/windows_2019': {
+            'ansible_connection': 'winrm',
+            'ansible_user': 'vagrant',
+            'ansible_password': 'vagrant',
+            'ansible_port': 5985,
+            'ansible_winrm_server_cert_validation': 'ignore',
+            'system': 'windows',
+            'ansible_admin_user': 'vagrant',
+            'ansible_python_interpreter': 'C:\\Users\\vagrant\\AppData\\Local\\Programs\\Python\\Python39\\python.exe',
+            'installation_files_path': WINDOWS_TMP
         }
     }
 
-    def __init__(self, tests, wazuh_version, qa_branch='master', qa_files_path=join(gettempdir(), 'qa_ctl', 'wazuh-qa')):
+    def __init__(self, tests=None, wazuh_version=None, qa_branch='master',
+                 qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
         self.tests = tests
-        self.wazuh_version = get_last_wazuh_version() if wazuh_version is None else wazuh_version
-        self.qactl_used_ips_file = join(gettempdir(), 'qa_ctl', 'qactl_used_ips.txt')
-        self.config_file_path = join(gettempdir(), 'qa_ctl', f"config_{get_current_timestamp()}.yaml")
+        self.wazuh_version = wazuh_version
+        self.systems = systems
+        self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
+        self.config_file_path = join(gettempdir(), 'wazuh_qa_ctl', f"config_{get_current_timestamp()}.yaml")
         self.config = {}
         self.hosts = []
         self.qa_branch = qa_branch
         self.qa_files_path = qa_files_path
+
+        # Create qa-ctl temporarily files path
+        file.recursive_directory_creation(join(gettempdir(), 'wazuh_qa_ctl'))
 
     def __get_test_info(self, test_name):
         """Get information from a documented test.
@@ -85,10 +155,11 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        qa_docs_command = f"qa-docs -t {test_name} -o {join(gettempdir(), 'qa_ctl')} -I {join(self.qa_files_path, 'tests')}"
-        test_data_file_path = f"{join(gettempdir(), 'qa_ctl', test_name)}.json"
+        qa_docs_command = f"qa-docs -t {test_name} -o {join(gettempdir(), 'wazuh_qa_ctl')} -I " \
+                          f"{join(self.qa_files_path, 'tests')} --no-logging"
+        test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', test_name)}.json"
 
-        run_local_command_with_output(qa_docs_command)
+        run_local_command_returning_output(qa_docs_command)
 
         # Read test data file
         try:
@@ -149,7 +220,7 @@ class QACTLConfigGenerator:
             return True
 
         allowed_info = {
-            'os_platform': ['linux'],
+            'os_platform': ['linux', 'windows'],
             'os_version': list(QACTLConfigGenerator.BOX_MAPPING.keys())
         }
 
@@ -158,9 +229,9 @@ class QACTLConfigGenerator:
             _check_validate(check, test_info, allowed_values)
 
         # Validate version requirements
-        if parse(str(test_info['wazuh_min_version'])) > parse(str(self.wazuh_version)):
+        if parse(str(test_info['tests'][0]['wazuh_min_version'])) > parse(str(self.wazuh_version)):
             error_message = f"The minimal version of wazuh to launch the {test_info['test_name']} is " \
-                            f"{test_info['wazuh_min_version']} and you are using {self.wazuh_version}"
+                            f"{test_info['tests'][0]['wazuh_min_version']} and you are using {self.wazuh_version}"
             raise QAValueError(error_message, QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         return True
@@ -213,7 +284,7 @@ class QACTLConfigGenerator:
 
         file.write_file(self.qactl_used_ips_file, data)
 
-    def __add_instance(self, os_version, test_name, test_target, os_platform, vm_cpu=1, vm_memory=1024):
+    def __add_instance(self, os_version, test_name, test_target, os_platform):
         """Add a new provider instance for the deployment module. T
 
         Args:
@@ -229,10 +300,18 @@ class QACTLConfigGenerator:
             dict object: dict containing all the field required for generating a new vagrant box in the deployment
                          module.
         """
+        vm_cpu = 1
+        vm_memory = 1024
+
+        if os_version in self.BOX_MAPPING:
+            box = self.BOX_MAPPING[os_version]
+            vm_cpu = self.DEFAULT_BOX_RESOURCES[box]['cpu']
+            vm_memory = self.DEFAULT_BOX_RESOURCES[box]['memory']
+
         instance_ip = self.__get_host_IP()
         instance = {
             'enabled': True,
-            'vagrantfile_path': join(gettempdir(), 'qa_ctl'),
+            'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
             'vagrant_box': QACTLConfigGenerator.BOX_MAPPING[os_version],
             'vm_memory': vm_memory,
             'vm_cpu': vm_cpu,
@@ -264,43 +343,78 @@ class QACTLConfigGenerator:
 
         return package_url
 
+    def __add_deployment_config_block(self, test_name, os_version, components, os_platform):
+        """Add a configuration block to deploy a test environment in qa-ctl.
+
+        Args:
+            test_name (string): Test name.
+            os_version (string): Host vendor to deploy (e.g: CentOS 8).
+            components (string): Test target (manager or agent).
+            os_platform (string): host system (e.g: linux).
+        """
+        # Process deployment data
+        host_number = len(self.config['deployment'].keys()) + 1
+        vm_name = f"{test_name}_{get_current_timestamp()}".replace('.', '_')
+        self.config['deployment'][f"host_{host_number}"] = {
+            'provider': {
+                'vagrant': self.__add_instance(os_version, vm_name, components, os_platform)
+            }
+        }
+        # Add manager if the target is an agent
+        if components == 'agent':
+            host_number += 1
+            self.config['deployment'][f"host_{host_number}"] = {
+                'provider': {
+                    'vagrant': self.__add_instance('CentOS 8', vm_name, 'manager', 'linux')
+                }
+            }
+
     def __process_deployment_data(self, tests_info):
         """Generate the data for the deployment module with the information of the tests given as parameter.
 
         Args:
             test_info(dict object): dict object containing information of all the tests that are going to be run.
+
+        Raises:
+            QAValueError: If the test system or specified systems are not valid.
         """
         self.config['deployment'] = {}
 
-        for test in tests_info:
-            if self.__validate_test_info(test):
-                # Choose items from the available list. To be improved in future versions
-                if 'Ubuntu Focal' in test['os_version']:
-                    test['os_version'] = 'Ubuntu Focal'
-                else:
-                    test['os_version'] = 'CentOS 8'
+        # If not system parameter was specified, then one is automatically selected
+        if not self.systems:
+            for test in tests_info:
+                if self.__validate_test_info(test):
+                    os_version = ''
+                    if 'CentOS 8' in test['os_version']:
+                        os_version = 'CentOS 8'
+                    elif 'Ubuntu Focal' in test['os_version']:
+                        os_version = 'Ubuntu Focal'
+                    elif 'CentOS 7' in test['os_version']:
+                        os_version = 'CentOS 7'
+                    elif 'Windows Server 2019' in test['os_version']:
+                        os_version = 'Windows Server 2019'
+                    else:
+                        raise QAValueError(f"No valid system was found for {test['name']} test",
+                                           QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
-                test['components'] = 'manager' if 'manager' in test['components'] else 'agent'
-                test['os_platform'] = 'linux'
+                    components = 'manager' if 'manager' in test['components'] else 'agent'
+                    os_platform = 'windows' if 'Windows' in os_version else 'linux'
 
-                # Process deployment data
-                host_number = len(self.config['deployment'].keys()) + 1
-                vm_name = f"{test['test_name']}_{get_current_timestamp()}"
-                self.config['deployment'][f"host_{host_number}"] = {
-                    'provider': {
-                        'vagrant': self.__add_instance(test['os_version'], vm_name, test['components'],
-                                                       test['os_platform'])
-                    }
-                }
-                # Add manager if the target is an agent
-                if test['components'] == 'agent':
-                    host_number += 1
-                    self.config['deployment'][f"host_{host_number}"] = {
-                        'provider': {
-                            'vagrant': self.__add_instance(test['os_version'], vm_name, 'manager',
-                                                           test['os_platform'])
-                        }
-                    }
+                    self.__add_deployment_config_block(test['test_name'], os_version, components, os_platform)
+
+        # If system parameter is specified and have values
+        elif isinstance(self.systems, list) and len(self.systems) > 0:
+            for system in self.systems:
+                for test in tests_info:
+                    if self.__validate_test_info(test):
+                        version = self.SYSTEMS[system]['os_version']
+                        platform = self.SYSTEMS[system]['os_platform']
+                        component = 'manager' if 'manager' in test['components'] and platform == 'linux' else 'agent'
+
+                        self.__add_deployment_config_block(test['test_name'], version, component, platform)
+        else:
+            raise QAValueError('Unable to process systems in the automatically generated configuration',
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
     def __process_provision_data(self):
         """Generate the data for the provision module using the fields from the already generated deployment module."""
@@ -319,13 +433,20 @@ class QACTLConfigGenerator:
             target = 'manager' if 'manager' in self.config['deployment'][instance]['provider']['vagrant']['label'] \
                 else 'agent'
             s3_package_url = self.__get_package_url(instance)
+            installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
+            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
+            wazuh_install_path = self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+                self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
+
             self.config['provision']['hosts'][instance]['wazuh_deployment'] = {
                 'type': 'package',
                 'target': target,
                 's3_package_url': s3_package_url,
-                'installation_files_path': QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path'],
-                'health_check': True
+                'installation_files_path': installation_files_path,
+                'health_check': True,
+                'wazuh_install_path': wazuh_install_path
             }
+
             if target == 'agent':
                 # Add manager IP to the agent. The manager's host will always be the one after the agent's host.
                 manager_host_number = int(instance.replace('host_', '')) + 1
@@ -335,36 +456,107 @@ class QACTLConfigGenerator:
             # QA framework
             self.config['provision']['hosts'][instance]['qa_framework'] = {
                 'wazuh_qa_branch': self.qa_branch,
-                'qa_workdir': join(self.LINUX_TMP, 'qa_ctl')
+                'qa_workdir': file.join_path([installation_files_path, 'wazuh_qa_ctl'], system)
             }
+
+    def __add_testing_config_block(self, instance, installation_files_path, system, test_path, test_name, modules,
+                                   component):
+        """Add a configuration block to launch a test in qa-ctl.
+
+        Args:
+            instance (str): block instance name (host_x).
+            installation_files_path (str): Path where locate wazuh qa-ctl files.
+            system (str): System where launch the test.
+            test_path (str): Path where are located the test files.
+            test_name (str): Test name.
+            modules (list(str)): List of modules.
+            component (str): Test component (manager, agent).
+        """
+        self.config['tests'][instance] = {'host_info': {}, 'test': {}}
+        self.config['tests'][instance]['host_info'] = \
+            dict(self.config['provision']['hosts'][instance]['host_info'])
+        wazuh_install_path = self.WINDOWS_DEFAULT_WAZUH_INSTALL_PATH if system == 'windows' else \
+            self.LINUX_DEFAULT_WAZUH_INSTALL_PATH
+
+        self.config['tests'][instance]['test'] = {
+            'type': 'pytest',
+            'path': {
+                'test_files_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                   test_path], system),
+                'run_tests_dir_path': file.join_path([installation_files_path, 'wazuh_qa_ctl', 'wazuh-qa',
+                                                      'tests', 'integration'], system),
+                'test_results_path': join(gettempdir(), 'wazuh_qa_ctl', f"{test_name}_{get_current_timestamp()}")
+            },
+            'wazuh_install_path': wazuh_install_path,
+            'system': system,
+            'component': component,
+            'modules':  modules
+        }
+
+    def __set_testing_config(self, tests_info):
+        """Add all blocks corresponding to the testing configuration for qa-ctl
+
+        Args:
+            test_info(dict object): dict object containing information of all the tests that are going to be run.
+        """
+        # Calculate the host that will run the test
+
+        # If there is no test config block, then start in host_+1
+        if len(self.config['tests'].keys()) == 0:
+            test_host_number = len(self.config['tests'].keys()) + 1
+        else:
+            last_config_test_item = len(self.config['tests'].keys())
+            instance = f"host_{last_config_test_item}"
+            # If the last test was for manager, then move on to the next one.
+            if self.config['tests'][instance]['test']['component'] == 'manager':
+                test_host_number = len(self.config['tests'].keys()) + 1
+            # If the last test was for agent, then 1 host must be skipped, since it is the manager for an agent test.
+            else:
+                test_host_number = len(self.config['tests'].keys()) + 2
+
+        for test in tests_info:
+            instance = f"host_{test_host_number}"
+            vm_box = self.config['deployment'][instance]['provider']['vagrant']['vagrant_box']
+            installation_files_path = QACTLConfigGenerator.BOX_INFO[vm_box]['installation_files_path']
+            system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
+
+            system = 'linux' if system == 'deb' or system == 'rpm' else system
+            modules = copy.deepcopy(test['modules'])
+            component = self.config['provision']['hosts'][instance]['wazuh_deployment']['target']
+
+            # Cut out the full path, and convert it to relative path (tests/integration....)
+            test_path = re.sub(r".*wazuh-qa.*(tests.*)", r"\1", test['path'])
+            # Convert test path string to the corresponding according to the system
+            test_path = file.join_path([test_path], system)
+
+            self.__add_testing_config_block(instance, installation_files_path, system, test_path,
+                                            test['test_name'], modules, component)
+            test_host_number += 1
+            # If it is an agent test then we skip the next manager instance since no test will be launched in that
+            # instance
+            if component == 'agent':
+                test_host_number += 1
 
     def __process_test_data(self, tests_info):
         """Generate the data for the test module with the information of the tests given as parameter.
 
         Args:
             test_info(dict object): dict object containing information of all the tests that are going to be run.
+
+        Raises:
+            QAValueError: If the specified systems are not valid.
         """
         self.config['tests'] = {}
-        test_host_number = len(self.config['tests'].keys()) + 1
 
-        for test in tests_info:
-            instance = f"host_{test_host_number}"
-            self.config['tests'][instance] = {'host_info': {}, 'test': {}}
-            self.config['tests'][instance]['host_info'] = \
-                dict(self.config['provision']['hosts'][instance]['host_info'])
-            self.config['tests'][instance]['test'] = {
-                'type': 'pytest',
-                'path': {
-                    'test_files_path': f"{self.LINUX_TMP}/qa_ctl/wazuh-qa/{test['path']}",
-                    'run_tests_dir_path': f"{self.LINUX_TMP}/qa_ctl/wazuh-qa/test/integration",
-                    'test_results_path': f"{gettempdir()}/qa_ctl/{test['test_name']}_{get_current_timestamp()}/"
-                }
-            }
-            test_host_number += 1
-            # If it is an agent test then we skip the next manager instance since no test will be launched in that
-            # instance
-            if test['components'] == 'agent':
-                test_host_number += 1
+        if not self.systems:
+            self.__set_testing_config(tests_info)
+        # If we want to launch the test in one or multiple systems specified in qa-ctl parameters
+        elif isinstance(self.systems, list) and len(self.systems) > 0:
+            for _ in self.systems:
+                self.__set_testing_config(tests_info)
+        else:
+            raise QAValueError('Unable to process systems in the automatically generated configuration',
+                               QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
     def __process_test_info(self, tests_info):
         """Process all the info of the desired tests that are going to be run in order to generate the data
@@ -377,10 +569,19 @@ class QACTLConfigGenerator:
         self.__process_provision_data()
         self.__process_test_data(tests_info)
 
+    def __proces_config_info(self):
+        """Write the config section info in the qa-ctl configuration file"""
+        # It is only necessary to specify the qa_ctl_launcher_branch when using qa-ctl on Windows, as this branch will
+        # be used to launch qa-ctl in the docker container used for provisioning and testing.
+        if sys.platform == 'win32':
+            self.config['config'] = {}
+            self.config['config']['qa_ctl_launcher_branch'] = self.qa_branch
+
     def run(self):
         """Run an instance with the parameters created. This generates the YAML configuration file automatically."""
         info = self.__get_all_tests_info()
         self.__process_test_info(info)
+        self.__proces_config_info()
         file.write_yaml_file(self.config_file_path, self.config)
 
     def destroy(self):
@@ -389,3 +590,75 @@ class QACTLConfigGenerator:
             self.__delete_ip_entry(host_ip)
 
         file.delete_file(self.config_file_path)
+
+    def get_deployment_configuration(self, instances):
+        """Generate the qa-ctl configuration required for the deployment of the specified config-instances.
+
+        Args:
+            instances(list(ConfigInstance)): List of config-instances to deploy.
+
+        Returns:
+            dict: Configuration block corresponding to the deployment of the instances
+
+        Raises:
+            QAValueError: If the instance operating system is not allowed for generating the qa-ctl configuration.
+        """
+        deployment_configuration = {'deployment': {}}
+
+        for index, instance in enumerate(instances):
+            try:
+                box = self.BOX_MAPPING[instance.os_version]
+            except KeyError as exception:
+                raise QAValueError(f"Could not find a qa-ctl box for {instance.os_version}",
+                                   QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER) from exception
+
+            instance_ip = self.__get_host_IP()
+            # Assign the IP to the instance object (Needed later to generate host config data)
+            instance.ip = instance_ip
+
+            deployment_configuration['deployment'][f"host_{index + 1}"] = {
+                'provider': {
+                    'vagrant': {
+                        'enabled': True,
+                        'vagrantfile_path': join(gettempdir(), 'wazuh_qa_ctl'),
+                        'vagrant_box': box,
+                        'vm_memory': instance.memory,
+                        'vm_cpu': instance.cpu,
+                        'vm_name': instance.name,
+                        'vm_system': instance.os_platform,
+                        'label': instance.name,
+                        'vm_ip': instance_ip
+                    }
+                }
+            }
+
+        return deployment_configuration
+
+    def get_tasks_configuration(self, instances, playbook_info, playbook_type='local'):
+        """Generate the qa-ctl configuration required for running ansible tasks.
+
+        Args:
+            instances (list(ConfigInstance)): List of config-instances to deploy.
+            playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
+            playbook_type (str): Playbook path configuration [local or remote_url].
+
+        Returns:
+            dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
+        """
+        tasks_configuration = {'tasks': {}}
+
+        for index, instance in enumerate(instances):
+            instance_box = self.BOX_MAPPING[instance.os_version]
+            host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+            host_info['host'] = instance.ip
+
+            playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
+                              {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
+                              in playbook_info.items()]
+
+            tasks_configuration['tasks'][f"task_{index + 1}"] = {
+                'host_info': host_info,
+                'playbooks': playbooks_dict
+            }
+
+        return tasks_configuration

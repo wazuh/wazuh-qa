@@ -1,7 +1,64 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
+       (Data access, Admin activity, System events, DNS queries, etc.) from the
+       Google Cloud infrastructure. Once events are collected, Wazuh processes
+       them using its threat detection rules. Specifically, these tests
+       will check if the 'gcp-pubsub' module gets GCP messages when it starts
+       if the 'pull_on_start' tag is set to 'yes', and sleeps otherwise.
+
+tier: 0
+
+modules:
+    - gcloud
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-analysisd
+    - wazuh-monitord
+    - wazuh-modulesd
+
+os_platform:
+    - linux
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#pull-on-start
+
+tags:
+    - pull
+    - config
+    - on_start
+    - scan
+'''
 import os
 import sys
 
@@ -26,10 +83,11 @@ logging = "info"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -55,12 +113,49 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_pull_on_start(get_configuration, configure_environment,
-                       restart_wazuh, wait_for_gcp_start):
-    """
-    Verify the module gcp-pubsub starts if pull_on_start is set to yes and
-    the module sleeps if pull_on_start is set to no.
-    In the second case, the module will start to pull messages after time interval.
-    """
+                       daemons_handler, wait_for_gcp_start):
+    '''
+    description: Check if the 'gcp-pubsub' module pulls messages when starting if the 'pull_on_start' is
+                 set to 'yes', or sleeps up to the next interval if that one is set to 'no'. For this
+                 purpose, the test will use the possible values for that tag ('yes' and 'no'). Then, it
+                 will wait for the 'fetching' event if the pull on start opction is enabled. Otherwise,
+                 the test will verify that the 'sleep' event is generated, and the 'fetching' event is not.
+
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_wazuh:
+            type: fixture
+            brief: Reset the 'ossec.log' file and start a new monitor.
+        - wait_for_gcp_start:
+            type: fixture
+            brief: Wait for the 'gpc-pubsub' module to start.
+
+    assertions:
+        - Verify that the 'gcp-pubsub' module gets GCP messages when it starts
+          if the 'pull_on_start' tag is set to 'yes'.
+        - Verify that the 'gcp-pubsub' module sleeps up to the next interval when it starts
+          if the 'pull_on_start' tag is set to 'no'.
+
+    input_description: A test case (ossec_conf) is contained in an external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'gcp-pubsub' module. That is
+                       combined with the 'pull_on_start' values defined in the module. The GCP access
+                       credentials can be found in the 'configuration_template.yaml' file.
+
+    expected_output:
+        - r'wm_gcp_main(): DEBUG.* Starting fetching of logs.'
+        - r'.*wm_gcp_main.*: DEBUG.* Sleeping until.*' (when 'pull_on_start=no')
+
+    tags:
+        - logs
+        - scheduled
+    '''
     pull_start = get_configuration['sections'][0]['elements'][3]['pull_on_start']['value'] == 'yes'
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))

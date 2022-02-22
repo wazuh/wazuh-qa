@@ -1,7 +1,77 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. Specifically, these tests will check if FIM events are generated
+       when subfolders are moved between monitored directories.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 import shutil
 import sys
@@ -14,6 +84,9 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
+# marks
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
+
 # variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
@@ -22,9 +95,8 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2, testdir3 = test_directories
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
-# marks
-pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # This directory won't be monitored
 testdir4 = os.path.join(PREFIX, 'testdir4')
@@ -68,26 +140,64 @@ def extra_configuration_after_yield():
     (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
     (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
 ])
+@mark_skip_agentWindows
 def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event,
                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if syscheckd detects 'added' or 'deleted' events when moving a
-    subfolder from a folder to another one.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon detects 'added' and 'deleted' events when moving a subdirectory
+                 from a monitored folder to another one. For this purpose, the test will move a testing subfolder
+                 from the source directory to the target directory and change the system time until the next
+                 scheduled scan. Finally, it verifies that the expected FIM events have been generated.
 
-    Parameters
-    ----------
-    subdir : str
-        Name of the subdir to be moved.
-    source_folder : str
-        Folder to move the file from.
-    target_folder : str
-        Destination folder to move the file to.
-    triggers_delete_event : bool
-        Expect a 'deleted' event in the source folder.
-    triggers_add_event : bool
-        Expect a 'added' event in the target folder.
-    """
+    wazuh_min_version: 4.2.0
 
+    parameters:
+        - source_folder:
+            type: str
+            brief: Path to the source directory where the subfolder to move is located.
+        - target_folder:
+            type: str
+            brief: Path to the destination directory where the subfolder will be moved.
+        - subdir:
+            type: str
+            brief: Name of the subfolder to be moved.
+        - tags_to_apply:
+            type: set
+            brief: Run test if match with a configuration identifier, skip otherwise.
+        - triggers_delete_event:
+            type: bool
+            brief: True if it expects a 'deleted' event in the source folder. False otherwise.
+        - triggers_add_event:
+            type: bool
+            brief: True if it expects an 'added' event in the target folder. False otherwise.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events of type 'added' and 'deleted' are generated
+          when subfolders are moved between monitored directories.
+
+    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added' and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     mode = get_configuration['metadata']['fim_mode']

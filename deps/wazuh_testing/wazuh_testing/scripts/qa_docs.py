@@ -42,6 +42,14 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
+def set_parameters(args):
+    # Set the qa-docs logger level
+    if args.debug_level:
+        set_qadocs_logger_level('DEBUG')
+
+    # Deactivate the qa-docs logger if necessary.
+    if args.no_logging:
+        set_qadocs_logger_level(None)
 
 def set_parameters(args):
     """Set the QADOCS parameters.

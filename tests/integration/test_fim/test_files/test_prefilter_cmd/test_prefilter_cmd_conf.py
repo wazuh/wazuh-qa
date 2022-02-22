@@ -1,7 +1,66 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check the 'prelink' program is installed on
+       the system to prevent prelinking from creating false positives running it before FIM scanning.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
+       files for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+
+os_version:
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#prefilter-cmd
+    - https://linux.die.net/man/8/prelink
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_prefilter_cmd
+'''
 import os
 import subprocess
 
@@ -61,12 +120,44 @@ def install_prelink():
 
 # Tests
 def test_prefilter_cmd_conf(get_configuration, configure_environment, install_prelink, restart_syscheckd):
-    """Check if prelink is installed and syscheck works. If prelink is not installed, checks if an error log is received.
+    '''
+    description: Check if the 'wazuh-syscheckd' detects the 'prelink' program installed on the system and runs it
+                 using the command defined in the 'prefilter_cmd' tag. For this purpose, the test will monitor
+                 a testing directory and run a bash script to check if the 'prelink' program is installed and
+                 install it if necessary. Finally, it will verify that the command to run the 'prelink' program
+                 is defined in the configuration.
 
-    This test was implemented when prefilter_cmd could only be set with 'prelink'.
+    wazuh_min_version: 4.2.0
 
-    This test will have to updated if prefilter_cmd is updated as well.
-    """
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - install_prelink:
+            type: fixture
+            brief: Call script to install 'prelink' if it is not installed.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+
+    assertions:
+        - Verify that the 'prelink' program is installed on the system.
+
+    input_description: A test case (prefilter_cmd) is contained in external YAML file (wazuh_prefilter_cmd_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these are combined
+                       with the testing directory to be monitored defined in the module. Also, a bash script
+                       (install_prelink.sh) is included to check if the 'prelink' program is installed and install it
+                       if necessary.
+
+    expected_output:
+        - The path of the 'prelink' program.
+
+    tags:
+        - prelink
+    '''
     if os.path.exists(prefilter.split()[0]):
         check_fim_start(wazuh_log_monitor)
     else:

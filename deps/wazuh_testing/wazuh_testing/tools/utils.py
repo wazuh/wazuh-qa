@@ -9,6 +9,7 @@ from random import randint, SystemRandom
 from time import sleep
 from random import randint, SystemRandom, choice
 import string
+import json
 import socket
 
 
@@ -127,6 +128,11 @@ def get_random_string(string_length, digits=True):
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
+def get_version():
+    f = open('../../version.json')
+    data = json.load(f)
+    version = data['version']
+    return version
 
 def lower_case_key_dictionary_array(array_dict):
     """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
@@ -138,6 +144,8 @@ def lower_case_key_dictionary_array(array_dict):
         List: List of dictionaries with lowercase keys.
     """
     return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]
+
+
 def get_host_name():
     """
     Gets the system host name.

@@ -25,6 +25,20 @@
         value: WINDOWS_REGISTRY_2
         attributes:
         - arch: "both"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Duplicate restrict configuration for keys
 - tags:
   - duplicate_restrict_entries
@@ -55,6 +69,20 @@
         attributes:
           - restrict_key: RESTRICT_2
           - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Duplicate arch configuration for keys
 - tags:
   - duplicate_arch_entries
@@ -81,6 +109,20 @@
         value: WINDOWS_REGISTRY_2
         attributes:
           - arch: "32bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Duplicate complex configuration for keys
 - tags:
   - duplicate_complex_entries
@@ -126,6 +168,20 @@
           - check_sum: "yes"
           - check_type: "yes"
           - check_size: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Duplicate report configuration for keys
 - tags:
   - duplicate_report_entries
@@ -156,6 +212,20 @@
         attributes:
           - report_changes: "no"
           - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Single registry and a list of registries
 - tags:
   - single_registry_and_list
@@ -176,3 +246,17 @@
         attributes:
           - check_all: "yes"
           - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

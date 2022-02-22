@@ -1,7 +1,78 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
+       files are modified. Specifically, these tests will check if FIM events generated contain only
+       the 'check_' fields specified in the configuration when using the 'check_all' attribute along
+       with other' check_' attributes.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 1
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_checks
+'''
 import os
 import sys
 
@@ -70,24 +141,56 @@ else:
 
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_check_all_single(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_fim_start):
-    """
-    Test the functionality of `check_all` option when used in conjunction with another check on the same directory,
-    having "check_all" to "yes" and the other check to "no".
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the checks specified in
+                 the configuration. These checks are attributes indicating that a monitored file has been modified.
+                 For example, if 'check_all=yes' and 'check_sum=no' are set for the same directory, 'syscheck' must
+                 send an event containing every possible 'check_' except the checksums. For this purpose, the test
+                 will monitor a testing folder using the 'check_all' attribute in conjunction with one 'check_'
+                 on the same directory, having 'check_all' to 'yes' and the other one to 'no'.
+                 Finally, the test will verify that the FIM events generated contain only the fields
+                 of the 'checks' specified for the monitored folder.
 
-    Example:
-        check_all="yes" check_sum="no"
-        check_all="yes" check_mtime="no"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_check_all.yaml or wazuh_check_all_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_check_all_single'}, get_configuration['tags'])
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
                      time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
@@ -115,24 +218,56 @@ else:
 
 
 @pytest.mark.parametrize('path, checkers', parametrize_list)
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_check_all(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                    wait_for_fim_start):
-    """
-    Test the functionality of `check_all` option when used in conjunction with more than one check on the same directory,
-    having "check_all" to "yes" and the other ones to "no".
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the checks specified in
+                 the configuration. These checks are attributes indicating that a monitored file has been modified.
+                 For example, if 'check_all=yes', 'check_sum=no', and 'check_md5sum=no' are set for the same directory,
+                 'syscheck' must send an event containing every possible 'check_' except the 'md5' checksum.
+                 For this purpose, the test will monitor a testing folder using the 'check_all' attribute in
+                 conjunction with more than one 'check_' on the same directory, having 'check_all' to 'yes' and
+                 the other ones to 'no'. Finally, the test will verify that the FIM events generated contain
+                 only the fields of the 'checks' specified for the monitored folder.
 
-    Example:
-        check_all="yes" check_sum="no" check_md5sum="no"
-        check_all="yes" check_perm="yes" check_mtime="no"
-        ...
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that the FIM events generated contain only the 'check_' fields specified in the configuration.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_check_all.yaml or wazuh_check_all_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_check_all'}, get_configuration['tags'])
 
     regular_file_cud(path, wazuh_log_monitor, min_timeout=15, options=checkers,
@@ -142,19 +277,57 @@ def test_check_all(path, checkers, get_configuration, configure_environment, res
 @pytest.mark.parametrize('path, checkers', [(testdir1, {})])
 def test_check_all_no(path, checkers, get_configuration, configure_environment, restart_syscheckd,
                       wait_for_fim_start):
-    """
-    Test the functionality of `check_all` option when set to no.
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon adds in the generated events the checks specified in
+                 the configuration. These checks are attributes indicating that a monitored file has been modified.
+                 For example, when setting 'check_all' to 'no', only the 'type' and 'checksum' attributes should
+                 appear in every FIM event. This will avoid any modification event. For this purpose, the test
+                 will monitor a testing folder using the 'check_all=no' attribute, create a testing file inside it,
+                 and verify that only the 'type' and 'checksum' attributes are in the 'added' event. Then, it
+                 will modify the testing file and verify that no FIM events of type 'modified' are generated.
+                 Finally, the test will delete the testing file and verify that only the 'type' and
+                 'checksum' attributes are in the 'deleted' event.
 
-    When setting `check_all` to no, only 'type' and 'checksum' attributes should appear in every event. This will
-    avoid any modification event.
+    wazuh_min_version: 4.2.0
 
-    Parameters
-    ----------
-    path : str
-        Directory where the file is being created and monitored.
-    checkers : dict
-        Check options to be used.
-    """
+    parameters:
+        - path:
+            type: str
+            brief: Directory where the file is being created and monitored.
+        - checkers:
+            type: set
+            brief: Checks to be compared to the actual event check list.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that FIM events generated are only of type 'added' and 'deleted' when
+          the 'check_all=no' attribute is used.
+        - Verify that FIM events generated only contain the 'type' and 'checksum' attributes
+          when the 'check_all=no' attribute is used.
+
+    input_description: Different test cases are contained in external YAML files
+                       (wazuh_check_all.yaml or wazuh_check_all_windows.yaml) which includes
+                       configuration settings for the 'wazuh-syscheckd' daemon and testing
+                       directories to monitor.
+
+    expected_output:
+        - r'.*Sending FIM event: (.+)$' ('added', and 'deleted' event)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'test_check_all_no'}, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 

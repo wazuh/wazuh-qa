@@ -1,0 +1,4 @@
+wazuh-agent1:
+  - regex: ".*File integrity monitoring scan ended.$"
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 30

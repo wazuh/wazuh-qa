@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -25,6 +25,9 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
 else:
 
@@ -43,7 +46,7 @@ else:
         PREFIX = os.sep
 
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
-    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
+    WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
@@ -53,11 +56,12 @@ else:
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')
+    LOGCOLLECTOR_FILE_STATUS_PATH = os.path.join(WAZUH_PATH, 'queue', 'logcollector', 'file_status.json')
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
-
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
     try:
         import grp
@@ -96,10 +100,10 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
-LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
+CUSTOM_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules')
+LOCAL_RULES_PATH = os.path.join(CUSTOM_RULES_PATH, 'local_rules.xml')
 LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
 
@@ -108,6 +112,7 @@ CLIENT_CUSTOM_CERT_PATH = os.path.join(_data_path, 'sslmanager.cert')
 
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
+ALERT_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.log')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 QUEUE_ALERTS_PATH = os.path.join(WAZUH_PATH, 'queue', 'alerts')
@@ -192,12 +197,6 @@ API_DAEMONS_REQUIREMENTS = [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_D
 DISABLE_MONITORD_ROTATE_LOG_OPTION = {'monitord.rotate_log': '0'}
 ANALYSISD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 AGENTD_LOCAL_INTERNAL_OPTIONS = {'agent.debug': '2', 'execd': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_MANAGER = {'syscheck.debug': '2',
-                                      'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_UNIX = {'syscheck.debug': '2',
-                                         'agent.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_WINDOWS = {'syscheck.debug': '2',
-                                            'windows.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 GCLOUD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2',
                                  'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 LOGTEST_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}

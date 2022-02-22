@@ -1,16 +1,93 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when
+       these files are modified. In particular, these tests will verify that when using 'hard' and
+       'symbolic' links, the FIM events contain the number of inodes and paths to files consistent.
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
+       for changes to the checksums, permissions, and ownership.
+
+tier: 0
+
+modules:
+    - fim
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+    - macos
+    - solaris
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - Windows 10
+    - Windows 8
+    - Windows 7
+    - Windows Server 2019
+    - Windows Server 2016
+    - Windows Server 2012
+    - Windows Server 2003
+    - Windows XP
+    - macOS Catalina
+    - Solaris 10
+    - Solaris 11
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+    - https://en.wikipedia.org/wiki/Inode
+
+pytest_args:
+    - fim_mode:
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
+    - tier:
+        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
+        1: Only level 1 tests are performed, they check functionalities of medium complexity.
+        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
+tags:
+    - fim_basic_usage
+'''
 import os
 
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
-    callback_entries_path_count, check_time_travel
+    check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.fim_module.event_monitor import callback_entries_path_count
 
 # Marks
 
@@ -51,12 +128,45 @@ def extra_configuration_before_yield():
 
 
 def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
-    """
-    Check if FIM entries match the path count
+    '''
+    description: Check if FIM events contain the correct number of file paths when 'hard'
+                 and 'symbolic' links are used. For this purpose, the test will monitor
+                 a testing folder and create two regular files, a 'symlink' and a 'hard link'
+                 before the scan starts. Finally, it verifies in the generated FIM event
+                 that three inodes and four file paths are detected.
 
-    It creates two regular files, a symlink and a hard link before the scan begins. After events are logged,
-    we should have 3 inode entries and a path count of 4.
-    """
+    wazuh_min_version: 4.2.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the 'ossec.log' file and start a new monitor.
+        - wait_for_fim_start:
+            type: fixture
+            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+
+    assertions:
+        - Verify that when using hard and symbolic links, the FIM events contain
+          the number of inodes and paths to files consistent.
+
+    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
+                       is combined with the testing directories to be monitored defined in this module.
+
+    expected_output:
+        - r'.*Fim inode entries*, path count' (If the OS used is not Windows)
+        - r'.*Fim entries' (If the OS used is Windows)
+
+    tags:
+        - scheduled
+        - time_travel
+    '''
     check_apply_test({'ossec_conf'}, get_configuration['tags'])
 
     entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
