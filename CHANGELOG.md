@@ -20,7 +20,7 @@ Release report: TBD
 ### Changed
 
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
-- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/))
+- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
 - Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501))
 - Fix the unstable FIM tests that need refactoring. ([#2421](https://github.com/wazuh/wazuh-qa/pull/2458))
 - Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
