@@ -93,7 +93,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 wazuh_component = get_service()
-first_macos_log_process=False
+first_macos_log_process = False
+macos_process_timeout_init = 10
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -183,10 +184,12 @@ configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size'
 def generate_macos_logs(get_configuration):
     """Get configurations from the module."""
     global first_macos_log_process
-    if not first_macos_log_process and sys.platform == 'darwin' and get_configuration['metadata']['log_format'] == 'macos':
+    if not first_macos_log_process and sys.platform == 'darwin' and \
+       get_configuration['metadata']['log_format'] == 'macos':
         control_service('restart', 'wazuh-logcollector')
-        time.sleep(10)
-        first_macos_log_process=True
+        time.sleep(macos_process_timeout_init)
+
+        first_macos_log_process = True
 
 
 def check_only_future_events_valid(cfg):

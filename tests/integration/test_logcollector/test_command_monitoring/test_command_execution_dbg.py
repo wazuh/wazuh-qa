@@ -62,7 +62,7 @@ from wazuh_testing.tools import monitoring, LOG_FILE_PATH
 from wazuh_testing import global_parameters
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, FileMonitor
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
@@ -160,6 +160,8 @@ def dbg_reading_command(command, alias, log_format):
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
     output = check_output(command, universal_newlines=True, shell=True).strip()
 
@@ -169,12 +171,12 @@ def dbg_reading_command(command, alias, log_format):
     else:
         msg = fr"DEBUG: Reading command message: 'ossec: output: '{alias}': {output}'"
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    log_monitor.start(timeout=global_parameters.default_timeout,
                       callback=monitoring.make_callback(pattern=msg, prefix=prefix),
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+@pytest.mark.xfail(reason='Fixed in https://github.com/wazuh/wazuh-qa/issues/2318')
 def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
                                configure_environment, restart_logcollector):
     '''
