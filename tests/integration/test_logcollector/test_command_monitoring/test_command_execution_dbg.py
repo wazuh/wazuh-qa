@@ -62,7 +62,8 @@ from wazuh_testing.tools import monitoring, LOG_FILE_PATH
 from wazuh_testing import global_parameters
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+import tempfile
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
@@ -76,12 +77,20 @@ local_internal_options = {
     'logcollector.max_lines': '100',
     'logcollector.debug': '2'
 }
+file_structure = [
+    {
+        'folder_path': os.path.join(tempfile.gettempdir(), 'wazuh-testing'),
+        'filename': ['not_ending_command_file.log'],
+    }
+]
+
+not_ending_command_file_full_path = os.path.join(file_structure[0]['folder_path'], file_structure[0]['filename'][0])
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
     {'LOG_FORMAT': 'command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': f'tail -f {LOG_FILE_PATH}', 'ALIAS': ''},
+    {'LOG_FORMAT': 'command', 'COMMAND': f'tail -f {not_ending_command_file_full_path}', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
@@ -90,7 +99,7 @@ parameters = [
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': f'tail -f {LOG_FILE_PATH}', 'ALIAS': ''},
+    {'LOG_FORMAT': 'full_command', 'COMMAND': f'tail -f {not_ending_command_file_full_path}', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
@@ -101,7 +110,8 @@ metadata = [
     {'log_format': 'command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
     {'log_format': 'command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
     {'log_format': 'command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'command', 'command': f'tail -f {LOG_FILE_PATH}', 'alias': '', 'info': 'does not end'},
+    {'log_format': 'command', 'command': f'tail -f {not_ending_command_file_full_path}', 'alias': '',
+     'info': 'does not end'},
     {'log_format': 'command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
     {'log_format': 'command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
     {'log_format': 'command', 'command': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'alias': '',
@@ -112,7 +122,8 @@ metadata = [
     {'log_format': 'full_command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
     {'log_format': 'full_command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
     {'log_format': 'full_command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'full_command', 'command': f'tail -f {LOG_FILE_PATH}', 'alias': '', 'info': 'does not end'},
+    {'log_format': 'full_command', 'command': f'tail -f {not_ending_command_file_full_path}', 'alias': '',
+     'info': 'does not end'},
     {'log_format': 'full_command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
     {'log_format': 'full_command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
     {'log_format': 'full_command', 'command': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'alias': '',
@@ -160,8 +171,6 @@ def dbg_reading_command(command, alias, log_format):
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    log_monitor = FileMonitor(LOG_FILE_PATH)
-
     prefix = LOG_COLLECTOR_DETECTOR_PREFIX
     output = check_output(command, universal_newlines=True, shell=True).strip()
 
@@ -171,15 +180,20 @@ def dbg_reading_command(command, alias, log_format):
     else:
         msg = fr"DEBUG: Reading command message: 'ossec: output: '{alias}': {output}'"
 
-    log_monitor.start(timeout=global_parameters.default_timeout,
-                      callback=monitoring.make_callback(pattern=msg, prefix=prefix),
-                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                            callback=monitoring.make_callback(pattern=msg, prefix=prefix),
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-@pytest.mark.xfail(reason='Fixed in https://github.com/wazuh/wazuh-qa/issues/2318')
-def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
-                               configure_environment, restart_logcollector):
-    '''
+
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
+
+def test_command_execution_dbg(get_files_list, create_file_structure_module, configure_local_internal_options_module,
+                               get_configuration, file_monitoring, configure_environment, restart_logcollector):
+   '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
                  special characteristics. For this purpose, the test will configure the logcollector to run
                  a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
@@ -225,6 +239,7 @@ def test_command_execution_dbg(configure_local_internal_options_module, get_conf
     tags:
         - logs
     '''
+ 
     config = get_configuration['metadata']
 
     # Check log line "DEBUG: Running command '<command>'"
@@ -233,6 +248,11 @@ def test_command_execution_dbg(configure_local_internal_options_module, get_conf
                       callback=logcollector.callback_running_command(log_format=config['log_format'],
                                                                      command=config['command'],
                                                                      escape=True))
+
+    if config['info'] == 'does not end':
+        with open(not_ending_command_file_full_path, 'a') as command_file:
+            for line in range(int(local_internal_options['logcollector.max_lines']) + 1):
+                command_file.write(f"Testing not ending command.Line {line}\n")
 
     # Command with known output to test "Reading command message: ..."
     if config['command'].startswith('echo') and config['alias'] != '':
