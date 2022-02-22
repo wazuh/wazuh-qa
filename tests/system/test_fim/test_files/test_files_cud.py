@@ -41,12 +41,12 @@ tags:
 """
 
 import os
+
 import pytest
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 from test_fim import create_folder_file, wait_for_fim_scan_end
-
 
 
 # Hosts
@@ -67,6 +67,7 @@ scheduled_mode = 'testdir1'
 @pytest.mark.parametrize('folder_path', ['testdir1', 'testdir2', 'testdir3'])
 def test_file_cud(folder_path, case):
     '''
+    
     description:  The test will monitor a directory.
                   Finally, it will verify that the FIM event is generated
                   in agent and manager side.
