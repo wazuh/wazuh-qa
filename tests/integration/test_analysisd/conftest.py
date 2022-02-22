@@ -12,7 +12,7 @@ from wazuh_testing.tools import (ALERT_FILE_PATH, LOG_FILE_PATH,
                                  CUSTOM_RULES_PATH)
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.vulnerability_detector import create_mocked_agent, delete_mocked_agent
+from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
@@ -81,17 +81,3 @@ def restart_analysisd():
 
     for daemon in required_logtest_daemons:
         control_service('stop', daemon=daemon)
-
-
-@pytest.fixture(scope='module')
-def mock_agent():
-    """Fixture to create a mocked agent in wazuh databases"""
-    control_service('stop', daemon='wazuh-db')
-    agent_id = create_mocked_agent(name="mocked_agent")
-    control_service('start', daemon='wazuh-db')
-
-    yield agent_id
-
-    control_service('stop', daemon='wazuh-db')
-    delete_mocked_agent(agent_id)
-    control_service('start', daemon='wazuh-db')

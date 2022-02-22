@@ -133,7 +133,6 @@ def clean_directories(request):
     (testdir1, {'ossec_conf'}),
     (testdir2, {'ossec_conf'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_rename(folder, tags_to_apply,
                 get_configuration, clean_directories, configure_environment,
                 restart_syscheckd, wait_for_fim_start):

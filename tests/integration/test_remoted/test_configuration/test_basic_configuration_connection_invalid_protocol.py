@@ -101,17 +101,17 @@ def get_configuration(request):
     return request.param
 
 
-def test_invalid_protocol(get_configuration, configure_environment, restart_remoted):
+def test_invalid_protocol(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' sets properly prococol values.
                  First of all, it selects a valid protocol to be used. If a pair of protocols is provided, in case one
                  of them is invalid, it should be used the valid protocol. Otherwise, if none of them is valid, TCP
                  should be used(For a syslog connection if more than one protocol is provided only TCP should be used).
                  For this purpose, it selects a valid protocol(within a proper checking), checks if remoted is properly
-                 started and if the configuration is the same as the API reponse. 
-    
+                 started and if the configuration is the same as the API reponse.
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -122,27 +122,28 @@ def test_invalid_protocol(get_configuration, configure_environment, restart_remo
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that invalid procotol selection warning message appears in ossec.log.
         - Verify that no valid protocol selection warning message appears in ossec.log.
         - Verify that remoted starts correctly.
         - Verify that the selected configuration is the same that API response.
-    
+
     input_description: A configuration template (test_basic_configuration_connection) is contained in an external YAML
                        file, (wazuh_basic_configuration.yaml). That template is combined with different test cases
                        defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon and
                        agents info.
-    
+
     expected_output:
         - The expected error output has not been produced
         - r'WARNING: .* Ignored invalid value .* for protocol field.'
         - r'WARNING: .* Error getting protocol. Default value TCP will be used.'
         - r'Started <pid>: .* Listening on port .*'
-    
+
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
     protocol_field = cfg['protocol'].split(',')
 

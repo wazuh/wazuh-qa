@@ -162,7 +162,6 @@ def get_configuration(request):
     (sub_key_3, KEY_WOW64_64KEY, key_all_attrs, attrs_value_sum_3, {'test_checksum'}, True),
     (sub_key_4, KEY_WOW64_64KEY, key_all_attrs, attrs_value_sum_4, {'test_checksum'}, True)
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checkers(key, subkey, arch, key_attrs, value_attrs, tags_to_apply, triggers_modification,
                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''

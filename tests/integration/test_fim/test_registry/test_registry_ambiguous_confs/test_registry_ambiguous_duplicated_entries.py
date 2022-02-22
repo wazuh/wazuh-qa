@@ -220,7 +220,6 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
     (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
     (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, report_changes,
                               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''

@@ -62,11 +62,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.wazuh_variables import DATA
 from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                                     YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, INTEGRITY_CONTROL_MESSAGE,
+                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
                                                     SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
@@ -105,6 +105,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
@@ -150,4 +151,4 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     # The registry synchronization event shouldn't be triggered
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
-                                        callback=callback_generator(INTEGRITY_CONTROL_MESSAGE)).result()
+                                        callback=generate_monitoring_callback(CB_INTEGRITY_CONTROL_MESSAGE)).result()

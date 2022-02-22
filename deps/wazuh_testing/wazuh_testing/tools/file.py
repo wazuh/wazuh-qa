@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
@@ -18,6 +18,8 @@ import zipfile
 import filetype
 import requests
 import yaml
+from wazuh_testing import logger
+
 
 
 def read_json(file_path):
@@ -109,6 +111,30 @@ def random_string(length, encode=None):
 
     return st
 
+def generate_string(stringLength=10, character='0'):
+    """Generate a string with line breaks.
+
+    Parameters
+    ----------
+    stringLength : int, optional
+        Number of characters to add in the string. Default `10`
+    character : str, optional
+        Character to be added. Default `'0'`
+
+    Returns
+    -------
+    random_str : str
+        String with line breaks.
+    """
+    generated_string = ''
+
+    for i in range(stringLength):
+        generated_string += character
+
+        if i % 127 == 0:
+            generated_string += '\n'
+
+    return generated_string
 
 def read_file(file_path):
     with open(file_path) as f:
@@ -116,7 +142,7 @@ def read_file(file_path):
     return data
 
 
-def write_file(file_path, data):
+def write_file(file_path, data=''):
     with open(file_path, 'w') as f:
         f.write(data)
 
@@ -441,7 +467,7 @@ def create_large_file(directory, file_path):
         while os.stat(file_path).st_size < file_size:
             f.write(random.choice(string.printable) * chunksize)
 
-            
+
 def download_text_file(file_url, local_destination_path):
     """Download a remote file with text/plain content type.
 

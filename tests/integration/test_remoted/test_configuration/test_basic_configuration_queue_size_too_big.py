@@ -90,14 +90,14 @@ def get_configuration(request):
     return request.param
 
 
-def test_big_queue_size(get_configuration, configure_environment, restart_remoted):
+def test_big_queue_size(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
-    description: Check that when 'wazuh-remoted' sets the queue size too big(greater than 262144), a warning message 
+    description: Check that when 'wazuh-remoted' sets the queue size too big(greater than 262144), a warning message
                  appears. For this purpose, it uses the configuration from test cases, check if the warning has been
                  logged and the configuration is the same as the API respnse.
-    
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -108,28 +108,29 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that remoted starts correctly.
         - Verify that the API query matches correctly with the configuration that ossec.conf contains.
         - Verify that the warning is logged when the queue size is too big.
         - Verify that the selected configuration is the same as the API response.
-    
+
     input_description: A configuration template (test_basic_configuration_queue_size) is contained in an external YAML
                        file, (wazuh_basic_configuration.yaml). That template is combined with different test cases
                        defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon and
                        agents info.
-    
+
     expected_output:
         - r'Started <pid>: .* Listening on port .*'
-        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the 
+        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the
           introduced configuration on ossec.conf.'
         - The expected error output has not been produced
         - 'WARNING: Queue size is very high. The application may run out of memory'
-    
+
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     log_callback = remote.callback_queue_size_too_big()

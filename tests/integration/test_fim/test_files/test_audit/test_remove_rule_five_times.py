@@ -104,6 +104,7 @@ def get_configuration(request):
 
 # Test
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply, folder, audit_key', [
     ({'config1'}, '/testdir2', 'wazuh_fim')
 ])
