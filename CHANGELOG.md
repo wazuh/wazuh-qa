@@ -16,8 +16,11 @@ Release report: TBD
 - Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
 
 ### Changed
-- Fix the unstable FIM tests that need refactoring. ([#2421](https://github.com/wazuh/wazuh-qa/pull/2458))
+
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
+- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
+- Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501))
+- Fix the unstable FIM tests that need refactoring. ([#2421](https://github.com/wazuh/wazuh-qa/pull/2458))
 - Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
 - Adapt logtest ITs given the rules skipping ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
 - Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454))
@@ -29,7 +32,6 @@ Release report: TBD
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
 - Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
 - Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
-
 
 ### Deleted
 - Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
