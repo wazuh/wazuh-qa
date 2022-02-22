@@ -154,7 +154,7 @@ def write_file_without_close(file_path, data=''):
     Args:
         file_path: File path where the file will create.
         data: Data to write.
-        
+
     """
     file = open(file_path, "w")
     file.write(data)
