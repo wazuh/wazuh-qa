@@ -9,3 +9,21 @@
   configuration:
     logs:
       level: debug
+- tags:
+  - logs_plain
+  configuration:
+    logs:
+      level: info
+      format: plain
+- tags:
+  - logs_json
+  configuration:
+    logs:
+      level: info
+      format: json
+- tags:
+  - logs_json_plain
+  configuration:
+    logs:
+      level: info
+      format: json,plain
