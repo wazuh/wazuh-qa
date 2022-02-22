@@ -85,7 +85,7 @@ def clean_environment():
 
 
 @pytest.fixture(scope='function')
-def enrollment():
+def restart_agent_manager():
     # Start the agent enrollment process by restarting the wazuh-agent
     host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
     host_manager.get_host('wazuh-agent1').ansible('command', 'service wazuh-agent restart', check=False)
