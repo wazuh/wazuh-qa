@@ -61,6 +61,8 @@ daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
 
+macos_timeout_process_init = 3
+
 macos_log_messages = [
     {
         'command': 'os_log',
@@ -158,7 +160,7 @@ def test_macos_format_basic(restart_logcollector_required_daemons_package, get_c
                       callback=logcollector.callback_monitoring_macos_logs,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-    time.sleep(3)
+    time.sleep(macos_timeout_process_init)
 
     if log_command == 'logger':
         logcollector.generate_macos_logger_log(macos_message['message'])

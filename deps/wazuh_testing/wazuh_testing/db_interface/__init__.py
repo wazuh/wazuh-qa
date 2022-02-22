@@ -1,18 +1,13 @@
 import json
 import socket
 import os
+import sys
 import sqlite3
 from time import sleep
 
+from wazuh_testing import WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
-import wazuh_testing
-
-
-QUEUE_DB_PATH = os.path.join(wazuh_testing.WAZUH_PATH, 'queue', 'db')
-WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
-
-CVE_DB_PATH = os.path.join(wazuh_testing.WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
 
 
 def query_wdb(command):
@@ -70,19 +65,34 @@ def query_wdb(command):
     return data
 
 
-def load_sqlite_db(db_path):
-    """Load a sqlite database.
+def execute_sqlite_query(cursor, query):
+    """Execute a sqlite query, retrying in case the database is locked.
 
     Args:
-        db_path (str): Path where is located the DB.
+        cursor (sqlite3.Cursor): Sqlite cursor object.
+        query (str): Query to execute.
 
-    Returns:
-        Connection: connection to the database.
-        Cursor: cursor to the database.
+    Raises:
+        sqlite3.OperationalError if database is locked after max retries
     """
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    return conn, cursor
+    retries = 0
+    max_retries = 10
+    make_query = True
+
+    # Execute the query, retrying it if necessary up to a maximum number of times.
+    while make_query and retries < max_retries:
+        try:
+            cursor.execute(query)
+            make_query = False
+        except sqlite3.OperationalError:
+            _, exception_message, _ = sys.exc_info()
+            if str(exception_message) == 'database is locked':
+                sleep(0.5)
+                retries += 1
+
+    # If the database is locked after the maximum number of retries, then raise the exception
+    if retries == max_retries:
+        raise sqlite3.OperationalError('database is locked')
 
 
 def make_sqlite_query(db_path, query_list):
@@ -92,14 +102,21 @@ def make_sqlite_query(db_path, query_list):
         db_path (string): Path where is located the DB.
         query_list (list): List with queries to run.
     """
-    connect = sqlite3.connect(db_path)
+    control_service('stop', daemon='wazuh-db')
 
     try:
-        with connect:
-            for item in query_list:
-                connect.execute(item)
+        db_connection = sqlite3.connect(db_path)
+
+        for item in query_list:
+            cursor = db_connection.cursor()
+            execute_sqlite_query(cursor, item)
+            cursor.close()
+
+        db_connection.commit()
     finally:
-        connect.close()
+        cursor.close()
+        db_connection.close()
+        control_service('start', daemon='wazuh-db')
 
 
 def get_sqlite_query_result(db_path, query):
@@ -112,9 +129,13 @@ def get_sqlite_query_result(db_path, query):
     Returns:
         result (List[list]): Each row is the query result row and each column is the query field value.
     """
+    control_service('stop', daemon='wazuh-db')
+
     try:
-        db, cursor = load_sqlite_db(db_path)
-        cursor.execute(query)
+        db_connection = sqlite3.connect(db_path)
+        cursor = db_connection.cursor()
+
+        execute_sqlite_query(cursor, query)
         records = cursor.fetchall()
         result = []
 
@@ -125,4 +146,5 @@ def get_sqlite_query_result(db_path, query):
 
     finally:
         cursor.close()
-        db.close()
+        db_connection.close()
+        control_service('start', daemon='wazuh-db')
