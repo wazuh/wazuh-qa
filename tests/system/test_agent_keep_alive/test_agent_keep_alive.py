@@ -25,14 +25,13 @@ import os
 from time import sleep
 
 import pytest
-import re
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_LOGS_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import FileMonitor, HostMonitor
 from wazuh_testing.tools.system import HostManager
-
-GLOBAL_DB_PATH = f"{WAZUH_PATH}/queue/db/global.db"
+from wazuh_testing.remote import callback_ack, callback_inserting_keep_alive, callback_keep_alive_agent_ip, \
+                                 callback_keep_alive_merged, callback_reading_keep_alive, callback_sending_keep_alive
 
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
@@ -50,81 +49,6 @@ test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_agent_keep_alive
 
 wait_agent_start = 70
 network = {}
-
-
-def callback_sending_keep_alive(line):
-    global info
-    match = re.match(r'.*Sending keep alive.*', line)
-    if match:
-        keep_alive = match.group(0)
-        info = keep_alive.split('#!-')[1]
-        return keep_alive
-
-
-def callback_sending_merged(line):
-    global merged
-    match = re.match(r'.*merged.mg*', line)
-    if match:
-        merged = match.group(0)
-        return merged
-
-
-def callback_sending_agent_ip(line):
-    global agent_ip
-    match = re.match(r'.*agent_ip.*', line)
-    if match:
-        agent_ip = match.group(0)
-        return agent_ip
-
-
-def callback_reading_keep_alive(line):
-    global reading
-    match = re.match(r'.*inserting.*', line)
-    if match:
-        reading = match.group(0)
-        reading = reading.split("'")[1]
-        return match.group(0)
-
-
-def callback_reading_merged(line):
-    global reading_merged
-    match = re.match(r'.*merged.mg*', line)
-    if match:
-        reading_merged = match.group(0)
-        return reading_merged
-
-
-def callback_reading_agent_ip(line):
-    global reading_agent_ip
-    match = re.match(r'.*agent_ip.*', line)
-    if match:
-        reading_agent_ip = match.group(0)
-        return reading_agent_ip
-
-
-def callback_inserting_keep_alive(line):
-    global inserting
-    match = re.match(r'.*reading.*', line)
-    if match:
-        inserting = match.group(0)
-        inserting = inserting.split("'")[1]
-        return match.group(0)
-
-
-def callback_inserting_merged(line):
-    global inserting_merged
-    match = re.match(r'.*merged.mg*', line)
-    if match:
-        inserting_merged = match.group(0)
-        return inserting_merged
-
-
-def callback_inserting_agent_ip(line):
-    global inserting_agent_ip
-    match = re.match(r'.*agent_ip.*', line)
-    if match:
-        inserting_agent_ip = match.group(0)
-        return inserting_agent_ip
 
 
 def get_agent_keep_alive():
