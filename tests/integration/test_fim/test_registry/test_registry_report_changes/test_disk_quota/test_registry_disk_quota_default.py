@@ -89,7 +89,7 @@ DEFAULT_SIZE = 1024 * 1024
 p, m = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': reg1,
                                                           'WINDOWS_REGISTRY_2': reg2})
 
-configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_registry_disk_quota_default.yaml')
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 

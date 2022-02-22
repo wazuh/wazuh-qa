@@ -101,7 +101,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted):
+def test_rids_closing_time_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check that 'rids_closing_time' can be set with no errors. For this purpose, 
                  it uses the configuration from test cases and check if the selected cfg matches with the API response.
@@ -138,6 +138,7 @@ def test_rids_closing_time_valid(get_configuration, configure_environment, resta
         - simulator
         - rids
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration

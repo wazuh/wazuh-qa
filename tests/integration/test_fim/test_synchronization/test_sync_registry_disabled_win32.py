@@ -105,6 +105,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop

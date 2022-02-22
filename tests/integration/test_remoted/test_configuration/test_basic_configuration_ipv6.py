@@ -89,7 +89,7 @@ def get_configuration(request):
     return request.param
 
 
-def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
+def test_ipv6_secure(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' correctly starts using ipv6 values.
                  For this purpose, it loads the configuration from test cases cfg(when the connection is secure, ipv4 is
@@ -127,6 +127,7 @@ def test_ipv6_secure(get_configuration, configure_environment, restart_remoted):
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     if cfg['connection'] == 'secure':
