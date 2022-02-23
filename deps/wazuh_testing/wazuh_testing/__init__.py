@@ -255,9 +255,5 @@ class Parameters:
         self._fim_mode = value
 
 
-LOGGING_LEVELS = {
-    'VV': 2,
-    'V': 1
-}
 
 global_parameters = Parameters()
