@@ -53,25 +53,47 @@ SYSTEM_DATA = {
             'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'amz', 'node_name': 'node01',
             'date_add': '1645433793', 'last_keepalive': '253402300799', 'sync_status': 'synced',
             'connection_status': 'active', 'disconnection_time': '0'},
-    'ALAS2': {'os_name': 'Amazon Linux', 'os_major': '2', 'os_minor': '', 'os_platform': 'amzn',
-              'name': 'amazonlinux2'},
+    'ALAS2': {'hostname': 'alas2', 'architecture': 'x86_64', 'os_name': 'Amazon Linux', 'os_version': '2',
+              'os_codename': '', 'os_major': '2', 'os_minor': '', 'os_patch': '', 'os_build': '', 'os_platform': 'amzn',
+              'sysname': 'Linux', 'release': '4.14.198-152.320.amzn2.x86_64', 'version': 'Wazuh v4.3.0',
+              'os_release': '', 'checksum': '1645538649327530789', 'name': 'alas2', 'ip': '127.0.0.1',
+              'register_ip': '127.0.0.1', 'internal_key': '',
+              'os_uname': 'Linux |alas2 |4.14.198-152.320.amzn2.x86_64 |#1 SMP Wed Sep 23 23:57:28 UTC 2020 |x86_64',
+              'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'alas2', 'node_name': 'node01',
+              'date_add': '1645538646', 'last_keepalive': '253402300799', 'sync_status': 'synced',
+              'connection_status': 'active'},
     'RHEL8': {'os_name': 'CentOS Linux', 'os_major': '8', 'os_minor': '1', 'os_platform': 'centos',
-              'name': 'centos8'},
+              'name': 'centos8', 'connection_status': 'active'},
     'RHEL7': {'os_name': 'CentOS Linux', 'os_major': '7', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '7.0',
               'name': 'centos7'},
     'RHEL6': {'os_name': 'CentOS Linux', 'os_major': '6', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '6.0',
               'name': 'centos6'},
     'RHEL5': {'os_name': 'CentOS Linux', 'os_major': '5', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '5.0',
               'name': 'centos5'},
-    'FOCAL': {'os_name': 'Ubuntu', 'os_major': '20', 'os_minor': '04', 'os_platform': 'ubuntu', 'name': 'Ubuntu-focal'},
+    'FOCAL': {'hostname': 'focal', 'architecture': 'x86_64', 'os_name': 'Ubuntu', 'os_version': '20.04.3 LTS',
+              'os_codename': 'Focal Fossa', 'os_major': '20', 'os_minor': '04', 'os_patch': '3', 'os_build': '',
+              'os_platform': 'ubuntu', 'sysname': 'Linux', 'release': '5.4.0-99-generic', 'version': 'Wazuh v4.3.0',
+              'os_release': '', 'checksum': '1645531600116313579', 'name': 'focal', 'ip': '127.0.0.1',
+              'register_ip': '127.0.0.1', 'internal_key': '',
+              'os_uname': 'Linux |focal |5.4.0-99-generic |#112-Ubuntu SMP Thu Feb 3 13:50:55 UTC 2022 |x86_64',
+              'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'focal', 'node_name': 'node01',
+              'date_add': '1645531596', 'last_keepalive': '253402300799', 'sync_status': 'synced',
+              'connection_status': 'active'},
     'BIONIC': {'os_name': 'Ubuntu', 'os_major': '18', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-bionic'},
     'XENIAL': {'os_name': 'Ubuntu', 'os_major': '16', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-xenial'},
     'TRUSTY': {'os_name': 'Ubuntu', 'os_major': '14', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-trusty'},
-    'BULLSEYE': {'os_name': 'Debian GNU/Linux', 'os_major': '11', 'os_minor': '0', 'os_platform': 'debian',
-                 'name': 'debian11'},
+    'BULLSEYE': {'hostname': 'bullseye', 'architecture': 'x86_64', 'os_name': 'Debian GNU/Linux', 'os_version': '11',
+                 'os_codename': 'bullseye', 'os_major': '11', 'os_minor': '', 'os_patch': '', 'os_build': '',
+                 'os_platform': 'debian', 'sysname': 'Linux', 'release': '5.10.0-10-amd64', 'version': 'Wazuh v4.3.0',
+                 'os_release': '', 'checksum': '1645537989645288350', 'name': 'bullseye', 'ip': '127.0.0.1',
+                 'register_ip': '127.0.0.1', 'internal_key': '',
+                 'os_uname': 'Linux |bullseye |5.10.0-10-amd64 |#1 SMP Debian 5.10.84-1 (2021-12-08) |x86_64',
+                 'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'bullseye',
+                 'node_name': 'node01', 'date_add': '1645537986', 'last_keepalive': '253402300799',
+                 'sync_status': 'synced', 'connection_status': 'active'},
     'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
@@ -101,7 +123,8 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                         manager_host='centos-8', node_name='node01', date_add='1612942494', hostname='centos-8',
                         last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
                         client_key_secret=None, os_release='', os_patch='', release='', sysname='Linux',
-                        checksum='checksum', os_display_version='', triaged=0, reference='', disconnection_time='0'):
+                        checksum='checksum', os_display_version='', triaged=0, reference='', disconnection_time='0',
+                        architecture='x64'):
 
     """Mock a new agent creating a new client keys entry, adding it to the global db and creating a new agent id DB.
 
@@ -140,6 +163,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
         triaged (int): Triaged.
         reference (str): Reference.
         disconnection_time (str): Last disconnection time.
+        architecture (str): Architecture.
 
     Return:
         str: Agent ID.
