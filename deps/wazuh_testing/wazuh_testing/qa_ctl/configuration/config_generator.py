@@ -4,6 +4,7 @@ import copy
 from os.path import join, exists
 from tempfile import gettempdir
 from packaging.version import parse
+from copy import deepcopy
 
 from wazuh_testing.tools import file
 from wazuh_testing.tools.exceptions import QAValueError
@@ -634,31 +635,39 @@ class QACTLConfigGenerator:
 
         return deployment_configuration
 
-    def get_tasks_configuration(self, instances, playbook_info, playbook_type='local'):
+    def get_tasks_configuration(self, playbook_info, instances=None, playbook_type='local', remote_hosts_info=None):
         """Generate the qa-ctl configuration required for running ansible tasks.
 
         Args:
             instances (list(ConfigInstance)): List of config-instances to deploy.
             playbook_info (dict): Playbook dictionary info. {playbook_name: playbook_path}
             playbook_type (str): Playbook path configuration [local or remote_url].
+            remote_hosts_info (list(dict)): List with all the information of the remote hosts.
 
         Returns:
             dict: Configuration block corresponding to the ansible tasks to run with qa-ctl.
         """
-        tasks_configuration = {'tasks': {}}
-
-        for index, instance in enumerate(instances):
-            instance_box = self.BOX_MAPPING[instance.os_version]
-            host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
-            host_info['host'] = instance.ip
-
+        def get_tasks_configuration(host_info, playbook_info, playbook_type):
             playbooks_dict = [{'name': playbook_name, 'local_path': playbook_path} if playbook_type == 'local' else
                               {'name': playbook_name, 'remote_url': playbook_path} for playbook_name, playbook_path
                               in playbook_info.items()]
-
-            tasks_configuration['tasks'][f"task_{index + 1}"] = {
+            return {
                 'host_info': host_info,
                 'playbooks': playbooks_dict
             }
 
+        tasks_configuration = {'tasks': {}}
+
+        if instances:  # Build task configuration for local instances host
+            for index, instance in enumerate(instances):
+                instance_box = self.BOX_MAPPING[instance.os_version]
+                host_info = QACTLConfigGenerator.BOX_INFO[instance_box]
+                host_info['host'] = instance.ip
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                                                                                            playbook_type)
+        elif remote_hosts_info:  # Build task configuration for remote AWS hosts
+            for index, custom_host_info in enumerate(remote_hosts_info):
+                host_info = deepcopy(custom_host_info)
+                tasks_configuration['tasks'][f"task_{index + 1}"] = get_tasks_configuration(host_info, playbook_info,
+                                                                                            playbook_type)
         return tasks_configuration

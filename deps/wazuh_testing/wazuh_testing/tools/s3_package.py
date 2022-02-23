@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+from wazuh_testing.tools import github_checks
 
 
 PROD_BUCKET = 'packages.wazuh.com'
@@ -26,6 +27,26 @@ ARCHITECTURES = {
     'amd64': 'amd64',
     'arm64v8': 'arm64v8',
     'arm32v7': 'arm32v7'
+}
+
+PACKAGE_SYSTEM_TO_ARCHITECTURE = {
+    'deb': 'amd64',
+    'rpm': 'x86_64',
+    'rpm5': 'x86_64',
+    'windows': 'i386',
+    'macos': 'amd64',
+    'solaris10': 'i386',
+    'solaris11': 'i386',
+    'wpk-linux': 'x86_64',
+    'wpk-windows': 'i386',
+}
+
+OS_SYSTEM_TO_PACKAGE_SYSTEM = {
+    'centos': 'rpm',
+    'amazon': 'rpm',
+    'ubuntu': 'deb',
+    'debian': 'deb',
+    'windows': 'windows',
 }
 
 
@@ -256,3 +277,61 @@ def get_package_name(target, version, system, revision, repository, architecture
         raise ValueError(f"{system} is not a valid system")
 
     return package_name
+
+
+def get_package_system(os_system):
+    """Translate the operating system to its package system.
+
+    Example: centos7 -> rpm, ubuntu -> deb.
+
+    Returns:
+        str: Package system from the OS system.
+
+    Raises:
+        ValueError: If the os_system was not found in the mapping data.
+
+    """
+    for key, value in OS_SYSTEM_TO_PACKAGE_SYSTEM.items():
+        if key in os_system:
+            return value
+
+    # Raise exception if the os_system was not found in the OS_SYSTEM_TO_PACKAGE_SYSTEM data
+    raise ValueError(f"{os_system} was not found in get_package_system mapping")
+
+
+def get_production_package_url(wazuh_target, os_system, wazuh_version):
+    """Get an URL from a production package (it has been released)
+
+    Args:
+        wazuh_target (str): Wazuh target (manager or agent)
+        os_system (str): Operating system (e.g centos8)
+        wazuh_version (str): Wazuh version (e.g 4.2.5)
+
+    Returns:
+        str: Package URL from production bucket.
+    Raises:
+        ValueError: If could not find an architecture for the package system.
+    """
+    package_system = get_package_system(os_system)
+
+    try:
+        architecture = PACKAGE_SYSTEM_TO_ARCHITECTURE[package_system]
+    except KeyError as exception:
+        raise ValueError(f"{package_system} is not a valid system to get the package architecture.") from exception
+
+    return get_s3_package_url('live', wazuh_target, wazuh_version, '1', package_system, architecture)
+
+
+def get_last_production_package_url(wazuh_target, os_system):
+    """Get the package URL from the last released package.
+
+    Args:
+        wazuh_target (str): Wazuh target (manager or agent)
+        os_system (str): Operating system (e.g centos8)
+
+    Returns:
+        str: Last released package URL from production bucket.
+    """
+    last_wazuh_version = github_checks.get_last_wazuh_version()
+
+    return get_production_package_url(wazuh_target, os_system, last_wazuh_version)
