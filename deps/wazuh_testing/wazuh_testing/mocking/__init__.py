@@ -186,18 +186,18 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                                      sync_status=sync_status, connection_status=connection_status,
                                      disconnection_time=disconnection_time)
 
+    # Restart Wazuh-DB before creating new DB
+    control_service('restart', daemon='wazuh-db')
+
+    # sleep is needed since, without it, the agent database creation may fail
+    sleep(3)
+
     # Add or update os_info related to the new created agent
     agent_db.update_os_info(agent_id=agent_id_str, hostname=hostname, architecture=os_arch, os_name=os_name,
                             os_version=os_version, os_codename=os_codename, os_major=os_major, os_minor=os_minor,
                             os_patch=os_patch, os_build=os_build, os_platform=os_platform, sysname=sysname,
                             release=release, version=version, os_release=os_release, checksum=checksum,
                             os_display_version=os_display_version, triaged=triaged, reference=reference)
-
-    # Restart Wazuh-DB before creating new DB
-    control_service('restart', daemon='wazuh-db')
-
-    # sleep is needed since, without it, the agent database creation may fail
-    sleep(3)
 
     return agent_id_str
 
