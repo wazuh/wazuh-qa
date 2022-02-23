@@ -204,9 +204,8 @@ def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, co
     update_command = f'global sql UPDATE agent SET connection_status = "{connection_status}",\
                        disconnection_time = "{disconnection_time}" WHERE id = {id};'
     try:
-        r1 = query_wdb(insert_command)
-        r2 = query_wdb(update_command)
-        return [r1, r2]
+        query_wdb(insert_command)
+        query_wdb(update_command)
     except Exception:
         raise Exception(f"Unable to add agent {id}")
 
