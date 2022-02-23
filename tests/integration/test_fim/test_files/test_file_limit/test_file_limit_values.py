@@ -79,11 +79,13 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_value_file_limit, generate_params, create_file, REGULAR, \
-    callback_entries_path_count
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.fim_module import (ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE,
+    ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.fim_module.event_monitor import callback_entries_path_count
 
 # Marks
 
@@ -97,16 +99,17 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
+monitor_timeout= 40
 
 # Configurations
 
-file_limit_list = ['1', '10', '100', '1000']
-conf_params = {'TEST_DIRECTORIES': testdir1, 'MODULE_NAME': __name__}
+file_limit_list = ['1', '1000']
+conf_params = {'TEST_DIRECTORIES': testdir1}
 
-p, m = generate_params(extra_params=conf_params,
+params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list))
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -129,11 +132,8 @@ def extra_configuration_before_yield():
 
 # Tests
 
-@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
-@pytest.mark.parametrize('tags_to_apply', [
-    {'file_limit_conf'}
-])
-def test_file_limit_values(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh #11819")
+def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the value of the 'entries' tag, which corresponds
                  to the maximum number of files to monitor from the 'file_limit' feature of FIM. For this purpose,
@@ -144,9 +144,6 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -155,7 +152,7 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM event 'maximum number of entries' has the correct value
@@ -170,35 +167,21 @@ def test_file_limit_values(tags_to_apply, get_configuration, configure_environme
 
     tags:
         - scheduled
-        - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    # Get the file_limit value configured from the wazuh logs
+    file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                               callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
+                                               error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
+    # assert it matches the expected value
+    assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
-    file_limit_value = wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
-        callback=callback_value_file_limit,
-        error_message='Did not receive expected '
-        '"DEBUG: ...: Maximum number of entries to be monitored: ..." event').result()
-
-    if file_limit_value:
-        assert file_limit_value == get_configuration['metadata']['file_limit'], 'Wrong value for file_limit'
-    else:
-        raise AssertionError('Wrong value for file_limit')
-
-    entries, path_count = wazuh_log_monitor.start(timeout=40,
-                                                  callback=callback_entries_path_count,
-                                                  error_message='Did not receive expected '
-                                                                '"Fim inode entries: ..., path count: ..." event'
-                                                  ).result()
+    
+    # Check number of entries and paths in DB and assert the value matches the expected count
+    entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
+                                                  error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     if sys.platform != 'win32':
-        if entries and path_count:
-            assert (entries == get_configuration['metadata']['file_limit'] and
-                    path_count == get_configuration['metadata']['file_limit']), 'Wrong number of inodes and path count'
-        else:
-            raise AssertionError('Wrong number of inodes and path count')
+        assert (entries == get_configuration['metadata']['file_limit'] and
+                    path_count == get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_INODE_PATH_COUNT
     else:
-        if entries:
-            assert entries == str(get_configuration['metadata']['file_limit']), 'Wrong number of entries count'
-        else:
-            raise AssertionError('Wrong number of entries count')
+        assert entries == str(get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

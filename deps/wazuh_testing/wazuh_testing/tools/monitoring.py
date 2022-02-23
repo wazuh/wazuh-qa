@@ -864,13 +864,11 @@ def generate_monitoring_callback(regex):
         regex (str): regex to use to look for a match.
     """
     def new_callback(line):
-        match = re.search(regex, line)
+        match = re.match(regex, line)
         if match:
-            logger.debug(line)
-            try:
+            if match.group(1) is not None:
                 return match.group(1)
-            except Exception:
-                return line
+            return True
 
     return new_callback
 
