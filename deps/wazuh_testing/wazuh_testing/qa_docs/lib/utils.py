@@ -301,13 +301,18 @@ def get_qa_docs_run_options(args):
         command += ' --types'
         for type in args.test_types:
             command += f" {type}"
-            if args.test_modules:
-                command += ' --modules'
-                for modules in args.test_modules:
-                    command += f" {modules} "
-    elif args.test_names:
-        command += ' -t'
-        for test_name in args.test_names:
-            command += f" {test_name} "
+            if args.test_components:
+                command += ' --components'
+                for components in args.test_components:
+                    command += f" {components} "
+                if args.test_suites:
+                    command += ' --suites'
+                    for suite in args.test_suites:
+                        command += f" {suite} "
+
+    elif args.test_modules:
+        command += ' -m'
+        for module in args.test_modules:
+            command += f" {module} "
 
     return command

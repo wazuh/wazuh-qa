@@ -41,10 +41,10 @@ class PytestWrap:
         self.plugin = PytestPlugin()
 
     def collect_test_cases(self, path):
-        """Execute pytest in 'collect-only' mode to extract all the test cases found for a test file.
+        """Execute pytest in 'collect-only' mode to extract all the test cases found for a module file.
 
         Args:
-            path (str): A string with the path of the test file to extract the test cases.
+            path (str): A string with the path of the module file to extract the test cases.
 
         Returns:
             outpout (dict): A dictionary that contains the pytest parsed output.

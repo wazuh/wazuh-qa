@@ -83,13 +83,13 @@ class IndexData:
         """
         if self.files_format == 'json':
             for file in files:
-                with open(file, 'r') as test_file:
-                    lines = json.load(test_file)
+                with open(file, 'r') as module_file:
+                    lines = json.load(module_file)
                     self.output.append(lines)
         else:
             for file in files:
-                with open(file, 'r') as test_file:
-                    lines = yaml.load(test_file, Loader=yaml.FullLoader)
+                with open(file, 'r') as module_file:
+                    lines = yaml.load(module_file, Loader=yaml.FullLoader)
                     self.output.append(lines)
 
     def remove_index(self):
