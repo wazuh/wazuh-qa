@@ -155,34 +155,6 @@ def query_wdb(command):
 
     return data
 
-def execute_wazuh_db_query(command, single_response=True):
-    """Function to send a command to the wazuh-db socket.
-
-    Args:
-        command(str): Message to send to the socket.
-        single_response(bool): If set to False, all the 'due' responses
-                               will be appended to a response array
-    Returns:
-        str: A response from the socket
-    """
-    
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect(WAZUH_DB_SOCKET_PATH)
-    
-    sock.send(command, size=True)
-    if single_response == True:
-        return sock.receive(size=True).decode()
-    else:
-        response_array = []
-        while True:
-            response = sock.receive(size=True).decode()
-            response_array.append(response)
-            status = response.split()[0]
-            if status != 'due':
-                break
-
-        return response_array[0] if len(response_array) == 1 else response_array
-
 
 def clean_agents_from_db():
     """
@@ -209,13 +181,3 @@ def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, co
     except Exception:
         raise Exception(f"Unable to add agent {id}")
 
-
-
-def remove_agent(agent_id):
-    """Function that wraps the needed queries to remove an agent.
-
-    Args:
-        agent_id(int): Unique identifier of an agent
-    """
-    data = execute_wazuh_db_query(f"global delete-agent {agent_id}").split()
-    assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
