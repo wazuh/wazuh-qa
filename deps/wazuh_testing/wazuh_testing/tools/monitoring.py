@@ -311,6 +311,8 @@ class SocketController:
                 output = self.sock.sendto(msg_bytes, self.address)
         except OSError as e:
             raise e
+        logging_message('MonitorLog', 'VV', f"SocketController - send - Send message:{message}")
+        logging_message('MonitorLog', 'VV', f"SocketController - send - Send message output:{output}")
 
         return output
 
@@ -330,15 +332,16 @@ class SocketController:
                 return output
             size = wazuh_unpack(data)
             output = self.sock.recv(size, socket.MSG_WAITALL)
+            logging_message('MonitorLog', 'VV', f"SocketController - receive - Received message:{output}")
         else:
             output = self.sock.recv(4096)
             if len(output) == 4096:
                 while 1:
                     try:  # error means no more data
                         output += self.sock.recv(4096, socket.MSG_DONTWAIT)
-                    except:
+                    except Exception:
                         break
-
+            logging_message('MonitorLog', 'VV', f"SocketController - receive - Received message:{output}")
         return output
 
     def set_ssl_configuration(self, ciphers="HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH",

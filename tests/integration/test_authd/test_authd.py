@@ -63,6 +63,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
+from wazuh_testing.tools.logging import logging_message
 
 # Marks
 
@@ -92,9 +93,13 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def set_up_groups(request):
     groups = request.param.get('groups', [])
     for group in groups:
+        logging_message('FunctionLog', 'V', f"set_up_groups - Adding group {group}")
         subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', f'{group}', '-q'])
+
     yield request.param
+
     for group in groups:
+        logging_message('FunctionLog', 'V', f"set_up_groups - Removing group {group}")
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
@@ -159,15 +164,19 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
     '''
     test_case = set_up_groups['test_case']
     for stage in test_case:
+        logging_message('TestLog', 'V', f"Stage {stage}")
         # Reopen socket (socket is closed by manager after sending message with client key)
         receiver_sockets[0].open()
         expected = stage['output']
+        logging_message('TestLog', 'V', f"Expected {expected}")
         message = stage['input']
+        logging_message('TestLog', 'V', f"Send message {expected}")
         receiver_sockets[0].send(message, size=False)
         timeout = time.time() + 10
         response = ''
         while response == '':
             response = receiver_sockets[0].receive().decode()
+            logging_message('TestLog', 'VV', f"Receive {response}")
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
         assert response[:len(expected)] == expected, \
