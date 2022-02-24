@@ -261,6 +261,25 @@ class HostManager:
         """
         return self.get_host(host).interface(interface).addresses
 
+    def find_file(self, host: str, path: str, file_type: str = 'file', pattern: str = '*', recurse: bool = False,
+                  use_regex: bool = False):
+        """Search and return information of a file inside a path.
+
+        Args:
+            host (str): Hostname
+            path (str): Path in which to search for the file that matches the pattern.
+            file_type (str): Type of file to select. Choices are 'any', 'directory', 'file', 'link'.
+            pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+
+        Returns:
+            Files (list): List of found files.
+        """
+        return self.get_host(host).ansible('find', f"paths={path} file_type={file_type} patterns={pattern} "
+                                                   f"recurse={recurse} use_regex={use_regex}")
+
+
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager
     Args:
