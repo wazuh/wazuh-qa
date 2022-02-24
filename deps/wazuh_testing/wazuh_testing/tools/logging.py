@@ -142,4 +142,4 @@ LOGGING_LEVELS = {
 
 def logging_message(logger, level, message):
     target_logger = logging.getLogger(logger)
-    target_logger.log(message, LOGGING_LEVELS[level])
+    target_logger.log(LOGGING_LEVELS[level], message)
