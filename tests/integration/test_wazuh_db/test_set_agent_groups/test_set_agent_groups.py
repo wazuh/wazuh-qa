@@ -155,4 +155,4 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
     if case_data["expected_group"] == 'None' and 'err' in output:
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
-        assert case_data["expected_group"] == response[0]['group'], "did not recieve expected groups in Agent."
+        assert case_data["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
