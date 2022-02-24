@@ -1,5 +1,6 @@
 import logging
 import os
+import inspect
 
 
 class Logging:
@@ -142,4 +143,6 @@ LOGGING_LEVELS = {
 
 def logging_message(logger, level, message):
     target_logger = logging.getLogger(logger)
-    target_logger.log(LOGGING_LEVELS[level], message)
+    curframe = inspect.currentframe()
+    calframe = inspect.getouterframes(curframe, 2)
+    target_logger.log(LOGGING_LEVELS[level], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")

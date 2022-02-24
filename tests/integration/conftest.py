@@ -1071,7 +1071,7 @@ class QALoggerFormatter(logging.Formatter):
         .. versionchanged:: 3.2
         Added the ``style`` parameter.
         """
-        super().__init__(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        super().__init__(fmt='%(asctime)s - %(name)s.%(levelname)s - %(message)s')
 
 
 def pytest_logger_config(logger_config):
