@@ -434,7 +434,7 @@ class QueueMonitor:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
                 item = callback(msg)
-                logging_message('MonitorLog', 'V', f"QueueMonitor Read: {msg}")
+                logging_message('MonitorLog', 'VV', f"QueueMonitor Read: {msg}")
                 if item is not None and item:
                     logging_message('MonitorLog', 'V', f"QueueMonitor Match line: {msg}")
                     result_list.append(item)
@@ -852,7 +852,7 @@ def generate_monitoring_callback(regex):
     def new_callback(line):
         match = re.match(regex, line)
         if match:
-            logging_message('MonitorLog', 'V', f"Line:{line} match regex {regex}")
+            logging_message('MonitorLog', 'V', f"Callback - Line:{line} match regex {regex}")
             if match.group(1) is not None:
                 return match.group(1)
             return True
