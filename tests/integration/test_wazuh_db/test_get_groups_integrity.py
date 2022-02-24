@@ -85,17 +85,14 @@ receiver_sockets= None  # Set in the fixtures
                          )
 def test_set_agent_groups(configure_sockets_environment, connect_to_sockets_module, test_case):
     '''
-    description: Check that every input message using the 'get-groups-integrity' command in wazuh-db socket generates 
-                 the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command 
+    description: Check that every input message using the 'get-groups-integrity' command in wazuh-db socket generates
+                 the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
                  taken from the list of test_cases's 'input' field, and compare the result with the test_case's
-                 'output' field. 
+                 'output' field.
 
     wazuh_min_version: 4.4.0
 
     parameters:
-        - restart_wazuh:
-            type: fixture
-            brief: Reset the 'ossec.log' file and start a new monitor.
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
