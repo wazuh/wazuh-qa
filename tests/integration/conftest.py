@@ -388,17 +388,18 @@ def pytest_runtest_makereport(item, call):
         log_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logs')
         test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
 
-        test_case_data = re.match("(.*)\[(.*)\]", item.name)
+        if global_parameters.logger_file_enable:
+            test_case_data = re.match("(.*)\[(.*)\]", item.name)
+     
+            if test_case_data:
+                test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
+            else:
+                test_case_folder = item.name
 
-        if test_case_data:
-            test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
-        else:
-            test_case_folder = item.name
-
-        test_case_log_folder = os.path.join(test_log_folder, test_case_folder)
-        for file in os.listdir(test_case_log_folder):
-            with open(os.path.join(test_case_log_folder, file)) as f:
-                extra.append(pytest_html.extras.text(f.read(), name=file))
+            test_case_log_folder = os.path.join(test_log_folder, test_case_folder)
+            for file in os.listdir(test_case_log_folder):
+                with open(os.path.join(test_case_log_folder, file)) as f:
+                    extra.append(pytest_html.extras.text(f.read(), name=file))
 
         if not report.passed and not report.skipped:
             report.extra = extra
@@ -1076,13 +1077,15 @@ class QALoggerFormatter(logging.Formatter):
 
 def pytest_logger_config(logger_config):
     logger_config.add_loggers(['TestLog', 'FunctionLog', 'SimulatorLog', 'MonitorLog'])
-    logger_config.set_log_option_default('TestLog')
-
     logging.getLevelName = getLoggingLevelNameQA
-    logger_config.set_formatter_class(QALoggerFormatter)
+    logger_config.set_log_option_default('')
     logging.V = logging.ERROR
     logging.VV = logging.DEBUG
 
 
 def pytest_logger_logdirlink(config):
-    return os.path.join(os.path.dirname(__file__), 'logs')
+    if config.getoption('--loggers'):
+        global_parameters.logger_file_enable = True
+        return os.path.join(os.path.dirname(__file__), 'logs')
+    else:
+        global_parameters.logger_file_enable = False
