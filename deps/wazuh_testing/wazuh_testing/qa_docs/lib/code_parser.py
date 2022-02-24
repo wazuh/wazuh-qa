@@ -18,7 +18,7 @@ STOP_FIELDS = ['tests', 'test_cases']
 
 
 class CodeParser:
-    """Class that parses the content of the test files.
+    """Class that parses the content of the module files.
 
     Attributes:
         conf (Config): A `Config` instance with the loaded configuration.
@@ -56,7 +56,7 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
+        """Remove the fields from a parsed module file to delete the fields that are not mandatory or optional.
 
         It may disappear because the fields that are parsed and not specified in the `qa-docs` schema raise an error.
 
@@ -181,18 +181,18 @@ class CodeParser:
 
         return doc
 
-    def parse_test(self, path, id, group_id):
-        """Parse the content of a test file.
+    def parse_module(self, path, id, group_id):
+        """Parse the content of a module file.
 
         Args:
-            path (str): A string with the path of the test file to be parsed.
-            id (str): An integer with the ID of the new test document.
-            group_id (int): An integer with the ID of the group where the new test document belongs.
+            path (str): A string with the path of the module file to be parsed.
+            id (str): An integer with the ID of the new module document.
+            group_id (int): An integer with the ID of the group where the new module document belongs.
 
         Returns:
             module_doc (dict): A dictionary with the documentation block parsed with module and tests fields.
         """
-        CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
+        CodeParser.LOGGER.debug(f"Parsing module file '{path}'")
         self.scan_file = path
         with open(path) as fd:
             file_content = fd.read()
@@ -253,8 +253,8 @@ class CodeParser:
 
         Args:
             group_file (str): A string with the path of the group file to be parsed.
-            id (int): An integer with the ID of the new test document.
-            group_id (int): An integer with the ID of the group where the new test document belongs.
+            id (int): An integer with the ID of the new module document.
+            group_id (int): An integer with the ID of the group where the new module document belongs.
 
         Returns:
             group_doc (dict): A dictionary with the parsed information from `group_file`.

@@ -92,7 +92,7 @@ def get_parameters():
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
                         help='Show this help message and exit.')
 
-    parser.add_argument('-s', '--sanity-check', action='store_true', dest='sanity',
+    parser.add_argument('--sanity-check', action='store_true', dest='sanity',
                         help="Run a sanity check.")
 
     parser.add_argument('--no-logging', action='store_true', dest='no_logging',
@@ -104,17 +104,20 @@ def get_parameters():
     parser.add_argument('-d', '--debug', action='count', dest='debug_level',
                         help="Enable debug messages.")
 
-    parser.add_argument('--tests-path', dest='tests_path',
+    parser.add_argument('-p', '--tests-path', dest='tests_path',
                         help="Path where tests are located.")
 
-    parser.add_argument('-t', '--tests', nargs='+', default=[], dest='test_names',
-                        help="Parse the test(s) that you pass as argument.")
-
-    parser.add_argument('--types', nargs='+', default=[], dest='test_types',
+    parser.add_argument('-t', '--types', nargs='+', default=[], dest='test_types',
                         help="Parse the tests from type(s) that you pass as argument.")
 
-    parser.add_argument('--modules', nargs='+', default=[], dest='test_modules',
-                        help="Parse the tests from modules(s) that you pass as argument.")
+    parser.add_argument('-c', '--components', nargs='+', default=[], dest='test_components',
+                        help="Parse the tests from components(s) that you pass as argument.")
+
+    parser.add_argument('-s', '--suites', nargs='+', default=[], dest='test_suites',
+                        help="Parse the tests from suite(s) that you pass as argument.")
+
+    parser.add_argument('-m', '--modules', nargs='+', default=[], dest='test_modules',
+                        help="Parse the test(s) that you pass as argument.")
 
     parser.add_argument('-i', '--index-data', dest='index_name',
                         help="Indexes the data named as you specify as argument to elasticsearch.")
@@ -158,9 +161,10 @@ def check_incompatible_parameters(parameters):
     Args:
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
-    default_run = parameters.test_types or parameters.test_modules
+    default_run = parameters.test_types or parameters.test_components or parameters.test_suites or \
+                  parameters.test_modules
     api_run = parameters.index_name or parameters.app_index_name or parameters.launching_index_name
-    test_run = parameters.test_names or parameters.test_exist
+    test_run = parameters.test_exist
 
     qadocs_logger.debug('Checking parameters incompatibilities.')
 
@@ -175,53 +179,55 @@ def check_incompatible_parameters(parameters):
 
         if parameters.tests_path is None:
             raise QAValueError('The -s(--sanity-check) option needs the path to the tests to be parsed. You must '
-                               'specify it by using -I, --tests-path',
+                               'specify it by using --tests-path',
                                qadocs_logger.error)
 
     if parameters.test_types:
         if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The --types option needs the path to the tests to be parsed. You must specify it by '
-                               'using -I, --tests-path',
-                               qadocs_logger.error)
-
-        if parameters.test_names:
-            raise QAValueError('The --types option is not compatible with -t(--test)',
+                               'using --tests-path',
                                qadocs_logger.error)
 
         if parameters.test_exist:
             raise QAValueError('The --types option is not compatible with -e(--exist)',
                                qadocs_logger.error)
 
-    if parameters.test_modules:
+    if parameters.test_components:
         if parameters.tests_path is None and not parameters.run_with_docker:
-            raise QAValueError('The --modules option needs the path to the tests to be parsed. You must specify it by '
-                               'using -I, --tests-path',
-                               qadocs_logger.error)
-
-        if parameters.test_names:
-            raise QAValueError('The --modules option is not compatible with -t(--test)',
+            raise QAValueError('The --components option needs the path to the tests to be parsed. You must specify it by '
+                               'using --tests-path',
                                qadocs_logger.error)
 
         if parameters.test_exist:
-            raise QAValueError('The --modules option is not compatible with -e(--exist)',
+            raise QAValueError('The --components option is not compatible with -e(--exist)',
                                qadocs_logger.error)
 
-    if parameters.test_names:
+    if parameters.test_suites:
+        if not parameters.test_components:
+            raise QAValueError('The --suites option needs the suite module to be parsed. You must specify it '
+                                'using --components',
+                                qadocs_logger.error)
+
+        if parameters.test_exist:
+                raise QAValueError('The --suites option is not compatible with -e(--exist)',
+                                qadocs_logger.error)
+
+    if parameters.test_modules:
         if parameters.tests_path is None and not parameters.run_with_docker:
-            raise QAValueError('The -t(--test) option needs the path to the tests to be parsed. You must specify it by'
-                               ' using -I, --tests-path',
+            raise QAValueError('The -m(--modules) option needs the path to the tests to be parsed. You must specify it '
+                               'using --tests-path',
                                qadocs_logger.error)
 
         if parameters.index_name:
-            raise QAValueError('The -t(--test) option is not compatible with -i option',
+            raise QAValueError('The -m(--modules) option is not compatible with -i option',
                                qadocs_logger.error)
 
         if parameters.app_index_name:
-            raise QAValueError('The -t(--test) option is not compatible with -l option',
+            raise QAValueError('The -m(--modules) option is not compatible with -l option',
                                qadocs_logger.error)
 
         if parameters.launching_index_name:
-            raise QAValueError('The -t(--test) option is not compatible with -il option',
+            raise QAValueError('The -m(--modules) option is not compatible with -il option',
                                qadocs_logger.error)
 
     if parameters.test_exist:
@@ -306,15 +312,6 @@ def validate_parameters(parameters, parser):
                 raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.",
                                    qadocs_logger.error)
 
-        # Check that test_input name exists
-        if parameters.test_names:
-            doc_check = DocGenerator(Config(SCHEMA_PATH, parameters.tests_path, test_names=parameters.test_names))
-
-            for test_name in parameters.test_names:
-                if doc_check.locate_test(test_name) is None:
-                    raise QAValueError(f"{test_name} has not been not found in "
-                                       f"{parameters.tests_path}.", qadocs_logger.error)
-
         # Check that the index exists
         if parameters.app_index_name:
             es = Elasticsearch()
@@ -329,18 +326,37 @@ def validate_parameters(parameters, parser):
                     raise QAValueError(f"The given type: {type}, not found in {parameters.tests_path}",
                                        qadocs_logger.error)
 
-        # Check that modules selection is done within a test type
-        if parameters.test_modules:
+        # Check that components selection is done within a test type
+        if parameters.test_components:
             if len(parameters.test_types) != 1:
-                raise QAValueError('The --modules option work when is only parsing a single test type. Use --types with'
-                                   ' just one type if you want to parse some modules within a test type.',
+                raise QAValueError('The --components option work when is only parsing a single test type. Use --types with'
+                                   ' just one type if you want to parse some components within a test type.',
                                    qadocs_logger.error)
 
-            for module in parameters.test_modules:
+            if parameters.test_suites:
+                if len(parameters.test_components) != 1:
+                    raise QAValueError('The --suites option work when is only parsing a single test module. Use '
+                                       '--components with just one type if you want to parse some components within a test '
+                                       'type.', qadocs_logger.error)
+
+            for component in parameters.test_components:
                 type_path = os.path.join(parameters.tests_path, parameters.test_types[0])
-                if module not in os.listdir(type_path):
-                    raise QAValueError(f"The given module: {module}, not found in {type_path}",
+                if component not in os.listdir(type_path):
+                    raise QAValueError(f"The given component: {component}, not found in {type_path}",
                                        qadocs_logger.error)
+                    
+                for suite in parameters.test_suites:
+                    component_path = os.path.join(type_path, component)
+                    if suite not in os.listdir(component_path):
+                        raise QAValueError(f"The given suite: {suite}, not found in {component_path}",
+                                           qadocs_logger.error)
+
+                    for module in parameters.test_modules:
+                        suite_path = os.path.join(component_path, suite)
+                        module_file = f"{module}.py"
+                        if module_file not in os.listdir(suite_path):
+                            raise QAValueError(f"The given module: {module_file}, not found in {suite_path}",
+                                               qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
@@ -348,7 +364,7 @@ def validate_parameters(parameters, parser):
 def install_searchui_deps():
     """Install SearchUI dependencies if needed"""
     os.chdir(SEARCH_UI_PATH)
-    if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_modules')):
+    if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_components')):
         qadocs_logger.info('Installing SearchUI dependencies')
         run_local_command("npm install")
 
@@ -364,27 +380,38 @@ def run_searchui(index):
 def parse_data(args):
     """Parse the tests and collect the data."""
     if args.test_exist:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_names=args.test_exist))
+        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_modules=args.test_exist))
 
-        doc_check.check_test_exists(args.tests_path)
-
-    # Parse a list of tests
-    elif args.test_names:
-        qadocs_logger.info(f"Parsing the following test(s) {args.test_names}")
-
-        docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_names=args.test_names,
-                            check_doc=args.check_doc), OUTPUT_FORMAT)
+        doc_check.check_module_exists(args.tests_path)
 
     # Parse a list of test types
     elif args.test_types:
         qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
 
-        # Parse a list of test modules
-        if args.test_modules:
-            qadocs_logger.info(f"Parsing the following test(s) modules(s): {args.test_modules}")
-            docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                args.test_modules), OUTPUT_FORMAT)
+        # Parse a list of test components
+        if args.test_components:
+            qadocs_logger.info(f"Parsing the following test(s) components(s): {args.test_components}")
+
+            if args.test_suites:
+                qadocs_logger.info(f"Parsing the following suite(s): {args.test_suites}")
+
+                if args.test_modules:
+                    qadocs_logger.info(f"Parsing the following modules(s): {args.test_modules}")
+
+                    # Parse specified modules
+                    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                    args.test_components, args.test_suites, args.test_modules), OUTPUT_FORMAT)
+                else:
+                    # Parse specified suites
+                    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                        args.test_components, args.test_suites), OUTPUT_FORMAT)
+            else:
+                # Parse specified components
+                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                args.test_components), OUTPUT_FORMAT)
+
         else:
+            # Parse all type of tests
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types), OUTPUT_FORMAT)
 
     # Parse the whole path
@@ -394,10 +421,10 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH), OUTPUT_FORMAT)
             docs.run()
 
-    if args.test_types or args.test_modules or args.test_names and not args.check_doc:
+    if args.test_types or args.test_components or args.test_modules and not args.check_doc:
         qadocs_logger.info('Running QADOCS')
         docs.run()
-    elif args.test_names and args.check_doc:
+    elif args.test_modules and args.check_doc:
         docs.check_documentation()
 
 
@@ -432,6 +459,7 @@ def main():
 
     if args.run_with_docker:
         command = get_qa_docs_run_options(args)
+        qadocs_logger.info(f"Running {command} in a docker container.")
         qa_docs_docker_run(args.qa_branch, command, OUTPUT_PATH)
     elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
