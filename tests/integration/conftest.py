@@ -945,13 +945,13 @@ def mock_system_parametrized(system):
 
 
 @pytest.fixture(scope='function')
-def mock_agent_packages():
-    """Add 10 mocked packages to the agent 001 DB"""
-    package_names = mocking.insert_mocked_packages(agent_id='001')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
 
     yield package_names
 
-    mocking.delete_mocked_packages(agent_id='001')
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
 
 
 @pytest.fixture(scope='function')
