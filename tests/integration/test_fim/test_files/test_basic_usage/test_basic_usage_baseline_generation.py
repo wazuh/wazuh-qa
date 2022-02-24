@@ -72,7 +72,7 @@ pytest_args:
 tags:
     - fim_basic_usage
 '''
-import os
+import os, sys
 from time import time
 
 import pytest
@@ -131,6 +131,7 @@ def extra_configuration_before_yield():
         create_file(REGULAR, testdir2, f'test_{int(round(time() * 10 ** 6))}', content='')
 
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_wait_until_baseline(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if FIM events are appearing after the 'baseline'. The log message

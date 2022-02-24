@@ -78,12 +78,13 @@ from time import sleep
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_file_limit_capacity, delete_file, \
-    generate_params, create_file, REGULAR
+from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
-
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.fim_module import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
+    ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
+from wazuh_testing.fim_module.event_monitor import callback_detect_event
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
@@ -99,17 +100,16 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_delete_full.yaml'
 testdir1 = test_directories[0]
 NUM_FILES = 7
 NUM_FILES_TO_CREATE = 8
+sleep_time = 2
 
 # Configurations
 
 file_limit_list = ['10']
-conf_params = {'TEST_DIRECTORIES': testdir1,
-               'LIMIT': str(NUM_FILES)
-               }
+conf_params = {'TEST_DIRECTORIES': testdir1, 'LIMIT': str(NUM_FILES)}
 
-p, m = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
+params, metadata = generate_params(extra_params=conf_params, modes=['realtime', 'whodata'])
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
@@ -135,11 +135,8 @@ def extra_configuration_before_yield():
 # Tests
 
 
-@pytest.mark.parametrize('folder, file_name, tags_to_apply', [
-    (testdir1, f'{base_file_name}{1}', {'tags_delete_full'})
-])
-def test_file_limit_delete_full(folder, file_name, tags_to_apply,
-                                get_configuration, configure_environment, restart_syscheckd):
+@pytest.mark.parametrize('folder, file_name', [(testdir1, f'{base_file_name}{1}')])
+def test_file_limit_delete_full(folder, file_name, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check a specific case. If a testing file ('test_file1') is not inserted in the FIM database
                  (because the maximum number of files to be monitored has already been reached), and another
@@ -159,9 +156,6 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
         - file_name:
             type: str
             brief: Name of the testing file to be created.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -170,7 +164,7 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
             brief: Configure a custom environment for testing.
         - restart_syscheckd:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Clear the Wazuh logs file and start a new monitor.
 
     assertions:
         - Verify that the FIM database is in 'full database alert' mode
@@ -192,30 +186,31 @@ def test_file_limit_delete_full(folder, file_name, tags_to_apply,
         - realtime
         - who-data
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
+    #Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                             callback=callback_file_limit_capacity,
-                                             error_message='Did not receive expected '
-                                                           '"DEBUG: ...: Sending DB 100% full alert." event').result()
+                                             callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
+                                             error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
-    if database_state:
-        assert database_state == '100', 'Wrong value for full database alert'
+    assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
+    # Create a file with the database being full - Should not generate events
     create_file(REGULAR, testdir1, file_name)
-    sleep(2)
-
+    sleep(sleep_time)
+    # Delete the file created - Should not generate events
     delete_file(folder, file_name)
 
+    # Check no Creation or Deleted event has been  generated
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
-        assert event is None, 'No events should be detected.'
+        assert event is None, ERR_MSG_NO_EVENTS_EXPECTED
 
+    # Delete the first file that was created (It is included in DB)
     delete_file(folder, f'{file_name}{0}')
 
+    #Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event,
-                                    error_message='Did not receive expected deleted event').result()
+                                    error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
 
     assert event['data']['path'] == os.path.join(folder, f'{file_name}{0}')

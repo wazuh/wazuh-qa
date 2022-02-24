@@ -187,13 +187,26 @@ def modify_agent_scan_timestamp(agent_id='000', timestamp=0, full_scan=True):
     query_wdb(f"agent {agent_id} sql UPDATE vuln_metadata SET {scan_type}={timestamp}")
 
 
-def delete_os_info_data(agent_id='000'):
+def delete_os_info(agent_id='000'):
     """Delete the sys_osinfo data from a specific agent.
 
     Args:
         agent_id (str): Agent ID.
     """
     query_wdb(f"agent {agent_id} sql DELETE FROM sys_osinfo")
+
+
+def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                   hostname='centos8', architecture='x86_64', os_name='CentOS Linux', os_version='8.4', os_major='8',
+                   os_minor='4', os_build='', version='', os_release='', os_patch='', release='',
+                   checksum='dummychecksum'):
+    """Update the sys_osinfo data from a specific agent.
+
+    Args:
+        agent_id (str): Agent ID.
+    """
+    delete_os_info(agent_id)
+    insert_os_info(**locals())
 
 
 def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, condition, severity='-', cvss2=0,
@@ -231,3 +244,12 @@ def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, co
     result = query_wdb(query)[0]['result']
 
     return result
+
+
+def clean_sys_programs(agent_id='000'):
+    """Clean all the agent packages data from the DB
+
+      Args:
+        agent_id (str): Agent ID.
+    """
+    clean_table(agent_id, 'sys_programs')

@@ -57,15 +57,13 @@ references:
 tags:
     - logcollector_location_cust_sockets
 '''
+import pytest
 from os import path, unlink
 from sys import platform
-if platform != 'win32':
-    from socket import AF_UNIX
-
 from socket import SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
 from tempfile import gettempdir
-
-import pytest
+if platform != 'win32':
+    from socket import AF_UNIX
 
 from wazuh_testing import global_parameters
 from wazuh_testing import logcollector as lg
@@ -179,7 +177,7 @@ def get_files_list():
     return file_structure
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+@pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, create_file_structure_module,
@@ -296,7 +294,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+@pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
                                          get_configuration, configure_environment, create_file_structure_module,

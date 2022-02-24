@@ -376,7 +376,7 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
 @pytest.mark.parametrize('directory,  tags_to_apply', [
     (os.path.join('/', 'nfs-mount-point'), {'skip_nfs'})
 ])
-@pytest.mark.xfail(reason='Xfail on Jenkins to issue: https://github.com/wazuh/wazuh-qa/issues/2186')
+@pytest.mark.skip(reason="It will be blocked by #2174 and #2186, when it was solve we can enable again this test")
 @patch('wazuh_testing.fim.modify_file_inode')
 def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, get_configuration, configure_environment,
                   restart_syscheckd, wait_for_fim_start):

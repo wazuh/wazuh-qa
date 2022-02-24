@@ -207,13 +207,13 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     create_file(REGULAR, folder, file_name, content='')
     modify_registry_value(key_h, "test_value", REG_SZ, 'added')
 
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
 
     TimeMachine.travel_to_future(timedelta(hours=13))
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
     assert sending_event['data']['path'] == os.path.join(key, subkey)

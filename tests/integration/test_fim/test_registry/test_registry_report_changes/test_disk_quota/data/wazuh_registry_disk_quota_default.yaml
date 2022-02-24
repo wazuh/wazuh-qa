@@ -1,0 +1,35 @@
+---
+# Test report changes
+- tags:
+  - test_report_changes
+  apply_to_modules:
+  - test_registry_disk_quota_default
+  sections:
+  - section: syscheck
+    elements:
+      - disabled:
+          value: 'no'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_1
+          attributes:
+            - arch: 'both'
+            - report_changes: 'yes'
+      - windows_registry:
+          value: WINDOWS_REGISTRY_2
+          attributes:
+            - arch: '64bit'
+            - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

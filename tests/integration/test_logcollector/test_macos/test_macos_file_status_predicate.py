@@ -81,13 +81,12 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
 def test_macos_file_status_predicate(restart_logcollector_required_daemons_package, truncate_log_file,
                                      delete_file_status_json,
                                      configure_local_internal_options_module,
                                      get_configuration, configure_environment,
                                      file_monitoring, daemons_handler):
-    '''
+    """
     description: Check if the 'wazuh-logcollector' does not update the 'file_status.json' file from logging
                  events when using an invalid predicate in the 'query' tag of the 'localfile' section.
                  The agent uses a dummy localfile (/Library/Ossec/logs/active-responses.log) which triggers
@@ -141,8 +140,8 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
 
     tags:
         - logs
-    '''
-    time.sleep(2)
+    """
+    time.sleep(file_status_update_time)
     log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT,
                       callback=callback_log_bad_predicate(),
                       error_message='Expected log that matches the regex ".*Execution error \'log:" could not be found')

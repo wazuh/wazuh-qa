@@ -1,0 +1,32 @@
+# Configuration for sync max eps enabled
+- tags:
+  - max_eps_synchronization
+  apply_to_modules:
+  - test_max_eps_synchronization
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - FIM_MODE
+    - synchronization:
+        elements:
+        - max_eps:
+            value: MAX_EPS
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
