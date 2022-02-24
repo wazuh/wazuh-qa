@@ -26,7 +26,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import logging_message, LOGGING_LEVELS
 from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
