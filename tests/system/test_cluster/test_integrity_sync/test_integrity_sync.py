@@ -244,12 +244,14 @@ def test_extra_files(clean_files):
             assert result == '', f"File {file} was expected to be removed from {host}, but it still exists."
 
 
-def test_extra_valid_files(clean_files):
+def not_test_extra_valid_files(clean_files):
     """Check that extra_valid files created in the workers are copied in the master.
 
     Register two agents, wait and check that the client.keys file have been updated in all worker nodes.
     Then, each worker creates an 'agent-groups' file for one of the created agents. Files inside
     /var/ossec/queue/agent-groups are 'extra_valid' according to cluster.json, so they should be sent to the master.
+
+    This test is no longer in use, but it could be useful in the future.
     """
     # Modulesd will delete any file inside 'agent-groups' dir if its ID is not inside client.keys.
     registered_ids = list()
