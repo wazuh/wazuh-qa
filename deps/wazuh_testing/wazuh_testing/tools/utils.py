@@ -11,9 +11,7 @@ from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
 
-from wazuh_testing import LOGGING_LEVELS
-
-function_logging = logging.getLogger('function')
+from wazuh_testing.tools.logging import logging_message
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -45,7 +43,7 @@ def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
                     attempt -= 1
                     msg = f'Exception: "{exception}". {attempt}/{attempts} remaining attempts. ' \
                           f'Waiting {wait_time} seconds.'
-                    function_logging.log(LOGGING_LEVELS['V'], msg)
+                    logging_message.log('function', 'V', msg)
                     sleep(wait_time)
             return func(*args, **kwargs)  # final attempt
         return to_retry  # actual decorator

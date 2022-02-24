@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 
 class Monitor:
     """Class to monitor a binary process and extract data referring to the CPU usage, memory consumption, etc.
-
+º
     Args:
         process_name (str): name of the process to monitor.
         pid (int): PID of the process.

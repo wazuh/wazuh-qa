@@ -73,7 +73,8 @@ import psutil
 import pytest
 import wazuh_testing.fim as fim
 
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters
+from wazuh_testing.tools.logging import logging_message
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -149,7 +150,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
     tags:
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_health_check,
@@ -198,9 +199,9 @@ def test_added_rules(tags_to_apply, get_configuration,
         - audit-rules
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    logger.info('Checking the event...')
+    logging_message('test', 'VV',  'Checking the event...')
     events = wazuh_log_monitor.start(timeout=20,
                                      callback=fim.callback_audit_added_rule,
                                      accum_results=3,
@@ -256,7 +257,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
         - audit-rules
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
@@ -322,7 +323,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
         - audit-rules
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
@@ -389,7 +390,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
         - realtime
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
@@ -457,7 +458,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
         - audit-keys
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
 
     # Add watch rule
@@ -532,7 +533,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         - audit-keys
         - who-data
     '''
-    logger.info('Applying the test configuration')
+    logging_message('test', 'VV',  'Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # We need to retry get_audit_creation_time in case syscheckd didn't have
@@ -541,7 +542,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
-                logger.info(f"auditd detected. PID: {proc.pid}")
+                logging_message('test', 'VV',  f"auditd detected. PID: {proc.pid}")
                 return proc.create_time()
         raise Exception('Auditd is not running')
 

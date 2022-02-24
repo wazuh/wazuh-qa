@@ -78,7 +78,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import configurations_
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
-from wazuh_testing import logger
+from wazuh_testing.tools.logging import logging_message
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -187,7 +187,7 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-        logger.error(f'Unexpected event {event.result()}')
+        logging_message('test', 'VV',  f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     fim.modify_file_content(testdir2, file1, new_content='Sample modification')

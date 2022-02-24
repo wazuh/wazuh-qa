@@ -76,7 +76,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import testdir_target,
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
      extra_configuration_after_yield
-from wazuh_testing import logger
+from wazuh_testing.tools.logging import logging_message
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -171,7 +171,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
         fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-            logger.error(error_msg)
+            logging_message('test', 'VV',  error_msg)
             raise AttributeError(error_msg)
 
     # Modify the target file and don't expect any events
@@ -179,7 +179,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logger.error(error_msg)
+        logging_message('test', 'VV',  error_msg)
         raise AttributeError(error_msg)
 
     # Delete the target file and don't expect any events
@@ -187,5 +187,5 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logger.error(error_msg)
+        logging_message('test', 'VV',  error_msg)
         raise AttributeError(error_msg)

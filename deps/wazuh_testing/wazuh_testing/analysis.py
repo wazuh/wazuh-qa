@@ -9,7 +9,7 @@ from copy import deepcopy
 from datetime import datetime
 
 from jsonschema import validate, exceptions
-from wazuh_testing import logger
+from wazuh_testing.tools.logging import logging_message
 
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -191,7 +191,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     try:
         validate_analysis_alert(alert, schema)
     except exceptions.ValidationError as e:
-        logger.error(f'Validation Error with: {alert}')
+        logging_message('function', 'VV', f'Validation Error with: {alert}')
         raise e
     try:
         validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')

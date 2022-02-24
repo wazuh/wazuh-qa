@@ -13,14 +13,15 @@ import uuid
 from datetime import datetime
 
 import logging
-from wazuh_testing import LOGGING_LEVELS
+from wazuh_testing.tools.logging import LOGGING_LEVELS, logging_message
+
 
 import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -28,7 +29,6 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
-
 
 
 if sys.platform == 'win32':
@@ -772,49 +772,49 @@ def daemons_handler(get_configuration, request):
         if 'daemons' in daemons_handler_configuration and not all_daemons:
             daemons = daemons_handler_configuration['daemons']
             if not daemons or (type(daemons) == list and len(daemons) == 0):
-                logger.error('Daemons list is not set')
+                logging_message('function', 'V',  'Daemons list is not set')
                 raise ValueError
 
         if 'all_daemons' in daemons_handler_configuration:
-            logger.debug(f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
+            logging_message('function', 'VV',  f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
             all_daemons = daemons_handler_configuration['all_daemons']
 
         if 'ignore_errors' in daemons_handler_configuration:
-            logger.debug(f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+            logging_message('function', 'VV',  f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
             ignore_errors = daemons_handler_configuration['ignore_errors']
 
     except AttributeError as daemon_configuration_not_set:
-        logger.error('daemons_handler_configuration is not set')
+        logging_message('function', 'V',  'daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
     try:
         if all_daemons:
-            logger.debug('Restarting wazuh using wazuh-control')
+            logging_message('function', 'VV',  'Restarting wazuh using wazuh-control')
             # Restart daemon instead of starting due to legacy used fixture in the test suite.
             control_service('restart')
         else:
             for daemon in daemons:
-                logger.debug(f"Restarting {daemon}")
+                logging_message('function', 'VV',  f"Restarting {daemon}")
                 # Restart daemon instead of starting due to legacy used fixture in the test suite.
                 control_service('restart', daemon=daemon)
 
     except ValueError as value_error:
-        logger.error(f"{str(value_error)}")
+        logging_message('function', 'V',  f"{str(value_error)}")
         if not ignore_errors:
             raise value_error
     except subprocess.CalledProcessError as called_process_error:
-        logger.error(f"{str(called_process_error)}")
+        logging_message('function', 'V',  f"{str(called_process_error)}")
         if not ignore_errors:
             raise called_process_error
 
     yield
 
     if all_daemons:
-        logger.debug('Stopping wazuh using wazuh-control')
+        logging_message('function', 'VV',  'Stopping wazuh using wazuh-control')
         control_service('stop')
     else:
         for daemon in daemons:
-            logger.debug(f"Stopping {daemon}")
+            logging_message('function', 'VV',  f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
 
 
@@ -832,7 +832,7 @@ def file_monitoring(request):
     else:
         file_to_monitor = LOG_FILE_PATH
 
-    logger.debug(f"Initializing file to monitor to {file_to_monitor}")
+    logging_message('function', 'VV',  f"Initializing file to monitor to {file_to_monitor}")
 
     file_monitor = FileMonitor(file_to_monitor)
     setattr(request.module, 'log_monitor', file_monitor)
@@ -840,7 +840,7 @@ def file_monitoring(request):
     yield
 
     truncate_file(file_to_monitor)
-    logger.debug(f"Trucanted {file_to_monitor}")
+    logging_message('function', 'VV',  f"Trucanted {file_to_monitor}")
 
 
 @pytest.fixture(scope='module')
@@ -854,17 +854,17 @@ def configure_local_internal_options_module(request):
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
     except AttributeError as local_internal_configuration_not_set:
-        logger.debug('local_internal_options is not set')
+        logging_message('function', 'VV',  'local_internal_options is not set')
         raise local_internal_configuration_not_set
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
 
-    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
+    logging_message('function', 'VV',  f"Set local_internal_option to {str(local_internal_options)}")
     conf.set_local_internal_options_dict(local_internal_options)
 
     yield
 
-    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    logging_message('function', 'VV',  f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
@@ -927,7 +927,7 @@ class QALoggerFormatter(logging.Formatter):
 
 
 def pytest_logger_config(logger_config):
-    logger_config.add_loggers(['test', 'function', 'monitoring', 'external', 'simulator'])
+    logger_config.add_loggers(['test', 'function', 'monitoring', 'simulator']) # Test-Fixture-functions-monitoring-simulators
     logger_config.set_log_option_default('test')
 
     logging.getLevelName = getLoggingLevelNameQA

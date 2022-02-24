@@ -12,7 +12,7 @@ import json
 from wazuh_testing.fim import change_internal_options
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools import monitoring
-from wazuh_testing import logger
+from wazuh_testing.tools.logging import logging_message
 
 
 DEFAULT_VALUES = {
@@ -283,7 +283,7 @@ def callback_detect_upgrade_ack_event(event_log):
             json_event = json.loads(match.group(1))
             return json_event
         except (json.JSONDecodeError, AttributeError) as e:
-            logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+            logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_upgrade_module_up():

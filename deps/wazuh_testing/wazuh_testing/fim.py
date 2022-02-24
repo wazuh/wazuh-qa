@@ -28,7 +28,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing.tools.time import logging_message
+from wazuh_testing.tools.logging import logging_message
 
 
 if sys.platform == 'win32':
@@ -738,7 +738,7 @@ def rename_registry(key, subkey_path, src_name, arch, dst_name):
         dst_name (str): name of the renamed key
     """
     if sys.platform == 'win32':
-        logger.info(f"- Renaming registry {src_name} to {dst_name}")
+        logging_message('test', 'VV', f"- Renaming registry {src_name} to {dst_name}")
 
         try:
             source_key = os.path.join(subkey_path, src_name)
@@ -750,10 +750,8 @@ def rename_registry(key, subkey_path, src_name, arch, dst_name):
             win32api.RegCopyTree(src_key_h, None, dst_key_h)
 
             delete_registry(key, source_key, arch)
-        except OSError as e:
-            logger.warning(f"Registry could not be renamed: {e}")
-        except pywintypes.error as e:
-            logger.warning(f"Registry could not be renamed: {e}")
+        except (OSError, pywintypes.error) as e:
+            logging_message('test', 'V', f"Registry could not be renamed: {e}")
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):
@@ -2108,7 +2106,6 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event_delete)
 
         if triggers_event_delete:
-            logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
             logging_message('function', 'VV', "'deleted' {} detected as expected.\n".format("events"
                             if len(key_list) > 1 else "event"))
 
