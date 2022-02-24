@@ -1,6 +1,6 @@
 ---
 -
-  name: "Two Agents Registered - Valid Hash - Synced"
+  name: "No Agents Registered - No Hash - Error"
   test_case:
   -
     output: err [{"data":[]}]
