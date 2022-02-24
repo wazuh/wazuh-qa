@@ -161,9 +161,10 @@ def check_incompatible_parameters(parameters):
     Args:
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
-    default_run = parameters.test_types or parameters.test_components or parameters.test_suites
+    default_run = parameters.test_types or parameters.test_components or parameters.test_suites or \
+                  parameters.test_modules
     api_run = parameters.index_name or parameters.app_index_name or parameters.launching_index_name
-    test_run = parameters.test_modules or parameters.test_exist
+    test_run = parameters.test_exist
 
     qadocs_logger.debug('Checking parameters incompatibilities.')
 
@@ -187,10 +188,6 @@ def check_incompatible_parameters(parameters):
                                'using --tests-path',
                                qadocs_logger.error)
 
-        if parameters.test_modules:
-            raise QAValueError('The --types option is not compatible with -t(--modules)',
-                               qadocs_logger.error)
-
         if parameters.test_exist:
             raise QAValueError('The --types option is not compatible with -e(--exist)',
                                qadocs_logger.error)
@@ -199,10 +196,6 @@ def check_incompatible_parameters(parameters):
         if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The --components option needs the path to the tests to be parsed. You must specify it by '
                                'using --tests-path',
-                               qadocs_logger.error)
-
-        if parameters.test_modules:
-            raise QAValueError('The --components option is not compatible with -m(--modules)',
                                qadocs_logger.error)
 
         if parameters.test_exist:
@@ -319,15 +312,6 @@ def validate_parameters(parameters, parser):
                 raise QAValueError(f"{parameters.tests_path} does not exist. Tests directory not found.",
                                    qadocs_logger.error)
 
-        # Check that test_input name exists
-        if parameters.test_modules:
-            doc_check = DocGenerator(Config(SCHEMA_PATH, parameters.tests_path, test_modules=parameters.test_modules))
-
-            for test_name in parameters.test_modules:
-                if doc_check.locate_module(test_name) is None:
-                    raise QAValueError(f"{test_name} has not been not found in "
-                                       f"{parameters.tests_path}.", qadocs_logger.error)
-
         # Check that the index exists
         if parameters.app_index_name:
             es = Elasticsearch()
@@ -355,17 +339,24 @@ def validate_parameters(parameters, parser):
                                        '--components with just one type if you want to parse some components within a test '
                                        'type.', qadocs_logger.error)
 
-            for module in parameters.test_components:
+            for component in parameters.test_components:
                 type_path = os.path.join(parameters.tests_path, parameters.test_types[0])
-                if module not in os.listdir(type_path):
-                    raise QAValueError(f"The given module: {module}, not found in {type_path}",
+                if component not in os.listdir(type_path):
+                    raise QAValueError(f"The given component: {component}, not found in {type_path}",
                                        qadocs_logger.error)
                     
                 for suite in parameters.test_suites:
-                    module_path = os.path.join(parameters.tests_path, parameters.test_types[0], module)
-                    if suite not in os.listdir(module_path):
-                        raise QAValueError(f"The given suite: {suite}, not found in {module_path}",
+                    component_path = os.path.join(type_path, component)
+                    if suite not in os.listdir(component_path):
+                        raise QAValueError(f"The given suite: {suite}, not found in {component_path}",
                                            qadocs_logger.error)
+
+                    for module in parameters.test_modules:
+                        suite_path = os.path.join(component_path, suite)
+                        module_file = f"{module}.py"
+                        if module_file not in os.listdir(suite_path):
+                            raise QAValueError(f"The given module: {module_file}, not found in {suite_path}",
+                                               qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
@@ -393,13 +384,6 @@ def parse_data(args):
 
         doc_check.check_module_exists(args.tests_path)
 
-    # Parse a list of modules
-    elif args.test_modules:
-        qadocs_logger.info(f"Parsing the following test(s) {args.test_modules}")
-
-        docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, test_modules=args.test_modules,
-                            check_doc=args.check_doc), OUTPUT_FORMAT)
-
     # Parse a list of test types
     elif args.test_types:
         qadocs_logger.info(f"Parsing the following test(s) type(s): {args.test_types}")
@@ -410,13 +394,24 @@ def parse_data(args):
 
             if args.test_suites:
                 qadocs_logger.info(f"Parsing the following suite(s): {args.test_suites}")
-                docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                    args.test_components, args.test_suites), OUTPUT_FORMAT)
+
+                if args.test_modules:
+                    qadocs_logger.info(f"Parsing the following modules(s): {args.test_modules}")
+
+                    # Parse specified modules
+                    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                    args.test_components, args.test_suites, args.test_modules), OUTPUT_FORMAT)
+                else:
+                    # Parse specified suites
+                    docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                        args.test_components, args.test_suites), OUTPUT_FORMAT)
             else:
+                # Parse specified components
                 docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
                                 args.test_components), OUTPUT_FORMAT)
 
         else:
+            # Parse all type of tests
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types), OUTPUT_FORMAT)
 
     # Parse the whole path

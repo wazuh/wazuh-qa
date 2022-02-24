@@ -50,9 +50,8 @@ class DocGenerator:
         for ignore_regex in self.conf.ignore_paths:
             self.ignore_regex.append(re.compile(ignore_regex.replace('\\', '/')))
         self.include_regex = []
-        if self.conf.mode == Mode.DEFAULT:
-            for include_regex in self.conf.include_regex:
-                self.include_regex.append(re.compile(include_regex.replace('\\', '/')))
+        for include_regex in self.conf.include_regex:
+            self.include_regex.append(re.compile(include_regex.replace('\\', '/')))
         self.file_format = file_format
 
     def is_valid_folder(self, path):
@@ -220,25 +219,12 @@ class DocGenerator:
         tests = self.parser.parse_module(path, self.__id_counter, group_id)
 
         if tests:
-            if self.conf.mode == Mode.DEFAULT:
-                doc_path = self.get_module_doc_path(path)
+            doc_path = self.get_module_doc_path(path)
 
-                self.dump_output(tests, doc_path)
-                DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
-                                          f"was created with ID:{self.__id_counter}")
-                return self.__id_counter
-
-            elif self.conf.mode == Mode.PARSE_MODULES:
-                # If qa-docs is run with --check-doc flag then the output files wont be generated
-                if self.conf.check_doc:
-                    return
-
-                if self.conf.documentation_path:
-                    doc_path = self.conf.documentation_path
-                    doc_path = os.path.join(doc_path, module_name)
-
-                    self.dump_output(tests, doc_path)
-                    DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created.")
+            self.dump_output(tests, doc_path)
+            DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
+                                        f"was created with ID:{self.__id_counter}")
+            return self.__id_counter
         else:
             DocGenerator.LOGGER.error(f"Content for {path} is empty, ignoring it")
             raise QAValueError(f"Content for {path} is empty, ignoring it", DocGenerator.LOGGER.error)
@@ -274,14 +260,14 @@ class DocGenerator:
 
     def parse_module_list(self):
         """Parse the modules that the user has specified."""
-        for module in self.conf.test_modules:
-            self.module_path = self.locate_module(module)
-
-            if self.module_path:
-                self.create_module(self.module_path, 0, module)
+        for module_index in range(len(self.conf.include_paths)):
+            if self.is_valid_file(f"{self.conf.test_modules[module_index]}.py"):
+                self.scan_path = self.conf.include_paths[module_index]
+                self.create_module(self.conf.include_paths[module_index], 0)
             else:
-                DocGenerator.LOGGER.error(f"'{module}' could not be found")
-                raise QAValueError(f"'{module}' could not be found", DocGenerator.LOGGER.error)
+                DocGenerator.LOGGER.error(f"'{self.conf.test_modules[module_index]}' not a valid module file.")
+                raise QAValueError(f"'{self.conf.test_modules[module_index]}'  not a valid module file.",
+                                   DocGenerator.LOGGER.error)
 
     def locate_module(self, module_name):
         """Get the module path when a module is specified by the user.

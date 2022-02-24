@@ -70,6 +70,7 @@ class Config():
         self.test_types = []
         self.test_components = []
         self.test_suites = []
+        self.test_modules = []
         self.predefined_values = {}
         self.check_doc = check_doc
 
@@ -77,11 +78,6 @@ class Config():
         self.__read_output_fields()
         self.__set_documentation_path(output_path.replace('\\', '/'))
         self.__read_predefined_values()
-
-        if test_modules is not None:
-            # When a name is passed, it is using just a single module.
-            self.mode = Mode.PARSE_MODULES
-            self.test_modules = test_modules
 
         if test_types is None:
             self.__get_test_types()
@@ -93,6 +89,10 @@ class Config():
 
                 if test_suites:
                     self.test_suites = test_suites
+
+        if test_modules:
+            self.mode = Mode.PARSE_MODULES
+            self.test_modules = test_modules
 
         # Get the paths to parse
         self.__get_include_paths()
@@ -118,9 +118,16 @@ class Config():
 
             if self.test_components:
                 if self.test_suites:
-                    for component in self.test_components:
-                        for suite in self.test_suites:
-                            self.include_paths.append(os.path.join(subset_tests, component, suite))
+                    if self.test_modules:
+                        for component in self.test_components:
+                            for suite in self.test_suites:
+                                for module in self.test_modules:
+                                    self.include_paths.append(os.path.join(subset_tests, component, suite,
+                                                              f"{module}.py"))
+                    else:
+                        for component in self.test_components:
+                            for suite in self.test_suites:
+                                self.include_paths.append(os.path.join(subset_tests, component, suite))
                 else:
                     for component in self.test_components:
                         self.include_paths.append(os.path.join(subset_tests, component))
