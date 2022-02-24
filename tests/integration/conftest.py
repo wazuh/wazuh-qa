@@ -932,7 +932,8 @@ def pytest_logger_config(logger_config):
 
     logging.getLevelName = getLoggingLevelNameQA
     logger_config.set_formatter_class(QALoggerFormatter)
-
+    logging.V = logging.ERROR
+    logging.VV = logging.DEBUG
 
 def pytest_logger_logdirlink(config):
     return os.path.join(os.path.dirname(__file__), 'logs')
