@@ -431,9 +431,9 @@ class QueueMonitor:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
                 item = callback(msg)
-                logging_message('function', 'V', f"QueueMonitor Read: {msg}")
+                logging_message('MonitorLog', 'V', f"QueueMonitor Read: {msg}")
                 if item is not None and item:
-                    logging_message('function', 'V', f"QueueMonitor Match line: {msg}")
+                    logging_message('MonitorLog', 'V', f"QueueMonitor Match line: {msg}")
                     result_list.append(item)
                     if len(result_list) == accum_results and timeout_extra > 0 and not extra_timer_is_running:
                         extra_timer_is_running = True
@@ -462,10 +462,10 @@ class QueueMonitor:
                 if self._abort:
                     self.stop()
                     if error_message:
-                        logging_message('function', 'V', error_message)
-                        logging_message('function', 'V', f"Results accumulated: ",
+                        logging_message('MonitorLog', 'V', error_message)
+                        logging_message('MonitorLog', 'V', f"Results accumulated: ",
                                         f"{len(result) if isinstance(result, list) else 0}")
-                        logging_message('function', 'V', f"Results expected: {accum_results}")
+                        logging_message('MonitorLog', 'V', f"Results expected: {accum_results}")
                     raise TimeoutError(error_message)
                 result = self.get_results(callback=callback, accum_results=accum_results, timeout=timeout,
                                           update_position=update_position, timeout_extra=timeout_extra)
@@ -849,7 +849,7 @@ def generate_monitoring_callback(regex):
     def new_callback(line):
         match = re.match(regex, line)
         if match:
-            logging_message('function', 'VV', f"Line:{line} match regex {regex}")
+            logging_message('MonitorLog', 'V', f"Line:{line} match regex {regex}")
             if match.group(1) is not None:
                 return match.group(1)
             return True
@@ -901,11 +901,11 @@ class HostMonitor:
             for path in monitored_files:
                 output_path = f'{host}_{path.split("/")[-1]}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
-                logging_message('function', 'VV', f'Add new file composer process for {host} and path: {path}')
+                logging_message('MonitorLog', 'V', f'Add new file composer process for {host} and path: {path}')
                 self._file_monitors.append(self._start(host=host,
                                                        payload=[block for block in payload if block["path"] == path],
                                                        path=output_path))
-                logging_message('function', 'VV', f'Add new file monitor process for {host} and path: {path}')
+                logging_message('MonitorLog', 'V', f'Add new file monitor process for {host} and path: {path}')
 
         while True:
             if not any([handler.is_alive() for handler in self._file_monitors]):
@@ -934,7 +934,7 @@ class HostMonitor:
             truncate_file(os.path.join(self._tmp_path, output_path))
         except FileNotFoundError:
             pass
-        logging_message('function', 'VV' f'Starting file composer for {host} and path: {path}. '
+        logging_message('MonitorLog', 'V' f'Starting file composer for {host} and path: {path}. '
                         f'Composite file in {os.path.join(self._tmp_path, output_path)}')
         tmp_file = os.path.join(self._tmp_path, output_path)
         while True:
@@ -968,7 +968,7 @@ class HostMonitor:
                 tailer.encoding = encoding
             tailer.start()
             for case in payload:
-                logging_message('function', 'VV', f'Starting QueueMonitor for {host} and message: {case["regex"]}')
+                logging_message('MonitorLog', 'V', f'Starting QueueMonitor for {host} and message: {case["regex"]}')
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
@@ -981,7 +981,7 @@ class HostMonitor:
                     except (KeyError, TypeError):
                         self._queue.put({
                             host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
-                logging_message('function', 'VV', f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
+                logging_message('MonitorLog', 'V', f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
         finally:
             tailer.shutdown()
 
@@ -997,18 +997,18 @@ class HostMonitor:
 
     def check_result(self):
         """Check if a TimeoutError occurred."""
-        logging_message('function', 'VV', f'Checking results...')
+        logging_message('MonitorLog', 'V', f'Checking results...')
         while not self._queue.empty():
             result = self._queue.get(block=True)
             for host, msg in result.items():
                 if isinstance(msg, TimeoutError):
                     raise msg
-                logging_message('function', 'VV', f'Received from {host} the expected message: {msg}')
+                logging_message('MonitorLog', 'V', f'Received from {host} the expected message: {msg}')
                 self._result[host].append(msg)
 
     def clean_tmp_files(self):
         """Remove tmp files."""
-        logging_message('function', 'VV', f'Cleaning temporal files...')
+        logging_message('MonitorLog', 'V', f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
             os.remove(os.path.join(self._tmp_path, file))
 
@@ -1037,7 +1037,7 @@ def wait_mtime(path, time_step=5, timeout=-1):
         time.sleep(time_step)
 
         if last_mtime - tic >= timeout:
-            logging_message('function', 'V', f"{len(open(path, 'r').readlines())} lines within the file.")
+            logging_message('MonitorLog', 'V', f"{len(open(path, 'r').readlines())} lines within the file.")
             raise TimeoutError("Reached timeout.")
 
 

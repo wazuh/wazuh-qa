@@ -135,8 +135,8 @@ class Logging:
 
 
 LOGGING_LEVELS = {
-    'V': 1,
-    'VV': 2
+    'V': logging.ERROR,
+    'VV': logging.DEBUG
 }
 
 

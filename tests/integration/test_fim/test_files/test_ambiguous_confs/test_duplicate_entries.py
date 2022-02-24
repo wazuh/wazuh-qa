@@ -149,7 +149,7 @@ def check_event(previous_mode: str, previous_event: dict, file: str):
     """
     current_event = None
     try:
-        logging_message('test', 'VV',  'Checking for a second event...')
+        logging_message('TestLog', 'VV',  'Checking for a second event...')
         current_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                 callback=callback_detect_event,
                                                 error_message='Did not receive expected '
@@ -211,7 +211,7 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
         - realtime
         - time_travel
     '''
-    logging_message('test', 'VV',  'Applying the test configuration')
+    logging_message('TestLog', 'VV',  'Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_simple'}, get_configuration['tags'])
     file = 'hello'
     mode = get_configuration['metadata']['fim_mode']
@@ -219,12 +219,12 @@ def test_duplicate_entries(get_configuration, configure_environment, restart_sys
     scheduled = mode == 'scheduled'
     mode = "realtime" if mode == "real-time" else mode
 
-    logging_message('test', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
+    logging_message('TestLog', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
 
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled)
-    logging_message('test', 'VV',  'Checking the event...')
+    logging_message('TestLog', 'VV',  'Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      error_message=f'Did not receive expected event for file '
@@ -278,30 +278,30 @@ def test_duplicate_entries_sregex(get_configuration, configure_environment,
         - scheduled
         - time_travel
     '''
-    logging_message('test', 'VV',  'Applying the test configuration')
+    logging_message('TestLog', 'VV',  'Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_sregex'}, get_configuration['tags'])
     file = 'hello'
     mode = get_configuration['metadata']['fim_mode']
     scheduled = mode == 'scheduled'
 
     # Check for an event
-    logging_message('test', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
+    logging_message('TestLog', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
-        logging_message('test', 'VV',  'Checking the event...')
+        logging_message('TestLog', 'VV',  'Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
         raise AttributeError(f'Unexpected event {event}')
 
     # Check for a second event
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
-        logging_message('test', 'VV',  'Checking the event...')
+        logging_message('TestLog', 'VV',  'Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event).result()
         raise AttributeError(f'Unexpected event {event}')
@@ -349,25 +349,25 @@ def test_duplicate_entries_report(get_configuration, configure_environment, rest
         - scheduled
         - time_travel
     '''
-    logging_message('test', 'VV',  'Applying the test configuration')
+    logging_message('TestLog', 'VV',  'Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_report'}, get_configuration['tags'])
     file = 'hello'
     mode = get_configuration['metadata']['fim_mode']
     scheduled = mode == 'scheduled'
 
     # Check for an event
-    logging_message('test', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
+    logging_message('TestLog', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: " "')
     create_file(REGULAR, testdir1, file, content=' ')
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message=f'Did not receive expected event for file '
                                           f'{os.path.join(testdir1, file)}').result()
 
     # Check for a second event
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message=f'Did not receive expected event for file '
@@ -431,7 +431,7 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
         content.replace(old, new)
         f.close()
 
-    logging_message('test', 'VV',  'Applying the test configuration')
+    logging_message('TestLog', 'VV',  'Applying the test configuration')
     check_apply_test({'ossec_conf_duplicate_complex'}, get_configuration['tags'])
     file = 'hello'
     mode = get_configuration['metadata']['fim_mode']
@@ -439,13 +439,13 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
     scheduled = mode == 'scheduled'
     mode = "realtime" if mode == "real-time" else mode
 
-    logging_message('test', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: "testing"')
+    logging_message('TestLog', 'VV',  f'Adding file {os.path.join(testdir1, file)}, content: "testing"')
     create_file(REGULAR, testdir1, file, content='testing')
     file_path = os.path.join(testdir1, file)
 
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    logging_message('test', 'VV',  'Checking the event...')
+    logging_message('TestLog', 'VV',  'Checking the event...')
     event1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      error_message=f'It was expected that a "Sending FIM event:" '
@@ -453,29 +453,29 @@ def test_duplicate_entries_complex(get_configuration, configure_environment, res
                                      ).result()
 
     # Replace character, change the group and ownership and touch the file
-    logging_message('test', 'VV',  f'Replacing a character of {os.path.join(testdir1, file)} content')
+    logging_message('TestLog', 'VV',  f'Replacing a character of {os.path.join(testdir1, file)} content')
     replace_character('i', '1', file_path)
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s group')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s group')
     modify_file_group(testdir1, file)
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s owner')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s owner')
     modify_file_owner(testdir1, file)
-    logging_message('test', 'VV',  f'Adding new file {file_path}')
+    logging_message('TestLog', 'VV',  f'Adding new file {file_path}')
     Path(file_path).touch()
 
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     event2 = check_event(previous_mode=mode, previous_event=event1, file=file)
     assert event2 is None, "Multiple events created"
 
     # Change the permissions and the size of the file
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s permissions')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)}\'s permissions')
     modify_file_permission(testdir1, file)
-    logging_message('test', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
+    logging_message('TestLog', 'VV',  f'Modifying {os.path.join(testdir1, file)} content')
     modify_file_content(testdir1, file)
 
-    logging_message('test', 'VV',  f'Time travel: {scheduled}')
+    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    logging_message('test', 'VV',  'Checking the event...')
+    logging_message('TestLog', 'VV',  'Checking the event...')
     event3 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                      callback=callback_detect_event,
                                      error_message=f'Did not receive expected "Sending FIM event:" '

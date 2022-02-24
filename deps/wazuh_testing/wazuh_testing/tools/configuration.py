@@ -630,7 +630,7 @@ def get_local_internal_options_dict():
                     option_name, option_value = configuration_option.split('=')
                     local_internal_option_dict[option_name] = option_value
                 except ValueError:
-                    logging_message('function', 'V',  f"Invalid local_internal_options value: {configuration_option}")
+                    logging_message('FunctionLog', 'V',  f"Invalid local_internal_options value: {configuration_option}")
                     raise ValueError('Invalid local_internal_option')
 
     return local_internal_option_dict

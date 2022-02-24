@@ -22,7 +22,7 @@ def callback_detect_event(line):
         if json_event['type'] == 'event':
             return json_event
     except (json.JSONDecodeError, AttributeError, KeyError) as e:
-        logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
+        logging_message('FunctionLog', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_entries_path_count(line):

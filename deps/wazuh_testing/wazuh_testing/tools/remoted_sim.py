@@ -589,7 +589,7 @@ class RemotedSimulator:
         keys = self.get_key()
         if keys is None:
             # No valid keys
-            logging_message('function', 'V', "Not valid keys used.")
+            logging_message('FunctionLog', 'V', "Not valid keys used.")
             return -1
         (id, name, ip, key) = keys
         self.create_encryption_key(id, name, key)

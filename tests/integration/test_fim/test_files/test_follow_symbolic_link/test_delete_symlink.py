@@ -182,7 +182,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-        logging_message('test', 'VV', f'Unexpected event {event.result()}')
+        logging_message('TestLog', 'VV', f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     # Restore symlink and modify the target again. Expect events now

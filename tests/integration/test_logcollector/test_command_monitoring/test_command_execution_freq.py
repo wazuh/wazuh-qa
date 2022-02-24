@@ -174,7 +174,7 @@ def test_command_execution_freq(configure_local_internal_options_module, get_con
 
     before = str(datetime.now())
     TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-    logging_message('test', 'VV',  f"Changing the system clock from {before} to {datetime.now()}")
+    logging_message('TestLog', 'VV',  f"Changing the system clock from {before} to {datetime.now()}")
 
     # The command should not be executed in the middle of the command execution cycle.
     with pytest.raises(TimeoutError):
@@ -183,7 +183,7 @@ def test_command_execution_freq(configure_local_internal_options_module, get_con
 
     before = str(datetime.now())
     TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-    logging_message('test', 'VV',  f"Changing the system clock from {before} to {datetime.now()}")
+    logging_message('TestLog', 'VV',  f"Changing the system clock from {before} to {datetime.now()}")
 
     log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)

@@ -62,7 +62,7 @@ def mock_agent(
     try:
         query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
-        logging_message('function', 'V', "Failed to mock agent in database!")
+        logging_message('FunctionLog', 'V', "Failed to mock agent in database!")
 
 
 def load_db(db_path):

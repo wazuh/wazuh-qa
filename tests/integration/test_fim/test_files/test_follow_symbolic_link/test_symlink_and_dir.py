@@ -189,7 +189,7 @@ def test_symlink_dir_inside_monitored_dir(tags_to_apply, get_configuration, conf
 
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event)
-        logging_message('test', 'V',  f'Unexpected event {event.result()}')
+        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     # Create a file in the pointed folder and expect events

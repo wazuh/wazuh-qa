@@ -260,7 +260,7 @@ class Agent:
             ssl_socket.close()
             sock.close()
 
-        logging_message('simulator', 'V', "Registration - " +
+        logging_message('SimulatorLog', 'V', "Registration - " +
                         f"{self.name}({self.id}) in {self.registration_address}")
 
     def register(self):
@@ -430,7 +430,7 @@ class Agent:
                     else:
                         continue
                 except MemoryError:
-                    logging_message('simulator', 'V', f"Memory error, trying to allocate {data_len}.")
+                    logging_message('SimulatorLog', 'V', f"Memory error, trying to allocate {data_len}.")
                     return
                 except Exception:
                     return
@@ -458,7 +458,7 @@ class Agent:
                 msg_decoded = msg_decompress.decode('ISO-8859-1')
                 self.process_message(sender, msg_decoded)
             except zlib.error:
-                logging_message('simulator', 'V', "Corrupted message from the manager. Continuing.")
+                logging_message('SimulatorLog', 'V', "Corrupted message from the manager. Continuing.")
 
     def stop_receiver(self):
         """Stop Agent listener."""
@@ -529,7 +529,7 @@ class Agent:
             command = 'getstate'
         else:
             return
-        logging_message('simulator', 'V', f"Processing command: {message_list}")
+        logging_message('SimulatorLog', 'V', f"Processing command: {message_list}")
 
         if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
@@ -619,7 +619,7 @@ class Agent:
             msg = msg.replace("<VERSION>", self.long_version)
             msg = msg.replace("<MERGED_CHECKSUM>", self.merged_checksum)
         except UnboundLocalError:
-            logging_message('simulator', 'V', "Error creating keep alive for the agent. Check if " +
+            logging_message('SimulatorLog', 'V', "Error creating keep alive for the agent. Check if " +
                             "the OS is in the keepalives.txt")
 
         if self.labels:
@@ -628,7 +628,7 @@ class Agent:
                 msg_as_list.insert(1, f'"{key}":{value}')
             msg = '\n'.join(msg_as_list)
 
-        logging_message('simulator', 'VV', f"Keep alive message = {msg}")
+        logging_message('SimulatorLog', 'VV', f"Keep alive message = {msg}")
 
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
@@ -1003,10 +1003,10 @@ class Rootcheck:
         """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
-            logging_message('simulator', 'VV', f"Scan started - {self.agent_name}({self.agent_id}) "
+            logging_message('SimulatorLog', 'VV', f"Scan started - {self.agent_name}({self.agent_id}) "
                                                         f"- rootcheck({self.rootcheck_path})")
         if message == 'Ending rootcheck scan.':
-            logging_message('simulator', 'VV', f"Scan ended - {self.agent_name}({self.agent_id}) "
+            logging_message('SimulatorLog', 'VV', f"Scan ended - {self.agent_name}({self.agent_id}) "
                                                         f"- rootcheck({self.rootcheck_path})")
         return message
 
@@ -1505,7 +1505,7 @@ class Sender:
             try:
                 self.socket.send(length + event)
             except BrokenPipeError:
-                logging_message('simulator', 'V', "Broken Pipe error while sending event. " +
+                logging_message('SimulatorLog', 'V', "Broken Pipe error while sending event. " +
                                 "Creating new socket...")
 
                 sleep(5)
@@ -1513,7 +1513,7 @@ class Sender:
                 self.socket.connect((self.manager_address, int(self.manager_port)))
                 self.socket.send(length + event)
             except ConnectionResetError:
-                logging_message('simulator', 'V', "Connection reset by peer. Continuing...")
+                logging_message('SimulatorLog', 'V', "Connection reset by peer. Continuing...")
         if is_udp(self.protocol):
             self.socket.sendto(event, (self.manager_address, int(self.manager_port)))
 
@@ -1594,7 +1594,7 @@ class InjectorThread(threading.Thread):
     def keep_alive(self):
         """Send a keep alive message from the agent to the manager."""
         sleep(10)
-        logging_message('simulator', 'VV', "Startup - {}({})".format(self.agent.name, self.agent.id))
+        logging_message('SimulatorLog', 'VV', "Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
         self.sender.send_event(self.agent.keep_alive_event)
         start_time = time()
@@ -1605,14 +1605,14 @@ class InjectorThread(threading.Thread):
             eps = self.agent.modules["keepalive"]["eps"]
         while self.stop_thread == 0:
             # Send agent keep alive
-            logging_message('simulator', 'VV', f"KeepAlive - {self.agent.name}({self.agent.id})")
+            logging_message('SimulatorLog', 'VV', f"KeepAlive - {self.agent.name}({self.agent.id})")
 
             self.sender.send_event(self.agent.keep_alive_event)
             self.totalMessages += 1
             if frequency > 0:
                 sleep(frequency - ((time() - start_time) % frequency))
             else:
-                logging_message('simulator', 'V', 'Merged checksum modified to force manager overload')
+                logging_message('SimulatorLog', 'V', 'Merged checksum modified to force manager overload')
                 new_checksum = str(getrandbits(128))
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
@@ -1687,7 +1687,7 @@ class InjectorThread(threading.Thread):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
-        logging_message('simulator', 'VV', f"Starting - {self.agent.name}({self.agent.id})" + 
+        logging_message('SimulatorLog', 'VV', f"Starting - {self.agent.name}({self.agent.id})" + 
                                                     f"({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()

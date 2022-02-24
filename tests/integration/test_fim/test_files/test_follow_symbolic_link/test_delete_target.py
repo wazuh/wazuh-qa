@@ -216,9 +216,9 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         # We don't expect any event since symlink hasn't updated the link information
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            logging_message('test', 'V', 'A "Sending FIM event: ..." event has been detected. No event should be detected as symlink '
+            logging_message('TestLog', 'V', 'A "Sending FIM event: ..." event has been detected. No event should be detected as symlink '
                             'has not updated the link information yet.')
-            logging_message('test', 'V', f'Unexpected event {event.result()}')
+            logging_message('TestLog', 'V', f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
 
     wait_for_symlink_check(wazuh_log_monitor)

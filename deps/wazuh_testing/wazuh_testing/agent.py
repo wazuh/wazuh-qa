@@ -283,7 +283,7 @@ def callback_detect_upgrade_ack_event(event_log):
             json_event = json.loads(match.group(1))
             return json_event
         except (json.JSONDecodeError, AttributeError) as e:
-            logging_message('function', 'V', f"Couldn't load a log line into json object. Reason {e}")
+            logging_message('FunctionLog', 'V', f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_upgrade_module_up():

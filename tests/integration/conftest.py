@@ -388,8 +388,13 @@ def pytest_runtest_makereport(item, call):
         log_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logs')
         test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
 
-        test_case_data = re.search(r"(.*)\[([A-Za-z0-9_]+)\]", item.name)
-        test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
+        test_case_data = re.match("(.*)\[(.*)\]", item.name)
+
+        if test_case_data:
+            test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
+        else:
+            test_case_folder = item.name
+
         test_case_log_folder = os.path.join(test_log_folder, test_case_folder)
         for file in os.listdir(test_case_log_folder):
             with open(os.path.join(test_case_log_folder, file)) as f:
@@ -774,49 +779,49 @@ def daemons_handler(get_configuration, request):
         if 'daemons' in daemons_handler_configuration and not all_daemons:
             daemons = daemons_handler_configuration['daemons']
             if not daemons or (type(daemons) == list and len(daemons) == 0):
-                logging_message('function', 'V',  'Daemons list is not set')
+                logging_message('FunctionLog', 'V',  'Daemons list is not set')
                 raise ValueError
 
         if 'all_daemons' in daemons_handler_configuration:
-            logging_message('function', 'VV',  f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
+            logging_message('FunctionLog', 'VV',  f"Wazuh control set to {daemons_handler_configuration['all_daemons']}")
             all_daemons = daemons_handler_configuration['all_daemons']
 
         if 'ignore_errors' in daemons_handler_configuration:
-            logging_message('function', 'VV',  f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
+            logging_message('FunctionLog', 'VV',  f"Ignore error set to {daemons_handler_configuration['ignore_errors']}")
             ignore_errors = daemons_handler_configuration['ignore_errors']
 
     except AttributeError as daemon_configuration_not_set:
-        logging_message('function', 'V',  'daemons_handler_configuration is not set')
+        logging_message('FunctionLog', 'V',  'daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
     try:
         if all_daemons:
-            logging_message('function', 'VV',  'Restarting wazuh using wazuh-control')
+            logging_message('FunctionLog', 'VV',  'Restarting wazuh using wazuh-control')
             # Restart daemon instead of starting due to legacy used fixture in the test suite.
             control_service('restart')
         else:
             for daemon in daemons:
-                logging_message('function', 'VV',  f"Restarting {daemon}")
+                logging_message('FunctionLog', 'VV',  f"Restarting {daemon}")
                 # Restart daemon instead of starting due to legacy used fixture in the test suite.
                 control_service('restart', daemon=daemon)
 
     except ValueError as value_error:
-        logging_message('function', 'V',  f"{str(value_error)}")
+        logging_message('FunctionLog', 'V',  f"{str(value_error)}")
         if not ignore_errors:
             raise value_error
     except subprocess.CalledProcessError as called_process_error:
-        logging_message('function', 'V',  f"{str(called_process_error)}")
+        logging_message('FunctionLog', 'V',  f"{str(called_process_error)}")
         if not ignore_errors:
             raise called_process_error
 
     yield
 
     if all_daemons:
-        logging_message('function', 'VV',  'Stopping wazuh using wazuh-control')
+        logging_message('FunctionLog', 'VV',  'Stopping wazuh using wazuh-control')
         control_service('stop')
     else:
         for daemon in daemons:
-            logging_message('function', 'VV',  f"Stopping {daemon}")
+            logging_message('FunctionLog', 'VV',  f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
 
 
@@ -834,7 +839,7 @@ def file_monitoring(request):
     else:
         file_to_monitor = LOG_FILE_PATH
 
-    logging_message('function', 'VV',  f"Initializing file to monitor to {file_to_monitor}")
+    logging_message('FunctionLog', 'VV',  f"Initializing file to monitor to {file_to_monitor}")
 
     file_monitor = FileMonitor(file_to_monitor)
     setattr(request.module, 'log_monitor', file_monitor)
@@ -842,7 +847,7 @@ def file_monitoring(request):
     yield
 
     truncate_file(file_to_monitor)
-    logging_message('function', 'VV',  f"Trucanted {file_to_monitor}")
+    logging_message('FunctionLog', 'VV',  f"Trucanted {file_to_monitor}")
 
 
 @pytest.fixture(scope='module')
@@ -856,17 +861,17 @@ def configure_local_internal_options_module(request):
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
     except AttributeError as local_internal_configuration_not_set:
-        logging_message('function', 'VV',  'local_internal_options is not set')
+        logging_message('FunctionLog', 'VV',  'local_internal_options is not set')
         raise local_internal_configuration_not_set
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
 
-    logging_message('function', 'VV',  f"Set local_internal_option to {str(local_internal_options)}")
+    logging_message('FunctionLog', 'VV',  f"Set local_internal_option to {str(local_internal_options)}")
     conf.set_local_internal_options_dict(local_internal_options)
 
     yield
 
-    logging_message('function', 'VV',  f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    logging_message('FunctionLog', 'VV',  f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
@@ -905,17 +910,17 @@ def configure_local_internal_options_function(request):
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
     except AttributeError as local_internal_configuration_not_set:
-        logging_message('function', 'V', 'local_internal_options is not set')
+        logging_message('FunctionLog', 'V', 'local_internal_options is not set')
         raise local_internal_configuration_not_set
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
 
-    logging_message('function', 'V', f"Set local_internal_option to {str(local_internal_options)}")
+    logging_message('FunctionLog', 'V', f"Set local_internal_option to {str(local_internal_options)}")
     conf.set_local_internal_options_dict(local_internal_options)
 
     yield
 
-    logging_message('function', 'V', f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    logging_message('FunctionLog', 'V', f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 @pytest.fixture(scope='function')
@@ -1070,8 +1075,8 @@ class QALoggerFormatter(logging.Formatter):
 
 
 def pytest_logger_config(logger_config):
-    logger_config.add_loggers(['test', 'function', 'monitoring', 'simulator']) # Test-Fixture-functions-monitoring-simulators
-    logger_config.set_log_option_default('test')
+    logger_config.add_loggers(['TestLog', 'FunctionLog', 'SimulatorLog', 'MonitorLog'])
+    logger_config.set_log_option_default('TestLog')
 
     logging.getLevelName = getLoggingLevelNameQA
     logger_config.set_formatter_class(QALoggerFormatter)
