@@ -18,8 +18,6 @@ import zipfile
 import filetype
 import requests
 import yaml
-from wazuh_testing import logger
-
 
 
 def read_json(file_path):
