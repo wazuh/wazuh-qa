@@ -16,7 +16,6 @@ target = ["agents", "managers"] if not global_parameters.target_hosts else globa
 def get_log_daemon(log_line):
     pattern = re.compile(".*\d+\/\d+\/\d+ \d+:\d+:\d+ (.*?):")
     if pattern.match(log_line):
-        print(pattern.match(log_line).group(1))
         return pattern.match(log_line).group(1)
     else:
         return None
