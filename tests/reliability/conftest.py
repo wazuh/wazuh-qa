@@ -1,6 +1,6 @@
-import pytest
 import json
 
+import pytest
 from wazuh_testing import global_parameters
 
 
