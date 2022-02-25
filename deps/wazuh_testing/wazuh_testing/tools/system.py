@@ -280,6 +280,18 @@ class HostManager:
         return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
                                                    f"use_regex={use_regex}")
 
+    def get_stats(self, host: str, path: str):
+        """Retrieve file or file system status.
+
+        Args:
+            host (str): Hostname.
+            path (str): The full path of the file/object to get the facts of.
+
+        Returns:
+            Dictionary containing all the stat data.
+        """
+        return self.get_host(host).ansible("stat", f"path={path}")
+
 
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager

@@ -143,16 +143,18 @@ def test_missing_file(clean_files):
 
     # Check whether files are correctly synchronized and if correct permissions are applied.
     for file in files_to_sync:
-        m_content = host_manager.run_command(test_hosts[0], f'cat {file}')
+        m_stats = host_manager.get_stats(test_hosts[0], path=file)['stat']
 
         for host in worker_hosts:
-            ls_result = host_manager.run_command(host, f'ls {file}')
-            assert ls_result == file, f"File {file} was expected to be copied in {host}, but it was not."
-            perm = host_manager.run_command(host, f'stat -c "%a" {file}')
-            assert perm == '660', f"{file} permissions were expected to be '660' in {host}, but they are {perm}."
-            # Make sure the content of files in worker nodes is the same that in master node.
-            w_content = host_manager.run_command(host, f'cat {file}')
-            assert w_content == m_content, f'The content of {file} is different in worker {host} and in master.'
+            try:
+                w_stats = host_manager.get_stats(host, path=file)['stat']
+                assert w_stats['mode'] == '0660', f"{file} permissions were expected to be '660' in {host}, but they " \
+                                                  f"are {w_stats['mode']}."
+                # Make sure the content of files in worker nodes is the same that in master node.
+                assert w_stats['checksum'] == m_stats['checksum'], f'The content of {file} is different in worker ' \
+                                                                   f'{host} and in master.'
+            except KeyError:
+                pytest.fail(f'File {file} was expected to be copied in {host}, but it was not.')
 
     # Check that files which should not be synchronized are not sent to the workers. For example, only
     # merged.mg file inside /var/ossec/etc/shared/ directory should be synchronized, but nothing else.
