@@ -17,13 +17,24 @@ def clean_table(agent_id, table):
 
 
 def update_last_full_scan(last_scan=0, agent_id='000'):
-    """Update the last scan of an agent.
+    """Update the last full scan of an agent.
 
     Args:
         last_scan (int): Last scan ID. This is compute by casting to int the result of time().
         agent_id (str): Agent ID.
     """
     query_string = f"agent {agent_id} sql UPDATE vuln_metadata SET LAST_FULL_SCAN={last_scan}"
+    query_wdb(query_string)
+
+
+def update_last_partial_scan(last_scan=0, agent_id='000'):
+    """Update the last partial scan of an agent.
+
+    Args:
+        last_scan (int): Last scan ID. This is compute by casting to int the result of time().
+        agent_id (str): Agent ID.
+    """
+    query_string = f"agent {agent_id} sql UPDATE vuln_metadata SET LAST_PARTIAL_SCAN={last_scan}"
     query_wdb(query_string)
 
 
@@ -238,43 +249,6 @@ def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
     insert_os_info(**locals())
 
 
-def check_vulnerability_scan_inventory(agent_id='000', package='', version='', arch='', cve='', condition='',
-                                       severity='-', cvss2=0, cvss3=0):
-    """Check the existence or lack of a vulnerability in the agent's DB.
-
-    Args:
-        agent_id (str): Agent ID.
-        package (str): Package name.
-        version (str): Package version.
-        arch (str): Package architecture.
-        cve (str): Vulnerability ID associated to the vulnerable package.
-        condition (str): This parameter is used to check if the vulnerability exists ('inserted') or
-                         not ('removed') in the inventory.
-        severity (str): Vulnerability severity.
-        cvss2 (str): CVSS2 score of the vulnerable package.
-        cvss3 (str): CVSS3 score of the vulnerable package.
-
-    Raises:
-        Exception: If the condition has unexpected value.
-    """
-    if condition != 'inserted' and condition != 'removed':
-        raise Exception(f'The "condition" parameter has an unexpected value: {condition}')
-
-    if condition == 'inserted':
-        query = f"agent {agent_id} sql SELECT CASE WHEN EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' AND " \
-                f"name = '{package}' AND version = '{version}' AND architecture = '{arch} AND severity = ' " \
-                f"'{severity}' AND cvss2_score = {cvss2} AND cvss3_score = {cvss3}) THEN 'true' ELSE 'false' END " \
-                "as 'result'"
-    else:
-        query = f"agent {agent_id} sql SELECT CASE WHEN NOT EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' " \
-                f"AND name = '{package}' AND version = '{version}' AND architecture = '{arch}')  THEN 'true' " \
-                f"ELSE 'false' END as 'result'"
-
-    result = query_wdb(query)[0]['result']
-
-    return result
-
-
 def clean_sys_programs(agent_id='000'):
     """Clean all the agent packages data from the DB
 
@@ -310,3 +284,47 @@ def get_packages_number(agent_id='000', package=''):
     result = query_wdb(query)[0]['count(*)']
 
     return result
+
+
+def get_vulnerability_inventory_data(agent_id='000', name=None, status=None, cve=None, version=None, type=None,
+                                     architecture=None, severity=None, cvss2_score=None, cvss3_score=None):
+    """Get the vulnerability inventory data according to the specified parameters.
+
+    Args:
+        agent_id (str):
+        name (str):
+        status (str):
+        cve (str):
+        version (str):
+        type (str):
+        architecture (str):
+        severity (str):
+        cvss2_score (float):
+        cvss3_score (float):
+
+    Returns:
+        list(dict): Data in the DB.
+
+    """
+    # Build a dictionary with local variables
+    query_parameters = locals()
+
+    # Remove non query parameters
+    del query_parameters['agent_id']
+
+    # Define the initial query string
+    query = f"agent {agent_id} sql SELECT * FROM vuln_cves"
+
+    # Build the query string according to the specified parameters
+    first_parameter = True
+    for item, value in query_parameters.items():
+        if value is not None:
+            formated_value = f"'{value}'" if isinstance(value, str) else value
+
+            if first_parameter:
+                query += f" WHERE {item}={formated_value}"
+                first_parameter = False
+            else:
+                query += f" AND {item}={formated_value}"
+
+    return query_wdb(query)
