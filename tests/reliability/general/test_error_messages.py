@@ -90,10 +90,11 @@ os_version:
     - Windows Server 2016
     - Windows Server 2019
 '''
-import pytest
 import json
 import os
 import re
+
+import pytest
 
 from wazuh_testing import global_parameters
 
