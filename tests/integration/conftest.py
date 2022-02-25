@@ -1079,13 +1079,14 @@ def pytest_logger_config(logger_config):
     logger_config.add_loggers(['TestLog', 'FunctionLog', 'SimulatorLog', 'MonitorLog'])
     logging.getLevelName = getLoggingLevelNameQA
     logger_config.set_log_option_default('')
+    logger_config.set_formatter_class(QALoggerFormatter)
     logging.V = logging.ERROR
     logging.VV = logging.DEBUG
 
 
 def pytest_logger_logdirlink(config):
-    if config.getoption('--loggers'):
+    if config.getoption('--logger-logsdir'):
         global_parameters.logger_file_enable = True
-        return os.path.join(os.path.dirname(__file__), 'logs')
+        return os.path.join(os.path.dirname(__file__), config.getoption('--logger-logsdir'))
     else:
         global_parameters.logger_file_enable = False
