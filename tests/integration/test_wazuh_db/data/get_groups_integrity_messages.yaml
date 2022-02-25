@@ -37,6 +37,14 @@
     agent_ids: [1,2]
     agent_status: ["synced", "syncreq"]
 -
+  name: "Two Agents Registered - Hash param Empty. => error hash Less than 40 chars"
+  test_case:
+  -
+    output: err Hash hex-digest does not have the expected length. Expected (40) got (0)
+    invalid_hash: ""
+    agent_ids: [1,2]
+    agent_status: ["synced", "syncreq"]
+-
   name: "Two Agents Registered - Both Synced - Hash does not match DB Hash => hash_mismatch"
   test_case:
   -
