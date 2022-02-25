@@ -3,7 +3,7 @@
   name: "Group Append - Add TestGroup1"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":001,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":001,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 1
     expected_group: "TestGroup1"
@@ -11,7 +11,7 @@
   name: "Group Append Empty groups - Agent has no groups - No groups added"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":002,\"groups\":[]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":002,\"groups\":[]}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 2
     expected_group: "None"
@@ -19,8 +19,8 @@
   name: "Group Append Empty groups - Agent has default group - No groups affected"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":002,\"groups\":[\"default\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":002,\"groups\":[]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":002,\"groups\":[\"default\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":002,\"groups\":[]}]}"
     output: "ok"
     agent_id: 2
     expected_group: "default"
@@ -28,8 +28,8 @@
   name: "Group Append Add same group twice - Has only one group"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":003,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":003,\"groups\":[\"TestGroup1\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":003,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":003,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 3
     expected_group: "TestGroup1"
@@ -37,8 +37,8 @@
   name: "Group Append Two groups - Agent Has two groups"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":004,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":004,\"groups\":[\"TestGroup2\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":004,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":004,\"groups\":[\"TestGroup2\"]}]}"
     output: "ok"
     agent_id: 4
     expected_group: "TestGroup1,TestGroup2"
@@ -46,7 +46,7 @@
   name: "Group Empty-Only - Agent Has no groups. One Group is Added"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":005,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":005,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 5
     expected_group: "TestGroup1"
@@ -54,8 +54,8 @@
   name: "Group Empty-Only - Agent Has no groups. No new groups added"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":006,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":006,\"groups\":[\"TestGroup2\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":006,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"empty_only\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":006,\"groups\":[\"TestGroup2\"]}]}"
     output: "ok"
     agent_id: 6
     expected_group: "TestGroup1"
@@ -63,8 +63,8 @@
   name: "Group Override - Agent Has one group.  New group replaces old group"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":007,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":007,\"groups\":[\"TestGroup2\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":007,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":007,\"groups\":[\"TestGroup2\"]}]}"
     output: "ok"
     agent_id: 7
     expected_group: "TestGroup2"
@@ -72,8 +72,8 @@
   name: "Group Override - Agent has Group - Pass no new group.  Error - groups not affected"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":008,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":008,\"groups\":[]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":008,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":008,\"groups\":[]}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 8
     expected_group: "TestGroup1"
@@ -81,8 +81,8 @@
   name: "Group Remove - Agent has one Group - Remove the group.  Agent has default assigned"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":009,\"groups\":[\"TestGroup1\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":009,\"groups\":[\"TestGroup1\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":009,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":009,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 9
     expected_group: "default"
@@ -90,8 +90,8 @@
   name: "Group Remove - Agent has TestGroup1 and TestGroup2 - Remove Tesgroup1.  Agent has TestGroup2 assigned"
   test_case:
   -
-    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":010,\"groups\":[\"TestGroup1\",\"TestGroup2\"]}]}"
-    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":010,\"groups\":[\"TestGroup1\"]}]}"
+    pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":010,\"groups\":[\"TestGroup1\",\"TestGroup2\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":010,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 10
     expected_group: "TestGroup2"
@@ -99,7 +99,7 @@
   name: "Group Remove - Agent has no groups - Try remove a group.  Agent has default assigned "
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":011,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"remove\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":011,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 11
     expected_group: "default"
@@ -107,7 +107,7 @@
   name: "Invalid Mode - use an Invalid mode - no groups added"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"wrong_mode\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":012,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"wrong_mode\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":012,\"groups\":[\"TestGroup1\"]}]}"
     output: "err Invalid mode 'wrong_mode' in set_agent_groups command"
     agent_id: 12
     expected_group: "None"
@@ -115,7 +115,7 @@
   name: "No Mode - No mode is passed - no groups affected"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":013,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":013,\"groups\":[\"TestGroup1\"]}]}"
     output: "err Invalid mode '' in set_agent_groups command"
     agent_id: 13
     expected_group: "None"
@@ -123,7 +123,7 @@
   name: "sync_status Synced - Assign a group using Synced Sync Status - agent has TestGroup1 assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"synced\",\"source\":\"remote\",\"data\":[{\"id\":014,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"synced\",\"data\":[{\"id\":014,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 14
     expected_group: "TestGroup1"
@@ -131,7 +131,7 @@
   name: "Wrong sync_status - Assign a group using and invalid Sync_Status - agent has no group"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"wrong_status\",\"source\":\"remote\",\"data\":[{\"id\":015,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"wrong_status\",\"data\":[{\"id\":015,\"groups\":[\"TestGroup1\"]}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 15
     expected_group: "None"
@@ -139,7 +139,7 @@
   name: "No sync_status - Assign a group using and empty Sync_Status field - agent has no group assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"\",\"source\":\"remote\",\"data\":[{\"id\":016,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"\",\"data\":[{\"id\":016,\"groups\":[\"TestGroup1\"]}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 16
     expected_group: "None"
@@ -147,7 +147,7 @@
   name: "Missing Fields - Assign a group using without data field - agent has no group assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\"}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\"}"
     output: "err Invalid JSON data, missing required fields"
     agent_id: 16
     expected_group: "None"
@@ -155,7 +155,7 @@
   name: "Missing Fields - Assign a group using without data groups field - agent has no group assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":016}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":016}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 16
     expected_group: "None"
@@ -163,23 +163,15 @@
   name: "Missing Fields - Assign a group using without data id field - agent has no group assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"groups\":[\"TestGroup1\"]}]}"
     output: "err An error occurred during the set of the groups"
     agent_id: 16
     expected_group: "None"
 -
-  name: "Missing Fields - Assign a group using without source field - agent has TestGroup1 assigned"
-  test_case:
-  -
-    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":016,\"groups\":[\"TestGroup1\"]}]}"
-    output: "ok"
-    agent_id: 16
-    expected_group: "TestGroup1"
--
   name: "Missing Fields - Assign a group using without mode field - agent has no group assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"sync_status\":\"syncreq\",\"source\":\"remote\",\"data\":[{\"id\":017,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"sync_status\":\"syncreq\",\"data\":[{\"id\":017,\"groups\":[\"TestGroup1\"]}]}"
     output: "err Invalid JSON data, missing required fields"
     agent_id: 17
     expected_group: "None"
@@ -187,7 +179,7 @@
   name: "Missing Fields - Assign a group using without sync_status field - agent has TestGroup1 assigned"
   test_case:
   -
-    input: "global set-agent-groups {\"mode\":\"append\",\"source\":\"remote\",\"data\":[{\"id\":018,\"groups\":[\"TestGroup1\"]}]}"
+    input: "global set-agent-groups {\"mode\":\"append\",\"data\":[{\"id\":018,\"groups\":[\"TestGroup1\"]}]}"
     output: "ok"
     agent_id: 18
     expected_group: "TestGroup1"
