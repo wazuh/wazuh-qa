@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import functools
@@ -6,10 +6,12 @@ import json
 import logging
 import socket
 import sqlite3
+import time
 
 from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
+
 
 def callback_wazuhdb_response(item):
     if isinstance(item, tuple):
@@ -167,6 +169,28 @@ def clean_agents_from_db():
         raise Exception('Unable to clean agents')
 
 
+def clean_groups_from_db():
+    """
+    Clean groups from DB
+    """
+    command = 'global sql DELETE FROM "group"'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean groups')
+
+
+def clean_belongs():
+    """
+    Clean belong DB
+    """
+    command = 'global sql DELETE FROM belongs'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean belongs')
+
+
 def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
                        disconnection_time=0):
     """
@@ -180,3 +204,18 @@ def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, co
         query_wdb(update_command)
     except Exception:
         raise Exception(f"Unable to add agent {id}")
+
+
+def insert_agent_into_group(amount):
+    for i in range(amount):
+        id = i + 1
+        name = 'Agent-test' + str(id)
+        date = time.time()
+        command = f'global insert-agent {{"id":{id},"name":"{name}","date_add":{date}}}'
+        results = query_wdb(command)
+        assert results == 'ok'
+
+        command = f'''global set-agent-groups {{"mode":"append","sync_status":"syncreq",
+                   "source":"remote","data":[{{"id":{id},"groups":["Test_group{id}"]}}]}}'''
+        results = query_wdb(command)
+        assert results == 'ok'

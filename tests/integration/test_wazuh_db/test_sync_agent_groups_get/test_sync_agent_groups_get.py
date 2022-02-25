@@ -1,11 +1,54 @@
-
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: integration
+brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh persistent information, exposing a socket
+       to receive requests and provide information. The Wazuh core uses list-based databases to store information
+       related to agent keys, and FIM/Rootcheck event data.
+       This test checks the usage of the sync-agent-groups-get command used to allow the cluster getting the
+       information to be synchronized..
+tier: 0
+modules:
+    - wazuh_db
+components:
+    - manager
+daemons:
+    - wazuh-db
+os_platform:
+    - linux
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-db.html
+tags:
+    - wazuh_db
+'''
 import os
 import time
 import pytest
 import yaml
+import json
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.wazuh_db import query_wdb
-from wazuh_testing.tools.services import delete_dbs
+from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
+                                    clean_groups_from_db, clean_belongs)
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -21,30 +64,19 @@ log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets= None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 agents = ['agent1', 'agent2']
 
 
-#Fixtures
-@pytest.fixture(scope='module')
-def remove_database(request):
-    yield
-    delete_dbs()
-
-
-@pytest.fixture(scope='module')
+# Fixtures
+@pytest.fixture(scope='function')
 def pre_insert_agents():
-    for i in range(len(agents)):
-        id = i + 1
-        name = 'Agent-test' + str(id)
-        date = time.time()
-        command = f'global insert-agent {{"id":{id},"name":"{name}","date_add":{date}}}'
-        results = query_wdb(command)
-        assert results == 'ok'
+    insert_agent_into_group(2)
 
-        command = f'global set-agent-groups {{"mode":"append","sync_status":"syncreq","source":"remote","data":[{{"id":{id},"groups":["Test_group{id}"]}}]}}'
-        results = query_wdb(command)
-        assert results == 'ok'
+    yield
+    clean_agents_from_db()
+    clean_groups_from_db()
+    clean_belongs()
 
 
 # Tests
@@ -54,17 +86,48 @@ def pre_insert_agents():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_set_agent_groups(remove_database, configure_sockets_environment, connect_to_sockets_module, test_case, pre_insert_agents):
-    
+def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_module, test_case, pre_insert_agents):
+    '''
+    description: Check that commands about sync_aget_groups_get works properly.
+    wazuh_min_version: 4.4.0
+    parameters:
+        - configure_sockets_environment:
+            type: fixture
+            brief: Configure environment for sockets and MITM.
+        - connect_to_sockets_module:
+            type: fixture
+            brief: Module scope version of 'connect_to_sockets' fixture.
+        - test_case:
+            type: fixture
+            brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
+        - pre_insert_agents:
+            type: fixture
+            brief: fixture in charge of insert agents and groups into DB.
+    assertions:
+        - Verify that the socket response matches the expected output.
+    input_description:
+        - Test cases are defined in the sync_agent_groups_get.yaml file.
+    expected_output:
+        - an array with all the agents that match with the search criteria
+    tags:
+        - wazuh_db
+        - wdb_socket
+    '''
     case_data = test_case[0]
     output = case_data["output"]
 
     if 'pre_input' in case_data:
         query_wdb(case_data['pre_input'])
 
+    time.sleep(1)
     response = query_wdb(case_data["input"])
-    
+
     # validate response
     assert str(response) == output
 
-    
+    # validate if the status of the group has change
+    if "new_status" in case_data:
+        agent_id = json.loads(case_data["agent_id"])
+        for id in agent_id:
+            response = query_wdb(f'global get-agent-info {id}')
+            assert case_data["new_status"] == response[0]['group_sync_status']
