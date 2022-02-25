@@ -1,3 +1,86 @@
+'''
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: reliability
+
+brief: Agents once they register to the manager, they will start communicating with the manager.
+       In this process, they send a keep-alive message to the manager, which will respond in normal
+       conditions with an ACK. The difference between keep-alive and ACK should not exceed 20 seconds.
+
+tier: 0
+
+modules:
+    - agentd
+    - remoted
+
+components:
+    - agent
+    - manager
+
+daemons:
+    - wazuh-agentd
+    - wazuh-agentlessd
+    - wazuh-analysisd
+    - wazuh-authd
+    - wazuh-csyslogd
+    - wazuh-apid
+    - wazuh-clusterd
+    - wazuh-db
+    - wazuh-dbd
+    - wazuh-execd
+    - wazuh-integratord
+    - wazuh-logcollector
+    - wazuh-maild
+    - wazuh-monitord
+    - wazuh-modulesd
+    - wazuh-remoted
+    - wazuh-reportd
+    - wazuh-syscheckd
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+    - macOS Server
+    - macOS Catalina
+    - macOS Sierra
+    - Windows XP
+    - Windows 7
+    - Windows 8
+    - Windows 10
+    - Windows Server 2003
+    - Windows Server 2012
+    - Windows Server 2016
+    - Windows Server 2019
+
+
+tags:
+    - remoted_agent_communication
+    - remoted
+    - agentd
+'''
 import pytest
 
 
