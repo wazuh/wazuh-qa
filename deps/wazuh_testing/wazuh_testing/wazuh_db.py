@@ -167,7 +167,7 @@ def clean_agents_from_db():
         raise Exception('Unable to clean agents')
 
 
-def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
+def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status="never_connected",
                        disconnection_time=0):
     """
     Write agent in global.db
