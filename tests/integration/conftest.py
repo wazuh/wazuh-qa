@@ -385,10 +385,10 @@ def pytest_runtest_makereport(item, call):
                     content = f.read()
                     extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
-        log_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logs')
-        test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
+        if global_parameters.logger_file:
+            log_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), global_parameters.logger_file)
+            test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
 
-        if global_parameters.logger_file_enable:
             test_case_data = re.match("(.*)\[(.*)\]", item.name)
      
             if test_case_data:
@@ -1086,7 +1086,7 @@ def pytest_logger_config(logger_config):
 
 def pytest_logger_logdirlink(config):
     if config.getoption('--logger-logsdir'):
-        global_parameters.logger_file_enable = True
+        global_parameters.logger_file = config.getoption('--logger-logsdir')
         return os.path.join(os.path.dirname(__file__), config.getoption('--logger-logsdir'))
     else:
-        global_parameters.logger_file_enable = False
+        global_parameters.logger_file = None
