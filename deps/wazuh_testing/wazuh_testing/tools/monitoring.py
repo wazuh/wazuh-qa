@@ -311,8 +311,8 @@ class SocketController:
                 output = self.sock.sendto(msg_bytes, self.address)
         except OSError as e:
             raise e
-        logging_message('MonitorLog', 'VV', f"SocketController - send - Send message:{message}")
-        logging_message('MonitorLog', 'VV', f"SocketController - send - Send message output:{output}")
+        logging_message('MonitorLog', 'VV', f"SocketController - Send message:{message}")
+        logging_message('MonitorLog', 'VV', f"SocketController - Send message output:{output}")
 
         return output
 
@@ -332,7 +332,7 @@ class SocketController:
                 return output
             size = wazuh_unpack(data)
             output = self.sock.recv(size, socket.MSG_WAITALL)
-            logging_message('MonitorLog', 'VV', f"SocketController - receive - Received message:{output}")
+            logging_message('MonitorLog', 'VV', f"SocketController - Received message:{output}")
         else:
             output = self.sock.recv(4096)
             if len(output) == 4096:
