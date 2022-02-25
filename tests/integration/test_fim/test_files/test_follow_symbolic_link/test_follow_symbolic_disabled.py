@@ -171,7 +171,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
         fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-            logging_message('TestLog', 'VV',  error_msg)
+            logging_message('TestLog', 'V',  error_msg)
             raise AttributeError(error_msg)
 
     # Modify the target file and don't expect any events
@@ -179,7 +179,7 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'VV',  error_msg)
+        logging_message('TestLog', 'V',  error_msg)
         raise AttributeError(error_msg)
 
     # Delete the target file and don't expect any events
@@ -187,5 +187,5 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'VV',  error_msg)
+        logging_message('TestLog', 'V',  error_msg)
         raise AttributeError(error_msg)

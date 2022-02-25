@@ -261,5 +261,4 @@ class Parameters:
         self._fim_mode = value
 
 
-
 global_parameters = Parameters()

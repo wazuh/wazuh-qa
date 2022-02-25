@@ -718,7 +718,7 @@ def modify_registry_owner(key, subkey, arch, user):
 
             return key_h
         except (OSError, pywintypes.error) as e:
-            logging_message('FunctionLog', 'VV', f"Registry owner could not be modified: {e}")
+            logging_message('FunctionLog', 'V', f"Registry owner could not be modified: {e}")
 
 
 def modify_registry(key, subkey, arch):

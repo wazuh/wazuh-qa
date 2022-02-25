@@ -7,9 +7,7 @@ import re
 
 # Callbacks
 def callback_logtest_started(line):
-
-    regex = r'.*INFO: \(\d+\): Logtest started'
-    match = re.match(regex, line)
+    match = re.match(r'.*INFO: \(\d+\): Logtest started', line)
     if match:
         return True
     return None

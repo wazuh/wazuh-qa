@@ -191,7 +191,7 @@ def validate_analysis_alert_complex(alert, event, schema='linux'):
     try:
         validate_analysis_alert(alert, schema)
     except exceptions.ValidationError as e:
-        logging_message('FunctionLog', 'VV', f'Validation Error with: {alert}')
+        logging_message('FunctionLog', 'V', f'Validation Error with: {alert}')
         raise e
     try:
         validate_attributes(deepcopy(alert['syscheck']), deepcopy(event), 'attributes', 'after')

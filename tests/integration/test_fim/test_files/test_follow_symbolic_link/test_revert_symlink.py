@@ -173,7 +173,7 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'VV',  f'Unexpected event {event.result()}')
+        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     # Change the target to the folder and now expect an event
@@ -192,6 +192,6 @@ def test_symbolic_revert_symlink(tags_to_apply, get_configuration, configure_env
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'VV',  f'Unexpected event {event.result()}')
+        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
     modify_and_assert(file1)
