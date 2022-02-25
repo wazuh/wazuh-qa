@@ -130,7 +130,7 @@ def test_set_agent_groups(configure_sockets_environment, connect_to_sockets_modu
     for index, id in enumerate(agent_ids):
         response = insert_agent_in_db(id=id+1, connection_status="disconnected", 
                                       registration_time=str(time.time()))
-        command = f'global set-agent-groups {{"mode":"append","sync_status":"{agent_status[index]}","source":"remote",\
+        command = f'global set-agent-groups {{"mode":"append","sync_status":"{agent_status[index]}",\
                     "data":[{{"id":{id},"groups":["Test_group{id}"]}}]}}'
         response =  query_wdb(command)
 
