@@ -180,3 +180,13 @@ def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, co
         query_wdb(update_command)
     except Exception:
         raise Exception(f"Unable to add agent {id}")
+
+
+def remove_agent(agent_id):
+    """Function that wraps the needed queries to remove an agent.
+
+    Args:
+        agent_id(int): Unique identifier of an agent
+    """
+    data = query_wdb(f"global delete-agent {agent_id}").split()
+    assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
