@@ -23,23 +23,7 @@ components:
 
 daemons:
     - wazuh-agentd
-    - wazuh-agentlessd
-    - wazuh-analysisd
-    - wazuh-authd
-    - wazuh-csyslogd
-    - wazuh-apid
-    - wazuh-clusterd
-    - wazuh-db
-    - wazuh-dbd
-    - wazuh-execd
-    - wazuh-integratord
-    - wazuh-logcollector
-    - wazuh-maild
-    - wazuh-monitord
-    - wazuh-modulesd
     - wazuh-remoted
-    - wazuh-reportd
-    - wazuh-syscheckd
 
 os_platform:
     - linux
@@ -74,7 +58,6 @@ os_version:
     - Windows Server 2012
     - Windows Server 2016
     - Windows Server 2019
-
 
 tags:
     - remoted_agent_communication

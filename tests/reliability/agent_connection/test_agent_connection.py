@@ -12,9 +12,6 @@ brief: Agents register their state in the file /var/ossec/var/run/wazuh-agentd.s
         in the file /var/ossec/var/run/wazuh-remoted.state. Under normal conditions, the agents should never disconnect
         and the tcp_sessions should be equal to the number of connected agents on the node.
 
-
-Translated with www.DeepL.com/Translator (free version)
-
 tier: 0
 
 modules:
