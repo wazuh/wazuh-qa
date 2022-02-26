@@ -143,7 +143,7 @@ def modify_ip_address_conf(test_case):
         message_ip_agent = format_ipv6_long(network['agent_network'][1])
     elif test_case['ip_type'] == 'dns':
         address_ip = 'wazuh-manager'
-        message_dns_manager = f"{address_ip}/"
+        message_dns_manager = f"{address_ip}\\/"
         if test_case['ipv6_enabled'] == 'yes':
             if 'ipv4' in test_case['manager_network'] or 'ipv4' in test_case['agent_network']:
                 message_ip_manager = f"{network['manager_network'][0]}"
