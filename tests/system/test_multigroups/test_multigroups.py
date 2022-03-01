@@ -108,7 +108,7 @@ def clean_files():
 def test_create_multigroups():
     """Check the generation of new multi-groups when an agent is assigned to groups.
 
-    For each agent, the stipulated groups are generated and it is verified thata multigroup
+    For each agent, the stipulated groups are generated and it is verified that a multigroup
     is not created. Then, assign the agent to the group and verify that the multigroup is created.
     """
     for agent_name, groups in agent_groups.items():
@@ -141,7 +141,7 @@ def test_multigroups_not_reloaded():
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
-    and check the modification time of each file again. Verify that all files mtime remained intact.
+    and check the modification time of each file again. Verify that all files remained intact.
     """
     folders_to_check = set()
     for agent_name, groups in agent_groups.items():
@@ -164,11 +164,11 @@ def test_multigroups_not_reloaded():
     random.choice(agent_groups['wazuh-agent1'][1:]),
     'default'
 ])
-def test_multigroups_changed(target_group):
-    """Check that only the appropriate multi-groups are generated a group file is created.
+def test_multigroups_updated(target_group):
+    """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
-    a group. Verify that its merged.mg and the files within the affected multigroup are regenerated.
+    a group. Verify that only its 'merged.mg' and the files within the affected multigroup are regenerated.
 
     Args:
         target_group (str): Group in which to create the new file.
