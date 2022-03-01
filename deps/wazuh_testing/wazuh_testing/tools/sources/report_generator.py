@@ -89,12 +89,7 @@ class LogAnalyzer:
 
                         keep_alives[match.group(3)]["last_keep_alive"] = match.group(1)
 
-            for key in keep_alives.keys():
-                keep_alives[key]["mean_difference"] = \
-                    keep_alives[key]["mean_difference"]/keep_alives[key]["n_keep_alive"]
-
-            last_timestamp = None
-            with open(log_file['logs']['ossec.log']) as log:
+                last_timestamp = None
                 log_lines = log.readlines()
                 for line in reversed(log_lines):
                     last_log_line = line
@@ -104,6 +99,11 @@ class LogAnalyzer:
                         break
 
             for agent in keep_alives.keys():
+                # Calculate means
+                keep_alives[agent]["mean_difference"] = \
+                    keep_alives[agent]["mean_difference"]/keep_alives[agent]["n_keep_alive"]
+
+                # Calculate last keep alive
                 last_keep_alive = datetime.strptime(keep_alives[agent]['last_keep_alive'], '%Y/%m/%d %H:%M:%S')
                 keep_alives[agent] = \
                     {**keep_alives[agent], **{'remainder': abs(last_timestamp - last_keep_alive).seconds}}
@@ -302,8 +302,8 @@ class ReportGenerator:
                 artifacts_files += self.get_instances_artifacts('workers', hosts_regex)
         else:
             artifact_path = self.component_path[component]
-            artifacts_files = [{"name": f, "path": os.path.join(artifact_path, f)}
-                               for f in os.listdir(artifact_path) if re.match(rf'{hosts_regex}', f)]
+            artifacts_files = [{"name": filename, "path": os.path.join(artifact_path, filename)}
+                               for filename in os.listdir(artifact_path) if re.match(rf'{hosts_regex}', filename)]
         return artifacts_files
 
     def get_instance_all_log_files(self, hostname):
@@ -325,9 +325,10 @@ class ReportGenerator:
         return artifacts_paths
 
     def get_instances_process_metrics(self, process, component, hosts_regex='.*'):
-        files = self.get_instances_artifacts(component, hosts_regex=hosts_regex)
+        files = self.get_instances_artifacts(component, hosts_regex)
         for file in files:
-            file.update((k, os.path.join(v, 'data', 'binaries', process + '.csv')) for k, v in file.items())
+            file.update((host, os.path.join(artifact_path, 'data', 'binaries', process + '.csv'))
+                        for host, artifact_path in file.items())
         return files
 
     def get_instances_statistics(self, statistic, component, hosts_regex='.*'):
