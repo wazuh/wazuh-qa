@@ -98,12 +98,12 @@ import pytest
 
 from wazuh_testing import global_parameters
 
-error_codes = ["warning", "error", "critical"]
+error_codes = ['warning', 'error', 'critical']
 known_messages_filename = 'know_messages.json'
 known_messages_path = os.path.join(os.path.dirname(__file__), known_messages_filename)
 
 
-target = ["agents", "managers"] if not global_parameters.target_hosts else global_parameters.target_hosts
+target = ['agents', 'managers'] if not global_parameters.target_hosts else global_parameters.target_hosts
 
 
 def get_log_daemon(log_line):
@@ -134,7 +134,7 @@ def test_error_messages(get_report, code, target):
                 if target_message:
                     known_error = False
                     if expected_error_messages[code]:
-                        combined_known_regex = "(" + ")|(".join(expected_error_messages[code]) + ")"
+                        combined_known_regex = '(' + ')|('.join(expected_error_messages[code]) + ')'
                         known_error = re.match(combined_known_regex, error_message)
 
                     if not known_error:
