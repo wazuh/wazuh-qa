@@ -11,6 +11,25 @@ from re import compile
 import numpy as np
 import pandas as pd
 
+aggregation_function = {
+    "Daemon": "first",
+    "Version": "first",
+    "PID": "first",
+    "CPU(%)": "sum",
+    "VMS(KB)": "sum",
+    "RSS(KB)": "sum",
+    "USS(KB)": "sum",
+    "PSS(KB)": "sum",
+    "SWAP(KB)": "sum",
+    "FD": "sum",
+    "Read_Ops": "sum",
+    "Write_Ops": "sum",
+    "Disk_Read(KB)": "sum",
+    "Disk_Written(KB)": "sum",
+    "Disk_Read_Speed(KB/s)": "sum",
+    "Disk_Write_Speed(KB/s)": "sum"
+}
+
 
 class ClusterCSVParser:
     """Class to load and parse CSVs with data produced by the Wazuh cluster.
@@ -102,12 +121,36 @@ class ClusterCSVParser:
 
         for node, files in dfs_dict.items():
             for phase in [self.SETUP_PHASE, self.STABLE_PHASE]:
-                for file_name, file_df in files.items():
+
+                # Check whether we are calculating the resources' stats
+                for file_df in files.values():
+                    all_files = self._add_child_process_to_parent_process(files) if "Daemon" in file_df else files
+                    break
+
+                for file_name, file_df in all_files.items():
                     trimmed_df = self._trim_dataframe(file_df, phase, setup_datetime)
                     if len(trimmed_df):
                         result[phase][file_name][node] = self._calculate_stats(trimmed_df)
-
         return result
+
+    @staticmethod
+    def _add_child_process_to_parent_process(files):
+        """Add the parent and children processes using the timestamp.
+
+        Args:
+            files (dataframe): dataframes to sum up.
+
+        Returns:
+            (dict): dictionary that contains a dataframe with all the final results from adding the different processes
+            values.
+        """
+
+        concat_dfs = pd.concat([file_df for _, file_df in files.items()])
+        concat_dfs = concat_dfs.groupby(concat_dfs["Timestamp"]).aggregate(aggregation_function)
+        concat_dfs["Daemon"] = concat_dfs["Daemon"].apply(lambda x: "wazuh-clusterd")
+        concat_dfs.reset_index(inplace=True)
+
+        return {'wazuh-clusterd': concat_dfs}
 
     def _group_stats(self, dfs_dict):
         """Group statistics by type of node, phase and column and get the maximum of each group.
@@ -201,7 +244,8 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
 
     def __init__(self, artifacts_path, columns=None):
         self.columns = ['USS(KB)', 'CPU(%)', 'FD'] if columns is None else columns
-        super().__init__(artifacts_path, files_to_load=['wazuh-clusterd', 'integrity_sync'])
+        super().__init__(artifacts_path, files_to_load=['wazuh-clusterd', 'integrity_sync', 'wazuh-clusterd_child_1',
+                                                        'wazuh-clusterd_child_2'])
 
     def _calculate_stats(self, df):
         """Calculate mean and regression coefficient of each column in self.columns from a dataframe.
