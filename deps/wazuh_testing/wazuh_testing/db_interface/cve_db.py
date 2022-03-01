@@ -165,25 +165,14 @@ def modify_metadata_vuldet_feed(feed, timestamp):
     sleep(1)
 
 
-def modify_nvd_metadata_vuldet(timestamp):
+def update_nvd_metadata_vuldet(timestamp):
     """Update the timestamp value of the nvd_metadata table.
 
     Args:
         timestamp (int): The new timestamp value to set.
-
-    Raises:
-        sqlite3.OperationalError: If could not update the value.
     """
     query_string = f"UPDATE NVD_METADATA SET LAST_UPDATE={timestamp};"
-
-    for _ in range(vd.T_20):
-        try:
-            make_sqlite_query(vd.CVE_DB_PATH, [query_string])
-            break
-        except OperationalError:
-            sleep(1)
-    else:
-        raise OperationalError
+    make_sqlite_query(vd.CVE_DB_PATH, [query_string])
 
 
 def check_inserted_value_exists(table, column, value):

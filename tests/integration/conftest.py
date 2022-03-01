@@ -16,7 +16,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -945,13 +945,13 @@ def mock_system_parametrized(system):
 
 
 @pytest.fixture(scope='function')
-def mock_agent_packages():
-    """Add 10 mocked packages to the agent 001 DB"""
-    package_names = mocking.insert_mocked_packages(agent_id='001')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
 
     yield package_names
 
-    mocking.delete_mocked_packages(agent_id='001')
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
 
 
 @pytest.fixture(scope='function')
@@ -1004,5 +1004,13 @@ def mock_agent_with_custom_system(agent_system):
 def setup_log_monitor():
     """Create the log monitor"""
     log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def setup_alert_monitor():
+    """Create the alert monitor"""
+    log_monitor = FileMonitor(ALERTS_JSON_PATH)
 
     yield log_monitor
