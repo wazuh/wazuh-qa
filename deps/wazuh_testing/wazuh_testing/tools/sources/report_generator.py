@@ -1,13 +1,15 @@
+# Copyright (C) 2015-2021, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import re
 
-import pandas as pd
-import numpy as np
-
-from itertools import groupby
-from mmap import mmap, ACCESS_READ
-from re import compile, MULTILINE
 from datetime import datetime
+from itertools import groupby
+from mmap import ACCESS_READ, mmap
+
+import numpy as np
+import pandas as pd
 
 
 class LogAnalyzer:
@@ -47,10 +49,10 @@ class LogAnalyzer:
                 error_list_host = []
                 for host_name, log_path in host_log['logs'].items():
                     if os.path.exists(log_path):
-                        agent_error = LogAnalyzer.get_error_log_file(log_path, type)
-                        if agent_error:
+                        host_error = LogAnalyzer.get_error_log_file(log_path, type)
+                        if host_error:
                             error_list_host += \
-                                              [f"[{host_name}] " + agent_error_line for agent_error_line in agent_error]
+                                              [f"[{host_name}] " + host_error_line for host_error_line in host_error]
                 if error_list_host:
                     error_dict[type] += [{host_log['name']:  error_list_host}]
         return error_dict
@@ -62,7 +64,7 @@ class LogAnalyzer:
 
         keep_alives = {}
         for log_file in log_files:
-            regex = compile(rf"{keep_alive_regex}", MULTILINE)
+            regex = re.compile(rf"{keep_alive_regex}", re.MULTILINE)
 
             with open(log_file['logs']['ossec.log']) as log:
                 for match in regex.finditer(log.read()):
@@ -118,8 +120,8 @@ class StatisticsAnalyzer:
 
         for field in fields:
             mean_fields['mean_' + field] = 0
-            mean_fields['max_mean_' + field] = 0
-            mean_fields['min_mean_' + field] = 0
+            mean_fields['max_mean_' + field] = None
+            mean_fields['min_mean_' + field] = None
 
             mean_fields['min_' + field] = None
             mean_fields['max_' + field] = None
@@ -133,8 +135,8 @@ class StatisticsAnalyzer:
         for statistic in statistis_files:
             for field in fields:
                 dataframe = pd.read_csv(statistic['path'])
-                mean = dataframe[field].mean()
 
+                mean = dataframe[field].mean()
                 max = dataframe[field].max()
                 min = dataframe[field].min()
 
