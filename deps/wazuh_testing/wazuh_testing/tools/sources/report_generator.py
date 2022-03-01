@@ -90,6 +90,7 @@ class LogAnalyzer:
                         keep_alives[match.group(3)]["last_keep_alive"] = match.group(1)
 
                 last_timestamp = None
+                log.seek(0)
                 log_lines = log.readlines()
                 for line in reversed(log_lines):
                     last_log_line = line
