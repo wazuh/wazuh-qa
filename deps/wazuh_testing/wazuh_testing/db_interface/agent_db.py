@@ -291,16 +291,16 @@ def get_vulnerability_inventory_data(agent_id='000', name=None, status=None, cve
     """Get the vulnerability inventory data according to the specified parameters.
 
     Args:
-        agent_id (str):
-        name (str):
-        status (str):
-        cve (str):
-        version (str):
-        type (str):
-        architecture (str):
-        severity (str):
-        cvss2_score (float):
-        cvss3_score (float):
+        agent_id (str): Agent ID.
+        name (str): Vulnerability name.
+        status (str): Vulnerability status.
+        cve (str): Vulnerability CVE.
+        version (str): Version.
+        type (str): Vulnerability type.
+        architecture (str): Architecture.
+        severity (str): Vulnerability severity.
+        cvss2_score (float): CVSS2 score.
+        cvss3_score (float): CVSS3 score
 
     Returns:
         list(dict): Data in the DB.
@@ -328,3 +328,28 @@ def get_vulnerability_inventory_data(agent_id='000', name=None, status=None, cve
                 query += f" AND {item}={formated_value}"
 
     return query_wdb(query)
+
+
+def insert_vulnerability_in_agent_inventory(agent_id='000', name='', status='PENDING', cve='', version='',
+                                            type='PACKAGE', architecture='', severity='-', cvss2_score=0,
+                                            cvss3_score=0, reference='', detection_time=''):
+    """Insert a vulnerability in the agent vulnerabilities inventory.
+
+    Args:
+        agent_id (str): Agent ID.
+        name (str): Vulnerability name.
+        status (str): Vulnerability status.
+        cve (str): Vulnerability CVE.
+        version (str): Version.
+        type (str): Vulnerability type.
+        architecture (str): Architecture.
+        severity (str): Vulnerability severity.
+        cvss2_score (float): CVSS2 score.
+        cvss3_score (float): CVSS3 score
+        reference (str): Vulnerability reference.
+        detection_time (str): Vulnerability detection time.
+    """
+    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, reference, " \
+              f"type, status, severity, cvss2_score, cvss3_score, detection_time) VALUES ('{name}', '{version}', " \
+              f"'{architecture}', '{cve}', '{reference}', '{type}', '{status}', '{severity}', {cvss2_score}, " \
+              f"{cvss3_score}, '{detection_time}')")
