@@ -146,10 +146,11 @@ class StatisticsAnalyzer:
                 mean_fields['min_' + field] = int(min) if not mean_fields['min_' + field] or \
                     min < mean_fields['min_' + field] else int(mean_fields['min_' + field])
 
-                mean_fields['max_mean_' + field] = int(mean) if mean > mean_fields['max_mean_' + field] else \
-                    int(mean_fields['max_mean_' + field])
+                mean_fields['max_mean_' + field] = int(mean) if not mean_fields['max_mean_' + field] or \
+                    mean > mean_fields['max_mean_' + field] else int(mean_fields['max_mean_' + field])
 
-                mean_fields['min_mean_' + field] = int(mean) if mean < mean_fields['min_mean_' + field] else \
+                mean_fields['min_mean_' + field] = int(mean) if not mean_fields['min_mean_' + field] or \
+                    mean < mean_fields['min_mean_' + field] else \
                     int(mean_fields['min_mean_' + field])
 
                 mean_fields['mean_' + field] += int(mean)
