@@ -10,20 +10,20 @@
     logs:
       level: debug
 - tags:
-  - logs_plain
-  configuration:
-    logs:
-      level: info
-      format: plain
-- tags:
   - logs_json
   configuration:
     logs:
-      level: info
       format: json
+      level: error
+- tags:
+  - logs_plain
+  configuration:
+    logs:
+      format: plain
+      level: info
 - tags:
   - logs_json_plain
   configuration:
     logs:
-      level: info
       format: json,plain
+      level: info
