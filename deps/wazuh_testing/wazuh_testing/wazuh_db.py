@@ -191,7 +191,7 @@ def clean_belongs():
         raise Exception('Unable to clean belongs')
 
 
-def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
+def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status="never_connected",
                        disconnection_time=0):
     """
     Write agent in global.db
@@ -219,3 +219,13 @@ def insert_agent_into_group(amount):
                    "source":"remote","data":[{{"id":{id},"groups":["Test_group{id}"]}}]}}'''
         results = query_wdb(command)
         assert results == 'ok'
+
+
+def remove_agent(agent_id):
+    """Function that wraps the needed queries to remove an agent.
+
+    Args:
+        agent_id(int): Unique identifier of an agent
+    """
+    data = query_wdb(f"global delete-agent {agent_id}").split()
+    assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
