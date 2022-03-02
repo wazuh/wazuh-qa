@@ -28,4 +28,4 @@
   test_case:
   -
     input: 'wazuhdb getconfig wdb'
-    output: "{'wdb':{ 'backup_settings_nodes':[{'node_name':'global','enabled':true,'interval':86400,'max_files':3}]}}"
+    output: "{'wdb': {'backup': [{'database': 'global', 'enabled': True, 'interval': 86400, 'max_files': 3}]}}"
