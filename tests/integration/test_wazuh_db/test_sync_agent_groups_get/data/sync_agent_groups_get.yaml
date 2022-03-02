@@ -10,7 +10,7 @@
   name: "Test sync_status without response"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_sync_status="synced"'
+    pre_input: ['global sql UPDATE agent SET group_sync_status="synced"']
     input: 'global sync-agent-groups-get {"condition":"sync_status"}'
     output: "[{'data': []}]"
 
@@ -25,7 +25,7 @@
   name: "Test 'all' condition when agent groups are in 'synced'"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_sync_status="synced"'
+    pre_input: ['global sql UPDATE agent SET group_sync_status="synced"']
     input: 'global sync-agent-groups-get {"condition":"all"}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
 
@@ -33,7 +33,7 @@
   name: "Test 'sync_status' condition when one agent groups are in 'synced'"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_sync_status="synced" WHERE id = 2'
+    pre_input: ['global sql UPDATE agent SET group_sync_status="synced" WHERE id = 2']
     input: 'global sync-agent-groups-get {"condition":"sync_status"}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}]}]"
 
@@ -41,7 +41,7 @@
   name: "Test 'all' condition when one agent groups are in 'synced'"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_sync_status="synced" WHERE id = 2'
+    pre_input: ['global sql UPDATE agent SET group_sync_status="synced" WHERE id = 2']
     input: 'global sync-agent-groups-get {"condition":"all"}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
 
@@ -90,7 +90,7 @@
   name: "Test get_global_hash in true"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_hash = "DUMMY"'
+    pre_input: ['global sql UPDATE agent SET group_hash = "DUMMY"']
     input: 'global sync-agent-groups-get {"last_id":0, "condition":"sync_status", "get_global_hash":true}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}], 'hash': '49087946dd7a587ae30ae89cbc8084cad2cb0bfd'}]"  
 
@@ -98,7 +98,7 @@
   name: "Test get_global_hash in false"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_hash = "DUMMY"'
+    pre_input: ['global sql UPDATE agent SET group_hash = "DUMMY"']
     input: 'global sync-agent-groups-get {"last_id":0, "condition":"sync_status", "get_global_hash":false}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
 
@@ -106,7 +106,7 @@
   name: "Test get_global_hash with invalid value"
   test_case:
   -
-    pre_input: 'global sql UPDATE agent SET group_hash = "DUMMY"'
+    pre_input: ['global sql UPDATE agent SET group_hash = "DUMMY"']
     input: 'global sync-agent-groups-get {"last_id":0, "condition":"sync_status", "get_global_hash":"set"}'
     output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]" 
 
@@ -127,18 +127,20 @@
 -
   name: "Test 'agent_registration_delta' with delta in 10000 and sync_status"
   test_case:
-  -
-    pre_input: 'global insert-agent {"id":4,"name":"Agent-test4","date_add":1545753642}'
+  - 
+    pre_input: ['global insert-agent {"id":5,"name":"Agent-test5","date_add":1545753642}', 'global set-agent-groups {"mode":"append","sync_status":"syncreq",
+                   "source":"remote","data":[{"id":5,"groups":["Test_group5"]}]}']
     input: 'global sync-agent-groups-get {"condition":"sync_status", "agent_registration_delta":10000}'
-    output: "[{'data': [{'id': 4, 'groups': ['default']}]}]"
+    output: "[{'data': [{'id': 5, 'groups': ['Test_group5']}]}]"
 
 -
   name: "Test 'agent_registration_delta' with delta in 10000 and all"
   test_case:
   -
-    pre_input: 'global insert-agent {"id":4,"name":"Agent-test4","date_add":1545753642}'
+    pre_input: ['global insert-agent {"id":6,"name":"Agent-test6","date_add":1545753642}', 'global set-agent-groups {"mode":"append","sync_status":"syncreq",
+                   "source":"remote","data":[{"id":6,"groups":["Test_group6"]}]}']
     input: 'global sync-agent-groups-get {"condition":"all", "agent_registration_delta":10000}'
-    output: "[{'data': [{'id': 4, 'groups': ['default']}]}]"
+    output: "[{'data': [{'id': 6, 'groups': ['Test_group6']}]}]"
 
 -
   name: "Test last_id - by default"
@@ -158,12 +160,12 @@
   name: "Test last_id - with not exist id"
   test_case:
   -
-    input: 'global sync-agent-groups-get {"last_id":50, "condition":"sync_status"}'
+    input: 'global sync-agent-groups-get {"last_id":3, "condition":"sync_status"}'
     output: "[{'data': []}]"
 
 -
   name: "Test last_id - with negative value"
   test_case:
   -
-    input: 'global sync-agent-groups-get {"last_id":-3, "condition":"sync_status"}'
-    output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
+    input: 'global sync-agent-groups-get {"last_id":50, "condition":"sync_status"}'
+    output: "[{'data': []}]"

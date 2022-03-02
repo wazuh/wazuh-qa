@@ -117,8 +117,10 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     output = case_data["output"]
 
     if 'pre_input' in case_data:
-        query_wdb(case_data['pre_input'])
-
+        for command in case_data['pre_input']:
+            query_wdb(command)
+            results = query_wdb(command)
+        
     time.sleep(1)
     response = query_wdb(case_data["input"])
 
