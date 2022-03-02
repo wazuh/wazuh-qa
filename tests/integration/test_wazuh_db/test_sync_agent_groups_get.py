@@ -55,7 +55,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-messages_file = os.path.join(test_data_path, 'sync_agent_groups_get.yaml')
+messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'sync_agent_groups_get.yaml')
 module_tests = []
 with open(messages_file) as f:
     module_tests.append((yaml.safe_load(f), messages_file.split('_')[0]))
