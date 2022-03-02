@@ -56,7 +56,7 @@ def pytest_configure(config):
 @pytest.fixture(scope='session')
 def get_report():
     if not global_parameters.report_path:
-        raise ValueError('No option named 'report'')
+        raise ValueError("No option named 'report'")
     try:
         with open(global_parameters.report_path) as report:
             yield json.loads(report.read())
