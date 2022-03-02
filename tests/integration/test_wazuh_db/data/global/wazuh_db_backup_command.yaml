@@ -1,0 +1,38 @@
+---
+-
+  name: "Create One Backup File"
+  test_case:
+  -
+    backups_ammount: 1
+    command: 'global backup create'
+-
+  name: "Create Three Backups File"
+  test_case:
+  -
+    backups_ammount: 3
+    command: 'global backup create'
+-
+  name: "Restore backup file saving previous state - save_pre_restore_state == false"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: 'false'
+    restore_response: ok
+-
+  name: "Restore backup file saving previous state - save_pre_restore_state == true"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: 'true'
+    restore_response: ok
+-
+  name: "Restore backup from pre_restore backup - database should not have the test_values"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: 'true'
+    restore_response: ok
+    restore_pre_restore: true
