@@ -60,12 +60,20 @@ import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file
-
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.fim import generate_params
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+
+configurations_path = os.path.join(test_data_path, 'wazuh_db_backups_conf.yaml')
+conf_params=[{'ENABLED': 'no', 'INTERVAL':'1d', 'MAX_FILES':3}]
+conf_metadata=[{'ENABLED': 'no', 'INTERVAL':'1d', 'MAX_FILES':3}]
+configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'wazuh_db_backup_command.yaml')
 module_tests = []
 with open(messages_file) as f:
@@ -85,6 +93,7 @@ create_db_command = 'global backup create'
 get_backups_command = 'global backup get'
 sql_select_command = ' global sql select * from metadata'
 
+
 # Fixtures
 @pytest.fixture(scope='function')
 def add_database_values(request):
@@ -101,6 +110,13 @@ def remove_backups(request):
     os.chmod(backups_path, 0o777)
     yield
     remove_file(backups_path)
+
+
+@pytest.fixture(scope='module', params=configurations)
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
+
 
 # Tests
 @pytest.mark.parametrize('test_case',
