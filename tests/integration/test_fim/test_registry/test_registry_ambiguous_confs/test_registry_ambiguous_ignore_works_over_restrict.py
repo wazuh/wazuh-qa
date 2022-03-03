@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_ambiguous_confs
+
+targets:
     - agent
 
 daemons:
@@ -130,6 +130,8 @@ def test_ignore_over_restrict_key(key, subkey, key_name, arch,
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - key:
             type: str
@@ -196,6 +198,8 @@ def test_ignore_over_restrict_values(key, subkey, value_name, arch,
                  that no FIM events are generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:
