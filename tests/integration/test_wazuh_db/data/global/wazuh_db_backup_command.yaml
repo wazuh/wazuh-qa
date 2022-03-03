@@ -36,3 +36,54 @@
     save_pre_restore: 'true'
     restore_response: ok
     restore_pre_restore: true
+-
+  name: "Restore backup with no save_pre_restore_state - pre_restore backup is generated normally"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: 'none'
+    restore_response: ok
+-
+  name: "ERROR - Restore backup with empty pre_restore value - save_pre_restore_state ==''  "
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: ''
+    restore_response: err Invalid JSON syntax
+-
+  name: "ERROR - Restore backup with invalid pre_restore value - save_pre_restore_state ==value  "
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    save_pre_restore: value
+    restore_response: err Invalid JSON syntax
+-
+  name: "ERROR - Restore backup with invalid snapshot value"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    snapshot: '"snapshot":"invalid_snapshot_value"'
+    save_pre_restore: false
+    restore_response: err Invalid JSON syntax
+-
+  name: "ERROR - Restore backup with empty snapshot value"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    snapshot: '"snapshot":""'
+    save_pre_restore: false
+    restore_response: err Invalid JSON syntax
+-
+  name: "ERROR - Restore backup with empty snapshot value"
+  test_case:
+  -
+    backups_ammount: 1
+    restore: true
+    snapshot: 
+    save_pre_restore: false
+    restore_response: err Invalid JSON syntax

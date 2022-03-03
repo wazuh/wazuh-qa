@@ -87,6 +87,7 @@ sql_select_command = ' global sql select * from metadata'
 # Fixtures
 @pytest.fixture(scope='function')
 def add_database_values(request):
+    "Add test values to database"
     response= query_wdb(f'global sql insert into metadata (key,value) VALUES ("{test_values[0]}","{test_values[1]}")')
     yield
     response = query_wdb(f'global sql delete from metadata where key="{test_values[0]}"')
@@ -94,10 +95,13 @@ def add_database_values(request):
 
 @pytest.fixture(scope='function')
 def remove_backups(request):
+    "Creates backups folder in case it does not exist."
     recursive_directory_creation(backups_path)
     os.chmod(backups_path, 0o777)
     yield
     remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
 
 # Tests
 @pytest.mark.parametrize('test_case',
@@ -170,9 +174,20 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         # Restore the DB - Assert command response
         save_pre_restore = case_data['save_pre_restore']
         restore_command = f'global backup restore {{"snapshot": "{backups[0]}","save_pre_restore_state": {save_pre_restore}}}'
-        response = query_wdb(restore_command)
-        assert response == case_data['restore_response']
         
+        if save_pre_restore == 'none':
+            restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'    
+
+        if 'snapshot' in case_data:
+            snapshot= case_data['snapshot']
+            restore_command = f'global backup restore {{"{snapshot}","save_pre_restore_state": {save_pre_restore}}}'
+
+        response = query_wdb(restore_command)
+        assert case_data['restore_response'] in response
+
+        if 'err' in case_data['restore_response']:
+            return
+
         # Assert the test_values have been restored into the DB
         db_response = query_wdb(sql_select_command)
         assert test_values[0] in db_response[-1]['key']
