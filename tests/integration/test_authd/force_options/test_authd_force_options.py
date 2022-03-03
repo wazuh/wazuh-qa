@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -10,12 +10,12 @@ type: integration
 brief: These tests will check if the 'wazuh-authd' daemon correctly responds to the enrollment requests
        messages respecting the valid option values used in the force configuration block.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+suite: force_options
+
+targets:
     - manager
 
 daemons:
@@ -31,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 tags:
     - enrollment
@@ -110,6 +102,8 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
 
     wazuh_min_version:
         4.3.0
+
+    tier: 0
 
     parameters:
         - get_current_test_case:
