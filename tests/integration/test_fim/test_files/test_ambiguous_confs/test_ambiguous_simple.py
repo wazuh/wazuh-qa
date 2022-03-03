@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: files_ambiguous_complex
+
+targets:
     - agent
 
 daemons:
@@ -37,26 +37,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -207,6 +194,8 @@ def test_ambiguous_restrict(folders, tags_to_apply, get_configuration, configure
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - folders:
             type: list
@@ -271,6 +260,8 @@ def test_ambiguous_report(folders, tags_to_apply, get_configuration, configure_e
                  is generated in the events when required.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - folders:
@@ -364,6 +355,8 @@ def test_ambiguous_tags(folders, tags_to_apply, get_configuration, configure_env
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - folders:
             type: list
@@ -431,6 +424,8 @@ def test_ambiguous_recursion(dirname, recursion_level, tags_to_apply, get_config
                  and modifications are made in each level to see if events are generated when required.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - dirname:
@@ -507,6 +502,8 @@ def test_ambiguous_recursion_tag(dirnames, recursion_level, triggers_event, tags
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - dirnames:
             type: list
@@ -582,6 +579,8 @@ def test_ambiguous_check(dirname, checkers, tags_to_apply, get_configuration, co
                  the fields of the 'checks' specified for the monitored folder.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - dirname:
