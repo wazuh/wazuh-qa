@@ -10,8 +10,8 @@ type: integration
 brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh persistent information, exposing a socket
        to receive requests and provide information. The Wazuh core uses list-based databases to store information
        related to agent keys, and FIM/Rootcheck event data.
-       This test checks the usage of the get-groups-integrity command used to determine if the agent groups are synced 
-       or if a sync is needed.
+       This test checks the usage of the backup command used generate backups and restore the database using backups
+       generated with this same command.
 
 tier: 0
 
@@ -52,6 +52,7 @@ references:
 tags:
     - wazuh_db
 '''
+from cmath import exp
 import os
 import time
 import pytest
@@ -100,8 +101,6 @@ def remove_backups(request):
     os.chmod(backups_path, 0o777)
     yield
     remove_file(backups_path)
-    recursive_directory_creation(backups_path)
-    os.chmod(backups_path, 0o777)
 
 # Tests
 @pytest.mark.parametrize('test_case',
@@ -110,12 +109,14 @@ def remove_backups(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups, add_database_values, test_case):
+def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups, 
+                            add_database_values, test_case):
     '''
-    description: Check that every input message using the 'get-groups-integrity' command in wazuh-db socket generates
-                 the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
-                 taken from the list of test_cases's 'input' field, and compare the result with the test_case's
-                 'output' field.
+    description: Check that every input message using the 'backup' command in wazuh-db socket generates
+                 the proper output to wazuh-db socket. To do this, it performs a series of queries to the socket with 
+                 paramerters from the list of test_cases, and compare the result with the test_case's 'restore_response
+                 field, as well as checking that the files have been created and the state of the data in DB in cases
+                 where the 'restore' parameter is used.
 
     wazuh_min_version: 4.4.0
 
@@ -126,17 +127,25 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         - connect_to_sockets_module:
             type: fixture
             brief: Module scope version of 'connect_to_sockets' fixture.
-        - test_case:
+        - remove_backups:
             type: fixture
-            brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
-
+            brief: Creates the folder where the backups will be stored in case it doesn't exist. It clears it when the
+                   test yields.
+        - add_database_values:
+            type: fixture
+            brief: Add values to check that the restore procedure has worked and the DB has the expected data.
+        - test_case:
+            type: parameter
+            brief: List of test_case stages (dicts with number of backups, restore, restore_response, and other keys).
     assertions:
-        - Verify that the socket response matches the expected output.
+        - Verify that the socket response matches the expected response.
+        - Verify that the backup file has been created
+        - Verify that after restoring the DB has the expected data
 
     input_description:
-        - Test cases are defined in the get_groups_integrity_messages.yaml file. This file contains the agent id's to
-          register, as well as the group_sync_status that each agent will have, as well as the expected output and 
-          result for the test.
+        - Test cases are defined in the wazuh_db_backup_command.yaml file. This file contains the ammount of backups to
+          create, if a restore of the DB will be done, and different combinations of parameters used for the restore,
+          as well as the expected responses.
 
     expected_output:
         - f"Assertion Error - expected {output}, but got {response}"
@@ -148,33 +157,34 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         - wdb_socket
     '''
     case_data = test_case[0]
-    
+    backups_ammount = case_data["backups_ammount"]
     # Create the database backups and assert they have been created correctly
-    for backup in range(0, case_data["backups_ammount"]):
+    for backup in range(0, backups_ammount):
         response = query_wdb(create_db_command)
         time.sleep(1)
         assert 'global.db-backup-' in response[0], f'Backup creation failed. Got: {response}'
 
-    # Create the database backups and assert they have been created correctly
+    # Check that the expected ammount of database backups have been created 
     backups= query_wdb(get_backups_command)
-    assert backups.__len__() == case_data["backups_ammount"]
-    
-    
-    # Manage retoring the DB
+    assert backups.__len__() == backups_ammount, f'Error - Found {backups.__len__()} files, expected {backups_ammount}'
+
+
+    # Manage restoring the DB
     if 'restore' in case_data:
         # Assert the DB has the test_values
         db_response = query_wdb(sql_select_command)
-        assert test_values[0] in db_response[-1]['key']
-    
+        assert test_values[0] in db_response[-1]['key'], f'Error expected value: key:"{test_values[0]}" was not found.'
+
         # Remove the test_values from the DB
         query_wdb(f'global sql delete from metadata where key="{test_values[0]}"')
         db_response = query_wdb(sql_select_command)
-        assert test_values[0] not in db_response[-1]['key']
+        assert test_values[0] not in db_response[-1]['key'], f'Error found unexpected: "key":"{test_values[0]}" value.'
 
-        # Restore the DB - Assert command response
+        # Generate the correct restore command for test
         save_pre_restore = case_data['save_pre_restore']
-        restore_command = f'global backup restore {{"snapshot": "{backups[0]}","save_pre_restore_state": {save_pre_restore}}}'
-        
+        restore_command = f'global backup restore {{"snapshot": "{backups[0]}",\
+                            "save_pre_restore_state": {save_pre_restore}}}'
+
         if save_pre_restore == 'none':
             restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'    
 
@@ -182,26 +192,32 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             snapshot= case_data['snapshot']
             restore_command = f'global backup restore {{"{snapshot}","save_pre_restore_state": {save_pre_restore}}}'
 
+        # Restore the DB - Assert command response
+        expected = case_data['restore_response']
         response = query_wdb(restore_command)
-        assert case_data['restore_response'] in response
+        assert expected in response, f'Error - Did not find expected: {expected} in response: {response}'
 
-        if 'err' in case_data['restore_response']:
+        # Break out of test if error during restore.
+        if 'err' in expected:
             return
 
         # Assert the test_values have been restored into the DB
         db_response = query_wdb(sql_select_command)
-        assert test_values[0] in db_response[-1]['key']
-        
+        assert test_values[0] in db_response[-1]['key'], f'Error expected value: key:"{test_values[0]}" was not found.'
+
         if save_pre_restore == 'true':
             backups= query_wdb(get_backups_command)
-            assert backups.__len__() ==  case_data["backups_ammount"] +1
+            # Check that the pre-restore state backup has been generated.
+            assert backups.__len__() ==  backups_ammount +1, f'Error - Found {backups.__len__()} files, \
+                                                               expected {backups_ammount + 1}'
             assert "-pre_restore.gz" in backups[-1]
 
             if 'restore_pre_restore' in case_data:
                 restore_command = f'global backup restore {{"snapshot": "{backups[-1]}","save_pre_restore_state": "false"}}'
                 response = query_wdb(restore_command)
-                assert response == case_data['restore_response']
-                
+                assert response == expected
+
                 # Check that DB is empty does not have test_values after restoring
                 db_response = query_wdb(sql_select_command)
-                assert test_values[0] not in db_response[-1]['key']
+                assert test_values[0] not in db_response[-1]['key'], f'Error found unexpected: \
+                                                                       "key":"{test_values[0]}" value.'
