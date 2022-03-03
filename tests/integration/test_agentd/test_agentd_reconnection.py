@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: The 'wazuh-agentd' program is the client-side daemon that communicates wi
        the agent successfully enrolls after losing connection with the 'wazuh-remoted' daemon.
        The wazuh-remoted program is the server side daemon that communicates with the agents.
 
-tier: 0
-
-modules:
+components:
     - agentd
 
-components:
+targets:
     - agent
 
 daemons:
@@ -35,26 +33,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -249,6 +234,8 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - configure_authd_server:
             type: fixture
@@ -331,6 +318,8 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
                  In this case, the agent doesn't have the 'client.keys' file.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_authd_server:
@@ -418,6 +407,8 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - configure_authd_server:
             type: fixture
@@ -504,6 +495,8 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
                  getting the new key to communicate with the 'wazuh-remoted' daemon.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_authd_server:
@@ -596,6 +589,8 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
                  then the agent performs multiple connection retries before requesting a new enrollment.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_authd_server:
