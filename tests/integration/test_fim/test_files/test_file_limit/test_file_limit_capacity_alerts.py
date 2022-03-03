@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -83,10 +83,11 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGU
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT,
+from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT,
     ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
-    CB_FILE_LIMIT_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL, ERR_MSG_FIM_INODE_ENTRIES)
-from wazuh_testing.fim_module.event_monitor import callback_entries_path_count
+    CB_FILE_LIMIT_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL, ERR_MSG_FIM_INODE_ENTRIES,
+    CB_FILE_LIMIT_CAPACITY, SCHEDULE_MODE)
+from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 
 # Marks
 
@@ -108,7 +109,7 @@ scan_delay = 10
 file_limit_list = ['100']
 conf_params = {'TEST_DIRECTORIES': testdir1}
 
-params, metadata = generate_params(extra_params=conf_params, modes=['scheduled'],
+params, metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE],
                        apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
@@ -167,7 +168,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added' event if the testing directory is not ignored)
-        - r'.*Sending DB * full alert.'
+        - r'.*File database is * full.'
         - r'.*Sending DB back to normal alert.'
         - r'.*Fim inode entries*, path count'
         - r'.*Fim entries' (on Windows systems)
@@ -191,14 +192,14 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
     wait_for_scheduled_scan(True, interval=scan_delay, monitor=wazuh_log_monitor)
     #Look for file_limit percentage alert configure value and check it matches with the expected percentage
-    if percentage >= 80:  
+    if percentage >= 80:
         file_limit_capacity = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                       callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                                       error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
 
         assert file_limit_capacity == str(percentage), ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT
     # Check the is back on normal levels
-    else:  
+    else:
         event_found = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                               callback=generate_monitoring_callback(CB_FILE_LIMIT_BACK_TO_NORMAL),
                                               error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()

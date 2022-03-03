@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -82,9 +82,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, creat
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
-    ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
-from wazuh_testing.fim_module.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
+                                       ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED,
+                                       ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
@@ -179,7 +180,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                        the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending DB * full alert.'
+        - r'.*File database is (\d+)% full'
         - r'.*Sending FIM event: (.+)$' ('deleted' event)
 
     tags:

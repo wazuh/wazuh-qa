@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -81,7 +81,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
+from wazuh_testing.modules.fim import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
 
 # Marks
 

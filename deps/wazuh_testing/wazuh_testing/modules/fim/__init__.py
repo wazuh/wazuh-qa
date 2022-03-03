@@ -62,12 +62,36 @@ CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
 CB_AGENT_CONNECT = r'.* Connected to the server .*'
+CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: '(\d+)', path count: '(\d+)'"
+CB_FILE_LIMIT_CAPACITY = r".*File database is (\d+)% full."
+CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
+CB_FIM_ENTRIES_COUNT =r".*Fim entries: (\d+)"
+CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
+CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
+CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
+CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
+
 
 # Error message
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
+ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
+ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT= 'Wrong capacity log for DB file_limit'
+ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
+ERR_MSG_WRONG_INODE_PATH_COUNT = 'Wrong number of inodes and path count'
+ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ...: Sending DB back to normal alert." event'
+ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., path count: ..." event'
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+ERR_MSG_WRONG_FILE_LIMIT_VALUE ='Wrong value for file_limit.'
+ERR_MSG_DATABASE_FULL_ALERT_EVENT = 'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
+ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
+ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
+ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
+ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
+ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
+
 
 # Setting Local_internal_option file
 
