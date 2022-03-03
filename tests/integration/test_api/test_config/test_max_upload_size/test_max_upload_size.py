@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: These tests will check if the 'max_upload_size' setting of the API is wor
        the Wazuh manager from a web browser, command line tool like 'cURL' or any script
        or program that can make web requests.
 
-tier: 2
-
-modules:
+components:
     - api
 
-components:
+suite: config
+
+targets:
     - manager
 
 daemons:
@@ -36,18 +36,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -172,6 +164,8 @@ def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environ
                  both PUT and POST endpoints should fail when trying to send a bigger body.
 
     wazuh_min_version: 4.3.0
+
+    tier: 2
 
     parameters:
         - tags_to_apply:
