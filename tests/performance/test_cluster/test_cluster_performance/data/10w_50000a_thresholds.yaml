@@ -3,101 +3,101 @@ tasks:
     agent-info_sync:
       time_spent(s):
         master:
-          max: 30
-          mean: 5
+          max: 8.5
+          mean: 1.5
         workers:
-          max: 40
-          mean: 10
+          max: 21
+          mean: 4
     integrity_check:
       time_spent(s):
         master:
-          max: 50
-          mean: 10
+          max: 16
+          mean: 3
         workers:
-          max: 50
-          mean: 15
+          max: 26
+          mean: 7.5
     integrity_sync:
       time_spent(s):
         master:
-          max: 80
-          mean: 30
+          max: 20.2
+          mean: 3.6
         workers:
-          max: 50
-          mean: 20
+          max: 10
+          mean: 1.5
   stable_phase:
     agent-info_sync:
       time_spent(s):
         master:
-          max: 10
-          mean: 0.5242
+          max: 3
+          mean: 1.4
         workers:
-          max: 10
-          mean: 1.43406
+          max: 5.1
+          mean: 4.1
     integrity_check:
       time_spent(s):
         master:
-          max: 9
-          mean: 1.45237
+          max: 4.5
+          mean: 2.5
         workers:
           max: 9
-          mean: 3.32689
+          mean: 6.7
 
 resources:
   setup_phase:
     wazuh-clusterd:
       CPU(%):
         master:
-          max: 110
-          mean: 60
-          reg_cof: 1.5
+          max: 132
+          mean: 47
+          reg_cof: 0.05
         workers:
-          max: 110
-          mean: 10
-          reg_cof: 0.5
+          max: 60
+          mean: 12.166
+          reg_cof: 0.05
       FD:
         master:
-          max: 200
+          max: 128.7
           mean: 100
-          reg_cof: 5
+          reg_cof: 0.01
         workers:
-          max: 150
-          mean: 30
-          reg_cof: 1
+          max: 79.2
+          mean: 66
+          reg_cof: 0.015
       USS(KB):
         master:
-          max: 2097152            # (2 GB)
-          mean: 1048576           # (1 GB)
-          reg_cof: 102400         # (100 MB)
+          max: 315000           # (315 MB)
+          mean: 168979          # (168 MB)
+          reg_cof: 550          # (332 B)
         workers:
-          max: 307200             # (300 MB)
-          mean: 153600            # (150 MB)
-          reg_cof: 1024           # (1 MB)
+          max: 208700           # (200 MB)
+          mean: 116458          # (116 MB)
+          reg_cof: 330          # (330 B)
   stable_phase:
     wazuh-clusterd:
       CPU(%):
         master:
-          max: 70
-          mean: 47
-          reg_cof: 0.05
+          max: 81.07
+          mean: 51.018
+          reg_cof: 0.0891
         workers:
-          max: 50
-          mean: 15
-          reg_cof: 0.05
+          max: 38.28
+          mean: 14.036
+          reg_cof: 0.8239
       FD:
         master:
-          max: 65
-          mean: 26.77512
-          reg_cof: 0.001
+          max: 52.8
+          mean: 50
+          reg_cof: 0.05
         workers:
-          max: 20
-          mean: 16
-          reg_cof: 0.0040
+          max: 70.4
+          mean: 70
+          reg_cof: 2.717
       USS(KB):
         master:
-          max: 309394.8
-          mean: 240663.67742
-          reg_cof: 30
+          max: 204781           # (204 MB)
+          mean: 197162          # (197 MB)
+          reg_cof: 209.6        # (209 MB)
         workers:
-          max: 189895.2
-          mean: 117506.60276
-          reg_cof: 30
+          max: 201480           # (201 MB)
+          mean: 145000          # (145 MB)
+          reg_cof: 8224         # (8 MB)
