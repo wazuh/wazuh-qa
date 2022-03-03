@@ -88,12 +88,11 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules import DATA
+from wazuh_testing.modules import DATA, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 from wazuh_testing.modules.fim import (DIFF_DEFAULT_LIMIT_VALUE, CB_MAXIMUM_FILE_SIZE,
                                        REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES,
                                        YAML_CONF_DIFF, ERR_MSG_MAXIMUM_FILE_SIZE,
-                                       ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE, SYSCHECK_DEBUG,
-                                       VERBOSE_DEBUG_OUTPUT)
+                                       ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 
 # Marks
 
