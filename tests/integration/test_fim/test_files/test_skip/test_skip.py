@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_skip
+
+targets:
     - agent
     - manager
 
@@ -30,19 +30,15 @@ os_platform:
     - linux
 
 os_version:
+    - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -164,6 +160,8 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -253,6 +251,8 @@ def test_skip_sys(get_configuration, configure_environment, restart_syscheckd, w
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -329,6 +329,8 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - modify_inode_mock:
             type: None
@@ -387,6 +389,8 @@ def test_skip_nfs(modify_inode_mock, directory, tags_to_apply, configure_nfs, ge
                  from the NFS folder are generated or not depending on the value of the 'skip_nfs' tag.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - modify_inode_mock:
