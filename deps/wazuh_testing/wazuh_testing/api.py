@@ -20,6 +20,7 @@ API_PORT = '55000'
 API_USER = 'wazuh'
 API_PASS = 'wazuh'
 API_LOGIN_ENDPOINT = '/security/user/authenticate'
+API_GLOBAL_TIMEOUT = 5
 
 
 # Callbacks
