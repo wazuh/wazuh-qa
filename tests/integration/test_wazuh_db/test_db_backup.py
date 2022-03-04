@@ -52,7 +52,7 @@ references:
 tags:
     - wazuh_db
 '''
-from cmath import exp
+
 import os
 import time
 import pytest
@@ -60,20 +60,13 @@ import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.fim import generate_params
+
+
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
-
-configurations_path = os.path.join(test_data_path, 'wazuh_db_backups_conf.yaml')
-conf_params=[{'ENABLED': 'no', 'INTERVAL':'1d', 'MAX_FILES':3}]
-conf_metadata=[{'ENABLED': 'no', 'INTERVAL':'1d', 'MAX_FILES':3}]
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
-
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'wazuh_db_backup_command.yaml')
 module_tests = []
 with open(messages_file) as f:
@@ -110,12 +103,6 @@ def remove_backups(request):
     os.chmod(backups_path, 0o777)
     yield
     remove_file(backups_path)
-
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
 
 
 # Tests
@@ -164,9 +151,12 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
           as well as the expected responses.
 
     expected_output:
-        - f"Assertion Error - expected {output}, but got {response}"
-        - f'Unexpected response: got {response}, but expected {output}'
-        - 'Unable to add agent'
+        - f'Backup creation failed. Got: {response}'
+        - f'Error - Found {backups.__len__()} files, expected {backups_ammount}'
+        - f'Error expected value: key:"{test_values[0]}" was not found.'
+        - f'Error found unexpected: "key":"{test_values[0]}" value.'
+        - f'Did not find expected: {expected} in response: {response}'
+        - f'Error - Found {backups.__len__()} files, expected {backups_ammount + 1}'
 
     tags:
         - wazuh_db
@@ -202,7 +192,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
                             "save_pre_restore_state": {save_pre_restore}}}'
 
         if save_pre_restore == 'none':
-            restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'    
+            restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'
 
         if 'snapshot' in case_data:
             snapshot= case_data['snapshot']
@@ -211,7 +201,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         # Restore the DB - Assert command response
         expected = case_data['restore_response']
         response = query_wdb(restore_command)
-        assert expected in response, f'Error - Did not find expected: {expected} in response: {response}'
+        assert expected in response, f'Did not find expected: {expected} in response: {response}'
 
         # Break out of test if error during restore.
         if 'err' in expected:
@@ -229,7 +219,8 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             assert "-pre_restore.gz" in backups[-1]
 
             if 'restore_pre_restore' in case_data:
-                restore_command = f'global backup restore {{"snapshot": "{backups[-1]}","save_pre_restore_state": "false"}}'
+                restore_command = f'global backup restore {{"snapshot": "{backups[-1]}",\
+                                    "save_pre_restore_state": "false"}}'
                 response = query_wdb(restore_command)
                 assert response == expected
 
