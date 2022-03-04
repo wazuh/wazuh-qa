@@ -1,0 +1,53 @@
+---
+- 
+  configuration:
+    logs:
+      level: info
+      format: json
+- 
+  expected_error_message: True 
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: json
+-
+  configuration:
+    logs:
+      level: info
+      format: plain
+-
+  expected_error_message: True 
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: plain
+-
+  configuration:
+    logs:
+      level: info
+      format: json,plain
+-
+  expected_error_message: True 
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: json,plain
+-
+  configuration:
+    logs:
+      level: info
+      format: plain,json
+-
+  expected_error_message: True 
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: plain,json
