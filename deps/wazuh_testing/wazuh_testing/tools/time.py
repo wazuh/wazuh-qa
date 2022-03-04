@@ -271,3 +271,28 @@ def interval_to_time_modifier(interval):
     time_value = interval[:-1]
     time_unit = interval[-1]
     return f"{time_value} {interval_units_dict[time_unit]}"
+
+
+def parse_datetime_format(date_time):
+    """Parse the specified date_time to return a common format.
+
+    Args:
+        date_time (str): Date time to parse.
+
+    Returns:
+        str: Date time in format '%Y-%m-%d %H:%M:%S'
+
+    Raises:
+        ValueError: If could not parse the specified date_time
+    """
+    try:
+        return datetime.strftime(datetime.fromisoformat(date_time), '%Y-%m-%d %H:%M:%S')
+
+    except ValueError as exception:
+        for date_time_format in ['%Y-%m-%dT%H:%MZ', '%Y-%m-%d %H:%M:%S']:
+            try:
+                return datetime.strftime(datetime.strptime(date_time, date_time_format), '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                pass
+
+        raise ValueError(f"Could not parse the {date_time} datetime") from exception
