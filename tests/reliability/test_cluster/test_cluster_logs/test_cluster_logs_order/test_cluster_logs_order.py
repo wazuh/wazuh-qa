@@ -29,7 +29,7 @@ def dict_to_tree(dict_tree):
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-logs_format = re.compile(r'.* \[(Agent-info sync|Integrity check|Integrity sync)] (.*)')
+logs_format = re.compile(r'.* \[(Agent-info sync|Integrity check|Integrity sync|Agent-groups sync)] (.*)')
 node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
 incorrect_order = {}
 logs_order = {

@@ -77,7 +77,7 @@ def check_agent_status(status, token, agent):
 def test_agent_groups_create_group():
     """Check agent agent-groups synchronization works as expected.
 
-    This test will wait for the expected agent-groups messages declared in data/messages.yml. Additionally, it will
+    This test will wait for the expected agent-groups messages declared in data/add_messages.yml. Additionally, it will
     ensure agent-group synchronization is working by adding a group to an agent."""
 
     # Get the token
@@ -130,7 +130,7 @@ def test_agent_groups_create_group():
 def test_agent_groups_remove_group():
     """Check agent agent-groups synchronization works as expected.
 
-    This test will wait for the expected agent-groups messages declared in data/messages.yml. Additionally, it will
+    This test will wait for the expected agent-groups messages declared in data/delete_messages.yml. Additionally, it will
     ensure agent-group synchronization is working by removing an agent from group."""
 
     # Get the token
