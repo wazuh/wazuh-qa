@@ -1,14 +1,14 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
 
-brief: Active responses perform various countermeasures to address active
-       threats, such as blocking access to an agent from the threat source when certain
-       criteria are met. These tests will check if an active response command is sent
-       correctly to the Wazuh agent by `wazuh-remoted` daemon.
+brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh persistent information, exposing a socket
+       to receive requests and provide information. Wazuh-db has the capability to do automatic database backups, based
+       on the configuration parameters. This test, checks the proper working of the backup configuration and the
+       backup files are generated correctly.
 
 tier: 0
 
@@ -72,36 +72,42 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_db_backups_conf.yaml')
 backups_path = os.path.join(WAZUH_PATH, 'backup', 'db')
 interval = 5
+
 parameters = [{'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':''},
               {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':'value'},
               {'ENABLED': 'yes', 'INTERVAL': '', 'MAX_FILES':'1'},
               {'ENABLED': 'yes', 'INTERVAL': 'value', 'MAX_FILES':1},
               {'ENABLED': 'no', 'INTERVAL': str(interval)+'s', 'MAX_FILES':1},
               {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':1},
-]
+              {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':3},
+              {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':0}
+            ]
+
 metadata = [{'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':''},
             {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':'value'},
             {'ENABLED': 'yes', 'INTERVAL': '', 'MAX_FILES':1},
             {'ENABLED': 'yes', 'INTERVAL': 'value', 'MAX_FILES':1},
             {'ENABLED': 'no', 'INTERVAL': str(interval)+'s', 'MAX_FILES':1},
             {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':1},
-]
+            {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':3},
+            {'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':0}
+           ]
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
                                            params=parameters, metadata=metadata)
+
+# Variables
+BACKUP_CREATION_CALLBACK = r'.*Created Global database backup "(backup/db/global.db-backup.*.gz)"'
+WRONG_INTERVAL_CALLBACK = r".*Invalid value for element ('interval':.*)"
+WRONG_MAX_FILES_CALLBACK = r".*Invalid value for element ('max_files':.*)"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-def restart_wazuh(log_monitor):
-    # Stop Wazuh
+def restart_wazuh():
+    """Restarts Wazuh."""
     control_service('stop')
-    
-    # Reset ossec.log and start a new monitor
-    #truncate_file(LOG_FILE_PATH)
-    #log_monitor = FileMonitor(LOG_FILE_PATH)
-    
-    # Start Wazuh
     control_service('start')
+
 
 def validate_interval_format(interval):
     if interval=='':
@@ -110,11 +116,20 @@ def validate_interval_format(interval):
         return False
     return True
 
+
 # Fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
+
+@pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
 
 @pytest.fixture(scope='function')
@@ -127,23 +142,64 @@ def remove_backups(request):
 
 
 # Tests
-def test_wdb_backup_configs(get_configuration, configure_environment, remove_backups):
+def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs, remove_backups):
     '''
-    description: 
-  
+    description: Check that given different wdb backup configuration parámeters, the expected behaviour is achieved.
+                 For this, the test gets a series of parameters for the wazuh_db_backups_conf.yaml file and applies
+                 them to the manager's ossec.conf. It checks in case of erroneous configurations that the manager was
+                 unable to start; otherwise it will check that after creating "max_files+1", there are a total of 
+                 "max_files" backup files in the backup folder.
+
+    wazuh_min_version: 4.4.0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_enviroment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - clear_logs:
+            type: fixture
+            brief: Clears the ossec.log file and starts a new File_Monitor.
+        - remove_backups:
+            type: fixture
+            brief: Creates the folder where the backups will be stored in case it doesn't exist. It clears it when the
+                   test yields.
+    assertions:
+        - Verify that manager starts behaviour is correct for any given configuration
+        - Verify that the backup file has been created, wait for "max_files+1"
+        - Verify that after "max_files+1" files created, there's only "max_files" in the folder
+
+    input_description:
+        - Test cases are defined in the parameters and metada variables, that will be applied to the the 
+          wazuh_db_backup_command.yaml file. The paramerters tested are: "enabled", "interval" and "max_files".
+          With the given input the test will check the correct behaviour of wdb automatic global db backups.
+
+    expected_output:
+        - f"Invalid value element for interval..."
+        - f"Invalid value element for max_files..."
+        - f'Did not receive expected "Created Global database..." event'
+        - f'Expected {test_max_files} backup creation messages, but got {result}'
+        - f'Wrong backup file ammount, expected {test_max_files} but {total_files} are present in folder.
+
+    tags:
+        - wazuh_db
+        - wdb_socket
+
     '''
     test_interval = get_configuration['metadata']['INTERVAL']
     test_max_files = get_configuration['metadata']['MAX_FILES']
     try:
-        restart_wazuh(wazuh_log_monitor)
+        restart_wazuh()
     except (subprocess.CalledProcessError, ValueError) as err:
         if not validate_interval_format(test_interval):
-            wazuh_log_monitor.start(callback=generate_monitoring_callback(r".*Invalid value for element ('interval':.*)"), timeout=15,
+            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_INTERVAL_CALLBACK), timeout=15,
                                            error_message='Did not receive expected '
                                                          '"Invalid value element for interval..." event')
             return
-        elif not isinstance(test_max_files, numbers.Number):
-            wazuh_log_monitor.start(callback=generate_monitoring_callback(r".*Invalid value for element ('max_files':.*)"), timeout=15,
+        elif not isinstance(test_max_files, numbers.Number) or test_max_files==0:
+            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_MAX_FILES_CALLBACK), timeout=15,
                                            error_message='Did not receive expected '
                                                          '"Invalid value element for max_files..." event')
             return
@@ -152,7 +208,7 @@ def test_wdb_backup_configs(get_configuration, configure_environment, remove_bac
 
     # Wait for backup files to be generated
     time.sleep(interval*(int(test_max_files)+1))
-    
+
     # Manage if backup generation is not enabled - no backups expected
     if get_configuration['metadata']['ENABLED'] == 'no':
         # Fail the test if a file or more were found in the backups_path
@@ -160,9 +216,14 @@ def test_wdb_backup_configs(get_configuration, configure_environment, remove_bac
             pytest.fail("Error - A file was found in backups_path and No backups where expected - enabled = no")
     # Manage if backup generation is enabled - one or more backups expected
     else:
+
         result= wazuh_log_monitor.start(timeout=15, accum_results=test_max_files+1,
-                                callback=generate_monitoring_callback(r'.*Created Global database backup "(backup/db/global.db-backup.*.gz)"'),
-                                error_message='Did not receive expected "Created Global database backup..." event').result()
-        print(result)
+                                        callback=generate_monitoring_callback(BACKUP_CREATION_CALLBACK),
+                                        error_message=f'Did not receive expected\
+                                                        "Created Global database..." event').result()
+        assert len(result) == test_max_files+1, f'Expected {test_max_files} backup creation messages, but got {result}'
+        total_files=0
         for file in os.listdir(backups_path):
-            print(os.path.join(backups_path, file))
+            total_files = total_files+1
+        assert total_files == test_max_files, f'Wrong backup file ammount, expected {test_max_files} \
+                                                but {total_files} are present in folder.'
