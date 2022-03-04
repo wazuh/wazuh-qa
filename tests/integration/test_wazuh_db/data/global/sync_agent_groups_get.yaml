@@ -57,7 +57,7 @@
   test_case:
   -
     input: 'global sync-agent-groups-get {"last_id":0}'
-    output: 'err Invalid JSON data, missing required fields'
+    output: "err Invalid JSON data, missing required 'condition' field"
 
 -
   name: "Test set_synced in True"
@@ -69,7 +69,7 @@
     agent_id: "[1,2]"
 
 -
-  name: "Test set_synced with invalidad value"
+  name: "Test set_synced with invalid value - false"
   test_case:
   -
     input: 'global sync-agent-groups-get {"condition":"sync_status", "set_synced":false}'
@@ -78,11 +78,11 @@
     agent_id: "[1,2]"
 
 -
-  name: "Test set_synced with invalidad value"
+  name: "Test set_synced with invalid value - String"
   test_case:
   -
     input: 'global sync-agent-groups-get {"condition":"sync_status", "set_synced":"set"}'
-    output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
+    output: "err Invalid JSON data, invalid alternative fields data type"
     new_status:  "syncreq"
     agent_id: "[1,2]"
 
@@ -108,7 +108,7 @@
   -
     pre_input: ['global sql UPDATE agent SET group_hash = "DUMMY"']
     input: 'global sync-agent-groups-get {"last_id":0, "condition":"sync_status", "get_global_hash":"set"}'
-    output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]" 
+    output: "err Invalid JSON data, invalid alternative fields data type" 
 
 -
   name: "Test 'agent_registration_delta' in 0 and sync_status"
@@ -167,5 +167,5 @@
   name: "Test last_id - with negative value"
   test_case:
   -
-    input: 'global sync-agent-groups-get {"last_id":50, "condition":"sync_status"}'
-    output: "[{'data': []}]"
+    input: 'global sync-agent-groups-get {"last_id":-3, "condition":"sync_status"}'
+    output: "[{'data': [{'id': 1, 'groups': ['Test_group1']}, {'id': 2, 'groups': ['Test_group2']}]}]"
