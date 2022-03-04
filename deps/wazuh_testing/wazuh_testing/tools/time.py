@@ -285,14 +285,13 @@ def parse_datetime_format(date_time):
     Raises:
         ValueError: If could not parse the specified date_time
     """
-    try:
-        return datetime.strftime(datetime.fromisoformat(date_time), '%Y-%m-%d %H:%M:%S')
+    custom_formats = ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%MZ', '%Y-%m-%dT%H:%M:%S.%f%z', '%Y-%m-%d %H:%M:%S',
+                      '%Y-%m-%dT%H:%M:%S%z']
 
-    except ValueError as exception:
-        for date_time_format in ['%Y-%m-%dT%H:%MZ', '%Y-%m-%d %H:%M:%S']:
-            try:
-                return datetime.strftime(datetime.strptime(date_time, date_time_format), '%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                pass
+    for date_time_format in custom_formats:
+        try:
+            return datetime.strftime(datetime.strptime(date_time, date_time_format), '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            pass
 
-        raise ValueError(f"Could not parse the {date_time} datetime") from exception
+    raise ValueError(f"Could not parse the {date_time} datetime. Accepted formats: {custom_formats}")
