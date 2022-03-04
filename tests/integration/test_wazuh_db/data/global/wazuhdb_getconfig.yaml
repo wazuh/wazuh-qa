@@ -1,0 +1,31 @@
+---
+-
+  name: 'Get config missing parameter'
+  test_case:
+  -
+    input: 'wazuhdb getconfig'
+    output: "err Invalid DB query syntax, near 'getconfig'"
+-
+  name: 'Get config empty parameter'
+  test_case:
+  -
+    input: 'wazuhdb getconfig '
+    output: 'err Failed reading wazuh-db config'
+-
+  name: 'Get config wrong parameter'
+  test_case:
+  -
+    input: 'wazuhdb getconfig wrong_parameter'
+    output: 'err Failed reading wazuh-db config'
+-
+  name: 'Get internal config'
+  test_case:
+  -
+    input: 'wazuhdb getconfig internal'
+    output: "{'wazuh_db': {'commit_time_max': 60, 'commit_time_min': 10, 'open_db_limit': 64, 'sock_queue_size': 128, 'worker_pool_size': 8}}"
+-
+  name: 'Get wdb config'
+  test_case:
+  -
+    input: 'wazuhdb getconfig wdb'
+    output: "{'wdb': {'backup': [{'database': 'global', 'enabled': True, 'interval': 86400, 'max_files': 3}]}}"
