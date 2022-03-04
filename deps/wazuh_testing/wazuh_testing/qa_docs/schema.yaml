@@ -4,13 +4,13 @@ output_fields:
       - copyright
       - type
       - brief
-      - tier
-      - modules
-      - daemons
       - components
+      - targets
+      - daemons
       - os_platform
       - os_version
     optional:
+      - suite
       - references
       - pytest_args
       - tags
@@ -20,11 +20,13 @@ output_fields:
     mandatory:
       - description
       - wazuh_min_version
+      - tier
       - parameters
       - assertions
       - input_description
-      - expected_output
     optional:
+      - test_phases
+      - expected_output
       - inputs
       - tags
 
@@ -33,8 +35,8 @@ test_cases_field: test_cases
 predefined_values:
   module_fields:
     - type
-    - modules
     - components
+    - targets
     - daemons
     - os_platform
     - os_version
@@ -47,7 +49,7 @@ predefined_values:
     - performance
     - system
     - unit
-  modules:
+  components:
     - active_response
     - agentd
     - analysisd
@@ -63,6 +65,7 @@ predefined_values:
     - remoted
     - rids
     - rootcheck
+    - syscheck
     - vulnerability_detector
     - wazuh_db
     - wpk
@@ -116,7 +119,7 @@ predefined_values:
     - Windows Server 2012
     - Windows Server 2016
     - Windows Server 2019
-  components:
+  targets:
     - agent
     - manager
   daemons:
@@ -170,8 +173,10 @@ predefined_values:
     - 3.13.0
     - 4.0.0
     - 4.1.0
+    - 4.1.3
     - 4.2.0
     - 4.3.0
+    - 4.4.0
   tags:
     - active_response
     - agentd
@@ -224,6 +229,7 @@ predefined_values:
     - fim_inotify
     - fim_invalid
     - fim_max_eps
+    - fim_max_eps_sync
     - fim_max_files_per_second
     - fim_moving_files
     - fim_multiple_dirs
@@ -307,7 +313,7 @@ predefined_values:
     - msu_feeds
     - nvd
     - office365
-    - on start
+    - on_start
     - oval
     - prelink
     - providers
