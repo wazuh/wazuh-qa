@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: command_monitoring
+
+targets:
     - agent
     - manager
 
@@ -39,21 +39,14 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
     - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - macOS Catalina
     - Solaris 10
     - Solaris 11
+    - macOS Catalina
+    - macOS Server
+    - Ubuntu Focal
+    - Ubuntu Bionic
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -167,6 +160,8 @@ def test_command_execution(configure_local_internal_options_module, get_configur
                  that the command is executed, has been generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_local_internal_options_module:

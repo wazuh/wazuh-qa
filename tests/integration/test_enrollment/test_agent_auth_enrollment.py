@@ -1,48 +1,43 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
-    Created by Wazuh, Inc. <info@wazuh.com>.
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+copyright: Copyright (C) 2015-2021, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
-tier:
-    0
-modules:
-    - agent-auth
+
 components:
+    - agentd
+
+targets:
     - agent
+
 daemons:
-    - agent-auth
-path:
-    /tests/integration/test_enrollment/test_agent_auth_enrollment.py
-os_platform
+    - wazuh-authd
+
+os_platform:
     - linux
     - windows
+
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
-    - Windows 7
-    - Windows 8
     - Windows 10
-    - Windows Server 2003
-    - Windows Server 2012
+    - Windows Server 2019
     - Windows Server 2016
+
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import pytest
@@ -97,8 +92,11 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         "Check that different configuration generates the adequate enrollment message or the corresponding
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
-    wazuh_min_version:
-        4.2
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
     parameters:
         - configure_environment:
             type: fixture
@@ -130,13 +128,16 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         - request:
             type: fixture
             brief: Provide information of the requesting test function.
+
     assertions:
         - The enrollment message is sent when the configuration is valid
         - The enrollment message is generated as expected when the configuration is valid.
         - The error log is generated as expected when the configuration is invalid.
+
     input_description:
         Different test cases are contained in an external YAML file (wazuh_enrollment_tests.yaml) which includes the
         different available enrollment-related configurations.
+
     expected_output:
         - Enrollment request message on Authd socket
         - Error logs related to the wrong configuration block

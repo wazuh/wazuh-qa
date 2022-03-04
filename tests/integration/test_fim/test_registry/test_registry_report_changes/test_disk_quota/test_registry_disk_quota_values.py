@@ -1,5 +1,5 @@
 """
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes_disk_quota
+
+targets:
     - agent
 
 daemons:
@@ -120,12 +120,14 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  limit, and increase its size on each test case. Finally, the test will verify that the
                  compressed file has been created, and the related FIM event includes the 'content_changes'
                  field if the value size does not exceed the specified limit and viceversa.
-                 - Case 1: small file - when compressed it will be less than the disk_quota. The file is generated 
+                 - Case 1, small file - when compressed it will be less than the disk_quota. The file is generated 
                  and the logs have content_changes data.
-                 - Case 2: big size - when compressed the file would be bigger than the disk_quota. The file is not
+                 - Case 2, big size - when compressed the file would be bigger than the disk_quota. The file is not
                  generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:

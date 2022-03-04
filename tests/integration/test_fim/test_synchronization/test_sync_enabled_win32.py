@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: synchronization
+
+targets:
     - agent
 
 daemons:
@@ -110,7 +110,11 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
                  Finally, it will verify that the FIM 'integrity' event generated corresponds with a
                  file or a registry when the synchronization is enabled, depending on the test case.
+
     wazuh_min_version: 4.2.0
+
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -124,14 +128,18 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - wait_for_fim_start_sync_disabled:
             type: fixture
             brief: Wait for end of initial FIM scan.
+
     assertions:
         - Verify that FIM 'integrity' events generated correspond to a file/registry depending on
           the value of the 'enabled' and the 'registry_enabled' tags (synchronization enabled).
+
     input_description: Different test cases are contained in external YAML file (wazuh_sync_conf_win32.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined with
                        the testing directory/key to be monitored defined in this module.
+
     expected_output:
         - r'.*Sending integrity control message'
+
     tags:
         - scheduled
         - time_travel

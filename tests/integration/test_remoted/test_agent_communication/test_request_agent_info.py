@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -9,12 +9,12 @@ brief: The 'wazuh-remoted' program is the server side daemon that communicates w
        Specifically, these tests will check that the manager can communicate correctly with the
        agent to ask for its information.
 
-tier: 0
-
-modules:
+components:
     - remoted
 
-components:
+suite: agent_communication
+
+targets:
     - manager
 
 daemons:
@@ -29,18 +29,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
@@ -114,7 +106,9 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
                  from default agent group to reduce the time required by the test to make the checks.
     
     wazuh_min_version: 4.2.0
-    
+
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture

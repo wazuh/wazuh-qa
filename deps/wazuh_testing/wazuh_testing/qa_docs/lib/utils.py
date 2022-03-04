@@ -218,6 +218,26 @@ def clean_folder(folder):
             utils_logger.error(f"Failed to delete {file_path}. Reason: {e}")
 
 
+def get_file_path_recursively(file_to_find, path):
+    """Get the given file path.
+
+    Args:
+        file_to_find (str): Filename to search.
+        path (str): Root path where the file is searched.
+    Returns:
+        path (str): File path if exists within the given path, None otherwise.
+    """
+    (root, folders, files) = next(os.walk(path))
+    for file in files:
+        if file == file_to_find:
+            return os.path.join(root, file)
+
+    for folder in folders:
+        path = get_file_path_recursively(file_to_find, os.path.join(root, folder))
+        if path is not None:
+            return path
+
+
 def run_local_command(command):
     """Run local commands without getting the output, but validating the result code.
 

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_nodiff
+
+targets:
     - agent
 
 daemons:
@@ -129,6 +129,8 @@ def test_no_diff_str(key, subkey, arch, value_name, truncated, tags_to_apply,
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - key:
             type: str
@@ -228,6 +230,8 @@ def test_no_diff_regex(key, subkey, arch, value_name, truncated, tags_to_apply,
                  a message indicating that 'diff' is truncated because the 'nodiff' option is used.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:

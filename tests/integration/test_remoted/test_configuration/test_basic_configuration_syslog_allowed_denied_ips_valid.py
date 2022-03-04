@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -9,12 +9,12 @@ brief: The 'wazuh-remoted' program is the server side daemon that communicates w
        Specifically, this test will check that syslog is allowing the specified IPs in 'allowed-ips'
        when the values are valid.
 
-tier: 0
-
-modules:
+components:
     - remoted
 
-components:
+suite: configuration
+
+targets:
     - manager
 
 daemons:
@@ -29,18 +29,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
@@ -103,6 +95,8 @@ def test_allowed_denied_ips_syslog(get_configuration, configure_environment, res
                  the configuration is the same as the API reponse.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

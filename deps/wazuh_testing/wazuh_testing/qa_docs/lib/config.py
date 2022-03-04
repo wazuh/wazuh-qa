@@ -10,6 +10,7 @@ import re
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.qa_docs.lib.utils import get_file_path_recursively
 
 
 class Config():
@@ -115,22 +116,29 @@ class Config():
 
         for type in self.test_types:
             subset_tests = os.path.join(self.project_path, type)
-
             if self.test_components:
                 if self.test_suites:
                     if self.test_modules:
                         for component in self.test_components:
                             for suite in self.test_suites:
                                 for module in self.test_modules:
-                                    self.include_paths.append(os.path.join(subset_tests, component, suite,
-                                                              f"{module}.py"))
+                                    module_path = get_file_path_recursively(f"{module}.py",
+                                                                            os.path.join(subset_tests, component,
+                                                                                         suite))
+                                    self.include_paths.append(module_path)
                     else:
                         for component in self.test_components:
                             for suite in self.test_suites:
                                 self.include_paths.append(os.path.join(subset_tests, component, suite))
                 else:
-                    for component in self.test_components:
-                        self.include_paths.append(os.path.join(subset_tests, component))
+                    if self.test_modules:
+                        for module in self.test_modules:
+                            module_path = get_file_path_recursively(f"{module}.py", os.path.join(subset_tests,
+                                                                    self.test_components[0]))
+                            self.include_paths.append(module_path)
+                    else:
+                        for component in self.test_components:
+                            self.include_paths.append(os.path.join(subset_tests, component))
             else:
                 for name in os.listdir(subset_tests):
                     if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: These tests will check if the IP blocking feature of the API handled by t
        with the Wazuh manager from a web browser, command line tool like 'cURL' or any script
        or program that can make web requests.
 
-tier: 0
-
-modules:
+components:
     - api
 
-components:
+suite: config
+
+targets:
     - manager
 
 daemons:
@@ -95,6 +95,8 @@ def test_bruteforce_blocking_system(tags_to_apply, get_configuration, configure_
                  the blocking time finishes and one after the blocking time.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:

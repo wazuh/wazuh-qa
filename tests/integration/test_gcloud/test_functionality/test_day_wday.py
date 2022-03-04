@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        will check if the 'gcp-pubsub' module gets the GCP logs at the date-time
        specified in the configuration and sleeps up to it.
 
-tier: 0
-
-modules:
+components:
     - gcloud
 
-components:
+suite: functionality
+
+targets:
     - agent
     - manager
 
@@ -37,18 +37,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#day
@@ -144,6 +136,8 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - tags_to_apply:
             type: set
@@ -215,6 +209,8 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
                  will check that the 'sleep' event is triggered and matches with the set interval.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:

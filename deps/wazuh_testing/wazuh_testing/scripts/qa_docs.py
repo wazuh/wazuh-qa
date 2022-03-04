@@ -15,7 +15,7 @@ from tempfile import gettempdir
 from wazuh_testing.qa_docs.lib.config import Config
 from wazuh_testing.qa_docs.lib.index_data import IndexData
 from wazuh_testing.qa_docs.lib.sanity import Sanity
-from wazuh_testing.qa_docs.lib.utils import run_local_command, qa_docs_docker_run, get_qa_docs_run_options
+from wazuh_testing.qa_docs.lib import utils
 from wazuh_testing.qa_docs.doc_generator import DocGenerator
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
@@ -42,6 +42,7 @@ def set_qadocs_logger_level(logging_level):
     else:
         qadocs_logger.set_level(logging_level)
 
+
 def set_parameters(args):
     # Set the qa-docs logger level
     if args.debug_level:
@@ -50,6 +51,7 @@ def set_parameters(args):
     # Deactivate the qa-docs logger if necessary.
     if args.no_logging:
         set_qadocs_logger_level(None)
+
 
 def set_parameters(args):
     """Set the QADOCS parameters.
@@ -194,8 +196,8 @@ def check_incompatible_parameters(parameters):
 
     if parameters.test_components:
         if parameters.tests_path is None and not parameters.run_with_docker:
-            raise QAValueError('The --components option needs the path to the tests to be parsed. You must specify it by '
-                               'using --tests-path',
+            raise QAValueError('The --components option needs the path to the tests to be parsed. You must specify it '
+                               'by using --tests-path',
                                qadocs_logger.error)
 
         if parameters.test_exist:
@@ -205,12 +207,12 @@ def check_incompatible_parameters(parameters):
     if parameters.test_suites:
         if not parameters.test_components:
             raise QAValueError('The --suites option needs the suite module to be parsed. You must specify it '
-                                'using --components',
-                                qadocs_logger.error)
+                               'using --components',
+                               qadocs_logger.error)
 
         if parameters.test_exist:
-                raise QAValueError('The --suites option is not compatible with -e(--exist)',
-                                qadocs_logger.error)
+            raise QAValueError('The --suites option is not compatible with -e(--exist)',
+                               qadocs_logger.error)
 
     if parameters.test_modules:
         if parameters.tests_path is None and not parameters.run_with_docker:
@@ -323,39 +325,55 @@ def validate_parameters(parameters, parser):
         if parameters.test_types:
             for type in parameters.test_types:
                 if type not in os.listdir(parameters.tests_path):
-                    raise QAValueError(f"The given type: {type}, not found in {parameters.tests_path}",
+                    raise QAValueError(f"The given type: {type} has not been found in {parameters.tests_path}",
                                        qadocs_logger.error)
 
         # Check that components selection is done within a test type
         if parameters.test_components:
             if len(parameters.test_types) != 1:
-                raise QAValueError('The --components option work when is only parsing a single test type. Use --types with'
-                                   ' just one type if you want to parse some components within a test type.',
+                raise QAValueError('The --components option works when is only parsing a single test type. Use --types '
+                                   'with just one type if you want to parse some components within a test type.',
                                    qadocs_logger.error)
 
             if parameters.test_suites:
                 if len(parameters.test_components) != 1:
-                    raise QAValueError('The --suites option work when is only parsing a single test module. Use '
-                                       '--components with just one type if you want to parse some components within a test '
-                                       'type.', qadocs_logger.error)
+                    raise QAValueError('The --suites option works when is only parsing a single test module. Use '
+                                       '--components with just one type if you want to parse some components within a '
+                                       'test type.', qadocs_logger.error)
+
+        if parameters.test_modules:
+            # If at least one module is specified
+            if len(parameters.test_components) != 1:
+                raise QAValueError('The --modules option work swhen is only parsing a single test component. Use '
+                                   '--components with just one component if you want to parse some modules within a '
+                                   'test component.', qadocs_logger.error)
+
+            if parameters.test_suites:
+                if len(parameters.test_suites) != 1:
+                    raise QAValueError('The --modules option works when is only parsing a single test suite. Use '
+                                       '--suites with just one type if you want to parse some modules within a '
+                                       'test suite.', qadocs_logger.error)
 
             for component in parameters.test_components:
                 type_path = os.path.join(parameters.tests_path, parameters.test_types[0])
+                component_path = os.path.join(type_path, component)
                 if component not in os.listdir(type_path):
-                    raise QAValueError(f"The given component: {component}, not found in {type_path}",
+                    raise QAValueError(f"The given component: {component} has not been found in {type_path}",
                                        qadocs_logger.error)
-                    
+
                 for suite in parameters.test_suites:
-                    component_path = os.path.join(type_path, component)
                     if suite not in os.listdir(component_path):
-                        raise QAValueError(f"The given suite: {suite}, not found in {component_path}",
+                        raise QAValueError(f"The given suite: {suite} has not been found in {component_path}",
                                            qadocs_logger.error)
 
-                    for module in parameters.test_modules:
-                        suite_path = os.path.join(component_path, suite)
-                        module_file = f"{module}.py"
-                        if module_file not in os.listdir(suite_path):
-                            raise QAValueError(f"The given module: {module_file}, not found in {suite_path}",
+                suite_path = '' if not parameters.test_suites else parameters.test_suites[0]
+
+                for module in parameters.test_modules:
+                    suite_path = os.path.join(component_path, suite_path)
+                    module_file = f"{module}.py"
+                    if module_file not in os.listdir(suite_path):
+                        if utils.get_file_path_recursively(module_file, suite_path) is None:
+                            raise QAValueError(f"The given module: {module_file} has not been found in {suite_path}",
                                                qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
@@ -366,7 +384,7 @@ def install_searchui_deps():
     os.chdir(SEARCH_UI_PATH)
     if not os.path.exists(os.path.join(SEARCH_UI_PATH, 'node_components')):
         qadocs_logger.info('Installing SearchUI dependencies')
-        run_local_command("npm install")
+        utils.run_local_command("npm install")
 
 
 def run_searchui(index):
@@ -374,7 +392,7 @@ def run_searchui(index):
     install_searchui_deps()
     qadocs_logger.debug('Running SearchUI')
 
-    run_local_command(f"npm --ELASTICHOST=http://localhost:9200 --INDEX={index} start")
+    utils.run_local_command(f"npm --ELASTICHOST=http://localhost:9200 --INDEX={index} start")
 
 
 def parse_data(args):
@@ -400,15 +418,22 @@ def parse_data(args):
 
                     # Parse specified modules
                     docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                    args.test_components, args.test_suites, args.test_modules), OUTPUT_FORMAT)
+                                               args.test_components, args.test_suites, args.test_modules),
+                                        OUTPUT_FORMAT)
                 else:
                     # Parse specified suites
                     docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
                                         args.test_components, args.test_suites), OUTPUT_FORMAT)
             else:
+                if args.test_modules:
+                    qadocs_logger.info(f"Parsing the following modules(s): {args.test_modules}")
+                    test_modules_values = args.test_modules
+                else:
+                    test_modules_values = None
+
                 # Parse specified components
                 docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
-                                args.test_components), OUTPUT_FORMAT)
+                                           args.test_components, test_modules=test_modules_values), OUTPUT_FORMAT)
 
         else:
             # Parse all type of tests
@@ -458,9 +483,9 @@ def main():
         return 0
 
     if args.run_with_docker:
-        command = get_qa_docs_run_options(args)
+        command = utils.get_qa_docs_run_options(args)
         qadocs_logger.info(f"Running {command} in a docker container.")
-        qa_docs_docker_run(args.qa_branch, command, OUTPUT_PATH)
+        utils.qa_docs_docker_run(args.qa_branch, command, OUTPUT_PATH)
     elif args.version:
         with open(VERSION_PATH, 'r') as version_file:
             version_data = version_file.read()

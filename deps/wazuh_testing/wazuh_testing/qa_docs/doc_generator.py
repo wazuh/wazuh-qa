@@ -222,8 +222,7 @@ class DocGenerator:
             doc_path = self.get_module_doc_path(path)
 
             self.dump_output(tests, doc_path)
-            DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' "
-                                        f"was created with ID:{self.__id_counter}")
+            DocGenerator.LOGGER.debug(f"New documentation file '{doc_path}' was created with ID:{self.__id_counter}")
             return self.__id_counter
         else:
             DocGenerator.LOGGER.error(f"Content for {path} is empty, ignoring it")
@@ -335,9 +334,11 @@ class DocGenerator:
             qa-docs -I ../../tests/ -m test_cache -o /tmp -> It would be running as `single module mode`
             creating `/tmp/test_cache.json`
         """
-        if self.conf.mode == Mode.DEFAULT:
+        if not self.conf.check_doc:
             DocGenerator.LOGGER.debug(f"Cleaning doc folder located in {self.conf.documentation_path}")
             clean_folder(self.conf.documentation_path)
+
+        if self.conf.mode == Mode.DEFAULT:
             for path in self.conf.include_paths:
                 self.scan_path = path
                 DocGenerator.LOGGER.debug(f"Going to parse files on '{path}'")

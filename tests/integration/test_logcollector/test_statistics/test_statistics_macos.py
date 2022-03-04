@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        receive logs through text files or Windows event logs. It can also directly receive logs via
        remote syslog which is useful for firewalls and other such devices.
 
-tier: 1
-
-modules:
+components:
     - logcollector
 
-components:
+suite: statistics
+
+targets:
     - agent
 
 daemons:
@@ -30,6 +30,7 @@ os_platform:
 
 os_version:
     - macOS Catalina
+    - macOS Server
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -91,6 +92,8 @@ def test_options_state_interval_no_file(configure_local_internal_options_module,
                  'interval' sections.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - configure_local_internal_options_module:

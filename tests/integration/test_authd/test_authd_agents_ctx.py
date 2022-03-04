@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: These tests will check if the 'wazuh-authd' daemon correctly handles the 
        add a Wazuh agent to a Wazuh manager and provide the key to the agent. It is used along with
        the 'agent-auth' application.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -34,18 +32,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
@@ -403,6 +393,8 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
     wazuh_min_version:
         4.2.0
 
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture
@@ -463,6 +455,8 @@ def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configur
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
