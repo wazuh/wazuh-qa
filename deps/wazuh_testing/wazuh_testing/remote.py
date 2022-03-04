@@ -479,6 +479,31 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=20)
 
 
+def wait_to_remoted_update_groups(wazuh_log_monitor):
+    """Allow to detect when remoted has reloaded its groups and multigroups.
+
+    This is necessary for remoted to find shared group files to send to agents.
+
+    The reload time is editable in the internal_options.conf and defaults to 10 seconds.
+
+    >> remoted.shared_reload=10
+
+    Args:
+        wazuh_log_monitor (FileMonitor): FileMonitor object to monitor the Wazuh log.
+
+    Raises:
+        TimeoutError: if could not find the remoted key loading log.
+    """
+    # We have to make sure that remoted has correctly reloaded its groups and multigroups.
+    # The log is truncated to ensure that the information has been loaded after the agent has been registered.
+    truncate_file(LOG_FILE_PATH)
+
+    callback_pattern = '.*c_files().*End updating shared files sums.'
+    error_message = 'Could not find the groups reload log'
+
+    check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=20)
+
+
 def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=TCP, manager_address='127.0.0.1',
                      manager_port=1514, agent_os='debian7', agent_version='4.2.0', disable_all_modules=True):
     """Allow to create a new simulated agent and send a message to the manager.
@@ -643,6 +668,9 @@ def check_push_shared_config(agent, sender, injector=None):
 
         # Add agent to group and check if the configuration is pushed.
         add_agent_to_group(DEFAULT_TESTING_GROUP_NAME, agent.id)
+
+        # Wait until remoted has reloaded its groups and multigroups
+        wait_to_remoted_update_groups(wazuh_log_monitor)
 
         keep_alive_agent = multiprocessing.Process(target=keep_alive_until_group_configuration_sent,
                                                    args=(sender,))
