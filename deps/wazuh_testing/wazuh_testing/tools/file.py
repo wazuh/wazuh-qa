@@ -61,7 +61,7 @@ def get_list_of_content_yml(file_path, filter, list=[]):
         list: a list with previous information
 
     Returns:
-       list
+       list with elements that match with the filter
     """
     list.append((read_yaml(file_path), file_path + filter))
     return list
