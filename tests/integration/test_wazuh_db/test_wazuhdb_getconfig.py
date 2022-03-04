@@ -44,6 +44,7 @@ import pytest
 import yaml
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.tools.file import get_list_of_content_yml
 
 
 # Marks
@@ -52,9 +53,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'wazuhdb_getconfig.yaml')
-module_tests = []
-with open(messages_file) as f:
-    module_tests.append((yaml.safe_load(f), messages_file.split('_')[0]))
+module_tests = get_list_of_content_yml(messages_file, ".split('_')[0]")
 
 log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))

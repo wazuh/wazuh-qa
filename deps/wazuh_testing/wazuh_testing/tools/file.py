@@ -51,6 +51,22 @@ def read_yaml(file_path):
         return yaml.safe_load(f)
 
 
+def get_list_of_content_yml(file_path, filter, list=[]):
+    """Read a YAML file from a given path, return a list with the YAML data
+    after apply filter
+
+    Args:
+        file_path (str): Path of the YAML file to be readed
+        filter (str): filder to extract some part of yaml
+        list: a list with previous information
+
+    Returns:
+       list
+    """
+    list.append((read_yaml(file_path), file_path + filter))
+    return list
+
+
 def truncate_file(file_path):
     """
     Truncate a file to reset its content.
@@ -485,3 +501,6 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
+
+
+def get_content_yml():
