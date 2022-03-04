@@ -1,8 +1,10 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages.
        Specifically, these tests will check if commands with different characteristics are executed
        correctly by the logcollector. They will also check if the 'info' and 'debug' lines are
@@ -11,44 +13,45 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        servers or devices. This component can receive logs through text files or Windows event logs.
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
-tier: 0
-modules:
-    - logcollector
+
 components:
+    - logcollector
+
+suite: command_monitoring
+
+targets:
     - agent
     - manager
+
 daemons:
     - wazuh-logcollector
+
 os_platform:
     - linux
     - macos
     - solaris
+
 os_version:
     - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
     - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - macOS Catalina
     - Solaris 10
     - Solaris 11
+    - macOS Catalina
+    - macOS Server
+    - Ubuntu Focal
+    - Ubuntu Bionic
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#command
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#alias
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
+
 tags:
     - logcollector_cmd_exec
 '''
@@ -193,18 +196,22 @@ def get_files_list():
 
 def test_command_execution_dbg(get_files_list, create_file_structure_module, configure_local_internal_options_module,
                                get_configuration, file_monitoring, configure_environment, restart_logcollector):
-   '''
+    '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
-                 special characteristics. For this purpose, the test will configure the logcollector to run
-                 a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
-                 formats. The properties of that command can be, for example, a non-existent command or one
-                 that includes special characters. Once the logcollector has started, it will wait for the
-                 'running' event that indicates that the command has been executed. Finally, the test
-                 will verify that the debug 'read N lines' event is generated, this event indicates the number
-                 of lines read from the command run. Depending on test case, the test also will verify that
-                 the debug event 'reading command' is generated, this event includes the output of the command
-                 run, and its alias if it is set in the 'alias' tag.
+                    special characteristics. For this purpose, the test will configure the logcollector to run
+                    a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
+                    formats. The properties of that command can be, for example, a non-existent command or one
+                    that includes special characters. Once the logcollector has started, it will wait for the
+                    'running' event that indicates that the command has been executed. Finally, the test
+                    will verify that the debug 'read N lines' event is generated, this event indicates the number
+                    of lines read from the command run. Depending on test case, the test also will verify that
+                    the debug event 'reading command' is generated, this event includes the output of the command
+                    run, and its alias if it is set in the 'alias' tag.
+
     wazuh_min_version: 4.2.0
+
+    tier: 0
+
     parameters:
         - configure_local_internal_options_module:
             type: fixture
@@ -224,22 +231,25 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
+
     assertions:
         - Verify that the debug 'running' event is generated when running the command set in the 'command' tag.
         - Verify that the debug 'reading command' event is generated when running the related command.
         - Verify that the debug 'lines' event is generated when running the related command.
+
     input_description: A configuration template (test_command_execution) is contained in an external
-                       YAML file (wazuh_command_conf.yaml), which includes configuration settings for
-                       the 'wazuh-logcollector' daemon and, it is combined with the test cases
-                       (log formats and commands to run) defined in the module.
+                        YAML file (wazuh_command_conf.yaml), which includes configuration settings for
+                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
+                        (log formats and commands to run) defined in the module.
+
     expected_output:
         - r'DEBUG: Running .*'
         - r'DEBUG: Reading command message.*'
         - r'lines from command .*'
+
     tags:
         - logs
     '''
- 
     config = get_configuration['metadata']
 
     # Check log line "DEBUG: Running command '<command>'"
