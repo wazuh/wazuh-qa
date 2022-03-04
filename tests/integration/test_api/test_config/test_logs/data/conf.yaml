@@ -10,20 +10,58 @@
     logs:
       level: debug
 - tags:
-  - logs_json
+  - log_json_info
   configuration:
     logs:
+      level: info
       format: json
+- tags:
+  - log_json_error
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
       level: error
+      format: json
 - tags:
-  - logs_plain
+  - log_plain_info
   configuration:
     logs:
+      level: info
       format: plain
-      level: info
 - tags:
-  - logs_json_plain
+  - log_plain_error
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: plain
+- tags:
+  - log_json_plain_info
   configuration:
     logs:
-      format: json,plain
       level: info
+      format: json,plain
+- tags:
+  - log_json_plain_error
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: json,plain
+- tags:
+  - log_plain_json_info
+  configuration:
+    logs:
+      level: info
+      format: plain,json
+- tags:
+  - log_plain_json_error
+  configuration:
+    intervals:
+      request_timeout: 0
+    logs:
+      level: error
+      format: plain,json

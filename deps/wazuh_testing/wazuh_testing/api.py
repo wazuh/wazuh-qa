@@ -30,6 +30,12 @@ def callback_detect_api_start(line):
         return match.group(1)
 
 
+def callback_detect_api_start_json_format(line):
+    match = re.match(r'.*Listening on (.+)..', line)
+    if match:
+        return match.group(1)
+
+
 def callback_detect_api_debug(line):
     match = re.match(r'.*DEBUG: (.*)', line)
     if match:

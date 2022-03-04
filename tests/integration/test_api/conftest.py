@@ -6,8 +6,8 @@ import os
 import shutil
 
 import pytest
-from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
-from wazuh_testing.tools import API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
+from wazuh_testing.api import callback_detect_api_start, callback_detect_api_start_json_format, get_api_details_dict
+from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -74,6 +74,14 @@ def configure_api_environment(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
+def clean_log_files(get_configuration, request):
+    """Reset the log files of the API."""
+    log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
+    for log_file in log_files:
+        truncate_file(log_file)
+
+
+@pytest.fixture(scope='module')
 def restart_api(get_configuration, request):
     # Stop Wazuh and Wazuh API
     control_service('stop')
@@ -92,8 +100,17 @@ def restart_api(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
     # Wait for API to start
-    file_monitor = FileMonitor(API_LOG_FILE_PATH)
-    file_monitor.start(timeout=20, callback=callback_detect_api_start,
+    log_file = API_LOG_FILE_PATH
+    callback = callback_detect_api_start
+    try:
+        log_format = get_configuration.get('configuration')['logs']['format']
+        if log_format == 'json':
+            log_file = API_JSON_LOG_FILE_PATH
+            callback = callback_detect_api_start_json_format
+    except KeyError as e:
+        pass
+    file_monitor = FileMonitor(log_file)
+    file_monitor.start(timeout=20, callback=callback,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
 
 

@@ -1,9 +1,0 @@
----
-- name: ErrorLevel
-  test_case:
-  - level: ERROR
-  - output: '{"timestamp": "(\d+\/)+\d+ (\d+:)+\d+", "levelname": "ERROR", "data": {"type": "informative", "payload": "(.+: address already in use.)"}}'
-- name: InfoLevel
-  test_case:
-  - level: INFO
-  - output: '{"timestamp": "(\d+\/)+\d+ (\d+:)+\d+", "levelname": "INFO", "data": {"type": "informative", "payload": "Listening on (.+).."}}'
