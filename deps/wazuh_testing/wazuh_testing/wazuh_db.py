@@ -171,24 +171,24 @@ def clean_agents_from_db():
 
 def clean_groups_from_db():
     """
-    Clean groups from DB
+    Clean groups table from global.db
     """
     command = 'global sql DELETE FROM "group"'
     try:
         query_wdb(command)
     except Exception:
-        raise Exception('Unable to clean groups')
+        raise Exception('Unable to clean groups table.')
 
 
 def clean_belongs():
     """
-    Clean belong DB
+    Clean belong table from global.db
     """
     command = 'global sql DELETE FROM belongs'
     try:
         query_wdb(command)
     except Exception:
-        raise Exception('Unable to clean belongs')
+        raise Exception('Unable to clean belongs table.')
 
 
 def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status="never_connected",
@@ -206,8 +206,9 @@ def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, co
         raise Exception(f"Unable to add agent {id}")
 
 
-def insert_agent_into_group(amount):
-    for i in range(amount):
+# Insert agents into DB and assign them into a group
+def insert_agent_into_group(total_agents):
+    for i in range(total_agents):
         id = i + 1
         name = 'Agent-test' + str(id)
         date = time.time()
