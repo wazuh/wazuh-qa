@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -11,12 +11,12 @@ brief: The 'wazuh-remoted' program is the server side daemon that communicates w
        Agent's status should change from 'disconnected' to 'active' status after the manager
        receives the agents' keep-alive message.
 
-tier: 2
-
-modules:
+components:
     - remoted
 
-components:
+suite: agent_communication
+
+targets:
     - manager
 
 daemons:
@@ -31,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
@@ -115,7 +107,9 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
                  ensuring the agent version is correct.
     
     wazuh_min_version: 4.2.0
-    
+
+    tier: 2
+
     parameters:
         - agent_name:
             type: dict_keys
