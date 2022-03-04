@@ -7,7 +7,7 @@ from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH, API_JSON_LOG_FILE_PAT
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, \
-    get_login_headers
+    API_GLOBAL_TIMEOUT, get_login_headers
 
 # Marks
 
@@ -39,7 +39,8 @@ def send_request(login_attempts=5):
     login_url = f"{API_PROTOCOL}://{API_HOST}:{API_PORT}{API_LOGIN_ENDPOINT}"
 
     for _ in range(login_attempts):
-        response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False, timeout=10)
+        response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
+                                timeout=API_GLOBAL_TIMEOUT)
         if response.status_code == 200: return True
 
 
