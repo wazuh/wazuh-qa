@@ -1,7 +1,8 @@
 import os
-import pytest
 import re
+
 import requests
+import pytest
 
 from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
@@ -10,7 +11,6 @@ from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PA
     API_GLOBAL_TIMEOUT, get_login_headers
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # Variables
