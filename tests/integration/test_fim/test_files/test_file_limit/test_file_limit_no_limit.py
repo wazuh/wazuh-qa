@@ -76,16 +76,18 @@ import os
 import sys
 
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
+from wazuh_testing.modules import TIER1
 
 # Marks
 
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [TIER1]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
