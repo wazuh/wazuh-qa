@@ -211,11 +211,6 @@ def check_incompatible_parameters(parameters):
                                'using --tests-path',
                                qadocs_logger.error)
 
-        if not parameters.test_suites:
-            raise QAValueError('The --modules option needs the module suite to be parsed. You must specify it '
-                               'using --suites',
-                               qadocs_logger.error)
-
         if parameters.index_name:
             raise QAValueError('The -m(--modules) option is not compatible with -i option',
                                qadocs_logger.error)
@@ -441,10 +436,11 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH), OUTPUT_FORMAT)
             docs.run()
 
-    if args.test_types or args.test_components or args.test_modules and not args.check_doc:
+    if (args.test_types or args.test_components or args.test_modules) and not args.check_doc:
         qadocs_logger.info('Running QADOCS')
         docs.run()
     elif args.test_modules and args.check_doc:
+        print('asdasd')
         docs.check_documentation()
 
 

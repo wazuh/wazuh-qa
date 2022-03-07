@@ -19,3 +19,8 @@
   - Created qa-docs code documentation. ([#1907])(https://github.com/wazuh/wazuh-qa/pull/1907)
   - Automatized the SearchUI dependencies installation if necessary. ([#1968])(https://github.com/wazuh/wazuh-qa/pull/1968)
   - Added qa-docs docker deployment. ([#1983])(https://github.com/wazuh/wazuh-qa/pull/1983)
+
+### Changed
+
+- Adapt the tool to some framework changes. ([#2605])(https://github.com/wazuh/wazuh-qa/pull/2605)
+- Change the schema since framework changes. ([#2590])(https://github.com/wazuh/wazuh-qa/issues/2590)
