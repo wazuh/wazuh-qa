@@ -273,7 +273,7 @@ def interval_to_time_modifier(interval):
     return f"{time_value} {interval_units_dict[time_unit]}"
 
 
-def parse_datetime_format(date_time):
+def parse_date_time_format(date_time):
     """Parse the specified date_time to return a common format.
 
     Args:
@@ -285,13 +285,16 @@ def parse_datetime_format(date_time):
     Raises:
         ValueError: If could not parse the specified date_time
     """
-    custom_formats = ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%MZ', '%Y-%m-%dT%H:%M:%S.%f%z', '%Y-%m-%d %H:%M:%S',
-                      '%Y-%m-%dT%H:%M:%S%z']
+    regex_list = [
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})Z', 'append': ':00'},  # CPE format
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})', 'append': ''},  # RHEL Canonical, ALAS, MSU, Debian, NVD
+        {'regex': r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', 'append': ''}  # Arch
+    ]
 
-    for date_time_format in custom_formats:
-        try:
-            return datetime.strftime(datetime.strptime(date_time, date_time_format), '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            pass
+    for item in regex_list:
+        match = re.compile(item['regex']).match(date_time)
 
-    raise ValueError(f"Could not parse the {date_time} datetime. Accepted formats: {custom_formats}")
+        if match:
+            return f"{match.group(1)} {match.group(2)}{item['append']}"
+
+    ValueError(f"Could not parse the {date_time} datetime.")
