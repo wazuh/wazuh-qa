@@ -51,8 +51,9 @@ tags:
 '''
 
 import os
-import pytest
 import subprocess
+
+import pytest
 import time
 import numbers
 
@@ -171,9 +172,9 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
             brief: Creates the folder where the backups will be stored in case it doesn't exist. It clears it when the
                    test yields.
     assertions:
-        - Verify that manager starts behaviour is correct for any given configuration
-        - Verify that the backup file has been created, wait for "max_files+1"
-        - Verify that after "max_files+1" files created, there's only "max_files" in the folder
+        - Verify that manager starts behaviour is correct for any given configuration.
+        - Verify that the backup file has been created, wait for "max_files+1".
+        - Verify that after "max_files+1" files created, there's only "max_files" in the folder.
 
     input_description:
         - Test cases are defined in the parameters and metada variables, that will be applied to the the 
@@ -208,7 +209,7 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
                                                          '"Invalid value element for max_files..." event')
             return
         else:
-            pytest.fail(f"Got unexpected Error - {err}")
+            pytest.fail(f"Got unexpected Error: {err}")
 
     # Wait for backup files to be generated
     time.sleep(interval*(int(test_max_files)+1))
@@ -217,15 +218,14 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
     if get_configuration['metadata']['ENABLED'] == 'no':
         # Fail the test if a file or more were found in the backups_path
         if os.listdir(backups_path):
-            pytest.fail("Error - A file was found in backups_path and No backups where expected - enabled = no")
+            pytest.fail("Error: A file was found in backups_path. No backups where expected when enabled is 'no'.")
     # Manage if backup generation is enabled - one or more backups expected
     else:
-
         result= wazuh_log_monitor.start(timeout=timeout, accum_results=test_max_files+1,
                                         callback=generate_monitoring_callback(BACKUP_CREATION_CALLBACK),
                                         error_message=f'Did not receive expected\
                                                         "Created Global database..." event').result()
-        assert len(result) == test_max_files+1, f'Expected {test_max_files} backup creation messages, but got {result}'
+        assert len(result) == test_max_files+1, f'Expected {test_max_files} backup creation messages, but got {result}.'
         total_files=0
         for file in os.listdir(backups_path):
             total_files = total_files+1
