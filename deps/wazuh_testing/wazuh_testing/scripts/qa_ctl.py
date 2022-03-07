@@ -155,7 +155,7 @@ def set_environment(parameters):
     # Create the wazuh_qa_ctl temporary folder
     recursive_directory_creation(os.path.join(gettempdir(), 'wazuh_qa_ctl'))
 
-    if parameters.run_test:
+    if parameters.run:
         # Download wazuh-qa repository locally to run qa-docs tool and get the tests info
         local_actions.download_local_wazuh_qa_repository(branch=parameters.qa_branch,
                                                          path=os.path.join(gettempdir(), 'wazuh_qa_ctl'))
@@ -172,10 +172,12 @@ def validate_parameters(parameters):
                       has not been released, or wazuh QA branch does not exist (calculated from wazuh_version).
     """
     def _validate_tests_os(parameters):
-        for test in parameters.run_test:
+        for type, component, suite, module in zip(parameters.test_types, parameters.test_components,
+                                                  parameters.test_suites, parameters.test_modules):
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
-            test_documentation_command = f"qa-docs -I {tests_path} -t {test} -o {gettempdir()} --no-logging"
-            test_documentation_file_path = os.path.join(gettempdir(), f"{test}.json")
+            test_documentation_command = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -m {module} " \
+                                         f"-o {gettempdir()} --no-logging"
+            test_documentation_file_path = os.path.join(gettempdir(), f"{module}.json")
             local_actions.run_local_command_returning_output(test_documentation_command)
 
             test_data = json.loads(file.read_file(test_documentation_file_path))
@@ -185,27 +187,39 @@ def validate_parameters(parameters):
                 platform = QACTLConfigGenerator.SYSTEMS[op_system]['os_platform'] if op_system in \
                     QACTLConfigGenerator.SYSTEMS.keys() else op_system
                 if platform not in test_data['os_platform']:
-                    raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed platforms: "
-                                       f"{test_data['os_platform']} (ubuntu and centos are from linux platform)")
+                    raise QAValueError(f"The {module} module does not support the {op_system} system. Allowed platforms:"
+                                       f" {test_data['os_platform']} (ubuntu and centos are from linux platform)")
                 # Check os version
                 if len([os_version.lower() for os_version in test_data['os_version'] if op_system in os_version]) > 0:
-                    raise QAValueError(f"The {test} test does not support the {op_system} system. Allowed operating "
-                                       f"system versions: {test_data['os_version']}")
+                    raise QAValueError(f"The {module} module does not support the {op_system} system. Allowed operating"
+                                       f" system versions: {test_data['os_version']}")
             # Clean the temporary files
             for extension in ['.json', '.yaml']:
-                file.remove_file(os.path.join(gettempdir(), f"{test}{extension}"))
+                file.remove_file(os.path.join(gettempdir(), f"{module}{extension}"))
 
     qactl_logger.info('Validating input parameters')
 
     # Check incompatible parameters
-    if parameters.config and parameters.run_test:
+    if parameters.config and parameters.run:
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
                            'configuration', qactl_logger.error, QACTL_LOGGER)
 
-    if parameters.user_version and parameters.run_test is None:
+    if parameters.run and not (parameters.test_components and parameters.test_suites and parameters.test_modules):
+        raise QAValueError('The --run parameter needs the component, suite and module to run a test. You can specify '
+                           'them with --test-components, --test-suites and --test-modules.',
+                           qactl_logger.error, QACTL_LOGGER)
+
+    if len(parameters.test_types) != len(parameters.test_components) or  \
+       len(parameters.test_types) != len(parameters.test_suites) or \
+       len(parameters.test_types) != len(parameters.test_modules):
+        raise QAValueError('The parameters that specify the modules, suites, components, and types must have the same '
+                           'length: --test-types, --test-components, --test-suites and --test_modules.',
+                           qactl_logger.error, QACTL_LOGGER)
+
+    if parameters.user_version and parameters.run is None:
         raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_logger.error)
 
-    if parameters.dry_run and parameters.run_test is None:
+    if parameters.dry_run and parameters.run is None:
         raise QAValueError('The --dry-run parameter can only be used with -r, --run', qactl_logger.error, QACTL_LOGGER)
 
     if (parameters.skip_deployment or parameters.skip_provisioning or parameters.skip_testing) \
@@ -229,23 +243,25 @@ def validate_parameters(parameters):
                            qactl_logger.error, QACTL_LOGGER)
 
     # Check if specified tests exist. Wazuh-qa repository needs to be downloaded locally before.
-    if parameters.run_test:
-        for test in parameters.run_test:
+    if parameters.run:
+        # cambiar el for para iterar sobre los 4 arrays
+        for type, component, suite, module in zip(parameters.test_types, parameters.test_components,
+                                                  parameters.test_suites, parameters.test_modules):
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             # Validate if the specified tests exist
-            check_test_exist = local_actions.run_local_command_returning_output(f"qa-docs -e {test} -I {tests_path} "
-                                                                                '--no-logging')
-            if f"{test} exists" not in check_test_exist:
-                raise QAValueError(f"{test} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
+            exist_cmd = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -e {module} --no-logging"
+            check_test_exist = local_actions.run_local_command_returning_output(exist_cmd)
+            if f"{module} exists" not in check_test_exist:
+                raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
             # Validate if the selected tests are documented
-            test_documentation_check = local_actions.run_local_command_returning_output(f"qa-docs -t {test} -I "
-                                                                                        f"{tests_path} "
-                                                                                        '--check-documentation '
-                                                                                        '--no-logging')
-            if f'{test} is not documented' in test_documentation_check:
-                raise QAValueError(f"{test} is not documented using qa-docs current schema", qactl_logger.error,
+            check_doc_cmd = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -m {module} --no-logging " \
+                            '--check-documentation'
+            test_documentation_check = local_actions.run_local_command_returning_output(check_doc_cmd)
+            if f'{module} is not documented' in test_documentation_check:
+                raise QAValueError(f"{module} is not documented using qa-docs current schema", qactl_logger.error,
                                    QACTL_LOGGER)
+
     # Validate the tests operating system compatibility if specified
     if parameters.operating_systems:
         _validate_tests_os(parameters)
@@ -282,7 +298,26 @@ def get_script_parameters():
                         help='Config generation mode. The test data will be processed and the configuration will be '
                              'generated without running anything.')
 
-    parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
+    # parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
+    #                     help='Independent run method. Specify a test or a list of tests to be run.')
+ 
+    parser.add_argument('--run', '-r', action='store_true',
+                        help='Independent run method. The tests that the use specified will be run.')
+
+    parser.add_argument('--test-types', type=str, action='store', required=False, nargs='+', dest='test_types',
+                        default=['integration'],
+                        help='Independent run method. Specify a test or a list of tests to be run.')
+
+    parser.add_argument('--test-components', type=str, action='store', required=False, nargs='+',
+                        dest='test_components', default=[],
+                        help='Independent run method. Specify a test or a list of tests to be run.')
+
+    parser.add_argument('--test-suites', type=str, action='store', required=False, nargs='+', dest='test_suites',
+                        default=[],
+                        help='Independent run method. Specify a test or a list of tests to be run.')
+
+    parser.add_argument('--test-modules', type=str, action='store', required=False, nargs='+', dest='test_modules',
+                        default=[],
                         help='Independent run method. Specify a test or a list of tests to be run.')
 
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
@@ -334,12 +369,23 @@ def main():
     if not arguments.no_validation:
         validate_parameters(arguments)
 
-    qa_ctl_mode = AUTOMATIC_MODE if arguments.run_test else MANUAL_MODE
+    qa_ctl_mode = AUTOMATIC_MODE if arguments.run else MANUAL_MODE
 
     # Generate or get the qactl configuration file
     if qa_ctl_mode == AUTOMATIC_MODE:
         qactl_logger.debug('Generating configuration file')
-        config_generator = QACTLConfigGenerator(arguments.run_test, arguments.version, arguments.qa_branch,
+        # cambiar run_test de config generator
+        # args = ['types', 'components', 'suites', 'modules']
+        modules_data = {'types': [], 'components': [], 'suites': [], 'modules': []}
+        # modules_data = dict(zip(args,[[] for x in range(0,len(args))]))
+        for type, component, suite, module in zip(arguments.test_types, arguments.test_components,
+                                                  arguments.test_suites, arguments.test_modules):
+            modules_data['types'].append(type)
+            modules_data['components'].append(component)
+            modules_data['suites'].append(suite)
+            modules_data['modules'].append(module)
+
+        config_generator = QACTLConfigGenerator(modules_data, arguments.version, arguments.qa_branch,
                                                 WAZUH_QA_FILES, arguments.operating_systems)
         config_generator.run()
         launched['config_generator'] = True
@@ -406,10 +452,10 @@ def main():
             if TEST_KEY in configuration_data and launched['test_runner']:
                 tests_runner.destroy()
 
-            if arguments.run_test and launched['config_generator']:
+            if arguments.run and launched['config_generator']:
                 config_generator.destroy()
         else:
-            if not RUNNING_ON_DOCKER_CONTAINER and arguments.run_test:
+            if not RUNNING_ON_DOCKER_CONTAINER and arguments.run:
                 qactl_logger.info(f"Configuration file saved in {config_generator.config_file_path}")
 
 
