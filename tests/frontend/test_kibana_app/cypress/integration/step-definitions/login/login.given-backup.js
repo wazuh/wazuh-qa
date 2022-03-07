@@ -1,10 +1,11 @@
 import { Given } from 'cypress-cucumber-preprocessor/steps';
 import { navigate, validateURLIncludes, setCookies } from '../../utils/driver';
 import { LOGIN_TYPE, OVERVIEW_URL } from '../../utils/login-constants';
-const cookie = require('../../../fixtures/cookie.json')
+const cookie = require('../../../../cookie.json')
 
-Given('The kibana admin user is logged in using {} authentication',(loginMethod) => {
-  
+// Given('The kibana admin user is logged in using {} authentication',(loginMethod) => {
+Given('...',(loginMethod) => {
+
   cy.setSessionStorage('healthCheck', 'executed');
   
   Cypress.on('uncaught:exception', (err, runnable) => {

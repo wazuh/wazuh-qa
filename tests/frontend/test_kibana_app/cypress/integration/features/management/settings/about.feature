@@ -6,6 +6,6 @@ Feature: Wazuh version information
 
   @about
   Scenario: Check Wazuh version information
-    Given The kibana admin user is logged in using xpack authentication
+    Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
     When The user navigates to About settings
     Then The Wazuh information is displayed

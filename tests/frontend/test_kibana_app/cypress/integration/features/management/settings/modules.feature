@@ -5,7 +5,7 @@ Feature: enable and disable modules
   in order to see them in the modules directory
   
   Background:
-  Given The kibana admin user is logged in using xpack authentication
+  Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
   @modules
   Scenario Outline: Enable and Disable modules, <Module Name>
     When The user navigates to Modules settings
@@ -27,7 +27,7 @@ Feature: enable and disable modules
 
     @modules
     Scenario Outline: Disable modules, <Module Name>
-      # Given The kibana admin user is logged in using xpack authentication
+      # Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
       When The user navigates to Modules settings
       And The user deactivates the modules with <Module Name>
       Then The deactivated modules with <Module Name> are not displayed on home page
