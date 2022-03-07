@@ -61,10 +61,11 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.modules import TIER0, WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
 
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark =  [pytest.mark.linux, TIER0, pytest.mark.server]
 
 
 # Configuration
@@ -101,15 +102,18 @@ BACKUP_CREATION_CALLBACK = r'.*Created Global database backup "(backup/db/global
 WRONG_INTERVAL_CALLBACK = r".*Invalid value for element ('interval':.*)"
 WRONG_MAX_FILES_CALLBACK = r".*Invalid value for element ('max_files':.*)"
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+timeout = 15
 
 
 def restart_wazuh():
     """Restarts Wazuh."""
-    control_service('stop')
-    control_service('start')
+    control_service(WAZUH_SERVICES_STOP)
+    control_service(WAZUH_SERVICES_START)
 
 
 def validate_interval_format(interval):
+    """Validate that the interval passed has the format in which the last digit is a letter from those passed and
+       the other characters are between 0-9"""
     if interval=='':
         return False
     if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
@@ -194,12 +198,12 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
         restart_wazuh()
     except (subprocess.CalledProcessError, ValueError) as err:
         if not validate_interval_format(test_interval):
-            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_INTERVAL_CALLBACK), timeout=15,
+            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_INTERVAL_CALLBACK), timeout=timeout,
                                            error_message='Did not receive expected '
                                                          '"Invalid value element for interval..." event')
             return
         elif not isinstance(test_max_files, numbers.Number) or test_max_files==0:
-            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_MAX_FILES_CALLBACK), timeout=15,
+            wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_MAX_FILES_CALLBACK), timeout=timeout,
                                            error_message='Did not receive expected '
                                                          '"Invalid value element for max_files..." event')
             return
@@ -217,7 +221,7 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
     # Manage if backup generation is enabled - one or more backups expected
     else:
 
-        result= wazuh_log_monitor.start(timeout=15, accum_results=test_max_files+1,
+        result= wazuh_log_monitor.start(timeout=timeout, accum_results=test_max_files+1,
                                         callback=generate_monitoring_callback(BACKUP_CREATION_CALLBACK),
                                         error_message=f'Did not receive expected\
                                                         "Created Global database..." event').result()

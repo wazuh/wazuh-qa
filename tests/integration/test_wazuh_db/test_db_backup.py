@@ -58,12 +58,13 @@ import time
 import pytest
 import yaml
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.modules import TIER0
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file
 
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
+pytestmark = [pytest.mark.linux, TIER0, pytest.mark.server]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -216,7 +217,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             # Check that the pre-restore state backup has been generated.
             assert backups.__len__() ==  backups_ammount +1, f'Error - Found {backups.__len__()} files, \
                                                                expected {backups_ammount + 1}'
-            assert "-pre_restore.gz" in backups[-1]
+            assert "-pre_restore.gz" in backups[-1], f'Did not find the expected "-pre_restore.gz" file"'
 
             if 'restore_pre_restore' in case_data:
                 restore_command = f'global backup restore {{"snapshot": "{backups[-1]}",\
