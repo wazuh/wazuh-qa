@@ -1635,7 +1635,7 @@ def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta
             return
 
     if wait_for_scan:
-        logger.info(f"waiting for scheduled scan to start for {interval} seconds")
+        logging_message('FunctionLog', 'VV', f"waiting for scheduled scan to start for {interval} seconds")
         time.sleep(interval)
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
@@ -2057,8 +2057,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
 
         if triggers_event:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
+            logging_message('FunctionLog', 'VV', "'added' {} detected as expected.\n".format("events" if
+                            len(value_list) > 1 else "event"))
 
     def registry_value_update(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                            wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
@@ -2116,7 +2116,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event)
 
         if triggers_event:
-            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+            logging_message('FunctionLog', 'VV', "'modified' {} detected as expected.\n".format("events" if
+                            len(value_list) > 1 else "event"))
 
     def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                            wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
@@ -2173,8 +2174,8 @@ if sys.platform == 'win32':
         registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
 
         if triggers_event:
-            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
+            logging_message('FunctionLog', 'VV', "'deleted' {} detected as expected.\n".format("events" if 
+                            len(value_list) > 1 else "event"))
 
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
