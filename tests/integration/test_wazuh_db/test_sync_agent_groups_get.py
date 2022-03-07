@@ -87,7 +87,8 @@ def pre_insert_agents_into_group():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_module, test_case, pre_insert_agents_into_group):
+def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_module,
+                           test_case, pre_insert_agents_into_group):
     '''
     description: Check that commands about sync_aget_groups_get works properly.
     wazuh_min_version: 4.4.0
@@ -122,7 +123,7 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     if 'pre_input' in case_data:
         for command in case_data['pre_input']:
             query_wdb(command)
-        
+
     time.sleep(1)
     response = query_wdb(case_data["input"])
 
