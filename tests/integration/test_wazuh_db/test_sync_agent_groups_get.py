@@ -50,9 +50,10 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
                                     clean_groups_from_db, clean_belongs)
 from wazuh_testing.tools.file import get_list_of_content_yml
+from wazuh_testing.modules import TIER0, SERVER, LINUX
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
+pytestmark = [LINUX, TIER0, SERVER]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -121,7 +122,6 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     if 'pre_input' in case_data:
         for command in case_data['pre_input']:
             query_wdb(command)
-            results = query_wdb(command)
         
     time.sleep(1)
     response = query_wdb(case_data["input"])
