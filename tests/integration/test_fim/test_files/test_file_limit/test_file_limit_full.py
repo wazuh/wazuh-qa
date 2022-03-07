@@ -187,13 +187,13 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
     # Create a file with the database being full - Should not generate events
     create_file(REGULAR, testdir1, 'file_full', content='content')
 
-    # Check new file could not be added to DB
-    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
-                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
-
     # Check number of entries and paths in DB and assert the value matches the expected count
     entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
+
+    # Check new file could not be added to DB
+    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
+                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     if sys.platform != 'win32':
         if entries and path_count:
