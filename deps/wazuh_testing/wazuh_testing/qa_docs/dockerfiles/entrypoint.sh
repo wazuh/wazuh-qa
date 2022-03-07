@@ -18,7 +18,7 @@ then
   exit 1
 fi
 
-/usr/local/bin/qa-docs --tests-path /tests/wazuh-qa/tests --validate-parameters ${CMD}
+/usr/local/bin/qa-docs -p /tests/wazuh-qa/tests --validate-parameters ${CMD}
 
 # get run status
 status=$?
@@ -37,8 +37,8 @@ fi
 service wazuh-manager start
 
 # Run qa-docs with the given args
-echo "Running /usr/local/bin/qa-docs -I /tests/wazuh-qa/tests ${CMD}"
-/usr/local/bin/qa-docs --tests-path /tests/wazuh-qa/tests ${CMD}
+echo "Running /usr/local/bin/qa-docs -p /tests/wazuh-qa/tests ${CMD}"
+/usr/local/bin/qa-docs -p /tests/wazuh-qa/tests ${CMD}
 
 # Move the documentation parsed to the shared dir
 echo "Moving qa-docs output to shared directory: ${SHARED_VOL}/output"

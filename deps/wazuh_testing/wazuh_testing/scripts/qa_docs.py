@@ -44,16 +44,6 @@ def set_qadocs_logger_level(logging_level):
 
 
 def set_parameters(args):
-    # Set the qa-docs logger level
-    if args.debug_level:
-        set_qadocs_logger_level('DEBUG')
-
-    # Deactivate the qa-docs logger if necessary.
-    if args.no_logging:
-        set_qadocs_logger_level(None)
-
-
-def set_parameters(args):
     """Set the QADOCS parameters.
 
     Args:
@@ -70,16 +60,12 @@ def set_parameters(args):
     if args.no_logging:
         set_qadocs_logger_level(None)
 
-    if args.run_with_docker:
+    if args.output_path:
         global OUTPUT_PATH
-        OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs')
-
-    if args.output_path and not args.run_with_docker:
         OUTPUT_PATH = os.path.join(args.output_path, 'output')
 
-    if args.output_format:
-        global OUTPUT_FORMAT
-        OUTPUT_FORMAT = args.output_format
+    if args.run_with_docker:
+        OUTPUT_PATH = args.output_path if args.output_path else os.path.join(gettempdir(), 'qa_docs')
 
 
 def get_parameters():
@@ -366,10 +352,9 @@ def validate_parameters(parameters, parser):
                         raise QAValueError(f"The given suite: {suite} has not been found in {component_path}",
                                            qadocs_logger.error)
 
-                suite_path = '' if not parameters.test_suites else parameters.test_suites[0]
-
+                suite = '' if not parameters.test_suites else parameters.test_suites[0]
+                suite_path = os.path.join(component_path, suite)
                 for module in parameters.test_modules:
-                    suite_path = os.path.join(component_path, suite_path)
                     module_file = f"{module}.py"
                     if module_file not in os.listdir(suite_path):
                         if utils.get_file_path_recursively(module_file, suite_path) is None:

@@ -7,10 +7,9 @@ import os
 import sys
 import shutil
 
-from tempfile import gettempdir
-
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 utils_logger = Logging.get_logger(QADOCS_LOGGER)
 
@@ -258,9 +257,8 @@ def run_local_command(command):
     result_code = run.returncode
 
     if result_code != 0:
-        print("error")
-        # raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.LOGGER.error,
-        #                    QADOCS_LOGGER)
+        raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.error,
+                           QADOCS_LOGGER)
 
 
 def run_local_command_with_output(command):
@@ -291,7 +289,7 @@ def qa_docs_docker_run(qa_branch, command, output_path):
     """
     docker_args = f"{qa_branch} {output_path} {command}"
     docker_image_name = 'wazuh/qa-docs'
-    docker_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dockerfiles')
+    docker_image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dockerfiles')
 
     utils_logger.info(f"Building qa-docs docker image")
     run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
