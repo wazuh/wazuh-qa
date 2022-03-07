@@ -57,8 +57,8 @@ def clean_all_cve_tables():
     make_sqlite_query(CVE_DB_PATH, query)
 
 
-def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', target_minor='',
-                         package=vd.DEFAULT_PACKAGE_NAME, operation='less than', operation_value='2.0.0-1.el7',
+def insert_vulnerability(cveid='CVE-000', target='RHEL7', target_minor='',
+                         package='custom-package-0', operation='less than', operation_value='2.0.0-1.el7',
                          title='', severity='critical',
                          published=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"), updated='',
                          reference='https://github.com/wazuh/wazuh-qa', target_v='REDHAT', cvss='10.000000',
@@ -192,3 +192,39 @@ def check_inserted_value_exists(table, column, value):
     rows_number = int(result[0])
 
     return rows_number > 0
+
+
+def get_metadata_timestamp(provider_os):
+    """Get the timestamp data for a specific provider_os from metadata table.
+
+    Args:
+        provider_os (str): Provider OS. (example: TRUSTY)
+
+    Returns:
+        str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
+    """
+    query_string = f"SELECT timestamp FROM metadata WHERE target='{provider_os}'"
+    result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
+
+
+def get_nvd_metadata_timestamp(year):
+    """Get the NVD timestamp data for a specific year from nvd_metadata table.
+
+    Args:
+        year (int): NVD feed year. (example: 2022)
+
+    Returns:
+        str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
+    """
+    query_string = f"SELECT timestamp FROM nvd_metadata WHERE year={year}"
+    result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
