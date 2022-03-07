@@ -206,7 +206,7 @@ Using `-c, --components` flag you can parse only the tests inside the component(
 #### Parse specific suite(s)
     qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE1> <SUITE2>
 
-Using `-s, --suites` flag you can parse only the tests inside the modules(s) folder(s) you want. It also needs the type of tests where the tests are located.
+Using `-s, --suites` flag you can parse only the tests inside the components(s) folder(s) you want.
 
 #### Parse specific module(s)
     qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE> -m(--modules) MODULE_NAME1 MODULE_NAME2
@@ -217,7 +217,7 @@ flag and specify the output directory. To parse modules you need to specify thei
 This option is not compatible with API-related options, because the output is printed or saved with `-o` in a custom directory.
 
 #### Check if test(s) exist
-    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE> --modules <MODULE> -e(--exist) TEST_NAME1 TEST_NAME2
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE> -e(--exist) MODULE_NAME1 MODULE_NAME2
 
 With this option the tool prints if test(s) do(es) exist.
 
