@@ -3,44 +3,44 @@ tasks:
     agent-info_sync:
       time_spent(s):
         master:
-          max: 16.9
-          mean: 0.66
+          max: 31
+          mean: 3.1
         workers:
-          max: 10.1
-          mean: 1.5
+          max: 50
+          mean: 8
     integrity_check:
       time_spent(s):
         master:
-          max: 22.348
-          mean: 1.6
+          max: 50
+          mean: 8.3
         workers:
-          max: 26.6
-          mean: 3.3
+          max: 55
+          mean: 13.5
     integrity_sync:
       time_spent(s):
         master:
-          max: 20
-          mean: 1.5
+          max: 54
+          mean: 11
         workers:
-          max: 4.4
-          mean: 0.6
+          max: 22
+          mean: 3.2
   stable_phase:
     agent-info_sync:
       time_spent(s):
         master:
           max: 5
-          mean: 0.8
+          mean: 1
         workers:
           max: 8.5
-          mean: 1.8
+          mean: 3.3
     integrity_check:
       time_spent(s):
         master:
           max: 6.5
-          mean: 1.6
+          mean: 3
         workers:
           max: 10
-          mean: 3.644
+          mean: 6
 
 resources:
   setup_phase:
@@ -62,11 +62,11 @@ resources:
         workers:
           max: 72.6
           mean: 70
-          reg_cof: 0.015
+          reg_cof: 0.02
       USS(KB):
         master:
           max: 1069926          # (1 GB)
-          mean: 168979          # (168 MB)
+          mean: 216623          # (211 MB)
           reg_cof: 332.64       # (332 B)
         workers:
           max: 208700           # (200 MB)
@@ -76,28 +76,28 @@ resources:
     wazuh-clusterd:
       CPU(%):
         master:
-          max: 104.5
+          max: 110
           mean: 53
-          reg_cof: 0.05
+          reg_cof: 0.12
         workers:
-          max: 44.44
-          mean: 12.65
-          reg_cof: 0.8239
+          max: 40
+          mean: 14
+          reg_cof: 0.1
       FD:
         master:
           max: 70.5
-          mean: 37.4
-          reg_cof: 0.05
+          mean: 59
+          reg_cof: 0.11
         workers:
           max: 72.6
           mean: 72
           reg_cof: 0.33
       USS(KB):
         master:
-          max: 557994           # (557 MB)
-          mean: 313429          # (313 MB)
+          max: 300000           # (290 MB)
+          mean: 155000          # (150 MB)
           reg_cof: 850
         workers:
           max: 233266           # (233 MB)
           mean: 157321          # (157 MB)
-          reg_cof: 8224         # (8 MB)
+          reg_cof: 760
