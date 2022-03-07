@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this tool will be documented in this file.
 
-## [v0.3] - 2021-12-10
+## [v0.3.1] - 2022-03-07
 
 ### Added
 
@@ -12,6 +12,7 @@ All notable changes to this tool will be documented in this file.
 ### Changed
 
 - Improved modularization of functions for reading data from ansible instances.
+- Changed how the tool uses `qa-docs`. ([2640])(https://github.com/wazuh/wazuh-qa/pull/2640)
 
 
 ### Fixed
