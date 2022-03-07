@@ -120,17 +120,16 @@ class ClusterCSVParser:
         setup_datetime = self.get_setup_phase('master')
 
         for node, files in dfs_dict.items():
+            if all("Daemon" in df for df in files.values()):
+                # Ensure these dataframes contain resources' stats before trying to add up all children.
+                files = self._add_child_process_to_parent_process(files)
+
             for phase in [self.SETUP_PHASE, self.STABLE_PHASE]:
-
-                # Check whether we are calculating the resources' stats
-                for file_df in files.values():
-                    all_files = self._add_child_process_to_parent_process(files) if "Daemon" in file_df else files
-                    break
-
-                for file_name, file_df in all_files.items():
+                for file_name, file_df in files.items():
                     trimmed_df = self._trim_dataframe(file_df, phase, setup_datetime)
                     if len(trimmed_df):
                         result[phase][file_name][node] = self._calculate_stats(trimmed_df)
+
         return result
 
     @staticmethod
@@ -144,12 +143,10 @@ class ClusterCSVParser:
             (dict): dictionary that contains a dataframe with all the final results from adding the different processes
             values.
         """
-
         concat_dfs = pd.concat([file_df for _, file_df in files.items()])
         concat_dfs = concat_dfs.groupby(concat_dfs["Timestamp"]).aggregate(aggregation_function)
         concat_dfs["Daemon"] = concat_dfs["Daemon"].apply(lambda x: "wazuh-clusterd")
         concat_dfs.reset_index(inplace=True)
-
         return {'wazuh-clusterd': concat_dfs}
 
     def _group_stats(self, dfs_dict):

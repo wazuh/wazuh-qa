@@ -71,7 +71,7 @@ resources:
         workers:
           max: 208700           # (200 MB)
           mean: 116458          # (116 MB)
-          reg_cof: 831          # (831 B)
+          reg_cof: 831
   stable_phase:
     wazuh-clusterd:
       CPU(%):
@@ -96,7 +96,7 @@ resources:
         master:
           max: 557994           # (557 MB)
           mean: 313429          # (313 MB)
-          reg_cof: 850          # (850 MB)
+          reg_cof: 850
         workers:
           max: 233266           # (233 MB)
           mean: 157321          # (157 MB)
