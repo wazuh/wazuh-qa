@@ -41,10 +41,11 @@ tags:
     - wazuh_db
 '''
 import os
+
 import time
 import pytest
-import yaml
 import json
+
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
                                     clean_groups_from_db, clean_belongs)
