@@ -466,7 +466,7 @@ class QueueMonitor:
                     self.stop()
                     if error_message:
                         logging_message('MonitorLog', 'V', error_message)
-                        logging_message('MonitorLog', 'V', f"Results accumulated: ",
+                        logging_message('MonitorLog', 'V', f"Results accumulated: " +
                                         f"{len(result) if isinstance(result, list) else 0}")
                         logging_message('MonitorLog', 'V', f"Results expected: {accum_results}")
                     raise TimeoutError(error_message)

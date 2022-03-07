@@ -178,7 +178,7 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}')
+            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}'))
             raise AttributeError(f'Unexpected event {event.result()}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -199,13 +199,13 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}')
+            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}'))
             raise AttributeError(f'Unexpected event {event.result()}')
     else:
         fim.create_file(fim.REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}')
+            logging_message('TestLog', 'V', (f'Unexpected event {event.result()}'))
             raise AttributeError(f'Unexpected event {event.result()}')
 
     # Change the target of the symlink and expect events while there's no syscheck scan

@@ -52,7 +52,8 @@ from datetime import timedelta, datetime
 import time
 import sys
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters
+from wazuh_testing.tools.logging import logging_message
 from wazuh_testing.tools.time import TimeMachine
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.time import time_to_seconds
@@ -211,7 +212,7 @@ def test_reconnect_time(start_eventlog_process, get_local_internal_options, conf
         before = str(datetime.now())
         seconds_to_travel = time_to_seconds(config['reconnect_time']) / 2
         TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-        logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
+        logging_message('TestLog', 'VV', f"Changing the system clock from {before} to {datetime.now()}")
 
     log_callback = logcollector.callback_reconnect_eventchannel(config['location'])
 
@@ -219,7 +220,7 @@ def test_reconnect_time(start_eventlog_process, get_local_internal_options, conf
 
     if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
         TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
-        logger.debug(f"Changing the system clock from {before} to {datetime.now()}")
+        logging_message('TestLog', 'VV', f"Changing the system clock from {before} to {datetime.now()}")
 
     wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
