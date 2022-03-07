@@ -167,6 +167,28 @@ def clean_agents_from_db():
         raise Exception('Unable to clean agents')
 
 
+def clean_groups_from_db():
+    """
+    Clean groups table from global.db
+    """
+    command = 'global sql DELETE FROM "group"'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean groups table.')
+
+
+def clean_belongs():
+    """
+    Clean belong table from global.db
+    """
+    command = 'global sql DELETE FROM belongs'
+    try:
+        query_wdb(command)
+    except Exception:
+        raise Exception('Unable to clean belongs table.')
+
+
 def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
                        disconnection_time=0):
     """

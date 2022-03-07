@@ -66,6 +66,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.wazuh_db import clean_groups_from_db, clean_agents_from_db, clean_belongs
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 # Marks
@@ -133,13 +134,9 @@ def clean_keys():
 
 
 def clean_groups():
-    groups_folder = os.path.join(WAZUH_PATH, 'queue', 'agent-groups')
-    for filename in os.listdir(groups_folder):
-        file_path = os.path.join(groups_folder, filename)
-        try:
-            os.unlink(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    clean_agents_from_db()
+    clean_groups_from_db()
+    clean_belongs()
 
 
 def clean_diff():
@@ -169,11 +166,11 @@ def clean_agents_timestamp():
 
 
 def check_agent_groups(id, expected, timeout=30):
-    group_path = os.path.join(WAZUH_PATH, 'queue', 'agent-groups', id)
+    subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', id, '-q'])
     wait = time.time() + timeout
     while time.time() < wait:
-        ret = os.path.exists(group_path)
-        if ret == expected:
+        s = subprocess.check_output(f"/var/ossec/bin/agent_groups")
+        if id in str(s):
             return True
     return False
 
