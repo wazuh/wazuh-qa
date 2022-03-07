@@ -209,12 +209,13 @@ def validate_parameters(parameters):
                            'them with --test-components, --test-suites and --test-modules.',
                            qactl_logger.error, QACTL_LOGGER)
 
-    if len(parameters.test_types) != len(parameters.test_components) or  \
-       len(parameters.test_types) != len(parameters.test_suites) or \
-       len(parameters.test_types) != len(parameters.test_modules):
-        raise QAValueError('The parameters that specify the modules, suites, components, and types must have the same '
-                           'length: --test-types, --test-components, --test-suites and --test_modules.',
-                           qactl_logger.error, QACTL_LOGGER)
+    if parameters.run:
+        if len(parameters.test_types) != len(parameters.test_components) or  \
+        len(parameters.test_types) != len(parameters.test_suites) or \
+        len(parameters.test_types) != len(parameters.test_modules):
+            raise QAValueError('The parameters that specify the modules, suites, components, and types must have the '
+                               'same length: --test-types, --test-components, --test-suites and --test_modules.',
+                               qactl_logger.error, QACTL_LOGGER)
 
     if parameters.user_version and parameters.run is None:
         raise QAValueError('The -v, --version parameter can only be used with -r, --run', qactl_logger.error)
