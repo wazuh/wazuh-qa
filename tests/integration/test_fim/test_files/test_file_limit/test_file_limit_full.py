@@ -178,7 +178,7 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
         - whodata
         - realtime
     '''
-    #Check that database is full and assert database usage percentage is 100%
+    # Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
@@ -190,10 +190,6 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
     # Check number of entries and paths in DB and assert the value matches the expected count
     entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
-
-    # Check new file could not be added to DB
-    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
-                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     if sys.platform != 'win32':
         if entries and path_count:

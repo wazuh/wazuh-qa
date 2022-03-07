@@ -82,7 +82,7 @@
     - db_entry_limit:
         elements:
           - enabled:
-              value: 'no'
+              value: 'yes'
           - files:
               value: FILE_LIMIT
           - registries:
