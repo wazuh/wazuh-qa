@@ -6,13 +6,13 @@ Feature: Read Kibana logs
 
   @logs
   Scenario: Check Kibana logs
-    Given The kibana admin user is logged in using xpack authentication
+    Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
     When The user navigates to Logs settings
     Then The Logs are displayed
 
   @logs
   Scenario: Reload Kibana logs
-    Given The kibana admin user is logged in using xpack authentication
+    Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
     When The user navigates to Logs settings
     And The user reloads the logs
     Then The Logs are displayed

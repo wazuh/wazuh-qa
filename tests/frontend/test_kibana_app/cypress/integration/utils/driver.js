@@ -50,3 +50,43 @@ export const setCookies = (cookieObj) => {
   });
 
 }
+
+export const updateCookies = (parameterToFilter) => {
+  const filename = 'cookie.json';
+  cy.getCookies().then((currentCook) => {
+    const [cookie] = currentCook.filter(e => e.name == parameterToFilter);
+    // const newCookies = cookieMock.map(e => {
+    //   //ver cookie.value
+    //   if (e.name == parameterToFilter) e.value = cookie.value;
+    //   return e;
+    debugger
+    cy.readFile(filename).then((obj) => {
+  
+      obj.forEach(e => {
+        debugger
+        if(e.name == parameterToFilter) e.value = cookie.value
+      })
+      cy.writeFile(filename, obj)
+
+    })
+    // })
+    
+   cy.log(`cookie: ${currentCook}`);
+  });
+}
+
+export const writeFiles = async (cookie) => {
+  const filename = 'cookie.json';
+  cy.readFile(filename).then((list) => {
+    list.push(cookie)
+    // escribe el objeto fusionado
+    cy.writeFile(filename, list)
+  })
+}
+
+export const getMyCookie = () => {
+  let cookie;
+  return cy.getCookie().then((c) => {
+    return cookie = c;
+  })
+}
