@@ -186,6 +186,11 @@ def check_incompatible_parameters(parameters):
                                'by using --tests-path',
                                qadocs_logger.error)
 
+        if not parameters.test_types:
+            raise QAValueError('The --components option needs the component type to be parsed. You must specify it '
+                               'using --types',
+                               qadocs_logger.error)
+
         if parameters.test_exist:
             raise QAValueError('The --components option is not compatible with -e(--exist)',
                                qadocs_logger.error)
@@ -204,6 +209,11 @@ def check_incompatible_parameters(parameters):
         if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The -m(--modules) option needs the path to the tests to be parsed. You must specify it '
                                'using --tests-path',
+                               qadocs_logger.error)
+
+        if not parameters.test_suites:
+            raise QAValueError('The --modules option needs the module suite to be parsed. You must specify it '
+                               'using --suites',
                                qadocs_logger.error)
 
         if parameters.index_name:
@@ -330,7 +340,7 @@ def validate_parameters(parameters, parser):
         if parameters.test_modules:
             # If at least one module is specified
             if len(parameters.test_components) != 1:
-                raise QAValueError('The --modules option work swhen is only parsing a single test component. Use '
+                raise QAValueError('The --modules option works when is only parsing a single test component. Use '
                                    '--components with just one component if you want to parse some modules within a '
                                    'test component.', qadocs_logger.error)
 
