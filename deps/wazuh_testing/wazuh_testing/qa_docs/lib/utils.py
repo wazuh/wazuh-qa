@@ -226,7 +226,12 @@ def get_file_path_recursively(file_to_find, path):
     Returns:
         path (str): File path if exists within the given path, None otherwise.
     """
-    (root, folders, files) = next(os.walk(path))
+    try:
+        (root, folders, files) = next(os.walk(path))
+    except StopIteration:
+        # When iterates over it even after it has been exhausted
+        return
+
     for file in files:
         if file == file_to_find:
             return os.path.join(root, file)

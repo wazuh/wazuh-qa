@@ -176,33 +176,16 @@ def check_incompatible_parameters(parameters):
                                'using --tests-path',
                                qadocs_logger.error)
 
-        if parameters.test_exist:
-            raise QAValueError('The --types option is not compatible with -e(--exist)',
-                               qadocs_logger.error)
-
     if parameters.test_components:
         if parameters.tests_path is None and not parameters.run_with_docker:
             raise QAValueError('The --components option needs the path to the tests to be parsed. You must specify it '
                                'by using --tests-path',
                                qadocs_logger.error)
 
-        if not parameters.test_types:
-            raise QAValueError('The --components option needs the component type to be parsed. You must specify it '
-                               'using --types',
-                               qadocs_logger.error)
-
-        if parameters.test_exist:
-            raise QAValueError('The --components option is not compatible with -e(--exist)',
-                               qadocs_logger.error)
-
     if parameters.test_suites:
         if not parameters.test_components:
             raise QAValueError('The --suites option needs the suite module to be parsed. You must specify it '
                                'using --components',
-                               qadocs_logger.error)
-
-        if parameters.test_exist:
-            raise QAValueError('The --suites option is not compatible with -e(--exist)',
                                qadocs_logger.error)
 
     if parameters.test_modules:
@@ -332,7 +315,7 @@ def validate_parameters(parameters, parser):
                                        '--components with just one type if you want to parse some components within a '
                                        'test type.', qadocs_logger.error)
 
-        if parameters.test_modules:
+        if parameters.test_modules or parameters.test_exist:
             # If at least one module is specified
             if len(parameters.test_components) != 1:
                 raise QAValueError('The --modules option works when is only parsing a single test component. Use '
@@ -357,14 +340,16 @@ def validate_parameters(parameters, parser):
                         raise QAValueError(f"The given suite: {suite} has not been found in {component_path}",
                                            qadocs_logger.error)
 
-                suite = '' if not parameters.test_suites else parameters.test_suites[0]
-                suite_path = os.path.join(component_path, suite)
-                for module in parameters.test_modules:
-                    module_file = f"{module}.py"
-                    if module_file not in os.listdir(suite_path):
-                        if utils.get_file_path_recursively(module_file, suite_path) is None:
-                            raise QAValueError(f"The given module: {module_file} has not been found in {suite_path}",
-                                               qadocs_logger.error)
+        if parameters.test_modules:
+            suite_path = '' if not parameters.test_suites else parameters.test_suites[0]
+
+            for module in parameters.test_modules:
+                suite_path = os.path.join(component_path, suite_path)
+                module_file = f"{module}.py"
+                if module_file not in os.listdir(suite_path):
+                    if utils.get_file_path_recursively(module_file, suite_path) is None:
+                        raise QAValueError(f"The given module: {module_file} has not been found in {suite_path}",
+                                           qadocs_logger.error)
 
     qadocs_logger.debug('Input parameters validation completed')
 
@@ -388,7 +373,18 @@ def run_searchui(index):
 def parse_data(args):
     """Parse the tests and collect the data."""
     if args.test_exist:
-        doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, '', test_modules=args.test_exist))
+
+        if args.test_suites:
+
+            # Looking for specified modules
+            doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                            args.test_components, args.test_suites, args.test_exist),
+                                     OUTPUT_FORMAT)
+        else:
+
+            # Parse specified components
+            doc_check = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH, args.test_types,
+                                            args.test_components, test_modules=args.test_exist), OUTPUT_FORMAT)
 
         doc_check.check_module_exists(args.tests_path)
 
@@ -436,7 +432,11 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH), OUTPUT_FORMAT)
             docs.run()
 
+<<<<<<< HEAD
     if (args.test_types or args.test_components or args.test_modules) and not args.check_doc:
+=======
+    if (args.test_types or args.test_components or args.test_modules) and not (args.check_doc or args.test_exist):
+>>>>>>> c85360473a709feb62ce0fdae328c43718541424
         qadocs_logger.info('Running QADOCS')
         docs.run()
     elif args.test_modules and args.check_doc:
