@@ -9,11 +9,31 @@ All notable changes to this tool will be documented in this file.
 - Added new methods to avoid the SSH fingerprint check ansible error.
 - Added generation of independent configuration blocks for instance and task deployment.
 - Added CentOS 7 support.
+
+
 ### Changed
 
 - Improved modularization of functions for reading data from ansible instances.
 - Changed how the tool uses `qa-docs`. ([2640])(https://github.com/wazuh/wazuh-qa/pull/2640)
 
+
+### Fixed
+
+- Fixed some typos in qa-ctl logs.
+- Fixed some uses of UNIX libraries in `file` module under Windows.
+
+
+## [v0.3] - 2021-12-10
+
+### Added
+
+- Added new module to be able to launch custom ansible tasks with `qa-ctl`.
+- Added new methods to avoid the SSH fingerprint check ansible error.
+- Added generation of independent configuration blocks for instance and task deployment.
+- Added CentOS 7 support.
+### Changed
+
+- Improved modularization of functions for reading data from ansible instances.
 
 ### Fixed
 
