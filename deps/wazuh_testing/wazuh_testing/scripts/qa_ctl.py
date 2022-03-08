@@ -104,7 +104,6 @@ def check_test_module_exists(tests_path, type, component, suite_command, module)
         component (str): Test component.
         suite_command (str): Suite flag and name to be used in the qa-docs run.
         module (str): Test module.
-
     """
     check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -e {module} --no-logging"
     check_test_exist = local_actions.run_local_command_returning_output(check_test_exist)
@@ -121,7 +120,6 @@ def check_test_module_documentation(tests_path, type, component, suite_command, 
         component (str): Test component.
         suite_command (str): Suite flag and name to be used in the qa-docs run.
         module (str): Test module.
-
     """
     test_documentation_check = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -m {module} " \
                                '--no-logging --check-documentation'
