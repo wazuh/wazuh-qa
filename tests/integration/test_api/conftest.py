@@ -80,10 +80,15 @@ def configure_api_environment(get_configuration, request):
 @pytest.fixture(scope='module')
 def clean_log_files(get_configuration, request):
     """Reset the log files of the API and delete the rotated log files."""
-    shutil.rmtree(os.path.join(WAZUH_PATH, 'logs', 'api'))
-    log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
-    for log_file in log_files:
-        truncate_file(log_file)
+    def clean_log_files():
+        shutil.rmtree(os.path.join(WAZUH_PATH, 'logs', 'api'))
+        log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
+        for log_file in log_files:
+            truncate_file(log_file)
+
+    yield
+
+    clean_log_files()
 
 
 @pytest.fixture(scope='module')
