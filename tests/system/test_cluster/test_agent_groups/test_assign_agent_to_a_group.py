@@ -5,10 +5,8 @@
 import os
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
-from system import (check_agent_groups, check_agent_status, restart_cluster, clean_cluster_logs, get_agent_id, get_agents_in_cluster,
+from system import (check_agent_groups, check_agent_status, restart_cluster, clean_cluster_logs,
                     check_keys_file, assign_agent_to_new_group, delete_group_of_agents,
                     remove_cluster_agents)
 from common import register_agent
@@ -27,7 +25,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 
 @pytest.fixture(scope='function')
-def clean_environment(request):
+def clean_environment():
 
     clean_cluster_logs(test_infra_agents + test_infra_managers, host_manager)
 
@@ -41,14 +39,14 @@ def clean_environment(request):
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
-                 Check that when an agent pointing to a master/worker node is registered using CLI tool, and when 
+                 Check that when an agent pointing to a master/worker node is registered using CLI tool, and when
                  it's assigned to a new group the change is sync with the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
             type: string
             brief: name of the host where the agent will register
-        - initial_status: 
+        - initial_status:
             type: string
             brief: status of the agent when the assign the new group
         - clean_enviroment:
@@ -62,11 +60,11 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    
+
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
     # Check that agent has no group assigned
     check_agent_groups(agent_id, 'Null', test_infra_managers, host_manager)
-    
+
     # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager)
 
@@ -81,16 +79,15 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
         time.sleep(10)
         check_agent_status(agent_id, agent_name, agent_ip, 'disconnected', host_manager, test_infra_managers)
-    
-    # Add agent to a new group
-    assign_agent_to_new_group('wazuh-master', 'group_test', agent_name, host_manager)
 
+    try:
+        # Add agent to a new group
+        assign_agent_to_new_group('wazuh-master', 'group_test', agent_id, host_manager)
 
-    # # Check that agent has group set to group_test on Managers
-    # for host in ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]:
-    #assert "group_test" in host_manager.run_command('wazuh-master', f'{WAZUH_PATH}/bin/agent_groups -s -i  {result[2]}')
-    check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
+        time.sleep(10)
+        # Check that agent has group set to group_test on Managers
+        check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
 
-
-    # Delete group of agent
-    delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+    finally:
+        # Delete group of agent
+        delete_group_of_agents('wazuh-master', 'group_test', host_manager)
