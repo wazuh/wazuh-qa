@@ -66,7 +66,6 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
-from wazuh_testing.wazuh_db import clean_groups_from_db, clean_agents_from_db, clean_belongs
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 # Marks
@@ -89,7 +88,7 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2'), (ls_
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
+groups_infra = ['001','002', '003', '004']
 
 # Aux
 @pytest.fixture(scope="function")
@@ -134,19 +133,19 @@ def clean_keys():
 
 
 def clean_groups():
-    clean_agents_from_db()
-    clean_groups_from_db()
-    clean_belongs()
+    groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
+    for group in groups_infra:
+        if(group in str(groups_created)):
+            subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
 def clean_diff():
     diff_folder = os.path.join(WAZUH_PATH, 'queue', 'diff')
-    for agent_diff in os.listdir(diff_folder):
-        diff_path = os.path.join(diff_folder, agent_diff)
-        try:
-            shutil.rmtree(diff_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (diff_path, e))
+    try:
+        shutil.rmtree(diff_folder)
+        os.mkdir(diff_folder)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (diff_folder, e))
 
 
 def clean_rids():
@@ -169,8 +168,8 @@ def check_agent_groups(id, expected, timeout=30):
     subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', id, '-q'])
     wait = time.time() + timeout
     while time.time() < wait:
-        s = subprocess.check_output(f"/var/ossec/bin/agent_groups")
-        if id in str(s):
+        groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
+        if id in str(groups_created):
             return True
     return False
 
