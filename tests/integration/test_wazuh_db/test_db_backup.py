@@ -222,7 +222,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
                 restore_command = f'global backup restore {{"snapshot": "{backups[-1]}",\
                                     "save_pre_restore_state": "false"}}'
                 response = query_wdb(restore_command)
-                assert response == expected
+                assert response == expected, f'Error restoring from pre_restore state. Response {response} does not match the expected {expected}.'
 
                 # Check that DB is empty does not have test_values after restoring
                 db_response = query_wdb(sql_select_command)
