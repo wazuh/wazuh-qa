@@ -66,10 +66,11 @@ from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                                     ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules import WINDOWS, TIER1
 
 # Marks
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
+pytestmark = [WINDOWS, TIER1]
 
 # Variables
 
