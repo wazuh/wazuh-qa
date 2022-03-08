@@ -918,6 +918,15 @@ def truncate_log_files():
         truncate_file(log_file)
 
 
+
+@pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
 @pytest.fixture(scope='function')
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""

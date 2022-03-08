@@ -9,6 +9,7 @@ import time
 import psutil
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
+from wazuh_testing.modules import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP
 
 
 def restart_wazuh_daemon(daemon):
@@ -139,6 +140,12 @@ def control_service(action, daemon=None, debug_mode=False):
 
     if result != 0:
         raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}")
+
+
+def restart_wazuh_function():
+    """Restarts Wazuh."""
+    control_service(WAZUH_SERVICES_STOP)
+    control_service(WAZUH_SERVICES_START)
 
 
 def get_process(search_name):

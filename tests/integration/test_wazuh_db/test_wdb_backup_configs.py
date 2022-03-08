@@ -58,12 +58,12 @@ import time
 import numbers
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.file import recursive_directory_creation, remove_file, truncate_file
+from wazuh_testing.tools.services import restart_wazuh_function
+from wazuh_testing.tools.file import recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.utils import validate_interval_format
-from wazuh_testing.modules import TIER0, LINUX, SERVER,  WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
+from wazuh_testing.modules import TIER0, LINUX, SERVER
 
 
 # Marks
@@ -107,25 +107,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 timeout = 15
 
 
-def restart_wazuh():
-    """Restarts Wazuh."""
-    control_service(WAZUH_SERVICES_STOP)
-    control_service(WAZUH_SERVICES_START)
-
-
 # Fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
-
-@pytest.fixture(scope='function')
-def clear_logs(get_configuration, request):
-    """Reset the ossec.log and start a new monitor"""
-    truncate_file(LOG_FILE_PATH)
-    file_monitor = FileMonitor(LOG_FILE_PATH)
-    setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
 
 @pytest.fixture(scope='function')
@@ -187,7 +173,7 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
     test_interval = get_configuration['metadata']['INTERVAL']
     test_max_files = get_configuration['metadata']['MAX_FILES']
     try:
-        restart_wazuh()
+        restart_wazuh_function()
     except (subprocess.CalledProcessError, ValueError) as err:
         if not validate_interval_format(test_interval):
             wazuh_log_monitor.start(callback=generate_monitoring_callback(WRONG_INTERVAL_CALLBACK), timeout=timeout,
