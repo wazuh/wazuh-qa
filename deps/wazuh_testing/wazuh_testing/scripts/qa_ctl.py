@@ -95,8 +95,43 @@ def validate_configuration_data(configuration_data, qa_ctl_mode):
     qactl_logger.debug('Schema validation has passed successfully')
 
 
-def validate_test_module_exists_and_documented(type=None, component=None, suite=None, module=None):
-    """Check that the modules specified exist and are documented.
+def check_test_module_exists(tests_path, type, component, suite_command, module):
+    """Check that the module exists.
+
+    Args:
+        tests_path (str): Path where the tests with the documentation are.
+        type (str): Test type.
+        component (str): Test component.
+        suite_command (str): Suite flag and name to be used in the qa-docs run.
+        module (str): Test module.
+
+    """
+    check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -e {module} --no-logging"
+    check_test_exist = local_actions.run_local_command_returning_output(check_test_exist)
+    if f"{module} exists" not in check_test_exist:
+        raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
+
+
+def check_test_module_documentation(tests_path, type, component, suite_command, module):
+    """Check that the module is documented.
+
+    Args:
+        tests_path (str): Path where the tests with the documentation are.
+        type (str): Test type.
+        component (str): Test component.
+        suite_command (str): Suite flag and name to be used in the qa-docs run.
+        module (str): Test module.
+
+    """
+    test_documentation_check = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -m {module} " \
+                               '--no-logging --check-documentation'
+    test_documentation_check = local_actions.run_local_command_returning_output(test_documentation_check)
+    if f'{module} is not documented' in test_documentation_check:
+        raise QAValueError(f"{module} is not documented using qa-docs current schema", qactl_logger.error,
+                           QACTL_LOGGER)
+
+def validate_test_module(type=None, component=None, suite=None, module=None):
+    """Check that the module exists and is documented.
 
     Args:
         type (str): Test type.
@@ -105,20 +140,10 @@ def validate_test_module_exists_and_documented(type=None, component=None, suite=
         module (str): Test module.
     """
     tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
-    # Validate if the specified tests exist
     suite_command = f"-s {suite}" if suite is not None else ''
-    check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -e {module} --no-logging"
-    check_test_exist = local_actions.run_local_command_returning_output(check_test_exist)
-    if f"{module} exists" not in check_test_exist:
-        raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
 
-    # Validate if the selected tests are documented
-    test_documentation_check = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -m {module} " \
-                               '--no-logging --check-documentation'
-    test_documentation_check = local_actions.run_local_command_returning_output(test_documentation_check)
-    if f'{module} is not documented' in test_documentation_check:
-        raise QAValueError(f"{module} is not documented using qa-docs current schema", qactl_logger.error,
-                           QACTL_LOGGER)
+    check_test_module_exists(tests_path, type, component, suite_command, module)
+    check_test_module_documentation(tests_path, type, component, suite_command, module)
 
 
 def set_qactl_logging(qactl_configuration):
@@ -277,11 +302,11 @@ def validate_parameters(parameters):
         if parameters.test_suites:
             for type, component, suite, module in zip(parameters.test_types, parameters.test_components,
                                                       parameters.test_suites, parameters.test_modules):
-                validate_test_module_exists_and_documented(type, component, suite, module)
+                validate_test_module(type, component, suite, module)
         else:
             for type, component, module in zip(parameters.test_types, parameters.test_components,
                                                parameters.test_modules):
-                validate_test_module_exists_and_documented(type, component, module=module)
+                validate_test_module(type, component, module=module)
 
     # Validate the tests operating system compatibility if specified
     if parameters.operating_systems:
