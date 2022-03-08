@@ -60,13 +60,13 @@ import pytest
 import yaml
 
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.modules import TIER0
+from wazuh_testing.modules import TIER0, LINUX, SERVER
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file
 
 
 # Marks
-pytestmark = [pytest.mark.linux, TIER0, pytest.mark.server]
+pytestmark = [TIER0, LINUX, SERVER]
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

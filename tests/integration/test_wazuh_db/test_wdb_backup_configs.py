@@ -62,11 +62,11 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.modules import TIER0, WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
+from wazuh_testing.modules import TIER0, LINUX, SERVER,  WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
 
 
 # Marks
-pytestmark =  [pytest.mark.linux, TIER0, pytest.mark.server]
+pytestmark =  [TIER0, LINUX, SERVER]
 
 
 # Configuration
