@@ -95,6 +95,32 @@ def validate_configuration_data(configuration_data, qa_ctl_mode):
     qactl_logger.debug('Schema validation has passed successfully')
 
 
+def validate_test_module_exists_and_documented(type=None, component=None, suite=None, module=None):
+    """Check that the modules specified exist and are documented.
+
+    Args:
+        type (str): Test type.
+        component (str): Test component.
+        suite (str): Test suite.
+        module (str): Test module.
+    """
+    tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
+    # Validate if the specified tests exist
+    suite_command = f"-s {suite}" if suite is not None else ''
+    check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -e {module} --no-logging"
+    check_test_exist = local_actions.run_local_command_returning_output(check_test_exist)
+    if f"{module} exists" not in check_test_exist:
+        raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
+
+    # Validate if the selected tests are documented
+    test_documentation_check = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -m {module} " \
+                               '--no-logging --check-documentation'
+    test_documentation_check = local_actions.run_local_command_returning_output(test_documentation_check)
+    if f'{module} is not documented' in test_documentation_check:
+        raise QAValueError(f"{module} is not documented using qa-docs current schema", qactl_logger.error,
+                           QACTL_LOGGER)
+
+
 def set_qactl_logging(qactl_configuration):
     """Set qa-ctl logging configuration according to the config section of the qa-ctl configuration file.
 
@@ -187,8 +213,9 @@ def validate_parameters(parameters):
                 platform = QACTLConfigGenerator.SYSTEMS[op_system]['os_platform'] if op_system in \
                     QACTLConfigGenerator.SYSTEMS.keys() else op_system
                 if platform not in test_data['os_platform']:
-                    raise QAValueError(f"The {module} module does not support the {op_system} system. Allowed platforms:"
-                                       f" {test_data['os_platform']} (ubuntu and centos are from linux platform)")
+                    raise QAValueError(f"The {module} module does not support the {op_system} system. Allowed "
+                                       f"platforms: {test_data['os_platform']} (ubuntu and centos are from linux "
+                                       'platform)')
                 # Check os version
                 if len([os_version.lower() for os_version in test_data['os_version'] if op_system in os_version]) > 0:
                     raise QAValueError(f"The {module} module does not support the {op_system} system. Allowed operating"
@@ -204,14 +231,16 @@ def validate_parameters(parameters):
         raise QAValueError('The --run parameter is incompatible with --config. --run will autogenerate the '
                            'configuration', qactl_logger.error, QACTL_LOGGER)
 
-    if parameters.run and not (parameters.test_components and parameters.test_suites and parameters.test_modules):
+    # Check that run flag has the minimal test module information
+    if parameters.run and not (parameters.test_components and parameters.test_modules):
         raise QAValueError('The --run parameter needs the component, suite and module to run a test. You can specify '
                            'them with --test-components, --test-suites and --test-modules.',
                            qactl_logger.error, QACTL_LOGGER)
 
+    # Check that the test flags have the same lenght
     if parameters.run:
         if len(parameters.test_types) != len(parameters.test_components) or  \
-        len(parameters.test_types) != len(parameters.test_suites) or \
+        (len(parameters.test_types) != len(parameters.test_suites) and parameters.test_suites) or \
         len(parameters.test_types) != len(parameters.test_modules):
             raise QAValueError('The parameters that specify the modules, suites, components, and types must have the '
                                'same length: --test-types, --test-components, --test-suites and --test_modules.',
@@ -245,23 +274,14 @@ def validate_parameters(parameters):
 
     # Check if specified tests exist. Wazuh-qa repository needs to be downloaded locally before.
     if parameters.run:
-        # cambiar el for para iterar sobre los 4 arrays
-        for type, component, suite, module in zip(parameters.test_types, parameters.test_components,
-                                                  parameters.test_suites, parameters.test_modules):
-            tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
-            # Validate if the specified tests exist
-            exist_cmd = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -e {module} --no-logging"
-            check_test_exist = local_actions.run_local_command_returning_output(exist_cmd)
-            if f"{module} exists" not in check_test_exist:
-                raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
-
-            # Validate if the selected tests are documented
-            check_doc_cmd = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -m {module} --no-logging " \
-                            '--check-documentation'
-            test_documentation_check = local_actions.run_local_command_returning_output(check_doc_cmd)
-            if f'{module} is not documented' in test_documentation_check:
-                raise QAValueError(f"{module} is not documented using qa-docs current schema", qactl_logger.error,
-                                   QACTL_LOGGER)
+        if parameters.test_suites:
+            for type, component, suite, module in zip(parameters.test_types, parameters.test_components,
+                                                      parameters.test_suites, parameters.test_modules):
+                validate_test_module_exists_and_documented(type, component, suite, module)
+        else:
+            for type, component, module in zip(parameters.test_types, parameters.test_components,
+                                               parameters.test_modules):
+                validate_test_module_exists_and_documented(type, component, module=module)
 
     # Validate the tests operating system compatibility if specified
     if parameters.operating_systems:
@@ -299,27 +319,24 @@ def get_script_parameters():
                         help='Config generation mode. The test data will be processed and the configuration will be '
                              'generated without running anything.')
 
-    # parser.add_argument('--run', '-r', type=str, action='store', required=False, nargs='+', dest='run_test',
-    #                     help='Independent run method. Specify a test or a list of tests to be run.')
- 
     parser.add_argument('--run', '-r', action='store_true',
                         help='Independent run method. The tests that the use specified will be run.')
 
     parser.add_argument('--test-types', type=str, action='store', required=False, nargs='+', dest='test_types',
                         default=['integration'],
-                        help='Independent run method. Specify a test or a list of tests to be run.')
+                        help='Specify the types of the tests to be run.')
 
     parser.add_argument('--test-components', type=str, action='store', required=False, nargs='+',
                         dest='test_components', default=[],
-                        help='Independent run method. Specify a test or a list of tests to be run.')
+                        help='Specify the components of the tests to be run.')
 
     parser.add_argument('--test-suites', type=str, action='store', required=False, nargs='+', dest='test_suites',
                         default=[],
-                        help='Independent run method. Specify a test or a list of tests to be run.')
+                        help='Specify the suites of the tests to be run.')
 
     parser.add_argument('--test-modules', type=str, action='store', required=False, nargs='+', dest='test_modules',
                         default=[],
-                        help='Independent run method. Specify a test or a list of tests to be run.')
+                        help='Specify the modules that contain the tests to be run.')
 
     parser.add_argument('--version', '-v', type=str, action='store', required=False, dest='version',
                         help='Wazuh installation and tests version.')
@@ -375,16 +392,21 @@ def main():
     # Generate or get the qactl configuration file
     if qa_ctl_mode == AUTOMATIC_MODE:
         qactl_logger.debug('Generating configuration file')
-        # cambiar run_test de config generator
-        # args = ['types', 'components', 'suites', 'modules']
         modules_data = {'types': [], 'components': [], 'suites': [], 'modules': []}
-        # modules_data = dict(zip(args,[[] for x in range(0,len(args))]))
-        for type, component, suite, module in zip(arguments.test_types, arguments.test_components,
-                                                  arguments.test_suites, arguments.test_modules):
-            modules_data['types'].append(type)
-            modules_data['components'].append(component)
-            modules_data['suites'].append(suite)
-            modules_data['modules'].append(module)
+
+        if arguments.test_suites:
+            for type, component, suite, module in zip(arguments.test_types, arguments.test_components,
+                                                      arguments.test_suites, arguments.test_modules):
+                modules_data['types'].append(type)
+                modules_data['components'].append(component)
+                modules_data['suites'].append(suite)
+                modules_data['modules'].append(module)
+        else:
+            for type, component, module in zip(arguments.test_types, arguments.test_components,
+                                               arguments.test_modules):
+                modules_data['types'].append(type)
+                modules_data['components'].append(component)
+                modules_data['modules'].append(module)
 
         config_generator = QACTLConfigGenerator(modules_data, arguments.version, arguments.qa_branch,
                                                 WAZUH_QA_FILES, arguments.operating_systems)

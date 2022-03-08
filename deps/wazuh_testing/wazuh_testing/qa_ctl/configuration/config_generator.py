@@ -29,7 +29,7 @@ class QACTLConfigGenerator:
         wazuh package version will be taken from the documetation test information
 
     Attributes:
-        tests (list): list with all the test that the user desires to run.
+        test_modules_data (dict): dict with all the tests that the user desires to run.
         wazuh_version (string): version of the wazuh packages that the user desires to install.
         This parameter is set to None by default. In case that version parameter is not given, the
         wazuh package version will be taken from the documetation test information
@@ -131,9 +131,9 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, modules_data=None, wazuh_version=None, qa_branch='master',
+    def __init__(self, test_modules_data=None, wazuh_version=None, qa_branch='master',
                  qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
-        self.modules_data = modules_data
+        self.test_modules_data = test_modules_data
         self.wazuh_version = wazuh_version
         self.systems = systems
         self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
@@ -155,8 +155,9 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
+        suite_command = f"-s {suite}" if suite else ''
         qa_docs_command = f"qa-docs -p {join(self.qa_files_path, 'tests')} -o {join(gettempdir(), 'wazuh_qa_ctl')} " \
-                          f"-t {type} -c {component} -s {suite} -m {module} --no-logging"
+                          f"-t {type} -c {component} {suite_command} -m {module} --no-logging"
         test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', 'output', module)}.json"
 
         run_local_command_returning_output(qa_docs_command)
@@ -184,9 +185,16 @@ class QACTLConfigGenerator:
             dict object : dict containing all the information of the tests given from their documentation.
         """
         tests_info = []
-        for type, component, suite, module in zip(self.modules_data['types'], self.modules_data['components'],
-                                                  self.modules_data['suites'], self.modules_data['modules']):
-            tests_info.append(self.__get_module_info(type, component, suite, module))
+        if self.test_modules_data['suites']:
+            for type, component, suite, module in zip(self.test_modules_data['types'],
+                                                      self.test_modules_data['components'],
+                                                      self.test_modules_data['suites'],
+                                                      self.test_modules_data['modules']):
+                tests_info.append(self.__get_module_info(type, component, suite, module))
+        else:
+            for type, component, module in zip(self.test_modules_data['types'], self.test_modules_data['components'],
+                                               self.test_modules_data['modules']):
+                tests_info.append(self.__get_module_info(type, component, '', module))
 
         return tests_info
 
