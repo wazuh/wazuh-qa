@@ -94,3 +94,8 @@
 
 - name: Start Wazuh
   command: /var/ossec/bin/wazuh-control restart
+
+- name: Create script to check BD
+  copy:
+    src: ../../../../../scripts/system_query_db.py
+    dest: /var/

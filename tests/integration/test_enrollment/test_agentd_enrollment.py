@@ -8,14 +8,14 @@ brief: This module verifies the correct behavior of Wazuh Agentd during the enro
 tier:
     0
 modules:
-    - Agentd
+    - agentd
 components:
     - agent
 daemons:
-    - Agentd
+    - wazuh-agentd
 path:
     /tests/integration/test_enrollment/test_agentd_enrollment.py
-os_platform
+os_platform:
     - linux
     - windows
 os_version:
@@ -42,7 +42,7 @@ os_version:
     - Windows Server 2012
     - Windows Server 2016
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import pytest
@@ -66,7 +66,7 @@ tests = read_yaml(os.path.join(test_data_path, 'wazuh_enrollment_tests.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_enrollment_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__)
 host_name = socket.gethostname()
-
+no_restart_windows_after_configuration_set = True
 configuration_ids = ['agentd_enrollment']
 test_case_ids = [f"{test_case['name']}" for test_case in tests]
 
@@ -114,7 +114,7 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
         wazuh_min_version:
-            4.2
+            4.2.0
         parameters:
             - configure_environment:
                 type: fixture
@@ -157,9 +157,12 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
+        expected_error_dict = get_current_test_case['expected_error']
+        expected_error = expected_error_dict['agent-enrollment'] if 'agent-enrollment' in expected_error_dict else \
+                                                                    expected_error_dict
         try:
             log_monitor.start(timeout=AGENTD_ENROLLMENT_REQUEST_TIMEOUT,
-                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                              callback=make_callback(expected_error, prefix='.*',
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:

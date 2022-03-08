@@ -86,6 +86,7 @@ test_case = {
                   '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}')
 }
 
+timeout_remoted_socket = 15
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 config_ids = [x['PROTOCOL'] for x in parameters]
@@ -163,7 +164,8 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
         if "disconnected" not in command_request:
             sender, injector = ag.connect(agent, manager_address, protocol)
         else:
-            sleep(10) # Give time for the remoted socket to be ready.
+            # Give time for the remoted socket to be ready.
+            sleep(timeout_remoted_socket)
 
         msg_request = f'{agent.id} {command_request}'
 
