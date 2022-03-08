@@ -4,10 +4,11 @@
 
 import re
 import json
-from sys import platform
-from wazuh_testing import logger
 
+from sys import platform
 from datetime import datetime
+
+from wazuh_testing import logger
 from wazuh_testing.modules.fim import (CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_MESSAGE, CB_INODE_ENTRIES_PATH_COUNT,
                                        CB_FIM_ENTRIES_COUNT, CB_DETECT_FIM_EVENT)
 
