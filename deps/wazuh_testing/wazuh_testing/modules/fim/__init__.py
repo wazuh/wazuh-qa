@@ -14,6 +14,7 @@ import sys
 # Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
 MONITORED_KEY = 'SOFTWARE\\random_key'
+MONITORED_KEY_2 = "SOFTWARE\\Classes\\random_key_2"
 WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 
@@ -94,6 +95,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to be monitored: ..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE ='Wrong value for file_limit.'
+ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE ='Wrong value for db_value_limit registries tag.'
 ERR_MSG_DATABASE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Registry database is 100% full" alert'
 ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
 ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
