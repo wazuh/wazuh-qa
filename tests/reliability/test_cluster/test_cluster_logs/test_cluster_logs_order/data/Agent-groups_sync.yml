@@ -11,29 +11,26 @@
   parent: log0
   tag: 'Starting.*'
 
-# No chunks obtained.
+# No need to synchronize.
 - log_id: log2
   parent: log1
   tag: 'Obtained [1-9][0-9]* chunks of data in.*'
 - log_id: log3
   parent: log2
-  tag: 'All chunks sent.*'
+  tag: 'There is no agent information that needs to be synchronized in the local database. Skipping...*'
 
-# Chunks obtained.
+# Chunks sent.
 - log_id: log4
-  parent: log1
-  tag: 'Obtained [1-9][0-9]* chunks of data in.*'
+  parent: log2
+  tag: 'All chunks sent.*'
 - log_id: log5
   parent: log4
-  tag: 'All chunks sent.*'
-- log_id: log6
-  parent: log5
   tag: 'Finished in .* \(.* chunks updated\).*'
 
 # Race condition: 'All chunks sent' arrives (sometimes) after 'Finished in'.
-- log_id: log7
-  parent: log4
+- log_id: log6
+  parent: log2
   tag: 'Finished in .* \(.* chunks updated\).*'
-- log_id: log8
-  parent: log7
+- log_id: log7
+  parent: log6
   tag: 'All chunks sent.*'

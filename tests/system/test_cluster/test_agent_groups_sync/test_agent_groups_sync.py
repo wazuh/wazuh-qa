@@ -38,7 +38,12 @@ queries = ['global sql select * from "group" where name="{name}"']
 
 
 def obtain_agent_id(token, agent):
-    """Obtain agent's ID."""
+    """Obtain agent's ID.
+
+    Args:
+        token (str): the host token.
+        agent (str): agent's name.
+    """
 
     response = host_manager.make_api_call(host=master_host, method='GET', token=token,
                                           endpoint=f"/agents?name={agent}")
@@ -51,7 +56,13 @@ def obtain_agent_id(token, agent):
 
 
 def check_agent_status(status, token, agent):
-    """Restart the removed agent to trigger auto-enrollment."""
+    """Restart the removed agent to trigger auto-enrollment.
+
+    Args:
+        status (str): the agent status we are looking for.
+        token (str): the host token.
+        agent (str): agent's name.
+    """
     timeout = time() + time_to_agent_reconnect
 
     while True:

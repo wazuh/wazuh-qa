@@ -8,8 +8,10 @@ from glob import glob
 
 import pytest
 import treelib
+from datetime import datetime
 from yaml import safe_load
 
+datetime_format = '%Y/%m/%d %H:%M:%S'
 
 # Functions
 def dict_to_tree(dict_tree):
