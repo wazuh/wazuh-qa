@@ -82,7 +82,6 @@ documentation content into the App UI.
         |   ├── search_ui               | search-ui module directory
         |   ├── __init__.py
         |   ├── CHANGELOG.md            | Record of all notable changes made 
-        |   ├── deploy_qa_docs.sh       | Script that builds the qa-docs image and runs it using a specific branch
         |   ├── doc_generator.py        | The main module and the entry point of the tool execution
         |   ├── requirements.txt        | Contains the modules that qa-docs needs
         |   ├── README.MD
@@ -96,7 +95,7 @@ documentation content into the App UI.
 ## Schema
 The schema file of the tool is located at **qa-docs/schema.yaml**.
 
-The schema fields are specified in the qa-docs documenting test [wiki](https://github.com/wazuh/wazuh-qa/wiki/QADOCS-tool-How-to-document-a-test).
+The schema fields are specified in the qa-docs documenting test [wiki](https://github.com/wazuh/wazuh-qa/wiki/QA-Documentation---How-to-document-a-test-using-Schema-2.0).
 
 ## Installation
 
@@ -191,36 +190,46 @@ Also, you can visit the `qa-docs` tool [use guide](https://github.com/wazuh/wazu
 #### Complete run
     qa-docs --tests-path /path-to-tests-to-parse/
 
-Using just the `--tests-path` flag, the tool will load the schema file and run a complete parse of the paths in the
+Using just the `-p, --tests-path` flag, the tool will load the schema file and run a complete parse of the paths in the
 configuration to dump the content into the output folder located in the `qa-docs` build directory. e.g: `qa-docs --tests-path /wazuh-qa/tests/`
 
 #### Parse specific type(s)
     qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE1> <TYPE2>
 
-Using `--type` flag you can parse only the tests inside the type(s) folder(s) you want.
+Using `-t, --types` flag you can parse only the tests inside the type(s) folder(s) you want.
+
+#### Parse specific component(s)
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT1> <COMPONENT2>
+
+Using `-c, --components` flag you can parse only the tests inside the component(s) folder(s) you want. It also needs the type of tests where the tests are located.
+
+#### Parse specific suite(s)
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE1> <SUITE2>
+
+Using `-s, --suites` flag you can parse only the tests inside the components(s) folder(s) you want.
 
 #### Parse specific module(s)
-    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE1> <TYPE2> --modules <MODULE1> <MODULE2>
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE> -m(--modules) MODULE_NAME1 MODULE_NAME2
 
-Using `--modules` flag you can parse only the tests inside the modules(s) folder(s) you want. It also needs the type of tests where the tests are located.
-
-#### Parse specific test(s)
-    qa-docs --tests-path /path-to-tests-to-parse/ -t(--test) TEST_NAME1 TEST_NAME2
-
-Using `-t, --test` flag you can parse only the tests that you want. The documentation parsed will be printed, if you want to save it you have to use the `-o`
-flag and specify the output directory. e.g: `qa-docs --tests-path /wazuh-qa/tests/ -t test_cache test_cors -o /tmp`.
+Using `-m, --modules` flag you can parse only the modules that you want. The documentation parsed will be printed, if you want to save it you have to use the `-o`
+flag and specify the output directory. To parse modules you need to specify their type, component and suite. e.g: `qa-docs -p /wazuh-qa/tests/ --types integration --components test_api -s test_config -t test_cache test_cors -o /tmp`.
 
 This option is not compatible with API-related options, because the output is printed or saved with `-o` in a custom directory.
 
 #### Check if test(s) exist
-    qa-docs --tests-path /path-to-tests-to-parse/ -e(--exist) TEST_NAME1 TEST_NAME2
+    qa-docs --tests-path /path-to-tests-to-parse/ --types <TYPE> --components <COMPONENT> --suites <SUITE> -e(--exist) MODULE_NAME1 MODULE_NAME2
 
 With this option the tool prints if test(s) do(es) exist.
 
-#### Sanity Check
-    qa-docs --tests-path /path-to-tests-to-parse/ -s
+#### Check if module(s) are documented following qa-docs current schema
+    qa-docs -p /path-to-tests-to-parse/ -t <TYPE> -c <COMPONENT> -s <SUITE> -m TEST_NAME1 TEST_NAME2 --check-documentation
 
-Using `-s`, the tool will run a sanity check of the content in the output folder.
+With this option the tool prints if test(s) has the expected documentation blocks following the qa-docs schema.
+
+#### Sanity Check
+    qa-docs --tests-path /path-to-tests-to-parse/ --sanity-check
+
+Using `--sanity-check`, the tool will run a sanity check of the content in the output folder.
 
 It will check the coverage of the already parsed files in the **output path** comparing it with the tests found within
 the **tests path**.
@@ -274,7 +283,7 @@ Using `-l` option, the tool launches the application with a previously generated
 #### Index output data and launch the api
     qa-docs -il <INDEX_NAME>
 
-Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the API. The name of the index must be provided as a parameter. e.g: `qa-docs -I /wazuh-qa/tests/ -il qa-tests`. A previous run must be performed, e.g.`qa-docs -I /wazuh-qa/tests/` so the output data is previously generated.
+Using `-il` option, the tool indexes the content of each file output as a document into ElasticSearch and then launches the API. The name of the index must be provided as a parameter. e.g: `qa-docs -p /wazuh-qa/tests/ -il qa-tests`. A previous run must be performed, e.g.`qa-docs -p /wazuh-qa/tests/` so the output data is previously generated.
 
 ### Sample executions
 
@@ -283,9 +292,24 @@ Using `-il` option, the tool indexes the content of each file output as a docume
 qa-docs --tests-path /path-to-tests/
 ```
 
-- Parse `fim` module
+- Parse `fim` component
 ```
-qa-docs --tests-path /path-to-tests/ --type integration --modules test_fim
+qa-docs --tests-path /path-to-tests/ --type integration --components test_fim
+```
+
+- Parse api `config` and `rbac` suites
+```
+qa-docs --tests-path /path-to-tests/ --type integration --components test_api --suites test_config test_rbac
+```
+
+- Parse some `logtest` modules 
+```
+qa-docs --tests-path /path-to-tests/ --type integration --components test_logtest --suites test_invalid_token --modules test_invalid_session_token
+```
+
+- Check if some `logtest` modules has documentation blocks
+```
+qa-docs -p /path-to-tests/ --type integration --components test_logtest --suites test_configuration --modules test_configuration_file test_get_configuration_sock --check-documentation
 ```
 
 - Index the parsed data
@@ -298,9 +322,9 @@ qa-docs -i my_index
 qa-docs -l my_index
 ```
 
-- Parse `vulnerability_detector` module, index the output data, and launch `search-ui`
+- Parse `vulnerability_detector` component, index the output data, and launch `search-ui`
 ```
-qa-docs --tests-path /path-to-tests/ --type integration --modules test_vulnerability_detector -il vd-index
+qa-docs --tests-path /path-to-tests/ --type integration --components test_vulnerability_detector -il vd-index
 ```
 
 ## Docker deployment
@@ -311,10 +335,15 @@ Few examples:
 
 - Parse `test_active_response` tests and generate the documentation in `/tmp/qa_docs`:
 ```bash
-qa-docs --docker-run --types integration --modules test_active_response  --qa-branch 1796-migrate-doc-active-response
+qa-docs --docker-run --types integration --components test_active_response  --qa-branch 1796-migrate-doc-active-response
+```
+
+- Parse `test_fim` tests and generate the documentation in custom folder:
+```bash
+qa-docs --docker-run --types integration --components test_fim -o /tmp/fim_docu --qa-branch 1796-migrate-doc-active-response
 ```
 
 - Parse `test_active_response` and `test_agentd` tests and launch search-ui to visualize the documentation:
 ```bash
-qa-docs --docker-run --types integration --modules test_active_response test_agentd -il qa-index --qa-branch 1796-migrate-doc-schema-2
+qa-docs --docker-run --types integration --components test_active_response test_agentd -il qa-index --qa-branch 1796-migrate-doc-schema-2
 ```

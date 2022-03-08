@@ -44,16 +44,6 @@ def set_qadocs_logger_level(logging_level):
 
 
 def set_parameters(args):
-    # Set the qa-docs logger level
-    if args.debug_level:
-        set_qadocs_logger_level('DEBUG')
-
-    # Deactivate the qa-docs logger if necessary.
-    if args.no_logging:
-        set_qadocs_logger_level(None)
-
-
-def set_parameters(args):
     """Set the QADOCS parameters.
 
     Args:
@@ -70,16 +60,12 @@ def set_parameters(args):
     if args.no_logging:
         set_qadocs_logger_level(None)
 
-    if args.run_with_docker:
+    if args.output_path:
         global OUTPUT_PATH
-        OUTPUT_PATH = os.path.join(gettempdir(), 'qa_docs')
-
-    if args.output_path and not args.run_with_docker:
         OUTPUT_PATH = os.path.join(args.output_path, 'output')
 
-    if args.output_format:
-        global OUTPUT_FORMAT
-        OUTPUT_FORMAT = args.output_format
+    if args.run_with_docker:
+        OUTPUT_PATH = args.output_path if args.output_path else os.path.join(gettempdir(), 'qa_docs')
 
 
 def get_parameters():
@@ -332,7 +318,7 @@ def validate_parameters(parameters, parser):
         if parameters.test_modules or parameters.test_exist:
             # If at least one module is specified
             if len(parameters.test_components) != 1:
-                raise QAValueError('The --modules option work swhen is only parsing a single test component. Use '
+                raise QAValueError('The --modules option works when is only parsing a single test component. Use '
                                    '--components with just one component if you want to parse some modules within a '
                                    'test component.', qadocs_logger.error)
 
