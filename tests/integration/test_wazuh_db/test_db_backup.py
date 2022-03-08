@@ -96,15 +96,6 @@ def add_database_values(request):
     response = query_wdb(f'global sql delete from metadata where key="{test_values[0]}"')
 
 
-@pytest.fixture(scope='function')
-def remove_backups(request):
-    "Creates backups folder in case it does not exist."
-    recursive_directory_creation(backups_path)
-    os.chmod(backups_path, 0o777)
-    yield
-    remove_file(backups_path)
-
-
 # Tests
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -112,8 +103,9 @@ def remove_backups(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
+@pytest.mark.parametrize('backups_path',[backups_path])
 def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups, 
-                            add_database_values, test_case):
+                            add_database_values, test_case, backups_path):
     '''
     description: Check that every input message using the 'backup' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a series of queries to the socket with 

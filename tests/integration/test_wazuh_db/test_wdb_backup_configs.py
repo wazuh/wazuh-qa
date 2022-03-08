@@ -114,17 +114,9 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def remove_backups(request):
-    "Creates backups folder in case it does not exist."
-    recursive_directory_creation(backups_path)
-    os.chmod(backups_path, 0o777)
-    yield
-    remove_file(backups_path)
-
-
 # Tests
-def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs, remove_backups):
+@pytest.mark.parametrize('backups_path', [backups_path])
+def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs, remove_backups, backups_path):
     '''
     description: Check that given different wdb backup configuration parámeters, the expected behaviour is achieved.
                  For this, the test gets a series of parameters for the wazuh_db_backups_conf.yaml file and applies
