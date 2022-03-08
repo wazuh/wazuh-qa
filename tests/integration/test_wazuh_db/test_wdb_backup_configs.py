@@ -50,6 +50,7 @@ tags:
     - wazuh_db
 '''
 
+
 import os
 import subprocess
 
@@ -98,6 +99,7 @@ metadata = [{'ENABLED': 'yes', 'INTERVAL': str(interval)+'s', 'MAX_FILES':''},
 
 configurations = load_wazuh_configurations(configurations_path, __name__ ,
                                            params=parameters, metadata=metadata)
+
 
 # Variables
 BACKUP_CREATION_CALLBACK = r'.*Created Global database backup "(backup/db/global.db-backup.*.gz)"'

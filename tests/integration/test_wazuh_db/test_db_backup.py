@@ -53,6 +53,7 @@ tags:
     - wazuh_db
 '''
 
+
 import os
 import time
 
@@ -61,17 +62,17 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.modules import TIER0, LINUX, SERVER
 from wazuh_testing.wazuh_db import query_wdb
-from wazuh_testing.tools.file import recursive_directory_creation, remove_file, get_list_of_content_yml
+from wazuh_testing.tools.file import get_list_of_content_yml
 
 
 # Marks
 pytestmark = [TIER0, LINUX, SERVER]
 
+
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'wazuh_db_backup_command.yaml')
 module_tests = get_list_of_content_yml(messages_file, messages_file.split('_')[0])
-
 log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 backups_path = os.path.join(WAZUH_PATH, 'backup', 'db')
@@ -134,8 +135,8 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             brief: List of test_case stages (dicts with number of backups, restore, restore_response, and other keys).
     assertions:
         - Verify that the socket response matches the expected response.
-        - Verify that the backup file has been created
-        - Verify that after restoring the DB has the expected data
+        - Verify that the backup file has been created.
+        - Verify that after restoring the DB has the expected data.
 
     input_description:
         - Test cases are defined in the wazuh_db_backup_command.yaml file. This file contains the ammount of backups to
@@ -165,7 +166,6 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
     # Check that the expected ammount of database backups have been created 
     backups= query_wdb(get_backups_command)
     assert backups.__len__() == backups_ammount, f'Found {backups.__len__()} files, expected {backups_ammount}.'
-
 
     # Manage restoring the DB
     if 'restore' in case_data:
