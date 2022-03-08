@@ -1,0 +1,13 @@
+---
+- configuration:
+    logs:
+      format: json
+- configuration:
+    logs:
+      format: plain
+- configuration:
+    logs:
+      format: json,plain
+- configuration:
+    logs:
+      format: plain,json
