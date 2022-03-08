@@ -29,7 +29,7 @@ class QACTLConfigGenerator:
         wazuh package version will be taken from the documetation test information
 
     Attributes:
-        tests (list): list with all the test that the user desires to run.
+        test_modules_data (dict): dict with all the tests that the user desires to run.
         wazuh_version (string): version of the wazuh packages that the user desires to install.
         This parameter is set to None by default. In case that version parameter is not given, the
         wazuh package version will be taken from the documetation test information
@@ -131,9 +131,9 @@ class QACTLConfigGenerator:
         }
     }
 
-    def __init__(self, tests=None, wazuh_version=None, qa_branch='master',
+    def __init__(self, test_modules_data=None, wazuh_version=None, qa_branch='master',
                  qa_files_path=join(gettempdir(), 'wazuh_qa_ctl', 'wazuh-qa'), systems=None):
-        self.tests = tests
+        self.test_modules_data = test_modules_data
         self.wazuh_version = wazuh_version
         self.systems = systems
         self.qactl_used_ips_file = join(gettempdir(), 'wazuh_qa_ctl', 'qactl_used_ips.txt')
@@ -146,7 +146,7 @@ class QACTLConfigGenerator:
         # Create qa-ctl temporarily files path
         file.recursive_directory_creation(join(gettempdir(), 'wazuh_qa_ctl'))
 
-    def __get_test_info(self, test_name):
+    def __get_module_info(self, type, component, suite, module):
         """Get information from a documented test.
 
         Args:
@@ -155,9 +155,10 @@ class QACTLConfigGenerator:
         Returns:
             dict : return the info of the named test in dict format.
         """
-        qa_docs_command = f"qa-docs -t {test_name} -o {join(gettempdir(), 'wazuh_qa_ctl')} -I " \
-                          f"{join(self.qa_files_path, 'tests')} --no-logging"
-        test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', test_name)}.json"
+        suite_command = f"-s {suite}" if suite else ''
+        qa_docs_command = f"qa-docs -p {join(self.qa_files_path, 'tests')} -o {join(gettempdir(), 'wazuh_qa_ctl')} " \
+                          f"-t {type} -c {component} {suite_command} -m {module} --no-logging"
+        test_data_file_path = f"{join(gettempdir(), 'wazuh_qa_ctl', 'output', module)}.json"
 
         run_local_command_returning_output(qa_docs_command)
 
@@ -170,7 +171,7 @@ class QACTLConfigGenerator:
                                QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
         # Add test name extra info
-        info['test_name'] = test_name
+        info['test_name'] = module
 
         # Delete test data file
         file.delete_file(test_data_file_path)
@@ -183,7 +184,17 @@ class QACTLConfigGenerator:
         Returns:
             dict object : dict containing all the information of the tests given from their documentation.
         """
-        tests_info = [self.__get_test_info(test) for test in self.tests]
+        tests_info = []
+        if self.test_modules_data['suites']:
+            for type, component, suite, module in zip(self.test_modules_data['types'],
+                                                      self.test_modules_data['components'],
+                                                      self.test_modules_data['suites'],
+                                                      self.test_modules_data['modules']):
+                tests_info.append(self.__get_module_info(type, component, suite, module))
+        else:
+            for type, component, module in zip(self.test_modules_data['types'], self.test_modules_data['components'],
+                                               self.test_modules_data['modules']):
+                tests_info.append(self.__get_module_info(type, component, '', module))
 
         return tests_info
 
@@ -343,13 +354,13 @@ class QACTLConfigGenerator:
 
         return package_url
 
-    def __add_deployment_config_block(self, test_name, os_version, components, os_platform):
+    def __add_deployment_config_block(self, test_name, os_version, targets, os_platform):
         """Add a configuration block to deploy a test environment in qa-ctl.
 
         Args:
             test_name (string): Test name.
             os_version (string): Host vendor to deploy (e.g: CentOS 8).
-            components (string): Test target (manager or agent).
+            targets (string): Test target (manager or agent).
             os_platform (string): host system (e.g: linux).
         """
         # Process deployment data
@@ -357,11 +368,11 @@ class QACTLConfigGenerator:
         vm_name = f"{test_name}_{get_current_timestamp()}".replace('.', '_')
         self.config['deployment'][f"host_{host_number}"] = {
             'provider': {
-                'vagrant': self.__add_instance(os_version, vm_name, components, os_platform)
+                'vagrant': self.__add_instance(os_version, vm_name, targets, os_platform)
             }
         }
         # Add manager if the target is an agent
-        if components == 'agent':
+        if targets == 'agent':
             host_number += 1
             self.config['deployment'][f"host_{host_number}"] = {
                 'provider': {
@@ -397,10 +408,10 @@ class QACTLConfigGenerator:
                         raise QAValueError(f"No valid system was found for {test['name']} test",
                                            QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
 
-                    components = 'manager' if 'manager' in test['components'] else 'agent'
+                    targets = 'manager' if 'manager' in test['targets'] else 'agent'
                     os_platform = 'windows' if 'Windows' in os_version else 'linux'
 
-                    self.__add_deployment_config_block(test['test_name'], os_version, components, os_platform)
+                    self.__add_deployment_config_block(test['test_name'], os_version, targets, os_platform)
 
         # If system parameter is specified and have values
         elif isinstance(self.systems, list) and len(self.systems) > 0:
@@ -409,9 +420,9 @@ class QACTLConfigGenerator:
                     if self.__validate_test_info(test):
                         version = self.SYSTEMS[system]['os_version']
                         platform = self.SYSTEMS[system]['os_platform']
-                        component = 'manager' if 'manager' in test['components'] and platform == 'linux' else 'agent'
+                        targets = 'manager' if 'manager' in test['targets'] and platform == 'linux' else 'agent'
 
-                        self.__add_deployment_config_block(test['test_name'], version, component, platform)
+                        self.__add_deployment_config_block(test['test_name'], version, targets, platform)
         else:
             raise QAValueError('Unable to process systems in the automatically generated configuration',
                                QACTLConfigGenerator.LOGGER.error, QACTL_LOGGER)
@@ -521,9 +532,8 @@ class QACTLConfigGenerator:
             system = QACTLConfigGenerator.BOX_INFO[vm_box]['system']
 
             system = 'linux' if system == 'deb' or system == 'rpm' else system
-            modules = copy.deepcopy(test['modules'])
+            modules = copy.deepcopy(test['components'])
             component = self.config['provision']['hosts'][instance]['wazuh_deployment']['target']
-
             # Cut out the full path, and convert it to relative path (tests/integration....)
             test_path = re.sub(r".*wazuh-qa.*(tests.*)", r"\1", test['path'])
             # Convert test path string to the corresponding according to the system

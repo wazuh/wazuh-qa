@@ -13,6 +13,7 @@ from wazuh_testing.qa_docs.lib.utils import clean_folder
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.qa_docs.lib.utils import get_file_path_recursively
 
 
 class DocGenerator:
@@ -277,12 +278,14 @@ class DocGenerator:
         complete_module_name = f"{module_name}.py"
         DocGenerator.LOGGER.info(f"Looking for {complete_module_name}")
 
-        for root, dirnames, filenames in os.walk(self.conf.project_path, topdown=True):
-            for filename in filenames:
-                if filename == complete_module_name:
-                    return os.path.join(root, complete_module_name)
+        if self.conf.test_types:
+            path_where_looks_for = os.path.join(self.conf.project_path, self.conf.test_types[0])
+            if self.conf.test_components:
+                path_where_looks_for = os.path.join(path_where_looks_for, self.conf.test_components[0])
+                if self.conf.test_suites:
+                    path_where_looks_for = os.path.join(path_where_looks_for, self.conf.test_suites[0])
 
-        return None
+        return get_file_path_recursively(complete_module_name, path_where_looks_for)
 
     def check_module_exists(self, path):
         """Check that a module exists within the modules path input.
