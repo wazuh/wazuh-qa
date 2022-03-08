@@ -432,15 +432,10 @@ def parse_data(args):
             docs = DocGenerator(Config(SCHEMA_PATH, args.tests_path, OUTPUT_PATH), OUTPUT_FORMAT)
             docs.run()
 
-<<<<<<< HEAD
-    if (args.test_types or args.test_components or args.test_modules) and not args.check_doc:
-=======
     if (args.test_types or args.test_components or args.test_modules) and not (args.check_doc or args.test_exist):
->>>>>>> c85360473a709feb62ce0fdae328c43718541424
         qadocs_logger.info('Running QADOCS')
         docs.run()
     elif args.test_modules and args.check_doc:
-        print('asdasd')
         docs.check_documentation()
 
 
