@@ -57,7 +57,7 @@
     agent_address: "192.168.0.1000"
   pre_existent_keys:
     - ""
-  expected_error: "ERROR: (4104): Invalid hostname: '192.168.0.1000'."
+  expected_error: "ERROR: Invalid IP address provided for sender IP."
   expected_fail:
     os: "any"
     reason: "Known Issue: Invalid adress is not checked. https://github.com/wazuh/wazuh/issues/4965"
@@ -288,3 +288,79 @@
   message:
     expected: "OSSEC A:'{host_name}' G:'group_1' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
+-
+  name: "Valid agent IPv6 address"
+  description: "Check a valid IPv6 agent_address configuration"
+  configuration:
+    agent_address: "02db:4660:46af:e523:d05e:a62e:4ca7:8e58"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}' IP:'02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58'\n"
+    response: "OSSEC K:'001 {host_name} 02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58 TopSecret'\n"
+-
+  name: "Valid compressed agent IPv6 address"
+  description: "Check a valid compressed IPv6 agent_address configuration"
+  configuration:
+    agent_address: "2001:db8:0:b::1A"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}' IP:'2001:0DB8:0000:000B:0000:0000:0000:001A'\n"
+    response: "OSSEC K:'001 {host_name} 2001:0DB8:0000:000B:0000:0000:0000:001A TopSecret'\n"
+-
+  name: "Invalid Agent IPv6 address double colon"
+  description: "Check an invalid agent_address with double colon in auto enrollment configuration"
+  configuration:
+    agent_address: "56FE::2159:5BBC::6594"
+  pre_existent_keys:
+    - ""
+  expected_error:
+     agent-auth: "ERROR: Invalid IP address provided for sender IP."
+     agent-enrollment: "ERROR: (4104): Invalid hostname: '56FE::2159:5BBC::6594'."
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 56FE::2159:5BBC::6594 TopSecret'\n"
+-
+  name: "Valid manager IPv6 address"
+  description: "Check a valid manager_address configuration"
+  ipv6: 'manager'
+  configuration:
+    manager_address: "::1"
+  pre_existent_keys:
+    - ""
+  message:
+    expected: "OSSEC A:'{host_name}'\n"
+    response: "OSSEC K:'001 {host_name} any TopSecret'\n"
+-
+  name: "Invalid long agent IPv6 address"
+  description: "Check an invalid agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA"
+  pre_existent_keys:
+    - ""
+  expected_error:
+    agent-auth: "ERROR: Invalid IP address provided for sender IP."
+    agent-enrollment: "ERROR: (4104): Invalid hostname: '11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA'."
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA:11AA TopSecret'\n"
+-
+  name: "Invalid Agent IPv6 address with words"
+  description: "Check an invalid agent_address in auto enrollment configuration"
+  configuration:
+    agent_address: "02db:4660:46af:invalid:d05e:a62e:4ca7:8e58"
+  pre_existent_keys:
+    - ""
+  expected_error:
+     agent-auth: "ERROR: Invalid IP address provided for sender IP."
+     agent-enrollment: "ERROR: (4104): Invalid hostname: '02db:4660:46af:invalid:d05e:a62e:4ca7:8e58'."
+  expected_fail:
+    os: "win32"
+    reason: "Known Issue: Invalid address is not checked. https://github.com/wazuh/wazuh/issues/4965"
+  message:
+    response: "OSSEC K:'001 {host_name} 02db:4660:46af:invalid:d05e:a62e:4ca7:8e58 TopSecret'\n"

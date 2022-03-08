@@ -114,7 +114,7 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'invalid_no_regex', 'invalid_scan', 'invalid_file_limit'})
 ])

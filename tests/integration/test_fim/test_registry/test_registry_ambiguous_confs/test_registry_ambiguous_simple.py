@@ -138,6 +138,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, sub_keys, is_key, name', [
     (key, (subkey_1, os.path.join(subkey_1, key_name)), True, "onekey"),
     (key, (subkey_2, os.path.join(subkey_2, key_name)), False, "other_value")

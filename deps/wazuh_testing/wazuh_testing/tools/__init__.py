@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -25,6 +25,11 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
+    GLOBAL_DB_PATH = None
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
 else:
 
@@ -58,6 +63,10 @@ else:
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
+    if sys.platform == 'sunos5':
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
+    else:
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
     try:
@@ -194,12 +203,6 @@ API_DAEMONS_REQUIREMENTS = [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_D
 DISABLE_MONITORD_ROTATE_LOG_OPTION = {'monitord.rotate_log': '0'}
 ANALYSISD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 AGENTD_LOCAL_INTERNAL_OPTIONS = {'agent.debug': '2', 'execd': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_MANAGER = {'syscheck.debug': '2',
-                                      'analysisd.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_UNIX = {'syscheck.debug': '2',
-                                         'agent.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
-FIM_LOCAL_INTERNAL_OPTIONS_AGENT_WINDOWS = {'syscheck.debug': '2',
-                                            'windows.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 GCLOUD_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2',
                                  'wazuh_modules.debug': '2'}.update(DISABLE_MONITORD_ROTATE_LOG_OPTION)
 LOGTEST_LOCAL_INTERNAL_OPTIONS = {'analysisd.debug': '2'}

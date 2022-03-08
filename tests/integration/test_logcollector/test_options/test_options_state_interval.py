@@ -81,6 +81,7 @@ from wazuh_testing.tools.services import control_service
 
 # Marks
 pytestmark = pytest.mark.tier(level=1)
+elapsed_time_modification = 1
 
 
 # Configuration
@@ -159,7 +160,7 @@ def test_options_state_interval(get_local_internal_options, file_monitoring):
             previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             while last_modification_time == previous_modification_time:
-                sleep(1)
+                sleep(elapsed_time_modification)
                 last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
             elapsed = last_modification_time - previous_modification_time
             if sys.platform == 'win32':

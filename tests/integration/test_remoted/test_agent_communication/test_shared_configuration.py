@@ -55,7 +55,7 @@ from time import sleep
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP, TCP_UDP
-from wazuh_testing.remote import check_push_shared_config
+from wazuh_testing.remote import check_push_shared_config, REMOTED_GLOBAL_TIMEOUT
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -154,6 +154,6 @@ def test_push_shared_config(get_configuration, configure_environment, remove_sha
     for protocol in protocols.split(","):
         agent = ag.Agent(**agent_info)
         # Sleep to avoid ConnectionRefusedError
-        sleep(1)
+        sleep(REMOTED_GLOBAL_TIMEOUT)
         sender = ag.Sender(agent_info['manager_address'], protocol=protocol)
         check_push_shared_config(agent, sender)

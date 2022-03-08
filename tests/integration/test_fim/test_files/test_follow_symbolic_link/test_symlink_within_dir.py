@@ -124,6 +124,7 @@ def extra_configuration_after_yield():
 
 # Tests
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply, checkers', [
     ({'symlink_within_directory'}, fim.REQUIRED_ATTRIBUTES[fim.CHECK_ALL] - {fim.CHECK_SIZE}),
 ])

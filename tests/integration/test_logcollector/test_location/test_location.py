@@ -86,7 +86,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
-date = datetime.date.today().strftime("%Y-%m-%d")
+date = datetime.date.today().strftime(r'%Y-%m-%d')
 
 file_structure = [
     {
@@ -129,7 +129,7 @@ parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'c*test.txt'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'LOG_FORMAT': 'syslog', 'PATH_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')},
-    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'), 'LOG_FORMAT': 'syslog'}
 ]
 
@@ -168,8 +168,8 @@ metadata = [
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')],
      'log_format': 'syslog', 'path_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'file_type': 'duplicated_file'},
-    {'location': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing', f'file.log-{date}')], 'log_format': 'syslog',
+    {'location': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'),
+     'files': [os.path.join(temp_dir, 'wazuh-testing', f"file.log-{date}")], 'log_format': 'syslog',
      'file_type': 'single_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', 'multiple')],
@@ -299,8 +299,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
 
             try:
                 wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' "
-                                                  f"message has not been produced")
-            except:                                      
+                                        error_message=f"The expected 'File limit has been reached' "
+                                                      f"message has not been produced")
+            except Exception:
                 if sys.platform == 'sunos5':
                     pytest.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/10751')

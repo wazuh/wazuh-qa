@@ -63,7 +63,7 @@ from urllib3.exceptions import InsecureRequestWarning
 import requests
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -99,14 +99,14 @@ def get_configuration(request):
     return request.param
 
 
-def test_local_ip_valid(get_configuration, configure_environment, restart_remoted):
+def test_local_ip_valid(get_configuration, configure_environment, restart_remoted, wait_for_remoted_start_log):
     '''
     description: Check if 'wazuh-remoted' can set 'local_ip' using different IPs without errors.
                  For this purpose, it uses the configuration from test cases and check if the cfg in ossec.conf matches
                  with the API response.
-    
+
     wazuh_min_version: 4.2.0
-    
+
     parameters:
         - get_configuration:
             type: fixture
@@ -117,26 +117,27 @@ def test_local_ip_valid(get_configuration, configure_environment, restart_remote
         - restart_remoted:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-    
+
     assertions:
         - Verify that remoted starts correctly.
         - Verify that the API query matches correctly with the configuration that ossec.conf contains.
         - Verify that the selected configuration is the same as the API response
-    
+
     input_description: A configuration template (test_basic_configuration_local_ip) is contained in an external YAML
                        file, (wazuh_basic_configuration.yaml). That template is combined with different test cases
                        defined in the module. Those include configuration settings for the 'wazuh-remoted' daemon and
                        agents info.
-    
+
     expected_output:
         - r'Started <pid>: .* Listening on port .*'
-        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the 
+        - r'API query '{protocol}://{host}:{port}/manager/configuration?section=remote' doesn't match the
           introduced configuration on ossec.conf.'
         - API query matches the cfg.
-    
+
     tags:
         - simulator
     '''
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cfg = get_configuration['metadata']
 
     # Check that API query return the selected configuration
