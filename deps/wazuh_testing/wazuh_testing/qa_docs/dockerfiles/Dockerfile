@@ -28,7 +28,7 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add - && \
     apt-get install wazuh-manager
 
 WORKDIR /
-RUN git clone https://github.com/wazuh/wazuh-qa -b 1864-qa-docs-fixes
+RUN git clone https://github.com/wazuh/wazuh-qa
 WORKDIR /wazuh-qa/
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt --ignore-installed
