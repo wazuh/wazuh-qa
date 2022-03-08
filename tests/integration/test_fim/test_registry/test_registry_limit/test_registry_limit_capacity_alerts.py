@@ -52,7 +52,7 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim_registry_file_limit
+    - fim_registry_limit
 '''
 import os
 import pytest
@@ -61,9 +61,10 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
-from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY, 
-    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_BACK_TO_NORMAL, 
-    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
+    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES, CB_REGISTRY_DB_BACK_TO_NORMAL,
+    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_SCHEDULED_SCAN_ENDED)
+from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 if platform == 'win32':
@@ -71,7 +72,7 @@ if platform == 'win32':
 
 # Marks
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
+pytestmark = [WINDOWS, TIER1]
 
 # Variables
 
@@ -82,11 +83,11 @@ scan_delay = 5
 
 # Configurations
 
-file_limit_list = ['100']
+registry_limit_list = ['100']
 
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
+                       apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
                        modes=['scheduled'])
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -105,8 +106,8 @@ def get_configuration(request):
 # Tests
 
 
-@pytest.mark.parametrize('percentage', [(80), (90), (0)])
-def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
+@pytest.mark.parametrize('percentage', [(80), (90), (0)]) # [(80), (90), (0)])
+def test_registry_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
@@ -143,7 +144,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
           exceeds the established threshold and viceversa.
         - Verify that FIM 'entries' events contain one unit more than the number of monitored values.
 
-    input_description: A test case (file_limit_registry_conf) is contained in external YAML file (wazuh_conf.yaml)
+    input_description: A test case (fim_registry_limit) is contained in external YAML file (wazuh_conf.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
                        with the percentages and the testing registry key to be monitored defined in this module.
 
@@ -156,7 +157,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
     tags:
         - scheduled
     '''
-    limit = int(get_configuration['metadata']['file_limit'])
+    limit = int(get_configuration['metadata']['registries'])
 
     NUM_REGS = int(limit * (percentage / 100)) + 1
 
@@ -177,7 +178,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=callback_detect_end_scan,
-                                error_message=ERR_MSG_FIM_INODE_ENTRIES)
+                                error_message=ERR_MSG_SCHEDULED_SCAN_ENDED)
 
         for i in range(limit):
             try:
@@ -193,17 +194,17 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
 
     if percentage >= 80:  # Percentages 80 and 90
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
+                                callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_CAPACITY),
                                 error_message=ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT).result()
 
     else:  # Database back to normal
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=generate_monitoring_callback(CB_FILE_LIMIT_BACK_TO_NORMAL),
+                                callback=generate_monitoring_callback(CB_REGISTRY_DB_BACK_TO_NORMAL),
                                 error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
-                                      error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
+                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
+                                      error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
 
     # We add 1 because of the key created to hold the values
-    assert entries == str(NUM_REGS + 1), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    assert entries == str(NUM_REGS), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

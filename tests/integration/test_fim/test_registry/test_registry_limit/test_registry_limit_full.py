@@ -51,23 +51,24 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim_registry_file_limit
+    - fim_registry_limit
 '''
 import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_FILE_LIMIT_CAPACITY,
-    ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
-    CB_COUNT_REGISTRY_FIM_ENTRIES, ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
+    ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+    CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
     ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 # Marks
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
+pytestmark = [WINDOWS, TIER1]
 
 # Variables
 test_reg = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
@@ -79,10 +80,10 @@ monitor_timeout = 40
 
 # Configurations
 
-file_limit_list = ['10']
+registry_limit_list = ['10']
 conf_params = {'WINDOWS_REGISTRY': test_reg}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list),
+                       apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
                        modes=['scheduled'])
 
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -111,7 +112,7 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'file_limit' tag.
@@ -142,7 +143,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
         - Verify that proper FIM events are generated while the database
           is in 'full database alert' mode.
 
-    input_description: A test case (file_limit_registry_conf) is contained in external YAML file (wazuh_conf.yaml)
+    input_description: A test case (fim_registry_limit) is contained in external YAML file (wazuh_conf.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
                        with the testing registry key to be monitored defined in this module.
 
@@ -155,8 +156,8 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
         - scheduled
     '''
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                             callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
-                                             error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
+                                             callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_CAPACITY),
+                                             error_message=ERR_MSG_DATABASE_FULL_ALERT).result()
 
     assert database_state == EXPECTED_DATABES_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
@@ -170,7 +171,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
                             error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_FIM_ENTRIES),
-                                      error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
+                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
+                                      error_message=ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES).result()
 
-    assert entries == str(get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    assert entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

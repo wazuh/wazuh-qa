@@ -1,7 +1,7 @@
 ---
 #conf 1
 - tags:
-  - file_limit_registry_conf
+  - fim_registry_limit
   apply_to_modules:
   - test_registry_limit_capacity_alerts
   - test_registry_limit_full
@@ -17,12 +17,12 @@
         value: WINDOWS_REGISTRY
         attributes:
         - arch: '64bit'
-    - file_limit:
+    - db_entry_limit:
         elements:
-        - enabled:
-            value: 'yes'
-        - entries:
-            value: FILE_LIMIT
+          - enabled:
+              value: 'yes'
+          - registries:
+              value: REGISTRIES
   - section: sca
     elements:
     - enabled:
