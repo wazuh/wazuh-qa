@@ -62,6 +62,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import recursive_directory_creation, remove_file, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing.tools.utils import validate_interval_format
 from wazuh_testing.modules import TIER0, LINUX, SERVER,  WAZUH_SERVICES_STOP, WAZUH_SERVICES_START
 
 
@@ -110,16 +111,6 @@ def restart_wazuh():
     """Restarts Wazuh."""
     control_service(WAZUH_SERVICES_STOP)
     control_service(WAZUH_SERVICES_START)
-
-
-def validate_interval_format(interval):
-    """Validate that the interval passed has the format in which the last digit is a letter from those passed and
-       the other characters are between 0-9"""
-    if interval=='':
-        return False
-    if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
-        return False
-    return True
 
 
 # Fixtures
