@@ -76,10 +76,23 @@ def configure_api_environment(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def clean_log_files(get_configuration, request):
+<<<<<<< HEAD
     """Reset the log files of the API."""
     log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
     for log_file in log_files:
         truncate_file(log_file)
+=======
+    """Reset the log files of the API and delete the rotated log files."""
+    def clean_log_files():
+        shutil.rmtree(os.path.join(WAZUH_PATH, 'logs', 'api'))
+        log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
+        for log_file in log_files:
+            truncate_file(log_file)
+
+    yield
+
+    clean_log_files()
+>>>>>>> fcddfc259... fix: clean_log_files fixed, it's now removing the files correctly. #2636
 
 
 @pytest.fixture(scope='module')
