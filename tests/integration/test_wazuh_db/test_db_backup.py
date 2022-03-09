@@ -52,8 +52,6 @@ references:
 tags:
     - wazuh_db
 '''
-
-
 import os
 import time
 
