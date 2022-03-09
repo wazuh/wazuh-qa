@@ -8,9 +8,10 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
-       when these files are modified. Specifically, these tests will check if the threshold
-       set in the 'file_limit' tag generates FIM events when the number of monitored entries
-       approaches this value.
+       when these files are modified. Specifically, these tests will check if FIM events are
+       generated while the database is close to for reaching the limit of entries to monitor 
+       set in the 'db_entry_limit'-'registries' tag.
+
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
@@ -44,8 +45,7 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled: implies a scheduled scan
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -70,33 +70,29 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 if platform == 'win32':
     import pywintypes
 
-# Marks
 
+# Marks
 pytestmark = [WINDOWS, TIER1]
 
-# Variables
 
+# Variables
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 scan_delay = 5
 
+
 # Configurations
-
 registry_limit_list = ['100']
-
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
                        apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
                        modes=['scheduled'])
-
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
-
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -104,9 +100,7 @@ def get_configuration(request):
 
 
 # Tests
-
-
-@pytest.mark.parametrize('percentage', [(80), (90), (0)]) # [(80), (90), (0)])
+@pytest.mark.parametrize('percentage', [(80), (90), (0)])
 def test_registry_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
                                    wait_for_fim_start):
     '''
@@ -117,15 +111,12 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                  the total and when the number is less than that percentage. Finally, the test will verify that, in
                  the FIM 'entries' event, the entries number is one unit more than the number of monitored values.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.4.0
 
     parameters:
         - percentage:
             type: int
             brief: Percentage of testing values to be created.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -149,10 +140,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                        with the percentages and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added' events)
-        - r'.*Sending DB .* full alert.'
-        - r'.*Sending DB back to normal alert.'
-        - r'.*Fim registry entries'
+        - r".*Registry database is (\d+)% full."
+        - r".*(The registry database status returns to normal)."
+        - r".*Fim registry value entries count: '(\d+)'"
 
     tags:
         - scheduled
@@ -202,9 +192,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                                 callback=generate_monitoring_callback(CB_REGISTRY_DB_BACK_TO_NORMAL),
                                 error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
-    entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    value_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
                                       error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
 
-    # We add 1 because of the key created to hold the values
-    assert entries == str(NUM_REGS), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    # Assert the number of value_entries matches the ammount that was generated.
+    assert value_entries == str(NUM_REGS), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
