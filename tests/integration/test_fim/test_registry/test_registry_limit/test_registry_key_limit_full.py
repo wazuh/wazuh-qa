@@ -106,10 +106,6 @@ def extra_configuration_before_yield():
     for key in (MONITORED_KEY, MONITORED_KEY_2):        
         reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key, KEY_WOW64_64KEY)
         reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-
-        #for i in range(0, NUM_REGS):
-        #    modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
-
         RegCloseKey(reg_handle)
 
 
