@@ -86,3 +86,52 @@
     elements:
       - disabled:
           value: 'yes'
+
+#conf 2
+- tags:
+  - fim_registry_limit
+  apply_to_modules:
+  - test_registry_key_limit_values
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: 5
+    - windows_registry:
+        value: WINDOWS_REGISTRY_1
+        attributes:
+        - arch: '64bit'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_2
+        attributes:
+        - arch: '64bit'
+    - windows_registry:
+        value: WINDOWS_REGISTRY_3
+        attributes:
+        - arch: '64bit'
+    - db_entry_limit:
+        elements:
+          - enabled:
+              value: 'yes'
+          - registries:
+              value: REGISTRIES
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
