@@ -58,8 +58,8 @@ tags:
 import os
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
-     REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, registry_parser, KEY_WOW64_64KEY, \
+    KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, CB_REGISTRY_LIMIT_CAPACITY,
     ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
     CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
@@ -113,18 +113,15 @@ def extra_configuration_before_yield():
 def test_registry_key_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
-                 'full database alert' mode for reaching the limit of entries to monitor set in the 'file_limit' tag.
-                 For this purpose, the test will monitor a key in which several testing values will be created
-                 until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
-                 when a new testing value is added to the monitored key. Finally, the test will verify that,
-                 in the FIM 'entries' event, the number of entries and monitored values match.
+                 'full database alert' mode for reaching the limit of entries to monitor set in the 'registries' option
+                 of the 'db_entry_limit' tag.
+                 For this purpose, the test will set the a limit of keys to monitor, and will  monitor a series of keys. 
+                 Then, it will try to add a new key and it will check if the FIM event 'full' is generated. Finally, the
+                 test will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
 
     wazuh_min_version: 4.4.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -146,9 +143,9 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending DB .* full alert.'
-        - r'.*The DB is full.*'
-        - r'.*Fim registry entries'
+        - r'.*Registry database is (\d+)% full.'
+        - r'.*Couldn't insert ('.*') entry into DB. The DB is full.*'
+        - r'.*Fim registry entries count:.*'
 
     tags:
         - scheduled
@@ -167,8 +164,8 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
     wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE),
                             error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
-    entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    key_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
                                       error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
 
-    assert entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    assert key_entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
