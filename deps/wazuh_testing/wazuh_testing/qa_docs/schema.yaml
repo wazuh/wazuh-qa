@@ -193,6 +193,7 @@ predefined_values:
     - audit_rules
     - authd
     - aws
+    - basic_configuration
     - brute_force_attack
     - cache
     - canonical
@@ -203,6 +204,7 @@ predefined_values:
     - config
     - cors
     - cpe
+    - cpe_helper
     - debian
     - debian_feeds
     - decoder
@@ -329,6 +331,7 @@ predefined_values:
     - rules
     - scan
     - scan_results
+    - scan_types
     - schedule
     - scheduled
     - session_error
