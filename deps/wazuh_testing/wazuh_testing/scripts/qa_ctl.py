@@ -343,7 +343,7 @@ def get_script_parameters():
                              'generated without running anything.')
 
     parser.add_argument('--run', '-r', action='store_true',
-                        help='Independent run method. The tests that the use specified will be run.')
+                        help='Independent run method. The tests that the user has specified will be run.')
 
     parser.add_argument('--test-types', type=str, action='store', required=False, nargs='+', dest='test_types',
                         default=['integration'],
