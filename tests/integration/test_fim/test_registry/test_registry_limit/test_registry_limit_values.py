@@ -8,11 +8,12 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
-       when these files are modified. Specifically, these tests will check if the FIM event
-       'maximum number of entries' has the correct value for the monitored entries limit of
-       the 'registries' option.
-       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
-       files for changes to the checksums, permissions, and ownership.
+       when these files are modified. Specifically, these tests will check that after having a
+       limit configured for the 'registries' option for 'db_entry_limit' of syscheck, it will
+       only monitor values up to the specified limit and any excess will not be monitored.
+
+       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
+       configured files for changes to the checksums, permissions, and ownership.
 
 tier: 1
 
@@ -44,8 +45,7 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled: implies a scheduled scan
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -61,38 +61,35 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_v
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_VALUE,
                                        ERR_MSG_REGISTRY_LIMIT_VALUES, CB_COUNT_REGISTRY_VALUE_ENTRIES,
-                                       ERR_MSG_FIM_REGISTRY_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
-                                       ERR_MSG_WRONG_FILE_LIMIT_VALUE,ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES,
-                                       CB_COUNT_REGISTRY_ENTRIES)
+                                       ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_FILE_LIMIT_VALUE,
+                                       ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
 
-# Marks
 
+# Marks
 pytestmark = [WINDOWS, TIER1]
 
-# Variables
 
+# Variables
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 monitor_timeout = 40
 
-# Configurations
 
-registry_limit_list = ['1', '1000']  # , '1000'
+# Configurations
+registry_limit_list = [10]
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
+                       apply_to_all=({'REGISTRIES': registry_elem} for registry_elem in registry_limit_list),
                        modes=['scheduled'])
-
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
 # Fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -100,29 +97,28 @@ def get_configuration(request):
 
 
 # Functions
-
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    reg1_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
-
-    RegCloseKey(reg1_handle)
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
+    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    # Add values to registry plus 1 values over the registry limit
+    for i in range(0, registry_limit_list[0] + 1):
+        modify_registry_value(reg_handle, f'value_{i}', REG_SZ, 'added')
+    RegCloseKey(reg_handle)
 
 
 # Tests
 def test_registry_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
-                 the maximum number of entries to monitor from the 'file_limit' option of FIM. For this purpose,
+    description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'registries' tag, which corresponds to
+                 the maximum number of entries to monitor from the 'db_entry_limit' option of FIM. For this purpose,
                  the test will monitor a key in which multiple testing values will be added. Then, it will check if
                  the FIM event 'maximum number of entries' is generated and has the correct value. Finally, the test
-                 will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
+                 will verify that, in the FIM 'values entries' event, the number of entries and monitored values match.
 
     wazuh_min_version: 4.2.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -142,31 +138,24 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
                        with the limits and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Maximum number of entries to be monitored'
-        - r'.*Fim registry entries'
+        - r".*Maximum number of registry values to be monitored: '(\d+)'"
+        - r".*Fim registry values entries count: '(\d+)'"
 
     tags:
         - scheduled
     '''
-    file_limit = get_configuration['metadata']['registries']
-    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-    # Add values to registry plus 10 values over the file limit
-    for i in range(0, int(file_limit) + 10):
-        modify_registry_value(reg1_handle, f'value_{i}', REG_SZ, 'added')
+    registry_limit = get_configuration['metadata']['registries']
     
     # Look for the file limit value has been configured
-    file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    registry_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_VALUE),
                                                error_message=ERR_MSG_REGISTRY_LIMIT_VALUES).result()
     # Compare that the value configured is correct
-    assert file_limit_value == get_configuration['metadata']['registries'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
+    assert registry_limit_value == str(registry_limit), ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
     # Get the ammount of entries monitored and assert they are the same as the limit and not over
-    entries = wazuh_log_monitor.start(timeout=monitor_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
-                                      error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
     value_entries = wazuh_log_monitor.start(timeout=monitor_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
                                       error_message=ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES).result()
     
-    assert entries + value_entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    assert value_entries == str(registry_limit), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
