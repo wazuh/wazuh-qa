@@ -114,4 +114,4 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
 
     finally:
         # Delete group of agent
-        delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+        delete_group_of_agents('wazuh-master', id_group, host_manager)
