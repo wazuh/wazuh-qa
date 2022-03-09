@@ -1021,7 +1021,10 @@ def clear_logs(get_configuration, request):
 @pytest.fixture(scope='function')
 def remove_backups(backups_path):
     "Creates backups folder in case it does not exist."
+    remove_file(backups_path)
     recursive_directory_creation(backups_path)
     os.chmod(backups_path, 0o777)
     yield
     remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
