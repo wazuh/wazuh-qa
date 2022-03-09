@@ -35,7 +35,7 @@ def clean_environment():
 
 
 @pytest.mark.parametrize("initial_status", ['active', 'disconnected'])
-@pytest.mark.parametrize("agent_target", test_infra_managers)
+@pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker1"])
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
