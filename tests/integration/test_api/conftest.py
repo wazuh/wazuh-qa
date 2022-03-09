@@ -116,13 +116,16 @@ def wait_for_start(get_configuration, request):
     # Wait for API to start
     log_file = API_LOG_FILE_PATH
     callback = callback_detect_api_start
-    try:
-        log_format = get_configuration.get('configuration')['logs']['format']
-        if log_format == 'json':
-            log_file = API_JSON_LOG_FILE_PATH
-            callback = callback_detect_api_start_json_format
-    except KeyError as e:
-        pass
+    if get_configuration is not None:
+        configuration = get_configuration.get('configuration')
+        if configuration is not None:
+            try:
+                log_format = configuration['logs']['format']
+                if log_format == 'json':
+                    log_file = API_JSON_LOG_FILE_PATH
+                    callback = callback_detect_api_start_json_format
+            except KeyError:
+                pass
     file_monitor = FileMonitor(log_file)
     file_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
