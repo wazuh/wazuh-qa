@@ -95,21 +95,23 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
 
-    # Create group with agent_groups
-    host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
+    try:
+        # Create group with agent_groups
+        host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
 
-    # Register agent with agent-auth
-    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target,
-                                                                host_manager, id_group)
+        # Register agent with agent-auth
+        agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target,
+                                                                    host_manager, id_group)
 
-    # Check that agent status is never_connected in cluster
-    check_agent_status(agent_id, agent_name, agent_ip, 'never_connected', host_manager, test_infra_managers)
+        # Check that agent status is never_connected in cluster
+        check_agent_status(agent_id, agent_name, agent_ip, 'never_connected', host_manager, test_infra_managers)
 
-    # Check that agent has group set to group_test on Managers
-    check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
+        # Check that agent has group set to group_test on Managers
+        check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
 
-    # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager)
+        # Check that agent has client key file
+        assert check_keys_file(test_infra_agents[0], host_manager)
 
-    # Delete group of agent
-    delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+    finally:
+        # Delete group of agent
+        delete_group_of_agents('wazuh-master', 'group_test', host_manager)
