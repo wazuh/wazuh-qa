@@ -157,12 +157,13 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
     assert database_state == EXPECTED_DATABES_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', KEY_WOW64_64KEY)
-    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', 0,
+                              KEY_ALL_ACCESS | KEY_WOW64_64KEY)
        
     RegCloseKey(reg_handle)
 
-    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE),
-                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
+    wazuh_log_monitor.start(timeout=monitor_timeout, error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
+                            callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE))
 
     key_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
