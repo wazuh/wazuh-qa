@@ -65,7 +65,7 @@ CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, 'etc', 'manager.cert')
 CRYPTO = "aes"
-SERVER_ADDRESS = 'localhost'
+SERVER_ADDRESS = '127.0.0.1'
 PROTOCOL = "tcp"
 
 test_metadata = [

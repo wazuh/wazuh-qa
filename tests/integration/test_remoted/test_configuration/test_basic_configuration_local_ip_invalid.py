@@ -50,7 +50,7 @@ import wazuh_testing.remote as remote
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -58,12 +58,16 @@ configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.ya
 
 # Set invalid local_ip configuration
 parameters = [
-    {'LOCAL_IP': '9.9.9.9'},
-    {'LOCAL_IP': '1.1.1.1'}
+    {'LOCAL_IP': '9.9.9.9', 'IPV6': 'no'},
+    {'LOCAL_IP': '1.1.1.1', 'IPV6': 'no'},
+    {'LOCAL_IP': '::ffff:909:909', 'IPV6': 'yes'},
+    {'LOCAL_IP': '::ffff:101:101', 'IPV6': 'yes'}
 ]
 metadata = [
-    {'local_ip': '9.9.9.9'},
-    {'local_ip': '1.1.1.1'}
+    {'local_ip': '9.9.9.9', 'ipv6': 'no'},
+    {'local_ip': '1.1.1.1', 'ipv6': 'no'},
+    {'local_ip': '::ffff:909:909', 'ipv6': 'yes'},
+    {'local_ip': '::ffff:101:101', 'ipv6': 'yes'}
 ]
 
 configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_local_ip", params=parameters,

@@ -8,7 +8,14 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
+<<<<<<< HEAD
 
+=======
+tier:
+    0
+modules:
+    - authd
+>>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 components:
     - agentd
 
@@ -17,7 +24,12 @@ targets:
 
 daemons:
     - wazuh-authd
+<<<<<<< HEAD
 
+=======
+path:
+    /tests/integration/test_enrollment/test_agent_auth_enrollment.py
+>>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 os_platform:
     - linux
     - windows
@@ -92,11 +104,16 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         "Check that different configuration generates the adequate enrollment message or the corresponding
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
+<<<<<<< HEAD
 
     wazuh_min_version: 4.2.0
 
     tier: 0
 
+=======
+    wazuh_min_version:
+        4.2.0
+>>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
     parameters:
         - configure_environment:
             type: fixture
@@ -150,9 +167,12 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
+        expected_error_dict = get_current_test_case['expected_error']
+        expected_error = expected_error_dict['agent-auth'] if 'agent-auth' in expected_error_dict else \
+                                                              expected_error_dict
         try:
             log_monitor.start(timeout=AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT,
-                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                              callback=make_callback(expected_error, prefix='.*',
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:

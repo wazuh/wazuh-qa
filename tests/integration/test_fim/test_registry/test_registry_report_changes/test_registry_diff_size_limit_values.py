@@ -77,7 +77,6 @@ test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-size_limit_configured = SIZE_LIMIT_CONFIGURED_VALUE
 scan_delay = 2
 
 # Configurations
@@ -178,7 +177,7 @@ def test_diff_size_limit_values(key, subkey, arch, value_name, size, get_configu
         assert os.path.exists(diff_file), '{diff_file} does not exist'
         assert event['data'].get('content_changes') is not None, ERR_MSG_CONTENT_CHANGES_EMPTY
 
-    if size > size_limit_configured:
+    if size > SIZE_LIMIT_CONFIGURED_VALUE:
         callback_test = report_changes_validator_no_diff
     else:
         callback_test = report_changes_validator_diff

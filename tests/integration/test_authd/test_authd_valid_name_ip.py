@@ -157,10 +157,5 @@ def test_authd_force_options(get_configuration, configure_environment, configure
             if time.time() > timeout:
                 raise ConnectionResetError('Manager did not respond to sent message!')
 
-        if stage.get('expected_fail') == 'yes':
-            with pytest.raises(Exception):
-                result, err_msg = validate_authd_response(response, stage['output'])
-                assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
-        else:
-            result, err_msg = validate_authd_response(response, stage['output'])
-            assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
+        result, err_msg = validate_authd_response(response, stage['output'])
+        assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
