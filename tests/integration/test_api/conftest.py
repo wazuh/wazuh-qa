@@ -3,17 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import glob
 import shutil
-from datetime import date
 
 import pytest
 from wazuh_testing.api import callback_detect_api_start, callback_detect_api_start_json_format, get_api_details_dict
 from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF, \
     WAZUH_PATH
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
-from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, delete_path_recursively, \
-    set_file_owner_and_group
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
@@ -112,13 +109,16 @@ def wait_for_start(get_configuration, request):
     # Wait for API to start
     log_file = API_LOG_FILE_PATH
     callback = callback_detect_api_start
-    try:
-        log_format = get_configuration.get('configuration')['logs']['format']
-        if log_format == 'json':
-            log_file = API_JSON_LOG_FILE_PATH
-            callback = callback_detect_api_start_json_format
-    except KeyError as e:
-        pass
+    if get_configuration is not None:
+        configuration = get_configuration.get('configuration')
+        if configuration is not None:
+            try:
+                log_format = configuration['logs']['format']
+                if log_format == 'json':
+                    log_file = API_JSON_LOG_FILE_PATH
+                    callback = callback_detect_api_start_json_format
+            except KeyError:
+                pass
     file_monitor = FileMonitor(log_file)
     file_monitor.start(timeout=20, callback=callback,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
