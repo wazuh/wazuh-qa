@@ -37,7 +37,7 @@ os_version:
     - Red Hat 7
     - Red Hat 6
 references:
-    - https://github.com/wazuh/wazuh-qa/issues/2508
+    - https://github.com/wazuh/wazuh-qa/issues/2513
 tags:
     - cluster
 """
@@ -76,7 +76,7 @@ def clean_environment():
     remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
 
 
-@pytest.mark.parametrize("agent_target", ['wazuh-worker1'])
+@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
 def test_assign_agent_to_a_group(agent_target, clean_environment):
     '''
     description: Check that when an agent with status never_connected, pointing to a master/worker node is
