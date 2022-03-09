@@ -2,7 +2,6 @@ import datetime
 from time import time
 
 from wazuh_testing.db_interface import query_wdb
-from wazuh_testing.modules.vulnerability_detector import DEFAULT_PACKAGE_NAME
 
 
 def clean_table(agent_id, table):
@@ -17,13 +16,24 @@ def clean_table(agent_id, table):
 
 
 def update_last_full_scan(last_scan=0, agent_id='000'):
-    """Update the last scan of an agent.
+    """Update the last full scan of an agent.
 
     Args:
         last_scan (int): Last scan ID. This is compute by casting to int the result of time().
         agent_id (str): Agent ID.
     """
     query_string = f"agent {agent_id} sql UPDATE vuln_metadata SET LAST_FULL_SCAN={last_scan}"
+    query_wdb(query_string)
+
+
+def update_last_partial_scan(last_scan=0, agent_id='000'):
+    """Update the last partial scan of an agent.
+
+    Args:
+        last_scan (int): Last scan ID. This is compute by casting to int the result of time().
+        agent_id (str): Agent ID.
+    """
+    query_string = f"agent {agent_id} sql UPDATE vuln_metadata SET LAST_PARTIAL_SCAN={last_scan}"
     query_wdb(query_string)
 
 
@@ -44,9 +54,10 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
 
 
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x86_64', os_name='CentOS Linux', os_version='8.4', os_major='8',
-                   os_minor='4', os_build='', version='', os_release='', os_patch='', release='',
-                   checksum='dummychecksum'):
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   reference=''):
     """Insert the OS information in the agent database.
 
     Args:
@@ -57,28 +68,36 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
         architecture (str): Architecture of the host.
         os_name (str): Complete name of the OS.
         os_version (str): Version of the OS.
+        os_codename (str): OS codename.
         os_major (str): Major version of the OS.
         os_minor (str): Minor version of the OS.
+        os_patch (str): Current patch of the OS.
         os_build (str): Build id of the OS.
+        os_platform (str): OS platform.
+        sysname (str): System name.
+        release (str): Release of the OS.
         version (str): Version of the OS.
         os_release (str): Release of the OS.
-        os_patch (str): Current patch of the OS.
-        release (str): Release of the OS.
         checksum (str): Checksum of the OS.
+        os_display_version (str): Os displayed version
+        triaged (int): Triaged.
+        reference (str): OS reference.
     """
     query_string = f"agent {agent_id} sql INSERT OR REPLACE INTO sys_osinfo (scan_id, scan_time, hostname, " \
-                   'architecture, os_name, os_version, os_major, os_minor, os_patch, os_build, release, version, ' \
-                   f"os_release, checksum) VALUES ('{scan_id}', '{scan_time}', '{hostname}', '{architecture}', " \
-                   f"'{os_name}', '{os_version}', '{os_major}', '{os_minor}', '{os_patch}', '{os_build}', " \
-                   f"'{release}', '{version}', '{os_release}', '{checksum}')"
+                   'architecture, os_name, os_version, os_codename, os_major, os_minor, os_patch, os_build, ' \
+                   'os_platform, sysname, release, version, os_release, os_display_version, checksum, reference, ' \
+                   f"triaged) VALUES ({scan_id}, '{scan_time}', '{hostname}', '{architecture}', '{os_name}', " \
+                   f"'{os_version}', '{os_codename}', '{os_major}', '{os_minor}', '{os_patch}', '{os_build}', " \
+                   f"'{os_platform}', '{sysname}', '{release}', '{version}', '{os_release}', '{os_display_version}', " \
+                   f"'{checksum}', '{reference}', {triaged})"
+
     query_wdb(query_string)
 
 
-def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=DEFAULT_PACKAGE_NAME,
-                   priority='', section='Unspecified', size=99, vendor='wazuhintegrationtests', version='1.0.0-1.el7',
-                   architecture='x86_64', multiarch='', description='Wazuh Integration tests mock package',
-                   source='Wazuh Integration tests mock package', location='', triaged=0,
-                   install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='custom-package-0',
+                   priority='', section='Unspecified', size=99, vendor='wazuh-mocking', version='1.0.0-1.el7',
+                   architecture='x64', multiarch='', description='Wazuh mocking packages', source='Wazuh QA tests',
+                   location='', triaged=0, install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), checksum='dummychecksum',
                    item_id='dummyitemid'):
     """Insert a package in the agent DB.
@@ -118,7 +137,6 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name=DEFAU
               f"{arguments['architecture']}, {arguments['multiarch']}, {arguments['source']}, "
               f"{arguments['description']}, {arguments['location']}, {arguments['triaged']}, {arguments['checksum']},"
               f"{arguments['item_id']})")
-
 
 def update_sync_info(agent_id='000', component='syscollector-packages', last_attempt=1, last_completion=1,
                      n_attempts=0, n_completions=0, last_agent_checksum=''):
@@ -197,53 +215,37 @@ def delete_os_info(agent_id='000'):
 
 
 def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x86_64', os_name='CentOS Linux', os_version='8.4', os_major='8',
-                   os_minor='4', os_build='', version='', os_release='', os_patch='', release='',
-                   checksum='dummychecksum'):
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   reference=''):
     """Update the sys_osinfo data from a specific agent.
 
     Args:
         agent_id (str): Agent ID.
+        scan_id (int): Id of the last scan.
+        scan_time (str): Date of the scan with this format "%Y/%m/%d %H:%M:%S".
+        hostname (str): Name of the host.
+        architecture (str): Architecture of the host.
+        os_name (str): Complete name of the OS.
+        os_version (str): Version of the OS.
+        os_codename (str): OS codename.
+        os_major (str): Major version of the OS.
+        os_minor (str): Minor version of the OS.
+        os_patch (str): Current patch of the OS.
+        os_build (str): Build id of the OS.
+        os_platform (str): OS platform.
+        sysname (str): System name.
+        release (str): Release of the OS.
+        version (str): Version of the OS.
+        os_release (str): Release of the OS.
+        checksum (str): Checksum of the OS.
+        os_display_version (str): Os displayed version
+        triaged (int): Triaged.
+        reference (str): OS reference.
     """
     delete_os_info(agent_id)
     insert_os_info(**locals())
-
-
-def check_vulnerability_scan_inventory(agent_id, package, version, arch, cve, condition, severity='-', cvss2=0,
-                                       cvss3=0):
-    """Check the existence or lack of a vulnerability in the agent's DB.
-
-    Args:
-        agent_id (str): Agent ID.
-        package (str): Package name.
-        version (str): Package version.
-        arch (str): Package architecture.
-        cve (str): Vulnerability ID associated to the vulnerable package.
-        condition (str): This parameter is used to check if the vulnerability exists ('inserted') or
-                         not ('removed') in the inventory.
-        severity (str): Vulnerability severity.
-        cvss2 (str): CVSS2 score of the vulnerable package.
-        cvss3 (str): CVSS3 score of the vulnerable package.
-
-    Raises:
-        Exception: If the condition has unexpected value.
-    """
-    if condition != 'inserted' and condition != 'removed':
-        raise Exception(f'The "condition" parameter has an unexpected value: {condition}')
-
-    if condition == 'inserted':
-        query = f"agent {agent_id} sql SELECT CASE WHEN EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' AND " \
-                f"name = '{package}' AND version = '{version}' AND architecture = '{arch} AND severity = ' " \
-                f"'{severity}' AND cvss2_score = {cvss2} AND cvss3_score = {cvss3}) THEN 'true' ELSE 'false' END " \
-                "as 'result'"
-    else:
-        query = f"agent {agent_id} sql SELECT CASE WHEN NOT EXISTS (select 1 FROM vuln_cves WHERE cve = '{cve}' " \
-                f"AND name = '{package}' AND version = '{version}' AND architecture = '{arch}')  THEN 'true' " \
-                f"ELSE 'false' END as 'result'"
-
-    result = query_wdb(query)[0]['result']
-
-    return result
 
 
 def clean_sys_programs(agent_id='000'):
@@ -253,3 +255,100 @@ def clean_sys_programs(agent_id='000'):
         agent_id (str): Agent ID.
     """
     clean_table(agent_id, 'sys_programs')
+
+
+def get_vulnerability_status(agent_id='000', package=''):
+    """Check the status of a vulnerability in the agent database table.
+
+    Args:
+        agent_id (str): Agent ID.
+        package (str): Package to be checked.
+    """
+    query = f"agent {agent_id} sql SELECT status FROM vuln_cves WHERE name = '{package}'"
+
+    result = query_wdb(query)[0]['status']
+
+    return result
+
+
+def get_packages_number(agent_id='000', package=''):
+    """Check the number of packages in the agent database table.
+
+    Args:
+        agent_id (str): Agent ID.
+        package (str): Package to be checked.
+    """
+    query = f"agent {agent_id} sql SELECT count(*) FROM sys_programs WHERE name = '{package}'"
+
+    result = query_wdb(query)[0]['count(*)']
+
+    return result
+
+
+def get_vulnerability_inventory_data(agent_id='000', name=None, status=None, cve=None, version=None, type=None,
+                                     architecture=None, severity=None, cvss2_score=None, cvss3_score=None):
+    """Get the vulnerability inventory data according to the specified parameters.
+
+    Args:
+        agent_id (str): Agent ID.
+        name (str): Vulnerability name.
+        status (str): Vulnerability status.
+        cve (str): Vulnerability CVE.
+        version (str): Version.
+        type (str): Vulnerability type.
+        architecture (str): Architecture.
+        severity (str): Vulnerability severity.
+        cvss2_score (float): CVSS2 score.
+        cvss3_score (float): CVSS3 score
+
+    Returns:
+        list(dict): Data in the DB.
+
+    """
+    # Build a dictionary with local variables
+    query_parameters = locals()
+
+    # Remove non query parameters
+    del query_parameters['agent_id']
+
+    # Define the initial query string
+    query = f"agent {agent_id} sql SELECT * FROM vuln_cves"
+
+    # Build the query string according to the specified parameters
+    first_parameter = True
+    for item, value in query_parameters.items():
+        if value is not None:
+            formated_value = f"'{value}'" if isinstance(value, str) else value
+
+            if first_parameter:
+                query += f" WHERE {item}={formated_value}"
+                first_parameter = False
+            else:
+                query += f" AND {item}={formated_value}"
+
+    return query_wdb(query)
+
+
+def insert_vulnerability_in_agent_inventory(agent_id='000', name='', status='PENDING', cve='', version='',
+                                            type='PACKAGE', architecture='', severity='-', cvss2_score=0,
+                                            cvss3_score=0, reference='', detection_time=''):
+    """Insert a vulnerability in the agent vulnerabilities inventory.
+
+    Args:
+        agent_id (str): Agent ID.
+        name (str): Vulnerability name.
+        status (str): Vulnerability status.
+        cve (str): Vulnerability CVE.
+        version (str): Version.
+        type (str): Vulnerability type.
+        architecture (str): Architecture.
+        severity (str): Vulnerability severity.
+        cvss2_score (float): CVSS2 score.
+        cvss3_score (float): CVSS3 score
+        reference (str): Vulnerability reference.
+        detection_time (str): Vulnerability detection time.
+    """
+    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, reference, " \
+              f"type, status, severity, cvss2_score, cvss3_score, detection_time) VALUES ('{name}', '{version}', " \
+              f"'{architecture}', '{cve}', '{reference}', '{type}', '{status}', '{severity}', {cvss2_score}, " \
+              f"{cvss3_score}, '{detection_time}')")

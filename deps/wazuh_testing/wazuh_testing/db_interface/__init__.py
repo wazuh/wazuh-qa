@@ -26,13 +26,11 @@ def query_wdb(command):
             retry = 0
             # Wait if the wdb socket is not still alive (due to wazuh-db restarts). Max 3 seconds
             while not os.path.exists(WAZUH_DB_SOCKET_PATH) and retry < max_retries:
-                print("Retrying ...")
                 sleep(0.5)
                 retry += 1
 
             # Restart wazuh-db in case of wdb socket is not yet up.
             if not os.path.exists(WAZUH_DB_SOCKET_PATH):
-                print("Restarting wazuh-db ...")
                 control_service('restart', daemon='wazuh-db')
 
         # Raise custom exception if the socket is not up in the expected time, even restarting wazuh-db
@@ -114,7 +112,6 @@ def make_sqlite_query(db_path, query_list):
 
         db_connection.commit()
     finally:
-        cursor.close()
         db_connection.close()
         control_service('start', daemon='wazuh-db')
 
@@ -133,18 +130,19 @@ def get_sqlite_query_result(db_path, query):
 
     try:
         db_connection = sqlite3.connect(db_path)
-        cursor = db_connection.cursor()
+        try:
+            cursor = db_connection.cursor()
 
-        execute_sqlite_query(cursor, query)
-        records = cursor.fetchall()
-        result = []
+            execute_sqlite_query(cursor, query)
+            records = cursor.fetchall()
+            result = []
 
-        for row in records:
-            result.append(', '.join([f"{item}" for item in row]))
+            for row in records:
+                result.append(', '.join([f"{item}" for item in row]))
 
-        return result
-
+            return result
+        finally:
+            cursor.close()
     finally:
-        cursor.close()
         db_connection.close()
         control_service('start', daemon='wazuh-db')

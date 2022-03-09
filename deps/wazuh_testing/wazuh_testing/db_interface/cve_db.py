@@ -1,6 +1,5 @@
 from datetime import datetime
 from time import sleep
-from sqlite3 import OperationalError
 
 from wazuh_testing import CVE_DB_PATH
 from wazuh_testing.db_interface import make_sqlite_query, get_sqlite_query_result
@@ -17,7 +16,7 @@ def _get_rows_number(cve_table):
         int: Number of rows.
     """
     query_string = f"SELECT count(*) from {cve_table}"
-    query_result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+    query_result = get_sqlite_query_result(CVE_DB_PATH, query_string)
     rows_number = int(query_result[0])
 
     return rows_number
@@ -29,7 +28,7 @@ def get_tables():
     Returns:
         list(str): Table names.
     """
-    return get_sqlite_query_result(vd.CVE_DB_PATH, "SELECT name FROM sqlite_master WHERE type='table';")
+    return get_sqlite_query_result(CVE_DB_PATH, "SELECT name FROM sqlite_master WHERE type='table';")
 
 
 def clean_table(table):
@@ -57,8 +56,8 @@ def clean_all_cve_tables():
     make_sqlite_query(CVE_DB_PATH, query)
 
 
-def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', target_minor='',
-                         package=vd.DEFAULT_PACKAGE_NAME, operation='less than', operation_value='2.0.0-1.el7',
+def insert_vulnerability(cveid='CVE-000', target='RHEL7', target_minor='',
+                         package='custom-package-0', operation='less than', operation_value='2.0.0-1.el7',
                          title='', severity='critical',
                          published=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"), updated='',
                          reference='https://github.com/wazuh/wazuh-qa', target_v='REDHAT', cvss='10.000000',
@@ -106,7 +105,7 @@ def insert_vulnerability(cveid=vd.DEFAULT_VULNERABILITY_ID, target='RHEL7', targ
         f"INSERT INTO ADVISORIES_INFO (id, target, advisory) VALUES ('{cveid}', '{ref_target}', '{advisory}')"
     ]
 
-    make_sqlite_query(vd.CVE_DB_PATH, queries)
+    make_sqlite_query(CVE_DB_PATH, queries)
 
 
 def delete_vulnerability(cveid):
@@ -123,7 +122,7 @@ def delete_vulnerability(cveid):
         f"DELETE FROM ADVISORIES_INFO WHERE id='{cveid}'"
     ]
 
-    make_sqlite_query(vd.CVE_DB_PATH, queries)
+    make_sqlite_query(CVE_DB_PATH, queries)
 
 
 def get_provider_feeds_number():
@@ -161,29 +160,18 @@ def modify_metadata_vuldet_feed(feed, timestamp):
         timestamp (str): Timestamp value to set.
     """
     query_string = f"update METADATA set TIMESTAMP='{timestamp}' where TARGET='{feed}'"
-    make_sqlite_query(vd.CVE_DB_PATH, [query_string])
+    make_sqlite_query(CVE_DB_PATH, [query_string])
     sleep(1)
 
 
-def modify_nvd_metadata_vuldet(timestamp):
+def update_nvd_metadata_vuldet(timestamp):
     """Update the timestamp value of the nvd_metadata table.
 
     Args:
         timestamp (int): The new timestamp value to set.
-
-    Raises:
-        sqlite3.OperationalError: If could not update the value.
     """
     query_string = f"UPDATE NVD_METADATA SET LAST_UPDATE={timestamp};"
-
-    for _ in range(vd.VULN_DETECTOR_GLOBAL_TIMEOUT):
-        try:
-            make_sqlite_query(vd.CVE_DB_PATH, [query_string])
-            break
-        except OperationalError:
-            sleep(1)
-    else:
-        raise OperationalError
+    make_sqlite_query(CVE_DB_PATH, [query_string])
 
 
 def check_inserted_value_exists(table, column, value):
@@ -199,7 +187,43 @@ def check_inserted_value_exists(table, column, value):
     """
     custom_value = f"'{value}'" if type(value) == str else value
     query_string = f"SELECT count(*) FROM {table} WHERE {column}={custom_value}"
-    result = get_sqlite_query_result(vd.CVE_DB_PATH, query_string)
+    result = get_sqlite_query_result(CVE_DB_PATH, query_string)
     rows_number = int(result[0])
 
     return rows_number > 0
+
+
+def get_metadata_timestamp(provider_os):
+    """Get the timestamp data for a specific provider_os from metadata table.
+
+    Args:
+        provider_os (str): Provider OS. (example: TRUSTY)
+
+    Returns:
+        str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
+    """
+    query_string = f"SELECT timestamp FROM metadata WHERE target='{provider_os}'"
+    result = get_sqlite_query_result(CVE_DB_PATH, query_string)
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
+
+
+def get_nvd_metadata_timestamp(year):
+    """Get the NVD timestamp data for a specific year from nvd_metadata table.
+
+    Args:
+        year (int): NVD feed year. (example: 2022)
+
+    Returns:
+        str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
+    """
+    query_string = f"SELECT timestamp FROM nvd_metadata WHERE year={year}"
+    result = get_sqlite_query_result(CVE_DB_PATH, query_string)
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
