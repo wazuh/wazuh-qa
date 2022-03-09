@@ -44,8 +44,7 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
+        scheduled: implies a scheduled scan
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -63,7 +62,7 @@ from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY
                                        CB_REGISTRY_LIMIT_VALUE, ERR_MSG_REGISTRY_LIMIT_VALUES, CB_COUNT_REGISTRY_ENTRIES,
                                        ERR_MSG_FIM_REGISTRY_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
                                        ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE,ERR_MSG_FIM_REGISTRY_ENTRIES,
-                                       CB_COUNT_REGISTRY_ENTRIES, CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES)
+                                       CB_COUNT_REGISTRY_ENTRIES)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
@@ -116,18 +115,16 @@ def extra_configuration_before_yield():
 # Tests
 def test_registry_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'entries' tag, which corresponds to
-                 the maximum number of entries to monitor from the 'file_limit' option of FIM. For this purpose,
-                 the test will monitor a key in which multiple testing values will be added. Then, it will check if
-                 the FIM event 'maximum number of entries' is generated and has the correct value. Finally, the test
-                 will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
+    description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'registries' tag, which corresponds to
+                 the maximum number of entries to monitor from the 'db_entries_limit' option of FIM. For this purpose,
+                 the test will monitor three keys, and the limit for registries to monitor, will change. Then it will
+                 check that the FIM event 'maximum number of entries' generated has the correct value of registries. 
+                 Finally, the test will verify that, in the FIM 'entries' event, the number of entries and monitored 
+                 values match.
 
     wazuh_min_version: 4.4.0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -147,8 +144,8 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
                        with the limits and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Maximum number of entries to be monitored'
-        - r'.*Fim registry entries'
+        - r".Maximum number of registry values to be monitored: '(\d+)'"
+        - r".*Fim registry entries count: '(\d+)'"
 
     tags:
         - scheduled
@@ -173,10 +170,4 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
                                       callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
                                       error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
     
-    assert key_entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
-    
-    value_entries = wazuh_log_monitor.start(timeout=monitor_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
-                                      error_message=ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES).result()
-    
-    assert value_entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES
+    assert key_entries == registry_limit, ERR_MSG_WRONG_NUMBER_OF_ENTRIES
