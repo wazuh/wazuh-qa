@@ -76,12 +76,26 @@ def get_agent_id(token, agent_name):
     Returns:
         str: Agent ID.
     """
-    agent_id = hm.make_api_call(host=test_hosts[0], token=token, method='GET', endpoint=f'/agents?name={agent_name}')
-    assert agent_id['status'] == 200, f'Failed trying to get ID of agent {agent_name}'
+    agent_id = hm.make_api_call(host=test_hosts[0], token=token, method='GET', endpoint=f"/agents?name={agent_name}")
+    assert agent_id['status'] == 200, f"Failed trying to get ID of agent {agent_name}"
     return agent_id['json']['data']['affected_items'][0]['id']
 
 
 # Fixtures
+
+@pytest.fixture(scope='module', autouse=True)
+def agent_healthcheck():
+    """Check if all agents are active."""
+    for _ in range(10):
+        result = hm.make_api_call(host=test_hosts[0], token=token, method='GET', endpoint=f'/agents?status=active')
+        if result.get('json', {}).get('data', {}).get('total_affected_items', 0) == 4:
+            break
+        sleep(5)
+    else:
+        pytest.fail('Not all agents are active.')
+
+    yield
+
 
 @pytest.fixture(scope='module', autouse=True)
 def clean_files():
@@ -90,13 +104,14 @@ def clean_files():
         for agent_name, groups in agent_groups.items():
             # Remove any pre-existing group.
             hm.make_api_call(host=test_hosts[0], token=hm.get_api_token(test_hosts[0]), method='DELETE',
-                             endpoint=f'/groups?groups_list={",".join(groups[1:])}')
+                             endpoint=f"/groups?groups_list={','.join(groups[1:])}")
 
             # Remove any pre-existing multigroup (just in case they weren't removed after deleting the group).
+            mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
             for host in test_hosts:
-                if (mg_path := os.path.join(mg_folder_path, calculate_mg_name(groups))) == '':
+                if hm.run_shell(host, f"ls {mg_path}") == '':
                     break
-                hm.run_shell(host, cmd=f'rm -rf {mg_path}')
+                hm.run_shell(host, cmd=f"rm -rf {mg_path}")
 
     remove_files()
     yield
@@ -119,22 +134,22 @@ def test_create_multigroups():
             # Create group.
             response = hm.make_api_call(host=test_hosts[0], token=token, method='POST', endpoint='/groups',
                                         request_body={'group_id': group})
-            assert response['status'] == 200, f'Failed to create {group} group: {response}'
+            assert response['status'] == 200, f"Failed to create {group} group: {response}"
 
             # Check that the multigroup folder does not exist yet.
             sleep(time_to_update)
             mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups[:idx+1]))
-            assert '' == hm.run_shell(test_hosts[0], f'ls {mg_path}'), f'{mg_path} should not exist, but it does.'
+            assert '' == hm.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should not exist, but it does."
 
             # Assign agent to group.
             agent_id = get_agent_id(token=token, agent_name=agent_name)
             response = hm.make_api_call(host=test_hosts[0], token=token, method='PUT',
-                                        endpoint=f'/agents/{agent_id}/group/{group}')
-            assert response['status'] == 200, f'Failed to add {agent_name} ({agent_id}) to group: {response}'
+                                        endpoint=f"/agents/{agent_id}/group/{group}")
+            assert response['status'] == 200, f"Failed to add {agent_name} ({agent_id}) to group: {response}"
 
             # Check that the multigroup folder exists.
             sleep(time_to_update)
-            assert '' != hm.run_shell(test_hosts[0], f'ls {mg_path}'), f'{mg_path} should exist, but it does not.'
+            assert '' != hm.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should exist, but it does not."
 
 
 def test_multigroups_not_reloaded():
@@ -182,7 +197,7 @@ def test_multigroups_updated(target_group):
     host_files = get_mtime(folders_to_check)
 
     # Add new file to any group of agent1.
-    filename = f'new_file_{target_group}'
+    filename = f"new_file_{target_group}"
     group_content = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
     group_path = os.path.join(shared_folder_path, target_group)
     hm.modify_file_content(test_hosts[0], path=os.path.join(group_path, filename), content=group_content)
@@ -203,7 +218,7 @@ def test_multigroups_updated(target_group):
                         assert mtime != host_files[host][file], f"This file should have changed in {host}: {file}"
                     except KeyError:
                         assert os.path.basename(file) == filename
-                        assert group_content == hm.run_command(host, f'cat {file}'), f"The new file content is not " \
+                        assert group_content == hm.run_command(host, f"cat {file}"), f"The new file content is not " \
                                                                                      f"the expected in {file}"
                     break
             else:
@@ -219,7 +234,7 @@ def test_multigroups_deleted():
     for agent_name, groups in agent_groups.items():
         # Check that multigroups exists for each agent.
         mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
-        assert '' != hm.run_shell(test_hosts[0], f'ls {mg_path}'), f'{mg_path} should exist, but it does not.'
+        assert '' != hm.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should exist, but it does not."
         agent_id = get_agent_id(token=token, agent_name=agent_name)
 
         for group in groups:
@@ -229,15 +244,15 @@ def test_multigroups_deleted():
             if agent_name == 'wazuh-agent1':
                 # Unassign agent.
                 response = hm.make_api_call(host=test_hosts[0], token=token, method='DELETE',
-                                            endpoint=f'/agents/{agent_id}/group/{group}')
-                assert response['status'] == 200, f'Failed when unassigning {agent_name} agent from ' \
-                                                  f'group {group}: {response}'
+                                            endpoint=f"/agents/{agent_id}/group/{group}")
+                assert response['status'] == 200, f"Failed when unassigning {agent_name} agent from " \
+                                                  f"group {group}: {response}"
             else:
                 # Delete group.
                 response = hm.make_api_call(host=test_hosts[0], token=token, method='DELETE',
-                                            endpoint=f'/groups?groups_list={group}')
-                assert response['status'] == 200, f'Failed to delete {group} group: {response}'
+                                            endpoint=f"/groups?groups_list={group}")
+                assert response['status'] == 200, f"Failed to delete {group} group: {response}"
 
         # Check that multigroups no longer exists for each agent.
         sleep(time_to_update)
-        assert '' == hm.run_shell(test_hosts[0], f'ls {mg_path}'), f'{mg_path} should not exist, but it does.'
+        assert '' == hm.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should not exist, but it does."
