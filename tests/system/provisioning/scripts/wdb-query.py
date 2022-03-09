@@ -4,7 +4,7 @@
 # Syntax: wdb-query.py <AGENT ID> <QUERY>
 #         wdb-query.py global "<COMMAND> <PARAMS>"
 #         wdb-query.py global "sql <QUERY>"
-# 
+#
 #         available global commands:
 #         "insert-agent %s"
 #         "insert-agent-group %s"
@@ -41,6 +41,7 @@ from sys import argv, exit
 from json import dumps, loads
 from json.decoder import JSONDecodeError
 
+
 def db_query(agent, query):
     WDB = '/var/ossec/queue/db/wdb'
     sock = socket(AF_UNIX, SOCK_STREAM)
@@ -51,6 +52,7 @@ def db_query(agent, query):
 
     length = unpack("<I", sock.recv(4))[0]
     return sock.recv(length).decode(errors='ignore')
+
 
 def db_query_global(query):
     WDB = '/var/ossec/queue/db/wdb'
@@ -64,6 +66,7 @@ def db_query_global(query):
     length = unpack("<I", sock.recv(4))[0]
     return sock.recv(length).decode(errors='ignore')
 
+
 def pretty(response):
     if response.startswith('ok '):
         try:
@@ -74,6 +77,7 @@ def pretty(response):
     else:
         return response
 
+
 if __name__ == "__main__":
     if len(argv) < 3 or (len(argv) > 1 and argv[1] in ('-h', '--help')):
         print("Syntax: {0} <agent id> <query>")
@@ -81,6 +85,6 @@ if __name__ == "__main__":
     if 'global' == argv[1]:
         response = db_query_global(argv[2])
         print(pretty(response))
-    else :
+    else:
         response = db_query(argv[1], ' '.join(argv[2:]))
         print(pretty(response))
