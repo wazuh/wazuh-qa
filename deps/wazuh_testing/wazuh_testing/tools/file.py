@@ -54,10 +54,12 @@ def read_yaml(file_path):
 def get_list_of_content_yml(file_path, filter, list=[]):
     """Read a YAML file from a given path, return a list with the YAML data
     after apply filter
+    
     Args:
         file_path (str): Path of the YAML file to be readed
         filter (str): filder to extract some part of yaml
         list: a list with previous information
+    
     Returns:
        list: Yaml structure.
     """
@@ -499,3 +501,4 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
+ 
