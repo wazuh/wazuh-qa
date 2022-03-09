@@ -1,14 +1,13 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-import logging
-import re
-import string
+import ipaddress
 import json
+import re
 import socket
-
+import string
 from functools import wraps
-from random import randint, SystemRandom
+from random import SystemRandom, randint
 from time import sleep
 
 from wazuh_testing.tools.logging import logging_message
@@ -129,11 +128,13 @@ def get_random_string(string_length, digits=True):
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
+
 def get_version():
     f = open('../../version.json')
     data = json.load(f)
     version = data['version']
     return version
+
 
 def lower_case_key_dictionary_array(array_dict):
     """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
@@ -150,7 +151,20 @@ def lower_case_key_dictionary_array(array_dict):
 def get_host_name():
     """
     Gets the system host name.
+
     Returns:
         str: The host name.
     """
     return socket.gethostname()
+
+
+def format_ipv6_long(ipv6_address):
+    """Return the long form of the address representation in uppercase.
+
+    Args:
+        ipv6_address (str): IPV6 address
+
+    Returns:
+        str: IPV6 long form
+    """
+    return (ipaddress.ip_address(ipv6_address).exploded).upper()

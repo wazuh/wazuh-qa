@@ -3,8 +3,6 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Unix only modules
-import logging
-
 try:
     import grp
     import pwd
@@ -34,7 +32,7 @@ from wazuh_testing.tools.system import HostManager
 
 REMOTED_DETECTOR_PREFIX = r'.*wazuh-remoted.*'
 LOG_COLLECTOR_DETECTOR_PREFIX = r'.*wazuh-logcollector.*'
-AGENT_DETECTOR_PREFIX = r'.*wazuh-agentd.*'
+AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*' if sys.platform == 'win32' else r'.*wazuh-agentd.*'
 WINDOWS_AGENT_DETECTOR_PREFIX = r'.*wazuh-agent.*'
 AUTHD_DETECTOR_PREFIX = r'.*wazuh-authd.*'
 MODULESD_DETECTOR_PREFIX = r'.*wazuh-modulesd.*'
@@ -42,7 +40,6 @@ WAZUH_DB_PREFIX = r'.*wazuh-db.*'
 
 DEFAULT_POLL_FILE_TIME = 1
 DEFAULT_WAIT_FILE_TIMEOUT = 30
-
 
 
 def wazuh_unpack(data, format_: str = "<I"):
@@ -243,8 +240,10 @@ class SocketController:
             self.family = socket.AF_UNIX
         elif family == 'AF_INET':
             self.family = socket.AF_INET
+        elif family == 'AF_INET6':
+            self.family = socket.AF_INET6
         else:
-            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX or AF_INET')
+            raise TypeError(f'Invalid family type detected: {family}. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         # Set socket protocol
         if connection_protocol.lower() == 'tcp' or 'ssl' in connection_protocol.lower():
@@ -525,6 +524,7 @@ class Queue(queue.Queue):
         """
         return str(self.queue)
 
+
 class StreamServerPort(socketserver.ThreadingTCPServer):
     pass
 
@@ -609,7 +609,20 @@ class SSLStreamServerPort(socketserver.ThreadingTCPServer):
         return connstream, fromaddr
 
 
+class SSLStreamServerPortV6(SSLStreamServerPort):
+    address_family = socket.AF_INET6
+
+
+class StreamServerPortV6(StreamServerPort):
+    address_family = socket.AF_INET6
+
+
 class DatagramServerPort(socketserver.ThreadingUDPServer):
+    pass
+
+
+class DatagramServerPortV6(DatagramServerPort):
+    address_family = socket.AF_INET6
     pass
 
 
@@ -662,7 +675,7 @@ class StreamHandler(socketserver.BaseRequestHandler):
             while 1:
                 try:  # error means no more data
                     received += self.request.recv(chunk_size, socket.MSG_DONTWAIT)
-                except:
+                except Exception:
                     break
         return received
 
@@ -745,23 +758,26 @@ class ManInTheMiddle:
             raise TypeError(f'Invalid connection protocol detected: {connection_protocol.lower()}. '
                             f'Valid ones are TCP or UDP')
 
-        if family in ('AF_UNIX', 'AF_INET'):
+        if family in ('AF_UNIX', 'AF_INET', 'AF_INET6'):
             self.family = family
         else:
-            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX or AF_INET')
+            raise TypeError('Invalid family type detected. Valid ones are AF_UNIX, AF_INET or AF_INET6')
 
         self.forwarded_socket_path = None
 
         class_tree = {
             'listener': {
                 'tcp': {
-                    'AF_INET': StreamServerPort
+                    'AF_INET': StreamServerPort,
+                    'AF_INET6': StreamServerPortV6
                 },
                 'udp': {
-                    'AF_INET': DatagramServerPort
+                    'AF_INET': DatagramServerPort,
+                    'AF_INET6': DatagramServerPortV6
                 },
                 'ssl': {
-                    'AF_INET': SSLStreamServerPort
+                    'AF_INET': SSLStreamServerPort,
+                    'AF_INET6': SSLStreamServerPortV6
                 }
             },
             'handler': {
@@ -894,7 +910,7 @@ class HostMonitor:
         with open(messages_path, 'r') as f:
             self.test_cases = yaml.safe_load(f)
 
-    def run(self):
+    def run(self, update_position=False):
         """This method creates and destroy the needed processes for the messages founded in messages_path.
         It creates one file composer (process) for every file to be monitored in every host."""
         for host, payload in self.test_cases.items():
@@ -953,7 +969,7 @@ class HostMonitor:
                 time.sleep(self._time_step)
 
     @new_process
-    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None):
+    def _start(self, host, payload, path, encoding=None, error_messages_per_host=None, update_position=False):
         """Start the file monitoring until the QueueMonitor returns an string or TimeoutError.
 
         Args:

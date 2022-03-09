@@ -8,14 +8,14 @@ brief: This module verifies the correct behavior of the agent-auth enrollment to
 tier:
     0
 modules:
-    - agent-auth
+    - authd
 components:
     - agent
 daemons:
-    - agent-auth
+    - wazuh-authd
 path:
     /tests/integration/test_enrollment/test_agent_auth_enrollment.py
-os_platform
+os_platform:
     - linux
     - windows
 os_version:
@@ -42,7 +42,7 @@ os_version:
     - Windows Server 2012
     - Windows Server 2016
 tags:
-    - Enrollment
+    - enrollment
 '''
 
 import pytest
@@ -98,7 +98,7 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
     wazuh_min_version:
-        4.2
+        4.2.0
     parameters:
         - configure_environment:
             type: fixture
@@ -149,9 +149,12 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
+        expected_error_dict = get_current_test_case['expected_error']
+        expected_error = expected_error_dict['agent-auth'] if 'agent-auth' in expected_error_dict else \
+                                                              expected_error_dict
         try:
             log_monitor.start(timeout=AGENT_AUTH_ENROLLMENT_REQUEST_TIMEOUT,
-                              callback=make_callback(get_current_test_case.get('expected_error'), prefix='.*',
+                              callback=make_callback(expected_error, prefix='.*',
                                                      escape=True),
                               error_message='Expected error log does not occured.')
         except Exception as error:

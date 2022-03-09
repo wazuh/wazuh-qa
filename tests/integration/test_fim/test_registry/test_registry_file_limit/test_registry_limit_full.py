@@ -44,7 +44,7 @@ references:
 
 pytest_args:
     - fim_mode:
-        scheduled:
+        scheduled: file/registry changes are monitored only at the configured interval
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
