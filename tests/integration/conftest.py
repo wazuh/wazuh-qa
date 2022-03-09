@@ -19,7 +19,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -918,6 +918,7 @@ def truncate_log_files():
         truncate_file(log_file)
 
 
+
 @pytest.fixture(scope='function')
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
@@ -1007,3 +1008,23 @@ def mock_agent_function(request):
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='function')
+def remove_backups(backups_path):
+    "Creates backups folder in case it does not exist."
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+    yield
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
