@@ -100,11 +100,8 @@ def test_rids_closing_time_valid(get_configuration, configure_environment, resta
 
     wazuh_min_version: 4.2.0
 
-<<<<<<< HEAD
     tier: 0
 
-=======
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
     parameters:
         - get_configuration:
             type: fixture

@@ -8,14 +8,6 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 type: integration
 
 brief: This module verifies the correct behavior of Wazuh Agentd during the enrollment under different configurations.
-<<<<<<< HEAD
-
-=======
-tier:
-    0
-modules:
-    - agentd
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 components:
     - agentd
 
@@ -24,12 +16,6 @@ targets:
 
 daemons:
     - wazuh-agentd
-<<<<<<< HEAD
-
-=======
-path:
-    /tests/integration/test_enrollment/test_agentd_enrollment.py
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 os_platform:
     - linux
     - windows
@@ -120,16 +106,11 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             "Check that different configuration generates the adequate enrollment message or the corresponding error
             log. The configuration, keys, and password files will be written with the different scenarios described
             in the test cases. After this, Agentd is started to wait for the expected result."
-<<<<<<< HEAD
 
         wazuh_min_version: 4.2.0
 
         tier: 0
 
-=======
-        wazuh_min_version:
-            4.2.0
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
         parameters:
             - configure_environment:
                 type: fixture

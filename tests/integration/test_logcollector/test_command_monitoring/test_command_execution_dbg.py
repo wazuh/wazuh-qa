@@ -198,15 +198,15 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
                                get_configuration, file_monitoring, configure_environment, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
-                    special characteristics. For this purpose, the test will configure the logcollector to run
-                    a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
-                    formats. The properties of that command can be, for example, a non-existent command or one
-                    that includes special characters. Once the logcollector has started, it will wait for the
-                    'running' event that indicates that the command has been executed. Finally, the test
-                    will verify that the debug 'read N lines' event is generated, this event indicates the number
-                    of lines read from the command run. Depending on test case, the test also will verify that
-                    the debug event 'reading command' is generated, this event includes the output of the command
-                    run, and its alias if it is set in the 'alias' tag.
+                 special characteristics. For this purpose, the test will configure the logcollector to run
+                 a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
+                 formats. The properties of that command can be, for example, a non-existent command or one
+                 that includes special characters. Once the logcollector has started, it will wait for the
+                 'running' event that indicates that the command has been executed. Finally, the test
+                 will verify that the debug 'read N lines' event is generated, this event indicates the number
+                 of lines read from the command run. Depending on test case, the test also will verify that
+                 the debug event 'reading command' is generated, this event includes the output of the command
+                 run, and its alias if it is set in the 'alias' tag.
 
     wazuh_min_version: 4.2.0
 
@@ -238,9 +238,9 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
         - Verify that the debug 'lines' event is generated when running the related command.
 
     input_description: A configuration template (test_command_execution) is contained in an external
-                        YAML file (wazuh_command_conf.yaml), which includes configuration settings for
-                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
-                        (log formats and commands to run) defined in the module.
+                       YAML file (wazuh_command_conf.yaml), which includes configuration settings for
+                       the 'wazuh-logcollector' daemon and, it is combined with the test cases
+                       (log formats and commands to run) defined in the module.
 
     expected_output:
         - r'DEBUG: Running .*'

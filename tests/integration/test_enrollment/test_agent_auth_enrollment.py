@@ -8,14 +8,6 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 type: integration
 
 brief: This module verifies the correct behavior of the agent-auth enrollment tool under different configurations
-<<<<<<< HEAD
-
-=======
-tier:
-    0
-modules:
-    - authd
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 components:
     - agentd
 
@@ -24,12 +16,6 @@ targets:
 
 daemons:
     - wazuh-authd
-<<<<<<< HEAD
-
-=======
-path:
-    /tests/integration/test_enrollment/test_agent_auth_enrollment.py
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
 os_platform:
     - linux
     - windows
@@ -104,16 +90,11 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         "Check that different configuration generates the adequate enrollment message or the corresponding
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
-<<<<<<< HEAD
 
     wazuh_min_version: 4.2.0
 
     tier: 0
 
-=======
-    wazuh_min_version:
-        4.2.0
->>>>>>> b61e90c98566c9df66498d494e2edc5cf8e12d67
     parameters:
         - configure_environment:
             type: fixture
