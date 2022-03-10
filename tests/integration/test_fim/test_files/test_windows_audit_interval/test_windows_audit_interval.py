@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_windows_audit_interval
+
+targets:
     - agent
 
 daemons:
@@ -147,6 +147,8 @@ def test_windows_audit_modify_sacl(tags_to_apply, get_configuration, configure_e
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -214,6 +216,8 @@ def test_windows_audit_restore_sacl(tags_to_apply, get_configuration, configure_
                  is generated, indicating the restoration of the previous SACL rules.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:

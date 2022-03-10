@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -11,12 +11,12 @@ brief: Active responses execute a script in response to the triggering of specif
        based on the alert level or rule group. These tests will check if the 'active responses',
        which are executed by the 'wazuh-execd' daemon via scripts, run correctly.
 
-tier: 0
-
-modules:
+components:
     - active_response
 
-components:
+suite: execd
+
+targets:
     - agent
 
 daemons:
@@ -32,18 +32,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
@@ -148,7 +140,6 @@ def start_agent(request, get_configuration):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
-
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
     """Remove the testing IP address from `iptables` if it exists.
@@ -245,6 +236,8 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
                  and removed from 'iptables', the Linux firewall.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - set_debug_mode:

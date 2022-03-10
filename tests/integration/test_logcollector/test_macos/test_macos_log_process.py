@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        event logs. It can also directly receive logs via remote syslog which is useful
        for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: macos
+
+targets:
     - agent
 
 daemons:
@@ -115,6 +115,8 @@ def test_independent_log_process(get_configuration, configure_environment, file_
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture
@@ -186,6 +188,8 @@ def test_macos_log_process_stop(get_configuration, configure_environment, file_m
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture
@@ -251,6 +255,8 @@ def test_macos_log_process_stop_suddenly_warning(get_configuration, configure_en
                  event is generated when the log or script process is not detected.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
