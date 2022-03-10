@@ -43,9 +43,8 @@ tags:
 """
 import os
 import time
-
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
+
 from wazuh_testing.tools.system import HostManager
 from system import (check_agent_groups, check_agent_status, remove_cluster_agents, restart_cluster, clean_cluster_logs, check_keys_file)
 from system.test_cluster.test_agent_groups.common import register_agent
