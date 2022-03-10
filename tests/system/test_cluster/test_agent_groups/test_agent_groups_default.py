@@ -1,19 +1,18 @@
-'''
+"""
 copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-type: integration
-brief: The Wazuh 'office365' module allows you to collect all the logs from Office 365 using its API.
-       Specifically, these tests will check if that module detects invalid configurations and indicates
-       the location of the errors detected. The Office 365 Management Activity API aggregates actions
-       and events into tenant-specific content blobs, which are classified by the type and source
-       of the content they contain.
+type: system
+brief: Verify that the agent connects correctly to the cluster and that when it has no specific
+       configuration, the agent belongs to the default group.
+.
 tier: 0
 modules:
     - cluster
 components:
     - manager
     - agent
+path: /tests/system/test_cluster/test_agent_groups/test_agent_groups_default.py
 daemons:
     - wazuh-db
     - wazuh-clusterd
@@ -38,12 +37,10 @@ os_version:
     - Red Hat 7
     - Red Hat 6
 references:
-    - https://documentation.wazuh.com/current/user-manual/reference/tools/agent-auth.html
-    - https://documentation.wazuh.com/current/user-manual/registering/command-line-registration.html
-    - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
+    - https://github.com/wazuh/wazuh-qa/issues/2505
 tags:
-    - wazuh-db
-'''
+    - cluster
+"""
 import os
 import time
 
