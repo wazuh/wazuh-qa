@@ -22,7 +22,6 @@ components:
 
 daemons:
     - wazuh-logcollector
-    - wazuh-agentd
 
 os_platform:
     - linux
@@ -63,13 +62,10 @@ tags:
     - logcollector
 '''
 import os
-import sys
-import tempfile
 
 import pytest
 
-from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON, AGENT_DAEMON
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -82,11 +78,11 @@ pytestmark = pytest.mark.tier(level=0)
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 wazuh_component = get_service()
-temp_dir = tempfile.gettempdir()
+log_message_level = 'CRITICAL' if 'manager' in wazuh_component else 'ERROR'
 
 # Configuration
 daemons_handler_configuration = {
-    'daemons': [LOGCOLLECTOR_DAEMON if 'manager' in wazuh_component else AGENT_DAEMON],
+    'daemons': [LOGCOLLECTOR_DAEMON],
     'ignore_errors': True
 }
 cases = [
@@ -105,8 +101,6 @@ metadata = [case['metadata'] for case in cases]
 tcase_ids = [f"location_None_logformat_{param['LOG_FORMAT']}" for param in params]
 configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'location_config.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
-agent_conf = os.path.join(WAZUH_PATH, 'shared', 'agent.conf') if sys.platform == 'win32' else \
-             os.path.join(WAZUH_PATH, 'etc', 'shared', 'agent.conf')
 
 
 @pytest.fixture(scope="module", params=configurations, ids=tcase_ids)
@@ -138,10 +132,12 @@ def test_invalid_configuration_logcollector(get_configuration, configure_environ
 
     expected_output:
         - 'Did not receive expected "CRITICAL: ...: Configuration error at event'
+        - 'Did not receive expected "ERROR: ...: Configuration error at event'
 
     tags:
         - logcollector
     '''
     metadata = get_configuration.get('metadata')
     wazuh_log_monitor.start(timeout=5, callback=metadata['regex'],
-                            error_message='Did not receive the expected "CRITICAL: ...: Configuration error at" event')
+                            error_message='Did not receive the expected '
+                            f'"{log_message_level}: ...: Configuration error at" event')
