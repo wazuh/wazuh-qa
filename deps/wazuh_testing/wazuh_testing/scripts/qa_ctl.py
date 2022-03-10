@@ -226,7 +226,7 @@ def validate_parameters(parameters):
             tests_path = os.path.join(WAZUH_QA_FILES, 'tests')
             test_documentation_command = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite} -m {module} " \
                                          f"-o {gettempdir()} --no-logging"
-            test_documentation_file_path = os.path.join(gettempdir(), f"{module}.json")
+            test_documentation_file_path = os.path.join(gettempdir(), f"output/{module}.json")
             local_actions.run_local_command_returning_output(test_documentation_command)
 
             test_data = json.loads(file.read_file(test_documentation_file_path))
