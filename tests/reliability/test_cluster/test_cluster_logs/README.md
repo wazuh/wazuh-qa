@@ -39,14 +39,15 @@ collected 5 items
 
 test_cluster_logs/test_cluster_connection/test_cluster_connection.py .                                                                                                                                [ 20%]
 test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py .                                                                                                                                [ 40%]
-test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py .                                                                                                                                [ 60%]
-test_cluster_logs/test_cluster_sync/test_cluster_sync.py .                                                                                                                                            [ 80%]                                                                                                                                            [100%]
+test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py .                                                                                                                  [ 60%]
+test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py .                                                                                                                  [ 80%]
+test_cluster_logs/test_cluster_sync/test_cluster_sync.py .                                                                                                                                           [ 100%] 
 
-========================================================================================= 4 passed in 3.50 seconds ==========================================================================================
+========================================================================================= 5 passed in 3.52 seconds ==========================================================================================
 ```
 
 ### Tests information
 
 | Number of tests | Time spent |
 |:--:|:--:|
-| 4 | 6s |
+| 5 | 4s |

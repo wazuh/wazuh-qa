@@ -111,7 +111,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 |----------------------------------------|----------------------|
 | test_cluster/test_agent_enrollment     | enrollment_cluster   |
 | test_cluster/test_agent_info_sync      | basic_cluster        |
-| test_cluster/test_agent_groups_sync    | basic_cluster        |
+| test_cluster/test_agent_groups         | basic_cluster        |
 | test_cluster/test_agent_key_polling    | basic_cluster        |
 | test_cluster/test_agent_files_deletion | basic_cluster        |
 | test_cluster/test_integrity_sync       | agentless_cluster    |

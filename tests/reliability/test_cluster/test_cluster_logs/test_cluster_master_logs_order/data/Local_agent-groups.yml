@@ -1,0 +1,30 @@
+# Root
+- log_id: root
+  parent: null
+  tag: 'Local agent-groups root'
+
+# Common logs
+- log_id: log0
+  parent: root
+  tag: 'Starting.*'
+
+# Chunks sent.
+- log_id: log1
+  parent: log0
+  tag: 'Obtained.*chunks of data in.*'
+- log_id: log2
+  parent: log1
+  tag: 'Finished in.*'
+
+# No clients connected.
+- log_id: log3
+  parent: log0
+  tag: 'No clients connected. Skipping.*'
+
+# Errors.
+- log_id: log5
+  parent: log0
+  tag: 'Error obtaining data from wazuh-db: Error 2003 - Error in wazuhdb request.*'
+- log_id: log6
+  parent: log5
+  tag: 'Finished in.*'

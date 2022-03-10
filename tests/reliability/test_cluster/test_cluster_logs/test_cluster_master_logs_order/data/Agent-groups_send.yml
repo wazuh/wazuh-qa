@@ -1,0 +1,30 @@
+# Root
+- log_id: root
+  parent: null
+  tag: 'Agent-groups send root'
+
+# Common logs
+- log_id: log0
+  parent: root
+  tag: 'Starting.*'
+
+# No chunks sent.
+- log_id: log1
+  parent: log0
+  tag: 'Finished in.*chunks sent.*'
+
+# Chunks sent.
+- log_id: log2
+  parent: log0
+  tag: 'All chunks sent.*'
+- log_id: log3
+  parent: log2
+  tag: 'Finished in.*chunks updated.*'
+
+# Race condition.
+- log_id: log4
+  parent: log0
+  tag: 'Finished in.*chunks updated.*'
+- log_id: log5
+  parent: log4
+  tag: 'All chunks sent.*'

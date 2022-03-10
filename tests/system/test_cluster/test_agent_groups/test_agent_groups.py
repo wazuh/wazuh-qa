@@ -4,10 +4,10 @@
 
 import json
 import os
-import re
 from time import sleep, time
 
-from wazuh_testing.tools import WAZUH_PATH
+import pytest
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
@@ -21,9 +21,11 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-add_messages_path = os.path.join(local_path, 'data/add_messages.yml')
+add_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
 delete_messages_path = os.path.join(local_path, 'data/delete_messages.yml')
-script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
+sync_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
+# script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
+script_path = '/wazuh-qa/tests/system/test_cluster/utils/get_wdb_agent.py'
 
 tmp_path = os.path.join(local_path, 'tmp')
 
@@ -35,6 +37,19 @@ time_to_sync = 21
 time_to_agent_reconnect = 180
 
 queries = ['global sql select * from "group" where name="{name}"']
+
+
+@pytest.fixture(scope='function')
+def clean_cluster_logs():
+    """Remove old logs from all the existent managers."""
+    for host in testinfra_hosts:
+        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+
+        # Its required to restart each node after clearing the log files
+        host_manager.get_host(host).ansible('command', 'service wazuh-manager restart', check=False)
+
+    yield
 
 
 def obtain_agent_id(token, agent):
@@ -85,10 +100,10 @@ def check_agent_status(status, token, agent):
     sleep(time_to_sync)
 
 
-def test_agent_groups_create_group():
+def test_agent_groups_create_group(clean_cluster_logs):
     """Check agent agent-groups synchronization works as expected.
 
-    This test will wait for the expected agent-groups messages declared in data/add_messages.yml. Additionally, it will
+    This test will wait for the expected agent-groups messages declared in data/synchronization_messages.yml. Additionally, it will
     ensure agent-group synchronization is working by adding a group to an agent."""
 
     # Get the token
@@ -96,6 +111,7 @@ def test_agent_groups_create_group():
 
     # Make sure that the agent is registered and active
     check_agent_status('active', master_token, modified_agent)
+    HostMonitor(inventory_path=inventory_path, messages_path=sync_messages_path, tmp_path=tmp_path).run()
 
     # Create group from master
     response = host_manager.make_api_call(host=master_host, method='POST', token=master_token, endpoint='/groups',
@@ -115,7 +131,7 @@ def test_agent_groups_create_group():
 
     # Obtain agent's ID
     agent_id = obtain_agent_id(master_token, modified_agent)
-    last_agent_id = obtain_agent_id(master_token, last_agent)
+    previous_agent_id = obtain_agent_id(master_token, last_agent)
 
     # Add group to agent
     response = host_manager.make_api_call(host=master_host, method='PUT', token=master_token,
@@ -126,7 +142,7 @@ def test_agent_groups_create_group():
 
     # Check if the new information is present in the master and workers dbs
     sleep(time_to_sync)
-    queries.append(f'global sync-agent-groups-get {"{"}"condition":"all", "last_id":{last_agent_id}{"}"}')
+    queries.append(f'global sync-agent-groups-get {"{"}"condition":"all", "last_id":{previous_agent_id}{"}"}')
     for host in testinfra_hosts:
         result = host_manager.run_command(host,
                                           f"{WAZUH_PATH}/framework/python/bin/python3.9 "
@@ -138,7 +154,7 @@ def test_agent_groups_create_group():
     HostMonitor(inventory_path=inventory_path, messages_path=add_messages_path, tmp_path=tmp_path).run()
 
 
-def test_agent_groups_remove_group():
+def test_agent_groups_remove_group(clean_cluster_logs):
     """Check agent agent-groups synchronization works as expected.
 
     This test will wait for the expected agent-groups messages declared in data/delete_messages.yml. Additionally, it will
@@ -152,6 +168,8 @@ def test_agent_groups_remove_group():
 
     # Obtain agent's ID
     agent_id = obtain_agent_id(master_token, modified_agent)
+    previous_agent_id = obtain_agent_id(master_token, last_agent)
+    queries.append(f'global sync-agent-groups-get {"{"}"condition":"all", "last_id":{previous_agent_id}{"}"}')
 
     # Remove group from agent
     response = host_manager.make_api_call(host=master_host, method='DELETE', token=master_token,

@@ -1,0 +1,18 @@
+# Root
+- log_id: root
+  parent: null
+  tag: 'Agent-groups full DB root'
+
+# Common logs
+- log_id: log0
+  parent: root
+  tag: 'Obtained 1 chunks of data in.*'
+- log_id: log1
+  parent: log0
+  tag: 'Requested entire agent-groups information by the worker node. Starting.*'
+- log_id: log2
+  parent: log1
+  tag: 'All chunks sent.*'
+- log_id: log3
+  parent: log2
+  tag: 'Sent all agent-groups information from the master node database.*'

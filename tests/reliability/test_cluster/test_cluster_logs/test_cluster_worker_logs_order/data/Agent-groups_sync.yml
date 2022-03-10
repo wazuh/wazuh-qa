@@ -26,11 +26,3 @@
 - log_id: log5
   parent: log4
   tag: 'Finished in .* \(.* chunks updated\).*'
-
-# Race condition: 'All chunks sent' arrives (sometimes) after 'Finished in'.
-- log_id: log6
-  parent: log2
-  tag: 'Finished in .* \(.* chunks updated\).*'
-- log_id: log7
-  parent: log6
-  tag: 'All chunks sent.*'

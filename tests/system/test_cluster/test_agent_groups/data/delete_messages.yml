@@ -6,55 +6,50 @@ wazuh-master:
   - regex: '.*DELETE /groups" with parameters {"groups_list": ".*and body {} done in.*200'
     path: "/var/ossec/logs/api.log"
     timeout: 60
-  - regex: '.*wazuh-worker1.*Agent-groups sync.*Starting.'
+  - regex: '.*Master.*Local agent-groups.*Starting.'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker2.*Agent-groups sync.*Starting.'
+  - regex: '.*Master.*Local agent-groups.*Obtained 1 chunks of data in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker1.*Agent-groups sync.*1/1 chunks updated in wazuh-db in.*'
+  - regex: '.*Master.*Local agent-groups.*Finished in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker2.*Agent-groups sync.*1/1 chunks updated in wazuh-db in.*'
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Starting.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker1.*Agent-groups sync.*Finished in.*Updated 1 chunks.*'
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Starting.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*wazuh-worker2.*Agent-groups sync.*Finished in.*Updated 1 chunks.*'
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*All chunks sent.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*All chunks sent.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Finished in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Finished in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
 
 wazuh-worker1:
-  - regex: '.*Agent-groups sync.*Permission to synchronize granted.'
+  - regex: '.*Agent-groups recv.*Starting.'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Agent-groups sync.*Starting.'
+  - regex: '.*Agent-groups recv.*1/1 chunks updated in wazuh-db in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Agent-groups sync.*Obtained.*chunks of data in.*'
+  - regex: '.*Agent-groups recv.*Obtained.*chunks of data in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Agent-groups sync.*All chunks sent.'
+  - regex: '.*Agent-groups recv.*There is no data requiring synchronization in the local database.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Agent-groups sync.*Finished in.*chunks updated.*'
+  - regex: '.*Agent-groups recv.*The checksum of both databases match.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-
-wazuh-worker2:
-  - regex: '.*Agent-groups sync.*Permission to synchronize granted.'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
-  - regex: '.*Agent-groups sync.*Starting.'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
-  - regex: '.*Agent-groups sync.*Obtained.*chunks of data in.*'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
-  - regex: '.*Agent-groups sync.*All chunks sent.'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
-  - regex: '.*Agent-groups sync.*Finished in.*chunks updated.*'
+  - regex: '.*Agent-groups recv.*Finished in.*Updated.*chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
