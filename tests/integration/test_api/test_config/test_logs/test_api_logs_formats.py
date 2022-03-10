@@ -3,9 +3,9 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: integration
-brief: There is an API configuration option, called 'logs', which allows to log in 4 formats ("json", "plain",
-       "json,plain", and "plain,json") through the 'format' field. The test checks if the logs of the API are in the
-       specified formats and the content of the log files are the expected.
+brief: There is an API configuration option, called logs, which allows to log in 4 different ways ("json", "plain",
+       "json,plain", and "plain,json") through the format field. When the API is configured with one of those values the
+       logs are stored in the api.log and api.json files.
 tier: 2
 modules:
     - api
@@ -47,7 +47,7 @@ import requests
 import pytest
 
 from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH
-from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
+from wazuh_testing.tools.configuration import get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, \
     API_GLOBAL_TIMEOUT, get_login_headers
@@ -129,8 +129,8 @@ def callback_plain_error(line):
 def test_api_logs_formats(get_configuration, configure_api_environment, clean_log_files, daemons_handler,
                           wait_for_start):
     '''
-    description: The test checks if the logs of the API are in the specified formats and the content of the log files
-                 are the expected.
+    description: The test checks if the logs of the API are stored in the specified formats and the content of the log
+                 files are the expected.
     wazuh_min_version: 4.4.0
     parameters:
         - get_configuration:
@@ -141,7 +141,7 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
             brief: Configure a custom environment for API testing.
         - clean_log_files:
             type: fixture
-            brief: Reset the log files of the API.
+            brief: Reset the log files of the API and delete the rotated log files.
         - daemons_handler:
             type: fixture
             brief: Handle the Wazuh daemons.
