@@ -78,7 +78,7 @@ def test_agent_default_group(agent_target, clean_cluster_environment):
         - agent_target:
             type: string
             brief: name of the host where the agent will register
-        - clean_enviroment:
+        - clean_cluster_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
     assertions:
@@ -101,7 +101,7 @@ def test_agent_default_group(agent_target, clean_cluster_environment):
 
 
     # Check that agent has no group assigned
-    check_agent_groups(agent_id, "Null", ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+    check_agent_groups(agent_id, "Null", test_infra_managers, host_manager)
 
     # Check that agent has client key file
     for host in test_infra_agents + test_infra_managers:
@@ -115,4 +115,4 @@ def test_agent_default_group(agent_target, clean_cluster_environment):
     check_agent_status(agent_id, agent_name, agent_ip, "active", host_manager, test_infra_managers)
 
     # Check that agent has group set to default
-    check_agent_groups(agent_id, "default", ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+    check_agent_groups(agent_id, "default", test_infra_managers, host_manager)
