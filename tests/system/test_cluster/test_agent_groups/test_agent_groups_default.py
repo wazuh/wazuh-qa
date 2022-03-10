@@ -67,7 +67,7 @@ def clean_cluster_environment():
     # Remove the agent once the test has finished
     remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
 
-@pytest.mark.parametrize("agent_target", test_infra_managers)
+@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
 def test_agent_default_group(agent_target, clean_cluster_environment):
     '''
     description: Check agent enrollment process and default group assignment works as expected in a cluster enviroment.
