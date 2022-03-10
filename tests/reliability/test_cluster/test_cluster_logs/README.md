@@ -30,24 +30,24 @@ These tests need only one parameter (artifacts) in order to be run. If this para
 
 ### Example output
 ```shell
-python3 -m pytest . --artifacts_path='/tmp/artifacts/cluster_performance/59' --html=report.html --self-contained-html
-============================================================================================ test session starts ============================================================================================
-platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
-rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
-plugins: metadata-1.10.0, html-3.1.1, testinfra-5.0.0, tavern-1.2.2, pep8-1.0.6, cov-2.10.0, asyncio-0.14.0
-collected 5 items                                                                                                                                                                                           
+========================================== test session starts ===========================================
+platform linux -- Python 3.9.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /home/yanazaeva/git/wazuh-qa
+plugins: testinfra-5.0.0, metadata-1.11.0, html-3.1.1
+collected 5 items                                                                                        
 
-test_cluster_logs/test_cluster_connection/test_cluster_connection.py .                                                                                                                                [ 20%]
-test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py .                                                                                                                                [ 40%]
-test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py .                                                                                                                  [ 60%]
-test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py .                                                                                                                  [ 80%]
-test_cluster_logs/test_cluster_sync/test_cluster_sync.py .                                                                                                                                           [ 100%] 
+../../tests/reliability/test_cluster/test_cluster_logs/test_cluster_connection/test_cluster_connection.py .
+../../tests/reliability/test_cluster/test_cluster_logs/test_cluster_error_logs/test_cluster_error_logs.py .
+../../tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py .
+../../tests/reliability/test_cluster/test_cluster_logs/test_cluster_sync/test_cluster_sync.py .
+../../tests/reliability/test_cluster/test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py .
 
-========================================================================================= 5 passed in 3.52 seconds ==========================================================================================
+=========================================== 5 passed in 45.08s ===========================================
+========================================================================================
 ```
 
 ### Tests information
 
 | Number of tests | Time spent |
-|:--:|:--:|
-| 5 | 4s |
+|:--:|:---:|
+| 5  | 45s |

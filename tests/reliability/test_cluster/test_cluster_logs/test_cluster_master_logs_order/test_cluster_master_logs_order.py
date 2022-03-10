@@ -63,7 +63,7 @@ def test_check_logs_order_master(artifacts_path):
     if len(cluster_log_files) == 0:
         pytest.fail(f"No files found inside {artifacts_path}.")
 
-    all_workers = {'Master': LogsOrder().logs_order}
+    all_managers = {'Master': LogsOrder().logs_order}
     name = ''
 
     with open(cluster_log_files) as file:
@@ -71,21 +71,21 @@ def test_check_logs_order_master(artifacts_path):
             if result := logs_format.search(line):
                 if 'Worker' in result.group(1):
                     name = re.search('.*Worker (.*?)]', result.group(1)).group(1)
-                    if name not in all_workers:
-                        all_workers[name] = LogsOrder().logs_order
+                    if name not in all_managers:
+                        all_managers[name] = LogsOrder().logs_order
                 elif 'Master' in result.group(1):
                     name = 'Master'
 
-                if result.group(2) in all_workers[name]:
+                if result.group(2) in all_managers[name]:
                     if 'Local agent-groups' in result.group(2) and 'Starting' in result.group(3):
-                        for key, item in all_workers.items():
+                        for key, item in all_managers.items():
                             assert item['Agent-groups send'][
                                        'node'] == 'root', f"Worker {key} did not finished the 'send' task."
-                    tree_info = all_workers[name][result.group(2)]
+                    tree_info = all_managers[name][result.group(2)]
                     for child in tree_info['tree'].children(tree_info['node']):
                         if re.search(child.tag, result.group(3)):
                             # Current node is updated so the tree points to the next expected log.
-                            all_workers[name][result.group(2)]['node'] = child.identifier if \
+                            all_managers[name][result.group(2)]['node'] = child.identifier if \
                                 tree_info['tree'].children(child.identifier) else 'root'
                             break
                     else:
@@ -99,5 +99,5 @@ def test_check_logs_order_master(artifacts_path):
                                     f"\n - Found log: {incorrect_order[0]['found_log']}")
 
     # Update status of all logs so they point to their tree root.
-    for log_type, tree_info in all_workers[name].items():
+    for log_type, tree_info in all_managers[name].items():
         tree_info['node'] = 'root'
