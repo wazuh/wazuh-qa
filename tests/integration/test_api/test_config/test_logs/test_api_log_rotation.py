@@ -63,7 +63,7 @@ date_format_str_2 = '%Y-%b-%d'
 WAIT_FOR_MIDNIGHT = 5
 
 # Configurations
-configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'conf_rotation.yaml')
+configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration_api_log_rotation.yaml')
 configurations = get_api_conf(configurations_path)
 tcase_ids = [f"format_{configuration['configuration']['logs']['format']}" for  configuration in configurations]
 
