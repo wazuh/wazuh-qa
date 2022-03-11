@@ -49,7 +49,7 @@ from time import sleep
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP, TCP_UDP, remote
-from wazuh_testing.remote import check_push_shared_config
+from wazuh_testing.remote import check_push_shared_config, REMOTED_GLOBAL_TIMEOUT
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -105,10 +105,8 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
     '''
     description: Check if the manager sends the shared configuration to agents through remote,
                  ensuring the agent version is correct.
-    
-    wazuh_min_version: 4.2.0
 
-    tier: 2
+    wazuh_min_version: 4.2.0
 
     parameters:
         - agent_name:
@@ -129,20 +127,20 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         - create_agent_group:
             type: fixture
             brief: Temporary creates a new agent group for testing purpose, must be run only on Managers.
-    
+
     assertions:
         - Verify that the shared configuration was sent, checking the agent version retrieved by 'wazuh_bd'
         - Verify the startup message was received.
-    
+
     input_description: A configuration template (test_agent_version_shared_configuration_startup_message) is contained
-                       in an external YAML file (wazuh_agent_version_shared_configuration_startup_message.yaml). 
-                       That template is combined with different test cases defined in the module. Those include 
+                       in an external YAML file (wazuh_agent_version_shared_configuration_startup_message.yaml).
+                       That template is combined with different test cases defined in the module. Those include
                        configuration settings for the 'wazuh-remoted' daemon and agents info.
-    
+
     expected_output:
         - fr"DEBUG: Agent <agent_name> sent HC_STARTUP from 127.0.0.1"
         - The start up message has not been found in the logs
-    
+
     tags:
         - simulator
         - wazuh_db
@@ -154,7 +152,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         agent = ag.Agent(**agent_info[agent_name])
 
         # Sleep to avoid ConnectionRefusedError
-        sleep(1)
+        sleep(REMOTED_GLOBAL_TIMEOUT)
 
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
 

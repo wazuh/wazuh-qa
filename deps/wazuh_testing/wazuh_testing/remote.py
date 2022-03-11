@@ -18,6 +18,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, make_callback, ManInTheM
 from wazuh_testing.tools.services import control_service
 
 REMOTED_GLOBAL_TIMEOUT = 10
+SYNC_FILES_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
 EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: ' \
@@ -501,7 +502,7 @@ def wait_to_remoted_update_groups(wazuh_log_monitor):
     callback_pattern = '.*c_files().*End updating shared files sums.'
     error_message = 'Could not find the groups reload log'
 
-    check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=20)
+    check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=SYNC_FILES_TIMEOUT)
 
 
 def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=TCP, manager_address='127.0.0.1',
