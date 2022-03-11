@@ -129,7 +129,7 @@ def callback_plain_error(line):
 def test_api_logs_formats(get_configuration, configure_api_environment, clean_log_files, daemons_handler,
                           wait_for_start):
     '''
-    description: The test checks if the logs of the API are stored in the specified formats and the content of the log
+    description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
     wazuh_min_version: 4.4.0
     parameters:
