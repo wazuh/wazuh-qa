@@ -150,12 +150,12 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
             brief: Wait until the API starts.
     assertions:
         - Verify that the expected log exists in the log file.
-        - Verify that the logs values are the same in both log formats.
+        - Verify that the values of the log are the same in both log formats.
     input_description: The test gets the configuration from the YAML file, which contains the API configuration.
     expected_output:
-        - The log was not the expected.
+        - The log was not expected.
         - The length of the subgroups of the match is not equal.
-        - The values of the logs doesn't match.
+        - The values of the logs don't match.
     tags:
         - api
         - logs
