@@ -45,7 +45,6 @@ tags:
 import os
 from datetime import datetime, timedelta
 from time import sleep
-
 import pytest
 
 from wazuh_testing.tools import PREFIX, WAZUH_PATH
@@ -146,8 +145,8 @@ def test_api_log_rotation(get_configuration, configure_api_environment, clean_lo
     sleep(WAIT_FOR_MIDNIGHT)
 
     if 'plain' in current_formats:
-        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f'api.log-{day}.gz'))
+        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f"api.log-{day}.gz"))
         assert file_exists, 'The plain log was not rotated.'
     if 'json' in current_formats:
-        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f'api.json-{day}.gz'))
+        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f"api.json-{day}.gz"))
         assert file_exists, 'The json log was not rotated.'
