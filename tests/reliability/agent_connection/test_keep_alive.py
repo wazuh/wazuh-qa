@@ -82,3 +82,8 @@ def test_keep_alives(get_report):
     assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
         f"Some managers received keep-alives from agents at an interval that exceeded {MAX_DIFFERENCE_ACK_KEEP_ALIVE}" \
         + 'seconds maximun'
+
+    remainder = [keep_alives[agent]['remainder'] for agent in keep_alives.keys()]
+    assert max(remainder) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+        'Some managers does not received keep-alives from agents at the required interval' + \
+        f"{MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"

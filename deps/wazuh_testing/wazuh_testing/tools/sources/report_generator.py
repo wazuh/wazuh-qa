@@ -184,8 +184,7 @@ class StatisticsAnalyzer:
             "max_status_change_count": 0,
 
             "max_diff_ack_keep_alive": 0,
-            "mean_diff_ack_keep_alive": 0,
-            "metrics": {}
+            "mean_diff_ack_keep_alive": 0
         }
 
         status_dataframe = pd.DataFrame()
