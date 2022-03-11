@@ -81,9 +81,24 @@ def get_agent_id(token, agent_name):
     return agent_id['json']['data']['affected_items'][0]['id']
 
 
+def remove_files():
+    """Delete all groups, except Default"""
+    for agent_name, groups in agent_groups.items():
+        # Remove any pre-existing group.
+        hm.make_api_call(host=test_hosts[0], token=hm.get_api_token(test_hosts[0]), method='DELETE',
+                         endpoint=f"/groups?groups_list={','.join(groups[1:])}")
+
+        # Remove any pre-existing multigroup (just in case they weren't removed after deleting the group).
+        mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
+        for host in test_hosts:
+            if hm.run_shell(host, f"ls {mg_path}") == '':
+                break
+            hm.run_shell(host, cmd=f"rm -rf {mg_path}")
+
+
 # Fixtures
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(scope='function')
 def agent_healthcheck():
     """Check if all agents are active."""
     for _ in range(10):
@@ -97,30 +112,42 @@ def agent_healthcheck():
     yield
 
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(scope='function')
 def clean_files():
-    """Remove test groups and multigroups before and after running the tests."""
-    def remove_files():
-        for agent_name, groups in agent_groups.items():
-            # Remove any pre-existing group.
-            hm.make_api_call(host=test_hosts[0], token=hm.get_api_token(test_hosts[0]), method='DELETE',
-                             endpoint=f"/groups?groups_list={','.join(groups[1:])}")
-
-            # Remove any pre-existing multigroup (just in case they weren't removed after deleting the group).
-            mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
-            for host in test_hosts:
-                if hm.run_shell(host, f"ls {mg_path}") == '':
-                    break
-                hm.run_shell(host, cmd=f"rm -rf {mg_path}")
-
+    """Remove test groups and multigroups before and after running a test."""
     remove_files()
+    yield
+    remove_files()
+
+
+@pytest.fixture(scope='function')
+def prepare_env():
+    """Prepare environment by deleting and creating expected groups and multigroups."""
+    remove_files()
+    for agent_name, groups in agent_groups.items():
+        for idx, group in enumerate(groups):
+            if group == 'default':
+                continue
+
+            # Create group.
+            response = hm.make_api_call(host=test_hosts[0], token=token, method='POST', endpoint='/groups',
+                                        request_body={'group_id': group})
+            assert response['status'] == 200, f"Failed to create {group} group while preparing env: {response}"
+
+            # Assign agent to group.
+            agent_id = get_agent_id(token=token, agent_name=agent_name)
+            response = hm.make_api_call(host=test_hosts[0], token=token, method='PUT',
+                                        endpoint=f"/agents/{agent_id}/group/{group}")
+            assert response['status'] == 200, f"Failed to add {agent_name} ({agent_id}) to group: {response}"
+    sleep(time_to_update)
+
     yield
     remove_files()
 
 
 # Tests
 
-def test_create_multigroups():
+def test_create_multigroups(clean_files, agent_healthcheck):
     """Check the generation of new multi-groups when an agent is assigned to groups.
 
     For each agent, the stipulated groups are generated and it is verified that a multigroup
@@ -152,7 +179,7 @@ def test_create_multigroups():
             assert '' != hm.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should exist, but it does not."
 
 
-def test_multigroups_not_reloaded():
+def test_multigroups_not_reloaded(agent_healthcheck, prepare_env):
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
@@ -179,7 +206,7 @@ def test_multigroups_not_reloaded():
     random.choice(agent_groups['wazuh-agent1'][1:]),
     'default'
 ])
-def test_multigroups_updated(target_group):
+def test_multigroups_updated(agent_healthcheck, prepare_env, target_group):
     """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
@@ -225,7 +252,7 @@ def test_multigroups_updated(target_group):
                 assert mtime == host_files[host][file], f"This file changed its modification time in {host}: {file}"
 
 
-def test_multigroups_deleted():
+def test_multigroups_deleted(agent_healthcheck, prepare_env):
     """Check that multigroups are removed when expected.
 
     Unassign an agent from their groups or delete the groups. Check that the associated
