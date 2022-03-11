@@ -62,7 +62,7 @@ error_log_payload = 'Timeout executing API request'
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'api_conf_logs_format.yaml')
+configurations_path = os.path.join(test_data_path, 'configuration_api_logs_format.yaml')
 configurations = get_api_conf(configurations_path)
 tcase_ids = [f"level_{configuration['configuration']['logs']['level']}" +  \
              f"_format_{configuration['configuration']['logs']['format']}" for  configuration in configurations]
