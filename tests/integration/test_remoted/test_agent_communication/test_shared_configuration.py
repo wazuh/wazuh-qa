@@ -103,6 +103,8 @@ def test_push_shared_config(get_configuration, configure_environment, remove_sha
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture

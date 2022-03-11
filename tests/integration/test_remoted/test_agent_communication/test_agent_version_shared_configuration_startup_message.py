@@ -108,6 +108,8 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - agent_name:
             type: dict_keys
