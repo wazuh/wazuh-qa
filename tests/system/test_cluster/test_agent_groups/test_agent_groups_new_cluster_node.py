@@ -96,7 +96,6 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     agent1_data = register_agent(test_infra_agents[0], test_infra_managers[0], host_manager, agent_groups[0])
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[0], host_manager, agent_groups[1])
     agent3_data = register_agent(test_infra_agents[2], test_infra_managers[0], host_manager, agent_groups[2])
-    
 
     restart_cluster(test_infra_agents, host_manager)
     time.sleep(10)
@@ -104,7 +103,6 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], "active", host_manager, test_infra_managers)
-
 
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
@@ -117,7 +115,7 @@ def test_agent_groups_new_cluster_node(clean_cluster_environment):
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_new_nodes)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_new_nodes)
     check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], "active", host_manager, test_infra_new_nodes)
-    
+
     # Check that agent has the correct group set in new node
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
@@ -145,25 +143,22 @@ def test_agent_groups_sync_from_worker_new_node(clean_cluster_environment):
 
     agent1_data = register_agent(test_infra_agents[0], test_infra_managers[1], host_manager, agent_groups[0])
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[2], host_manager, agent_groups[1])
-    
+
     restart_cluster(test_infra_agents[0:2], host_manager)
     # Check that agent status is active in cluster
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_managers)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_managers)
 
-
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
-    
 
     restart_cluster(test_infra_new_nodes, host_manager)
     time.sleep(10)
     # Check that agent status is active in new node
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], "active", host_manager, test_infra_new_nodes)
     check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], "active", host_manager, test_infra_new_nodes)
-    
-    
+
     # Check that agent has the correct group set in new node
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
