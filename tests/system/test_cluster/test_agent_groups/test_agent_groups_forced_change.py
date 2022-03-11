@@ -79,7 +79,10 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     the cluster, the group data is synchronized to the new node.
     wazuh_min_version: 4.4.0
     parameters:
-        - clean_enviroment:
+        - agent_host:
+            type: string
+            brief: name of the host where the agent will register
+        - clean_cluster_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
     assertions:
