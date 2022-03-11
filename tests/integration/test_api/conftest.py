@@ -83,7 +83,7 @@ def clean_log_files(get_configuration, request):
         log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
         for log_file in log_files:
             truncate_file(log_file)
-
+clean_log_files()
     yield
 
     clean_log_files()
