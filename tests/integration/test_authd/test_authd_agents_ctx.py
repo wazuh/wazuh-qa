@@ -55,19 +55,20 @@ tags:
     - enrollment
 '''
 import os
-import shutil
 import subprocess
 import time
+import requests
 
 import pytest
-import yaml
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, remove_file, recursive_directory_creation
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.api import get_token_login_api, API_PROTOCOL, API_HOST, API_PORT, API_USER,API_PASS,API_LOGIN_ENDPOINT
 
-CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+
+
 # Marks
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -78,6 +79,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
+CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
 
 # Variables
 log_monitor_paths = []
@@ -90,12 +92,57 @@ monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, T
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 groups_infra = ['001','002', '003', '004']
 
+timeout = 10
+login_attempts = 3
+sleep = 1
+
+
+
+#TOKEN=$(curl -u wazuh:wazuh -k -X GET "https://localhost:55000/security/user/authenticate?raw=true")
+
+# response = requests.post(f"curl -k -X POST 'https://localhost:55000/groups/' -H 'Content-Type: application/json' -d '{{\"group_id\":\"TestGroup\"}}'' -H \"Authorization: Bearer {token}\"")
+#curl -k -X DELETE "https://localhost:55000/groups/?group_ids="all" -H "Authorization: Bearer $TOKEN"
+
 # Aux
-@pytest.fixture(scope="function")
-def set_up_groups(request):
-    subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', 'TestGroup', '-q'])
-    yield
-    subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', 'TestGroup', '-q'])
+
+def create_groups_api_request(group, token):
+    
+    headers = {'Authorization': f"Bearer {token}",}
+    json_data = {'group_id': f"'{group}'",}
+    response = requests.post('https://localhost:55000/groups', headers=headers, json=json_data, verify=False)
+    return response
+
+def delete_group_api_request(group, token):
+    headers = {'Authorization': f"Bearer {token}",}
+    params = (
+        ('pretty', 'true'),
+        ('groups_list', 'all'),
+    )
+    response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
+    return response
+
+
+def set_up_groups(groups_list):
+    
+    time.sleep(5)
+    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
+
+    print("RESPONSE TOKEN "+str(response_token))
+    for group in groups_list:
+        time.sleep(3)
+        response = create_groups_api_request(group, response_token)
+        print(str(response) + group)
+
+
+def remove_groups(groups_list):
+    time.sleep(5)
+    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
+
+    print("RESPONSEEEEEEEEEEEEEEEEEEEEEEE"+str(response_token))
+    for group in groups_list:
+        time.sleep(3)
+        response = delete_group_api_request(group, response_token)
+        print(str(response) + group)
 
 
 @pytest.fixture(scope="module", params=configurations)
@@ -106,7 +153,6 @@ def get_configuration(request):
 
 def clean_agents_ctx():
     clean_keys()
-    clean_groups()
     clean_rids()
     clean_agents_timestamp()
     clean_diff()
@@ -132,18 +178,12 @@ def clean_keys():
     truncate_file(CLIENT_KEYS_PATH)
 
 
-def clean_groups():
-    groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
-    for group in groups_infra:
-        if(group in str(groups_created)):
-            subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
-
-
 def clean_diff():
     diff_folder = os.path.join(WAZUH_PATH, 'queue', 'diff')
     try:
-        shutil.rmtree(diff_folder)
-        os.mkdir(diff_folder)
+        remove_file(diff_folder)
+        recursive_directory_creation(diff_folder)
+        os.chmod(diff_folder, 0o777)
     except Exception as e:
         print('Failed to delete %s. Reason: %s' % (diff_folder, e))
 
@@ -169,6 +209,7 @@ def check_agent_groups(id, expected, timeout=30):
     wait = time.time() + timeout
     while time.time() < wait:
         groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
+        print(str(groups_created))
         if id in str(groups_created):
             return True
     return False
@@ -209,6 +250,7 @@ def check_agent_timestamp(id, name, ip, expected):
     found = False
     try:
         with open(timestamp_path) as file:
+#            print("TIMESTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMP")
             file_lines = file.read().splitlines()
             for file_line in file_lines:
                 if line in file_line:
@@ -216,7 +258,7 @@ def check_agent_timestamp(id, name, ip, expected):
                     break
     except IOError:
         raise
-
+#    print("FOUND!!!!!!!!" + str(found))
     if found == expected:
         return True
     else:
@@ -299,6 +341,7 @@ def register_agent_local_server(Name, Group=None, IP=None):
     receiver_sockets[1].send(message, size=True)
     response = receiver_sockets[1].receive(size=True).decode()
     time.sleep(5)
+#    print("RESPONSEEEEEEEEEE LOCAL!---------" + str(response))
     return response
 
 
@@ -312,6 +355,7 @@ def duplicate_ip_agent_delete_test(server):
     server : registration server to create registrations
         Valid values : "main", "local"
     """
+    clean_diff()
     if server == "main":
         SUCCESS_RESPONSE = "OSSEC K:'"
         register_agent = register_agent_main_server
@@ -323,6 +367,7 @@ def duplicate_ip_agent_delete_test(server):
 
     # Register first agent
     response = register_agent('userA', 'TestGroup', '192.0.0.0')
+    print("RESPONSE ----------------1" + str(response))
     create_rids('001')  # Simulate rids was created
     create_diff('userA')  # Simulate diff folder was created
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
@@ -334,6 +379,7 @@ def duplicate_ip_agent_delete_test(server):
 
     # Register agent with duplicate IP
     response = register_agent('userC', 'TestGroup', '192.0.0.0')
+    print("RESPONSE ----------------2" + str(response))
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('002', True), 'Agent key was never created'
     assert check_client_keys('001', False), 'Agent key was not removed'
@@ -354,6 +400,7 @@ def duplicate_name_agent_delete_test(server):
     server : registration server to create registrations
         Valid values : "main", "local"
     """
+    clean_diff()
     if server == "main":
         SUCCESS_RESPONSE = "OSSEC K:'"
         register_agent = register_agent_main_server
@@ -362,10 +409,6 @@ def duplicate_name_agent_delete_test(server):
         register_agent = register_agent_local_server
     else:
         raise Exception('Invalid registration server')
-
-    # Register first agents
-    response = register_agent('userB', 'TestGroup')
-    create_rids('003')  # Simulate rids was created
     create_diff('userB')  # Simulate diff folder was created
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('003', True), 'Agent key was never created'
@@ -376,6 +419,7 @@ def duplicate_name_agent_delete_test(server):
 
     # Register agent with duplicate Name
     response = register_agent('userB', 'TestGroup')
+    print("RESPONSE ----------------4" + str(response))
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('004', True), 'Agent key was never created'
     assert check_client_keys('003', False), 'Agent key was not removed'
@@ -387,8 +431,8 @@ def duplicate_name_agent_delete_test(server):
     assert check_diff('userB', False), 'Agent diff folder was not removed'
 
 
-def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure_environment,
-                                     configure_sockets_environment, connect_to_sockets_module):
+def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment,
+                                     configure_sockets_environment, connect_to_sockets_module, restart_wazuh):
     '''
     description:
         Check if when the 'wazuh-authd' daemon receives an enrollment request from an agent
@@ -400,15 +444,7 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
         4.2.0
 
     parameters:
-        - get_configuration:
-            type: fixture
-            brief: Get configurations from the module.
-        - set_up_groups:
-            type: fixture
-            brief: Create a testing group for agents.
-        - configure_environment:
-            type: fixture
-            brief: Configure a custom environment for testing.
+        - get_configuration:time.sleep(5)esting.
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
@@ -431,6 +467,7 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
         - keys
         - ssl
     '''
+    
     control_service('stop', daemon='wazuh-authd')
     check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
@@ -441,15 +478,17 @@ def test_ossec_authd_agents_ctx_main(get_configuration, set_up_groups, configure
     check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
-
+    
+    set_up_groups(['TestGroup'])
     duplicate_ip_agent_delete_test("main")
     duplicate_name_agent_delete_test("main")
 
     clean_agents_ctx()
+    remove_groups(['TestGroup'])
 
 
-def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configure_environment,
-                                      configure_sockets_environment, connect_to_sockets_module):
+def test_ossec_authd_agents_ctx_local(get_configuration, configure_environment,
+                                      configure_sockets_environment, connect_to_sockets_module, restart_wazuh):
     '''
     description:
         Checks if when the 'wazuh-authd' daemon receives an enrollment request from an agent
@@ -500,8 +539,8 @@ def test_ossec_authd_agents_ctx_local(get_configuration, set_up_groups, configur
     check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
-
+    set_up_groups(['TestGroup'])
     duplicate_ip_agent_delete_test("local")
     duplicate_name_agent_delete_test("local")
-
     clean_agents_ctx()
+    remove_groups(['TestGroup'])
