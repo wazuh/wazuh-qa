@@ -25,19 +25,13 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 
 
-@pytest.fixture(scope='function')
-def clean_environment():
 
-    clean_cluster_logs(test_infra_agents + test_infra_managers, host_manager)
-
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
-
-
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("initial_status", ['active', 'disconnected'])
 @pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker1"])
-def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment):
+def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
                  Check that when an agent pointing to a master/worker node is registered using CLI tool, and when
