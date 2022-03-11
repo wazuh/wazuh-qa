@@ -3,14 +3,15 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-
-import pytest
-from wazuh_testing.tools.system import HostManager
-from system import (check_agent_groups, check_agent_status, restart_cluster, clean_cluster_logs,
-                    check_keys_file, assign_agent_to_new_group, delete_group_of_agents,
-                    remove_cluster_agents)
-from common import register_agent
 import time
+import pytest
+
+from common import register_agent
+from system import (check_agent_groups, check_agent_status, restart_cluster, clean_cluster_logs,
+                    check_keys_file, assign_agent_to_new_group, delete_group_of_agents, remove_cluster_agents)
+                    
+from wazuh_testing.tools.system import HostManager
+
 
 
 # Hosts
@@ -60,7 +61,6 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
     # Check that agent has no group assigned
     check_agent_groups(agent_id, 'Null', test_infra_managers, host_manager)
