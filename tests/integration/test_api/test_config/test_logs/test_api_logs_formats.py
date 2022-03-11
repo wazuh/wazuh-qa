@@ -165,18 +165,20 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
     json_log_monitor = FileMonitor(API_JSON_LOG_FILE_PATH)
 
     current_formats = get_configuration['configuration']['logs']['format'].split(',')
-
+    current_level = get_configuration['configuration']['logs']['level']
     send_request()
 
     expected_error =  'expected_error' in get_configuration
     if 'json' in current_formats:
         callback = callback_json_log_error if expected_error else callback_json_log_login_info
         json_result = json_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
-                                             error_message='The log was not the expected.').result()
+                                             error_message=f'JSON API {current_level} log was not been generated.'
+                                             ).result()
     if 'plain' in current_formats:
         callback = callback_plain_error if expected_error else callback_plain_log_login_info
         plain_result = wazuh_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
-                                               error_message='The log was not the expected.').result()
+                                               error_message=f'Plain API {current_level} log was not the expected.'
+                                               ).result()
     if len(current_formats) == 2:
         assert len(json_result.groups()) == len(plain_result.groups()), 'The length of the subgroups of the match is ' \
                                                                         'not equal.' \
