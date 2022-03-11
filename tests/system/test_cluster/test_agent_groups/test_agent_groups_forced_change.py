@@ -72,6 +72,7 @@ def clean_cluster_environment():
     for group in agent_groups:
         delete_group_of_agents(test_infra_managers[0], group, host_manager)
 
+
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
 def test_force_group_change(agent_host, clean_cluster_environment):
     '''
@@ -102,12 +103,11 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     restart_cluster(test_infra_agents, host_manager)
     time.sleep(10)
 
-    
+    # Check agent status in all nodes
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
-    # check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
-    # check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
-        
-    
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
@@ -118,7 +118,6 @@ def test_force_group_change(agent_host, clean_cluster_environment):
 
     # Check that agent has group set to Group2 in new node
     check_agent_groups(agent1_data[1], agent_groups[1], test_infra_managers, host_manager)
-
 
 
 def test_force_group_change_during_sync(clean_cluster_environment):
@@ -144,15 +143,14 @@ def test_force_group_change_during_sync(clean_cluster_environment):
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[1], host_manager, agent_groups[1])
     agent3_data = register_agent(test_infra_agents[2], test_infra_managers[1], host_manager, agent_groups[2])
 
-
     restart_cluster(test_infra_agents, host_manager)
     time.sleep(10)
 
-    
+    # Check agent status in all nodes
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
-    # check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
-    # check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
-    
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
