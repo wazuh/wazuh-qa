@@ -37,12 +37,13 @@ os_version:
     - Red Hat 7
     - Red Hat 6
 references:
-    - https://github.com/wazuh/wazuh-qa/issues/2506
+    - https://github.com/wazuh/wazuh-qa/issues/2510
 tags:
     - cluster
 """
 
 import os
+import time
 
 import pytest
 from wazuh_testing.tools.system import HostManager
@@ -98,8 +99,11 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-
+    replace = '\n' + '            "sync_agent_groups": 30,\n            '
     # Add modify file wazuh/framework/wazuh/core/cluster/cluster.json - "sync_agent_groups" 
+    for host in test_infra_managers:
+        host_manager.add_block_to_file(host=host, path=f"{WAZUH_PATH}/framework/wazuh/core/cluster/cluster.json",
+                                       after='"process_pool_size": 2,', before='"timeout_extra_valid": 40,', replace=replace)
 
     # Create new group
     host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
@@ -120,10 +124,11 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
 
     try:
         check_agent_groups(agent_id, 'default', test_infra_managers, host_manager)
+        
+        # add: wait sync agent groups
 
         # Check that agent has group set to dafault and then override group info
         check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
-    
 
     finally:
         # Delete group of agent
