@@ -4,6 +4,7 @@
 
 import json
 import os
+import re
 from time import sleep, time
 
 import pytest
@@ -24,8 +25,7 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 add_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
 delete_messages_path = os.path.join(local_path, 'data/delete_messages.yml')
 sync_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
-# script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
-script_path = '/wazuh-qa/tests/system/test_cluster/utils/get_wdb_agent.py'
+script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
 
 tmp_path = os.path.join(local_path, 'tmp')
 

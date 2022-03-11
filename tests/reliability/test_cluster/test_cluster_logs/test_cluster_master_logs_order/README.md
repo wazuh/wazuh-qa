@@ -9,22 +9,18 @@ This test checks the order of the logs for the three cluster tasks (`agent-info 
 ## Objective
 
 To verify that:
-- The cluster does not skip any task.
+- The cluster does not skip any task. The master node does not skip any cluster's task.
 - Tasks do not overlap. For example, to make sure that two Agent-info sync tasks do not start simultaneously.
 - Find possible errors or unfinished tasks.
 
 ## General info
 ### Parameters
 The test needs to receive one parameter (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
-- `--artifacts_path`: Path where cluster logs can be found inside each worker folder. It should follow the structure below:
+- `--artifacts_path`: Path where cluster logs can be found inside the master folder. It should follow the structure below:
     ```.
-    ├── worker_x
+    ├── master
     │   └── logs
     │       └── cluster.log
-    ├── worker_y
-    │   └── logs
-    │       └── cluster.log
-    └── ...
     ```
 - `--html=report.html`: Create a html report with the test results. 
 - `--self-contained-html`: Store all the necessary data for the report inside the html file.
@@ -32,18 +28,16 @@ The test needs to receive one parameter (artifacts) in order to be run. If this 
 #### Example output
 ```shell
 pytest tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/ --artifacts_path=/docs/agent_groups --html=report.html --self-contained-html -sxvv 
-======================================== test session starts ========================================
-platform linux -- Python 3.9.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1 -- /home/yanazaeva/git/wazuh-qa/wazuh_qa_env/bin/python3.9
-cachedir: .pytest_cache
-metadata: {'Python': '3.9.5', 'Platform': 'Linux-5.15.15-76051515-generic-x86_64-with-glibc2.31', 'Packages': {'pytest': '6.2.2', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'testinfra': '5.0.0', 'metadata': '1.11.0', 'html': '3.1.1'}}
+========================================== test session starts ==========================================
+platform linux -- Python 3.9.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
 rootdir: /home/yanazaeva/git/wazuh-qa
 plugins: testinfra-5.0.0, metadata-1.11.0, html-3.1.1
-collected 1 item                                                                                    
+collected 1 item                                                                                        
 
-tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py::test_check_logs_order_master FAILED
+tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py F [100%]
 
-============================================= FAILURES ==============================================
-___________________________________ test_check_logs_order_master ____________________________________
+=============================================== FAILURES ================================================
+_____________________________________ test_check_logs_order_master ______________________________________
 
 artifacts_path = '/docs/agent_groups'
 
@@ -64,7 +58,7 @@ artifacts_path = '/docs/agent_groups'
         if len(cluster_log_files) == 0:
             pytest.fail(f"No files found inside {artifacts_path}.")
     
-        all_workers = {'Master': LogsOrder().logs_order}
+        all_managers = {'Master': LogsOrder().logs_order}
         name = ''
     
         with open(cluster_log_files) as file:
@@ -72,21 +66,21 @@ artifacts_path = '/docs/agent_groups'
                 if result := logs_format.search(line):
                     if 'Worker' in result.group(1):
                         name = re.search('.*Worker (.*?)]', result.group(1)).group(1)
-                        if name not in all_workers:
-                            all_workers[name] = LogsOrder().logs_order
+                        if name not in all_managers:
+                            all_managers[name] = LogsOrder().logs_order
                     elif 'Master' in result.group(1):
                         name = 'Master'
     
-                    if result.group(2) in all_workers[name]:
+                    if result.group(2) in all_managers[name]:
                         if 'Local agent-groups' in result.group(2) and 'Starting' in result.group(3):
-                            for key, item in all_workers.items():
+                            for key, item in all_managers.items():
                                 assert item['Agent-groups send'][
                                            'node'] == 'root', f"Worker {key} did not finished the 'send' task."
-                        tree_info = all_workers[name][result.group(2)]
+                        tree_info = all_managers[name][result.group(2)]
                         for child in tree_info['tree'].children(tree_info['node']):
                             if re.search(child.tag, result.group(3)):
                                 # Current node is updated so the tree points to the next expected log.
-                                all_workers[name][result.group(2)]['node'] = child.identifier if \
+                                all_managers[name][result.group(2)]['node'] = child.identifier if \
                                     tree_info['tree'].children(child.identifier) else 'root'
                                 break
                         else:
@@ -101,14 +95,12 @@ artifacts_path = '/docs/agent_groups'
 E                           Failed: [CLUSTER-Workload_benchmarks_metrics_B77_manager_1]
 E                            - Log type: Agent-groups send
 E                            - Expected logs: ['Finished in.*chunks updated.*']
-E                            - Found log: Fittttnished in 0.004s (1 chunks updated).
+E                            - Found log: Starting.
 
 tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py:96: Failed
---------------- generated html file: file:///home/yanazaeva/git/wazuh-qa/report.html ----------------
-====================================== short test summary info ======================================
+======================================== short test summary info ========================================
 FAILED tests/reliability/test_cluster/test_cluster_logs/test_cluster_master_logs_order/test_cluster_master_logs_order.py::test_check_logs_order_master
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-========================================= 1 failed in 0.33s =========================================
+=========================================== 1 failed in 0.18s ===========================================
 ```
 
 ### Adding or modifying logs order
