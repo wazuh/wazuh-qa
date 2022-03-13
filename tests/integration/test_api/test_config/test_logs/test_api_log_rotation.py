@@ -27,7 +27,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def time_machine_to_midnight():
     now = datetime.strptime(datetime.now().strftime(date_format_str), date_format_str)
     hours, minutes, seconds = [int(x) for x in now.strftime(date_format_str)[-8:].split(':')]
@@ -58,7 +58,7 @@ def test_api_log_rotation(get_configuration, configure_api_environment, clean_lo
     sleep(WAIT_FOR_MIDNIGHT)
 
     if 'plain' in current_formats:
-        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f'api-{day}.log.gz'))
+        file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f'api.log-{day}.gz'))
         assert file_exists, 'The plain log was not rotated.'
     if 'json' in current_formats:
         file_exists = os.path.isfile(os.path.join(WAZUH_PATH, 'logs', 'api', year, month, f'api.json-{day}.gz'))
