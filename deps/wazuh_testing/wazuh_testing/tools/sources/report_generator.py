@@ -3,25 +3,36 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import re
-
+import numpy as np
+import pandas as pd
 from datetime import datetime
 from itertools import groupby
 from mmap import ACCESS_READ, mmap
 
-import numpy as np
-import pandas as pd
-
 
 class LogAnalyzer:
+    """This class group several statics method to gather specific information from Wazuh logs."""
     error_codes = ['warning', 'error', 'critical']
 
     @staticmethod
     def get_log_timestamp(line):
+        """Get the timestamp of the line.
+
+        Args:
+            component (str): Log line.
+        """
         timestamp_match = re.match(r"^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", line)
         return datetime.strptime(timestamp_match.group(1), '%Y/%m/%d %H:%M:%S') if timestamp_match else None
 
     @staticmethod
     def findall_regex_line(lines, regex, flags=None):
+        """Get all the lines that match certain regex.
+
+        Args:
+            Lines (list): List of lines.
+            regex (str): Regex to match.
+            flags (str): Flags to use in the findall regex method.
+        """
         if flags:
             error_lines = re.findall(bytes(regex, encoding='utf8'), lines, flags=flags)
         else:
@@ -32,6 +43,12 @@ class LogAnalyzer:
 
     @staticmethod
     def get_error_log_file(log_path, type='error'):
+        """Get all the lines of the specified type of the log file.
+
+        Args:
+            log_path (list): Log path-
+            type (str): Type of log to search.
+        """
         error_lines = []
         if os.path.getsize(log_path) != 0:
             with open(log_path) as f:
@@ -43,6 +60,11 @@ class LogAnalyzer:
 
     @staticmethod
     def get_error_logs_hosts(log_dict):
+        """Get all the error/warning/critical logs of the logs dictionary.
+
+        Args:
+            log_dict (dict): Dictionary with the name of the host and the log path.
+        """
         error_dict = {'critical': [], 'error': [], 'warning': []}
         for type in LogAnalyzer.error_codes:
             for host_log in log_dict:
@@ -59,6 +81,11 @@ class LogAnalyzer:
 
     @staticmethod
     def keep_alive_log_parser(log_files):
+        """Get keep-alive information of the manager log.
+
+        Args:
+            log_files (list): List of manager logs to gather agent connection information.
+        """
         keep_alive_regex = '(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading ' + \
             "'(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)"
 
@@ -114,8 +141,15 @@ class LogAnalyzer:
 
 
 class StatisticsAnalyzer:
+    """This class group several statics method to gather specific information from Wazuh statistics."""
     @staticmethod
     def calculate_values(statistis_files, fields):
+        """Calculate statistical values of the specified files.
+
+        Args:
+            statistis_files (list): List of statistics csv files.
+            fields (list): List of fields to calculate certain statisticals values.
+        """
         n_stats = len(statistis_files)
         mean_fields = {}
 
@@ -171,6 +205,11 @@ class StatisticsAnalyzer:
         return mean_fields
 
     def analyze_agentd_statistics(agentd_statistics_files):
+        """Create a report for wazuh-agentd daemon.
+
+        Args:
+            agentd_statistics_files (dict): Agentd statistics files.
+        """
         # Status
         n_stats = len(agentd_statistics_files)
         agentd_report = {
@@ -230,7 +269,11 @@ class StatisticsAnalyzer:
         return agentd_report
 
     def analyze_remoted_statistics(remoted_statistics_files):
+        """Create a report for wazuh-remoted daemon.
 
+        Args:
+            agentd_statistics_files (dict): Remoted statistics files.
+        """
         remoted_report = StatisticsAnalyzer.calculate_values(remoted_statistics_files,
                                                              ['queue_size', 'total_queue_size', 'tcp_sessions',
                                                               'evt_count', 'ctrl_msg_count', 'discarded_count',
@@ -240,6 +283,24 @@ class StatisticsAnalyzer:
 
 
 class ReportGenerator:
+    """This class generates a Python object to generate a JSON report, that synthesizes the state of the environment.
+
+    This class will use an artifact folder with specified format in order to gather data from logs, statistics and
+    metrics. All this data will be used to the generation of an environment report during the uptime.
+
+    Args:
+        target (str): Artifact path.
+
+    Attributes:
+        artifact_path (str): Root artifact path.
+        agents_path (str): Agents artifact path.
+        managers_path (str): Managers artifact path.
+        master_path (str): Master artifact path.
+        worker_path (str): Worker artifact path.
+        n_workers (str): Number of workers nodes.
+        n_agents (str): Number of agents.
+        cluster_environment (boolean): Cluster or single node environment.
+    """
     def __init__(self, artifact_path):
 
         if os.path.isdir(artifact_path):
@@ -293,6 +354,12 @@ class ReportGenerator:
         self.n_agents = len(os.listdir(agents_path))
 
     def get_instances_artifacts(self, component, hosts_regex=".*"):
+        """Get the artifact path for specified hosts_regex
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         artifacts_files = []
         if component == 'all':
             artifacts_files += self.get_instances_artifacts('managers', hosts_regex)
@@ -308,11 +375,22 @@ class ReportGenerator:
         return artifacts_files
 
     def get_instance_all_log_files(self, hostname):
+        """Get all the logs paths files of the specified host.
+
+        Args:
+            hostname (str): Hostname to get all the logs files.
+        """
         files = os.path.join(self.get_instances_artifacts('all', hostname)[0]['path'], 'logs')
         host_log_list = [log for log in os.listdir(files)]
         return host_log_list
 
     def get_instances_logs(self, log, component, hosts_regex=".*"):
+        """Get the logs path for specified hosts_regex
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         artifacts_paths = self.get_instances_artifacts(component, hosts_regex)
         for host_artifact_path in artifacts_paths:
             host_artifact_path['logs'] = {}
@@ -326,6 +404,12 @@ class ReportGenerator:
         return artifacts_paths
 
     def get_instances_process_metrics(self, process, component, hosts_regex='.*'):
+        """Get the metrics statistics path for specified hosts_regex
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         files = self.get_instances_artifacts(component, hosts_regex)
         for file in files:
             file.update((host, os.path.join(artifact_path, 'data', 'binaries', process + '.csv'))
@@ -333,18 +417,36 @@ class ReportGenerator:
         return files
 
     def get_instances_statistics(self, statistic, component, hosts_regex='.*'):
+        """Get the daemons statistics path for specified hosts_regex
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         files = self.get_instances_artifacts(component, hosts_regex)
         for file in files:
             file['path'] = os.path.join(file['path'], 'data', 'stats', statistic + '_stats.csv')
         return files
 
     def agentd_report(self, component='agents', hosts_regex='.*'):
+        """Generate wazuh-agentd daemon report, combining metric and statistics.
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         agentd_report = StatisticsAnalyzer.analyze_agentd_statistics(self.get_instances_statistics('wazuh-agentd',
                                                                                                    component,
                                                                                                    hosts_regex))
         return agentd_report
 
     def remoted_report(self, component='managers', hosts_regex='.*'):
+        """Generate wazuh-remoted daemon report, combining metric and statistics.
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
         remoted_report = StatisticsAnalyzer.analyze_remoted_statistics(self.get_instances_statistics('wazuh-remoted',
                                                                                                      component,
                                                                                                      hosts_regex))
@@ -355,6 +457,7 @@ class ReportGenerator:
         return remoted_report
 
     def make_report(self):
+        """Build the JSON report of the environment."""
         report = {}
 
         report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
