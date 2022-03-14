@@ -40,18 +40,17 @@ references:
 tags:
     - cluster
 """
-
-
 import os
+import time
 
 import pytest
-from wazuh_testing.tools.system import HostManager
-from system import (check_agent_groups, check_agent_status, clean_cluster_logs,
-                    check_keys_file, delete_group_of_agents,
-                    remove_cluster_agents, assign_agent_to_new_group, restart_cluster)
+
 from common import register_agent
+from system import (AGENT_STATUS_ACTIVE, check_agent_groups, check_agent_status, check_keys_file,
+                    delete_group_of_agents, remove_cluster_agents, assign_agent_to_new_group, restart_cluster)
+from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
-import time
+
 
 
 # Hosts
@@ -63,23 +62,20 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
+
+# Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
 timeout = 10
 
 
-@pytest.fixture(scope='function')
-def clean_environment():
-
-    clean_cluster_logs(test_infra_agents + test_infra_managers, host_manager)
-
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
-
-
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
 @pytest.mark.parametrize("agent_target", ['wazuh-master','wazuh-worker1'])
-def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment):
+def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
+                                 test_infra_agents, host_manager):
     '''
     description: Check that when an agent registered inthe manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
@@ -91,6 +87,15 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_managers
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -100,7 +105,6 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
     group_id = 'group_test'
-
     # Modify local_internal_options
     replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
 
@@ -130,7 +134,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
 
-        check_agent_status(agent_id, agent_name, agent_ip, 'active', host_manager, test_infra_managers)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
         # Remove the agent
         remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
@@ -145,7 +149,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         # Restart agent
         restart_cluster(test_infra_agents, host_manager)
         time.sleep(timeout)
-        check_agent_status(agent_id, agent_name, agent_ip, 'active', host_manager, test_infra_managers)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
         # Check if remoted.guess_agent_group is disabled
         if(int(status_guess_agent_group) == 0):
@@ -154,4 +158,4 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
 
     finally:
         # Delete group of agent
-        delete_group_of_agents(test_infra_managers[0], 'group_test', host_manager)
+        delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
