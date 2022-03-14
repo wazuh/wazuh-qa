@@ -4,7 +4,7 @@
 
 Check that logs in the cluster nodes are printed in the expected order.
 
-This test checks the order of the logs for the three cluster tasks (`agent-info sync`, `integrity check` and `integrity sync`) in the worker nodes. 
+This test checks the order of the logs for the three cluster tasks (`agent-groups send`, `Local agent-groups` and `agent-groups full DB`) in the master nodes. 
 
 ## Objective
 
