@@ -179,7 +179,7 @@ def test_multigroups_not_reloaded(clean_files, agent_healthcheck, create_multigr
 
 
 @pytest.mark.parametrize('target_group', [
-    random.choice(agent_groups['wazuh-agent1'][1:]),
+    agent_groups['wazuh-agent1'][1],
     'default'
 ])
 def test_multigroups_updated(clean_files, agent_healthcheck, create_multigroups, target_group):
