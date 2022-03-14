@@ -244,58 +244,6 @@ def test_extra_files(clean_files):
             assert result == '', f"File {file} was expected to be removed from {host}, but it still exists."
 
 
-def not_test_extra_valid_files(clean_files):
-    """Check that extra_valid files created in the workers are copied in the master.
-
-    Register two agents, wait and check that the client.keys file have been updated in all worker nodes.
-    Then, each worker creates an 'agent-groups' file for one of the created agents. Files inside
-    /var/ossec/queue/agent-groups are 'extra_valid' according to cluster.json, so they should be sent to the master.
-
-    This test is no longer in use, but it could be useful in the future.
-    """
-    # Modulesd will delete any file inside 'agent-groups' dir if its ID is not inside client.keys.
-    registered_ids = list()
-    for _ in range(len(worker_hosts)):
-        result = host_manager.make_api_call('wazuh-master', method='POST', endpoint='/agents',
-                                            request_body={'name': token_hex(16)},
-                                            token=host_manager.get_api_token('wazuh-master'))
-        assert result['status'] == 200, f"Failed to register agent: {result}"
-        registered_ids.append(result['json']['data']['id'])
-
-    master_client_keys = host_manager.run_command(test_hosts[0], f"cat {client_keys_path}")
-    time.sleep(time_to_sync)
-
-    for i, host in enumerate(worker_hosts):
-        # Check the client.keys files is correctly updated in the workers.
-        worker_client_keys = host_manager.run_command(host, f"cat {client_keys_path}")
-        assert master_client_keys == worker_client_keys, f"The client.keys file is not the same in the master and" \
-                                                         f"in the {host} ->" \
-                                                         f"\nMaster client keys:\n{master_client_keys}" \
-                                                         f"\nWorker client keys:\n{worker_client_keys}"
-
-        # Create an 'agent-groups' file in each worker, using the ID of the agent registered above.
-        agent_groups_file = os.path.join(WAZUH_PATH, 'queue', 'agent-groups', registered_ids[i])
-        host_manager.run_command(host, f"touch {agent_groups_file}")
-        host_manager.run_command(host, f"chown wazuh:wazuh {agent_groups_file}")
-
-    time.sleep(time_to_sync)
-
-    # Check that the files created in the workers are in the master node now.
-    for id_ in registered_ids:
-        agent_groups_file = os.path.join(WAZUH_PATH, 'queue', 'agent-groups', id_)
-        ls_result = host_manager.run_command(test_hosts[0], f"ls {agent_groups_file}")
-        assert ls_result == agent_groups_file, f"File {agent_groups_file} was expected to be copied in " \
-                                               f"{test_hosts[0]}, but it was not."
-
-    # Delete the agents and the files created
-    host_manager.make_api_call('wazuh-master', method='DELETE', token=host_manager.get_api_token('wazuh-master'),
-                               endpoint=f"/agents?older_than=0s&agents_list={','.join(registered_ids)}")
-    for id_ in registered_ids:
-        host_manager.run_command(test_hosts[0], f"rm -rf {os.path.join(WAZUH_PATH, 'queue', 'agent-groups', id_)}")
-    # Wait until they are deleted in all nodes.
-    time.sleep(time_to_sync)
-
-
 def test_zip_size_limit(clean_files, update_cluster_json):
     """Check if zip size limit works and if it is dynamically adapted.
 

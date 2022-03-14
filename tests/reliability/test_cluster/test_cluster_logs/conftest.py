@@ -17,6 +17,7 @@ def pytest_addoption(parser):
         help="Path where information of all cluster nodes can be found (logs, stats CSVs, etc)."
     )
 
+
 # Fixtures
 @pytest.fixture()
 def artifacts_path(pytestconfig):
@@ -67,6 +68,7 @@ def pytest_html_results_table_row(report, cells):
     except AttributeError:
         pass
 
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     def atoi(text):
@@ -101,9 +103,11 @@ def pytest_runtest_makereport(item, call):
                     log_line.decode() for log_line in logs) + '</p>'))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
-        # Attach wrong order logs per each node in the 'test_check_logs_order_workers' test.
-        elif report.head_line == 'test_check_logs_order_workers' and item.module.incorrect_order:
-            extra.append(pytest_html.extras.html("<h2>Wrong worker logs order</h2>"))
+        # Attach wrong order logs per each node in the 'test_check_logs_order' tests (both master's and workers').
+        elif report.head_line == 'test_check_logs_order_workers' or report.head_line == 'test_check_logs_order_master' \
+                and item.module.incorrect_order:
+            extra.append(pytest_html.extras.html("<h2>Wrong worker logs order</h2>" if 'workers' in report.head_line
+                                                 else "<h2>Wrong master logs order</h2>"))
             # Keys are human/natural sorted.
             for key in sorted(item.module.incorrect_order.keys(),
                               key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d)]):
@@ -112,17 +116,6 @@ def pytest_runtest_makereport(item, call):
                     extra.append(pytest_html.extras.html('<b> - Log type:</b> {log_type}\n'
                                                          '<b>   Expected logs:</b> {expected_logs}\n'
                                                          '<b>   Found log:</b> {found_log}'.format(**failed_task)))
-            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
-
-        elif report.head_line == 'test_check_logs_order_master' and item.module.incorrect_order:
-            extra.append(pytest_html.extras.html("<h2>Wrong master logs order</h2>"))
-            # Keys are human/natural sorted.
-
-            for item in item.module.incorrect_order:
-                extra.append(pytest_html.extras.html('<p><b>{name}:</b>\n'
-                                                     '<b> - Log type:</b> {log_type}\n'
-                                                     '<b> - Expected logs:</b> {expected_logs}\n'
-                                                     '<b> - Found log:</b> {found_log}</p>'.format(**item)))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         # Attach repeated Integrity synchronizations per each node in the 'test_cluster_sync' test.

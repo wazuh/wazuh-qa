@@ -49,8 +49,6 @@ def clean_cluster_logs():
         # Its required to restart each node after clearing the log files
         host_manager.get_host(host).ansible('command', 'service wazuh-manager restart', check=False)
 
-    yield
-
 
 def obtain_agent_id(token, agent):
     """Obtain agent's ID.
@@ -100,11 +98,12 @@ def check_agent_status(status, token, agent):
     sleep(time_to_sync)
 
 
-def test_agent_groups_create_group(clean_cluster_logs):
+def test_agent_groups_create_remove_group(clean_cluster_logs):
     """Check agent agent-groups synchronization works as expected.
 
-    This test will wait for the expected agent-groups messages declared in data/synchronization_messages.yml. Additionally, it will
-    ensure agent-group synchronization is working by adding a group to an agent."""
+    This test will wait for the expected agent-groups messages declared in data/synchronization_messages.yml and
+    data/delete_messages.yml. Additionally, it will ensure agent-group synchronization is working by adding a group to
+    an agent and removing it afterwards."""
 
     # Get the token
     master_token = host_manager.get_api_token(master_host)
@@ -151,25 +150,8 @@ def test_agent_groups_create_group(clean_cluster_logs):
         result = json.loads(result[1:-1].replace("'", '"'))
         assert test_group in result['data'][0]['groups']
 
+    # Check whether the addition messages are present.
     HostMonitor(inventory_path=inventory_path, messages_path=add_messages_path, tmp_path=tmp_path).run()
-
-
-def test_agent_groups_remove_group(clean_cluster_logs):
-    """Check agent agent-groups synchronization works as expected.
-
-    This test will wait for the expected agent-groups messages declared in data/delete_messages.yml. Additionally, it will
-    ensure agent-group synchronization is working by removing an agent from group."""
-
-    # Get the token
-    master_token = host_manager.get_api_token(master_host)
-
-    # Make sure that the agent is registered and active
-    check_agent_status('active', master_token, modified_agent)
-
-    # Obtain agent's ID
-    agent_id = obtain_agent_id(master_token, modified_agent)
-    previous_agent_id = obtain_agent_id(master_token, last_agent)
-    queries.append(f'global sync-agent-groups-get {"{"}"condition":"all", "last_id":{previous_agent_id}{"}"}')
 
     # Remove group from agent
     response = host_manager.make_api_call(host=master_host, method='DELETE', token=master_token,
@@ -203,4 +185,5 @@ def test_agent_groups_remove_group(clean_cluster_logs):
                                           f"{script_path} '{queries[0].format(name=test_group)}'")
         assert not result, f"This db query should not have returned anything in {host}, but it did: {result}"
 
+    # Check whether the deletion messages are present.
     HostMonitor(inventory_path=inventory_path, messages_path=delete_messages_path, tmp_path=tmp_path).run()

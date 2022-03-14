@@ -4,11 +4,28 @@
 
 import os
 import re
-from glob import glob
 
 import pytest
 import treelib
 from yaml import safe_load
+
+# Configuration
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+logs_format = re.compile(r'(.*) \[(Local agent-groups|Agent-groups full DB|Agent-groups send)] (.*)')
+incorrect_order = []
+
+
+# Classes
+class LogsOrder:
+    """This class contains the logs order object."""
+
+    def __init__(self):
+        self.logs_order = {
+            ' '.join(filename.split('.')[0].split('_')): {
+                'tree': dict_to_tree(safe_load(open(os.path.join(test_data_path, filename)))),
+                'node': 'root'
+            } for filename in os.listdir(test_data_path)
+        }
 
 
 # Functions
@@ -27,25 +44,7 @@ def dict_to_tree(dict_tree):
     return tree
 
 
-# Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-logs_format = re.compile(r'(.*) \[(Local agent-groups|Agent-groups full DB|Agent-groups send)] (.*)')
-node_name = 'master'
-incorrect_order = []
-
-
-class LogsOrder:
-    """This class contains the logs order object."""
-
-    def __init__(self):
-        self.logs_order = {
-            ' '.join(filename.split('.')[0].split('_')): {
-                'tree': dict_to_tree(safe_load(open(os.path.join(test_data_path, filename)))),
-                'node': 'root'
-            } for filename in os.listdir(test_data_path)
-        }
-
-
+# Tests
 def test_check_logs_order_master(artifacts_path):
     """Check that cluster logs appear in the expected order.
 
@@ -60,7 +59,7 @@ def test_check_logs_order_master(artifacts_path):
 
     cluster_log_files = os.path.join(artifacts_path, 'master', 'logs', 'cluster.log')
 
-    if len(cluster_log_files) == 0:
+    if not os.path.exists(cluster_log_files):
         pytest.fail(f"No files found inside {artifacts_path}.")
 
     all_managers = {'Master': LogsOrder().logs_order}
@@ -69,35 +68,35 @@ def test_check_logs_order_master(artifacts_path):
     with open(cluster_log_files) as file:
         for line in file.readlines():
             if result := logs_format.search(line):
-                if 'Worker' in result.group(1):
-                    name = re.search('.*Worker (.*?)]', result.group(1)).group(1)
+                node_name = result.group(1)
+                if 'Worker' in node_name:
+                    name = re.search('.*Worker (.*?)]', node_name).group(1)
                     if name not in all_managers:
                         all_managers[name] = LogsOrder().logs_order
-                elif 'Master' in result.group(1):
+                elif 'Master' in node_name:
                     name = 'Master'
 
-                if result.group(2) in all_managers[name]:
-                    if 'Local agent-groups' in result.group(2) and 'Starting' in result.group(3):
+                log_tag = result.group(2)
+                full_log = result.group(3)
+
+                if log_tag in all_managers[name]:
+                    if 'Local agent-groups' in log_tag and 'Starting' in full_log:
                         for key, item in all_managers.items():
                             assert item['Agent-groups send'][
                                        'node'] == 'root', f"Worker {key} did not finished the 'send' task."
-                    tree_info = all_managers[name][result.group(2)]
+                    tree_info = all_managers[name][log_tag]
                     for child in tree_info['tree'].children(tree_info['node']):
-                        if re.search(child.tag, result.group(3)):
+                        if re.search(child.tag, full_log):
                             # Current node is updated so the tree points to the next expected log.
-                            all_managers[name][result.group(2)]['node'] = child.identifier if \
+                            all_managers[name][log_tag]['node'] = child.identifier if \
                                 tree_info['tree'].children(child.identifier) else 'root'
                             break
                     else:
-                        incorrect_order.append({'name': name, 'log_type': result.group(2),
+                        incorrect_order.append({'node': name, 'log_type': log_tag,
                                                 'expected_logs': [log.tag for log in
                                                                   tree_info['tree'].children(tree_info['node'])],
-                                                'found_log': result.group(3)})
-                        pytest.fail(f"[{incorrect_order[0]['name']}]"
+                                                'found_log': full_log})
+                        pytest.fail(f"[{incorrect_order[0]['node']}]"
                                     f"\n - Log type: {incorrect_order[0]['log_type']}"
                                     f"\n - Expected logs: {incorrect_order[0]['expected_logs']}"
                                     f"\n - Found log: {incorrect_order[0]['found_log']}")
-
-    # Update status of all logs so they point to their tree root.
-    for log_type, tree_info in all_managers[name].items():
-        tree_info['node'] = 'root'
