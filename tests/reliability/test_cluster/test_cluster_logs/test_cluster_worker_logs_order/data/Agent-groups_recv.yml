@@ -17,26 +17,23 @@
 # No need to synchronize.
 - log_id: log3
   parent: log2
-  tag: 'There is no data requiring synchronization in the local database.*'
+  tag: 'The checksum of both databases match.*'
 - log_id: log4
   parent: log3
-  tag: 'The checksum of both databases match.*'
-- log_id: log5
-  parent: log4
   tag: 'Finished in.*Updated.*chunks.*'
 
 # Synchronization needed.
-- log_id: log6
+- log_id: log5
   parent: log2
   tag: 'Checksum comparison failed. Attempt.*'
-- log_id: log7
-  parent: log6
+- log_id: log6
+  parent: log5
   tag: 'Finished in.*Updated.*chunks.*'
 
-# Synchronization needed.
-- log_id: log8
-  parent: log6
+# Forced synchronization is required.
+- log_id: log7
+  parent: log5
   tag: 'Sent request to obtain all agent-groups information from the master node.*'
-- log_id: log9
-  parent: log8
+- log_id: log8
+  parent: log7
   tag: 'Finished in.*Updated.*chunks.*'

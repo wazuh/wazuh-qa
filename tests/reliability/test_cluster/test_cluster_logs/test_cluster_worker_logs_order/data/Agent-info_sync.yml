@@ -25,15 +25,7 @@
   tag: 'Obtained [1-9][0-9]* chunks of data in.*'
 - log_id: log5
   parent: log4
-  tag: 'All chunks sent.*'
+  tag: 'Sending chunks.*'
 - log_id: log6
   parent: log5
   tag: 'Finished in .* \(.* chunks updated\).*'
-
-# Race condition: 'All chunks sent' arrives (sometimes) after 'Finished in'.
-- log_id: log7
-  parent: log4
-  tag: 'Finished in .* \(.* chunks updated\).*'
-- log_id: log8
-  parent: log7
-  tag: 'All chunks sent.*'

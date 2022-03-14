@@ -20,11 +20,3 @@
 - log_id: log3
   parent: log0
   tag: 'No clients connected. Skipping.*'
-
-# Errors.
-- log_id: log5
-  parent: log0
-  tag: 'Error obtaining data from wazuh-db: Error 2003 - Error in wazuhdb request.*'
-- log_id: log6
-  parent: log5
-  tag: 'Finished in.*'

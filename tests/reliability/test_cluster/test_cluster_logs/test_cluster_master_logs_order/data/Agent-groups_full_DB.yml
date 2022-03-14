@@ -6,7 +6,7 @@
 # Common logs
 - log_id: log0
   parent: root
-  tag: 'Obtained 1 chunks of data in.*'
+  tag: 'Obtained.*chunks of data in.*'
 - log_id: log1
   parent: log0
   tag: 'Requested entire agent-groups information by the worker node. Starting.*'
