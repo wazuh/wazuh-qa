@@ -49,7 +49,7 @@ import pytest
 from wazuh_testing.tools.system import HostManager
 from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
                     change_agent_group_with_wdb, restart_cluster, clean_cluster_logs, delete_group_of_agents,
-                    check_agent_status)
+                    check_agent_status, AGENT_STATUS_ACTIVE)
 from system.test_cluster.test_agent_groups.common import register_agent
 
 # Hosts
@@ -63,18 +63,12 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.fixture(scope='function')
-def clean_cluster_environment():
-    clean_cluster_logs(test_infra_managers + test_infra_agents, host_manager)
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
-    for group in agent_groups:
-        delete_group_of_agents(test_infra_managers[0], group, host_manager)
-
-
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_force_group_change(agent_host, clean_cluster_environment):
+def test_force_group_change(agent_host, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check that having a series of agents assigned with different groups, when an new node is added to
     the cluster, the group data is synchronized to the new node.
@@ -83,9 +77,18 @@ def test_force_group_change(agent_host, clean_cluster_environment):
         - agent_host:
             type: string
             brief: name of the host where the agent will register
-        - clean_cluster_enviroment:
+        - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_managers
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
@@ -104,9 +107,9 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     time.sleep(10)
 
     # Check agent status in all nodes
-    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
-    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
-    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
@@ -120,7 +123,11 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     check_agent_groups(agent1_data[1], agent_groups[1], test_infra_managers, host_manager)
 
 
-def test_force_group_change_during_sync(clean_cluster_environment):
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
+def test_force_group_change_during_sync(clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check that having a series of agents assigned with different groups, when an new node is added to
     the cluster, the group data is synchronized to the new node.
@@ -129,6 +136,15 @@ def test_force_group_change_during_sync(clean_cluster_environment):
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_managers
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
@@ -147,9 +163,9 @@ def test_force_group_change_during_sync(clean_cluster_environment):
     time.sleep(10)
 
     # Check agent status in all nodes
-    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
-    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
-    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
     # Check that agent has the expected group assigned in all nodes
     check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)

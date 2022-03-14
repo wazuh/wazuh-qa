@@ -88,7 +88,7 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
-        assert group_to_check in group_data
+        assert group_to_check in group_data, f"Didn't find the expected group: {group_to_check} in the agent's group list: {group_data}"
 
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
@@ -103,7 +103,7 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
     # List format: [f"{agent_id}  {agent_name}  {agent_ip}  {status}",...]
     data = get_agents_in_cluster(host, host_manager)
     for status in agent_expected_status_list:
-        assert status in data
+        assert status in data, f"Didn't recieve the agent status: {status} in the node's data: {data}"
 
 
 def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
