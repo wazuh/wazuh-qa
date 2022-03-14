@@ -41,11 +41,11 @@ tags:
     - cluster
 """
 import os
-
 import pytest
 
 from common import register_agent
-from system import check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents
+from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
+                    AGENT_STATUS_NEVER_CONNECTED)
 from wazuh_testing.tools.system import HostManager
 
 
@@ -104,13 +104,13 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
                                                                     host_manager, id_group)
 
         # Check that agent status is never_connected in cluster
-        check_agent_status(agent_id, agent_name, agent_ip, 'never_connected', host_manager, test_infra_managers)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_NEVER_CONNECTED, host_manager, test_infra_managers)
 
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
 
         # Check that agent has client key file
-        assert check_keys_file(test_infra_agents[0], host_manager)
+        assert check_keys_file(test_infra_agents[0], host_manager), f'Did not find the expected keys generated in the master node.'
 
     finally:
         # Delete group of agent
