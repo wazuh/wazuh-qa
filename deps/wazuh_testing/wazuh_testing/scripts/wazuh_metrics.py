@@ -43,7 +43,7 @@ def get_script_arguments():
                         help='Enable debug level logging.')
     parser.add_argument('-H', '--healthcheck-time', dest='healthcheck_time', action='store', default=10, type=int,
                         help='Time in seconds between each health check.')
-    parser.add_argument('-r', '--retries', dest='health_retries', action='store', default=5, type=int,
+    parser.add_argument('-r', '--retries', dest='health_retries', action='store', default=10, type=int,
                         help='Number of reconnection retries before aborting the monitoring process.')
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
