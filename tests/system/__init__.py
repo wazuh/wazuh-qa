@@ -11,9 +11,11 @@ def get_agent_id(host_manager):
     # Gets the first agent id in the master's client.keys file
     return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
+
 def get_id_from_agent(agent, host_manager):
     # Get the agent id from the agent's client.keys file
     return host_manager.run_command(agent, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+
 
 def restart_cluster(hosts_list, host_manager):
     # Restart the cluster's hosts
@@ -36,7 +38,7 @@ def remove_cluster_agents(wazuh_master, agents_list, host_manager):
     agent_id = get_agent_id(host_manager)
     while (agent_id != ''):
         host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                  check=False)
+                                                    check=False)
         agent_id = get_agent_id(host_manager)
     for agent in agents_list:
         host_manager.control_service(host=agent, service='wazuh', state="stopped")
@@ -52,9 +54,11 @@ def check_keys_file(host, host_manager):
     # Checks that the key file is not empty in a host
     return host_manager.get_file_content(host, os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
+
 def create_new_agent_group(host, group_name, host_manager):
     # Creates an agent group
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {group_name}")
+
 
 # Create new group and assing agent
 def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
@@ -74,14 +78,16 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
-        assert group_to_check in group_data
+        assert group_to_check in group_data, f"Didn't find the expected group: {group_to_check} in the agent's group \
+                                               list: {group_data}"
 
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
     for host in hosts_list:
-        data= get_agents_in_cluster(host, host_manager)
-        assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data
+        data = get_agents_in_cluster(host, host_manager)
+        assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data, f"Didn't recieve the agent status: {status} \
+                                                                            in the node's data: {data}"
 
 
 def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
@@ -90,3 +96,10 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
     data = get_agents_in_cluster(host, host_manager)
     for status in agent_expected_status_list:
         assert status in data
+
+
+def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
+    # Uses wdb commands to change the group of an agent
+    query = f'{"id":{agent_id}, "group":"{new_group}"}'
+    group_data = host_manager.run_command(host, f"{WAZUH_PATH}/bin/query-wdb global 'update-agent-group {query}'")
+    return group_data
