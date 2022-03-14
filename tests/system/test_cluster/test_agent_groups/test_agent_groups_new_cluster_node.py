@@ -137,7 +137,7 @@ def test_agent_groups_sync_worker_new_node(clean_environment, test_infra_manager
     is added to the cluster, the group data is synchronized to the new node.
     wazuh_min_version: 4.4.0
     parameters:
-        - clean_cluster_enviroment:
+        - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
