@@ -46,10 +46,10 @@ import os
 import time
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
-from system import (create_new_agent_group, check_agent_groups, check_agents_status_in_node, remove_cluster_agents,
-                    change_agent_group_with_wdb, restart_cluster, clean_cluster_logs, delete_group_of_agents)
+from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
+                    change_agent_group_with_wdb, restart_cluster, clean_cluster_logs, delete_group_of_agents,
+                    check_agent_status)
 from system.test_cluster.test_agent_groups.common import register_agent
 
 # Hosts
@@ -72,6 +72,7 @@ def clean_cluster_environment():
     for group in agent_groups:
         delete_group_of_agents(test_infra_managers[0], group, host_manager)
 
+
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
 def test_force_group_change(agent_host, clean_cluster_environment):
     '''
@@ -79,7 +80,10 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     the cluster, the group data is synchronized to the new node.
     wazuh_min_version: 4.4.0
     parameters:
-        - clean_enviroment:
+        - agent_host:
+            type: string
+            brief: name of the host where the agent will register
+        - clean_cluster_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
     assertions:
@@ -96,26 +100,24 @@ def test_force_group_change(agent_host, clean_cluster_environment):
     agent2_data = register_agent(test_infra_agents[1], agent_host, host_manager, agent_groups[1])
     agent3_data = register_agent(test_infra_agents[2], agent_host, host_manager, agent_groups[2])
 
-    agent_status_list = [f"{agent1_data[1]}  {agent1_data[2]}  {agent1_data[0]}  active",
-                         f"{agent2_data[1]}  {agent2_data[2]}  {agent2_data[0]}  active",
-                         f"{agent3_data[1]}  {agent3_data[2]}  {agent3_data[0]}  active"]
-
     restart_cluster(test_infra_agents, host_manager)
-    # Check that agent status is active in cluster
-    for host in test_infra_managers:
-        check_agents_status_in_node(agent_status_list, host, host_manager)
-    
+    time.sleep(10)
+
+    # Check agent status in all nodes
+    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+
     # Check that agent has the expected group assigned in all nodes
-    check_agent_groups(agent1_data[1], agent_groups[0], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
-    check_agent_groups(agent2_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
-    check_agent_groups(agent3_data[1], agent_groups[2], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+    check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
+    check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
+    check_agent_groups(agent3_data[1], agent_groups[2], test_infra_managers, host_manager)
 
     # Force group change on wazuh-agent1
     change_agent_group_with_wdb(agent1_data[1], agent_groups[1], test_infra_managers[0], host_manager)
 
-    # Check that agent has group set to default in new node
-    check_agent_groups(agent1_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
-
+    # Check that agent has group set to Group2 in new node
+    check_agent_groups(agent1_data[1], agent_groups[1], test_infra_managers, host_manager)
 
 
 def test_force_group_change_during_sync(clean_cluster_environment):
@@ -141,23 +143,22 @@ def test_force_group_change_during_sync(clean_cluster_environment):
     agent2_data = register_agent(test_infra_agents[1], test_infra_managers[1], host_manager, agent_groups[1])
     agent3_data = register_agent(test_infra_agents[2], test_infra_managers[1], host_manager, agent_groups[2])
 
-    agent_status_list = [f"{agent1_data[1]}  {agent1_data[2]}  {agent1_data[0]}  active",
-                         f"{agent2_data[1]}  {agent2_data[2]}  {agent2_data[0]}  active",
-                         f"{agent3_data[1]}  {agent3_data[2]}  {agent3_data[0]}  active"]
-
     restart_cluster(test_infra_agents, host_manager)
-    # Check that agent status is active in cluster
-    for host in test_infra_managers:
-        check_agents_status_in_node(agent_status_list, host, host_manager)
-    
+    time.sleep(10)
+
+    # Check agent status in all nodes
+    check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent2_data[1], agent2_data[2], agent2_data[0], 'active', host_manager, test_infra_managers)
+    check_agent_status(agent3_data[1], agent3_data[2], agent3_data[0], 'active', host_manager, test_infra_managers)
+
     # Check that agent has the expected group assigned in all nodes
-    check_agent_groups(agent1_data[1], agent_groups[0], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
-    check_agent_groups(agent2_data[1], agent_groups[1], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
-    check_agent_groups(agent3_data[1], agent_groups[2], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+    check_agent_groups(agent1_data[1], agent_groups[0], test_infra_managers, host_manager)
+    check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
+    check_agent_groups(agent3_data[1], agent_groups[2], test_infra_managers, host_manager)
 
     # Force group change twice on wazuh-agent1
     change_agent_group_with_wdb(agent1_data[1], agent_groups[1], test_infra_managers[0], host_manager)
     change_agent_group_with_wdb(agent1_data[1], agent_groups[2], test_infra_managers[0], host_manager)
 
     # Check that agent has group set to default in new node
-    check_agent_groups(agent1_data[1], agent_groups[3], ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_new_nodes
+    check_agent_groups(agent1_data[1], agent_groups[2], test_infra_managers, host_manager)
