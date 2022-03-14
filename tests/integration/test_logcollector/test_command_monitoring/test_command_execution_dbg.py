@@ -261,7 +261,7 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
 
     if config['info'] == 'does not end':
         with open(not_ending_command_file_full_path, 'a') as command_file:
-            for line in range(int(local_internal_options['logcollector.max_lines']) + 1):
+            for line in range(int(local_internal_options['logcollector.max_lines']) + 5):
                 command_file.write(f"Testing not ending command.Line {line}\n")
 
     # Command with known output to test "Reading command message: ..."
