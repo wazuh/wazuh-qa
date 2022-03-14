@@ -4,8 +4,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
 brief: Check that when an agent with status never_connected, pointing to a master/worker node is
-       registered using agent-auth and when aasing to a group with agent-group, the change is sync
-       with the cluster.
+       registered using agent-auth and when it is assigned to a group with agent-group, the change is 
+       synced in the cluster.
 tier: 1
 modules:
     - cluster
@@ -47,7 +47,6 @@ import time
 import pytest
 
 from common import register_agent
-
 from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
                     assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
 from wazuh_testing.tools.system import HostManager
@@ -74,8 +73,8 @@ wait_time = 10
 def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check that when an agent with status never_connected, pointing to a master/worker node is
-                 registered using agent-auth and when aasing to a group with agent-group, the change is sync
-                with the cluster.
+                 registered using agent-auth and when it is assigned to a group with agent-group, the change is synced
+                 with the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
