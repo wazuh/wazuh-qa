@@ -647,6 +647,13 @@ def check_push_shared_config(agent, sender, injector=None):
 
         # Send the start-up message
         sender.send_event(agent.startup_msg)
+
+        log_callback = callback_start_up(agent.name)
+        wazuh_log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
+                                error_message='The start up message has not been found in the logs')
+
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+        
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message

@@ -162,8 +162,3 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
 
         wazuh_db_agent_version = agent.get_agent_version()
         assert wazuh_db_agent_version == fr"Wazuh {agent_info[agent_name]['version']}"
-
-        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-        log_callback = remote.callback_start_up(agent.name)
-        wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                error_message='The start up message has not been found in the logs')
