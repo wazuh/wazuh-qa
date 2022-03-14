@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,10 @@ brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh pers
        Wazuh-db confirms that is able to save, update and erase the necessary information into the corresponding
        databases, using the proper commands and response strings.
 
-tier: 0
-
-modules:
+components:
     - wazuh_db
 
-components:
+targets:
     - manager
 
 daemons:
@@ -33,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-db.html
@@ -338,6 +328,8 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - restart_wazuh:
             type: fixture
@@ -408,6 +400,8 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - restart_wazuh:
             type: fixture
@@ -460,6 +454,8 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
                  To do this, it sends a command to the wazuh-db socket and checks the response from the socket.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_wazuh:
@@ -518,6 +514,8 @@ def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, c
                  contains agent checksum information and calculates the checksum range.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_wazuh:

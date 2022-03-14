@@ -1,12 +1,15 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import subprocess
 import os
+import sys
 import shutil
 
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
+from wazuh_testing.tools.exceptions import QAValueError
 
 utils_logger = Logging.get_logger(QADOCS_LOGGER)
 
@@ -212,3 +215,127 @@ def clean_folder(folder):
                 shutil.rmtree(file_path)
         except Exception as e:
             utils_logger.error(f"Failed to delete {file_path}. Reason: {e}")
+
+
+def get_file_path_recursively(file_to_find, path):
+    """Get the given file path.
+
+    Args:
+        file_to_find (str): Filename to search.
+        path (str): Root path where the file is searched.
+    Returns:
+        path (str): File path if exists within the given path, None otherwise.
+    """
+    try:
+        (root, folders, files) = next(os.walk(path))
+    except StopIteration:
+        # When iterates over it even after it has been exhausted
+        return
+
+    for file in files:
+        if file == file_to_find:
+            return os.path.join(root, file)
+
+    for folder in folders:
+        path = get_file_path_recursively(file_to_find, os.path.join(root, folder))
+        if path is not None:
+            return path
+
+
+def run_local_command(command):
+    """Run local commands without getting the output, but validating the result code.
+
+    Args:
+        command (string): Command to run.
+
+    Raises:
+        QAValueError: If the run command has failed (rc != 0).
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command])
+
+    # Wait for the process to finish
+    run.communicate()
+
+    result_code = run.returncode
+
+    if result_code != 0:
+        raise QAValueError(f"The command {command} returned {result_code} as result code.", utils_logger.error,
+                           QADOCS_LOGGER)
+
+
+def run_local_command_with_output(command):
+    """Run local commands getting the command output.
+    Args:
+        command (string): Command to run.
+
+    Returns:
+        str: Command output
+    """
+    if sys.platform == 'win32':
+        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    else:
+        run = subprocess.Popen(['/bin/bash', '-c', command], stdout=subprocess.PIPE)
+
+    return run.stdout.read().decode()
+
+
+def qa_docs_docker_run(qa_branch, command, output_path):
+    """Run qa-docs in a Linux docker container.
+
+    Having this functionality helps the people that do not have ElasticSearch and(or) wazuh framework to generate
+    the documentation of the tests.
+
+    Args:
+        qa_branch (str): Wazuh qa branch that will be used as tests input.
+        command (str): A string with the arguments to pass qa-docs when running within the docker container.
+    """
+    docker_args = f"{qa_branch} {output_path} {command}"
+    docker_image_name = 'wazuh/qa-docs'
+    docker_image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dockerfiles')
+
+    utils_logger.info(f"Building qa-docs docker image")
+    run_local_command_with_output(f"cd {docker_image_path} && docker build -q -t {docker_image_name} .")
+
+    utils_logger.info(f"Running the Linux container")
+    run_local_command(f"docker run --name qa_docs_container --rm -v {output_path}:/qa_docs {docker_image_name} "
+                      f"{docker_args}")
+
+
+def get_qa_docs_run_options(args):
+    """Get the parameters to run qa-docs.
+
+    Args:
+        args (argparse.Namespace): arguments that are passed to the tool.
+    Returns:
+        command (str): A string with the options to run qa-docs.
+    """
+    command = ''
+    if args.index_name:
+        command += f" -i {args.index_name}"
+    if args.app_index_name:
+        command += f" -l {args.app_index_name}"
+    if args.launching_index_name:
+        command += f" -il {args.launching_index_name}"
+
+    if args.test_types:
+        command += ' --types'
+        for type in args.test_types:
+            command += f" {type}"
+            if args.test_components:
+                command += ' --components'
+                for components in args.test_components:
+                    command += f" {components} "
+                if args.test_suites:
+                    command += ' --suites'
+                    for suite in args.test_suites:
+                        command += f" {suite} "
+
+    elif args.test_modules:
+        command += ' -m'
+        for module in args.test_modules:
+            command += f" {module} "
+
+    return command

@@ -21,7 +21,8 @@ package_data_list = [
     'data/sslmanager.cert',
     'tools/macos_log/log_generator.m',
     'qa_docs/schema.yaml',
-    'qa_docs/VERSION.json'
+    'qa_docs/VERSION.json',
+    'qa_docs/dockerfiles/*',
     'qa_ctl/deployment/dockerfiles/*',
     'qa_ctl/deployment/dockerfiles/qa_ctl/*',
     'qa_ctl/deployment/vagrantfile_template.txt',

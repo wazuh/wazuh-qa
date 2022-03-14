@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: These tests will check if the 'auth_token_exp_timeout' setting of the API
        The Wazuh API is an open source 'RESTful' API that allows for interaction with the Wazuh manager
        from a web browser, command line tool like 'cURL' or any script or program that can make web requests.
 
-tier: 0
-
-modules:
+components:
     - api
 
-components:
+suite: config
+
+targets:
     - manager
 
 daemons:
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -97,6 +89,8 @@ def test_jwt_token_exp_timeout(tags_to_apply, get_configuration, configure_api_e
                  and after the expiration time, waiting for a valid 'HTTP status code'.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:

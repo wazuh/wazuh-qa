@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: These tests will check if the File Integrity Monitoring (FIM) system does
        is managed by the 'wazuh-syscheckd' daemon, which checks configured files for changes
        to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_audit
+
+targets:
     - agent
     - manager
 
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://man7.org/linux/man-pages/man8/auditd.8.html
@@ -139,6 +131,8 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -167,8 +161,8 @@ def test_audit_no_dir(tags_to_apply, get_configuration, configure_environment, r
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

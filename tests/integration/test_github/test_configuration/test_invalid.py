@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: The Wazuh 'github' module allows you to collect all the 'audit logs' from
        the actions performed by members of your organization. It includes details such as who performed
        the action, what the action was, and when it was performed.
 
-tier: 0
-
-modules:
+components:
     - github
 
-components:
+suite: configuration
+
+targets:
     - agent
     - manager
 
@@ -36,18 +36,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://github.com/wazuh/wazuh-documentation/blob/develop/source/github/monitoring-github-activity.rst
@@ -259,6 +251,8 @@ def test_invalid(get_local_internal_options, configure_local_internal_options,
                  Finally, it will verify that error events are generated indicating the source of the errors.
 
     wazuh_min_version: 4.3.0
+
+    tier: 0
 
     parameters:
         - get_local_internal_options:

@@ -13,6 +13,8 @@ Release report: TBD
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
 - Test `get-groups-integrity` WDB command ([#2607](https://github.com/wazuh/wazuh-qa/pull/2607))
 - Test `set-agent-groups` WDB command ([#2602](https://github.com/wazuh/wazuh-qa/pull/2602))
+- Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
+- Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
 - Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
 - Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))

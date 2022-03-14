@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -10,6 +10,7 @@ import re
 from wazuh_testing.qa_docs import QADOCS_LOGGER
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.exceptions import QAValueError
+from wazuh_testing.qa_docs.lib.utils import get_file_path_recursively
 
 
 class Config():
@@ -31,34 +32,32 @@ class Config():
         ignore_paths (str): A string that specifies which paths will be ignored.
         module_fields (_fields): A struct that contains the module documentation data.
         test_fields (_fields): A struct that contains the test documentation data.
-        test_cases_field (_fields): A string that contains the test_cases key.
         test_types (list): A list with the types to be parsed.
-        test_modules (list): A list with the modules to be parsed.
-        test_names (list): A list with the tests to be parsed.
+        test_components (list): A list with the modules to be parsed.
+        test_modules (list): A list with the tests to be parsed.
         LOGGER (_fields): A custom qa-docs logger.
     """
     LOGGER = Logging.get_logger(QADOCS_LOGGER)
 
-    def __init__(self, schema_path, test_dir, output_path='', test_types=None, test_modules=None, test_names=None,
-                 check_doc=False):
+    def __init__(self, schema_path, test_dir, output_path='', test_types=None, test_components=None, test_suites=None,
+                 test_modules=None, check_doc=False):
         """Constructor that loads the schema file and set the `qa-docs` configuration.
 
-        If a test name is passed, it would be run in `single test mode`.
-        And if an output path is not received, when is running in single test mode, it will be printed using the
+        If a module name is passed, it would be run in `single module mode`.
+        And if an output path is not received, when is running in single module mode, it will be printed using the
         standard output. But if an output path is passed, there will be generated a JSON file with the same data that
-        would be printed in `single test` mode.
+        would be printed in `single module` mode.
 
         The default output path for `default mode` is `qa_docs_installation/output`, it cannot be changed.
 
         Args:
             schema_path (str): A string that contains the schema file path.
-            test_dir (str): A string that contains the path of the tests.
+            module_dir (str): A string that contains the path of the modules.
             output_path (str): A string that contains the doc output path.
-            test_types (list): A list that contains the tests type(s) to be parsed.
             test_types (list): A list that contains the test type(s) that the user specifies.
-            test_modules (list): A list that contains the test module(s) that the user specifies.
-            test_names (list): A list that contains the test name(s) that the user specifies.
-            check_dock (boolean): Flag to indicate if the test specified (with -t parameter) is documented.
+            test_components (list): A list that contains the test component(s) that the user specifies.
+            test_modules (list): A list that contains the test name(s) that the user specifies.
+            check_dock (boolean): Flag to indicate if the test specified (with -m parameter) is documented.
         """
         self.mode = Mode.DEFAULT
         self.project_path = test_dir
@@ -69,30 +68,32 @@ class Config():
         self.ignore_paths = []
         self.module_fields = _fields()
         self.test_fields = _fields()
-        self.test_cases_field = None
         self.test_types = []
+        self.test_components = []
+        self.test_suites = []
         self.test_modules = []
         self.predefined_values = {}
         self.check_doc = check_doc
 
         self.__read_schema_file(schema_path)
         self.__read_output_fields()
-        self.__read_test_cases_field()
         self.__set_documentation_path(output_path.replace('\\', '/'))
         self.__read_predefined_values()
-
-        if test_names is not None:
-            # When a name is passed, it is using just a single test.
-            self.mode = Mode.PARSE_TESTS
-            self.test_names = test_names
 
         if test_types is None:
             self.__get_test_types()
         else:
             self.test_types = test_types
 
-            if test_modules:
-                self.test_modules = test_modules
+            if test_components:
+                self.test_components = test_components
+
+                if test_suites:
+                    self.test_suites = test_suites
+
+        if test_modules:
+            self.mode = Mode.PARSE_MODULES
+            self.test_modules = test_modules
 
         # Get the paths to parse
         self.__get_include_paths()
@@ -109,19 +110,35 @@ class Config():
                 self.test_types.append(name)
 
     def __get_include_paths(self):
-        """Get all the modules to include within all the specified types.
-
-        The paths to be included are generated using this info.
-        """
+        """Get all the components and suites to include within all the specified types."""
         dir_regex = re.compile("test_.")
         self.include_paths = []
 
         for type in self.test_types:
             subset_tests = os.path.join(self.project_path, type)
-
-            if self.test_modules:
-                for name in self.test_modules:
-                    self.include_paths.append(os.path.join(subset_tests, name))
+            if self.test_components:
+                if self.test_suites:
+                    if self.test_modules:
+                        for component in self.test_components:
+                            for suite in self.test_suites:
+                                for module in self.test_modules:
+                                    module_path = get_file_path_recursively(f"{module}.py",
+                                                                            os.path.join(subset_tests, component,
+                                                                                         suite))
+                                    self.include_paths.append(module_path)
+                    else:
+                        for component in self.test_components:
+                            for suite in self.test_suites:
+                                self.include_paths.append(os.path.join(subset_tests, component, suite))
+                else:
+                    if self.test_modules:
+                        for module in self.test_modules:
+                            module_path = get_file_path_recursively(f"{module}.py", os.path.join(subset_tests,
+                                                                    self.test_components[0]))
+                            self.include_paths.append(module_path)
+                    else:
+                        for component in self.test_components:
+                            self.include_paths.append(os.path.join(subset_tests, component))
             else:
                 for name in os.listdir(subset_tests):
                     if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
@@ -174,14 +191,18 @@ class Config():
 
         module_fields = self._schema_data['output_fields']['module']
 
-        if 'mandatory' not in module_fields and 'optional' not in module_fields:
+        if 'mandatory' not in module_fields and 'optional' not in module_fields and 'auto' not in module_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'mandatory' in module_fields:
-            self.module_fields.mandatory = module_fields['mandatory']
+        if 'optional' not in module_fields:
+            raise QAValueError('optional module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'optional' in module_fields:
-            self.module_fields.optional = module_fields['optional']
+        if 'auto' not in module_fields:
+            raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
+
+        self.module_fields.mandatory = module_fields['mandatory']
+        self.module_fields.optional = module_fields['optional']
+        self.module_fields.auto = module_fields['auto']
 
     def __read_test_fields(self):
         """Read from the schema file the optional and mandatory fields for the test functions.
@@ -199,14 +220,14 @@ class Config():
 
         test_fields = self._schema_data['output_fields']['test']
 
-        if 'mandatory' not in test_fields and 'optional' not in test_fields:
+        if 'mandatory' not in test_fields:
             raise QAValueError('mandatory module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'mandatory' in test_fields:
-            self.test_fields.mandatory = test_fields['mandatory']
+        if 'optional' not in test_fields:
+            raise QAValueError('optional module fields are missing in the schema file', Config.LOGGER.error)
 
-        if 'optional' in test_fields:
-            self.test_fields.optional = test_fields['optional']
+        self.test_fields.mandatory = test_fields['mandatory']
+        self.test_fields.optional = test_fields['optional']
 
     def __read_output_fields(self):
         """Read all the mandatory and optional fields from schema file.
@@ -220,24 +241,19 @@ class Config():
         self.__read_module_fields()
         self.__read_test_fields()
 
-    def __read_test_cases_field(self):
-        """Read from the schema file the key to identify a Test Case list."""
-        Config.LOGGER.debug('Reading Test Case key from the schema file')
-
-        if 'test_cases_field' in self._schema_data:
-            self.test_cases_field = self._schema_data['test_cases_field']
-
 
 class _fields:
     """Struct for the documentation fields.
 
     Attributes:
-        mandatory: A list of strings that contains the mandatory block fields
-        optional: A list of strings that contains the optional block fields
+        mandatory (list): A list of strings that contains the mandatory block fields
+        optional (list): A list of strings that contains the optional block fields
+        auto (list): A lis tof strings that contains the fields autogeneratod
     """
     def __init__(self):
         self.mandatory = []
         self.optional = []
+        self.auto = []
 
 
 class Mode(Enum):
@@ -246,8 +262,8 @@ class Mode(Enum):
     The current modes that `doc_generator` has are these:
 
         Modes:
-            DEFAULT: `default mode` parses all tests within tests directory.
-            PARSE_TESTS: `single tests mode` parses a list of tests.
+            DEFAULT: `default mode` parses all modules within tests directory.
+            PARSE_MODULES: `single modules mode` parses a list of modules.
 
             For example, if you want to declare that it is running thru all tests directory, you must specify it by:
 
@@ -257,4 +273,4 @@ class Mode(Enum):
         Enum (Class): Base class for creating enumerated constants.
     """
     DEFAULT = 1
-    PARSE_TESTS = 2
+    PARSE_MODULES = 2
