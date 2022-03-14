@@ -62,6 +62,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
                               'provisioning', 'four_manager_disconnected_node', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
+timeout = 10
 
 
 #Tests
@@ -118,7 +119,6 @@ def test_agent_groups_new_cluster_node(clean_environment, test_infra_managers, t
     restart_cluster(test_infra_new_nodes, host_manager)
 
     # Check that agent status is active in new node
-
     check_agents_status_in_node(agent_status_list, test_infra_new_nodes[0], host_manager)
 
 
@@ -178,9 +178,9 @@ def test_agent_groups_sync_worker_new_node(clean_environment, test_infra_manager
     check_agent_groups(agent2_data[1], agent_groups[1], test_infra_managers, host_manager)
 
     restart_cluster(test_infra_new_nodes, host_manager)
-    time.sleep(10)
-    # Check that agent status is active in new node
+    time.sleep(timeout)
 
+    # Check that agent status is active in new node
     check_agents_status_in_node(agent_status_list, test_infra_new_nodes[0], host_manager)    
     
     # Check that agent has the correct group set in new node
