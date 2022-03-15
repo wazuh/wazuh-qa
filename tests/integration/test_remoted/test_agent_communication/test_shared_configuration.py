@@ -100,7 +100,7 @@ def test_push_shared_config(get_configuration, configure_environment, remove_sha
                  checksum is received from an agent is different than the stored one.
                  As the test has nothing to do with shared configuration files, we removed those rootcheck txt files
                  from default agent group to reduce the time required by the test to make the checks.
-    
+
     wazuh_min_version: 4.2.0
 
     tier: 1
@@ -121,24 +121,24 @@ def test_push_shared_config(get_configuration, configure_environment, remove_sha
         - create_agent_group:
             type: fixture
             brief: Temporary creates a new agent group for testing purpose, must be run only on Managers.
-    
+
     assertions:
         - Verify that group file configuration is completely pushed (up message, configuration and close message).
         - Verify that new configuration is pushed.
         - Verify that the same config is not pushed two times.
-    
+
     input_description: A configuration template (test_shared_configuration) is contained in an external YAML file,
                        (wazuh_shared_configuration.yaml). That template is combined with different test cases defined
                        in the module. Those include configuration settings for the 'wazuh-remoted' daemon and agents
                        info.
-    
+
     expected_output:
         - initial up file message not received
         - agent.conf message not received
         - initial close message not received
         - Same shared configuration pushed twice!
         - New group shared config not received
-    
+
     tags:
         - simulator
     '''
