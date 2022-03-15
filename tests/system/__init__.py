@@ -105,7 +105,7 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
     # List format: [f"{agent_id}  {agent_name}  {agent_ip}  {status}",...]
     data = get_agents_in_cluster(host, host_manager)
     for status in agent_expected_status_list:
-        assert status in data
+        assert status in data, f"Didn't recieve the agent status: {status} in the node's data: {data}"
 
 
 def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
