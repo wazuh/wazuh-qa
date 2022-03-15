@@ -48,6 +48,7 @@ from common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, check_agent_groups,
                     check_agent_status, restart_cluster, check_keys_file, assign_agent_to_new_group, 
                     delete_group_of_agents, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
+from wazuh_testing.wazuh_variables import WAZUH_SERVICES_STOPPED, WAZUH_SERVICE_PREFIX
 from wazuh_testing.tools.system import HostManager
 
 
@@ -121,7 +122,7 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
     if (initial_status == AGENT_STATUS_DISCONNECTED):
-        host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
+        host_manager.control_service(host='wazuh-agent1', service=WAZUH_SERVICE_PREFIX, state=WAZUH_SERVICES_STOPPED)
         time.sleep(timeout)
         check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_DISCONNECTED, host_manager, test_infra_managers)
 
