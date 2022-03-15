@@ -46,8 +46,7 @@ import os
 import time
 import pytest
 from wazuh_testing.tools.system import HostManager
-from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
-                    change_agent_group_with_wdb, restart_cluster, clean_cluster_logs, delete_group_of_agents,
+from system import (create_new_agent_group, check_agent_groups, change_agent_group_with_wdb, restart_cluster,
                     check_agent_status, AGENT_STATUS_ACTIVE)
 from system.test_cluster.test_agent_groups.common import register_agent
 
@@ -92,7 +91,7 @@ def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, test_
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
-        - Verify that after after adding a new node to the cluster, the agent's group data is synchronized.
+        - Verify that after after changing the agent's group, the agent's correct group is synced
     expected_output:
         - The 'Agent_name' with ID 'Agent_id' belongs to groups: 'group_name'.
     '''
@@ -149,7 +148,7 @@ def test_force_group_change_during_sync(clean_environment, test_infra_managers, 
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
-        - Verify that after after changing the agent's group twice in a row, the agent
+        - Verify that after after changing the agent's group twice in a row, the agent's correct group is synced
     expected_output:
         - The 'Agent_name' with ID 'Agent_id' belongs to groups: 'group_name'.
     '''
