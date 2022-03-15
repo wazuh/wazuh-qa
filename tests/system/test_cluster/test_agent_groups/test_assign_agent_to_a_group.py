@@ -71,7 +71,7 @@ timeout = 10
 @pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
-@pytest.mark.parametrize("initial_status", ['active', 'disconnected'])
+@pytest.mark.parametrize("initial_status", [AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED])
 @pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker1"])
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
@@ -89,6 +89,15 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_agents
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before starting the agent, it has no groups assigned.
