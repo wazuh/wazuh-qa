@@ -45,8 +45,9 @@ import time
 import pytest
 
 from common import register_agent
-from system import (AGENT_STATUS_ACTIVE, check_agent_groups, check_agent_status, check_keys_file,
-                    delete_group_of_agents, remove_cluster_agents, assign_agent_to_new_group, restart_cluster)
+from system import (AGENT_STATUS_ACTIVE, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, 
+                    check_agent_status, check_keys_file, delete_group_of_agents, remove_cluster_agents,
+                    assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
 
@@ -125,7 +126,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     restart_cluster(test_infra_agents, host_manager)
 
     # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager)
+    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
         # Create new group and assing agent
@@ -146,7 +147,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
                                                                     host_manager)
 
         # Check that agent has client key file
-        assert check_keys_file(test_infra_agents[0], host_manager)
+        assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
         # Restart agent
         restart_cluster(test_infra_agents, host_manager)
