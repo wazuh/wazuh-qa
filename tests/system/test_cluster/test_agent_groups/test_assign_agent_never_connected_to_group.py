@@ -81,7 +81,7 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         - test_infra_managers
             type: List
             brief: list of manager hosts in enviroment
-        - test_infra_managers
+        - test_infra_agents
             type: List
             brief: list of agent hosts in enviroment
         - host_manager
