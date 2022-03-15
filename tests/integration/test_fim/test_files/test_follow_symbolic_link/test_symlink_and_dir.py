@@ -77,7 +77,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import wait_for_symlin
     symlink_interval, \
     modify_symlink
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import TestLogger
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -189,7 +189,7 @@ def test_symlink_dir_inside_monitored_dir(tags_to_apply, get_configuration, conf
 
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
+        TestLogger.V(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     # Create a file in the pointed folder and expect events

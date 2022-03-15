@@ -12,7 +12,7 @@ import threading
 import time
 import zlib
 from struct import pack
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import FunctionLogger
 
 from Crypto.Cipher import AES, Blowfish
 from Crypto.Util.Padding import pad
@@ -589,7 +589,7 @@ class RemotedSimulator:
         keys = self.get_key()
         if keys is None:
             # No valid keys
-            logging_message('FunctionLog', 'V', "Not valid keys used.")
+            FunctionLogger.V("Not valid keys used.")
             return -1
         (id, name, ip, key) = keys
         self.create_encryption_key(id, name, key)

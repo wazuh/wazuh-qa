@@ -16,7 +16,7 @@ from typing import List, Any, Set
 
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import FunctionLogger
 from wazuh_testing.tools import file
 
 
@@ -630,7 +630,7 @@ def get_local_internal_options_dict():
                     option_name, option_value = configuration_option.split('=')
                     local_internal_option_dict[option_name] = option_value
                 except ValueError:
-                    logging_message('FunctionLog', 'V',  f"Invalid local_internal_options value: {configuration_option}")
+                    FunctionLogger.V(f"Invalid local_internal_options value: {configuration_option}")
                     raise ValueError('Invalid local_internal_option')
 
     return local_internal_option_dict

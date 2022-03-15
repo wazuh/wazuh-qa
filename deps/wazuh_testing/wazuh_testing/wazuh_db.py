@@ -9,7 +9,7 @@ import sqlite3
 from wazuh_testing.tools import GLOBAL_DB_PATH, WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import FunctionLogger
 
 
 def callback_wazuhdb_response(item):
@@ -62,7 +62,7 @@ def mock_agent(
     try:
         query_wdb(create_agent_query)
     except sqlite3.IntegrityError:
-        logging_message('FunctionLog', 'V', "Failed to mock agent in database!")
+        FunctionLogger.V("Failed to mock agent in database!")
 
 
 def load_db(db_path):

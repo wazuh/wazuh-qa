@@ -78,7 +78,7 @@ import sys
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import TestLogger
 from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
     generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
@@ -177,20 +177,20 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         - scheduled
         - time_travel
     '''
-    logging_message('TestLog', 'VV',  'Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Create file that must be ignored
-    logging_message('TestLog', 'VV',  f'Adding file {os.path.join(testdir1, filename)}, content: ""')
+    TestLogger.VV(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
     # Go ahead in time to let syscheck perform a new scan if mode is scheduled
-    logging_message('TestLog', 'VV',  f'Time travel: {scheduled}')
+    TestLogger.VV(f'Time travel: {scheduled}')
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     if triggers_event:
-        logging_message('TestLog', 'VV',  'Checking the event...')
+        TestLogger.VV('Checking the event...')
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=callback_detect_event,
                                         error_message=f'Did not receive expected "Sending FIM event" '

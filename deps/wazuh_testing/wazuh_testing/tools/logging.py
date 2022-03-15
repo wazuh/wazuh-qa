@@ -1,6 +1,7 @@
 import logging
 import os
 import inspect
+from abc import ABC
 
 
 class Logging:
@@ -136,13 +137,44 @@ class Logging:
 
 
 LOGGING_LEVELS = {
-    'V': logging.ERROR,
-    'VV': logging.DEBUG
+    'V': logging.CRITICAL,
+    'VV': logging.ERROR,
+    'VVV': logging.WARNING
 }
 
 
-def logging_message(logger, level, message):
-    target_logger = logging.getLogger(logger)
-    curframe = inspect.currentframe()
-    calframe = inspect.getouterframes(curframe, 2)
-    target_logger.log(LOGGING_LEVELS[level], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
+class QA_Logging(ABC):
+
+    @staticmethod
+    def V(self, message):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        self.target_logger.log(LOGGING_LEVELS['V'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
+
+    @staticmethod
+    def VV(self, message):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        self.target_logger.log(LOGGING_LEVELS['VV'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
+
+    @staticmethod
+    def VVV(self, message):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        self.target_logger.log(LOGGING_LEVELS['VVV'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
+
+
+class TestLogger(QA_Logging):
+    target_logger = logging.getLogger('TestLog')
+
+
+class FunctionLogger(QA_Logging):
+    target_logger = logging.getLogger('FunctionLog')
+
+
+class SimulatorLogger(QA_Logging):
+    target_logger = logging.getLogger('SimulatorLog')
+
+
+class MonitorLogger(QA_Logging):
+    target_logger = logging.getLogger('MonitorLog')

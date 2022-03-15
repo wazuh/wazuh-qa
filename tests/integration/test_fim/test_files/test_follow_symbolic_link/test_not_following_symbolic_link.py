@@ -76,7 +76,7 @@ import wazuh_testing.fim as fim
 
 from test_fim.test_files.test_follow_symbolic_link.common import modify_symlink
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import TestLogger
 
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -203,7 +203,7 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
+        TestLogger.V(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
     # Modify the target of the symlink and expect the modify event
@@ -213,9 +213,9 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     if 'modified' in result['data']['type']:
-        logging_message('TestLog', 'VV',  "Received modified event. No more events will be expected.")
+        TestLogger.VV("Received modified event. No more events will be expected.")
     elif 'deleted' in result['data']['type']:
-        logging_message('TestLog', 'VV',  "Received deleted event. Now an added event will be expected.")
+        TestLogger.VV("Received deleted event. Now an added event will be expected.")
         result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event,
                                          error_message='Did not receive expected '
                                                        '"Sending FIM event: ..." event').result()
@@ -229,5 +229,5 @@ def test_symbolic_monitor_directory_with_symlink(monitored_dir, non_monitored_di
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
-        logging_message('TestLog', 'V',  f'Unexpected event {event.result()}')
+        TestLogger.V(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')

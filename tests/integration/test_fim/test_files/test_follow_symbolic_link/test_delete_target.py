@@ -78,7 +78,7 @@ from test_fim.test_files.test_follow_symbolic_link.common import configurations_
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import TestLogger
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -216,9 +216,9 @@ def test_symbolic_delete_target(tags_to_apply, main_folder, aux_folder, get_conf
         # We don't expect any event since symlink hasn't updated the link information
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            logging_message('TestLog', 'V', 'A "Sending FIM event: ..." event has been detected. No event should be detected as symlink '
+            TestLogger.V('A "Sending FIM event: ..." event has been detected. No event should be detected as symlink '
                             'has not updated the link information yet.')
-            logging_message('TestLog', 'V', f'Unexpected event {event.result()}')
+            TestLogger.V(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
 
     wait_for_symlink_check(wazuh_log_monitor)

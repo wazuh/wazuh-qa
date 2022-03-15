@@ -87,7 +87,7 @@ from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_M
                                        ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG,
                                        SCHEDULE_MODE, REALTIME_MODE, WHODATA_MODE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import FunctionLogger
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
 from wazuh_testing.tools.file import delete_path_recursively, write_file
 
@@ -140,7 +140,7 @@ def create_multiple_files(get_configuration):
             path = os.path.join(test_directory, file_name)
             write_file(path)
     except OSError:
-        logging_message('FunctionLog', 'V', ERR_MSG_MULTIPLE_FILES_CREATION)
+        FunctionLogger.V(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
 # Tests

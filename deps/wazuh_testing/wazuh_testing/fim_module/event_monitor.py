@@ -6,7 +6,7 @@
 import re
 import json
 from sys import platform
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import FunctionLogger
 
 from wazuh_testing.fim_module import (CB_INODE_ENTRIES_PATH_COUNT, CB_FIM_ENTRIES_COUNT, CB_DETECT_FIM_EVENT)
 
@@ -22,7 +22,7 @@ def callback_detect_event(line):
         if json_event['type'] == 'event':
             return json_event
     except (json.JSONDecodeError, AttributeError, KeyError) as e:
-        logging_message('FunctionLog', 'V', f"Couldn't load a log line into json object. Reason {e}")
+        FunctionLogger.V(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_entries_path_count(line):

@@ -212,7 +212,7 @@ def test_reconnect_time(start_eventlog_process, get_local_internal_options, conf
         before = str(datetime.now())
         seconds_to_travel = time_to_seconds(config['reconnect_time']) / 2
         TimeMachine.travel_to_future(timedelta(seconds=seconds_to_travel))
-        logging_message('TestLog', 'VV', f"Changing the system clock from {before} to {datetime.now()}")
+        TestLogger.VV(f"Changing the system clock from {before} to {datetime.now()}")
 
     log_callback = logcollector.callback_reconnect_eventchannel(config['location'])
 
@@ -220,7 +220,7 @@ def test_reconnect_time(start_eventlog_process, get_local_internal_options, conf
 
     if time_to_seconds(config['reconnect_time']) >= timeout_callback_reconnect_time:
         TimeMachine.travel_to_future(timedelta(seconds=(seconds_to_travel)))
-        logging_message('TestLog', 'VV', f"Changing the system clock from {before} to {datetime.now()}")
+        TestLogger.VV(f"Changing the system clock from {before} to {datetime.now()}")
 
     wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
