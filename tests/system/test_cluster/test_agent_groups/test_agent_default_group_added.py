@@ -12,7 +12,6 @@ modules:
 components:
     - manager
     - agent
-path: /tests/system/test_cluster/test_agent_groups/test_agent_groups_default.py
 daemons:
     - wazuh-db
     - wazuh-clusterd
@@ -69,7 +68,7 @@ timeout = 5
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_target", test_infra_managers)
-def test_agent_default_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_agent_default_group_added(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and default group assignment works as expected in a cluster enviroment.
     An agent pointing to a master/worker node is registered using cli tool, and it gets assigned the default group
