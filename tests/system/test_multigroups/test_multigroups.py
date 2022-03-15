@@ -119,7 +119,7 @@ def agent_healthcheck():
 
 
 @pytest.fixture(scope='function')
-def clean_files():
+def clean_environment():
     """Remove test groups and multigroups before and after running a test."""
     delete_groups()
     yield
@@ -155,7 +155,7 @@ def create_multigroups():
 
 # Tests
 
-def test_multigroups_not_reloaded(clean_files, agent_healthcheck, create_multigroups):
+def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_multigroups):
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
@@ -169,7 +169,7 @@ def test_multigroups_not_reloaded(clean_files, agent_healthcheck, create_multigr
     # Check and store mtime of group files.
     host_files = get_mtime(folders_to_check)
 
-    sleep(time_to_sync)
+    sleep(time_to_update)
     new_host_files = get_mtime(folders_to_check)
 
     # Check that no file was modified after some time.
@@ -182,7 +182,7 @@ def test_multigroups_not_reloaded(clean_files, agent_healthcheck, create_multigr
     agent_groups['wazuh-agent1'][1],
     'default'
 ])
-def test_multigroups_updated(clean_files, agent_healthcheck, create_multigroups, target_group):
+def test_multigroups_updated(clean_environment, agent_healthcheck, create_multigroups, target_group):
     """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
@@ -228,7 +228,7 @@ def test_multigroups_updated(clean_files, agent_healthcheck, create_multigroups,
                 assert mtime == host_files[host][file], f"This file changed its modification time in {host}: {file}"
 
 
-def test_multigroups_deleted(clean_files, agent_healthcheck, create_multigroups):
+def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multigroups):
     """Check that multigroups are removed when expected.
 
     Unassign an agent from their groups or delete the groups. Check that the associated
@@ -237,7 +237,6 @@ def test_multigroups_deleted(clean_files, agent_healthcheck, create_multigroups)
     for agent_name, groups in agent_groups.items():
         # Check that multigroups exists for each agent.
         mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
-        assert '' != host_manager.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should exist, but it does not."
         agent_id = get_agent_id(token=token, agent_name=agent_name)
 
         for group in groups:
