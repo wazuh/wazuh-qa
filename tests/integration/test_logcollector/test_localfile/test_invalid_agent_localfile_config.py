@@ -113,7 +113,7 @@ file_structure = [
 cases = [
     {
         'params': {
-            'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'test.txt'),
+            'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]),
             'LOG_FORMAT': None
         },
         'metadata': {
