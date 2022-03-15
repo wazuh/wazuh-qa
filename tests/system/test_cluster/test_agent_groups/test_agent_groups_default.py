@@ -43,7 +43,6 @@ tags:
 """
 import os
 import time
-
 import pytest
 
 from socket import timeout
@@ -100,17 +99,15 @@ def test_agent_default_group(agent_target, clean_environment, test_infra_manager
         - Verify that after registering and after starting the agent, it has the default group assigned.
     expected_output:
         - f"{agent_id}  {agent_name}  {agent_ip}  never_connected"
-        - f'{agent_id}  {agent_name}  {agent_ip}  active'
+        - f"{agent_id}  {agent_name}  {agent_ip}  active"
     '''
 
-    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0],agent_target, host_manager)
+    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
 
 
     # Check that agent status is never-connected in cluster
     time.sleep(timeout)
     check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_NEVER_CONNECTED, host_manager, test_infra_managers)
-
-
     # Check that agent has no group assigned
     check_agent_groups(agent_id, AGENT_NO_GROUPS, test_infra_managers, host_manager)
 
