@@ -173,9 +173,18 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
     wazuh_min_version: 4.3.0
 
     parameters:
+        - get_files_list:
+            type: fixture
+            brief: Get file list to create from the module.
+        - create_file_structure_module:
+            type: fixture
+            brief: Module scope version of create_file_structure.
         - get_configuration:
             type: fixture
             brief: Get configuration from the module.
+        - remove_empty_options:
+            type: fixture
+            brief: Remove elements with 'None' value from sections.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
@@ -184,6 +193,7 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
             brief: Handler of Wazuh daemons.
 
     assertions:
+        - Verify that the expected error message is in the log
 
     input_description: A YAML file with the invalid configurations.
 
