@@ -18,7 +18,6 @@ import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
@@ -595,6 +594,26 @@ def configure_environment(get_configuration, request):
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
             control_service('restart')
+
+
+@pytest.fixture(scope="module")
+def set_agent_conf(get_configuration):
+    """Set a new configuration in 'agent.conf' file."""
+    backup_config = conf.get_agent_conf()
+    sections = get_configuration.get('sections')
+    # Remove elements with 'None' value
+    for section in sections:
+        for el in section['elements']:
+            for key in el.keys():
+                if el[key]['value'] is None:
+                    section['elements'].remove(el)
+
+    new_config = conf.set_section_wazuh_conf(sections, backup_config)
+    conf.write_agent_conf(new_config)
+
+    yield
+
+    conf.write_agent_conf(backup_config)
 
 
 @pytest.fixture(scope='module')

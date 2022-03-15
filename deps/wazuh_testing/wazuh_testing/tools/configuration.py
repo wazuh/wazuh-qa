@@ -156,6 +156,17 @@ def write_wazuh_conf(wazuh_conf: List[str]):
         f.writelines(wazuh_conf)
 
 
+def write_agent_conf(agent_conf: List[str]):
+    """
+    Write a new configuration in 'agent.conf' file.
+
+    Args:
+        agent_conf (list or str): Lines to be written in the agent.conf file.
+    """
+    with open(AGENT_CONF, 'w') as f:
+        f.writelines(agent_conf)
+
+
 def write_api_conf(path: str, api_conf: dict):
     """
     Write a new configuration in 'api.yaml' file.
