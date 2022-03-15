@@ -160,7 +160,7 @@ def test_force_group_change_during_sync(clean_environment, test_infra_managers, 
     agent3_data = register_agent(test_infra_agents[2], test_infra_managers[1], host_manager, agent_groups[2])
 
     restart_cluster(test_infra_agents, host_manager)
-    time.sleep(10)
+    time.sleep(timeout)
 
     # Check agent status in all nodes
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
