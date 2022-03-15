@@ -13,7 +13,7 @@ from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import file
 
@@ -111,6 +111,18 @@ def get_wazuh_conf() -> List[str]:
         List of str: A list containing all the lines of the `ossec.conf` file.
     """
     with open(WAZUH_CONF) as f:
+        lines = f.readlines()
+    return lines
+
+
+def get_agent_conf() -> List[str]:
+    """
+    Get current `agent.conf` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `agent.conf` file.
+    """
+    with open(AGENT_CONF) as f:
         lines = f.readlines()
     return lines
 
