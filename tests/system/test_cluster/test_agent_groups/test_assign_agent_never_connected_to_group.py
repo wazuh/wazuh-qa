@@ -45,7 +45,7 @@ import pytest
 
 from common import register_agent
 from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
-                    AGENT_STATUS_NEVER_CONNECTED)
+                    AGENT_STATUS_NEVER_CONNECTED, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
 from wazuh_testing.tools.system import HostManager
 
 
@@ -110,7 +110,7 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
 
         # Check that agent has client key file
-        assert check_keys_file(test_infra_agents[0], host_manager), f'Did not find the expected keys generated in the master node.'
+        assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     finally:
         # Delete group of agent
