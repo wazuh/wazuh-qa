@@ -11,7 +11,6 @@ modules:
 components:
     - manager
     - agent
-path: /tests/system/test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py
 daemons:
     - wazuh-db
     - wazuh-clusterd
@@ -40,16 +39,15 @@ references:
 tags:
     - cluster
 """
-
 import os
 import time
-
 import pytest
 
 from common import register_agent
-from system import check_agent_groups, check_agent_status, restart_cluster, check_keys_file, delete_group_of_agents
+from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, ERR_MSG_FAILED_TO_SET_AGENT_GROUP,
+                    ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_agent_status, restart_cluster,
+                    check_keys_file, delete_group_of_agents)
 from wazuh_testing.tools.system import HostManager
-
 
 
 # Hosts
@@ -62,11 +60,16 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 
+# Variables
+timeout = 10
+test_group = 'group_test'
 
+
+# Tests
 @pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
-@pytest.mark.parametrize("initial_status", ['active', 'disconnected'])
+@pytest.mark.parametrize("initial_status", [AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED])
 @pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker"])
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers, test_infra_agents,
                                  host_manager):
@@ -98,33 +101,34 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
 
     # Check that agent has no group assigned
-    check_agent_groups(agent_id, 'Null', test_infra_managers, host_manager)
+    check_agent_groups(agent_id, AGENT_NO_GROUPS, test_infra_managers, host_manager)
 
     # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager)
+    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     # Start the enrollment process by restarting cluster
     restart_cluster(test_infra_agents, host_manager)
 
-    time.sleep(10)
+    time.sleep(timeout)
     # Check that agent status is active in cluster
-    check_agent_status(agent_id, agent_name, agent_ip, 'active', host_manager, test_infra_managers)
+    check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
-    if (initial_status == 'disconnected'):
+    if (initial_status == AGENT_STATUS_DISCONNECTED):
         host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
-        time.sleep(10)
-        check_agent_status(agent_id, agent_name, agent_ip, 'disconnected', host_manager, test_infra_managers)
+        time.sleep(timeout)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_DISCONNECTED, host_manager, test_infra_managers)
 
     token = host_manager.get_api_token('wazuh-master')
-
-    response = host_manager.make_api_call('wazuh-master', method='PUT',
+    try:
+        response = host_manager.make_api_call('wazuh-master', method='PUT',
                                           endpoint=f'/agents/{agent_id}/group/group_test?pretty=true',
                                           token=token)
-    print(response)
-    assert response['status'] == 200, 'Failed when trying to set agent group'
+        print(response)
+        assert response['status'] == 200, ERR_MSG_FAILED_TO_SET_AGENT_GROUP
 
-    # Check that agent has group set to group_test on Managers
-    check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
+        # Check that agent has group set to group_test on Managers
+        check_agent_groups(agent_id, test_group, test_infra_managers, host_manager)
 
     # Delete group of agent
-    delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+    finally: 
+        delete_group_of_agents('wazuh-master', test_group, host_manager)
