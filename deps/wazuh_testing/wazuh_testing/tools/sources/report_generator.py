@@ -11,7 +11,7 @@ from mmap import ACCESS_READ, mmap
 
 
 class LogAnalyzer:
-    """This class group several statics method to gather specific information from Wazuh logs."""
+    """This class group several statics methods to gather specific information from Wazuh logs."""
     error_codes = ['warning', 'error', 'critical']
 
     @staticmethod
@@ -26,7 +26,7 @@ class LogAnalyzer:
 
     @staticmethod
     def findall_regex_line(lines, regex, flags=None):
-        """Get all the lines that match certain regex.
+        """Get all the lines that match a certain regex.
 
         Args:
             Lines (list): List of lines.
@@ -141,14 +141,14 @@ class LogAnalyzer:
 
 
 class StatisticsAnalyzer:
-    """This class group several statics method to gather specific information from Wazuh statistics."""
+    """This class group several statics methods to gather specific information from Wazuh statistics."""
     @staticmethod
     def calculate_values(statistis_files, fields):
         """Calculate statistical values of the specified files.
 
         Args:
             statistis_files (list): List of statistics csv files.
-            fields (list): List of fields to calculate certain statisticals values.
+            fields (list): List of fields to calculate certain statistical values.
         """
         n_stats = len(statistis_files)
         mean_fields = {}
@@ -285,8 +285,8 @@ class StatisticsAnalyzer:
 class ReportGenerator:
     """This class generates a Python object to generate a JSON report, that synthesizes the state of the environment.
 
-    This class will use an artifact folder with specified format in order to gather data from logs, statistics and
-    metrics. All this data will be used to the generation of an environment report during the uptime.
+    This class will use an artifact folder with a specified format in order to gather data from logs, statistics and,
+    metrics. All this data will be used for the generation of an environment report during the uptime.
 
     Args:
         target (str): Artifact path.
@@ -375,7 +375,7 @@ class ReportGenerator:
         return artifacts_files
 
     def get_instance_all_log_files(self, hostname):
-        """Get all the logs paths files of the specified host.
+        """Get all the log's paths files of the specified host.
 
         Args:
             hostname (str): Hostname to get all the logs files.

@@ -70,7 +70,7 @@ import pytest
 
 def test_agent_connection(get_report):
     '''
-    description: Check the agents does not disconnected during the environment time.
+    description: Check the agents do not disconnect during the environment time.
 
     wazuh_min_version: 4.4.0
 

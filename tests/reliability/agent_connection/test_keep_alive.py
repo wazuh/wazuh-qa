@@ -73,7 +73,7 @@ MAX_DIFFERENCE_ACK_KEEP_ALIVE = 20
 def test_keep_alives(get_report):
     '''
     description: Check if the communication between managers and agents works as expected.
-    This test ensure that ACK and keep alive does not overcome the specified maximun. The condition is checked using 
+    This test ensures that ACK and keep alive does not overcome the specified maximum. The condition is checked using 
     the agentd statistics data and the keep-alives received by the manager in the logs file.
 
     wazuh_min_version: 4.4.0
@@ -84,10 +84,10 @@ def test_keep_alives(get_report):
             brief: Get the JSON environment report.
 
     assertions:
-        - Verify agents maximun difference between ack and keepalive is less that specified maximun.
-        - Verify that max_difference between keeps alives of all the agents in the managers side is less that
+        - Verify agents maximum difference between ack and keepalive is less than specified maximum.
+        - Verify that the max_difference between keeps alives of all the agents in the managers side is less that
         the specified maximun.
-        - Verify the number of keep alives of each agent is the expected.
+        - Verify the number of keepalives of each agent is the expected.
 
     input_description: JSON environment reports
 
