@@ -69,6 +69,24 @@ import pytest
 
 
 def test_agent_connection(get_report):
+    '''
+    description: Check the agents does not disconnected during the environment time.
+
+    wazuh_min_version: 4.4.0
+
+    parameters:
+        - get_report:
+            type: fixture
+            brief: Get the JSON environment report.
+
+    assertions:
+        - Verify all the agents remain in connected status during the environment time.
+
+    input_description: JSON environment reports
+
+    expected_output:
+        - None
+    '''
     wazuh_target_report_agentd = get_report['agents']['wazuh-agentd']
     wazuh_target_report_remoted = get_report['managers']['wazuh-remoted']
 

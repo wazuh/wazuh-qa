@@ -117,6 +117,24 @@ def get_log_daemon(log_line):
 @pytest.mark.parametrize('code', error_codes)
 @pytest.mark.parametrize('target', target)
 def test_error_messages(get_report, code, target):
+    '''
+    description: Check if unexpected error, warning or critical occurs in the environment
+
+    wazuh_min_version: 4.4.0
+
+    parameters:
+        - get_report:
+            type: fixture
+            brief: Get the JSON environment report.
+
+    assertions:
+        - Verify that no unexpected warning, error or critical appears in any of the hosts.
+
+    input_description: JSON environment reports
+
+    expected_output:
+        - None
+    '''
     unexpected_errors = []
     with open(known_messages_path) as f:
         expected_error_messages = json.loads(f.read())
