@@ -73,12 +73,14 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#age
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#location
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
 
 tags:
     - logcollector
 '''
 import os
+import tempfile
 
 import pytest
 
@@ -95,16 +97,36 @@ pytestmark = pytest.mark.tier(level=0)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 wazuh_component = get_service()
 log_message_level = 'CRITICAL' if 'manager' in wazuh_component else 'ERROR'
+files = ['test.txt']
 
 # Configuration
 daemons_handler_configuration = {
     'daemons': [LOGCOLLECTOR_DAEMON],
     'ignore_errors': True
 }
+
+temp_dir = tempfile.gettempdir()
+file_structure = [
+    {
+        'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
+        'filename': files
+    }
+]
+
 cases = [
     {
         'params': {
+            'LOCATION': None,
             'LOG_FORMAT': 'syslog'
+        },
+        'metadata': {
+            'regex': callback_configuration_error
+        }
+    },
+    {
+        'params': {
+            'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]),
+            'LOG_FORMAT': None
         },
         'metadata': {
             'regex': callback_configuration_error
@@ -113,9 +135,16 @@ cases = [
 ]
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
-tcase_ids = [f"no_location_logformat_{param['LOG_FORMAT']}" for param in params]
-configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_localfile_config_no_location.yaml')
+tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_" \
+             f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in params]
+configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+
+
+@pytest.fixture(scope="module")
+def get_files_list():
+    """Get file list to create from the module."""
+    return file_structure
 
 
 @pytest.fixture(scope="module", params=configurations, ids=tcase_ids)
@@ -124,7 +153,19 @@ def get_configuration(request):
     return request.param
 
 
-def test_invalid_localfile_config_no_location(get_configuration, configure_environment, daemons_handler):
+@pytest.fixture(scope="module")
+def remove_empty_options(get_configuration):
+    """Remove elements with 'None' value from sections."""
+    sections = get_configuration.get('sections')
+    for section in sections:
+        for el in section['elements']:
+            for key in el.keys():
+                if el[key]['value'] is None:
+                    section['elements'].remove(el)
+
+
+def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_configuration, remove_empty_options,
+                            configure_environment, daemons_handler):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
                  set.
