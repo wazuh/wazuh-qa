@@ -1,17 +1,54 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
+"""
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: system
+brief: Check that when an agent pointing to a master/worker node is registered using CLI tool, and and then
+       it's assigned to a new group the change is synced in the cluster.
+tier: 0
+modules:
+    - cluster
+components:
+    - manager
+    - agent
+daemons:
+    - wazuh-db
+    - wazuh-clusterd
+os_platform:
+    - linux
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - CentOS 6
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Ubuntu Xenial
+    - Ubuntu Trusty
+    - Debian Buster
+    - Debian Stretch
+    - Debian Jessie
+    - Debian Wheezy
+    - Red Hat 8
+    - Red Hat 7
+    - Red Hat 6
+references:
+    - https://github.com/wazuh/wazuh-qa/issues/2507
+tags:
+    - cluster
+"""
 import os
 import time
+
 import pytest
 
 from common import register_agent
-from system import (check_agent_groups, check_agent_status, restart_cluster, clean_cluster_logs,
-                    check_keys_file, assign_agent_to_new_group, delete_group_of_agents, remove_cluster_agents)
-                    
+from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, check_agent_groups,
+                    check_agent_status, restart_cluster, check_keys_file, assign_agent_to_new_group, 
+                    delete_group_of_agents, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
 from wazuh_testing.tools.system import HostManager
-
 
 
 # Hosts
@@ -25,7 +62,12 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 
 
+# Variables
+test_group = 'group_test'
+timeout = 10
 
+
+# Tests
 @pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
@@ -34,8 +76,8 @@ tmp_path = os.path.join(local_path, 'tmp')
 def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
-                 Check that when an agent pointing to a master/worker node is registered using CLI tool, and when
-                 it's assigned to a new group the change is sync with the cluster.
+                 Check that when an agent pointing to a master/worker node is registered using CLI tool, and and then
+                 it's assigned to a new group the change is synced in the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
@@ -57,31 +99,31 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     '''
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
     # Check that agent has no group assigned
-    check_agent_groups(agent_id, 'Null', test_infra_managers, host_manager)
+    check_agent_groups(agent_id, AGENT_NO_GROUPS, test_infra_managers, host_manager)
 
     # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager)
+    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     # Start the enrollment process by restarting cluster
     restart_cluster(test_infra_agents, host_manager)
 
-    time.sleep(10)
+    time.sleep(timeout)
     # Check that agent status is active in cluster
-    check_agent_status(agent_id, agent_name, agent_ip, 'active', host_manager, test_infra_managers)
+    check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
-    if (initial_status == 'disconnected'):
+    if (initial_status == AGENT_STATUS_DISCONNECTED):
         host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
-        time.sleep(10)
-        check_agent_status(agent_id, agent_name, agent_ip, 'disconnected', host_manager, test_infra_managers)
+        time.sleep(timeout)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_DISCONNECTED, host_manager, test_infra_managers)
 
     try:
         # Add agent to a new group
-        assign_agent_to_new_group('wazuh-master', 'group_test', agent_id, host_manager)
+        assign_agent_to_new_group('wazuh-master', test_group, agent_id, host_manager)
 
-        time.sleep(10)
+        time.sleep(timeout)
         # Check that agent has group set to group_test on Managers
-        check_agent_groups(agent_id, 'group_test', test_infra_managers, host_manager)
+        check_agent_groups(agent_id, test_group, test_infra_managers, host_manager)
 
     finally:
         # Delete group of agent
-        delete_group_of_agents('wazuh-master', 'group_test', host_manager)
+        delete_group_of_agents('wazuh-master', test_group, host_manager)

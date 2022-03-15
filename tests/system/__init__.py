@@ -14,7 +14,8 @@ AGENT_STATUS_DISCONNECTED = 'disconnected'
 AGENT_NO_GROUPS = 'Null'
 
 
-
+# Error Messages
+ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
 
 
 def get_agent_id(host_manager):
