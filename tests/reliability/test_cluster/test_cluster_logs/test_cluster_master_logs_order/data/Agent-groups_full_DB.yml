@@ -12,7 +12,7 @@
   tag: 'Requested entire agent-groups information by the worker node. Starting.*'
 - log_id: log2
   parent: log1
-  tag: 'All chunks sent.*'
+  tag: 'Sending chunks.*'
 - log_id: log3
   parent: log2
   tag: 'Sent all agent-groups information from the master node database.*'

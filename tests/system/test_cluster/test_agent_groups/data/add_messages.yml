@@ -21,10 +21,10 @@ wazuh-master:
   - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Starting.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*All chunks sent.*'
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Sending chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*All chunks sent.*'
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Sending chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Finished in.*'

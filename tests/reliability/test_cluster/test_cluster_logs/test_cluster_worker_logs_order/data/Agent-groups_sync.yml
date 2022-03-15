@@ -22,7 +22,7 @@
 # Chunks sent.
 - log_id: log4
   parent: log2
-  tag: 'All chunks sent.*'
+  tag: 'Sending chunks.*'
 - log_id: log5
   parent: log4
   tag: 'Finished in .* \(.* chunks updated\).*'
