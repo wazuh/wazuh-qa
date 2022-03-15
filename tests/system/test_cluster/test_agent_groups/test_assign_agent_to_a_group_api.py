@@ -126,7 +126,6 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         response = host_manager.make_api_call(test_infra_managers[0], method='PUT',
                                           endpoint=f'/agents/{agent_id}/group/group_test?pretty=true',
                                           token=token)
-        print(response)
         assert response['status'] == 200, ERR_MSG_FAILED_TO_SET_AGENT_GROUP
 
         # Check that agent has group set to group_test on Managers
