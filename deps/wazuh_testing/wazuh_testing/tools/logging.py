@@ -146,19 +146,19 @@ LOGGING_LEVELS = {
 class QA_Logging(ABC):
 
     @staticmethod
-    def V(self, message):
+    def V(message):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         self.target_logger.log(LOGGING_LEVELS['V'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
 
     @staticmethod
-    def VV(self, message):
+    def VV(message):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         self.target_logger.log(LOGGING_LEVELS['VV'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
 
     @staticmethod
-    def VVV(self, message):
+    def VVV(message):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         self.target_logger.log(LOGGING_LEVELS['VVV'], f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
