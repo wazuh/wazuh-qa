@@ -51,11 +51,11 @@ In this file we will specify that we want to shut down the docker machines in ou
 ##### inventory.yml
 
 File containing the inventory of machines in our environment. In this file we will set the connection method and its
-python interpreter
+python interpreter.
 
 ##### playbook.yml
 
-Here we will write the commands to be executed in order to use our environment
+Here we will write the commands to be executed in order to use our environment.
 
 ##### roles
 
@@ -63,7 +63,7 @@ Folder with all the general roles that could be used for start our environment. 
 following structure:
 
 - **files**: Configuration files to be applied when the environment is setting up.
-- **tasks**: Main tasks to be performed for each role
+- **tasks**: Main tasks to be performed for each role.
 
 #### Vars
 
@@ -71,10 +71,10 @@ This folder contains the variables used to configure our environment. Variables 
 
 ## Environment
 
-The base environment defined for Docker provisioning is
+The base environment defined for Docker provisioning is:
 
-- A master node
-- Two workers nodes
+- A master node.
+- Two workers nodes.
 - Three agents, all connected to master manager.
 - A fourth manager is created that can be later connected to the cluster.
 
@@ -86,7 +86,7 @@ For running the docker provisioning we must execute the following command:
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch": "PUT YOUT wazuh/wazuh BRANCH HERE"}'
 ```
 
-To destroy it, the command is:
+To destroy it,  we must execute the following command:
 
 ```shell script
 ansible-playbook -i inventory.yml destroy.yml

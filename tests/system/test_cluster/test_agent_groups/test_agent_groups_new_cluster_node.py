@@ -44,7 +44,6 @@ tags:
 '''
 import os
 import time
-
 import pytest
 
 from wazuh_testing.tools.system import HostManager
@@ -69,7 +68,7 @@ timeout = 10
 @pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
-def test_agent_groups_new_cluster_node(clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check that having a series of agents assigned with different groups, when an new node is added to
     the cluster, the group data is synchronized to the new node.
