@@ -365,7 +365,6 @@ def clean_keys(request, get_configuration):
 def restart_agentd():
     """Restart agentd daemon with debug mode active."""
     control_service('stop', daemon="wazuh-agentd")
-    truncate_file(LOG_FILE_PATH)
     control_service('start', daemon="wazuh-agentd", debug_mode=True)
 
 
