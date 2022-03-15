@@ -70,8 +70,8 @@ class HostManager:
 
         Args:
             host (str): Hostname
-            path (str, bytes): path for the file to create and modify
-            content (str): content to write into the file
+            path (str): path for the file to create and modify
+            content (str, bytes): content to write into the file
         """
         tmp_file = tempfile.NamedTemporaryFile()
         tmp_file.write(content if isinstance(content, bytes) else content.encode())
