@@ -44,7 +44,6 @@ tags:
 '''
 import os
 import time
-
 import pytest
 from wazuh_testing.tools.system import HostManager
 from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
@@ -61,6 +60,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
                               'provisioning', 'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
+timeout = 10
 
 
 # Tests
@@ -68,10 +68,10 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 @pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
 @pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_force_group_change(agent_host, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
-    description: Check that having a series of agents assigned with different groups, when an new node is added to
-    the cluster, the group data is synchronized to the new node.
+    description: Check that having an agent with a group assigned, when the change is forced with a wdb command, the new group
+                 is synced in the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_host:
@@ -83,7 +83,7 @@ def test_force_group_change(agent_host, clean_environment, test_infra_managers, 
         - test_infra_managers
             type: List
             brief: list of manager hosts in enviroment
-        - test_infra_managers
+        - test_infra_agents
             type: List
             brief: list of agent hosts in enviroment
         - host_manager
@@ -104,7 +104,7 @@ def test_force_group_change(agent_host, clean_environment, test_infra_managers, 
     agent3_data = register_agent(test_infra_agents[2], agent_host, host_manager, agent_groups[2])
 
     restart_cluster(test_infra_agents, host_manager)
-    time.sleep(10)
+    time.sleep(timeout)
 
     # Check agent status in all nodes
     check_agent_status(agent1_data[1], agent1_data[2], agent1_data[0], AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
@@ -129,8 +129,9 @@ def test_force_group_change(agent_host, clean_environment, test_infra_managers, 
 @pytest.mark.parametrize("host_manager",[host_manager])
 def test_force_group_change_during_sync(clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
-    description: Check that having a series of agents assigned with different groups, when an new node is added to
-    the cluster, the group data is synchronized to the new node.
+    description: Check that having an agent with a group assigned, when the change is forced with a wdb command,
+                 and the agent's group is changed again during the sync timeframe, the agent has the correct group
+                 assigned and synced in the cluster.
     wazuh_min_version: 4.4.0
     parameters:
         - clean_enviroment:
@@ -139,7 +140,7 @@ def test_force_group_change_during_sync(clean_environment, test_infra_managers, 
         - test_infra_managers
             type: List
             brief: list of manager hosts in enviroment
-        - test_infra_managers
+        - test_infra_agents
             type: List
             brief: list of agent hosts in enviroment
         - host_manager
@@ -148,7 +149,7 @@ def test_force_group_change_during_sync(clean_environment, test_infra_managers, 
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
-        - Verify that after after adding a new node to the cluster, the agent's group data is synchronized.
+        - Verify that after after changing the agent's group twice in a row, the agent
     expected_output:
         - The 'Agent_name' with ID 'Agent_id' belongs to groups: 'group_name'.
     '''
