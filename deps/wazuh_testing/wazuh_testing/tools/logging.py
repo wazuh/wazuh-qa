@@ -152,15 +152,15 @@ class QA_Logging(ABC):
 
     @classmethod
     def V(cls, message):
-        cls.logger.logging_message(cls.logger, LOGGING_LEVELS['V'], message)
+        cls.logging_message(cls.logger, LOGGING_LEVELS['V'], message)
 
     @classmethod
     def VV(cls, message):
-        cls.logger.logging_message(cls.logger, LOGGING_LEVELS['VV'], message)
+        cls.logging_message(cls.logger, LOGGING_LEVELS['VV'], message)
 
     @classmethod
     def VVV(cls, message):
-        cls.logger.logging_message(cls.logger, LOGGING_LEVELS['VVV'], message)
+        cls.logging_message(cls.logger, LOGGING_LEVELS['VVV'], message)
 
 
 class TestLogger(QA_Logging):
