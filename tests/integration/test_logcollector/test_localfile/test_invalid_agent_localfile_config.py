@@ -72,7 +72,8 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#age
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#location
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
 
 tags:
     - logcollector
@@ -82,7 +83,7 @@ import tempfile
 
 import pytest
 
-from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
+from wazuh_testing.tools import LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import callback_configuration_error
@@ -93,7 +94,6 @@ pytestmark = [pytest.mark.tier(level=0), pytest.mark.agent]
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-wazuh_component = get_service()
 files = ['test.txt']
 
 # Configuration
@@ -160,12 +160,18 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
     wazuh_min_version: 4.3.0
 
     parameters:
+        - get_files_list:
+            type: fixture
+            brief: Get file list to create from the module.
+        - create_file_structure_module:
+            type: fixture
+            brief: Module scope version of create_file_structure.
         - get_configuration:
             type: fixture
             brief: Get configuration from the module.
-        - configure_environment:
+        - set_agent_conf:
             type: fixture
-            brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+            brief: Set a new configuration in 'agent.conf' file.
         - daemons_handler:
             type: fixture
             brief: Handler of Wazuh daemons.
