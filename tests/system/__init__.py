@@ -15,6 +15,10 @@ AGENT_NO_GROUPS = 'Null'
 AGENT_GROUPS_DEFAULT = 'default'
 
 
+# Error Messages
+ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+
+
 
 
 
