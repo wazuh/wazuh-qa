@@ -290,6 +290,8 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 authd_server = AuthdSimulator(SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 remoted_servers = []
 
+tcase_timeout = 120
+
 
 # fixtures
 @pytest.fixture(scope="module", params=configurations, ids=case_ids)
@@ -469,9 +471,9 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):
             try:
-                log_monitor.start(timeout=120, callback=lambda x: wait_until(x, log_str))
-            except TimeoutError as err:
-                assert False, f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}'
+                log_monitor.start(timeout=tcase_timeout, callback=lambda x: wait_until(x, log_str))
+            except TimeoutError:
+                assert False, f"Expected message '{log_str}' never arrived! Stage: {stage+1}, message number: {index+1}"
 
         for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
             # Clean after every stage
