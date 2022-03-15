@@ -8,8 +8,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 type: integration
 
 brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages. When Wazuh is
-       configured incorrectly then a configuration error is displayed in the Wazuh's log, and Wazuh does not start
-       (if it is restarted).
+       configured incorrectly then a configuration error is displayed in the Wazuh's log, and Wazuh does not start (if
+       it has been restarted previously).
 
 tier: 0
 
@@ -28,31 +28,48 @@ os_platform:
     - windows
 
 os_version:
-    - Arch Linux
-    - Amazon Linux 2
     - Amazon Linux 1
-    - CentOS 8
-    - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
+    - Amazon Linux 2
+    - Arch Linux
     - Debian Buster
     - Debian Stretch
     - Debian Jessie
     - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
+    - CentOS 6
+    - CentOS 7
+    - CentOS 8
+    - Fedora 31
+    - Fedora 32
+    - Fedora 33
+    - Fedora 34
+    - openSUSE 42
+    - Oracle 6
+    - Oracle 7
+    - Oracle 8
     - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2019
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
+    - Red Hat 7
+    - Red Hat 8
+    - Solaris 10
+    - Solaris 11
+    - SUSE 12
+    - SUSE 13
+    - SUSE 14
+    - SUSE 15
+    - Ubuntu Bionic
+    - Ubuntu Trusty
+    - Ubuntu Xenial
+    - Ubuntu Focal
+    - macOS Server
+    - macOS Sierra
+    - macOS Catalina
     - Windows XP
+    - Windows 7
+    - Windows 8
+    - Windows 10
+    - Windows Server 2003
+    - Windows Server 2012
+    - Windows Server 2016
+    - Windows Server 2019
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -65,9 +82,8 @@ import os
 
 import pytest
 
-from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON
+from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import callback_configuration_error
 
@@ -86,7 +102,6 @@ daemons_handler_configuration = {
     'ignore_errors': True
 }
 cases = [
-    # Case 1: <location> not present
     {
         'params': {
             'LOG_FORMAT': 'syslog'
@@ -98,8 +113,8 @@ cases = [
 ]
 params = [case['params'] for case in cases]
 metadata = [case['metadata'] for case in cases]
-tcase_ids = [f"location_None_logformat_{param['LOG_FORMAT']}" for param in params]
-configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'location_config.yaml')
+tcase_ids = [f"no_location_logformat_{param['LOG_FORMAT']}" for param in params]
+configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_localfile_config_no_location.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
 
@@ -109,9 +124,10 @@ def get_configuration(request):
     return request.param
 
 
-def test_invalid_configuration_logcollector(get_configuration, configure_environment, daemons_handler):
+def test_invalid_localfile_config_no_location(get_configuration, configure_environment, daemons_handler):
     '''
-    description: 
+    description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
+                 set.
 
     wazuh_min_version: 4.3.0
 
@@ -128,7 +144,7 @@ def test_invalid_configuration_logcollector(get_configuration, configure_environ
 
     assertions:
 
-    input_description: The 'invalid_configuration' includes the wrong configuration for the ossec.conf.
+    input_description: A YAML file with the invalid configurations.
 
     expected_output:
         - 'Did not receive expected "CRITICAL: ...: Configuration error at event'

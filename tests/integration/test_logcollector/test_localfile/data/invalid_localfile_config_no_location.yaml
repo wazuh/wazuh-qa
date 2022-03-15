@@ -1,0 +1,10 @@
+---
+- tags:
+  - test_invalid_localfile_config_no_location
+  apply_to_modules:
+  - test_invalid_localfile_config_no_location
+  sections:
+    - section: localfile
+      elements:
+      - log_format:
+          value: LOG_FORMAT
