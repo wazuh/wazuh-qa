@@ -42,7 +42,6 @@ tags:
 """
 import os
 import time
-
 import pytest
 
 from common import register_agent
@@ -50,7 +49,6 @@ from system import (AGENT_STATUS_ACTIVE, check_agent_groups, check_agent_status,
                     delete_group_of_agents, remove_cluster_agents, assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
-
 
 
 # Hosts
@@ -62,6 +60,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
+
 
 # Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
@@ -77,7 +76,7 @@ timeout = 10
 def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
                                  test_infra_agents, host_manager):
     '''
-    description: Check that when an agent registered inthe manager and assigned to group is removed, performs a
+    description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
     wazuh_min_version: 4.4.0
     parameters:
@@ -90,7 +89,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         - test_infra_managers
             type: List
             brief: list of manager hosts in enviroment
-        - test_infra_managers
+        - test_infra_agents
             type: List
             brief: list of agent hosts in enviroment
         - host_manager
@@ -108,7 +107,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     # Modify local_internal_options
     replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
 
-    if(int(status_guess_agent_group) == 1):
+    if (int(status_guess_agent_group) == 1):
         for host in test_infra_managers:
             host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
                                            after="upgrades.", before="authd.debug=2", replace=replace)
