@@ -48,7 +48,7 @@ from common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, check_agent_groups,
                     check_agent_status, restart_cluster, check_keys_file, assign_agent_to_new_group, 
                     delete_group_of_agents, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
-from wazuh_testing.wazuh_variables import WAZUH_SERVICES_STOPPED, WAZUH_SERVICE_PREFIX
+from wazuh_testing.modules import WAZUH_SERVICE_PREFIX, WAZUH_SERVICES_STOPPED
 from wazuh_testing.tools.system import HostManager
 
 

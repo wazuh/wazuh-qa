@@ -13,8 +13,7 @@ VERBOSE_DEBUG_OUTPUT = 2
 
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
-WAZUH_SERVICES_STOPPED = 'stopped'
-WAZUH_SERVICE_PREFIX = 'wazuh'
+
 
 # Configurations
 DATA = 'data'
