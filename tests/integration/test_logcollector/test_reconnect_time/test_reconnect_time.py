@@ -53,7 +53,7 @@ import time
 import sys
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing import global_parameters
-from wazuh_testing.tools.logging import logging_message
+from wazuh_testing.tools.logging import TestLogger
 from wazuh_testing.tools.time import TimeMachine
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.time import time_to_seconds

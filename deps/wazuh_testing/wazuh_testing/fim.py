@@ -660,7 +660,7 @@ def modify_key_perms(key, subkey, arch, user):
 
             win32api.RegSetKeySecurity(key_h, win32con.DACL_SECURITY_INFORMATION, sd)
         except (OSError, pywintypes.error) as e:
-            logging_message('fimction', 'V', f"Registry permissions could not be modified: {e}")
+            FunctionLogger.V(f"Registry permissions could not be modified: {e}")
 
 
 def modify_registry_key_mtime(key, subkey, arch):
@@ -749,7 +749,7 @@ def rename_registry(key, subkey_path, src_name, arch, dst_name):
         dst_name (str): name of the renamed key
     """
     if sys.platform == 'win32':
-        logging_message('FunctionLogLog', 'VV', f"- Renaming registry {src_name} to {dst_name}")
+        FunctionLogger.VV(f"- Renaming registry {src_name} to {dst_name}")
 
         try:
             source_key = os.path.join(subkey_path, src_name)
@@ -762,7 +762,7 @@ def rename_registry(key, subkey_path, src_name, arch, dst_name):
 
             delete_registry(key, source_key, arch)
         except (OSError, pywintypes.error) as e:
-            logging_message('FunctionLogLog', 'V', f"Registry could not be renamed: {e}")
+            FunctionLogger.V( f"Registry could not be renamed: {e}")
 
 
 def modify_file_content(path, name, new_content=None, is_binary=False):

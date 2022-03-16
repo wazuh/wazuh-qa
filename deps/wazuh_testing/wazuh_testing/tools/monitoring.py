@@ -953,7 +953,7 @@ class HostMonitor:
             truncate_file(os.path.join(self._tmp_path, output_path))
         except FileNotFoundError:
             pass
-        logging_message('MonitorLog', 'V' f'Starting file composer for {host} and path: {path}. '
+        MonitorLogger.V(f'Starting file composer for {host} and path: {path}. '
                         f'Composite file in {os.path.join(self._tmp_path, output_path)}')
         tmp_file = os.path.join(self._tmp_path, output_path)
         while True:
