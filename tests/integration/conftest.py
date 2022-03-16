@@ -1080,12 +1080,13 @@ class QALoggerFormatter(logging.Formatter):
 
 
 def pytest_logger_config(logger_config):
-    logger_config.add_loggers(['TestLog', 'FunctionLog', 'SimulatorLog', 'MonitorLog'])
+    logger_config.add_loggers(['TestLogger', 'FunctionLogger', 'SimulatorLogger', 'MonitorLogger'])
     logging.getLevelName = getLoggingLevelNameQA
-    logger_config.set_log_option_default('')
+    logger_config.set_log_option_default('TestLogger.V,FunctionLogger.V,SimulatorLogger.V,MonitorLogger.V')
     logger_config.set_formatter_class(QALoggerFormatter)
-    logging.V = logging.ERROR
-    logging.VV = logging.DEBUG
+    logging.V = logging.CRITICAL
+    logging.VV = logging.ERROR
+    logging.VVV = logging.WARNING
 
 
 def pytest_logger_logdirlink(config):

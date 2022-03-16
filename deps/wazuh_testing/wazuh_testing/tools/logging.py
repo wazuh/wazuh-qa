@@ -145,22 +145,32 @@ LOGGING_LEVELS = {
 
 class QA_Logging(ABC):
     @staticmethod
-    def logging_message(logger, logging_level, message):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        logger.log(logging_level, f"[{calframe[1][3]}:{calframe[1][2]}] {message}")
+    def logging_message(logger, logging_level, message, source):
+        logger.log(logging_level, f"[{source}] {message}")
 
     @classmethod
     def V(cls, message):
-        cls.logging_message(cls.logger, LOGGING_LEVELS['V'], message)
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        source = f"{calframe[1][3]}:{calframe[1][2]}"
+
+        cls.logging_message(cls.logger, LOGGING_LEVELS['V'], message, source)
 
     @classmethod
     def VV(cls, message):
-        cls.logging_message(cls.logger, LOGGING_LEVELS['VV'], message)
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        source = f"{calframe[1][3]}:{calframe[1][2]}"
+
+        cls.logging_message(cls.logger, LOGGING_LEVELS['VV'], message, source)
 
     @classmethod
     def VVV(cls, message):
-        cls.logging_message(cls.logger, LOGGING_LEVELS['VVV'], message)
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        source = f"{calframe[1][3]}:{calframe[1][2]}"
+
+        cls.logging_message(cls.logger, LOGGING_LEVELS['VVV'], message, source)
 
 
 class TestLogger(QA_Logging):
@@ -168,11 +178,11 @@ class TestLogger(QA_Logging):
 
 
 class FunctionLogger(QA_Logging):
-    logger = logging.getLogger('FunctionLog')
+    logger = logging.getLogger('FunctionLogger')
 
 
 class SimulatorLogger(QA_Logging):
-    logger = logging.getLogger('SimulatorLog')
+    logger = logging.getLogger('SimulatorLogger')
 
 class MonitorLogger(QA_Logging):
-    logger = logging.getLogger('MonitorLog')
+    logger = logging.getLogger('MonitorLogger')
