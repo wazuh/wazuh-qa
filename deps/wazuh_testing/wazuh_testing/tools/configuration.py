@@ -115,7 +115,7 @@ def get_wazuh_conf() -> List[str]:
     return lines
 
 
-def get_agent_conf() -> List[str]:
+def get_agent_conf():
     """
     Get current `agent.conf` file content.
 
@@ -156,7 +156,7 @@ def write_wazuh_conf(wazuh_conf: List[str]):
         f.writelines(wazuh_conf)
 
 
-def write_agent_conf(agent_conf: List[str]):
+def write_agent_conf(agent_conf):
     """
     Write a new configuration in 'agent.conf' file.
 
