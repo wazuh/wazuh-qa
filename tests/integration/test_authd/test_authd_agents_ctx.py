@@ -110,6 +110,7 @@ def create_groups_api_request(group, token):
     headers = {'Authorization': f"Bearer {token}",}
     json_data = {'group_id': f"'{group}'",}
     response = requests.post('https://localhost:55000/groups', headers=headers, json=json_data, verify=False)
+    print("CREATE GROUP RESPONSE "+str(response))
     return response
 
 def delete_group_api_request(group, token):
@@ -119,6 +120,7 @@ def delete_group_api_request(group, token):
         ('groups_list', 'all'),
     )
     response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
+    print("DELETE GROUP RESPONSE "+str(response))
     return response
 
 
@@ -127,22 +129,20 @@ def set_up_groups(groups_list):
     time.sleep(5)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
 
-    print("RESPONSE TOKEN "+str(response_token))
+    print("SET UP GROUPS RESPONSE TOKEN "+str(response_token))
     for group in groups_list:
         time.sleep(3)
         response = create_groups_api_request(group, response_token)
-        print(str(response) + group)
 
 
 def remove_groups(groups_list):
     time.sleep(5)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
 
-    print("RESPONSEEEEEEEEEEEEEEEEEEEEEEE"+str(response_token))
+    print("REMOVE GROUPS RESPONSE TOKEN"+str(response_token))
     for group in groups_list:
         time.sleep(3)
         response = delete_group_api_request(group, response_token)
-        print(str(response) + group)
 
 
 @pytest.fixture(scope="module", params=configurations)
