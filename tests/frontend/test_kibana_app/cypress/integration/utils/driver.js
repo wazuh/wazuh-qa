@@ -3,6 +3,13 @@ export const clickElement = (selector) => {
   return this;
 };
 
+export const getAttributeElement = (selector) => {
+  return getElement(selector).invoke('attr', 'aria-checked').then(($element) => {
+    const value = $element
+    return value;
+  });
+};
+
 export const elementIsNotVisible = (selector) => {
   return getElement(selector).should('not.exist');
 };
@@ -51,25 +58,27 @@ export const setCookies = (cookieObj) => {
 
 }
 
-export const updateCookies = (parameterToFilter) => {
+export const updateCookies =  () => {
   const filename = 'cookie.json';
   cy.getCookies().then((currentCook) => {
-    const [cookie] = currentCook.filter(e => e.name == parameterToFilter);
-    // const newCookies = cookieMock.map(e => {
-    //   //ver cookie.value
-    //   if (e.name == parameterToFilter) e.value = cookie.value;
-    //   return e;
-    debugger
-    cy.readFile(filename).then((obj) => {
-  
-      obj.forEach(e => {
-        debugger
-        if(e.name == parameterToFilter) e.value = cookie.value
-      })
-      cy.writeFile(filename, obj)
+    const parameterToFilter = ['sid','wz-token'];
+    for (let l = 0; l < parameterToFilter.length; l++) {
+      const [cookie] = currentCook.filter(e => e.name == parameterToFilter[l]);
+      // const newCookies = cookieMock.map(e => {
+      //   //ver cookie.value
+      //   if (e.name == parameterToFilter) e.value = cookie.value;
+      //   return e;
+      cy.readFile(filename).then((obj) => {
 
-    })
-    // })
+        obj.forEach(e => {
+
+          if (e.name == parameterToFilter[l]) e.value = cookie.value
+        })
+        cy.writeFile(filename, obj)
+
+      })
+
+    }
     
    cy.log(`cookie: ${currentCook}`);
   });
@@ -90,3 +99,4 @@ export const getMyCookie = () => {
     return cookie = c;
   })
 }
+

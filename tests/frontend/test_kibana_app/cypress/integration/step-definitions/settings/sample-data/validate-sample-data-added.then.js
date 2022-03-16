@@ -1,4 +1,4 @@
-import { getObject, elementIsVisible } from '../../../utils/driver';
+import { elementIsVisible } from '../../../utils/driver';
 import { dataAddedSuccessfullyToast } from '../../../pageobjects/settings/sample-data.page';
 
 Then('The add data success toasts are displayed', () => {

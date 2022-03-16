@@ -1,5 +1,5 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
-import { clickElement } from '../../../utils/driver';
+import { clickElement ,elementIsVisible } from '../../../utils/driver';
 import {
   editDecoderButtonSelector,
   manageDecodersFilesButtonSelector,
@@ -7,10 +7,10 @@ import {
 } from '../../../pageobjects/wazuh-menu/decoders.page';
 
 When('The user presses the edit decoder button and edits it', () => {
-  cy.wait(2000)
+  elementIsVisible(manageDecodersFilesButtonSelector);
   clickElement(manageDecodersFilesButtonSelector);
-  cy.wait(2000)
+  elementIsVisible(editDecoderButtonSelector);
   clickElement(editDecoderButtonSelector);
-  cy.wait(2000)
+  elementIsVisible(saveDecoderButtonSelector);
   clickElement(saveDecoderButtonSelector);
 });

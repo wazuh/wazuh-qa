@@ -1,5 +1,5 @@
 import { clickElement, elementIsVisible } from '../../../utils/driver';
-import { MODULES_CARDS, MODULES_SETTINGS } from '../../../utils/mappers/modules-mapper';
+import { MODULES_CARDS } from '../../../utils/mappers/modules-mapper';
 import {
   modulesButton,
   modulesDirectoryLink,
@@ -9,12 +9,9 @@ import {
 Then('The activated modules with {} are displayed on home page', (moduleName) => {
   elementIsVisible(wazuhMenuButton);
   clickElement(wazuhMenuButton);
-  cy.wait(2000)
   elementIsVisible(modulesButton);
   clickElement(modulesButton);
-  cy.wait(2000)
   elementIsVisible(modulesDirectoryLink);
   clickElement(modulesDirectoryLink);
-  cy.wait(2000)
   elementIsVisible(MODULES_CARDS[moduleName]);
 });
