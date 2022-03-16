@@ -1,4 +1,3 @@
-
 """
 copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
@@ -12,7 +11,7 @@ modules:
 components:
     - manager
     - agent
-path: /tests/system/test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py
+path: /tests/system/test_cluster/test_agent_groups/test_assign_agent_group_with_enrollment.py
 daemons:
     - wazuh-db
     - wazuh-clusterd
@@ -44,11 +43,10 @@ tags:
 
 import os
 import time
-
 import pytest
 from wazuh_testing.tools.system import HostManager
-from system import (check_agent_groups, restart_cluster, clean_cluster_logs,
-                    check_keys_file, remove_cluster_agents, delete_group_of_agents, get_id_from_agent)
+from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, restart_cluster,
+                    check_keys_file, delete_group_of_agents, get_id_from_agent)
 from wazuh_testing.tools import WAZUH_PATH
 
 
@@ -68,18 +66,12 @@ enrollment_group = """
     </enrollment>
                        """
 
-@pytest.fixture(scope='function')
-def clean_environment():
-
-    clean_cluster_logs(test_infra_agents + test_infra_managers, host_manager)
-
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
-
-
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_target", ["wazuh-worker1"])
-def test_assign_agent_to_a_group(agent_target, clean_environment):
+def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
                  Check that when an agent pointing to a master/worker node is registered, and when
@@ -92,6 +84,15 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_agents
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before receiving agent group info, it has the 'default' group assigned.
@@ -120,10 +121,10 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     agent_id = get_id_from_agent(test_infra_agents[0], host_manager)
 
     # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager)
+    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
-        check_agent_groups(agent_id, 'default', test_infra_managers, host_manager)
+        check_agent_groups(agent_id, AGENT_GROUPS_DEFAULT, test_infra_managers[1:], host_manager)
         
         # add: wait sync agent groups
 
