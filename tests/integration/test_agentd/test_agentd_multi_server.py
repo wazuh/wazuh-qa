@@ -244,17 +244,17 @@ metadata = [
         'LOG_MONITOR_STR': [
             [
                 f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
-                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}'",
+                f"Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}",
                 f"Received message: '#!-agent ack '",
             ],
             [
                 f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
-                f"Unable to connect to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}",
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}",
             ],
             [
                 f'Trying to connect to server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
-                f"Unable to connect to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}",
-                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}'",
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}",
+                f"Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}",
                 f'Server responded. Releasing lock.',
                 f"Received message: '#!-agent ack '"
             ]
