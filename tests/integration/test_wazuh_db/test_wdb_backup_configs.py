@@ -58,7 +58,6 @@ import numbers
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import restart_wazuh_function
-from wazuh_testing.tools.file import recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.utils import validate_interval_format

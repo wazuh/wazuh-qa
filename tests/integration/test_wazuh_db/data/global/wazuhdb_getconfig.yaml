@@ -22,7 +22,7 @@
   test_case:
   -
     input: 'wazuhdb getconfig internal'
-    output: "{'wazuh_db': {'commit_time_max': 60, 'commit_time_min': 10, 'open_db_limit': 64, 'sock_queue_size': 128, 'worker_pool_size': 8}}"
+    output: "{'wazuh_db': {'commit_time_max': 60, 'commit_time_min': 10, 'open_db_limit': 64, 'worker_pool_size': 8}}"
 -
   name: 'Get wdb config'
   test_case:

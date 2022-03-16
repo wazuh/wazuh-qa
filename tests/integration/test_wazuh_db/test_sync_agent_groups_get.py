@@ -41,7 +41,7 @@ tags:
     - wazuh_db
 '''
 import os
-
+import yaml
 import time
 import pytest
 import json
@@ -49,7 +49,6 @@ import json
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
                                     clean_groups_from_db, clean_belongs)
-from wazuh_testing.tools.file import get_list_of_content_yml
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 
 # Marks
@@ -58,7 +57,9 @@ pytestmark = [LINUX, TIER0, SERVER]
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'sync_agent_groups_get.yaml')
-module_tests = get_list_of_content_yml(messages_file, ".split('_')[0]")
+module_tests = []
+with open(messages_file) as f:
+    module_tests.append((yaml.safe_load(f), messages_file.split('_')[0]))
 
 log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))

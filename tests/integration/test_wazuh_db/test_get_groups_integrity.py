@@ -83,7 +83,7 @@ receiver_sockets= None  # Set in the fixtures
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_set_agent_groups(configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_get_groups_integrity(configure_sockets_environment, connect_to_sockets_module, test_case):
     '''
     description: Check that every input message using the 'get-groups-integrity' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
@@ -140,11 +140,12 @@ def test_set_agent_groups(configure_sockets_environment, connect_to_sockets_modu
     else:
         response = query_wdb(f'global sync-agent-groups-get {{"last_id": 0, "condition": "all", "get_global_hash": true, \
                              "set_synced": false, "agent_delta_registration": 0}}')
-        if "no_hash" in case_data:
-            assert response == output, f'Unexpected response: got {response}, but expected {output}'
-            return
         response = response[0]
         hash = response["hash"]
+        if "no_hash" in case_data:
+            response = str(response)
+            assert output in response , f'Unexpected response: got {response}, but expected {output}'
+            return
 
     # Get groups integrity
     response = query_wdb(f"global get-groups-integrity {hash}")

@@ -3,7 +3,7 @@
   name: "No Agents Registered - No Hash - Error"
   test_case:
   -
-    output: err [{"data":[]}]
+    output: "'hash': None"
     no_hash: True
     agent_ids: []
     agent_status: []
