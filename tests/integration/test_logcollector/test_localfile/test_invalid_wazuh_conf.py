@@ -88,6 +88,7 @@ from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import callback_configuration_error
+from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
 
 
 # Marks
@@ -205,6 +206,6 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
         - logcollector
     '''
     metadata = get_configuration.get('metadata')
-    wazuh_log_monitor.start(timeout=5, callback=metadata['regex'],
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=metadata['regex'],
                             error_message='Did not receive the expected '
                             f'"{log_message_level}: ...: Configuration error at" event')

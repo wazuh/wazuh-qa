@@ -87,6 +87,7 @@ from wazuh_testing.tools import LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.fim import callback_configuration_error
+from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
 
 
 # Marks
@@ -188,5 +189,5 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
         - logcollector
     '''
     metadata = get_configuration.get('metadata')
-    wazuh_log_monitor.start(timeout=5, callback=metadata['regex'],
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=metadata['regex'],
                             error_message='Did not receive the expected "ERROR: ...: Configuration error at" event')
