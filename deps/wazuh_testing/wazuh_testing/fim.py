@@ -427,7 +427,7 @@ def create_file(type_, path, name, **kwargs):
 
     try:
         FunctionLogger.VV("Creating file " + str(os.path.join(path, name)) + " of " +
-                        str(type_) + " type")
+                          str(type_) + " type")
         os.makedirs(path, exist_ok=True, mode=0o777)
         if type_ != REGULAR:
             try:
@@ -438,7 +438,7 @@ def create_file(type_, path, name, **kwargs):
             raise ValueError(f"'target' param is mandatory for type {type_}")
         getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
     except OSError:
-        FunctionLogger.VV("File could not be created.")
+        FunctionLogger.VV('File could not be created.')
         pytest.skip("OS does not allow creating this file.")
 
 
@@ -456,8 +456,7 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            FunctionLogger.VV("Creating registry key " +
-                            str(os.path.join(registry_class_name[key], subkey)))
+            FunctionLogger.VV(f"Creating registry key {str(os.path.join(registry_class_name[key], subkey))}")
 
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
 

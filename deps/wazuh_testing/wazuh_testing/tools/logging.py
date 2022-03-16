@@ -153,9 +153,9 @@ class QA_Logging(ABC):
 
     @classmethod
     def V(cls, message):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        source = f"{calframe[1][3]}:{calframe[1][2]}"
+        current_frame = inspect.currentframe()
+        outer_frames = inspect.getouterframes(current_frame, 2)
+        source = f"{outer_frames[1][3]}:{outer_frames[1][2]}"
 
         cls.logging_message(cls.logger, LOGGING_LEVELS['V'], message, source)
 

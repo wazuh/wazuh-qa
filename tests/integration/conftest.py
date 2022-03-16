@@ -1033,7 +1033,7 @@ def mock_agent_function(request):
     mocking.delete_mocked_agent(agent_id)
 
 
-def getLoggingLevelNameQA(level):
+def get_logging_level_name_QA(level):
     """
     Return the textual or numeric representation of logging level 'level'.
 
@@ -1055,7 +1055,7 @@ def getLoggingLevelNameQA(level):
         if level == values:
             return key
     else:
-        return "Level %s" % level
+        return f"Level {level}"
 
 
 class QALoggerFormatter(logging.Formatter):
@@ -1081,7 +1081,7 @@ class QALoggerFormatter(logging.Formatter):
 
 def pytest_logger_config(logger_config):
     logger_config.add_loggers(['TestLogger', 'FunctionLogger', 'SimulatorLogger', 'MonitorLogger'])
-    logging.getLevelName = getLoggingLevelNameQA
+    logging.getLevelName = get_logging_level_name_QA
     logger_config.set_log_option_default('TestLogger.V,FunctionLogger.V,SimulatorLogger.V,MonitorLogger.V')
     logger_config.set_formatter_class(QALoggerFormatter)
     logging.V = logging.CRITICAL
@@ -1095,6 +1095,8 @@ def pytest_logger_logdirlink(config):
         return os.path.join(os.path.dirname(__file__), config.getoption('--logger-logsdir'))
     else:
         global_parameters.logger_file = None
+
+
 @pytest.fixture(scope='function')
 def mock_agent_with_custom_system(agent_system):
     """Fixture to create a mocked agent with custom system specified as parameter"""
