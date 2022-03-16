@@ -29,7 +29,7 @@ class LogAnalyzer:
         """Get all the lines that match a certain regex.
 
         Args:
-            Lines (list): List of lines.
+            lines (list): List of lines.
             regex (str): Regex to match.
             flags (str): Flags to use in the findall regex method.
         """
@@ -46,7 +46,7 @@ class LogAnalyzer:
         """Get all the lines of the specified type of the log file.
 
         Args:
-            log_path (list): Log path-
+            log_path (list): Log path
             type (str): Type of log to search.
         """
         error_lines = []
@@ -388,6 +388,7 @@ class ReportGenerator:
         """Get the logs path for specified hosts_regex
 
         Args:
+            log (str): Host log file.
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
@@ -407,6 +408,7 @@ class ReportGenerator:
         """Get the metrics statistics path for specified hosts_regex
 
         Args:
+            process (str): Process name.
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
@@ -420,6 +422,7 @@ class ReportGenerator:
         """Get the daemons statistics path for specified hosts_regex
 
         Args:
+            statistic (str): Statistic name.
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
