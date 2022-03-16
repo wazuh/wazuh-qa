@@ -325,10 +325,11 @@ def test_zip_size_limit(clean_files, update_cluster_json):
 
     for host in worker_hosts:
         # Make sure that smaller files were synced.
-        ls_result = host_manager.run_shell(host, f"ls {os.path.join(dst_size_test_path, file_prefix + '*')}")
-        assert set(ls_result.splitlines()) == {os.path.join(dst_size_test_path, file) for file in big_filenames}, \
+        worker_files = {file['path'] for file in host_manager.find_file(host, path=dst_size_test_path,
+                                                                        pattern=file_prefix, use_regex=True)['files']}
+        assert worker_files == {os.path.join(dst_size_test_path, file) for file in big_filenames}, \
             f"Not all expected files were found in {host}."
 
         # While too big files were rejected.
-        ls_big = host_manager.run_shell(host, f"ls {os.path.join(dst_size_test_path, big_file_name)}")
-        assert ls_big == '', f"File {big_file_name}' was expected not to be copied in {host}, but it was."
+        assert not host_manager.find_file(host, path=dst_size_test_path, pattern=big_file_name)['files'], \
+            f"File {big_file_name}' was expected not to be copied in {host}, but it was."
