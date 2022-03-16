@@ -390,7 +390,7 @@ def pytest_runtest_makereport(item, call):
             test_log_folder = os.path.join(log_folder, os.path.relpath(inspect.getfile(item.function), __file__)[3:])
 
             test_case_data = re.match("(.*)\[(.*)\]", item.name)
-     
+
             if test_case_data:
                 test_case_folder = test_case_data.group(1) + '-' + test_case_data.group(2)
             else:
@@ -401,8 +401,8 @@ def pytest_runtest_makereport(item, call):
                 for file in os.listdir(test_case_log_folder):
                     with open(os.path.join(test_case_log_folder, file)) as f:
                         extra.append(pytest_html.extras.text(f.read(), name=file))
-            except Exception:
-                FunctionLogger.V( f"{test_case_log_folder} log file not found")
+            except FileNotFoundError:
+                FunctionLogger.V(f"{test_case_log_folder} log file not found")
                 pass
 
         if not report.passed and not report.skipped:

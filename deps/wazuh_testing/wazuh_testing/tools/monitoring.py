@@ -433,7 +433,7 @@ class QueueMonitor:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
                 item = callback(msg)
-                MonitorLogger.VV(f"QueueMonitor Read: {msg}")
+                MonitorLogger.VVV(f"QueueMonitor Read: {msg}")
                 if item is not None and item:
                     MonitorLogger.V(f"QueueMonitor Match line: {msg}")
                     result_list.append(item)
@@ -920,11 +920,11 @@ class HostMonitor:
             for path in monitored_files:
                 output_path = f'{host}_{path.split("/")[-1]}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
-                MonitorLogger.V(f'Add new file composer process for {host} and path: {path}')
+                MonitorLogger.VVV(f'Add new file composer process for {host} and path: {path}')
                 self._file_monitors.append(self._start(host=host,
                                                        payload=[block for block in payload if block["path"] == path],
                                                        path=output_path))
-                MonitorLogger.V(f'Add new file monitor process for {host} and path: {path}')
+                MonitorLogger.VVV(f'Add new file monitor process for {host} and path: {path}')
 
         while True:
             if not any([handler.is_alive() for handler in self._file_monitors]):
@@ -953,8 +953,8 @@ class HostMonitor:
             truncate_file(os.path.join(self._tmp_path, output_path))
         except FileNotFoundError:
             pass
-        MonitorLogger.V(f'Starting file composer for {host} and path: {path}. '
-                        f'Composite file in {os.path.join(self._tmp_path, output_path)}')
+        MonitorLogger.VVV(f'Starting file composer for {host} and path: {path}. '
+                          f'Composite file in {os.path.join(self._tmp_path, output_path)}')
         tmp_file = os.path.join(self._tmp_path, output_path)
         while True:
             with FileLock(tmp_file):
@@ -987,7 +987,7 @@ class HostMonitor:
                 tailer.encoding = encoding
             tailer.start()
             for case in payload:
-                MonitorLogger.V(f'Starting QueueMonitor for {host} and message: {case["regex"]}')
+                MonitorLogger.VVV(f'Starting QueueMonitor for {host} and message: {case["regex"]}')
                 monitor = QueueMonitor(tailer.queue, time_step=self._time_step)
                 try:
                     self._queue.put({host: monitor.start(timeout=case['timeout'],
@@ -1000,7 +1000,7 @@ class HostMonitor:
                     except (KeyError, TypeError):
                         self._queue.put({
                             host: TimeoutError(f'Did not found the expected callback in {host}: {case["regex"]}')})
-                MonitorLogger.V(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
+                MonitorLogger.VVV(f'Finishing QueueMonitor for {host} and message: {case["regex"]}')
         finally:
             tailer.shutdown()
 
@@ -1016,18 +1016,18 @@ class HostMonitor:
 
     def check_result(self):
         """Check if a TimeoutError occurred."""
-        MonitorLogger.V(f'Checking results...')
+        MonitorLogger.VVV(f'Checking results...')
         while not self._queue.empty():
             result = self._queue.get(block=True)
             for host, msg in result.items():
                 if isinstance(msg, TimeoutError):
                     raise msg
-                MonitorLogger.V(f'Received from {host} the expected message: {msg}')
+                MonitorLogger.VVV(f'Received from {host} the expected message: {msg}')
                 self._result[host].append(msg)
 
     def clean_tmp_files(self):
         """Remove tmp files."""
-        MonitorLogger.V(f'Cleaning temporal files...')
+        MonitorLogger.VVV(f'Cleaning temporal files...')
         for file in os.listdir(self._tmp_path):
             os.remove(os.path.join(self._tmp_path, file))
 

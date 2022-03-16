@@ -1574,7 +1574,7 @@ class EventChecker:
                         data_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
                     FunctionLogger.VV(f"Not asserting {expected_path} in event.data.path. "
-                                    f'Reason: using non-utf-8 encoding in darwin.')
+                                      'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
                     assert (expected_path in data_path), error_msg

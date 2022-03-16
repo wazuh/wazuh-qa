@@ -183,5 +183,5 @@ def test_symbolic_change_target_inside_folder(tags_to_apply, previous_target, ne
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=fim.callback_detect_event)
-        TestLogger.VV(f'Unexpected event {event.result()}')
+        TestLogger.V(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')

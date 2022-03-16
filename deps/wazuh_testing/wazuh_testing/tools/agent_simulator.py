@@ -529,7 +529,7 @@ class Agent:
             command = 'getstate'
         else:
             return
-        SimulatorLogger.V(f"Processing command: {message_list}")
+        SimulatorLogger.VVV(f"Processing command: {message_list}")
 
         if command in ['lock_restart', 'open', 'write', 'close', 'clear_upgrade_result']:
             if command == 'lock_restart' and self.stage_disconnect == 'lock_restart':
@@ -628,7 +628,7 @@ class Agent:
                 msg_as_list.insert(1, f'"{key}":{value}')
             msg = '\n'.join(msg_as_list)
 
-        SimulatorLogger.VV(f"Keep alive message = {msg}")
+        SimulatorLogger.VVV(f"Keep alive message = {msg}")
 
         self.keep_alive_event = self.create_event(msg)
         self.keep_alive_raw_msg = msg
@@ -1003,11 +1003,11 @@ class Rootcheck:
         """
         message = next(self.message)
         if message == 'Starting rootcheck scan.':
-            SimulatorLogger.VV(f"Scan started - {self.agent_name}({self.agent_id}) "
-                                                        f"- rootcheck({self.rootcheck_path})")
+            SimulatorLogger.VVV(f"Scan started - {self.agent_name}({self.agent_id}) "
+                                f"- rootcheck({self.rootcheck_path})")
         if message == 'Ending rootcheck scan.':
-            SimulatorLogger.VV(f"Scan ended - {self.agent_name}({self.agent_id}) "
-                                                        f"- rootcheck({self.rootcheck_path})")
+            SimulatorLogger.VVV(f"Scan ended - {self.agent_name}({self.agent_id}) "
+                                f"- rootcheck({self.rootcheck_path})")
         return message
 
 
@@ -1594,7 +1594,7 @@ class InjectorThread(threading.Thread):
     def keep_alive(self):
         """Send a keep alive message from the agent to the manager."""
         sleep(10)
-        SimulatorLogger.VV("Startup - {}({})".format(self.agent.name, self.agent.id))
+        SimulatorLogger.VVV("Startup - {}({})".format(self.agent.name, self.agent.id))
         self.sender.send_event(self.agent.startup_msg)
         self.sender.send_event(self.agent.keep_alive_event)
         start_time = time()
@@ -1605,14 +1605,14 @@ class InjectorThread(threading.Thread):
             eps = self.agent.modules["keepalive"]["eps"]
         while self.stop_thread == 0:
             # Send agent keep alive
-            SimulatorLogger.VV(f"KeepAlive - {self.agent.name}({self.agent.id})")
+            SimulatorLogger.VVV(f"KeepAlive - {self.agent.name}({self.agent.id})")
 
             self.sender.send_event(self.agent.keep_alive_event)
             self.totalMessages += 1
             if frequency > 0:
                 sleep(frequency - ((time() - start_time) % frequency))
             else:
-                SimulatorLogger.V('Merged checksum modified to force manager overload')
+                SimulatorLogger.VVV('Merged checksum modified to force manager overload')
                 new_checksum = str(getrandbits(128))
                 self.agent.update_checksum(new_checksum)
                 if self.totalMessages % eps == 0:
@@ -1687,7 +1687,7 @@ class InjectorThread(threading.Thread):
         # message = "1:/var/log/syslog:Jan 29 10:03:41 master sshd[19635]:
         #   pam_unix(sshd:session): session opened for user vagrant by (uid=0)
         #   uid: 0"
-        SimulatorLogger.VV(f"Starting - {self.agent.name}({self.agent.id})" + 
+        SimulatorLogger.VVV(f"Starting - {self.agent.name}({self.agent.id})" + 
                                                     f"({self.agent.os}) - {self.module}")
         if self.module == "keepalive":
             self.keep_alive()
