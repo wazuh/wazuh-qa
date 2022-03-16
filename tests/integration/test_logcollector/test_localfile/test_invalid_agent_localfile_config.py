@@ -84,10 +84,12 @@ import tempfile
 import pytest
 
 from wazuh_testing.tools import LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
+from wazuh_testing.tools.services import check_daemon_status
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 from wazuh_testing.fim import callback_configuration_error
-from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
+from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT, callback_missing_element_error
 
 
 # Marks
@@ -99,8 +101,7 @@ files = ['test.txt']
 
 # Configuration
 daemons_handler_configuration = {
-    'daemons': [LOGCOLLECTOR_DAEMON],
-    'ignore_errors': True
+    'daemons': [LOGCOLLECTOR_DAEMON]
 }
 
 temp_dir = tempfile.gettempdir()
@@ -111,32 +112,16 @@ file_structure = [
     }
 ]
 
-cases = [
-    {
-        'params': {
-            'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]),
-            'LOG_FORMAT': None
-        },
-        'metadata': {
-            'regex': callback_configuration_error
-        }
-    },
-    {
-        'params': {
-            'LOCATION': None,
-            'LOG_FORMAT': 'syslog'
-        },
-        'metadata': {
-            'regex': callback_configuration_error
-        }
-    }
+parameters = [
+    { 'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None },
+    { 'LOCATION': None, 'LOG_FORMAT': 'syslog' },
 ]
-params = [case['params'] for case in cases]
-metadata = [case['metadata'] for case in cases]
+metadata = lower_case_key_dictionary_array(parameters)
+
 tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_" \
-             f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in params]
+             f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in parameters]
 configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_agent_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
 @pytest.fixture(scope="module")
@@ -156,7 +141,7 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
                                         daemons_handler):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
-                 set.
+                 set and if the Wazuh continues running.
 
     wazuh_min_version: 4.3.0
 
@@ -183,11 +168,16 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
     input_description: A YAML file with the invalid configurations.
 
     expected_output:
-        - 'Did not receive expected "ERROR: ...: Configuration error at event'
+        - Did not receive expected "ERROR: ...: Configuration error at event
+        - Did not receive the expected "ERROR: ...: Missing ... element.
 
     tags:
         - logcollector
     '''
-    metadata = get_configuration.get('metadata')
-    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=metadata['regex'],
+    check_daemon_status(target_daemon=LOGCOLLECTOR_DAEMON, running_condition=True)
+
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_configuration_error,
                             error_message='Did not receive the expected "ERROR: ...: Configuration error at" event')
+    
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_missing_element_error,
+                            error_message='Did not receive the expected "ERROR: ...: Missing ... element.')
