@@ -51,20 +51,22 @@ def read_yaml(file_path):
         return yaml.safe_load(f)
 
 
-def get_list_of_content_yml(file_path, filter, list=[]):
+def get_list_of_content_yml(file_path, separator='_'):
     """Read a YAML file from a given path, return a list with the YAML data
     after apply filter
     
     Args:
         file_path (str): Path of the YAML file to be readed
-        filter (str): filder to extract some part of yaml
-        list: a list with previous information
+        separator (str): filder to extract some part of yaml
     
     Returns:
        list: Yaml structure.
     """
-    list.append((read_yaml(file_path), file_path + filter))
-    return list
+    value_list = []
+    with open(file_path) as f:
+        value_list.append((yaml.safe_load(f), file_path.split(separator)[0]))
+    
+    return value_list
 
 
 def truncate_file(file_path):
