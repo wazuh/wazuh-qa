@@ -17,6 +17,7 @@ AGENT_GROUPS_DEFAULT = 'default'
 
 # Error Messages
 ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
 
 
 # Functions
