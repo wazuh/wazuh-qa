@@ -76,7 +76,7 @@
                     "label": "checks.setup"
                 },
                 {
-                    "title": "Know fields",
+                    "title": "Known fields",
                     "subTitle": "Enable or disable the known fields health check when opening the app.",
                     "label": "checks.fields"
                 },

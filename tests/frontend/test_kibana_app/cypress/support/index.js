@@ -50,7 +50,8 @@ before(() => {
 })
 
 beforeEach(() => {
-    setCookies(cookieMock)
+    cy.setSessionStorage('healthCheck', 'executed');
+    setCookies(cookieMock);
 })
 
 afterEach(() => {
@@ -74,6 +75,5 @@ afterEach(() => {
 })
 
 after(() => {
-    updateCookies('sid');
-    updateCookies('wz-token');
+    updateCookies();
 })
