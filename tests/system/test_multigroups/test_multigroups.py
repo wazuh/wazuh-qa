@@ -91,10 +91,8 @@ def delete_groups():
 
         # Remove any pre-existing multigroup (just in case they weren't removed after deleting the group).
         mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
-        for host in test_hosts:
-            if host_manager.run_shell(host, f"ls {mg_path}") == '':
-                break
-            host_manager.run_shell(host, cmd=f"rm -rf {mg_path}")
+        host_manager.run_shell(test_hosts[0], cmd=f"rm -rf {mg_path}")
+    sleep(time_to_sync)
 
 
 # Fixtures
@@ -102,20 +100,16 @@ def delete_groups():
 @pytest.fixture(scope='function')
 def agent_healthcheck():
     """Check if expected agents are active."""
-    failed_agents = set()
-    for _ in range(5):
-        for agent, _ in agent_groups.items():
+    for agent, _ in agent_groups.items():
+        result = {}
+        for _ in range(5):
             result = host_manager.make_api_call(host=test_hosts[0], token=token, method='GET',
                                                 endpoint=f"/agents?status=active&name={agent}")
-            if result.get('json', {}).get('data', {}).get('total_affected_items', 0) != 1:
-                failed_agents.add(agent)
+            if result['status'] == 200 and result['json']['data']['total_affected_items'] == 1:
                 break
-            failed_agents.discard(agent)
+            sleep(time_to_update)
         else:
-            break
-        sleep(time_to_update)
-    else:
-        pytest.fail(f"These agents are not active: {', '.join(failed_agents)}")
+            pytest.fail(f"Agent {agent} is not active or its status could not be checked: {result.get('json', '')}")
 
 
 @pytest.fixture(scope='function')
@@ -139,8 +133,10 @@ def create_multigroups():
 
                 # Check that the multigroup folder does not exist yet.
                 sleep(time_to_update)
-                mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups[:idx+1]))
-                assert '' == host_manager.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should not exist."
+                mg_name = calculate_mg_name(groups[:idx+1])
+                assert not host_manager.find_file(
+                    test_hosts[0], path=mg_folder_path, pattern=mg_name, file_type='directory'
+                )['files'],  f"{os.path.join(mg_folder_path, mg_name)} should not exist."
 
                 # Assign agent to group.
                 agent_id = get_agent_id(token=token, agent_name=agent_name)
@@ -150,7 +146,9 @@ def create_multigroups():
 
                 # Check that the multigroup folder exists.
                 sleep(time_to_sync)
-                assert '' != host_manager.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should exist."
+                assert host_manager.find_file(
+                    test_hosts[0], path=mg_folder_path, pattern=mg_name, file_type='directory'
+                )['files'],  f"{os.path.join(mg_folder_path, mg_name)} should exist."
 
 
 # Tests
@@ -231,12 +229,12 @@ def test_multigroups_updated(clean_environment, agent_healthcheck, create_multig
 def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multigroups):
     """Check that multigroups are removed when expected.
 
-    Unassign an agent from their groups or delete the groups. Check that the associated
-    multigroup disappears in both cases.
+    Unassign an agent from their groups or delete the groups. Check that the associated multigroup disappears
+    in both cases.
     """
     for agent_name, groups in agent_groups.items():
         # Check that multigroups exists for each agent.
-        mg_path = os.path.join(mg_folder_path, calculate_mg_name(groups))
+        mg_name = os.path.join(mg_folder_path, calculate_mg_name(groups))
         agent_id = get_agent_id(token=token, agent_name=agent_name)
 
         for group in groups:
@@ -255,4 +253,6 @@ def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multig
 
         # Check that multigroups no longer exists for each agent.
         sleep(time_to_update)
-        assert '' == host_manager.run_shell(test_hosts[0], f"ls {mg_path}"), f"{mg_path} should not exist, but it does."
+        assert not host_manager.find_file(
+            test_hosts[0], path=mg_folder_path, pattern=mg_name, file_type='directory'
+        )['files'], f"{os.path.join(mg_folder_path, mg_name)} should not exist."
