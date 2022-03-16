@@ -7,6 +7,19 @@ import os
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 
 
+# Agent Variables
+AGENT_STATUS_ACTIVE = 'active'
+AGENT_STATUS_NEVER_CONNECTED = 'never_connected'
+AGENT_STATUS_DISCONNECTED = 'disconnected'
+AGENT_NO_GROUPS = 'Null'
+AGENT_GROUPS_DEFAULT = 'default'
+
+
+# Error Messages
+ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+
+
+# Functions
 def get_agent_id(host_manager):
     # Gets the first agent id in the master's client.keys file
     return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
