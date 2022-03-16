@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -11,12 +11,12 @@ brief: The 'wazuh-remoted' program is the server side daemon that communicates w
        Agent's status should change from 'disconnected' to 'active' status after the manager
        receives the agents' keep-alive message.
 
-tier: 2
-
-modules:
+components:
     - remoted
 
-components:
+suite: agent_communication
+
+targets:
     - manager
 
 daemons:
@@ -31,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
@@ -57,7 +49,7 @@ from time import sleep
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing import UDP, TCP, TCP_UDP, remote
-from wazuh_testing.remote import check_push_shared_config
+from wazuh_testing.remote import check_push_shared_config, REMOTED_GLOBAL_TIMEOUT
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -113,9 +105,11 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
     '''
     description: Check if the manager sends the shared configuration to agents through remote,
                  ensuring the agent version is correct.
-    
+
     wazuh_min_version: 4.2.0
-    
+
+    tier: 2
+
     parameters:
         - agent_name:
             type: dict_keys
@@ -135,20 +129,20 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         - create_agent_group:
             type: fixture
             brief: Temporary creates a new agent group for testing purpose, must be run only on Managers.
-    
+
     assertions:
         - Verify that the shared configuration was sent, checking the agent version retrieved by 'wazuh_bd'
         - Verify the startup message was received.
-    
+
     input_description: A configuration template (test_agent_version_shared_configuration_startup_message) is contained
-                       in an external YAML file (wazuh_agent_version_shared_configuration_startup_message.yaml). 
-                       That template is combined with different test cases defined in the module. Those include 
+                       in an external YAML file (wazuh_agent_version_shared_configuration_startup_message.yaml).
+                       That template is combined with different test cases defined in the module. Those include
                        configuration settings for the 'wazuh-remoted' daemon and agents info.
-    
+
     expected_output:
         - fr"DEBUG: Agent <agent_name> sent HC_STARTUP from 127.0.0.1"
         - The start up message has not been found in the logs
-    
+
     tags:
         - simulator
         - wazuh_db
@@ -160,7 +154,7 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
         agent = ag.Agent(**agent_info[agent_name])
 
         # Sleep to avoid ConnectionRefusedError
-        sleep(1)
+        sleep(REMOTED_GLOBAL_TIMEOUT)
 
         sender = ag.Sender(agent_info[agent_name]['manager_address'], protocol=protocol)
 
@@ -168,8 +162,3 @@ def test_agent_remote_configuration(agent_name, get_configuration, configure_env
 
         wazuh_db_agent_version = agent.get_agent_version()
         assert wazuh_db_agent_version == fr"Wazuh {agent_info[agent_name]['version']}"
-
-        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-        log_callback = remote.callback_start_up(agent.name)
-        wazuh_log_monitor.start(timeout=10, callback=log_callback,
-                                error_message='The start up message has not been found in the logs')

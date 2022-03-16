@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files for
        changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_follow_symbolic_link
+
+targets:
     - agent
     - manager
 
@@ -36,21 +36,14 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
     - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - macOS Catalina
     - Solaris 10
     - Solaris 11
+    - macOS Catalina
+    - macOS Server
+    - Ubuntu Focal
+    - Ubuntu Bionic
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -122,6 +115,8 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -178,7 +173,7 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'modified' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            TestLogger.V((f'Unexpected event {event.result()}'))
+            TestLogger.V(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
 
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -199,13 +194,13 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            TestLogger.V((f'Unexpected event {event.result()}'))
+            TestLogger.V(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
     else:
         fim.create_file(fim.REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
             event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
-            TestLogger.V((f'Unexpected event {event.result()}'))
+            TestLogger.V(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
 
     # Change the target of the symlink and expect events while there's no syscheck scan

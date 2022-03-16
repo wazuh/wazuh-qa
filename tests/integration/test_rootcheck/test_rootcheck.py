@@ -1,42 +1,42 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: The 'rootcheck' tool allows to define policies in order to check if the agents
        meet the requirement specified. The rootcheck engine can check if a process is running, if a file is 
        present and if the content of a file contains a pattern, 
        or if a Windows registry key contains a string or is simply present.
-tier: 0
-modules:
-    - rootcheck
+
 components:
+    - rootcheck
+
+targets:
     - manager
+
 daemons:
     - wazuh-analysisd
+
 os_platform:
     - linux
+
 os_version:
     - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/policy-monitoring/rootcheck
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
+
 tags:
     - rootcheck
 '''
@@ -171,6 +171,8 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
                  table request.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

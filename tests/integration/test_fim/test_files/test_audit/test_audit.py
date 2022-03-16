@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: These tests will check if the 'wazuh-syscheckd' and 'auditd' daemons work
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_audit
+
+targets:
     - agent
     - manager
 
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://man7.org/linux/man-pages/man8/auditd.8.html
@@ -73,14 +65,13 @@ import psutil
 import pytest
 import wazuh_testing.fim as fim
 
-
 from wazuh_testing import global_parameters
+from wazuh_testing.tools.logging import TestLogger
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 from wazuh_testing.tools.utils import retry
-from wazuh_testing.tools.logging import TestLogger
 
 # Marks
 
@@ -124,6 +115,8 @@ def test_audit_health_check(tags_to_apply, get_configuration,
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -150,9 +143,9 @@ def test_audit_health_check(tags_to_apply, get_configuration,
         - r'Whodata health-check: Success.'
 
     tags:
-        - who-data
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_health_check,
@@ -172,6 +165,8 @@ def test_added_rules(tags_to_apply, get_configuration,
                  directory is added verifying that the proper FIM event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -199,12 +194,12 @@ def test_added_rules(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    TestLogger.V('Checking the event...')
+    TestLogger.VV('Checking the event...')
     events = wazuh_log_monitor.start(timeout=20,
                                      callback=fim.callback_audit_added_rule,
                                      accum_results=3,
@@ -232,6 +227,8 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -258,10 +255,10 @@ def test_readded_rules(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Remove added rules
@@ -296,6 +293,8 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -324,10 +323,10 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Restart Audit
@@ -365,6 +364,8 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -392,9 +393,9 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
 
     tags:
         - realtime
-        - who-data
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Stop Audit
@@ -431,6 +432,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - audit_key:
             type: str
@@ -460,10 +463,10 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
         - r'Match audit_key' ('key="wazuh_hc"' and 'key="wazuh_fim"' must not appear in the event)
 
     tags:
-        - audit-keys
-        - who-data
+        - audit_keys
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
 
     # Add watch rule
@@ -502,6 +505,8 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -535,10 +540,10 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         - The creation time of the 'auditd' daemon process.
 
     tags:
-        - audit-keys
-        - who-data
+        - audit_keys
+        - who_data
     '''
-    TestLogger.V('Applying the test configuration')
+    TestLogger.VV('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # We need to retry get_audit_creation_time in case syscheckd didn't have
@@ -547,7 +552,7 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
     def get_audit_creation_time():
         for proc in psutil.process_iter(attrs=['name']):
             if proc.name() == "auditd":
-                TestLogger.V(f"auditd detected. PID: {proc.pid}")
+                TestLogger.VV(f"auditd detected. PID: {proc.pid}")
                 return proc.create_time()
         raise Exception('Auditd is not running')
 

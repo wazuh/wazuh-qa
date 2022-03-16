@@ -1,8 +1,10 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages.
        Specifically, these tests will check if commands with different characteristics are executed
        correctly by the logcollector. They will also check if the 'info' and 'debug' lines are
@@ -11,44 +13,45 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        servers or devices. This component can receive logs through text files or Windows event logs.
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
-tier: 0
-modules:
-    - logcollector
+
 components:
+    - logcollector
+
+suite: command_monitoring
+
+targets:
     - agent
     - manager
+
 daemons:
     - wazuh-logcollector
+
 os_platform:
     - linux
     - macos
     - solaris
+
 os_version:
     - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
     - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - macOS Catalina
     - Solaris 10
     - Solaris 11
+    - macOS Catalina
+    - macOS Server
+    - Ubuntu Focal
+    - Ubuntu Bionic
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#command
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#alias
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
+
 tags:
     - logcollector_cmd_exec
 '''
@@ -58,7 +61,7 @@ import pytest
 import sys
 
 from subprocess import check_output
-from wazuh_testing.tools import monitoring, LOG_FILE_PATH
+from wazuh_testing.tools import monitoring
 from wazuh_testing import global_parameters
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -77,20 +80,13 @@ local_internal_options = {
     'logcollector.max_lines': '100',
     'logcollector.debug': '2'
 }
-file_structure = [
-    {
-        'folder_path': os.path.join(tempfile.gettempdir(), 'wazuh-testing'),
-        'filename': ['not_ending_command_file.log'],
-    }
-]
 
-not_ending_command_file_full_path = os.path.join(file_structure[0]['folder_path'], file_structure[0]['filename'][0])
 
 parameters = [
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
     {'LOG_FORMAT': 'command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': f'tail -f {not_ending_command_file_full_path}', 'ALIAS': ''},
+    {'LOG_FORMAT': 'command', 'COMMAND': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
     {'LOG_FORMAT': 'command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
@@ -99,7 +95,7 @@ parameters = [
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': f'tail -f {not_ending_command_file_full_path}', 'ALIAS': ''},
+    {'LOG_FORMAT': 'full_command', 'COMMAND': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
     {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
@@ -110,8 +106,8 @@ metadata = [
     {'log_format': 'command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
     {'log_format': 'command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
     {'log_format': 'command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'command', 'command': f'tail -f {not_ending_command_file_full_path}', 'alias': '',
-     'info': 'does not end'},
+    {'log_format': 'command', 'command': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'alias': '',
+     'info': 'does_not_end'},
     {'log_format': 'command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
     {'log_format': 'command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
     {'log_format': 'command', 'command': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'alias': '',
@@ -122,7 +118,7 @@ metadata = [
     {'log_format': 'full_command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
     {'log_format': 'full_command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
     {'log_format': 'full_command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'full_command', 'command': f'tail -f {not_ending_command_file_full_path}', 'alias': '',
+    {'log_format': 'full_command', 'command': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'alias': '',
      'info': 'does not end'},
     {'log_format': 'full_command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
     {'log_format': 'full_command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
@@ -185,15 +181,9 @@ def dbg_reading_command(command, alias, log_format):
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-
-@pytest.fixture(scope="module")
-def get_files_list():
-    """Get file list to create from the module."""
-    return file_structure
-
-def test_command_execution_dbg(get_files_list, create_file_structure_module, configure_local_internal_options_module,
-                               get_configuration, file_monitoring, configure_environment, restart_logcollector):
-   '''
+def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
+                               configure_environment, restart_logcollector):
+    '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
                  special characteristics. For this purpose, the test will configure the logcollector to run
                  a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
@@ -204,7 +194,11 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
                  of lines read from the command run. Depending on test case, the test also will verify that
                  the debug event 'reading command' is generated, this event includes the output of the command
                  run, and its alias if it is set in the 'alias' tag.
+
     wazuh_min_version: 4.2.0
+
+    tier: 0
+
     parameters:
         - configure_local_internal_options_module:
             type: fixture
@@ -224,22 +218,25 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
         - restart_logcollector:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
+
     assertions:
         - Verify that the debug 'running' event is generated when running the command set in the 'command' tag.
         - Verify that the debug 'reading command' event is generated when running the related command.
         - Verify that the debug 'lines' event is generated when running the related command.
+
     input_description: A configuration template (test_command_execution) is contained in an external
                        YAML file (wazuh_command_conf.yaml), which includes configuration settings for
                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
                        (log formats and commands to run) defined in the module.
+
     expected_output:
         - r'DEBUG: Running .*'
         - r'DEBUG: Reading command message.*'
         - r'lines from command .*'
+
     tags:
         - logs
     '''
- 
     config = get_configuration['metadata']
 
     # Check log line "DEBUG: Running command '<command>'"
@@ -248,11 +245,6 @@ def test_command_execution_dbg(get_files_list, create_file_structure_module, con
                       callback=logcollector.callback_running_command(log_format=config['log_format'],
                                                                      command=config['command'],
                                                                      escape=True))
-
-    if config['info'] == 'does not end':
-        with open(not_ending_command_file_full_path, 'a') as command_file:
-            for line in range(int(local_internal_options['logcollector.max_lines']) + 1):
-                command_file.write(f"Testing not ending command.Line {line}\n")
 
     # Command with known output to test "Reading command message: ..."
     if config['command'].startswith('echo') and config['alias'] != '':

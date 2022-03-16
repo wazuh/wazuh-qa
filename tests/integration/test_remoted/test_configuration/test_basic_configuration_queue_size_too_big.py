@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -8,12 +8,13 @@ type: integration
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
        Specifically, this test will check that a warning message is produced when 'wazuh-remoted'
        sets the queue size too big (greater than 262144)
-tier: 0
-
-modules:
-    - remoted
 
 components:
+    - remoted
+
+suite: configuration
+
+targets:
     - manager
 
 daemons:
@@ -28,18 +29,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
@@ -97,6 +90,8 @@ def test_big_queue_size(get_configuration, configure_environment, restart_remote
                  logged and the configuration is the same as the API respnse.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
