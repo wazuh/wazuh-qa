@@ -83,13 +83,13 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 def set_up_groups(request):
     groups = request.param.get('groups', [])
     for group in groups:
-        FunctionLogger.V(f"set_up_groups - Adding group {group}")
+        FunctionLogger.VV(f"set_up_groups - Adding group {group}")
         subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', f'{group}', '-q'])
 
     yield request.param
 
     for group in groups:
-        FunctionLogger.V(f"set_up_groups - Removing group {group}")
+        FunctionLogger.VV(f"set_up_groups - Removing group {group}")
         subprocess.call(['/var/ossec/bin/agent_groups', '-r', '-g', f'{group}', '-q'])
 
 
