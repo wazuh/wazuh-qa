@@ -128,7 +128,7 @@ metadata = [
                 f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}",
             ],
             [  # Stage 2 - Pass second server and connect to third
-                #f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
                 f'Trying to connect to server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
@@ -160,7 +160,7 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                f'Lost connection with manager. Setting lock.',
+                #f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f'Connected to the server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
