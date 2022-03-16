@@ -80,15 +80,19 @@ tags:
     - logcollector
 '''
 import os
+import sys
 import tempfile
+import subprocess
 
 import pytest
 
-from wazuh_testing.tools import get_service, LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
+from wazuh_testing.tools import LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import callback_configuration_error
-from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT
+from wazuh_testing.logcollector import LOG_COLLECTOR_GLOBAL_TIMEOUT, callback_missing_element_error
 
 
 # Marks
@@ -96,16 +100,11 @@ pytestmark = pytest.mark.tier(level=0)
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-wazuh_component = get_service()
-log_message_level = 'CRITICAL' if 'manager' in wazuh_component else 'ERROR'
+no_restart_windows_after_configuration_set = True
+exception_regex = r'Error when executing .+ in daemon .+. Exit status: .+' if sys.platform == 'win32' else r'1'
 files = ['test.txt']
 
 # Configuration
-daemons_handler_configuration = {
-    'daemons': [LOGCOLLECTOR_DAEMON],
-    'ignore_errors': True
-}
-
 temp_dir = tempfile.gettempdir()
 file_structure = [
     {
@@ -114,32 +113,16 @@ file_structure = [
     }
 ]
 
-cases = [
-    {
-        'params': {
-            'LOCATION': None,
-            'LOG_FORMAT': 'syslog'
-        },
-        'metadata': {
-            'regex': callback_configuration_error
-        }
-    },
-    {
-        'params': {
-            'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]),
-            'LOG_FORMAT': None
-        },
-        'metadata': {
-            'regex': callback_configuration_error
-        }
-    }
+parameters = [
+    { 'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None },
+    { 'LOCATION': None, 'LOG_FORMAT': 'syslog' },
 ]
-params = [case['params'] for case in cases]
-metadata = [case['metadata'] for case in cases]
+metadata = lower_case_key_dictionary_array(parameters)
+
 tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_" \
-             f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in params]
+             f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in parameters]
 configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_wazuh_conf.yaml')
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 
 @pytest.fixture(scope="module")
@@ -166,10 +149,10 @@ def remove_empty_options(get_configuration):
 
 
 def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_configuration, remove_empty_options,
-                            configure_environment, daemons_handler):
+                            configure_environment):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
-                 set.
+                 set and if Wazuh refuses to restart.
 
     wazuh_min_version: 4.3.0
 
@@ -189,9 +172,6 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
-        - daemons_handler:
-            type: fixture
-            brief: Handler of Wazuh daemons.
 
     assertions:
         - Verify that the expected error message is in the log
@@ -199,13 +179,18 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
     input_description: A YAML file with the invalid configurations.
 
     expected_output:
-        - 'Did not receive expected "CRITICAL: ...: Configuration error at event'
-        - 'Did not receive expected "ERROR: ...: Configuration error at event'
+        - Did not receive expected "CRITICAL: ...: Configuration error at event
+        - Did not receive the expected "ERROR: ...: Missing ... element.
 
     tags:
         - logcollector
     '''
-    metadata = get_configuration.get('metadata')
-    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=metadata['regex'],
-                            error_message='Did not receive the expected '
-                            f'"{log_message_level}: ...: Configuration error at" event')
+    expected_exception = ValueError if sys.platform == 'win32' else subprocess.CalledProcessError
+    with pytest.raises(expected_exception, match=exception_regex):
+        control_service('restart', daemon=LOGCOLLECTOR_DAEMON)
+
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_configuration_error,
+                            error_message='Did not receive the expected "CRITICAL: ...: Configuration error at" event')
+    
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_missing_element_error,
+                            error_message='Did not receive the expected "ERROR: ...: Missing ... element.')
