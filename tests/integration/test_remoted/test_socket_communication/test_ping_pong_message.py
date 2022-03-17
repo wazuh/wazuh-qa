@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -8,12 +8,12 @@ type: integration
 brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
        Specifically, this test will check if 'wazuh-remoted' sends the #pong message.
 
-tier: 0
-
-modules:
+components:
     - remoted
 
-components:
+suite: socket_communication
+
+targets:
     - manager
 
 daemons:
@@ -29,24 +29,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
+    - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
@@ -139,7 +128,9 @@ def test_ping_pong_message(get_configuration, configure_environment, restart_rem
     description: Check if 'wazuh-remoted' sends the #pong message
     
     wazuh_min_version: 4.2.0
-    
+
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture

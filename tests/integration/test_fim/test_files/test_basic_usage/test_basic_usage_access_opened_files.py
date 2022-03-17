@@ -1,5 +1,5 @@
 """
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -10,22 +10,17 @@ type: integration
 brief: Check that files that are being scanned by the syscheckd daemon can
        modified (renamed/deleted), and that wazuh is not blocking the files.
 
-tier: 1
-
-modules:
+components:
     - syscheck
 
-components:
+suite: files_basic_usage
+
+targets:
     - manager
     - agent
 
-path: tests/integration/test_fim/test_files/test_basic_usage/test_basic_usage_access_opened_files.py
-
 daemons:
     - wazuh-syscheckd
-
-modes:
-    - scheduled
 
 os_platform:
     - linux
@@ -39,26 +34,25 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - macOS Server
+    - macOS Catalina
+    - Red Hat 8
+    - Solaris 10
+    - Solaris 11
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
+
+pytest_args:
+    - fim_mode:
+        scheduled: Implies scans at a determined interval
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/fim-configuration.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html
-
-tags:
-    - syscheck
 """
 
 import os
@@ -120,7 +114,9 @@ def test_basic_usage_modify_opened_files(tags_to_apply, get_configuration, confi
                  can modified (renamed), and that wazuh is not
                  blocking the files.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -173,7 +169,9 @@ def test_basic_usage_delete_opened_files(tags_to_apply, get_configuration, confi
                  can deleted, and that wazuh is not
                  blocking the files.
 
-    wazuh_min_version: 4.2
+    wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
