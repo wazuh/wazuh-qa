@@ -58,10 +58,10 @@ export const setCookies = (cookieObj) => {
 
 }
 
-export const updateCookies =  () => {
+export const updateCookies = () => {
   const filename = 'cookie.json';
   cy.getCookies().then((currentCook) => {
-    const parameterToFilter = ['sid','wz-token'];
+    const parameterToFilter = ['sid', 'wz-token'];
     for (let l = 0; l < parameterToFilter.length; l++) {
       const [cookie] = currentCook.filter(e => e.name == parameterToFilter[l]);
       // const newCookies = cookieMock.map(e => {
@@ -79,8 +79,8 @@ export const updateCookies =  () => {
       })
 
     }
-    
-   cy.log(`cookie: ${currentCook}`);
+
+    cy.log(`cookie: ${currentCook}`);
   });
 }
 
