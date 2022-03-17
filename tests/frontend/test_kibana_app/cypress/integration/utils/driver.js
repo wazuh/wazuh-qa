@@ -60,6 +60,7 @@ export const setCookies = (cookieObj) => {
 
 export const updateCookies = () => {
   const filename = 'cookie.json';
+  debugger;
   cy.getCookies().then((currentCook) => {
     const parameterToFilter = ['sid', 'wz-token'];
     for (let l = 0; l < parameterToFilter.length; l++) {
@@ -84,11 +85,13 @@ export const updateCookies = () => {
   });
 }
 
-export const writeFiles = async (cookie) => {
+export const writeFiles = (cookie, parameterToFilter) => {
   const filename = 'cookie.json';
-  cy.readFile(filename).then((list) => {
-    list.push(cookie)
-    cy.writeFile(filename, list)
+  cy.readFile(filename).then((obj) => {
+    obj.forEach(e => {
+      if (e.name == parameterToFilter[l]) e.value = cookie.value
+    })
+    cy.writeFile(filename, obj)
   })
 }
 
