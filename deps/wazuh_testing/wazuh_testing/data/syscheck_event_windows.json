@@ -149,12 +149,72 @@
             },
             "perm": {
               "$id": "#/properties/data/properties/attributes/properties/perm",
-              "type": "string",
-              "default": "",
-              "examples": [
-                "rw-r--r--"
-              ],
-              "pattern": "^(.*)$"
+              "type": "object",
+              "patternProperties": {
+                 "^S-[-0-9]*": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "$id": "#/properties/data/properties/attributes/properties/perm/name",
+                            "type": "string"
+                        },
+                        "allowed": {
+                            "$id": "#/properties/data/properties/attributes/properties/perm/allowed",
+                            "type": "array",
+                            "items": {
+                                "$id": "#/properties/data/properties/attributes/properties/perm/allowed/items",
+                                "type": "string",
+                                "enum": [
+                                    "generic_read",
+                                    "generic_write",
+                                    "generic_execute",
+                                    "generic_all",
+                                    "delete",
+                                    "read_control",
+                                    "write_dac",
+                                    "write_owner",
+                                    "synchronize",
+                                    "read_data",
+                                    "write_data",
+                                    "append_data",
+                                    "read_ea",
+                                    "write_ea",
+                                    "execute",
+                                    "read_attributes",
+                                    "write_attributes"
+                                ]
+                            }
+                        },
+                        "denied": {
+                            "$id": "#/properties/data/properties/attributes/properties/perm/denied",
+                            "type": "array",
+                            "items": {
+                                "$id": "#/properties/data/properties/attributes/properties/perm/denied/items",
+                                "type": "string",
+                                "enum": [
+                                    "generic_read",
+                                    "generic_write",
+                                    "generic_execute",
+                                    "generic_all",
+                                    "delete",
+                                    "read_control",
+                                    "write_dac",
+                                    "write_owner",
+                                    "synchronize",
+                                    "read_data",
+                                    "write_data",
+                                    "append_data",
+                                    "read_ea",
+                                    "write_ea",
+                                    "execute",
+                                    "read_attributes",
+                                    "write_attributes"
+                                  ]
+                            }
+                          }
+                      }
+                  }
+              }
             },
             "uid": {
               "$id": "#/properties/data/properties/attributes/properties/uid",

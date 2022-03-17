@@ -4,14 +4,14 @@
   decoder: "custom_decoder_0.xml"
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "dummy log","log_format": "syslog","location": "master->/var/log/syslog"}}'
   output_error: 0
-  output_data_msg: "(1226): Error reading XML file 'etc/decoders/local_decoder.xml': XMLERR: Attribute 'is' has no value. (line 2)."
+  output_data_msg: "(1226): Error reading XML file 'etc/decoders/custom_decoder_0.xml': XMLERR: Attribute 'is' has no value. (line 2)."
   output_data_codemsg: -1
 -
   name: "Invalid decoder syntax: no closing XML tag"
   decoder: "custom_decoder_1.xml"
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{"event": "dummy log","log_format": "syslog","location": "master->/var/log/syslog"}}'
   output_error: 0
-  output_data_msg: "(1226): Error reading XML file 'etc/decoders/local_decoder.xml': XMLERR: End of file and some elements were not closed. (line 3)."
+  output_data_msg: "(1226): Error reading XML file 'etc/decoders/custom_decoder_1.xml': XMLERR: End of file and some elements were not closed. (line 3)."
   output_data_codemsg: -1
 -
   name: "Invalid decoder syntax: no existing parent"

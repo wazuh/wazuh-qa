@@ -9,20 +9,24 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime
-
 import pytest
+from datetime import datetime
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, start_daemons, stop_daemons
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing import mocking
+from wazuh_testing.db_interface.agent_db import update_os_info
+from wazuh_testing.db_interface.global_db import get_system, modify_system
+
 
 if sys.platform == 'win32':
     from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
@@ -32,6 +36,21 @@ HOST_TYPES = set("server agent".split())
 
 catalog = list()
 results = dict()
+
+###############################
+report_files = [LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS]
+
+
+def set_report_files(files):
+    if files:
+        for file in files:
+            report_files.append(file)
+
+
+def get_report_files():
+    return report_files
+
+###############################
 
 
 def pytest_runtest_setup(item):
@@ -109,7 +128,7 @@ def pytest_addoption(parser):
         metavar="minimum_level",
         default=-1,
         type=int,
-        help="only run tests with a tier level less or equal than 'minimum_level'"
+        help="only run tests with a tier level greater or equal than 'minimum_level'"
     )
     parser.addoption(
         "--tier-maximum",
@@ -167,6 +186,14 @@ def pytest_addoption(parser):
         help="run tests using Google Cloud topic name"
     )
     parser.addoption(
+        "--gcp-configuration-file",
+        action="store",
+        metavar="gcp_configuration_file",
+        default=None,
+        type=str,
+        help="run tests using this configuration file."
+    )
+    parser.addoption(
         "--fim_mode",
         action="append",
         metavar="fim_mode",
@@ -181,6 +208,22 @@ def pytest_addoption(parser):
         default=None,
         type=str,
         help="run tests using a specific WPK package version"
+    )
+    parser.addoption(
+        "--save-file",
+        action="append",
+        metavar="file",
+        default=[],
+        type=str,
+        help="add file to the HTML report"
+    )
+    parser.addoption(
+        "--wpk_package_path",
+        action="append",
+        metavar="wpk_package_path",
+        default=None,
+        type=str,
+        help="run tests using a specific WPK package path"
     )
 
 
@@ -199,6 +242,16 @@ def pytest_configure(config):
     fim_database_memory = config.getoption("--fim-database-memory")
     if fim_database_memory:
         global_parameters.fim_database_memory = True
+
+    # Load GCP defaults from configuration file
+    gcp_configuration_file = config.getoption("--gcp-configuration-file")
+    if gcp_configuration_file:
+        global_parameters.gcp_configuration_file = gcp_configuration_file
+    else:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        default_configuration = os.path.join(dir_path, 'test_gcloud', 'data', 'configuration.yaml')
+        if os.path.exists(default_configuration):
+            global_parameters.gcp_configuration_file = default_configuration
 
     # Set gcp_project_id only if it is passed through command line args
     gcp_project_id = config.getoption("--gcp-project-id")
@@ -228,6 +281,14 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
+
+    # Set files to add to the HTML report
+    set_report_files(config.getoption("--save-file"))
+
+    # Set WPK package path
+    global_parameters.wpk_package_path = config.getoption("--wpk_package_path")
+    if global_parameters.wpk_package_path:
+        global_parameters.wpk_package_path = global_parameters.wpk_package_path
 
 
 def pytest_html_results_table_header(cells):
@@ -313,10 +374,12 @@ def pytest_runtest_makereport(item, call):
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
 
         # Extra files to be added in 'Links' section
-        for filepath in (LOG_FILE_PATH, WAZUH_CONF):
-            with open(filepath, mode='r', errors='replace') as f:
-                content = f.read()
-                extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
+        files = get_report_files()
+        for filepath in files:
+            if os.path.isfile(filepath):
+                with open(filepath, mode='r', errors='replace') as f:
+                    content = f.read()
+                    extra.append(pytest_html.extras.text(content, name=os.path.split(filepath)[-1]))
 
         if not report.passed and not report.skipped:
             report.extra = extra
@@ -396,7 +459,9 @@ def close_sockets(receiver_sockets):
 def connect_to_sockets_module(request):
     """Module scope version of connect_to_sockets."""
     receiver_sockets = connect_to_sockets(request)
+
     yield receiver_sockets
+
     close_sockets(receiver_sockets)
 
 
@@ -404,7 +469,19 @@ def connect_to_sockets_module(request):
 def connect_to_sockets_function(request):
     """Function scope version of connect_to_sockets."""
     receiver_sockets = connect_to_sockets(request)
+
     yield receiver_sockets
+
+    close_sockets(receiver_sockets)
+
+
+@pytest.fixture(scope='module')
+def connect_to_sockets_configuration(request, get_configuration):
+    """Configuration scope version of connect_to_sockets."""
+    receiver_sockets = connect_to_sockets(request)
+
+    yield receiver_sockets
+
     close_sockets(receiver_sockets)
 
 
@@ -563,6 +640,60 @@ def configure_sockets_environment(request):
     control_service('start')
 
 
+@pytest.fixture(scope='function')
+def configure_sockets_environment_function(request):
+    """Configure environment for sockets and MITM"""
+    monitored_sockets_params = getattr(request.module, 'monitored_sockets_params')
+    log_monitor_paths = getattr(request.module, 'log_monitor_paths')
+
+    # Stop wazuh-service and ensure all daemons are stopped
+    control_service('stop')
+    check_daemon_status(running_condition=False)
+
+    monitored_sockets = list()
+    mitm_list = list()
+    log_monitors = list()
+
+    # Truncate logs and create FileMonitors
+    for log in log_monitor_paths:
+        truncate_file(log)
+        log_monitors.append(FileMonitor(log))
+
+    # Start selected daemons and monitored sockets MITM
+    for daemon, mitm, daemon_first in monitored_sockets_params:
+        not daemon_first and mitm is not None and mitm.start()
+        control_service('start', daemon=daemon, debug_mode=True)
+        check_daemon_status(
+            running_condition=True,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
+        )
+        daemon_first and mitm is not None and mitm.start()
+        if mitm is not None:
+            monitored_sockets.append(QueueMonitor(queue_item=mitm.queue))
+            mitm_list.append(mitm)
+
+    setattr(request.module, 'monitored_sockets', monitored_sockets)
+    setattr(request.module, 'log_monitors', log_monitors)
+
+    yield
+
+    # Stop daemons and monitored sockets MITM
+    for daemon, mitm, _ in monitored_sockets_params:
+        mitm is not None and mitm.shutdown()
+        control_service('stop', daemon=daemon)
+        check_daemon_status(
+            running_condition=False,
+            target_daemon=daemon,
+            extra_sockets=[mitm.listener_socket_address] if mitm is not None and mitm.family == 'AF_UNIX' else []
+        )
+
+    # Delete all db
+    delete_dbs()
+
+    control_service('start')
+
+
 @pytest.fixture(scope='module')
 def put_env_variables(get_configuration, request):
     """
@@ -608,7 +739,7 @@ def create_file_structure_function(get_files_list):
 def file_monitoring(request):
     """Fixture to handle the monitoring of a specified file.
 
-    It uses de variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
+    It uses the variable `file_to_monitor` to determinate the file to monitor. Default `LOG_FILE_PATH`
 
     Args:
         request (fixture): Provide information on the executing test function.
@@ -696,7 +827,6 @@ def daemons_handler_module(request):
     stop_daemons(daemons_handler_configuration['module'])
 
 
-
 @pytest.fixture(scope='module')
 def daemons_handler_configuration(get_configuration, request):
     """Handler of Wazuh daemons.
@@ -717,3 +847,186 @@ def daemons_handler_configuration(get_configuration, request):
     yield
 
     stop_daemons(daemons_handler_configuration['configuration'])
+
+
+def set_wazuh_configuration(configuration):
+    """Set wazuh configuration
+
+    Args:
+        configuration (dict): Configuration template data to write in the ossec.conf
+    """
+    # Save current configuration
+    backup_config = conf.get_wazuh_conf()
+
+    # Configuration for testing
+    test_config = conf.set_section_wazuh_conf(configuration.get('sections'))
+
+    # Set new configuration
+    conf.write_wazuh_conf(test_config)
+
+    # Set current configuration
+    global_parameters.current_configuration = configuration
+
+    yield
+
+    # Restore previous configuration
+    conf.write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='function')
+def configure_local_internal_options_function(request):
+    """Fixture to configure the local internal options file.
+
+    It uses the test variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
+    """
+    try:
+        local_internal_options = getattr(request.module, 'local_internal_options')
+    except AttributeError as local_internal_configuration_not_set:
+        logger.debug('local_internal_options is not set')
+        raise local_internal_configuration_not_set
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
+    conf.set_local_internal_options_dict(local_internal_options)
+
+    yield
+
+    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+
+@pytest.fixture(scope='function')
+def stop_modules_function_after_execution():
+    """Stop wazuh modules daemon after finishing a test"""
+    yield
+    control_service('stop')
+
+
+@pytest.fixture(scope='function')
+def mock_system(request):
+    """Update the agent system in the global DB using the `mocked_system` variable defined in the test module and
+       restore the initial one after finishing.
+    """
+    system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+
+    # Backup the old system data
+    sys_info = get_system()
+
+    # Set the new system data
+    mocking.set_system(system)
+
+    yield
+
+    # Restore the backup system data
+    modify_system(os_name=sys_info['agent_query']['os_name'], os_major=sys_info['agent_query']['os_major'],
+                  name=sys_info['agent_query']['name'], os_minor=sys_info['agent_query']['os_minor'],
+                  os_arch=sys_info['agent_query']['os_arch'], os_version=sys_info['agent_query']['os_version'],
+                  os_platform=sys_info['agent_query']['os_platform'], version=sys_info['agent_query']['version'])
+
+    update_os_info(scan_id=sys_info['osinfo_query']['scan_id'], scan_time=sys_info['osinfo_query']['scan_time'],
+                   hostname=sys_info['osinfo_query']['hostname'], architecture=sys_info['osinfo_query']['architecture'],
+                   os_name=sys_info['osinfo_query']['os_name'], os_version=sys_info['osinfo_query']['os_version'],
+                   os_major=sys_info['osinfo_query']['os_major'], os_minor=sys_info['osinfo_query']['os_minor'],
+                   os_build=sys_info['osinfo_query']['os_build'], version=sys_info['osinfo_query']['version'],
+                   os_release=sys_info['osinfo_query']['os_release'], os_patch=sys_info['osinfo_query']['os_patch'],
+                   release=sys_info['osinfo_query']['release'], checksum=sys_info['osinfo_query']['checksum'])
+
+
+@pytest.fixture(scope='function')
+def mock_system_parametrized(system):
+    """Update the agent system in the global DB using the `system` variable defined in the parametrized function.
+
+    Args:
+        system (str): System to set. Available systems in SYSTEM_DATA variable from mocking module.
+    """
+    mocking.set_system(system)
+    yield
+
+
+@pytest.fixture(scope='function')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
+
+    yield package_names
+
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
+
+
+@pytest.fixture(scope='function')
+def clean_mocked_agents():
+    """Clean all mocked agents"""
+    mocking.delete_all_mocked_agents()
+
+    yield
+
+    mocking.delete_all_mocked_agents()
+
+
+@pytest.fixture(scope='module')
+def mock_agent_module():
+    """Fixture to create a mocked agent in wazuh databases"""
+    agent_id = mocking.create_mocked_agent(name='mocked_agent')
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def mock_agent_function(request):
+    """Fixture to create a mocked agent in wazuh databases"""
+    system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+    agent_data = mocking.SYSTEM_DATA[system] if system in mocking.SYSTEM_DATA else {'name': 'mocked_agent'}
+
+    agent_id = mocking.create_mocked_agent(**agent_data)
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def mock_agent_with_custom_system(agent_system):
+    """Fixture to create a mocked agent with custom system specified as parameter"""
+    if agent_system not in mocking.SYSTEM_DATA:
+        raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
+
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def setup_log_monitor():
+    """Create the log monitor"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def setup_alert_monitor():
+    """Create the alert monitor"""
+    log_monitor = FileMonitor(ALERTS_JSON_PATH)
+
+    yield log_monitor

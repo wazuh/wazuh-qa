@@ -4,6 +4,7 @@
 import socket
 import struct
 import time
+import json
 from os import path
 
 from wazuh_testing.tools import WAZUH_PATH, ACTIVE_RESPONSE_SOCKET_PATH
@@ -13,7 +14,59 @@ request_socket = path.join(WAZUH_PATH, 'queue', 'sockets', 'request')
 request_protocol = "tcp"
 
 
-def send_request(msg_request, response_size=100):
+class WazuhSocket:
+    def __init__(self, socket_file=request_socket):
+        """Encapsulate wazuh-socket communication (header with message size)
+
+        Args:
+            socket_file (str): Path of the file socket.
+        """
+        self.file = socket_file
+
+    def send(self, msg, response_size=4):
+        """Send and receive data to wazuh-socket (header with message size)
+
+        Args:
+            msg (str): data to send
+
+        Returns:
+            str: received data
+        """
+        @retry(socket.error)
+        def connection(_socket, request):
+            _socket.connect(request)
+
+        @retry(socket.error)
+        def send_msg(_socket, msg):
+            _socket.send(msg)
+
+        @retry(ValueError)
+        def recv_response(_socket, size):
+            size = struct.unpack("<I", _socket.recv(size, socket.MSG_WAITALL))[0]
+            recv_msg = _socket.recv(size, socket.MSG_WAITALL)
+            if recv_msg == '':
+                raise ValueError
+            return recv_msg
+
+        msg_json = json.dumps(msg)
+
+        try:
+            wazuh_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            encoded_msg = msg_json.encode('utf-8')
+            request_msg = struct.pack("<I", len(encoded_msg)) + encoded_msg
+
+            connection(wazuh_socket, self.file)
+            send_msg(wazuh_socket, request_msg)
+            response = recv_response(wazuh_socket, response_size)
+            wazuh_socket.close()
+
+            return json.loads(response)
+
+        except Exception:
+            raise ConnectionError
+
+
+def send_request(msg_request, response_size=100, wazuh_socket=request_socket):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     request_msg = struct.pack('<I', len(msg_request)) + msg_request.encode()
 
@@ -32,7 +85,7 @@ def send_request(msg_request, response_size=100):
             raise ValueError
         return answer
 
-    connection(sock, request_socket)
+    connection(sock, wazuh_socket)
     send_msg(sock, request_msg)
     response = recv_response(sock, response_size)
 

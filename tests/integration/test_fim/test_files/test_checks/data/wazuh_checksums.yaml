@@ -71,6 +71,25 @@
         - check_sum: "no"
         - check_md5sum: "no"
         - check_sha256sum: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 - tags:
   - test_checksums
   apply_to_modules:
@@ -139,3 +158,22 @@
         - check_sum: "yes"
         - check_md5sum: "no"
         - check_sha256sum: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+

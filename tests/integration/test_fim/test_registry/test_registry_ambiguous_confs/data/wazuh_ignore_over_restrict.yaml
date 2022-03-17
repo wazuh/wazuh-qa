@@ -28,6 +28,20 @@
           attributes:
           - type: 'sregex'
           - arch: 'both'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Restrict configuration for values
 - tags:
   - ambiguous_ignore_restrict_values
@@ -57,3 +71,17 @@
           attributes:
           - type: 'sregex'
           - arch: 'both'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

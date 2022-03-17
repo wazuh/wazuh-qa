@@ -5,14 +5,17 @@ import itertools
 import os
 import sys
 import xml.etree.ElementTree as ET
+import yaml
+import json
+import pytest
 from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
-import pytest
-import yaml
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing import global_parameters, logger
+from wazuh_testing.tools import file
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -271,7 +274,7 @@ def set_section_wazuh_conf(sections, template=None):
         return ET.tostringlist(elementTree.getroot(), encoding="unicode")
 
     def find_module_config(wazuh_conf: ET.ElementTree, section: str, attributes: List[dict]) -> ET.ElementTree:
-        """
+        r"""
         Check if a certain configuration section exists in ossec.conf and returns the corresponding block if exists.
         (This extra function has been necessary to implement it to configure the wodle blocks, since they have the same
         section but different attributes).
@@ -363,7 +366,7 @@ def expand_placeholders(mutable_obj, placeholders=None):
 
 def add_metadata(dikt, metadata=None):
     """
-    Create a new key 'metadata' in dikt if not already exists and updates it with metadata content.
+    Create a new key 'metadata' in dict if not already exists and updates it with metadata content.
 
     Args:
         dikt (dict):  Target dict to update metadata in.
@@ -396,7 +399,7 @@ def process_configuration(config, placeholders=None, metadata=None):
 
 
 def load_wazuh_configurations(yaml_file_path: str, test_name: str, params: list = None, metadata: list = None) -> Any:
-    """
+    r"""
     Load different configurations of Wazuh from a YAML file.
 
     Args:
@@ -515,7 +518,7 @@ def check_apply_test(apply_to_tags: Set, tags: List):
 
 
 def generate_syscheck_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags'.
 
     Every configuration is ready to be applied in the tag directories.
     """
@@ -532,7 +535,7 @@ def generate_syscheck_config():
 
 
 def generate_syscheck_registry_config():
-    """Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
+    r"""Generate all possible syscheck configurations with 'check_*', 'report_changes' and 'tags' for Windowsregistries.
 
     Every configuration is ready to be applied in the tag directories.
     """
@@ -600,9 +603,12 @@ def local_internal_options_to_dict(local_internal_options):
     dict_local_internal_options = {}
     no_comments_options = [line.strip() for line in local_internal_options
                            if not (line.startswith('#') or line == '\n')]
-    for line in no_comments_options:
-        key, value = line.split('=')
-        dict_local_internal_options[key.rstrip("\n")] = value
+    try:
+        for line in no_comments_options:
+            key, value = line.split('=')
+            dict_local_internal_options[key.rstrip('\n')] = value
+    except ValueError:
+        raise ValueError('Invalid local_internal_options.conf file.')
 
     return dict_local_internal_options
 
@@ -617,9 +623,13 @@ def get_local_internal_options_dict():
     with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_internal_option_file:
         configuration_options = local_internal_option_file.readlines()
         for configuration_option in configuration_options:
-            if not configuration_option.startswith('#'):
-                option_name, option_value = configuration_option.split('=')
-                local_internal_option_dict[option_name] = option_value
+            if not configuration_option.startswith('#') and not configuration_option == '\n':
+                try:
+                    option_name, option_value = configuration_option.split('=')
+                    local_internal_option_dict[option_name] = option_value
+                except ValueError:
+                    logger.error(f"Invalid local_internal_options value: {configuration_option}")
+                    raise ValueError('Invalid local_internal_option')
 
     return local_internal_option_dict
 
@@ -634,3 +644,78 @@ def set_local_internal_options_dict(dict_local_internal_options):
         for option_name, option_value in dict_local_internal_options.items():
             local_internal_configuration_string = f"{str(option_name)}={str(option_value)}\n"
             local_internal_option_file.write(local_internal_configuration_string)
+
+
+def load_configuration_template(data_file_path, configuration_parameters=[], configuration_metadata=[]):
+    """Load different configurations of Wazuh from a YAML file.
+
+    Args:
+        data_file_path (str): Full path of the YAML file to be loaded.
+        configuration_parameters (list(dict)) : List of dicts where each dict represents a replacement.
+        configuration_metadata (list(dict)): Custom metadata to be inserted in the configuration.
+
+    Returns:
+        list(dict): List containing wazuh configurations in dictionary form.
+
+    Raises:
+        ValueError: If the length of `params` and `metadata` are not equal.
+    """
+    if len(configuration_parameters) != len(configuration_metadata):
+        raise ValueError(f"configuration_parameters and configuration_metadata should have the same data length "
+                         f"{len(configuration_parameters)} != {len(configuration_metadata)}")
+
+    configuration = file.read_yaml(data_file_path)
+
+    if sys.platform == 'darwin':
+        configuration = set_correct_prefix([configuration], PREFIX)
+
+    return [process_configuration(configuration[0], placeholders=replacement, metadata=meta)
+            for replacement, meta in zip(configuration_parameters, configuration_metadata)]
+
+
+def get_test_cases_data(data_file_path):
+    """Load a test case template file and get its data.
+
+    Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
+
+    Args:
+        data_file_path (str): Test case template file path.
+
+    Returns:
+        (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
+    """
+    test_cases_data = file.read_yaml(data_file_path)
+    configuration_parameters = []
+    configuration_metadata = []
+    test_cases_ids = []
+
+    for test_case in test_cases_data:
+        configuration_parameters.append(test_case['configuration_parameters'])
+        metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
+        metadata_parameters.update(test_case['metadata'])
+        configuration_metadata.append(metadata_parameters)
+        test_cases_ids.append(test_case['name'])
+
+    return configuration_parameters, configuration_metadata, test_cases_ids
+
+
+def update_configuration_template(configurations, old_values, new_values):
+    """Update the configuration templates with specific values. Useful for setting the configuration dynamically.
+
+    Args:
+        configurations (list(dict)): Configuration templates.
+        old_values (list)): Values to be replace.
+        new_values (list): New values.
+
+    Raises:
+        ValueError: If the number of values to replace are not the same.
+    """
+    if len(configurations) != len(old_values) != len(new_values):
+        raise ValueError('The number of configuration and values items should be the same.')
+
+    configurations_to_update = json.dumps(configurations)
+
+    for old_value, new_value in zip(old_values, new_values):
+        configurations_to_update = configurations_to_update.replace(old_value, new_value)
+
+    return json.loads(configurations_to_update)

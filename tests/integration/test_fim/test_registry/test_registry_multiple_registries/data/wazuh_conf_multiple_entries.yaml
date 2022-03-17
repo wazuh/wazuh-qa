@@ -137,3 +137,17 @@
         value: WINDOWS_REGISTRY62
     - windows_registry:
         value: WINDOWS_REGISTRY63
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
