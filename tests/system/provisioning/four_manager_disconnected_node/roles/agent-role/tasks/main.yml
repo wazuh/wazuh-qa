@@ -66,6 +66,3 @@
     regexp: '<address>(.*)</address>'
     line: "<address>{{ manager_hostname }}</address>"
     backrefs: yes
-
-- name: Restart Wazuh
-  command: /var/ossec/bin/wazuh-control restart

@@ -14,7 +14,7 @@
       state: absent
       force_kill: yes
   - docker_container:
-      name: wazuh-worker2
+      name: wazuh-worker3
       state: absent
       force_kill: yes
   - docker_container:
