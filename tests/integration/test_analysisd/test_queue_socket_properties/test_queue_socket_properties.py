@@ -54,33 +54,20 @@ import os
 import pytest
 import subprocess
 
-from wazuh_testing.tools import WAZUH_PATH, ANALYSISD_QUEUE_SOCKET_PATH, ANALYSISD_DAEMON
-from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools import ANALYSISD_BINARY_PATH, ANALYSISD_QUEUE_SOCKET_PATH
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 # Variables
-
-analysisd_path = os.path.join(WAZUH_PATH, 'bin', ANALYSISD_DAEMON)
-command_exec = f'{analysisd_path} -t'
-
-# Fixtures
+command_exec = f'{ANALYSISD_BINARY_PATH} -t'
 
 
 @pytest.fixture(scope="function")
 def socket_file_properties():
     """Get the inode and modification time values of the 'queue' socket of 'wazuh-analysisd'"""
     return os.stat(ANALYSISD_QUEUE_SOCKET_PATH).st_ino, os.path.getmtime(ANALYSISD_QUEUE_SOCKET_PATH)
-
-
-@pytest.fixture(scope="function")
-def restart_analysisd():
-    """Restart and wait 'wazuh-analysisd' startup"""
-    # restart analysisd daemon
-    control_service('restart', daemon='wazuh-analysisd')
-    check_daemon_status(running_condition=True, target_daemon='wazuh-analysisd')
 
 
 @pytest.fixture(scope="function")
@@ -94,10 +81,11 @@ before_socket_properties = socket_file_properties
 after_socket_properties = socket_file_properties
 
 
+# Tests
 def test_queue_socket_properties(restart_analysisd, before_socket_properties, run_analysisd_test_config,
                                  after_socket_properties):
     '''
-    description: check if after running the configuration test of 'wazuh-analysisd' the properties
+    description: Check if after running the configuration test of 'wazuh-analysisd' the properties
                  of the queue socket file are changed.
 
     wazuh_min_version: 4.3.0
@@ -105,7 +93,7 @@ def test_queue_socket_properties(restart_analysisd, before_socket_properties, ru
     parameters:
         - restart_analysisd:
             type: fixture
-            brief: Restart wazuh-analysisd.
+            brief: Restart analysisd and truncate logs.
         - before_socket_properties:
             type: fixture
             brief: Obtain the previous properties of the 'queue' socket.

@@ -27,6 +27,7 @@ if sys.platform == 'win32':
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
     AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    ANALYSISD_BINARY_PATH = None
 
 else:
 
@@ -62,6 +63,7 @@ else:
     PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
 
     try:
         import grp
