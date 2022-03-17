@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks  configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: files_env_variables
+
+targets:
     - agent
     - manager
 
@@ -36,27 +36,15 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
+    - macOS Catalina
+    - macOS Server
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
-    - macOS Catalina
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -113,6 +101,7 @@ dir_config = ",".join(test_directories)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_nodiff.yaml')
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
@@ -134,6 +123,7 @@ def get_configuration(request):
     (dir3, "test.txt", True),
     (dir4, "testing.txt", False),
 ])
+@mark_skip_agentWindows
 def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_env_variables, configure_environment,
                     restart_syscheckd, wait_for_fim_start):
     '''
@@ -145,6 +135,8 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
                  the 'diff' files of the testing files set in the 'nodiff' tag have their content truncated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - directory:

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -11,12 +11,10 @@ brief: A Wazuh cluster is a group of Wazuh managers that work together to enhanc
        and scalability of the service. These tests will check the agent enrollment in a multi-server
        environment and how the agent manages the connections to the servers depending on their status.
 
-tier: 0
-
-modules:
+components:
     - agentd
 
-components:
+targets:
     - agent
 
 daemons:
@@ -28,32 +26,17 @@ os_platform:
     - linux
     - windows
 
+
 os_version:
     - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2019
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -406,6 +389,8 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
                  under different test conditions, verifying the agent's behavior through its log files.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - add_hostnames:

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
     - manager
 
@@ -35,26 +35,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -73,6 +60,7 @@ tags:
     - fim_basic_usage
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -95,6 +83,7 @@ directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1, testdir2, testdir1_subdir = test_directories
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -124,6 +113,7 @@ def get_configuration(request):
     (PREFIX, testdir1, False, True),
     (PREFIX, testdir1_subdir, False, True)
 ])
+@mark_skip_agentWindows
 def test_move_file(file, file_content, tags_to_apply, source_folder, target_folder,
                    triggers_delete_event, triggers_add_event,
                    get_configuration, configure_environment,
@@ -136,6 +126,8 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
                  the expected FIM events have been generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - file:

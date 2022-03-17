@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -10,12 +10,12 @@ type: integration
 brief: These tests will check if a set of wrong configuration option values in the block force
        are warned in the logs file.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+suite: force_options
+
+targets:
     - manager
 
 daemons:
@@ -30,21 +30,14 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 tags:
     - enrollment
+    - authd
 '''
 import os
 import pytest
@@ -68,7 +61,7 @@ local_internal_options = {'authd.debug': '2'}
 tests = []
 test_case_ids = []
 for file in os.listdir(tests_path):
-    group_name = file.split(".")[0]
+    group_name = file.split('.')[0]
     file_tests = read_yaml(os.path.join(tests_path, file))
     tests = tests + file_tests
     test_case_ids = test_case_ids + [f"{group_name} {test_case['name']}" for test_case in file_tests]
@@ -105,6 +98,8 @@ def test_authd_force_options_invalid_config(get_current_test_case, configure_loc
     wazuh_min_version:
         4.3.0
 
+    tier: 0
+
     parameters:
         - get_current_test_case:
             type: fixture
@@ -135,9 +130,9 @@ def test_authd_force_options_invalid_config(get_current_test_case, configure_loc
 
     truncate_file(LOG_FILE_PATH)
     try:
-        control_service("restart", daemon=DAEMON_NAME)
+        control_service('restart', daemon=DAEMON_NAME)
     except Exception:
         pass
     else:
-        raise Exception("Authd started when it was expected to fail")
+        raise Exception('Authd started when it was expected to fail')
     validate_authd_logs(get_current_test_case.get('log', []))

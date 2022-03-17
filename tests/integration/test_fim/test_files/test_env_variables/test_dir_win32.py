@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: files_env_variables
+
+targets:
     - agent
 
 daemons:
@@ -29,13 +29,8 @@ os_platform:
 
 os_version:
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -54,6 +49,7 @@ tags:
     - fim_env_variables
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -76,6 +72,7 @@ test_env = "%TEST_ENV_VAR%"
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_dir.yaml')
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 conf_params = {'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params)
@@ -92,6 +89,7 @@ def get_configuration(request):
 
 # Test
 @pytest.mark.parametrize('directory', [subdir1])
+@mark_skip_agentWindows
 def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
                          restart_syscheckd, wait_for_fim_start):
     '''
@@ -102,6 +100,8 @@ def test_tag_directories(directory, get_configuration, put_env_variables, config
                  that the proper FIM events have been generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - directory:

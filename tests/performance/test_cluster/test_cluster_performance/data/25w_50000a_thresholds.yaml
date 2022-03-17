@@ -1,0 +1,103 @@
+tasks:
+  setup_phase:
+    agent-info_sync:
+      time_spent(s):
+        master:
+          max: 50
+          mean: 10
+        workers:
+          max: 60
+          mean: 20
+    integrity_check:
+      time_spent(s):
+        master:
+          max: 150
+          mean: 20
+        workers:
+          max: 150
+          mean: 30
+    integrity_sync:
+      time_spent(s):
+        master:
+          max: 250
+          mean: 40
+        workers:
+          max: 150
+          mean: 20
+  stable_phase:
+    agent-info_sync:
+      time_spent(s):
+        master:
+          max: 10
+          mean: 0.37114
+        workers:
+          max: 10
+          mean: 2.05493
+    integrity_check:
+      time_spent(s):
+        master:
+          max: 9
+          mean: 2.19821
+        workers:
+          max: 9
+          mean: 4.21385
+
+resources:
+  setup_phase:
+    wazuh-clusterd:
+      CPU(%):
+        master:
+          max: 110
+          mean: 75
+          reg_cof: 1.5
+        workers:
+          max: 110
+          mean: 10
+          reg_cof: 0.5
+      FD:
+        master:
+          max: 500
+          mean: 200
+          reg_cof: 10
+        workers:
+          max: 150
+          mean: 20
+          reg_cof: 1
+      USS(KB):
+        master:
+          max: 4194304          # (4 GB)
+          mean: 2097152         # (2 GB)
+          reg_cof: 524288       # (0.5 GB)
+        workers:
+          max: 524288           # (0.5 GB)
+          mean: 262144          # (0.25 GB)
+          reg_cof: 1024         # (1 MB)
+  stable_phase:
+    wazuh-clusterd:
+      CPU(%):
+        master:
+          max: 100
+          mean: 84.33028
+          reg_cof: 0.05
+        workers:
+          max: 50
+          mean: 15
+          reg_cof: 0.05
+      FD:
+        master:
+          max: 75
+          mean: 44.385
+          reg_cof: 0.001
+        workers:
+          max: 20
+          mean: 16
+          reg_cof: 0.0040
+      USS(KB):
+        master:
+          max: 1048576          # (1 GB)
+          mean: 734003          # (0.7 GB)
+          reg_cof: 30
+        workers:
+          max: 190260.4         # (185 MB)
+          mean: 113246.83736    # (110 MB)
+          reg_cof: 30

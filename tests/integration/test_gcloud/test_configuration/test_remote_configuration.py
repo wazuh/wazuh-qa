@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        will check if the remote configuration used by GCP matches
        the local one set in the 'ossec.conf' file.
 
-tier: 1
-
-modules:
+components:
     - gcloud
 
-components:
+suite: configuration
+
+targets:
     - agent
     - manager
 
@@ -37,24 +37,17 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
 
 tags:
-    - gcloud_configuration
+    - config
+    - remote
 '''
 import os
 import pytest
@@ -90,6 +83,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_remote_conf.yaml')
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -100,7 +94,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 
 # fixtures
@@ -147,8 +141,7 @@ def get_remote_configuration(component_name, config):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_remote_configuration(get_configuration, configure_environment,
-                              restart_wazuh, wait_for_gcp_start):
+def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the remote configuration matches the local configuration of the 'gcp-pubsub' module.
                  For this purpose, the test will use different settings and get the remote configuration applied.
@@ -156,6 +149,8 @@ def test_remote_configuration(get_configuration, configure_environment,
                  when repeated options are used in the configuration, the last one detected is the one applied.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - get_configuration:

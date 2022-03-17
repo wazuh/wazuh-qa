@@ -3,16 +3,20 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
 from shutil import copyfile
-import pytest
+import sys
+
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
+
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools import LOG_FILE_PATH, LOGCOLLECTOR_FILE_STATUS_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.authd_sim import AuthdSimulator
-from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH
+from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH, get_service
 from os.path import exists
 from os import remove
 
@@ -84,3 +88,14 @@ def truncate_log_file():
     truncate_file(LOG_FILE_PATH)
 
     yield
+
+
+@pytest.fixture(scope='module')
+def restart_monitord():
+    wazuh_component = get_service()
+
+    """Reset log file and start a new monitor."""
+    if wazuh_component == 'wazuh-manager':
+        control_service('restart', daemon='wazuh-monitord')
+    else:
+        control_service('restart', daemon='wazuh-agentd')

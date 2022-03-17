@@ -20,7 +20,7 @@ GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
-LOG_COLLECTOR_GLOBAL_TIMEOUT = 30
+LOG_COLLECTOR_GLOBAL_TIMEOUT = 40
 
 DEFAULT_AUTHD_REMOTED_SIMULATOR_CONFIGURATION = {
     'ip_address': 'localhost',
@@ -69,7 +69,7 @@ if sys.platform == 'win32':
         'windows.debug': '2',
         'agent.debug': '2'
     }
-    prefix = monitoring.AGENT_DETECTOR_PREFIX
+    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
 else:
     LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'logcollector.debug': '2',
@@ -123,7 +123,7 @@ def callback_ignored_removed_file(file):
     Returns:
         callable: Callback to detect this event.
     """
-    msg = fr"File not available, ignoring it: '{file}'."
+    msg = f"File not available, ignoring it: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -290,7 +290,7 @@ def callback_reading_syslog_message(message):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"DEBUG: Reading syslog message: '{message}'"
+    msg = f"DEBUG: Reading syslog message: '{message}'"
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -353,7 +353,7 @@ def callback_event_log_service_down(location, severity='WARNING'):
         callable: callback to detect this event.
     """
     log_format_message = f"{severity}: The eventlog service is down. Unable to collect logs from '{location}' channel."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_trying_to_reconnect(location, reconnect_time):
@@ -365,7 +365,7 @@ def callback_trying_to_reconnect(location, reconnect_time):
         callable: callback to detect this event.
     """
     log_format_message = f"DEBUG: Trying to reconnect {location} channel in {reconnect_time} seconds."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_log_stream_exited_error():
@@ -386,7 +386,7 @@ def callback_reconnect_eventchannel(location):
         callable: callback to detect this event.
     """
     log_format_message = f"INFO: '{location}' channel has been reconnected succesfully."
-    return monitoring.make_callback(pattern=log_format_message, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
 def callback_match_pattern_file(file_pattern, file):
@@ -397,7 +397,7 @@ def callback_match_pattern_file(file_pattern, file):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"New file that matches the '{file_pattern}' pattern: '{file}'."
+    msg = f"New file that matches the '{file_pattern}' pattern: '{file}'."
     return monitoring.make_callback(pattern=msg, prefix=prefix, escape=True)
 
 
@@ -657,23 +657,31 @@ def create_file_structure(get_files_list):
         get_files_list(dict):  Files to create.
     """
     for file in get_files_list:
-        os.makedirs(file['folder_path'], exist_ok=True, mode=0o777)
-        for name in file['filename']:
+        file_folder_path = file['folder_path']
+        files_list = file['filename']
+        age = file['age'] if 'age' in file else None
+        size = file['size'] if 'size' in file else None
+        content = file['content'] if 'content' in file else None
+        size_kib = file['size_kib'] if 'size_kib' in file else None
+
+        os.makedirs(file_folder_path, exist_ok=True, mode=0o777)
+        for filename in files_list:
             for i in range(0, 5):
                 try:
-                    with open(os.path.join(file['folder_path'], name), mode='w'):
+                    with open(os.path.join(file_folder_path, filename), mode='w'):
                         pass
-                except:
-                    continue
-                break
+                    break
+                except Exception as e:
+                    print(f"Error creating file structure {e}")
+                    sleep(1)
 
-            if 'age' in file:
-                fileinfo = os.stat(f"{file['folder_path']}{file['filename']}")
-                os.utime(f"{file['folder_path']}{file['filename']}", (fileinfo.st_atime - file['age'],
-                                                                      fileinfo.st_mtime - file['age']))
-            elif 'size' in file:
-                add_log_data(log_path=os.path.join(file['folder_path'], name),
-                             log_line_message=file['content'], size_kib=file['size_kib'])
+            if age:
+                fileinfo = os.stat(os.path.join(file_folder_path, filename))
+                os.utime(os.path.join(file_folder_path, filename), (fileinfo.st_atime - age,
+                                                                      fileinfo.st_mtime - age))
+            elif size:
+                add_log_data(log_path=os.path.join(file_folder_path, filename),
+                             log_line_message=content, size_kib=size_kib)
 
 
 def delete_file_structure(get_files_list):

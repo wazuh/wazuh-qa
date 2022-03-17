@@ -32,11 +32,22 @@ class WazuhInstallation(ABC):
             ansible_tasks (ansible object): ansible instance with already provided tasks to run
             hosts (string): Parameter set to `all` by default
         """
-        create_path_task = AnsibleTask({'name': f"Create {self.installation_files_path} path",
-                                        'file': {'path': self.installation_files_path, 'state': 'directory'}})
+        create_path_task_unix = AnsibleTask({
+            'name': f"Create {self.installation_files_path} path (Unix)",
+            'file': {'path': self.installation_files_path, 'state': 'directory'},
+            'when': 'ansible_system != "Win32NT"'
+        })
+
+        create_path_task_windows = AnsibleTask({
+            'name': f"Create {self.installation_files_path} path (Windows)",
+            'win_file': {'path': self.installation_files_path, 'state': 'directory'},
+            'when': 'ansible_system == "Win32NT"'
+        })
+
         # Add path creation task at the beggining of the playbook
-        ansible_tasks.insert(0, create_path_task)
-        playbook_parameters = {'hosts': hosts, 'tasks_list': ansible_tasks}
+        ansible_tasks.insert(0, create_path_task_unix)
+        ansible_tasks.insert(1, create_path_task_windows)
+        playbook_parameters = {'hosts': hosts, 'gather_facts': True, 'tasks_list': ansible_tasks}
 
         AnsibleRunner.run_ephemeral_tasks(inventory_file_path, playbook_parameters,
                                           output=self.qa_ctl_configuration.ansible_output)

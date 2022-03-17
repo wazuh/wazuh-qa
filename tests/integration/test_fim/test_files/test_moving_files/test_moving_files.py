@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_moving_files
+
+targets:
     - agent
     - manager
 
@@ -36,26 +36,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -74,6 +61,7 @@ tags:
     - fim_moving_files
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -102,6 +90,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
@@ -162,6 +151,7 @@ def get_configuration(request):
     (testdir1, testdir2, testfile1, whodata, realtime),
     (testdir2, testdir1, testfile2, realtime, whodata)
 ])
+@mark_skip_agentWindows
 def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add_event, get_configuration,
                                 configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
@@ -173,6 +163,8 @@ def test_moving_file_to_whodata(dirsrc, dirdst, filename, mod_del_event, mod_add
                  generated to match the monitoring mode used in the folders.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - dirsrc:

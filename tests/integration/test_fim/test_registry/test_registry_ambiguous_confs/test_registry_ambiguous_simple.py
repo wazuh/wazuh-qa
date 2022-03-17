@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_ambiguous_confs
+
+targets:
     - agent
 
 daemons:
@@ -138,6 +138,7 @@ def get_configuration(request):
 
 # Tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('key, sub_keys, is_key, name', [
     (key, (subkey_1, os.path.join(subkey_1, key_name)), True, "onekey"),
     (key, (subkey_2, os.path.join(subkey_2, key_name)), False, "other_value")
@@ -155,6 +156,8 @@ def test_ambiguous_restrict(key, sub_keys, is_key, name,
                  the restricted registry entries.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:
@@ -225,6 +228,8 @@ def test_ambiguous_tags(key, sub_keys, arch,
                  in the configuration for the monitored key paths or subpaths.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:
@@ -300,6 +305,8 @@ def test_ambiguous_recursion(key, subkey, arch,
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - key:
             type: str
@@ -366,6 +373,8 @@ def test_ambiguous_checks(key, subkey, key_checkers, subkey_checkers,
                  only the 'check_' fields set in the configuration for the monitored key paths or subpaths.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:

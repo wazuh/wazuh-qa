@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: These tests will check if the 'level' setting of the API is working prope
        The Wazuh API is an open source 'RESTful' API that allows for interaction with the Wazuh manager
        from a web browser, command line tool like 'cURL' or any script or program that can make web requests.
 
-tier: 0
-
-modules:
+components:
     - api
 
-components:
+suite: config
+
+targets:
     - manager
 
 daemons:
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -56,12 +48,10 @@ tags:
     - api
 '''
 import os
-from grp import getgrnam
-from pwd import getpwnam
 
 import pytest
 from wazuh_testing.api import callback_detect_api_debug
-from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -72,8 +62,7 @@ pytestmark = pytest.mark.server
 # Variables
 
 test_directories = [os.path.join(PREFIX, 'test_logs')]
-new_log_file = os.path.join(test_directories[0], 'test.log')
-file_monitor = FileMonitor(new_log_file)
+file_monitor = FileMonitor(API_LOG_FILE_PATH)
 
 # Configurations
 
@@ -90,16 +79,6 @@ def get_configuration(request):
     return request.param
 
 
-# Functions
-
-def extra_configuration_before_yield():
-    # Create the log file with 'wazuh' as owner.
-    with open(new_log_file, 'w+'):
-        pass
-    os.chmod(new_log_file, 0o777)
-    os.chown(new_log_file, getpwnam("wazuh").pw_uid, getgrnam("wazuh").gr_gid)
-
-
 # Tests
 
 @pytest.mark.parametrize('tags_to_apply', [
@@ -108,12 +87,14 @@ def extra_configuration_before_yield():
 ])
 def test_logs(tags_to_apply, get_configuration, configure_api_environment, restart_api):
     '''
-    description: Check if the logs are saved in the desired path and with desired level.
-                 Logs are usually store in '/var/ossec/logs/api.log' and with level 'info'.
-                 In this test the API log has a different path and 'debug' level configured.
-                 It checks if logs are saved in the new path and with 'debug' level.
+    description: Check if the logs are saved with the desired level.
+                 Logs are always stored in '/var/ossec/logs/api.log', usually with level 'info'.
+                 In this test the API log has 'debug' level configured.
+                 It checks if logs are saved with 'debug' level.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:
@@ -134,7 +115,7 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
         - Verify that 'DEBUG' messages are written when the value of the 'level' setting is set to 'debug'.
 
     input_description: Different test cases are contained in an external YAML file (conf.yaml)
-                       which includes API configuration parameters (log paths and log levels).
+                       which includes API configuration parameters (log levels).
 
     expected_output:
         - r'.*DEBUG: (.*)'
@@ -144,7 +125,7 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    # Detect any "DEBUG:" message in the new log path
+    # Detect any "DEBUG:" message in the log path
     if get_configuration['configuration']['logs']['level'] == 'info':
         with pytest.raises(TimeoutError):
             file_monitor.start(timeout=15, callback=callback_detect_api_debug,
