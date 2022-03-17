@@ -191,10 +191,12 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
     tags:
         - logcollector
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     check_daemon_status(target_daemon=LOGCOLLECTOR_DAEMON, running_condition=False)
+
+    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_missing_element_error,
+                            error_message='Did not receive the expected "ERROR: ...: Missing ... element.')
 
     wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_configuration_error,
                             error_message='Did not receive the expected "CRITICAL: ...: Configuration error at" event')
-    
-    wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_missing_element_error,
-                            error_message='Did not receive the expected "ERROR: ...: Missing ... element.')
