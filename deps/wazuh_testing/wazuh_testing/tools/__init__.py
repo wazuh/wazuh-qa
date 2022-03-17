@@ -25,6 +25,7 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    ANALYSISD_BINARY_PATH = None
     HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
     GLOBAL_DB_PATH = None
     WAZUH_UNIX_USER = 'wazuh'
@@ -64,6 +65,7 @@ else:
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
+    ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
     if sys.platform == 'sunos5':
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
     else:
