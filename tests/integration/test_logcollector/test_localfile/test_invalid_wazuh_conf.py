@@ -82,13 +82,12 @@ tags:
 import os
 import sys
 import tempfile
-import subprocess
 
 import pytest
 
 from wazuh_testing.tools import LOGCOLLECTOR_DAEMON, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import check_daemon_status
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.fim import callback_configuration_error
@@ -105,6 +104,10 @@ exception_regex = r'Error when executing .+ in daemon .+. Exit status: .+' if sy
 files = ['test.txt']
 
 # Configuration
+daemons_handler_configuration = {
+    'daemons': [LOGCOLLECTOR_DAEMON],
+    'ignore_errors': True
+}
 temp_dir = tempfile.gettempdir()
 file_structure = [
     {
@@ -149,7 +152,7 @@ def remove_empty_options(get_configuration):
 
 
 def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_configuration, remove_empty_options,
-                            configure_environment):
+                            configure_environment, daemons_handler):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
                  set and if Wazuh refuses to restart.
@@ -172,6 +175,9 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
+        - daemons_handler:
+            type: fixture
+            brief: Handler of Wazuh daemons.
 
     assertions:
         - Verify that the expected error message is in the log
@@ -185,9 +191,7 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
     tags:
         - logcollector
     '''
-    expected_exception = ValueError if sys.platform == 'win32' else subprocess.CalledProcessError
-    with pytest.raises(expected_exception, match=exception_regex):
-        control_service('restart', daemon=LOGCOLLECTOR_DAEMON)
+    check_daemon_status(target_daemon=LOGCOLLECTOR_DAEMON, running_condition=False)
 
     wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_configuration_error,
                             error_message='Did not receive the expected "CRITICAL: ...: Configuration error at" event')
