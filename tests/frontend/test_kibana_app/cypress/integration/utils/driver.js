@@ -88,7 +88,6 @@ export const writeFiles = async (cookie) => {
   const filename = 'cookie.json';
   cy.readFile(filename).then((list) => {
     list.push(cookie)
-    // escribe el objeto fusionado
     cy.writeFile(filename, list)
   })
 }
