@@ -132,7 +132,7 @@ def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment, test_i
 @pytest.mark.parametrize("host_manager",[host_manager])
 def test_agent_groups_sync_worker_new_node(clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
-    description: Having two agents assined to different workers and different groups, check that when an new node
+    description: Having two agents assigned to different workers and different groups, check that when an new node
     is added to the cluster, the group data is synchronized to the new node.
     wazuh_min_version: 4.4.0
     parameters:
