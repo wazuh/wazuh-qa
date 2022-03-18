@@ -16,6 +16,8 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
 
+tier: 0
+
 components:
     - logcollector
 
@@ -50,20 +52,26 @@ os_version:
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#location
+    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#log-format
 
 tags:
-    - logcollector_configuration
+    - logcollector
 '''
+
 import sys
 import os
 import pytest
+import tempfile
+
 import wazuh_testing.api as api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools import get_service
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
+from wazuh_testing.tools import get_service, LOG_FILE_PATH
+from wazuh_testing.tools.services import check_if_process_is_running
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
-from wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST
-import tempfile
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.logcollector import WINDOWS_CHANNEL_LIST, callback_eventchannel_bad_format, \
+    LOG_COLLECTOR_GLOBAL_TIMEOUT
+
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
@@ -88,8 +96,11 @@ parameters = [
 ]
 
 windows_parameters = []
+invalid_channel = 'invalidchannel'
 for channel in WINDOWS_CHANNEL_LIST:
     windows_parameters.append({'LOCATION': f'{channel}', 'LOG_FORMAT': 'eventchannel'})
+windows_parameters.append({'LOCATION': f'{invalid_channel}', 'LOG_FORMAT': 'eventchannel'})
+log_monitor = None
 
 macos_parameters = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos'}]
 
@@ -140,6 +151,7 @@ def test_configuration_location(get_configuration, configure_environment, restar
     assertions:
         - Verify that the Wazuh component (agent or manager) can start when the 'location' tag is used.
         - Verify that the Wazuh API returns the same value for the 'localfile' section as the configured one.
+        - Verify that the expected event is present in the log file.
 
     input_description: A configuration template (test_basic_configuration_location) is contained in an external
                        YAML file (wazuh_basic_configuration.yaml). That template is combined with different
@@ -148,6 +160,7 @@ def test_configuration_location(get_configuration, configure_environment, restar
 
     expected_output:
         - Boolean values to indicate the state of the Wazuh component.
+        - Did not receive the expected "ERROR: Could not EvtSubscribe() for ... which returned ..." event.
 
     tags:
         - invalid_settings
@@ -160,5 +173,11 @@ def test_configuration_location(get_configuration, configure_environment, restar
     else:
         if sys.platform == 'win32':
             assert check_if_process_is_running('wazuh-agent.exe') == True
+            if cfg['location'] == invalid_channel:
+                log_monitor = FileMonitor(LOG_FILE_PATH)
+                callback = callback_eventchannel_bad_format(invalid_channel)
+                log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback,
+                                  error_message='Did not receive the expected "ERROR: Could not EvtSubscribe() for ...'
+                                  ' which returned ..." event.')
         else:
             check_if_process_is_running('wazuh-logcollector')

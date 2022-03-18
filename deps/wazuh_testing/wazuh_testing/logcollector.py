@@ -178,7 +178,7 @@ def callback_eventchannel_bad_format(event_location):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Could not EvtSubscribe() for ({event_location}) which returned \(\d+\)"
+    msg = fr"ERROR: Could not EvtSubscribe\(\) for \({event_location}\) which returned \(\d+\)"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
