@@ -4,6 +4,7 @@
   "viewportWidth": 1360,
   "viewportHeight": 790,
   "reporter": "mochawesome",
+  "watchForFileChanges": false,
   "reporterOptions": {
     "charts": true,
     "overwrite": false,
