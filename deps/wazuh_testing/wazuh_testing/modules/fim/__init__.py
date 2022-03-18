@@ -100,6 +100,7 @@ ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ... database statu
 ERR_MSG_DATABASE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Registry database is 100% full" alert'
 ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
 ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
+ERR_MSG_DATABASE_FULL_ALERT_EVENT = 'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
 
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
 ERR_MSG_WRONG_INODE_PATH_COUNT = 'Wrong number of inodes and path count'
