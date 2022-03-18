@@ -53,12 +53,13 @@ pytest_args:
 tags:
     - fim_registry_limit
 '''
-
-
 import os
 import pytest
+
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, registry_parser, KEY_WOW64_64KEY, \
+from wazuh_testing.tools import LOG_FILE_PATH
+
+from wazuh_testing.fim import generate_params, registry_parser, KEY_WOW64_64KEY, \
     KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, CB_REGISTRY_LIMIT_CAPACITY,
     ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
@@ -79,7 +80,7 @@ test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 NUM_REGS = 2
-EXPECTED_DATABES_STATE = "100"
+EXPECTED_DB_STATE = "100"
 monitor_timeout = 40
 
 
@@ -103,7 +104,7 @@ def get_configuration(request):
 # Functions
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
-    for key in (MONITORED_KEY, MONITORED_KEY_2):        
+    for key in (MONITORED_KEY, MONITORED_KEY_2):
         reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key, KEY_WOW64_64KEY)
         reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], key, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
         RegCloseKey(reg_handle)
@@ -115,7 +116,7 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'registries' option
                  of the 'db_entry_limit' tag.
-                 For this purpose, the test will set the a limit of keys to monitor, and will  monitor a series of keys. 
+                 For this purpose, the test will set the a limit of keys to monitor, and will monitor a series of keys.
                  Then, it will try to add a new key and it will check if the FIM event 'full' is generated. Finally, the
                  test will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
 
@@ -154,12 +155,12 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
                                              callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT).result()
 
-    assert database_state == EXPECTED_DATABES_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
+    assert database_state == EXPECTED_DB_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', KEY_WOW64_64KEY)
     reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', 0,
                               KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-       
+
     RegCloseKey(reg_handle)
 
     wazuh_log_monitor.start(timeout=monitor_timeout, error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
