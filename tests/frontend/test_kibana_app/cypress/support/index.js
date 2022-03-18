@@ -17,7 +17,7 @@
 
 import { navigate, validateURLIncludes, setCookies } from '../integration/utils/driver';
 import { LOGIN_TYPE, OVERVIEW_URL } from '../integration/utils/login-constants';
-import { updateCookies, clearSession } from '../integration/utils/driver';
+import { updateCookies, clearSession, updateExpiryValueCookies } from '../integration/utils/driver';
 const cookieMock = require('../../cookie.json');
 const loginMethod = 'xpack'
 import './commands';
@@ -51,6 +51,7 @@ before(() => {
 
 beforeEach(() => {
     cy.setSessionStorage('healthCheck', 'executed');
+    updateExpiryValueCookies()
     setCookies(cookieMock);
 })
 

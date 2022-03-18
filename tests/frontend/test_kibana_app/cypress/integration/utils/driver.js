@@ -52,47 +52,53 @@ export const clearSession = () => {
 };
 
 export const setCookies = (cookieObj) => {
+  try {
   cookieObj.forEach((element) => {
     cy.setCookie(element.name, element.value);
   });
-
+} catch (e) {
+}
 }
 
 export const updateCookies = () => {
   const filename = 'cookie.json';
-  debugger;
   cy.getCookies().then((currentCook) => {
     const parameterToFilter = ['sid', 'wz-token'];
     for (let l = 0; l < parameterToFilter.length; l++) {
       const [cookie] = currentCook.filter(e => e.name == parameterToFilter[l]);
-      // const newCookies = cookieMock.map(e => {
+      // const newCookies = obj.map(e => {
       //   //ver cookie.value
-      //   if (e.name == parameterToFilter) e.value = cookie.value;
+      //   if (e.name == parameterToFilter[l]) e.value = cookie.value
       //   return e;
       cy.readFile(filename).then((obj) => {
 
-        obj.forEach(e => {
-
-          if (e.name == parameterToFilter[l]) e.value = cookie.value
+        const newCookie = obj.map(e => {
+        if (e.name == parameterToFilter[l]) e.value = cookie.value
+        return e;
         })
-        cy.writeFile(filename, obj)
+        cy.writeFile(filename,  JSON.stringify(newCookie))
 
       })
-
     }
-
-    cy.log(`cookie: ${currentCook}`);
   });
 }
 
-export const writeFiles = (cookie, parameterToFilter) => {
+export const updateExpiryValueCookies =  () => {
+  let timestamp = new Date().getTime();
+  let today = new Date();
   const filename = 'cookie.json';
-  cy.readFile(filename).then((obj) => {
-    obj.forEach(e => {
-      if (e.name == parameterToFilter[l]) e.value = cookie.value
+  try {
+    cy.readFile(filename).then((obj) => {
+      const newCookie = obj.map(e => { 
+        let oldDate = new Date(e.expiry);
+        if (oldDate < today) e.expiry = timestamp;
+        return e;
+      })
+      cy.writeFile(filename, JSON.stringify(newCookie))
     })
-    cy.writeFile(filename, obj)
-  })
+  } catch (e) {
+  }
+  
 }
 
 export const getMyCookie = () => {
