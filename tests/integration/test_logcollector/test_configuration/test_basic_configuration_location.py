@@ -100,7 +100,6 @@ invalid_channel = 'invalidchannel'
 for channel in WINDOWS_CHANNEL_LIST:
     windows_parameters.append({'LOCATION': f'{channel}', 'LOG_FORMAT': 'eventchannel'})
 windows_parameters.append({'LOCATION': f'{invalid_channel}', 'LOG_FORMAT': 'eventchannel'})
-log_monitor = None
 
 macos_parameters = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos'}]
 
