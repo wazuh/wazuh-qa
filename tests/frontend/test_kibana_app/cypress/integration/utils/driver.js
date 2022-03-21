@@ -66,6 +66,7 @@ export const updateCookies = () => {
     const parameterToFilter = ['sid', 'wz-token'];
     for (let l = 0; l < parameterToFilter.length; l++) {
       const [cookie] = currentCook.filter(e => e.name == parameterToFilter[l]);
+<<<<<<< HEAD
       // const newCookies = obj.map(e => {
       //   //ver cookie.value
       //   if (e.name == parameterToFilter[l]) e.value = cookie.value
@@ -99,6 +100,34 @@ export const updateExpiryValueCookies =  () => {
   } catch (e) {
   }
   
+=======
+      // const newCookies = cookieMock.map(e => {
+      //   //ver cookie.value
+      //   if (e.name == parameterToFilter) e.value = cookie.value;
+      //   return e;
+      cy.readFile(filename).then((obj) => {
+
+        obj.forEach(e => {
+
+          if (e.name == parameterToFilter[l]) e.value = cookie.value
+        })
+        cy.writeFile(filename, obj)
+
+      })
+
+    }
+
+    cy.log(`cookie: ${currentCook}`);
+  });
+}
+
+export const writeFiles = async (cookie) => {
+  const filename = 'cookie.json';
+  cy.readFile(filename).then((list) => {
+    list.push(cookie)
+    cy.writeFile(filename, list)
+  })
+>>>>>>> a6a2378a9c9a1f794b836db060ab3bfaa3e9b700
 }
 
 export const getMyCookie = () => {

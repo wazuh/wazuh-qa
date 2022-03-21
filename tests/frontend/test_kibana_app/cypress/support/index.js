@@ -17,7 +17,11 @@
 
 import { navigate, validateURLIncludes, setCookies } from '../integration/utils/driver';
 import { LOGIN_TYPE, OVERVIEW_URL } from '../integration/utils/login-constants';
+<<<<<<< HEAD
 import { updateCookies, clearSession, updateExpiryValueCookies } from '../integration/utils/driver';
+=======
+import { updateCookies, clearSession } from '../integration/utils/driver';
+>>>>>>> a6a2378a9c9a1f794b836db060ab3bfaa3e9b700
 const cookieMock = require('../../cookie.json');
 const loginMethod = 'xpack'
 import './commands';
