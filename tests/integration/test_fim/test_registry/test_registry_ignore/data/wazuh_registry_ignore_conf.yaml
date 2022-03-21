@@ -30,6 +30,20 @@
             value: WINDOWS_REGISTRY_2
             attributes:
                 - arch: '64bit'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration for registry_ignore_value
 - tags:
   - ignore_registry_value
@@ -61,3 +75,17 @@
             value: WINDOWS_REGISTRY_2
             attributes:
                 - arch: '64bit'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

@@ -45,7 +45,7 @@ yum groupinstall "Development Tools" -y
 yum install python36 python36-pip python36-devel -y
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.4 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 - Add some internal options and restart
@@ -149,14 +149,16 @@ our [testing environment guide](#setting-up-a-test-environment).
 
 Our newest integration tests are located in `wazuh-qa/tests/integration/`. They are organized by capabilities:
 
+- _test_active_response_
 - _test_agentd_
 - _test_analysisd_
 - _test_api_
 - _test_authd_
-- _test_cluster_
+- _test_enrollment_
 - _test_fim_
 - _test_gcloud_
 - _test_logtest_
+- _test_remoted_
 - _test_rids_
 - _test_rootcheck_
 - _test_vulnerability_detector_
@@ -278,7 +280,7 @@ This will be our python module with all the needed code to test everything.
 To run them, we need to install all these Python dependencies:
 
 ```shell script
-pip3 install distro freezegun jq jsonschema paramiko psutil pydevd-pycharm pytest pyyaml==5.4 pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install distro freezegun jq jsonschema psutil pytest pyyaml==5.3 pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
 _**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
@@ -397,6 +399,10 @@ python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 - `--wpk_version`: Specify the WPK package version used to upgrade on WPK tests. (ex. --wpk_version=v4.2.0). Note: This
   field is required to execute any WPK test and the WPK package must be previously created in
   the [repository](packages-dev.wazuh.com/trash/wpk/).
+- `--wpk_package_path`: Specify the WPK package path used to upgrade on WPK tests. (ex. --wpk_package_path='packages-dev.wazuh.com/trash/wpk/'). 
+   This field is required to execute any WPK test.
+- `--save-file`: Specify the files of execution of the tests that you need to download. (ex. --save-file=archives.json). 
+   If the file does not exist while the test was executed,  the test will run without problems but not save this file in the report.
 
 _Use `-h` to see the rest or check its [documentation](https://docs.pytest.org/en/latest/usage.html)._
 

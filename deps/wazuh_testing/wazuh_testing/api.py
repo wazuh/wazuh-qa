@@ -125,7 +125,7 @@ def compare_config_api_response(configuration, section):
 
 def get_manager_configuration(section=None, field=None):
     """Get Wazuh manager configuration response from API using GET /manager/configuration
-        
+
     References: https://documentation.wazuh.com/current/user-manual/api/reference.html#operation/api.controllers.manager_controller.get_configuration
 
     Args:

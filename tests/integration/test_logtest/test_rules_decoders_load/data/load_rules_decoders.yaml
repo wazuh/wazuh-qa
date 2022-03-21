@@ -74,21 +74,21 @@
     input_event: '"event": "Dec 25 20:45:02 MyHost test_same_fields[12345]: User \"admin\" logged from \"192.168.1.100\" 5 this is the same_fields test"'
     output_predecoder: "{\"program_name\":\"test_same_fields\",\"timestamp\":\"Dec 25 20:45:02\",\"hostname\":\"MyHost\"}"
     output_decoder: "{\"name\":\"test_same\"}"
-    output_rule_id: "999205" #"{\"level\":3,\"description\":\"Testing same_fields\",\"id\":\"999205\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
+    output_rule_id: "100105" #"{\"level\":3,\"description\":\"Testing same_fields\",\"id\":\"999205\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
     output_alert: True
   -
     stage: 'Rule overwrite'
     input_event: '"event": "May 27 14:49:04 testUser ow_test[13244]: over write test"'
     output_predecoder: "{\"program_name\":\"ow_test\",\"timestamp\":\"May 27 14:49:04\",\"hostname\":\"testUser\"}"
     output_decoder: "{\"name\":\"ow_test\"}"
-    output_rule_id: "99902" #"{\"level\":3,\"description\":\"success overwrite\",\"id\":\"99902\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
+    output_rule_id: "100102" #"{\"level\":3,\"description\":\"success overwrite\",\"id\":\"99902\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
     output_alert: True
   -
     stage: 'Decoder and Rule match. Loglevel 0: no alert'
     input_event: '"event": "Dec 25 20:45:02 MyHost ow_test[13244]: level 0 test rule"'
     output_predecoder: "{\"program_name\":\"ow_test\",\"timestamp\":\"Dec 25 20:45:02\",\"hostname\":\"MyHost\"}"
     output_decoder: "{\"name\":\"ow_test\"}"
-    output_rule_id: "99901" #"{\"description\":\"level 0 test rule\",\"id\":\"99901\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
+    output_rule_id: "100101" #"{\"description\":\"level 0 test rule\",\"id\":\"100101\",\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
     output_alert: False
 -
   name: "Custom ruleset and decoder - Group match"
@@ -127,6 +127,5 @@
     input_event: "\"event\": \"Dec 25 20:45:02 MyHost test_same_fields[12345]: User 'admin' logged from '192.168.1.100' 5 this is the same_fields test\""
     output_predecoder: "{\"program_name\":\"test_same_fields\",\"timestamp\":\"Dec 25 20:45:02\",\"hostname\":\"MyHost\"}"
     output_decoder: "{\"name\":\"test_same\"}"
-    output_rule_id: "999206" #"{\"level\":7,\"description\":\"Same fields works\",\"id\":\"999206\",\"frequency\":3,\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
+    output_rule_id: "100106" #"{\"level\":7,\"description\":\"Same fields works\",\"id\":\"100106\",\"frequency\":3,\"firedtimes\":1,\"mail\":false,\"groups\":[\"qa\",\"test\"]}"
     output_alert: True
-

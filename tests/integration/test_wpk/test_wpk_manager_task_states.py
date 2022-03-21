@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -7,33 +7,26 @@ copyright: Copyright (C) 2015-2021, Wazuh Inc.
 
 type: integration
 
-brief: Register agents in the manager and test upgrading
-        them through a command, which will made the agent
-        to upgrade using WPK packages.
-
-tier: 0
-
-modules:
-    - wpk
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+        the WPK upgrade on the manager side, in case of the manager stopped before finishing
+        the upgrade.
 
 components:
+    - wpk
+
+targets:
     - manager
 
 daemons:
-    - wazuh-authd
-    - wazuh-csyslogd
-    - wazuh-execd
-    - wazuh-logcollector
     - wazuh-monitord
     - wazuh-remoted
-    - wazuh-syscheckd
-    - wazuh-clusterd
     - wazuh-modulesd
     - wazuh-db
 
 os_platform:
     - linux
-    - windows
 
 os_version:
     - Arch Linux
@@ -41,27 +34,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
 
 references:
-    - https://documentation.wazuh.com/current/development/packaging/generate-wpk-package.html
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
 
 pytest_args:
     - wpk_version: Specify the version to upgrade
@@ -81,13 +60,14 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.agent_simulator import Sender, Injector
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
+from wazuh_testing import global_parameters
 
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-WPK_REPOSITORY_4x = 'packages-dev.wazuh.com/trash/wpk/'
+WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0]
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
@@ -268,14 +248,19 @@ def overwrite_node_name(value):
         f.write(new_content)
 
 
+@pytest.mark.skip(reason="Blocked by issue wazuh-qa#2203, when is fixed we can enable this test again")
 def test_wpk_manager_task_states(get_configuration, configure_environment,
                                  restart_service, configure_agents):
     '''
-    description: Register agents in the manager and test upgrading
-                 them through a command, which will made the agent
-                 to upgrade using WPK packages.
+    description: Agents can be upgraded remotely. This upgrade is performed by the manager which
+                  sends each registered agent a WPK (Wazuh signed package) file that contains the files
+                  needed to upgrade the agent to the new version. These tests ensure, the behaviour of
+                  the WPK upgrade on the manager side, in case of the manager stopped before finishing
+                  the upgrade.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
@@ -286,19 +271,18 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
             brief: Configure a custom environment for testing.
         - restart_service:
             type: fixture
-            brief: Restarts Wazuh manager.
+            brief: Restart Wazuh manager.
         - configure_agents:
             type: fixture
             brief: Configure all simulated agents.
-        
+
+    input_description: Test case metadata
 
     assertions:
         - Verify that the first attemp is success
         - Verify the upgrade status matches the expected
         - Verify the upgrade status after restarting
         - Verify the upgrade response matches the expected
-
-    input_description: 
 
     expected_output:
         - r'Upgrade process result'

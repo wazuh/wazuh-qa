@@ -15,6 +15,21 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: ""
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 # conf 2
 - tags:
   - valid_regex
@@ -32,6 +47,21 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: ".restricted$"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 # conf 3
 - tags:
   - valid_regex
@@ -49,6 +79,21 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: "^restricted"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 # conf 4
 - tags:
   - valid_regex
@@ -66,6 +111,21 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: "filerestricted|other_restricted$"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 # conf 5
 - tags:
   - valid_regex_incomplete_unix
@@ -82,6 +142,21 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: "^/testdir1/f|^/testdir1/subdir/f|^/testdir2/f|^/testdir2/subdir/f"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
 # conf 6
 - tags:
   - valid_regex_incomplete_win
@@ -98,3 +173,17 @@
         - check_all: 'yes'
         - FIM_MODE
         - restrict: "^c:\\testdir1\\f|^c:\\testdir1\\subdir\\f|^c:\\testdir2\\f|^c:\\testdir2\\subdir\\f"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

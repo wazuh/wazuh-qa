@@ -42,17 +42,7 @@ def main():
     HOST = configuration['remote']['host']
     PORT = configuration['remote']['port']
 
-    if configuration['kibana']['enabled']:
-        kibana_logger = CustomLogger('kibana_thread', file_path=options.log_path, foreground=options.foreground,
-                                     tag='Kibana').get_logger()
-        try:
-            kibana_thread = APISimulator(HOST, PORT, request_template=options.kibana_template,
-                                         frequency=options.frequency, external_logger=kibana_logger)
-            kibana_thread.start()
-            sleep(options.time)
-            kibana_thread.shutdown()
-        except Exception as kibana_exception:
-            kibana_logger.error(f'Unhandled exception: {kibana_exception}')
+    thread_list = []
 
     if configuration['extra_load']['enabled']:
         extra_logger = CustomLogger('extra_thread', file_path=options.log_path, foreground=options.foreground,
@@ -62,10 +52,24 @@ def main():
             extra_load_thread = APISimulator(HOST, PORT, request_template=options.extraload_template,
                                              request_percentage=request_percentage, external_logger=extra_logger)
             extra_load_thread.start()
-            sleep(options.time)
-            extra_load_thread.shutdown()
+            thread_list.append(extra_load_thread)
         except Exception as extra_exception:
             extra_logger.error(f'Unhandled exception: {extra_exception}')
+
+    if configuration['kibana']['enabled']:
+        kibana_logger = CustomLogger('kibana_thread', file_path=options.log_path, foreground=options.foreground,
+                                     tag='Kibana').get_logger()
+        try:
+            kibana_thread = APISimulator(HOST, PORT, request_template=options.kibana_template,
+                                         frequency=options.frequency, external_logger=kibana_logger)
+            kibana_thread.start()
+            thread_list.append(kibana_thread)
+        except Exception as kibana_exception:
+            kibana_logger.error(f'Unhandled exception: {kibana_exception}')
+
+    sleep(options.time)
+    for thread in thread_list:
+        thread.shutdown()
 
 
 if __name__ == '__main__':

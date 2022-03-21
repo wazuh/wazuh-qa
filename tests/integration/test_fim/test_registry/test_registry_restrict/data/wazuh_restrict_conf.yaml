@@ -20,6 +20,20 @@
         attributes:
         - arch: "both"
         - restrict_value: RESTRICT_VALUE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Registry keys configuration
 - tags:
   - key_restrict
@@ -41,3 +55,17 @@
         attributes:
         - arch: "both"
         - restrict_key: RESTRICT_KEY
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

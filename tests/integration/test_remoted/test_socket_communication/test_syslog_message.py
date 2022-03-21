@@ -1,7 +1,49 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+type: integration
+
+brief: The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
+       Specifically, this test will check if 'wazuh-remoted' can receive syslog messages through
+       the socket.
+
+components:
+    - remoted
+
+suite: socket_communication
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - Debian Buster
+    - Red Hat 8
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
+
+tags:
+    - remoted
+'''
 import os
 
 import pytest
@@ -67,11 +109,39 @@ def get_configuration(request):
 
 @pytest.mark.parametrize("message", syslog_messages.keys())
 def test_syslog_message(message, get_configuration, configure_environment, restart_wazuh):
-    """Test if remoted can receive syslog messages through the socket.
+    '''
+    description: Check if 'wazuh-remoted' can receive syslog messages through the socket.
+    
+    wazuh_min_version: 4.2.0
 
-    Raises:
-        TimeoutError: if `wazuh-remoted` doesn't show the log message for syslog.
-    """
+    tier: 0
+
+    parameters:
+        - message:
+            type: fixture
+            brief: Message sent
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_remoted:
+            type: fixture
+            brief: Restart 'wazuh-remoted' daemon in manager.
+    
+    assertions:
+        - Verify the syslog message is received.
+    
+    input_description: A configuration template (test_syslog_message) is contained in an external YAML file,
+                       (wazuh_syslog.yaml). That template is combined with different test cases defined
+                       in the module. Those include configuration settings for the 'wazuh-remoted' daemon
+                       and agents info.
+    
+    expected_output:
+        - r'Started <pid>: .* Listening on port .*'
+        - r'<.>.*'
+    '''
     config = get_configuration['metadata']
     port, protocol = config['port'], config['protocol']
 

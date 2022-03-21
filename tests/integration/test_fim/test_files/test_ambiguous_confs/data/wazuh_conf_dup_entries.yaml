@@ -19,6 +19,20 @@
         attributes:
         - check_all: 'yes'
         - FIM_MODE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # conf 2
 - tags:
   - ossec_conf_duplicate_complex
@@ -43,6 +57,20 @@
         - check_size: 'yes'
         - check_perm: 'yes'
         - FIM_MODE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # conf 3
 - tags:
   - ossec_conf_duplicate_report
@@ -63,6 +91,20 @@
         attributes:
         - report_changes: 'no'
         - FIM_MODE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # conf 4
 - tags:
   - ossec_conf_duplicate_sregex
@@ -83,3 +125,18 @@
         attributes:
         - restrict: '^he.*$'
         - FIM_MODE
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+

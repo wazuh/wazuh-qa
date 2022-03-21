@@ -20,6 +20,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 2
 - tags:
   - valid_no_regex
@@ -39,6 +58,25 @@
         - report_changes: 'yes'
     - nodiff:
         value: "/testdir1/nodiff_this"
+    - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 3
 - tags:
   - valid_no_regex
@@ -58,6 +96,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 4
 - tags:
   - valid_no_regex
@@ -79,6 +136,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 5
 - tags:
   - valid_regex
@@ -100,6 +176,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+    - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 6
 - tags:
   - valid_regex
@@ -121,6 +216,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 7
 - tags:
   - valid_regex
@@ -146,6 +260,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 8
 - tags:
   - valid_regex
@@ -167,6 +300,25 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+
 # conf 9
 - tags:
   - valid_regex
@@ -188,3 +340,22 @@
         - check_all: 'yes'
         - FIM_MODE
         - report_changes: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+

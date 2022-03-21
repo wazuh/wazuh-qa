@@ -2,22 +2,24 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+from os.path import join, dirname, realpath
 from time import sleep
 
 import pytest
 import requests
 from py.xml import html
+from yaml import safe_load
+
 from wazuh_testing.api import get_api_details_dict
 
 results = dict()
+configuration = safe_load(open(join(dirname(realpath(__file__)), 'data', 'configuration.yaml')))['configuration']
 
 
 @pytest.fixture(scope='module')
 def set_api_test_environment(request):
     kwargs = dict()
-    if hasattr(request.module, 'configuration'):
-        configuration = getattr(request.module, 'configuration')
-        kwargs.update({'host': configuration['host'], 'port': configuration['port']})
+    kwargs.update({'host': configuration['host'], 'port': configuration['port']})
 
     api_details = get_api_details_dict(**kwargs)
 
@@ -167,10 +169,7 @@ def pytest_html_results_summary(prefix, summary, postfix):
 
 def pytest_collection_modifyitems(session, config, items):
     # Add test configuration as metadata (environment table)
-    try:
-        config._metadata = items[0].callspec.params['test_configuration']
-    except IndexError:
-        pass
+    config._metadata = configuration
 
     # Add each test_case metadata as user_properties for its item
     for item in items:

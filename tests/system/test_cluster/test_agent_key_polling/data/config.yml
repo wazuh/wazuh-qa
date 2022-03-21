@@ -12,12 +12,6 @@ wazuh-master:
           value: tcp
       - queue_size:
           value: 131072
-      - key_polling:
-          attributes:
-            - enabled: 'yes'
-          elements:
-            - mode:
-                value: local
   - section: wodle
     attributes:
       - name: 'agent-key-polling'
@@ -48,9 +42,4 @@ wazuh-worker1:
           value: tcp
       - queue_size:
           value: 131072
-      - key_polling:
-          attributes:
-            - enabled: 'yes'
-          elements:
-            - mode:
-                value: master
+

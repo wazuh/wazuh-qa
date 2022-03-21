@@ -16,8 +16,6 @@ from time import sleep
 
 import psutil
 
-MONITOR_LIST = []
-
 logger = logging.getLogger('wazuh-monitor')
 logger.setLevel(logging.INFO)
 
@@ -27,6 +25,7 @@ class Monitor:
 
     Args:
         process_name (str): name of the process to monitor.
+        pid (int): PID of the process.
         value_unit (str, optional): unit to store the bytes values. Defaults to KB.
         time_step (int, optional): time between each scan in seconds. Defaults to 1 second.
         version (str, optional): version of the binary. Defaults to None.
@@ -43,7 +42,7 @@ class Monitor:
         thread (thread): thread to scan the data.
         csv_file (str): path to the CSV file.
     """
-    def __init__(self, process_name, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
+    def __init__(self, process_name, pid, value_unit='KB', time_step=1, version=None, dst_dir=gettempdir()):
         self.process_name = process_name
         self.value_unit = value_unit
         self.time_step = time_step
@@ -51,37 +50,60 @@ class Monitor:
         self.data_units = {'B': 0, 'KB': 1, 'MB': 2}
         self.platform = platform
         self.dst_dir = dst_dir
-        self.pid = None
+        self.pid = pid
         self.proc = None
         self.event = None
         self.thread = None
         self.previous_read = None
         self.previous_write = None
-        self.set_pid(self.process_name)
+        self.set_process()
         self.csv_file = join(self.dst_dir, f'{self.process_name}.csv')
 
-    def set_pid(self, process_name):
-        """Search and set the PID of the process.
+    @classmethod
+    def get_process_pids(cls, process_name, check_children=True) -> list:
+        """Obtain the PIDs of the process and its children's if there are any.
 
-        Raises:
-            ValueError: if the process is not running.
+        Args:
+            process_name (str): name of the process.
+            check_children (bool): Check for children PIDs.
+
+        Returns:
+            list: List of integers with the PIDs.
         """
-        ppid = None
         for proc in psutil.process_iter():
             # These two binaries are executed using the Python interpreter instead of
             # directly execute them as daemons. That's why we need to search the .py file in
             # the cmdline instead of searching it in the name
             if process_name in ['wazuh-clusterd', 'wazuh-apid']:
-                if any(filter(lambda x: f"{process_name}.py" in x, proc.cmdline())):
-                    ppid = proc.pid
+                if any(filter(lambda x: f'{process_name}.py' in x, proc.cmdline())):
+                    pid = proc.pid
+                    break
             elif process_name in proc.name():
-                ppid = proc.pid
+                pid = proc.pid
+                break
+        else:
+            raise ValueError(f'The process {process_name} is not running')
 
-        if ppid is None:
-            raise ValueError(f"The process {process_name} is not running.")
+        if not check_children:
+            return [pid]
 
-        self.pid = ppid
-        self.proc = psutil.Process(self.pid)
+        # Look for all the children PIDs
+        parent_pid = psutil.Process(pid).parent().pid
+        if parent_pid == 1:
+            parent_pid = pid
+
+        return [parent_pid] + [child.pid for child in psutil.Process(parent_pid).children(recursive=True)]
+
+    def set_process(self):
+        """Create process instance and save it.
+
+        Raises:
+            ValueError: if the process is not running.
+        """
+        try:
+            self.proc = psutil.Process(self.pid)
+        except psutil.NoSuchProcess:
+            raise ValueError(f'The process {self.process_name} is not running.')
 
     def get_process_info(self, proc):
         """Collect the data from the process.
@@ -102,7 +124,6 @@ class Monitor:
             - Write_Ops: write operations.
             - Disk_Read: Bytes read by the process.
             - Disk_Written: Bytes written by the process.
-            - Disk(%): percentage of the I/O operations ran by the process compared with the OS.
 
         Args:
             proc (psutil.proc): psutil object with the data of the process.
@@ -115,11 +136,12 @@ class Monitor:
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
         # the CSV will set all its values to 0 to easily identify if there was a problem or not
-        info = {'Daemon': self.process_name, 'Version': self.version, 'Timestamp': datetime.now().strftime('%H:%M:%S'),
+        info = {'Daemon': self.process_name, 'Version': self.version,
+                'Timestamp': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
                 'PID': self.pid, 'CPU(%)': 0.0, f'VMS({self.value_unit})': 0.0, f'RSS({self.value_unit})': 0.0,
                 f'USS({self.value_unit})': 0.0, f'PSS({self.value_unit})': 0.0,
                 f'SWAP({self.value_unit})': 0.0, 'FD': 0.0, 'Read_Ops': 0.0, 'Write_Ops': 0.0,
-                f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0, 'Disk(%)': 0.0,
+                f'Disk_Read({self.value_unit})': 0.0, f'Disk_Written({self.value_unit})': 0.0,
                 f'Disk_Read_Speed({self.value_unit}/s)': 0.0, f'Disk_Write_Speed({self.value_unit}/s)': 0.0,
                 }
 
@@ -136,14 +158,10 @@ class Monitor:
 
                 if self.platform == 'linux' or platform == "win32":
                     io_counters = proc.io_counters()
-                    disk_usage_process = io_counters.read_bytes + io_counters.write_bytes
-                    disk_io_counter = psutil.disk_io_counters()
-                    disk_total = disk_io_counter.read_bytes + disk_io_counter.write_bytes
                     info['Read_Ops'] = io_counters.read_count
                     info['Write_Ops'] = io_counters.write_count
                     info[f'Disk_Read({self.value_unit})'] = unit_conversion(io_counters.read_bytes)
                     info[f'Disk_Written({self.value_unit})'] = unit_conversion(io_counters.write_bytes)
-                    info['Disk(%)'] = disk_usage_process / disk_total * 100
                     if self.previous_read is not None and self.previous_write is not None:
                         read_speed = (info[f'Disk_Read({self.value_unit})'] - self.previous_read) / self.time_step
                         write_speed = (info[f'Disk_Written({self.value_unit})'] - self.previous_write) / self.time_step
@@ -155,11 +173,8 @@ class Monitor:
                         self.previous_read = info[f'Disk_Read({self.value_unit})']
                         self.previous_write = info[f'Disk_Written({self.value_unit})']
         except psutil.NoSuchProcess:
-            logger.warning(f'Lost PID for {self.process_name}. Trying to obtain a new one')
-            try:
-                self.set_pid(self.process_name)
-            except ValueError:
-                logger.warning(f'Could not obtain a new PID for {self.process_name}. Trying again in {self.time_step}s')
+            logger.warning(f'Lost PID for {self.process_name}')
+            self.shutdown()
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for process {self.pid}')

@@ -36,7 +36,7 @@ class TimeMachine:
         """
         Change date and time in a Linux system.
 
-        Args: 
+        Args:
             datetime_ : New date and time to set.
         """
         import shlex
@@ -70,7 +70,7 @@ class TimeMachine:
         """
         Change date and time in a MacOS system.
 
-        Args:     
+        Args:
             datetime_ : New date and time to set.
         """
         # {month}{day}{hour}{minute}{year}.{seconds}
@@ -185,7 +185,7 @@ def time_to_human_readable(time_):
     Convert a time string like 5s or 2d into a human-readable string such as 5 seconds or 2 days
 
     Args:
-    
+
     time_ (str): String with the time and the measurement unit
 
     Returns:
@@ -251,3 +251,50 @@ def time_to_seconds(time_):
     units = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
     return time_value * units[time_unit]
+
+
+def get_current_timestamp():
+    """Get the current timestamp. For example: 1627028708.303002"""
+    return datetime.now().timestamp()
+
+
+def interval_to_time_modifier(interval):
+    """Convert a string with format (1s, 1m, 1h, 1d) to SQLite date modifier.
+
+    Args:
+        interval (str): Time interval string.
+
+    Returns:
+          str: SQLite date modifier.
+    """
+    interval_units_dict = {'s': 'seconds', 'm': 'minutes', 'h': 'hours', 'd': 'days'}
+    time_value = interval[:-1]
+    time_unit = interval[-1]
+    return f"{time_value} {interval_units_dict[time_unit]}"
+
+
+def parse_date_time_format(date_time):
+    """Parse the specified date_time to return a common format.
+
+    Args:
+        date_time (str): Date time to parse.
+
+    Returns:
+        str: Date time in format '%Y-%m-%d %H:%M:%S'
+
+    Raises:
+        ValueError: If could not parse the specified date_time
+    """
+    regex_list = [
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})Z', 'append': ':00'},  # CPE format
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})', 'append': ''},  # RHEL Canonical, ALAS, MSU, Debian, NVD
+        {'regex': r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', 'append': ''}  # Arch
+    ]
+
+    for item in regex_list:
+        match = re.compile(item['regex']).match(date_time)
+
+        if match:
+            return f"{match.group(1)} {match.group(2)}{item['append']}"
+
+    ValueError(f"Could not parse the {date_time} datetime.")
