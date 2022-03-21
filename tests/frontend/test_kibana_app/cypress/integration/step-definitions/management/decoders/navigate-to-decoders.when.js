@@ -9,11 +9,6 @@ import {
 When('The user navigates to decoders', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
-<<<<<<< HEAD
-  clickElement(decodersButton);
-  validateURLIncludes('/manager/?tab=decoders');
-=======
   clickElement(decodersLink);
   cy.wait(5000);
->>>>>>> Update selectors
 });

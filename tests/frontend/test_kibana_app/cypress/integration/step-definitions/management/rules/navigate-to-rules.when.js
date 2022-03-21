@@ -9,11 +9,6 @@ import {
 When('The user navigates to rules', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
-<<<<<<< HEAD
-  clickElement(rulesButton);
-  validateURLIncludes('/manager/?tab=rules');
-=======
   clickElement(rulesLink);
   cy.wait(3000);
->>>>>>> Update selectors
 });

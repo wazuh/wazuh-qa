@@ -9,54 +9,7 @@ export const settingsButton = '[data-test-subj=menuSettingsButton]';
 //endregion Menu
 //region SubMenu
 //region Modules
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-export const modulesDirectory = 'div.wz-menu-right-side > div > div > div.euiFlexGroup.euiFlexGroup--gutterLarge.euiFlexGroup--directionRow.euiFlexGroup--responsive > div > button > span > span';
-export const securityEventsButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const integrityMonitoringButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const amazonAwsButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(3) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const googleCloudPlatformButton = ':nth-child(1) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(4) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const policyMonitoringButton = ':nth-child(2) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const systemAuditingButton = ':nth-child(2) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const openScapButton = ':nth-child(2) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(3) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const cisCatButton = ':nth-child(2) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(4) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const securityConfigurationAssessmentButton = ':nth-child(2) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(5) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const vulnerabilitiesButton = ':nth-child(3) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const virusTotalButton = ':nth-child(3) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const osqueryButton = ':nth-child(3) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(3) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const dockerListenerButton = ':nth-child(3) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(4) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const mitreAttackButton = ':nth-child(3) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(5) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const pciDssButton = ':nth-child(4) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(1) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const gdprButton = ':nth-child(4) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(2) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const hipaaButton = ':nth-child(4) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(3) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const nistButton = ':nth-child(4) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(4) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-export const tscButton = ':nth-child(4) > .euiSideNav > .euiSideNav__content > .euiSideNavItem--root > .euiSideNavItem__items > :nth-child(5) > .euiSideNavItemButton > .euiSideNavItemButton__content > .euiSideNavItemButton__label';
-=======
-export const securityEventsLink = '[data-cy=menu-modules-general-link]';
-export const integrityMonitoringLink = '[data-cy=menu-modules-fim-link]';
-export const amazonAwsLink = '[data-cy=menu-modules-aws-link]';
-export const googleCloudPlatformLink = '[data-cy=menu-modules-gcp-link]';
-export const policyMonitoringLink = '[data-cy=menu-modules-pm-link]';
-export const systemAuditingLink = '[data-cy=menu-modules-audit-link]';
-export const openScapLink = '[data-cy=menu-modules-oscap-link]';
-export const cisCatLink = '[data-cy=menu-modules-ciscat-link]';
-export const securityConfigurationAssessmentLink = '[data-cy=menu-modules-sca-link]';
-export const vulnerabilitiesLink = '[data-cy=menu-modules-vuls-link]';
-export const virusTotalLink = '[data-cy=menu-modules-virustotal-link]';
-export const osqueryLink ='[data-cy=menu-modules-osquery-link]';
-export const dockerListenerLink = '[data-cy=menu-modules-docker-link]';
-export const mitreAttackLink = '[data-cy=menu-modules-mitre-link]';
-export const pciDssLink = '[data-cy=menu-modules-pci-link]';
-export const gdprLink = '[data-cy=menu-modules-gdpr-link]';
-export const hipaaLink = '[data-cy=menu-modules-hipaa-link]';
-export const nistLink = '[data-cy=menu-modules-nist-link]';
-export const tscLink = '[data-cy=menu-modules-tsc-link]';
->>>>>>> Update selectors
-=======
-=======
 export const modulesDirectoryLink = '.wz-menu-right-side  div.euiFlexGroup > div > button > span > span';
->>>>>>> added example table, and modified scripts to run tests from CLI
 export const securityEventsLink = '[data-test-subj=menuModulesSecurityEventsLink]';
 export const integrityMonitoringLink = '[data-test-subj=menuModulesFimLink]';
 export const amazonAwsLink = '[data-test-subj=menuModulesAwsLink]';
@@ -76,7 +29,6 @@ export const gdprLink = '[data-test-subj=menuModulesGdprLink]';
 export const hipaaLink = '[data-test-subj=menuModulesHipaaLink]';
 export const nistLink = '[data-test-subj=menuModulesNistLink]';
 export const tscLink = '[data-test-subj=menuModulesTscLink]';
->>>>>>> Update selectors
 //endregion
 //region Management
 export const rulesLink ='[data-test-subj=menuManagementRulesLink]';
