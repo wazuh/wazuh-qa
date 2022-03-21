@@ -69,7 +69,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
+from wazuh_testing.modules.fim import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
 # Marks
 
@@ -135,14 +135,14 @@ def test_file_limit_default(get_configuration, configure_environment, restart_sy
                        combined with the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*Maximum number of entries to be monitored'
+        - r'.*Maximum number of files to be monitored'
 
     tags:
         - scheduled
         - realtime
         - who_data
     '''
-    #Check the file limit configured and that it matches expected value (100000)
+    # Check the file limit configured and that it matches expected value (100000)
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()

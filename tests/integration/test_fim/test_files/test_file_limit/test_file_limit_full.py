@@ -70,10 +70,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import(CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
+from wazuh_testing.modules.fim import(CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
     ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, CB_DATABASE_FULL_COULD_NOT_INSERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
     ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
-from wazuh_testing.fim_module.event_monitor import callback_entries_path_count
+from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 
 # Marks
 
@@ -157,7 +157,7 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
                        combined with the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending DB * full alert.'
+        - r'.*File database is (\d+)% full'
         - r'.*The DB is full.*'
         - r'.*Fim inode entries*, path count'
         - r'.*Fim entries' (on Windows systems)
@@ -167,18 +167,14 @@ def test_file_limit_full( get_configuration, configure_environment, restart_sysc
         - who_data
         - realtime
     '''
-    #Check that database is full and assert database usage percentage is 100%
+    # Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
     assert database_state == '100', ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
-    
+
     # Create a file with the database being full - Should not generate events
     create_file(REGULAR, testdir1, 'file_full', content='content')
-
-    # Check new file could not be added to DB
-    wazuh_log_monitor.start(timeout=monitor_timeout, callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT),
-                            error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT)
 
     # Check number of entries and paths in DB and assert the value matches the expected count
     entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
