@@ -10,5 +10,5 @@ When('The user navigates to decoders', () => {
   clickElement(wazuhMenuButton);
   clickElement(managementButton);
   clickElement(decodersLink);
-  validateURLIncludes('/manager/?tab=decoders');
+  cy.wait(5000);
 });

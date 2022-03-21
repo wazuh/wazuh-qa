@@ -40,7 +40,7 @@ from wazuh_testing.tools.utils import retry, get_random_ip, get_random_string
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 os_list = ["debian7", "debian8", "debian9", "debian10", "ubuntu12.04",
-           "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave"]
+           "ubuntu14.04", "ubuntu16.04", "ubuntu18.04", "mojave", "solaris11"]
 agent_count = 1
 
 
@@ -565,7 +565,7 @@ class Agent:
                         sender.send_event(self.create_event(f'#!-req {req_code} {{"error":0, '
                                                             f'"message":"{self.sha_key}", "data":[]}}'))
             else:
-                raise ValueError(f'WPK SHA key should be configured in agent')
+                raise ValueError('WPK SHA key should be configured in agent')
 
         elif command == 'upgrade':
             if self.upgrade_exec_result:
@@ -675,7 +675,7 @@ class Agent:
     def init_rootcheck(self):
         """Initialize rootcheck module."""
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(self.os, self.name, self.id, self.rootcheck_sample)
+            self.rootcheck = Rootcheck(os = self.os, agent_name = self.name, agent_id = self.id, rootcheck_sample = self.rootcheck_sample)
 
     def init_fim(self):
         """Initialize fim module."""
@@ -717,7 +717,7 @@ class Agent:
         """
         return self.get_agent_info('connection_status')
 
-    @retry(AttributeError, attempts=10, delay=2, delay_multiplier=1)
+    @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         """Wait until agent status is active in global.db.
 
@@ -1561,6 +1561,8 @@ class Injector:
         for thread in range(self.thread_number):
             self.threads[thread].stop_rec()
         sleep(2)
+        if is_tcp(self.sender.protocol):
+            self.sender.socket.shutdown(socket.SHUT_RDWR)
         self.sender.socket.close()
 
 

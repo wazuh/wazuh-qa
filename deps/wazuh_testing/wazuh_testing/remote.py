@@ -4,18 +4,21 @@
 import os
 import re
 import socket
+import ipaddress
 import subprocess as sb
 import time
-
+import multiprocessing
 import pytest
-import wazuh_testing.tools as tools
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import TCP, UDP
-from wazuh_testing.tools import file, monitoring
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import UDP, TCP
+from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, QUEUE_SOCKETS_PATH, WAZUH_PATH
+from wazuh_testing.tools.file import bind_unix_socket, truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor, make_callback, ManInTheMiddle, QueueMonitor, \
+    REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 
 REMOTED_GLOBAL_TIMEOUT = 10
+SYNC_FILES_TIMEOUT = 10
 EXAMPLE_MESSAGE_EVENT = '1:/root/test.log:Feb 23 17:18:20 35-u20-manager4 sshd[40657]: Accepted publickey for root' \
                         ' from 192.168.0.5 port 48044 ssh2: RSA SHA256:IZT11YXRZoZfuGlj/K/t3tT8OdolV58hcCOJFZLIW2Y'
 EXAMPLE_INVALID_USER_LOG_EVENT = 'Feb  4 16:39:29 ip-10-142-167-43 sshd[6787]: ' \
@@ -24,7 +27,7 @@ EXAMPLE_VALID_USER_LOG_EVENT = '2021-03-04T02:16:16.998693-05:00 centos-8 su - -
                                'isSynced="0"] pam_unix(su:session): session opened for user wazuh_qa by (uid=0)'
 EXAMPLE_MESSAGE_PATTERN = 'Accepted publickey for root from 192.168.0.5 port 48044'
 ACTIVE_RESPONSE_EXAMPLE_COMMAND = 'dummy-ar admin 1.1.1.1 1.1 44 (any-agent) any->/testing/testing.txt - -'
-QUEUE_SOCKET_PATH = os.path.join(tools.QUEUE_SOCKETS_PATH, 'queue')
+QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 
 DEFAULT_TESTING_GROUP_NAME = 'testing_group'
 
@@ -34,21 +37,21 @@ data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 def new_agent_group(group_name=DEFAULT_TESTING_GROUP_NAME, configuration_file='agent.conf'):
     """Create a new agent group for testing purpose, must be run only on Managers."""
 
-    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-g", group_name])
 
     agent_conf_path = os.path.join(data_path, configuration_file)
 
-    with open(f"{tools.WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
+    with open(f"{WAZUH_PATH}/etc/shared/{group_name}/agent.conf", "w") as agent_conf_file:
         with open(agent_conf_path, 'r') as configuration:
             agent_conf_file.write(configuration.read())
 
 
 def remove_agent_group(group_name):
-    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-r", "-g", group_name])
 
 
 def add_agent_to_group(group_name, agent_id):
-    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", group_name])
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", group_name])
 
 
 def callback_detect_syslog_allowed_ips(syslog_ips):
@@ -62,7 +65,7 @@ def callback_detect_syslog_allowed_ips(syslog_ips):
     """
 
     msg = fr"Remote syslog allowed from: \'{syslog_ips}\'"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_detect_syslog_denied_ips(syslog_ips):
@@ -75,7 +78,7 @@ def callback_detect_syslog_denied_ips(syslog_ips):
         callable: callback to detect this event.
     """
     msg = fr"Message from \'{syslog_ips}\' not allowed. Cannot find the ID of the agent."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_invalid_value(option, value):
@@ -89,7 +92,7 @@ def callback_invalid_value(option, value):
         callable: callback to detect this event.
     """
     msg = fr"ERROR: \(\d+\): Invalid value for element '{option}': {value}."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_invalid_port(port):
@@ -102,7 +105,7 @@ def callback_error_invalid_port(port):
         callable: callback to detect this event.
     """
     msg = fr"ERROR: \(\d+\): Invalid port number: '{port}'."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_ignored_invalid_protocol(protocol):
@@ -115,7 +118,7 @@ def callback_ignored_invalid_protocol(protocol):
         callable: callback to detect this event.
     """
     msg = fr"WARNING: \(\d+\): Ignored invalid value '{protocol}' for 'protocol'"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_getting_protocol():
@@ -125,7 +128,7 @@ def callback_error_getting_protocol():
         callable: callback to detect this event.
     """
     msg = r"WARNING: \(\d+\): Error getting protocol. Default value \(TCP\) will be used."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_warning_syslog_tcp_udp():
@@ -137,7 +140,7 @@ def callback_warning_syslog_tcp_udp():
     msg = r"WARNING: \(\d+\): Only secure connection supports TCP and UDP at the same time. " \
           r"Default value \(TCP\) will be used."
 
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_warning_secure_ipv6():
@@ -147,7 +150,7 @@ def callback_warning_secure_ipv6():
         callable: callback to detect this event.
     """
     msg = r"WARNING: \(\d+\): Secure connection does not support IPv6. IPv4 will be used instead."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_bind_port():
@@ -157,7 +160,7 @@ def callback_error_bind_port():
         callable: callback to detect this event.
     """
     msg = r"CRITICAL: \(\d+\): Unable to Bind port '1514' due to \[\(\d+\)\-\(Cannot assign requested address\)\]"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_queue_size_syslog():
@@ -167,7 +170,7 @@ def callback_error_queue_size_syslog():
         callable: callback to detect this event.
     """
     msg = r"ERROR: Invalid option \<queue_size\> for Syslog remote connection."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_queue_size_too_big():
@@ -177,7 +180,7 @@ def callback_queue_size_too_big():
         callable: callback to detect this event.
     """
     msg = r"WARNING: Queue size is very high. The application may run out of memory."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_error_invalid_ip(ip):
@@ -190,7 +193,7 @@ def callback_error_invalid_ip(ip):
         callable: callback to detect this event.
     """
     msg = fr"ERROR: \(\d+\): Invalid ip address: '{ip}'."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_info_no_allowed_ips():
@@ -201,7 +204,7 @@ def callback_info_no_allowed_ips():
     """
     msg = r"INFO: \(\d+\): IP or network must be present in syslog access list \(allowed-ips\). "
     msg += "Syslog server disabled."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def get_protocols(all_protocols):
@@ -225,17 +228,17 @@ def get_protocols(all_protocols):
 
 def callback_active_response_received(ar_message):
     msg = fr"DEBUG: Active response request received: {ar_message}"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX, escape=True)
 
 
 def callback_active_response_sent(ar_message):
     msg = fr"DEBUG: Active response sent: #!-execd {ar_message[26:]}"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX, escape=True)
 
 
-def callback_start_up(agent_name):
-    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from 127.0.0.1"
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX, escape=True)
+def callback_start_up(agent_name, agent_ip='127.0.0.1'):
+    msg = fr"DEBUG: Agent {agent_name} sent HC_STARTUP from '{agent_ip}'"
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX, escape=True)
 
 
 def callback_detect_remoted_started(port, protocol, connection_type="secure"):
@@ -260,7 +263,7 @@ def callback_detect_remoted_started(port, protocol, connection_type="secure"):
         protocol_string = protocol_array[0] + ',' + protocol_array[1]
 
     msg = fr"Started \(pid: \d+\). Listening on port {port}\/{protocol_string.upper()} \({connection_type}\)."
-    return monitoring.make_callback(pattern=msg, prefix=monitoring.REMOTED_DETECTOR_PREFIX)
+    return make_callback(pattern=msg, prefix=REMOTED_DETECTOR_PREFIX)
 
 
 def callback_detect_syslog_event(message):
@@ -272,7 +275,7 @@ def callback_detect_syslog_event(message):
     Returns:
         callable: callback to detect this event.
     """
-    return monitoring.make_callback(pattern=message, prefix=r".*->\d+\.\d+\.\d+\.\d+\s", escape=True)
+    return make_callback(pattern=message, prefix=r".*->\d+\.\d+\.\d+\.\d+\s", escape=True)
 
 
 def callback_detect_example_archives_event():
@@ -281,7 +284,7 @@ def callback_detect_example_archives_event():
     Returns:
         callable: callback to detect this event
     """
-    return monitoring.make_callback(pattern=fr".*{EXAMPLE_MESSAGE_PATTERN}.*", prefix=None)
+    return make_callback(pattern=fr".*{EXAMPLE_MESSAGE_PATTERN}.*", prefix=None)
 
 
 def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
@@ -296,10 +299,17 @@ def send_syslog_message(message, port, protocol, manager_address="127.0.0.1"):
     Raises:
         ConnectionRefusedError: if there's a problem while sending messages to the manager.
     """
+    ip = ipaddress.ip_address(manager_address)
     if protocol.upper() == UDP:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if isinstance(ip, ipaddress.IPv4Address):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        elif isinstance(ip, ipaddress.IPv6Address):
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
     else:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if isinstance(ip, ipaddress.IPv4Address):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        elif isinstance(ip, ipaddress.IPv6Address):
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
     if not message.endswith("\n"):
         message += "\n"
@@ -316,8 +326,8 @@ def create_archives_log_monitor():
         FileMonitor: object to monitor the archives.log.
     """
     # Reset archives.log and start a new monitor
-    file.truncate_file(tools.ARCHIVES_LOG_FILE_PATH)
-    wazuh_archives_log_monitor = monitoring.FileMonitor(tools.ARCHIVES_LOG_FILE_PATH)
+    truncate_file(ARCHIVES_LOG_FILE_PATH)
+    wazuh_archives_log_monitor = FileMonitor(ARCHIVES_LOG_FILE_PATH)
 
     return wazuh_archives_log_monitor
 
@@ -362,6 +372,7 @@ def check_syslog_event(wazuh_archives_log_monitor, message, port, protocol, time
     for msg in parsed_msg.split("\n"):
         detect_archives_log_event(archives_monitor=wazuh_archives_log_monitor,
                                   callback=callback_detect_syslog_event(msg),
+                                  update_position=False,
                                   timeout=timeout,
                                   error_message="Syslog message wasn't received or took too much time.")
 
@@ -419,7 +430,7 @@ def check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message='
     wazuh_log_monitor.start(
         timeout=timeout,
         update_position=update_position,
-        callback=monitoring.make_callback(callback_pattern, monitoring.REMOTED_DETECTOR_PREFIX),
+        callback=make_callback(callback_pattern, REMOTED_DETECTOR_PREFIX),
         error_message=error_message
     )
 
@@ -461,12 +472,37 @@ def wait_to_remoted_key_update(wazuh_log_monitor):
     """
     # We have to make sure that remoted has correctly loaded the client key agent info. The log is truncated to
     # ensure that the information has been loaded after the agent has been registered.
-    file.truncate_file(tools.LOG_FILE_PATH)
+    truncate_file(LOG_FILE_PATH)
 
     callback_pattern = '.*rem_keyupdate_main().*Checking for keys file changes.'
     error_message = 'Could not find the remoted key loading log'
 
     check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=20)
+
+
+def wait_to_remoted_update_groups(wazuh_log_monitor):
+    """Allow to detect when remoted has reloaded its groups and multigroups.
+
+    This is necessary for remoted to find shared group files to send to agents.
+
+    The reload time is editable in the internal_options.conf and defaults to 10 seconds.
+
+    >> remoted.shared_reload=10
+
+    Args:
+        wazuh_log_monitor (FileMonitor): FileMonitor object to monitor the Wazuh log.
+
+    Raises:
+        TimeoutError: if could not find the remoted key loading log.
+    """
+    # We have to make sure that remoted has correctly reloaded its groups and multigroups.
+    # The log is truncated to ensure that the information has been loaded after the agent has been registered.
+    truncate_file(LOG_FILE_PATH)
+
+    callback_pattern = '.*c_files().*End updating shared files sums.'
+    error_message = 'Could not find the groups reload log'
+
+    check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=SYNC_FILES_TIMEOUT)
 
 
 def send_agent_event(wazuh_log_monitor, message=EXAMPLE_MESSAGE_EVENT, protocol=TCP, manager_address='127.0.0.1',
@@ -530,32 +566,32 @@ def check_queue_socket_event(raw_events=EXAMPLE_MESSAGE_PATTERN, timeout=30, upd
     control_service('stop', daemon='wazuh-analysisd')
 
     # Create queue socket if it does not exist.
-    file.bind_unix_socket(QUEUE_SOCKET_PATH, UDP)
+    bind_unix_socket(QUEUE_SOCKET_PATH, UDP)
 
     # Intercept queue sockets events
-    mitm = monitoring.ManInTheMiddle(address=QUEUE_SOCKET_PATH, family='AF_UNIX', connection_protocol=UDP,
-                                     func=intercept_socket_data)
+    mitm = ManInTheMiddle(address=QUEUE_SOCKET_PATH, family='AF_UNIX', connection_protocol=UDP,
+                          func=intercept_socket_data)
     mitm.start()
 
     # Monitor MITM queue
-    socket_monitor = monitoring.QueueMonitor(mitm.queue)
+    socket_monitor = QueueMonitor(mitm.queue)
 
     try:
         # Start socket monitoring
         for event in event_list:
-            socket_monitor.start(timeout=timeout, callback=monitoring.make_callback(event, '.*'),
+            socket_monitor.start(timeout=timeout, callback=make_callback(event, '.*'),
                                  error_message=error_message, update_position=update_position)
     finally:
         mitm.shutdown()
         control_service('start', daemon='wazuh-analysisd')
 
 
-def check_agent_received_message(message_queue, search_pattern, timeout=5, update_position=True, error_message='',
+def check_agent_received_message(agent, search_pattern, timeout=5, update_position=True, error_message='',
                                  escape=False):
     """Allow to monitor the agent received messages to search a pattern regex.
 
     Args:
-        message_queue (monitoring.Queue): Queue containing the messages received in the agent.
+        agent (Agent): Agent to monitor the received messages in its Queue.
         search_pattern (str): Regex to search in agent received messages.
         timeout (int): Maximum time in seconds to search the event.
         update_position (boolean): True to search in the entire queue, False to search in the current position of the
@@ -567,9 +603,8 @@ def check_agent_received_message(message_queue, search_pattern, timeout=5, updat
         TimeoutError: if search pattern is not found in agent received messages queue in the expected time.
 
     """
-    queue_monitor = monitoring.QueueMonitor(message_queue)
-
-    queue_monitor.start(timeout=timeout, callback=monitoring.make_callback(search_pattern, '.*', escape),
+    queue_monitor = QueueMonitor(agent.rcv_msg_queue)
+    queue_monitor.start(timeout=timeout, callback=make_callback(search_pattern, '.*', escape),
                         update_position=update_position, error_message=error_message)
 
 
@@ -589,6 +624,11 @@ def check_push_shared_config(agent, sender, injector=None):
     """
 
     # Activate receives_messages modules in simulated agent.
+    def keep_alive_until_group_configuration_sent(sender, interval=1, timeout=20):
+        for i in range(timeout):
+            sender.send_event(agent.keep_alive_event)
+            time.sleep(interval)
+
     agent.set_module_status('receive_messages', 'enabled')
 
     # Run injector with only receive messages module enabled
@@ -600,44 +640,58 @@ def check_push_shared_config(agent, sender, injector=None):
         stop_injector = True
 
     try:
-        wazuh_log_monitor = FileMonitor(tools.LOG_FILE_PATH)
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
         # Wait until remoted has loaded the new agent key
         wait_to_remoted_key_update(wazuh_log_monitor)
 
         # Send the start-up message
         sender.send_event(agent.startup_msg)
+
+        log_callback = callback_start_up(agent.name)
+        wazuh_log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
+                                error_message='The start up message has not been found in the logs')
+
+        wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+        
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
-        check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=10,
+        check_agent_received_message(agent, r'#!-up file \w+ merged.mg', timeout=10,
                                      error_message="initial up file message not received")
 
         # Check agent.conf message
-        check_agent_received_message(agent.rcv_msg_queue, '#default', timeout=10,
+        check_agent_received_message(agent, '#default', timeout=10,
                                      error_message="agent.conf message not received")
         # Check close file (push end) message
-        check_agent_received_message(agent.rcv_msg_queue, 'close', timeout=35,
+        check_agent_received_message(agent, 'close', timeout=35,
                                      error_message="initial close message not received")
 
         sender.send_event(agent.keep_alive_event)
 
         # Check that push message doesn't appear again
         with pytest.raises(TimeoutError):
-            check_agent_received_message(agent.rcv_msg_queue, r'#!-up file \w+ merged.mg', timeout=5)
+            check_agent_received_message(agent, r'#!-up file \w+ merged.mg', timeout=5)
             raise AssertionError("Same shared configuration pushed twice!")
 
         # Add agent to group and check if the configuration is pushed.
         add_agent_to_group(DEFAULT_TESTING_GROUP_NAME, agent.id)
 
-        for _ in range(5):
-            # send some keep alive messages until manager push the new group configuration
-            sender.send_event(agent.keep_alive_event)
-            time.sleep(1)
+        # Wait until remoted has reloaded its groups and multigroups
+        wait_to_remoted_update_groups(wazuh_log_monitor)
 
-        check_agent_received_message(agent.rcv_msg_queue, '#!-up file .* merged.mg', timeout=10,
+        keep_alive_agent = multiprocessing.Process(target=keep_alive_until_group_configuration_sent,
+                                                   args=(sender,))
+        keep_alive_agent.start()
+
+        log_callback = make_callback(pattern=".*End sending file '.+' to agent '\d+'\.", prefix='.*wazuh-remoted.*')
+        log_monitor = FileMonitor(LOG_FILE_PATH)
+        log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
+                          error_message="New shared configuration was not sent")
+        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=REMOTED_GLOBAL_TIMEOUT,
                                      error_message="New group shared config not received")
 
     finally:
         if stop_injector:
             injector.stop_receive()
+            keep_alive_agent.terminate()

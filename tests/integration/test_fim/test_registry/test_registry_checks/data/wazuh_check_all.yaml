@@ -21,6 +21,20 @@
         - FIM_MODE
         - check_all: "yes"
         - arch: "both"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration for check_all=no
 - tags:
   - check_all_no
@@ -43,6 +57,20 @@
         - FIM_MODE
         - check_all: "no"
         - arch: "both"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration for conjuction
 - tags:
   - check_all_conjuction
@@ -97,6 +125,20 @@
         - check_group: "no"
         - check_perm: "no"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration for test checksum all
 - tags:
   - test_checksum_all
@@ -138,6 +180,20 @@
         - check_sum: "no"
         - check_md5sum: "yes"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
 # Configuration for test checksum
 - tags:
   - test_checksum
@@ -192,3 +248,17 @@
         - check_mtime: "yes"
         - check_md5sum: "yes"
         - arch: "64bit"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'

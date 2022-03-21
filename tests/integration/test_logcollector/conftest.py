@@ -3,16 +3,22 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
 from shutil import copyfile
-import pytest
+import sys
+
+if sys.platform != 'win32':
+    from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
+
+from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing.logcollector import LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.remoted_sim import RemotedSimulator
 from wazuh_testing.tools.authd_sim import AuthdSimulator
-from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH
+from wazuh_testing.tools import CLIENT_CUSTOM_KEYS_PATH, CLIENT_CUSTOM_CERT_PATH, get_service
+from os.path import exists
+from os import remove
 
 DAEMON_NAME = "wazuh-logcollector"
 
@@ -68,21 +74,28 @@ def init_authd_remote_simulator(get_connection_configuration, request):
     authd_simulator.shutdown()
 
 
-@pytest.fixture(scope="package", autouse=True)
-def configure_local_internal_options_logcollector():
-    """Configure Wazuh with local internal options required for logcollector tests."""
-    backup_options_lines = conf.get_wazuh_local_internal_options()
-    backup_options_dict = conf.local_internal_options_to_dict(backup_options_lines)
+@pytest.fixture(scope='function')
+def delete_file_status_json():
+    """Delete file_status.json from logcollector"""
+    remove(LOGCOLLECTOR_FILE_STATUS_PATH) if exists(LOGCOLLECTOR_FILE_STATUS_PATH) else None
 
-    if backup_options_dict != LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS:
-        conf.add_wazuh_local_internal_options(LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS)
+    yield
 
-        control_service('restart')
 
-        yield
+@pytest.fixture(scope='function')
+def truncate_log_file():
+    """Truncate the log file (ossec.log)"""
+    truncate_file(LOG_FILE_PATH)
 
-        conf.set_wazuh_local_internal_options(backup_options_lines)
+    yield
 
-        control_service('restart')
+
+@pytest.fixture(scope='module')
+def restart_monitord():
+    wazuh_component = get_service()
+
+    """Reset log file and start a new monitor."""
+    if wazuh_component == 'wazuh-manager':
+        control_service('restart', daemon='wazuh-monitord')
     else:
-        yield
+        control_service('restart', daemon='wazuh-agentd')

@@ -27,6 +27,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.tools.file import generate_string
 
 if sys.platform == 'win32':
     import win32con
@@ -95,6 +96,7 @@ REQUIRED_REG_VALUE_ATTRIBUTES = {
 
 _last_log_line = 0
 _os_excluded_from_rt_wd = ['darwin', 'sunos5']
+registry_ignore_path = None
 
 if sys.platform == 'win32':
     registry_parser = {
@@ -174,7 +176,18 @@ else:
 
     def registry_key_cud():
         pass
+    
+    def registry_value_create():
+        pass
 
+    def registry_value_update():
+        pass
+    
+    def registry_value_delete():
+        pass
+    
+    def create_values_content():
+        pass
 
     def validate_registry_event():
         pass
@@ -983,7 +996,41 @@ def callback_detect_end_scan(line):
         logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
+def callback_detect_scan_start(line):
+    """
+    Detect the start of a scheduled scan or initial scan.
+    """
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        if json.loads(match.group(1))['type'] == 'scan_start':
+            return True
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_get_scan_timestap(line):
+    """
+    Get the timestamp for the end of the initial scan or a scheduled scan
+    """
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+    if not match:
+        return None
+    try:
+        if json.loads(match.group(1))['type'] == 'scan_end':
+            return json.loads(match.group(1))['data']['timestamp']
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
 def callback_detect_event(line):
+    """
+    Detect an 'event' type FIM log.
+    """
     msg = r'.*Sending FIM event: (.+)$'
     match = re.match(msg, line)
     if not match:
@@ -1006,6 +1053,20 @@ def callback_detect_modified_event(line):
     try:
         json_event = json.loads(match.group(1))
         if json_event['type'] == 'event' and json_event['data']['type'] == 'modified':
+            return json_event
+    except (JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_detect_delete_event(line):
+    msg = r'.*Sending FIM event: (.+)$'
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['type'] == 'event' and json_event['data']['type'] == 'deleted':
             return json_event
     except (JSONDecodeError, AttributeError, KeyError) as e:
         logger.warning(f"Couldn't load a log line into json object. Reason {e}")
@@ -1035,10 +1096,17 @@ def callback_detect_integrity_event(line):
     return None
 
 
-def callback_detect_registry_integrity_event(line):
-    match = re.match(r'.*Sending integrity control message: {"component":"fim_registry","type":"state","data":(.+)}', line)
-    if match:
-        return json.loads(match.group(1))
+def callback_detect_registry_integrity_state_event(line):
+    event = callback_detect_integrity_event(line)
+    if event and event['component'] == 'fim_registry' and event['type'] == 'state':
+        return event['data']
+    return None
+
+
+def callback_detect_registry_integrity_clear_event(line):
+    event = callback_detect_integrity_event(line)
+    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
+        return True
     return None
 
 
@@ -1204,12 +1272,6 @@ def callback_integrity_message(line):
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
 
 
-def callback_connection_message(line):
-    match = re.match(r'.* Connected to the server .*', line)
-    if match:
-        return True
-
-
 def callback_event_message(line):
     if callback_detect_event(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
@@ -1265,13 +1327,6 @@ def callback_disk_quota_default(line):
         return match.group(1)
 
 
-def callback_diff_size_limit_value(line):
-    match = re.match(r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*', line)
-
-    if match:
-        return match.group(1)
-
-
 def callback_deleted_diff_folder(line):
     match = re.match(r'.*Folder \'(.*)\' has been deleted.*', line)
 
@@ -1291,20 +1346,23 @@ def callback_registry_count_entries(line):
         return match.group(1)
 
 
+def callback_key_event(line):
+    event = callback_detect_event(line)
+
+    if (event is None or event['data']['attributes']['type'] != 'registry_key' or
+            event['data']['path'] == registry_ignore_path):
+        return None
+
+    return event
+
+
 def callback_value_event(line):
-    match = re.match(r'.*Sending FIM event: .*value_name.*', line)
+    event = callback_detect_event(line)
 
-    if match is not None:
-        msg = r'.*Sending FIM event: (.+)$'
-        match = re.match(msg, line)
+    if event is None or event['data']['attributes']['type'] != 'registry_value':
+        return None
 
-        try:
-            if json.loads(match.group(1))['type'] == 'event':
-                return json.loads(match.group(1))
-        except (AttributeError, JSONDecodeError, KeyError):
-            pass
-
-    return None
+    return event
 
 
 def callback_detect_max_files_per_second(line):
@@ -1314,21 +1372,21 @@ def callback_detect_max_files_per_second(line):
     return match is not None
 
 
-def callback_dbsync_no_data(line):
-    match = re.match(r'.*#!-fim_registry dbsync no_data (.+)', line)
-    if match:
-        return match.group(1)
-    return None
-
-
 def callback_detect_end_runtime_wildcards(line):
     match = re.match(r".*Configuration wildcards update finalize\.", line)
     return match is not None
 
 
+def callback_ignore_realtime_flag(line):
+    match = re.match(r".*Ignoring flag for real time monitoring on directory: (.+)$", line)
+    if match:
+        return True
+
+
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
                       timeout=global_parameters.default_timeout):
-    """Change date and time of the system depending on a boolean condition.
+    """Checks if the conditions for changing the current time and date are met and call to the specific function
+       depending on those conditions.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
 
@@ -1340,11 +1398,11 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
             scheduled scan. The `monitor` will not consume any log line. Default `None`.
         timeout (int, optional): If a monitor is provided, this parameter sets how log to wait for the end of scan.
-
     Raises
         TimeoutError: if `monitor` is not `None` and the scan has not ended in the
             default timeout specified in `global_parameters`.
     """
+
     if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
         mode = global_parameters.current_configuration['metadata']['fim_mode']
         if mode != 'scheduled' or mode not in global_parameters.fim_mode:
@@ -1358,8 +1416,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                           update_position=False,
-                          error_message=f'End of scheduled scan not detected after '
-                                        f'{timeout} seconds')
+                          error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
 def callback_configuration_warning(line):
@@ -1367,54 +1424,6 @@ def callback_configuration_warning(line):
     if match:
         return True
     return None
-
-
-def callback_value_file_limit(line):
-    match = re.match(r".*Maximum number of entries to be monitored: '(\d+)'", line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_file_limit_zero(line):
-    match = re.match(r".*No limit set to maximum number of entries to be monitored", line)
-
-    if match:
-        return True
-
-
-def callback_file_limit_capacity(line):
-    match = re.match(r".*Sending DB (\d+)% full alert.", line)
-
-    if match:
-        return match.group(1)
-
-
-def callback_file_limit_back_to_normal(line):
-    match = re.match(r".*Sending DB back to normal alert.", line)
-
-    if match:
-        return True
-
-
-def callback_file_limit_full_database(line):
-    match = re.match(r".*Couldn't insert '.*' (value )?entry into DB\. The DB is full.*", line)
-
-    if match:
-        return True
-
-
-def callback_entries_path_count(line):
-    if sys.platform != 'win32':
-        match = re.match(r".*Fim inode entries: (\d+), path count: (\d+)", line)
-    else:
-        match = re.match(r".*Fim entries: (\d+)", line)
-
-    if match:
-        if sys.platform != 'win32':
-            return match.group(1), match.group(2)
-        else:
-            return match.group(1), None
 
 
 def callback_warn_max_dir_monitored(line):
@@ -1457,11 +1466,12 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None):
         """Call both 'fetch_events' and 'check_events'.
 
         Args:
             event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            event_mode (str, optional): Specifies the scan mode to check in the events
             min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
             triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
             extra_timeout (int, optional): Additional time to wait after the min_timeout
@@ -1475,7 +1485,7 @@ class EventChecker:
         error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
 
         self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type)
+        self.check_events(event_type, mode=event_mode)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """Try to fetch events on a given log monitor. Will return a list with the events detected.
@@ -1537,6 +1547,7 @@ class EventChecker:
 
         Args:
             event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            mode (str, optional): Specifies the FIM scan mode to check in the events
         """
 
         def validate_checkers_per_event(events, options, mode):
@@ -1552,7 +1563,7 @@ class EventChecker:
 
         def check_events_type(events, ev_type, file_list=['testfile0']):
             event_types = Counter(filter_events(events, ".[].data.type"))
-            msg = f'Non expected number of events. {event_types[ev_type]} != {len(file_list)}'
+            msg = f"Non expected number of events. {event_types[ev_type]} != {len(file_list)}"
             assert (event_types[ev_type] == len(file_list)), msg
 
         def check_events_path(events, folder, file_list=['testfile0'], mode=None):
@@ -1564,7 +1575,7 @@ class EventChecker:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
                 if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f'Not asserting {expected_path} in event.data.path. '
+                    logger.info(f"Not asserting {expected_path} in event.data.path. "
                                 f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
@@ -1601,6 +1612,39 @@ class EventChecker:
         return result_list
 
 
+def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
+                            timeout=global_parameters.default_timeout):
+    """Checks if the conditions for waiting for a new scheduled scan.
+
+    Optionally, a monitor may be used to check if a scheduled scan has been performed.
+
+    This function is specially useful to deal with scheduled scans that are triggered on a time interval basis.
+
+    Args:
+        wait_scan (boolean): True if we need to update time. False otherwise.
+        interval (timedelta, optional): time interval that will be waited for the scheduled scan to start. Default: 20 seconds.
+        monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
+            scheduled scan. The `monitor` will not consume any log line. Default `None`.
+        timeout (int, optional): If a monitor is provided, this parameter sets how long to wait for the end of scan.
+    Raises
+        TimeoutError: if `monitor` is not `None` and the scan has not ended in the
+            default timeout specified in `global_parameters`.
+    """
+
+    if 'fim_mode' in global_parameters.current_configuration['metadata'].keys():
+        mode = global_parameters.current_configuration['metadata']['fim_mode']
+        if mode != 'scheduled' or mode not in global_parameters.fim_mode:
+            return
+
+    if wait_for_scan:
+        logger.info(f"waiting for scheduled scan to start for {interval} seconds")
+        time.sleep(interval)
+        if monitor:
+            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+                        update_position=False,
+                        error_message=f"End of scheduled scan not detected after {timeout} seconds")
+
+
 if sys.platform == 'win32':
     class RegistryEventChecker:
         """Utility to allow fetch events and validate them."""
@@ -1609,6 +1653,8 @@ if sys.platform == 'win32':
                      encoding=None, callback=callback_detect_event, is_value=False):
             self.log_monitor = log_monitor
             self.registry_key = registry_key
+            global registry_ignore_path
+            registry_ignore_path = registry_key
             self.registry_dict = registry_dict
             self.custom_validator = custom_validator
             self.options = options
@@ -1616,6 +1662,10 @@ if sys.platform == 'win32':
             self.events = None
             self.callback = callback
             self.is_value = is_value
+
+        def __del__(self):
+            global registry_ignore_path
+            registry_ignore_path = None
 
         def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
             """Call 'fetch_events', 'fetch_key_events' and 'check_events', depending on the type of event expected.
@@ -1628,8 +1678,7 @@ if sys.platform == 'win32':
             """
             assert event_type in ['added', 'modified', 'deleted'], f'Incorrect event type: {event_type}'
 
-            # Minus 1 because we don't need to count the registry parent key here
-            num_elems = len(self.registry_dict) - 1
+            num_elems = len(self.registry_dict)
 
             error_msg = "TimeoutError was raised because "
             error_msg += str(num_elems) if num_elems > 1 else "a single"
@@ -1639,7 +1688,7 @@ if sys.platform == 'win32':
             error_msg += " but were not detected." if num_elems > 1 else " but was not detected."
 
             key_error_msg = f"TimeoutError was raised because 1 event was expected for {self.registry_key} "
-            key_error_msg += "but was not detected."
+            key_error_msg += 'but was not detected.'
 
             if event_type == 'modified' or self.is_value:
                 self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
@@ -1647,52 +1696,32 @@ if sys.platform == 'win32':
             elif event_type == 'added':
                 self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
                 self.check_events(event_type)
-
-                # The callback for the registry parent key will be `None` when `check_mtime` is disabled
-                if self.registry_dict[self.registry_key][1] is not None:
-                    self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout,
-                                                    error_message=key_error_msg, is_parent=True)
-                    self.check_events(event_type, check_parent_key=True)
             elif event_type == 'deleted':
-                if self.registry_dict[self.registry_key][1] is not None:
-                    self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout,
-                                                    error_message=key_error_msg, is_parent=True)
-                    self.check_events(event_type, check_parent_key=True)
-
                 self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
                 self.check_events(event_type)
 
-        def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message='', is_parent=False):
+        def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
+            timeout_per_registry_estimation = 0.01
             try:
-                if is_parent:
-                    result = self.log_monitor.start(timeout=min_timeout,
-                                                    callback=self.registry_dict[self.registry_key][1],
-                                                    timeout_extra=extra_timeout,
-                                                    encoding=self.encoding,
-                                                    error_message=error_message).result()
-                else:
-                    # We substract 1 to the length of the dictionary because the parent key should not be detected here
-                    result = self.log_monitor.start(timeout=max((len(self.registry_dict) - 1) * 0.01, min_timeout),
-                                                    callback=self.callback,
-                                                    accum_results=len(self.registry_dict) - 1,
-                                                    timeout_extra=extra_timeout,
-                                                    encoding=self.encoding,
-                                                    error_message=error_message).result()
+                result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
+                                                            min_timeout),
+                                                callback=self.callback, accum_results=len(self.registry_dict),
+                                                timeout_extra=extra_timeout, encoding=self.encoding,
+                                                error_message=error_message).result()
 
-                assert triggers_event, f'No events should be detected.'
+                assert triggers_event, 'No events should be detected.'
                 return result if isinstance(result, list) else [result]
             except TimeoutError:
                 if triggers_event:
                     raise
                 logger.info("TimeoutError was expected and correctly caught.")
 
-        def check_events(self, event_type, mode=None, check_parent_key=False):
+        def check_events(self, event_type, mode=None):
             """Check and validate all events in the 'events' list.
 
             Args:
                 event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
                 mode (str): expected mode of the raised event.
-                check_parent_key (bool, optional): check the event raised by the parent key. Defaults `False`
             """
 
             def validate_checkers_per_event(events, options, mode):
@@ -1712,21 +1741,14 @@ if sys.platform == 'win32':
             def check_events_type(events, ev_type, reg_list=['testkey0']):
                 event_types = Counter(filter_events(events, ".[].data.type"))
 
-                # We substract 1 to the length of the dictionary because the parent key should not be counted here
-                msg = f'Non expected number of events. {event_types[ev_type]} != {len(reg_list) - 1}'
-
-                assert (event_types[ev_type] == (len(reg_list)) - 1), msg
+                assert (event_types[ev_type] == len(reg_list)
+                        ), f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
 
             def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
                 mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
                 key_path = filter_events(events, ".[].data.path")
-                skip_parent = True
 
                 for reg in reg_list:
-                    if skip_parent:
-                        skip_parent = False
-                        continue
-
                     expected_path = os.path.join(registry_key, reg)
 
                     if self.encoding is not None:
@@ -1736,30 +1758,12 @@ if sys.platform == 'win32':
                     error_msg = f"Expected key path was '{expected_path}' but event key path is '{key_path}'"
                     assert (expected_path in key_path), error_msg
 
-            def check_events_parent_registry_key(events, mode=None):
-                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-                parent_key_path = filter_events(events, ".[].data.path")
-
-                if self.encoding is not None:
-                    for index, item in enumerate(parent_key_path):
-                        parent_key_path[index] = item.encode(encoding=self.encoding)
-
-                error_msg = f"Expected parent key path was '{self.registry_key}'"
-                error_msg += f"but event parent key path is '{parent_key_path}'"
-
-                assert (self.registry_key in parent_key_path), error_msg
-
             def check_events_registry_value(events, key, value_list=['testvalue0'], mode=None):
                 mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
                 key_path = filter_events(events, ".[].data.path")
                 value_name = filter_events(events, ".[].data.value_name")
-                skip_parent = True
 
                 for value in value_list:
-                    if skip_parent:
-                        skip_parent = False
-                        continue
-
                     error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
                     assert (value in value_name), error_msg
 
@@ -1778,9 +1782,7 @@ if sys.platform == 'win32':
             if self.events is not None:
                 validate_checkers_per_event(self.events, self.options, mode)
 
-                if check_parent_key:
-                    check_events_parent_registry_key(self.events, mode=mode)
-                elif self.is_value:
+                if self.is_value:
                     check_events_type(self.events, event_type, self.registry_dict)
                     check_events_registry_value(self.events, self.registry_key, value_list=self.registry_dict,
                                                 mode=mode)
@@ -1788,7 +1790,7 @@ if sys.platform == 'win32':
                     check_events_type(self.events, event_type, self.registry_dict)
                     check_events_key_path(self.events, self.registry_key, reg_list=self.registry_dict, mode=mode)
 
-                if self.custom_validator is not None and not check_parent_key:
+                if self.custom_validator is not None:
                     self.custom_validator.validate_after_cud(self.events)
 
                     if event_type == "added":
@@ -1809,7 +1811,6 @@ if sys.platform == 'win32':
                 result_list.append(expected_elem_path)
 
             return result_list
-
 
     def registry_value_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
                            time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
@@ -1866,29 +1867,23 @@ if sys.platform == 'win32':
             value_added_content = 0
             value_default_content = 1
 
-        if not isinstance(value_list, list) and not isinstance(value_list, dict):
-            raise ValueError('Value error. It can only be list or dict')
-        elif isinstance(value_list, list):
-            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
-
+        aux_dict = {}
+        if isinstance(value_list, list):
             for elem in value_list:
                 aux_dict[elem] = (value_default_content, callback)
 
-            value_list = aux_dict
         elif isinstance(value_list, dict):
-            aux_dict = {registry_path: (value_default_content, callback_detect_event)}
-
             for key, elem in value_list.items():
                 aux_dict[key] = (elem, callback)
 
-            value_list = aux_dict
+        else:
+            raise ValueError('It can only be a list or dictionary')
+
+        value_list = aux_dict
 
         options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
         if options is not None:
             options_set = options_set.intersection(options)
-
-        if options_set is not None and CHECK_MTIME not in options_set:
-            value_list[registry_path] = (value_default_content, None)
 
         triggers_event_add = triggers_event and triggers_event_add
         triggers_event_modified = triggers_event and triggers_event_modified
@@ -1918,10 +1913,12 @@ if sys.platform == 'win32':
         if triggers_event_add:
             logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+            # Update the position of the log to the end of the scan
+            if time_travel:
+                log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                  update_position=True,
+                                  error_message=f'End of scheduled scan not detected after '
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Modify previous registry values
         for name, content in value_list.items():
@@ -1937,10 +1934,12 @@ if sys.platform == 'win32':
         if triggers_event_modified:
             logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+            # Update the position of the log to the end of the scan
+            if time_travel:
+                log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                  update_position=True,
+                                  error_message=f'End of scheduled scan not detected after '
+                                  f'{global_parameters.default_timeout} seconds')
 
         # Delete previous registry values
         for name, _ in value_list.items():
@@ -1955,16 +1954,232 @@ if sys.platform == 'win32':
         if triggers_event_delete:
             logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+        # Update the position of the log to the end of the scan
+        if time_travel:
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                              update_position=True,
+                              error_message=f'End of scheduled scan not detected after '
+                              f"{global_parameters.default_timeout} seconds")
+
+
+    def transform_registry_list(value_list=['test_value'], value_type=win32con.REG_SZ, callback=callback_value_event):
+
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_default_content = ''
+        else:
+            value_default_content = 1
+    
+        aux_dict = {}
+        if isinstance(value_list, list):
+            for elem in value_list:
+                aux_dict[elem] = (value_default_content, callback)
+
+        elif isinstance(value_list, dict):
+            for key, elem in value_list.items():
+                aux_dict[key] = (elem, callback)
+
+        else:
+            raise ValueError('It can only be a list or dictionary')
+        
+        return aux_dict
+
+
+    def set_check_options(options):
+        """ Return set of check options. If options given is none, it will return check_all"""
+        options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
+        if options is not None:
+            options_set = options_set.intersection(options)
+        return options_set
+
+
+    def create_values_content(value_name, size):
+        """ Create a string of data content of a given size for a specific key value"""
+        return {value_name: generate_string(size, '0')}
+
+    def registry_value_create(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_create=None, value_type=win32con.REG_SZ):
+        """Check if creation of registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            wait_for_scan (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_create (list, optional): List of functions that validates an event triggered when a new
+                registry value is created. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list)
+        if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
+            value_added_content = 'added'
+        else:
+            value_added_content = 0
+ 
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(validators_after_create, None, None, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+
+        # Open the desired key
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+
+        # Create registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+            modify_registry_value(key_handle, name, value_type, value_added_content)
+    
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+
+        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+
+    def registry_value_update(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_update=None, value_type=win32con.REG_SZ):
+        """Check if update registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_update (list, optional): List of functions that validates an event triggered
+                when a new registry value is modified. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list=value_list, value_type=value_type, callback=callback)
+
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(None, validators_after_update, None, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+        
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+        
+        # Modify previous registry values
+        for name, content in value_list.items():
+            if name in registry_path:
+                continue
+
+            modify_registry_value(key_handle, name, value_type, content[0])
+
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
+
+    def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
+                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
+                           callback=callback_value_event, validators_after_delete=None, value_type=win32con.REG_SZ):
+        """Check if delete registry value events are detected by syscheck.
+
+        This function provides multiple tools to validate events with custom validators.
+
+        Args:
+            root_key (str): root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
+            registry_sub_key (str): path of the subkey that will be created.
+            log_monitor (FileMonitor): file event monitor.
+            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
+            value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
+                strings in each value. Default `['test_value']`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
+            min_timeout (int, optional): Minimum timeout. Default `1`
+            options (set, optional): Set with all the checkers. Default `None`
+            triggers_event (boolean, optional): Boolean to determine if the
+                event should be raised or not. Default `True`
+            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
+            callback (callable, optional): Callback to use with the log monitor. Default `callback_value_event`
+            validators_after_delete (list, optional): List of functions that validates an event triggered
+                when a new registry value is deleted. Each function must accept a param to receive the event
+                to be validated. Default `None`
+        """
+        # Transform registry list
+        if root_key not in registry_parser:
+            raise ValueError("root_key not valid")
+
+        registry_path = os.path.join(root_key, registry_sub_key)
+
+        value_list = transform_registry_list(value_list=value_list, value_type=value_type, callback=callback)
+
+        options_set = set_check_options(options)
+
+        custom_validator = CustomValidator(None, None, validators_after_delete, None)
+
+        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
+                                                      registry_dict=value_list, options=options_set,
+                                                      custom_validator=custom_validator, encoding=encoding,
+                                                      callback=callback, is_value=True)
+        
+        key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
+             
+        # Delete previous registry values
+        for name, _ in value_list.items():
+            if name in registry_path:
+                continue
+            delete_registry_value(key_handle, name)
+
+        wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
+        registry_event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+
+        if triggers_event:
+            logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
 
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
                          triggers_event_modified=True, triggers_event_delete=True, encoding=None,
-                         callback=callback_detect_event, validators_after_create=None, validators_after_update=None,
+                         callback=callback_key_event, validators_after_create=None, validators_after_update=None,
                          validators_after_delete=None, validators_after_cud=None):
         """Check if creation, update and delete registry key events are detected by syscheck.
 
@@ -2009,29 +2224,22 @@ if sys.platform == 'win32':
 
         registry_path = os.path.join(root_key, registry_sub_key)
 
-        if not isinstance(key_list, list) and not isinstance(key_list, dict):
-            raise ValueError('Value error. It can only be list or dict')
-        elif isinstance(key_list, list):
-            aux_dict = {registry_path: ('', callback_detect_event)}
-
+        aux_dict = {}
+        if isinstance(key_list, list):
             for elem in key_list:
                 aux_dict[elem] = ('', callback)
 
-            key_list = aux_dict
         elif isinstance(key_list, dict):
-            aux_dict = {registry_path: ('', callback_detect_event)}
-
             for key, elem in key_list.items():
                 aux_dict[key] = (elem, callback)
+        else:
+            raise ValueError('It can only be a list or dictionary')
 
-            key_list = aux_dict
+        key_list = aux_dict
 
         options_set = REQUIRED_REG_KEY_ATTRIBUTES[CHECK_ALL]
         if options is not None:
             options_set = options_set.intersection(options)
-
-        if options_set is not None and CHECK_MTIME not in options_set:
-            key_list[registry_path] = ('', None)
 
         triggers_event_add = triggers_event and triggers_event_add
         triggers_event_modified = triggers_event and triggers_event_modified
@@ -2061,10 +2269,12 @@ if sys.platform == 'win32':
         if triggers_event_add:
             logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+            # Update the position of the log to the end of the scan
+            if time_travel:
+                log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                  update_position=True,
+                                  error_message=f'End of scheduled scan not detected after '
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Modify previous registry subkeys
         for name, _ in key_list.items():
@@ -2080,10 +2290,12 @@ if sys.platform == 'win32':
         if triggers_event_modified:
             logger.info("'modified' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+            # Update the position of the log to the end of the scan
+            if time_travel:
+                log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                  update_position=True,
+                                  error_message=f'End of scheduled scan not detected after '
+                                  f"{global_parameters.default_timeout} seconds")
 
         # Delete previous registry subkeys
         for name, _ in key_list.items():
@@ -2098,10 +2310,12 @@ if sys.platform == 'win32':
         if triggers_event_delete:
             logger.info("'deleted' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
 
-        log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                          update_position=True,
-                          error_message=f'End of scheduled scan not detected after '
-                          f'{global_parameters.default_timeout} seconds')
+            # Update the position of the log to the end of the scan
+            if time_travel:
+                log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                                  update_position=True,
+                                  error_message=f'End of scheduled scan not detected after '
+                                  f"{global_parameters.default_timeout} seconds")
 
 
 class CustomValidator:
@@ -2161,7 +2375,8 @@ class CustomValidator:
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, encoding=None, callback=callback_detect_event, validators_after_create=None,
-                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None):
+                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None,
+                     event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
@@ -2186,7 +2401,9 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
             is created, modified or deleted. Each function must accept a param to receive
             the event to be validated. Default `None`
+        event_mode (str, optional): Specifies the FIM scan mode to check in the events
     """
+
     # Transform file list
     if not isinstance(file_list, list) and not isinstance(file_list, dict):
         raise ValueError('Value error. It can only be list or dict')
@@ -2203,27 +2420,51 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         create_file(REGULAR, folder, name, content=content)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
+
+    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+
+        if time_travel:
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                              update_position=True,
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
     # Modify previous text files
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event, extra_timeout=2)
+
+    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+
+        if time_travel:
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                              update_position=True,
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
     # Delete previous text files
     for name in file_list:
         delete_file(folder, name)
 
     check_time_travel(time_travel, monitor=log_monitor)
-    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event)
+
+    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
+                                  event_mode=event_mode)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+
+        if time_travel:
+            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
+                              update_position=True,
+                              error_message=f"End of scheduled scan not detected after "
+                              f"{global_parameters.default_timeout} seconds")
 
 
 def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
@@ -2256,6 +2497,16 @@ def detect_initial_scan(file_monitor):
                        error_message='Did not receive expected "File integrity monitoring scan ended" event')
 
 
+def detect_initial_scan_start(file_monitor):
+    """Detect initial scan start when restarting Wazuh.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_detect_scan_start,
+                       error_message='Did not receive expected "File integrity monitoring scan started" event')
+
+
 def detect_realtime_start(file_monitor):
     """Detect realtime engine start when restarting Wazuh.
 
@@ -2275,6 +2526,17 @@ def detect_whodata_start(file_monitor):
     file_monitor.start(timeout=60, callback=callback_real_time_whodata_started,
                        error_message='Did not receive expected'
                                      '"File integrity monitoring real-time Whodata engine started" event')
+
+
+def get_scan_timestamp(file_monitor):
+    """Get the timestamp for the for the end of a scan
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    timestamp = file_monitor.start(timeout=60, callback=callback_get_scan_timestap,
+                       error_message='Did not receive expected "File integrity monitoring scan ended" event').result()
+    return timestamp
 
 
 def wait_for_audit(whodata, monitor):
@@ -2433,3 +2695,18 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return {key: {'whodata': 'yes'}}, metadata
     else:
         return None, None
+
+
+def check_fim_start(file_monitor):
+    """Check if realtime starts, whodata starts or ends the initial FIM scan.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events.
+    """
+    mode = global_parameters.current_configuration['metadata']['fim_mode']
+    if mode == 'realtime':
+        detect_realtime_start(file_monitor)
+    elif mode == 'whodata':
+        detect_whodata_start(file_monitor)
+    else:
+        detect_initial_scan(file_monitor)
