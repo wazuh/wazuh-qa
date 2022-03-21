@@ -17,6 +17,8 @@ AGENT_GROUPS_DEFAULT = 'default'
 
 # Error Messages
 ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
+
 
 
 # Functions
@@ -91,14 +93,16 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
-        assert group_to_check in group_data, f"Didn't find the expected group: {group_to_check} in the agent's group list: {group_data}"
+        assert group_to_check in group_data, f"Didn't find the expected group: {group_to_check} in the agent's group \
+                                               list: {group_data}"
 
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
     for host in hosts_list:
         data = get_agents_in_cluster(host, host_manager)
-        assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data
+        assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data, f"Didn't recieve the agent status: {status} \
+                                                                            in the node's data: {data}"
 
 
 def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
