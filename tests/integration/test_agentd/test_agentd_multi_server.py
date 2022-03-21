@@ -61,6 +61,7 @@ from wazuh_testing.agent import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_P
 
 SERVER_ADDRESS = '127.0.0.1'
 REMOTED_PORTS = [1514, 1516, 1517]
+AUTHD_PORT = 1515
 SERVER_HOSTS = ['testServer1', 'testServer2', 'testServer3']
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
@@ -96,11 +97,11 @@ metadata = [
         },
         'LOG_MONITOR_STR': [
             [  # Stage 1
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
-                f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
                 f'Requesting a key from server: {SERVER_HOSTS[2]}/{SERVER_ADDRESS}'
             ]
         ]
@@ -121,16 +122,16 @@ metadata = [
         },
         'LOG_MONITOR_STR': [
             [  # Stage 1 - Enroll to first server
-                f'Requesting a key from server: {SERVER_HOSTS[0]}',
+                f'Requesting a key from server: {SERVER_HOSTS[0]}/{SERVER_ADDRESS}',
                 f'Valid key received',
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}",
             ],
             [  # Stage 2 - Pass second server and connect to third
-                f'Requesting a key from server: {SERVER_HOSTS[0]}',
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f'Requesting a key from server: {SERVER_HOSTS[1]}/{SERVER_ADDRESS}',
-                f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
+                f'Connected to the server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
                 f"Received message: '#!-agent ack '"
             ]
         ]
@@ -151,16 +152,17 @@ metadata = [
         'LOG_MONITOR_STR': [
             [  # Stage 1 - Enroll and connect to first server
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
+                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}'",
                 f'Valid key received',
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f'Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
             ],
             [
-                # f'Lost connection with manager. Setting lock.',
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f'Connected to the server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
+                #f'Lost connection with manager. Setting lock.',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
+                f'Connected to the server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f"Received message: '#!-agent ack '",
             ]
         ]
@@ -182,16 +184,17 @@ metadata = [
         'LOG_MONITOR_STR': [
             [  # Stage 1 - Enroll and connect to first server
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
+                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}'",
                 f'Valid key received',
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f'Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
                 f"Received message: '#!-agent ack '"
             ],  # Stage 2 - Enroll and connect to second server after failed attempts to connect with server 1
             [
                 f'Server unavailable. Setting lock.',
                 f'Requesting a key from server: {SERVER_HOSTS[0]}',
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f'Connected to the server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
+                f'Connected to the server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
                 f"Received message: '#!-agent ack '",
             ]
         ]
@@ -211,15 +214,15 @@ metadata = [
         },
         'LOG_MONITOR_STR': [
             [
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[0]}",
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}",
             ],
             [
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}",
             ],
             [
-                f'Connected to the server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
+                f"Connected to enrollment service at '[{SERVER_ADDRESS}]:{AUTHD_PORT}'",
                 f"Received message: '#!-agent ack '"
             ]
         ]
@@ -239,18 +242,18 @@ metadata = [
         },
         'LOG_MONITOR_STR': [
             [
-                f'Trying to connect to server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
-                f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}',
+                f"Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}",
                 f"Received message: '#!-agent ack '",
             ],
             [
-                f'Trying to connect to server ({SERVER_HOSTS[1]}/{SERVER_ADDRESS}:{REMOTED_PORTS[1]}',
-                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[1]}",
+                f'Trying to connect to server ([{SERVER_HOSTS[1]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}',
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[1]}",
             ],
             [
-                f'Trying to connect to server ({SERVER_HOSTS[2]}/{SERVER_ADDRESS}:{REMOTED_PORTS[2]}',
-                f"Unable to connect to '{SERVER_ADDRESS}:{REMOTED_PORTS[2]}",
-                f'Connected to the server ({SERVER_HOSTS[0]}/{SERVER_ADDRESS}:{REMOTED_PORTS[0]}',
+                f'Trying to connect to server ([{SERVER_HOSTS[2]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}',
+                f"Unable to connect to '[{SERVER_ADDRESS}]:{REMOTED_PORTS[2]}",
+                f"Connected to the server ([{SERVER_HOSTS[0]}/{SERVER_ADDRESS}]:{REMOTED_PORTS[0]}",
                 f'Server responded. Releasing lock.',
                 f"Received message: '#!-agent ack '"
             ]
@@ -285,6 +288,8 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 authd_server = AuthdSimulator(SERVER_ADDRESS, key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 remoted_servers = []
+
+tcase_timeout = 120
 
 
 # fixtures
@@ -436,10 +441,10 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
         - r'Requesting a key from server'
         - r'Valid key received'
         - r'Trying to connect to server'
-        - r'Connected to the server'
+        - r'Connected to enrollment service'
         - r'Received message'
         - r'Server responded. Releasing lock.'
-        - r'Unable to connect to'
+        - r'Unable to connect to enrollment service at'
 
     tags:
         - simulator
@@ -466,9 +471,9 @@ def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id
 
         for index, log_str in enumerate(get_configuration['metadata']['LOG_MONITOR_STR'][stage]):
             try:
-                log_monitor.start(timeout=120, callback=lambda x: wait_until(x, log_str))
-            except TimeoutError as err:
-                assert False, f'Expected message {log_str} never arrived! Stage: {stage}, message number: {index}'
+                log_monitor.start(timeout=tcase_timeout, callback=lambda x: wait_until(x, log_str))
+            except TimeoutError:
+                assert False, f"Expected message '{log_str}' never arrived! Stage: {stage+1}, message number: {index+1}"
 
         for i in range(0, get_configuration['metadata']['SIMULATOR_NUMBER']):
             # Clean after every stage
