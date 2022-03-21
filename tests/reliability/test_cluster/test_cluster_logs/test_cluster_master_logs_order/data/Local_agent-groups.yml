@@ -4,6 +4,11 @@
   tag: 'Local agent-groups root'
 
 # Common logs
+- log_id: log4
+  parent: root
+  tag: 'Sleeping.*before starting the agent-groups task, waiting for the workers connection.*'
+
+# Common logs
 - log_id: log0
   parent: root
   tag: 'Starting.*'

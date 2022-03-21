@@ -14,15 +14,18 @@
 # No need to synchronize.
 - log_id: log2
   parent: log1
-  tag: 'Obtained [1-9][0-9]* chunks of data in.*'
+  tag: 'Obtained 0 chunks of data in.*'
 - log_id: log3
   parent: log2
-  tag: 'There is no agent information that needs to be synchronized in the local database. Skipping...*'
+  tag: 'Finished in.*Updated 0 chunks.*'
 
 # Chunks sent.
 - log_id: log4
-  parent: log2
-  tag: 'Sending chunks.*'
+  parent: log1
+  tag: 'Obtained.*chunks of data in.*'
 - log_id: log5
   parent: log4
-  tag: 'Finished in .* \(.* chunks updated\).*'
+  tag: 'Sending chunks.*'
+- log_id: log6
+  parent: log5
+  tag: 'Finished in.*Updated.*chunks.*'

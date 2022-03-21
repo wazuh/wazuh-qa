@@ -27,10 +27,10 @@ wazuh-master:
   - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Sending chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Finished in.*'
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Finished in.*Updated.*chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Finished in.*'
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Finished in.*Updated.*chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
 

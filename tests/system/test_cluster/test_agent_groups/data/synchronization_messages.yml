@@ -9,6 +9,6 @@ wazuh-worker1:
   - regex: '.*Agent-groups sync.*Obtained.*chunks of data in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 90
-  - regex: '.*Agent-groups sync.*There is no agent information that needs to be synchronized in the local database. Skipping.*'
+  - regex: '.*Agent-groups sync.*Finished in.*Updated.*chunks.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 90

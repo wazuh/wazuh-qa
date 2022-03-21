@@ -11,7 +11,7 @@
 # No chunks sent.
 - log_id: log1
   parent: log0
-  tag: 'Finished in.*chunks sent.*'
+  tag: 'Finished in.*Updated 1 chunks.*'
 
 # Chunks sent.
 - log_id: log2

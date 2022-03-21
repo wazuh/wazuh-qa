@@ -11,7 +11,8 @@ from yaml import safe_load
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-logs_format = re.compile(r'(.*) \[(Local agent-groups|Agent-groups full DB|Agent-groups send)] (.*)')
+logs_format = re.compile(
+    r'(.*) \[(Local agent-groups|Agent-groups send full|Agent-groups send)] (.*)')
 incorrect_order = []
 
 

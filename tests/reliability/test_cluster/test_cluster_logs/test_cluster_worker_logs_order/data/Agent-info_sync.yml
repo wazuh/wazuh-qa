@@ -10,21 +10,13 @@
 - log_id: log1
   parent: log0
   tag: 'Starting.*'
-
-# No chunks obtained.
 - log_id: log2
   parent: log1
-  tag: 'Obtained 0 chunks of data in.*'
-- log_id: log3
-  parent: log2
-  tag: 'Finished in .* \(.* chunks sent\).*'
+  tag: 'Obtained.*chunks of data in.*'
 
 # Chunks obtained.
-- log_id: log4
-  parent: log1
-  tag: 'Obtained [1-9][0-9]* chunks of data in.*'
 - log_id: log5
-  parent: log4
+  parent: log2
   tag: 'Sending chunks.*'
 - log_id: log6
   parent: log5
