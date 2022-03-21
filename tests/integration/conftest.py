@@ -849,6 +849,7 @@ def daemons_handler_configuration(get_configuration, request):
     stop_daemons(daemons_handler_configuration['configuration'])
 
 
+@pytest.fixtureÇ(scope='function')
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
 
