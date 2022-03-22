@@ -83,10 +83,10 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     parameters:
         - agent_target:
             type: string
-            brief: name of the host where the agent will register
+            brief: name of the host where the agent will register.
         - status_guess_agent_group
             type: string
-            brief: determine if the group guessing mechanism is enabled or disabled
+            brief: determine if the group guessing mechanism is enabled or disabled.
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
