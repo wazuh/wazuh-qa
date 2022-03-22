@@ -60,7 +60,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, create_registry, generate_params, \
     create_file, modify_registry_value, REGULAR, callback_detect_event, callback_real_time_whodata_started, \
-    KEY_WOW64_64KEY, registry_parser, REG_SZ
+    KEY_WOW64_64KEY, registry_parser, REG_SZ, callback_detect_synchronization
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -114,14 +114,8 @@ def extra_configuration_before_yield():
             create_registry(registry_parser[key], os.path.join(key, 'SOFTWARE', reg), KEY_WOW64_64KEY)
 
 
-def callback_integrity_synchronization_check(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
-        return line
-    return None
-
-
 def callback_integrity_or_whodata(line):
-    if callback_integrity_synchronization_check(line):
+    if callback_detect_synchronization(line):
         return 1
     elif callback_real_time_whodata_started(line):
         return 2
@@ -200,7 +194,7 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     else:
         # Check the integrity scan has begun
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
-                                callback=callback_integrity_synchronization_check,
+                                callback=callback_detect_synchronization,
                                 error_message='Did not receive expected '
                                               '"Initializing FIM Integrity Synchronization check" event')
 

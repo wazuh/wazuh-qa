@@ -1119,7 +1119,7 @@ def callback_detect_integrity_state(line):
 
 
 def callback_detect_synchronization(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
+    if 'Executing FIM sync' in line:
         return line
     return None
 
