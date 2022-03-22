@@ -98,7 +98,6 @@ export const updateExpiryValueCookies =  () => {
     })
   } catch (e) {
   }
-  
 }
 
 export const getMyCookie = () => {
