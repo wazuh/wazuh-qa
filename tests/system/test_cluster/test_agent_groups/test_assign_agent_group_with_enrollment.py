@@ -73,9 +73,9 @@ enrollment_group = """
 @pytest.mark.parametrize("agent_target", ["wazuh-worker1"])
 def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
-    description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
-                 Check that when an agent pointing to a master/worker node is registered, and when
-                 it's assigned to a new group using API the change is sync with the cluster.
+    description: Check race condition when an agent enrollment process with a group connects to the worker,
+                 when worker no receive information about the group and when data of groups is receive,
+                 the group is change.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
@@ -106,18 +106,22 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         host_manager.add_block_to_file(host=host, path=f"{WAZUH_PATH}/framework/wazuh/core/cluster/cluster.json",
                                        after='"process_pool_size": 2,', before='"timeout_extra_valid": 40,', replace=replace)
 
+    restart_cluster(test_infra_managers, host_manager)
+    time.sleep(10)
+
     # Create new group
     host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
 
     worker_ip = host_manager.run_command(agent_target, f'hostname -i')
     
-    # Modify ossec.conf
+    # Modify ossec.conf in agent
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
                                    after="</crypto_method>", before="</client>", replace=enrollment_group)
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
                                    after="<address>", before="</address>", replace=worker_ip)
                      
     restart_cluster(test_infra_agents, host_manager)
+    time.sleep(10)
     agent_id = get_id_from_agent(test_infra_agents[0], host_manager)
 
     # Check that agent has client key file
@@ -128,7 +132,7 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         
         # add: wait sync agent groups
 
-        # Check that agent has group set to dafault and then override group info
+        # Check that agent has group set to default and then override group info
         check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
 
     finally:
