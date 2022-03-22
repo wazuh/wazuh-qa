@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: configuration
+
+targets:
     - agent
     - manager
 
@@ -39,26 +39,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -69,11 +56,12 @@ tags:
 '''
 import os
 import sys
+from time import sleep
 import pytest
-import wazuh_testing.api as api
-from wazuh_testing.tools.services import get_service
+
+from wazuh_testing import api
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import get_process_cmd, check_if_process_is_running
+from wazuh_testing.tools.services import check_if_process_is_running, get_service
 
 
 # Marks
@@ -83,6 +71,7 @@ pytestmark = pytest.mark.tier(level=0)
 no_restart_windows_after_configuration_set = True
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+logcollector_start_up_timeout = 10
 
 wazuh_component = get_service()
 
@@ -144,6 +133,8 @@ def test_configuration_exclude(get_configuration, configure_environment, file_mo
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture
@@ -174,9 +165,10 @@ def test_configuration_exclude(get_configuration, configure_environment, file_mo
     if wazuh_component == 'wazuh-manager':
         api.wait_until_api_ready()
         api.compare_config_api_response([cfg], 'localfile')
-
     else:
-        if sys.platform == 'win32':
-            assert check_if_process_is_running('wazuh-agent.exe') == True
-        else:
-            assert check_if_process_is_running('wazuh-logcollector')
+        sleep(logcollector_start_up_timeout)
+
+    if sys.platform == 'win32':
+        assert check_if_process_is_running('wazuh-agent.exe')
+    else:
+        assert check_if_process_is_running('wazuh-logcollector')

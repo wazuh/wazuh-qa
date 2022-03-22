@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -10,12 +10,12 @@ brief: Active responses perform various countermeasures to address active
        criteria are met. These tests will check if an active response command is sent
        correctly to the Wazuh agent by `wazuh-remoted` daemon.
 
-tier: 1
-
-modules:
+components:
     - remoted
 
-components:
+suite: active_response
+
+targets:
     - manager
 
 daemons:
@@ -31,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/remote.html
@@ -113,6 +105,8 @@ def test_active_response_ar_sending(get_configuration, configure_environment, re
     
     wazuh_min_version: 4.2.0
     
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture

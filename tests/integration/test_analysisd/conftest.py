@@ -9,10 +9,9 @@ import pytest
 
 from wazuh_testing.tools import (ALERT_FILE_PATH, LOG_FILE_PATH,
                                  WAZUH_UNIX_USER, WAZUH_UNIX_GROUP,
-                                 CUSTOM_RULES_PATH)
+                                 CUSTOM_RULES_PATH, ANALYSISD_DAEMON)
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.services import control_service
-from wazuh_testing.mocking import create_mocked_agent, delete_mocked_agent
+from wazuh_testing.tools.services import control_service, check_daemon_status
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
@@ -68,30 +67,14 @@ def configure_custom_rules(request, get_configuration):
 
 @pytest.fixture(scope='module')
 def restart_analysisd():
-    """wazuh-analysisd restart and log truncation"""
-    required_logtest_daemons = ['wazuh-analysisd']
+    """Restart analysisd and truncate logs."""
 
     truncate_file(ALERT_FILE_PATH)
     truncate_file(LOG_FILE_PATH)
 
-    for daemon in required_logtest_daemons:
-        control_service('restart', daemon=daemon)
+    control_service('restart', daemon=ANALYSISD_DAEMON)
+    check_daemon_status(running_condition=True, target_daemon=ANALYSISD_DAEMON)
 
     yield
 
-    for daemon in required_logtest_daemons:
-        control_service('stop', daemon=daemon)
-
-
-@pytest.fixture(scope='module')
-def mock_agent():
-    """Fixture to create a mocked agent in wazuh databases"""
-    control_service('stop', daemon='wazuh-db')
-    agent_id = create_mocked_agent(name="mocked_agent")
-    control_service('start', daemon='wazuh-db')
-
-    yield agent_id
-
-    control_service('stop', daemon='wazuh-db')
-    delete_mocked_agent(agent_id)
-    control_service('start', daemon='wazuh-db')
+    control_service('stop', daemon=ANALYSISD_DAEMON)

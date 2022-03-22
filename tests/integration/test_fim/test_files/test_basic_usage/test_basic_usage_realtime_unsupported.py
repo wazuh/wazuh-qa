@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
 
 daemons:
@@ -30,6 +30,7 @@ os_platform:
 
 os_version:
     - macOS Catalina
+    - macOS Server
     - Solaris 10
     - Solaris 11
 
@@ -105,6 +106,8 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
                  generated with 'scheduled' mode and not 'realtime' as it is set in the configuration.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

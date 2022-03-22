@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: These tests will check if the 'wazuh-syscheckd' and 'auditd' daemons work
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_audit
+
+targets:
     - agent
     - manager
 
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://man7.org/linux/man-pages/man8/auditd.8.html
@@ -108,6 +100,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -120,6 +113,8 @@ def test_audit_health_check(tags_to_apply, get_configuration,
                  verifying that the proper FIM event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -147,7 +142,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
         - r'Whodata health-check: Success.'
 
     tags:
-        - who-data
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -156,6 +151,7 @@ def test_audit_health_check(tags_to_apply, get_configuration,
                             error_message='Health check failed')
 
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -168,6 +164,8 @@ def test_added_rules(tags_to_apply, get_configuration,
                  directory is added verifying that the proper FIM event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -195,8 +193,8 @@ def test_added_rules(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -212,6 +210,7 @@ def test_added_rules(tags_to_apply, get_configuration,
     assert testdir3 in events, f'{testdir3} not detected in scan'
 
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -226,6 +225,8 @@ def test_readded_rules(tags_to_apply, get_configuration,
                  the proper FIM event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -253,8 +254,8 @@ def test_readded_rules(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -276,7 +277,7 @@ def test_readded_rules(tags_to_apply, get_configuration,
 
         assert dir_ in events, f'{dir_} not in {events}'
 
-
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -290,6 +291,8 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
                  'load rule' events to be generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -319,8 +322,8 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - audit-rules
-        - who-data
+        - audit_rules
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -345,7 +348,7 @@ def test_readded_rules_on_restart(tags_to_apply, get_configuration,
     assert testdir2 in events, f'{testdir2} not in {events}'
     assert testdir3 in events, f'{testdir3} not in {events}'
 
-
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     ({'config1'})
 ])
@@ -359,6 +362,8 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
                  'realtime', verifying that the proper FIM events are generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -387,7 +392,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
 
     tags:
         - realtime
-        - who-data
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
@@ -412,6 +417,7 @@ def test_move_rules_realtime(tags_to_apply, get_configuration,
     p.wait()
 
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('audit_key, path', [
     ("custom_audit_key", "/testdir1")
 ])
@@ -424,6 +430,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
                  the test will check that the events that are generated with the custom key are processed.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - audit_key:
@@ -454,8 +462,8 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
         - r'Match audit_key' ('key="wazuh_hc"' and 'key="wazuh_fim"' must not appear in the event)
 
     tags:
-        - audit-keys
-        - who-data
+        - audit_keys
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test({audit_key}, get_configuration['tags'])
@@ -483,7 +491,7 @@ def test_audit_key(audit_key, path, get_configuration, configure_environment, re
     # Remove watch rule
     os.system("auditctl -W " + path + " -p wa -k " + audit_key)
 
-
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply, should_restart', [
     ({'audit_key'}, True),
     ({'restart_audit_false'}, False)
@@ -495,6 +503,8 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
                  and finally, it checks if the deleted plugin is created again.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -529,8 +539,8 @@ def test_restart_audit(tags_to_apply, should_restart, get_configuration, configu
         - The creation time of the 'auditd' daemon process.
 
     tags:
-        - audit-keys
-        - who-data
+        - audit_keys
+        - who_data
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])

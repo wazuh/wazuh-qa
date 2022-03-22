@@ -1,30 +1,24 @@
 '''
-copyright:
-    Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
-    Created by Wazuh, Inc. <info@wazuh.com>.
+           Created by Wazuh, Inc. <info@wazuh.com>.
 
-    This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-type:
-    integration
+type: integration
 
-brief:
-    These tests will check if the Syscollector events, which are processed by
-    the `wazuh-analysisd` daemon, generates appropriate alerts based on the
-    information contained in the delta.
+brief: These tests will check if the Syscollector events, which are processed by
+       the `wazuh-analysisd` daemon, generates appropriate alerts based on the
+       information contained in the delta.
 
-tier:
-    0
-
-modules:
-    - analysisd
 
 components:
-    - manager
+    - analysisd
 
-path:
-    tests/integration/test_analysisd/test_syscollector/test_syscollector_events.py
+suite: syscollector
+
+targets:
+    - manager
 
 daemons:
     - wazuh-analysisd
@@ -38,30 +32,21 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html#using-syscollector-information-to-trigger-alerts
 '''
-import json
 import os
-
-import pytest
 import yaml
+import pytest
 
 from wazuh_testing.tools import (ANALYSISD_QUEUE_SOCKET_PATH, ALERT_FILE_PATH)
 from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollector_alert
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -88,23 +73,24 @@ def get_configuration(request):
 
 
 # Tests
+@pytest.mark.skip(reason='Temporarily disabled until merge this PR https://github.com/wazuh/wazuh/pull/10843')
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
-def test_syscollector_events(test_case, get_configuration, mock_agent, configure_custom_rules, restart_analysisd,
+def test_syscollector_events(test_case, get_configuration, mock_agent_module, configure_custom_rules, restart_analysisd,
                              wait_for_analysisd_startup, connect_to_sockets_function, file_monitoring):
     '''
-    description:
-        Check if Analysisd handle Syscollector deltas properly by generating alerts.
+    description: Check if Analysisd handle Syscollector deltas properly by generating alerts.
 
-    wazuh_min_version:
-        4.4.0
+    wazuh_min_version: 4.4.0
+
+    tier: 2
 
     parameters:
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
-        - mock_agent:
+        - mock_agent_module:
             type: fixture
             brief: Create mock agent and get agent_id
         - configure_custom_rules:
@@ -129,7 +115,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
     input_description:
         Input dataset (defined as event_header + event_payload in syscollector.yaml)
         cover, in most of the cases, INSERTED, MODIFIED and DELETED deltas
-        for each of the available scan: osinfo, hwinfo, processes, packages, network_interface,
+        for each of the available scan; osinfo, hwinfo, processes, packages, network_interface,
         network_address, network_protocol, ports and hotfixes.
 
     expected_output:
@@ -140,7 +126,7 @@ def test_syscollector_events(test_case, get_configuration, mock_agent, configure
     '''
 
     # Get mock agent_id to create syscollector header
-    agent_id = mock_agent
+    agent_id = mock_agent_module
     event_header = f"d:[{agent_id}] {test_case['event_header']}"
 
     for stage in test_case['test_case']:
