@@ -13,5 +13,5 @@ When('The user navigates to decoders', () => {
   clickElement(managementButton);
   elementIsVisible(decodersLink);
   clickElement(decodersLink);
-  cy.wait(5000);
+  validateURLIncludes('/manager/?tab=decoders');
 });
