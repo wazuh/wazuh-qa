@@ -1,0 +1,120 @@
+[
+  {
+    "name": "currentApi",
+    "value": "%257B%2522name%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522id%2522%3A%2522default%2522%257D",
+    "path": "/app/wazuh/",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675352981,
+    "domain": "localhost"
+  },
+  {
+    "name": "currentPattern",
+    "value": "wazuh-alerts-*",
+    "path": "/app/wazuh/",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675352981,
+    "domain": "localhost"
+  },
+  {
+    "name": "clusterInfo",
+    "value": "%257B%2522status%2522%3A%2522enabled%2522%2C%2522manager%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522node%2522%3A%2522master-node%2522%2C%2522cluster%2522%3A%2522wazuh%2522%257D",
+    "path": "/app/wazuh/",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675352995,
+    "domain": "localhost"
+  },
+  {
+    "name": "currentApi",
+    "value": "%257B%2522name%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522id%2522%3A%2522default%2522%257D",
+    "path": "/app/wazuh",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675353002,
+    "domain": "localhost"
+  },
+  {
+    "name": "currentPattern",
+    "value": "wazuh-alerts-*",
+    "path": "/app/wazuh",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675353004,
+    "domain": "localhost"
+  },
+  {
+    "name": "clusterInfo",
+    "value": "%257B%2522status%2522%3A%2522enabled%2522%2C%2522manager%2522%3A%2522wazuh-manager-master-4.3-7.10.2%2522%2C%2522node%2522%3A%2522master-node%2522%2C%2522cluster%2522%3A%2522wazuh%2522%257D",
+    "path": "/app/wazuh",
+    "secure": false,
+    "httpOnly": false,
+    "expiry": 1675353004,
+    "domain": "localhost"
+  },
+  {
+    "name": "appName",
+    "value": "wazuh",
+    "path": "/app/wazuh/",
+    "secure": false,
+    "httpOnly": false,
+    "domain": "localhost"
+  },
+  {
+    "name": "patternSelector",
+    "value": "true",
+    "path": "/app/wazuh/",
+    "secure": false,
+    "httpOnly": false,
+    "domain": "localhost"
+  },
+  {
+    "name": "appName",
+    "value": "wazuh",
+    "path": "/app/wazuh",
+    "secure": false,
+    "httpOnly": false,
+    "domain": "localhost"
+  },
+  {
+    "name": "patternSelector",
+    "value": "true",
+    "path": "/app/wazuh",
+    "secure": false,
+    "httpOnly": false,
+    "domain": "localhost"
+  },
+  {
+    "name": "sid",
+    "value": "Fe26.2**645e4d2c50560693f82cb45d04840bd4a4c54cfc7cd009008fcfde039514eb9a*rvGdljL1sXDfX0pCNUsDtQ*iv__lwPoerDb-Tw4dOAtNi2RmC0Z4JMlVIeBh7Tw4zBI4JJKgX762OfDHH6tC4KbCqIqoP6R1wUaUHp8C7619zir31imYeRjN1KIB3528MmHm_Y5iWK_Y_OdgW_tfOaJ2BImaHstOvSU814DJh6QyNu0l6Qt7Rkh4BT0gC-2Ilk4Gy8qWdD_tTNpswvTvmybclNkYokQbXQjSxBJMVUbkgMVpGwLl8-gIplJuyPhDQo**25faab7be23a8b16040320beaf70955dda208ba10ca5fee33af6eecd8cf00b02*TfVbe8FLoQjVoawbblXdaiXAvn9bXiEzBh1HhIBgJYg",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "domain": "localhost"
+  },
+  {
+    "name": "wz-user",
+    "value": "elastic",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "domain": "localhost"
+  },
+  {
+    "name": "wz-api",
+    "value": "default",
+    "path": "/",
+    "secure": false,
+    "httpOnly": true,
+    "domain": "localhost"
+  },
+  {
+    "name": "wz-token",
+    "value": "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3YXp1aCIsImF1ZCI6IldhenVoIEFQSSBSRVNUIiwibmJmIjoxNjQ3NTMwODA2LCJleHAiOjE2NDc1MzE3MDYsInN1YiI6IndhenVoLXd1aSIsInJ1bl9hcyI6ZmFsc2UsInJiYWNfcm9sZXMiOlsxXSwicmJhY19tb2RlIjoid2hpdGUifQ.AcAjfz6OVAkHN5obg6KltEzGnNjc7HFd-OgFrnNLymdVKgig_xINivFyRytIAKNEKKOHr0IxNlrm-LumvbUToBGRAPkHMocWI5UsbBkH511bmMCU-CXKHgsDJ3YTpNtVDAkWk4rLPDPB6ZuX2vNWZqjWaDpm7lamIeCtXCiSAW7JiqHR",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "domain": "localhost"
+  }
+]

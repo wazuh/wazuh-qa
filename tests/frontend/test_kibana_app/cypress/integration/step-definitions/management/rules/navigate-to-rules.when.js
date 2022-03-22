@@ -1,5 +1,5 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
-import { clickElement, getElement, validateURLIncludes } from '../../../utils/driver';
+import { clickElement, elementIsVisible, validateURLIncludes } from '../../../utils/driver';
 import {
   managementButton,
   wazuhMenuButton,
@@ -7,8 +7,11 @@ import {
 } from '../../../pageobjects/wazuh-menu/wazuh-menu.page';
 
 When('The user navigates to rules', () => {
+  elementIsVisible(wazuhMenuButton);
   clickElement(wazuhMenuButton);
+  elementIsVisible(managementButton);
   clickElement(managementButton);
+  elementIsVisible(rulesLink);
   clickElement(rulesLink);
-  cy.wait(3000);
+  validateURLIncludes('/manager/?tab=rules');
 });
