@@ -100,11 +100,11 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    replace = '\n' + '            "sync_agent_groups": 30,\n            '
-    # Add modify file wazuh/framework/wazuh/core/cluster/cluster.json - "sync_agent_groups" 
+    replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 3000,\n            '
+    # Add modify agent_group_start_delay 
     for host in test_infra_managers:
-        host_manager.add_block_to_file(host=host, path=f"{WAZUH_PATH}/framework/wazuh/core/cluster/cluster.json",
-                                       after='"process_pool_size": 2,', before='"timeout_extra_valid": 40,', replace=replace)
+        host_manager.add_block_to_file(host=host, path=f"{WAZUH_PATH}/framework/python/lib/python3.9/site-packages/wazuh-4.4.0-py3.9.egg/wazuh/core/cluster/cluster.json",
+                                       after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,', replace=replace)
 
     restart_cluster(test_infra_managers, host_manager)
     time.sleep(10)
