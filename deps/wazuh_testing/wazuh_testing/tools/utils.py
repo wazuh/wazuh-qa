@@ -144,6 +144,8 @@ def lower_case_key_dictionary_array(array_dict):
         List: List of dictionaries with lowercase keys.
     """
     return [{str(key).lower(): value for key, value in element.items()} for element in array_dict]
+
+
 def get_host_name():
     """
     Gets the system host name.

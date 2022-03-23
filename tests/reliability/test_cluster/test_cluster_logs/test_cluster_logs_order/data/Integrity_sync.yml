@@ -1,0 +1,99 @@
+# Root
+- log_id: root
+  parent: null
+  tag: 'Integrity sync root'
+
+# Common logs
+- log_id: log0
+  parent: root
+  tag: 'Starting.*'
+
+# Sync anything except extra-valid files.
+- log_id: log10
+  parent: log0
+  tag: 'Files to create: [0-9]* \| Files to update: [0-9]* \| Files to delete: [0-9]* \| Files to send: 0.*'
+- log_id: log11
+  parent: log10
+  tag: 'Worker does not meet integrity checks. Actions required.*'
+- log_id: log12
+  parent: log11
+  tag: 'Updating local files: Start.*'
+- log_id: log13
+  parent: log12
+  tag: 'Received [0-9]* missing files to update from master.'
+- log_id: log14
+  parent: log13
+  tag: 'Received [0-9]* shared files to update from master.*'
+- log_id: log15
+  parent: log14
+  tag: 'Updating local files: End.'
+- log_id: log16
+  parent: log15
+  tag: 'Finished in .*'
+
+# Sync only extra-valid files.
+- log_id: log30
+  parent: log0
+  tag: 'Files to create: 0 \| Files to update: 0 \| Files to delete: 0 \| Files to send: [1-9][0-9]*.*'
+- log_id: log31
+  parent: log30
+  tag: 'Master requires some worker files.*'
+- log_id: log32
+  parent: log31
+  tag: 'Starting sending extra valid files to master.*'
+- log_id: log33
+  parent: log32
+  tag: "Compressing files and 'files_metadata.json' of [0-9]* files.*"
+- log_id: log34
+  parent: log33
+  tag: 'Sending zip file to master.*'
+- log_id: log35
+  parent: log34
+  tag: 'Zip file sent to master.*'
+- log_id: log36
+  parent: log35
+  tag: 'Finished sending extra valid files in.*'
+- log_id: log37
+  parent: log36
+  tag: 'Finished in .*'
+
+# Sync extra-valid and any other files.
+- log_id: log50
+  parent: log0
+  tag: 'Files to create: [0-9]* \| Files to update: [0-9]* \| Files to delete: [0-9]* \| Files to send: [1-9][0-9]*.*'
+- log_id: log51
+  parent: log50
+  tag: 'Worker does not meet integrity checks. Actions required.*'
+- log_id: log52
+  parent: log51
+  tag: 'Updating local files: Start.*'
+- log_id: log53
+  parent: log52
+  tag: 'Received [0-9]* missing files to update from master.'
+- log_id: log54
+  parent: log53
+  tag: 'Received [0-9]* shared files to update from master.*'
+- log_id: log55
+  parent: log54
+  tag: 'Updating local files: End.'
+- log_id: log56
+  parent: log55
+  tag: 'Master requires some worker files.*'
+- log_id: log57
+  parent: log56
+  tag: 'Starting sending extra valid files to master.*'
+- log_id: log58
+  parent: log57
+  tag: "Compressing files and 'files_metadata.json' of [0-9]* files.*"
+- log_id: log59
+  parent: log58
+  tag: 'Sending zip file to master.*'
+- log_id: log60
+  parent: log59
+  tag: 'Zip file sent to master.*'
+- log_id: log61
+  parent: log60
+  tag: 'Finished sending extra valid files in.*'
+- log_id: log62
+  parent: log61
+  tag: 'Finished in .*'
