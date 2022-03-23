@@ -54,25 +54,38 @@ def get_report_files():
 
 
 def pytest_collection_modifyitems(session, config, items):
-    selected = []
-    deselected = []
+    selected_tests = []
+    deselected_tests = []
+
     for item in items:
+        supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
+        plat = sys.platform
+
+        selected = True
+        if supported_platforms and plat not in supported_platforms:
+            selected = False
+
+        host_type = 'agent' if 'agent' in get_service() else 'server'
+        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+        if supported_types and host_type not in supported_types:
+            selected = False
+        # Consider only first mark
         levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-        tiers = item.config.getoption("--tier")
-        if tiers is not None and levels[0] not in tiers:
-            deselected.append(item)
-            continue
-        elif item.config.getoption("--tier-minimum") > levels[0]:
-            deselected.append(item)
-            continue
-        elif item.config.getoption("--tier-maximum") < levels[0]:
-            deselected.append(item)
-
+        if levels and len(levels) > 0:
+            tiers = item.config.getoption("--tier")
+            if tiers is not None and levels[0] not in tiers:
+                selected = False
+            elif item.config.getoption("--tier-minimum") > levels[0]:
+                selected = False
+            elif item.config.getoption("--tier-maximum") < levels[0]:
+                selected = False
+        if selected:
+            selected_tests.append(item)
         else:
-            selected.append(item)
+            deselected_tests.append(item)
 
-    config.hook.pytest_deselected(items=deselected)
-    items[:] = selected
+    config.hook.pytest_deselected(items=deselected_tests)
+    items[:] = selected_tests
 
 
 @pytest.fixture(scope='module')
