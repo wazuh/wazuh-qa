@@ -27,6 +27,11 @@ export const fillField = (selector, text) => {
   return this;
 };
 
+export const fillSelectorField = (selector, text) => {
+  getElement(selector).type(text);
+  return this;
+};
+
 export const getElement = (selector) => {
   return cy.get(selector);
 };
@@ -106,4 +111,14 @@ export const getMyCookie = () => {
     return cookie = c;
   })
 }
-
+// Function that's return the selector by xpath
+export const xPathSelector = (selector) => {
+  return cy.xpath(selector);
+}
+export const clickXpathElement = (selector) => {
+  xPathSelector(selector).click();
+  return this;
+};
+export const elementXpathIsVisible = (selector) => {
+  return xPathSelector(selector).should('exist').should('be.visible');
+};
