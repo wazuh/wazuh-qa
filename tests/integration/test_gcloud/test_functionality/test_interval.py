@@ -81,7 +81,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-modulesd']}}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -109,7 +109,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs at the periods set in the configuration
                  by the 'interval' tag. For this purpose, the test will use different intervals and check if
@@ -127,9 +127,12 @@ def test_interval(get_configuration, configure_environment, reset_ossec_log, dae
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - restart_wazuh:
+        - reset_ossec_log:
             type: fixture
             brief: Reset the 'ossec.log' file and start a new monitor.
+        - daemons_handler_module:
+            type: fixture
+            brief: Handler of Wazuh daemons.
         - wait_for_gcp_start:
             type: fixture
             brief: Wait for the 'gpc-pubsub' module to start.

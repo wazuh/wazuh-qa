@@ -57,7 +57,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
 
-daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-logcollector']}}
 
 macos_log_messages = [
     {
@@ -84,9 +84,9 @@ def get_connection_configuration():
 
 
 @pytest.mark.parametrize('macos_message', macos_log_messages)
-def test_macos_multiline_values(configure_local_internal_options_module, restart_logcollector_required_daemons_package, 
-                                get_configuration, configure_environment, macos_message, file_monitoring, 
-                                daemons_handler):
+def test_macos_multiline_values(configure_local_internal_options_module, restart_logcollector_required_daemons_package,
+                                get_configuration, configure_environment, macos_message, file_monitoring,
+                                daemons_handler_module):
     '''
     description: Check if the 'wazuh-logcollector' daemon collects multiline events from the macOS ULS
                  (unified logging system). For this purpose, the test will configure a 'localfile' section
@@ -115,7 +115,7 @@ def test_macos_multiline_values(configure_local_internal_options_module, restart
         - macos_message:
             type: dict
             brief: Dictionary with the testing macOS ULS event.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
         - file_monitoring:
@@ -146,7 +146,7 @@ def test_macos_multiline_values(configure_local_internal_options_module, restart
     multiline_message = macos_message['message'].split('\n')[:-1]
     multiline_logger = f"\"$(printf \"{macos_message['message']}\")\""
     logcollector.generate_macos_logger_log(multiline_logger)
-    
+
     for line in multiline_message:
         log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
                           callback=logcollector.callback_read_macos_message(line),

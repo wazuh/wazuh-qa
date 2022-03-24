@@ -48,7 +48,7 @@ parameters, metadata = fim.generate_params(extra_params=conf_params, modes=monit
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 
 registry_list = [(key, sub_key_1, fim.KEY_WOW64_64KEY), (key, sub_key_2, fim.KEY_WOW64_64KEY)]
-daemons_handler_configuration = {'daemons': ['wazuh-syscheckd']}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-syscheckd']}}
 local_internal_options = {'syscheck.debug': '2', 'monitord.rotate_log': '0'}
 
 
@@ -64,7 +64,7 @@ def get_configuration(request):
 @pytest.mark.skipif(get_version() != 'v4.2.3', reason="This test fails by wazuh/wazuh#6797, It was fixed on v4.2.3")
 @pytest.mark.parametrize('key, subkey1, subkey2, arch', [(key, sub_key_1, sub_key_2, fim.KEY_WOW64_32KEY)])
 def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuration, configure_environment,
-                                   file_monitoring, configure_local_internal_options_module, daemons_handler,
+                                   file_monitoring, configure_local_internal_options_module, daemons_handler_module,
                                    wait_for_fim_start):
     """Two registries with capital differences must trigger just one modify the event.
 
@@ -79,7 +79,7 @@ def test_registry_duplicated_entry(key, subkey1, subkey2, arch, get_configuratio
         arch (str): Value holding the system architecture for registries.
         get_configuration (fixture): Gets the current configuration of the test.
         configure_environment (fixture): Configure the environment for the execution of the test.
-        restart_syscheckd (fixture): Restarts syscheck.
+        daemons_handler_module (fixture): Handler of Wazuh daemons.
         wait_for_fim_start (fixture): Waits until the first FIM scan is completed.
 
     Raises:

@@ -71,7 +71,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 api_registration_requets_file = os.path.join(test_data_path, 'api_agent_registration_cases.yaml')
-daemons_handler_configuration = {'all_daemons': True}
+daemons_handler_configuration = {'module': {'all_daemons': True}}
 api_registration_requests = read_yaml(api_registration_requets_file)
 api_registration_requests_ids = [tcase['name'].replace(' ', '-').lower() for tcase in api_registration_requests]
 client_keys_update_timeout = 1

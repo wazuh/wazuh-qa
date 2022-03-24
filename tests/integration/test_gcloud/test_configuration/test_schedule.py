@@ -75,7 +75,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-modulesd']}}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -97,7 +97,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_schedule(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
+def test_schedule(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module):
     '''
     description: Check if the 'gcp-pubsub' module is executed in the periods specified in the 'interval' tag.
                  For this purpose, the test will use different values for the 'interval' tag (a positive number
@@ -116,9 +116,12 @@ def test_schedule(get_configuration, configure_environment, reset_ossec_log, dae
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - restart_wazuh:
+        - reset_ossec_log:
             type: fixture
             brief: Reset the 'ossec.log' file and start a new monitor.
+        - daemons_handler_module:
+            type: fixture
+            brief: Handler of Wazuh daemons.
 
     assertions:
         - Verify that the 'gcp-pubsub' module executes at the periods set in the 'interval' tag.
@@ -138,7 +141,7 @@ def test_schedule(get_configuration, configure_environment, reset_ossec_log, dae
     str_interval = get_configuration['sections'][0]['elements'][3]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     tags_to_apply = get_configuration['tags'][0]
-    
+
     # Warning log must appear in log (cause interval is not compatible with <day/month/week>)
     if (tags_to_apply == 'schedule_day' and 'M' not in str_interval) or \
     (tags_to_apply == 'schedule_wday' and 'w' not in str_interval) or \

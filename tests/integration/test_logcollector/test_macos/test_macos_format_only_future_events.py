@@ -68,7 +68,7 @@ configuration_ids = [f"{x['ONLY_FUTURE_EVENTS']}" for x in parameters]
 
 elapsed_time_macos_log = 10
 
-daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-logcollector']}}
 
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
@@ -99,7 +99,7 @@ def get_connection_configuration():
 
 def test_macos_format_only_future_events(restart_logcollector_required_daemons_package, get_configuration,
                                          configure_environment, configure_local_internal_options_module,
-                                         file_monitoring, daemons_handler):
+                                         file_monitoring, daemons_handler_module):
     """
     description: Check if the 'only-future-events' option is used properly by the 'wazuh-logcollector' when
                  using the macOS unified logging system (ULS) events. For this purpose, the test will configure
@@ -128,7 +128,7 @@ def test_macos_format_only_future_events(restart_logcollector_required_daemons_p
         - configure_local_internal_options_module:
             type: fixture
             brief: Set internal configuration for testing.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
         - file_monitoring:

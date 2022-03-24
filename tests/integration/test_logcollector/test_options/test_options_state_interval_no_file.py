@@ -71,7 +71,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1), pytest.mark.server]
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
 configurations_path = os.path.join(test_data_path, 'wazuh_configuration.yaml')
-daemons_handler_configuration = {'all_daemons': True}
+daemons_handler_configuration = {'module': {'all_daemons': True}}
 
 temp_dir = tempfile.gettempdir()
 

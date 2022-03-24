@@ -52,7 +52,7 @@ from time import sleep
 from os import remove
 if sys.platform != 'win32':
     from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
-    
+
 # Marks
 pytestmark = [pytest.mark.darwin, pytest.mark.tier(level=0)]
 
@@ -66,8 +66,8 @@ parameters = [{'FILE_TO_MONITOR': dummy_file}]
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters)
 
-daemons_handler_configuration = {'daemons': ['wazuh-logcollector'],
-                                 'ignore_errors': False}
+daemons_handler_configuration = {'module': {'daemons': ['wazuh-logcollector'],
+                                 'ignore_errors': False}}
 
 # Time in seconds to update the file_status.json
 file_status_update_time = 4
@@ -98,7 +98,7 @@ def get_configuration(request):
 
 def test_macos_file_status_when_no_macos(restart_logcollector_required_daemons_package, truncate_log_file, handle_files,
                                          delete_file_status_json, configure_local_internal_options_module,
-                                         get_configuration, configure_environment, file_monitoring, daemons_handler):
+                                         get_configuration, configure_environment, file_monitoring, daemons_handler_module):
     '''
     description: Check if the 'wazuh-logcollector' does not store and removes if exists, previous
                  macos-formatted localfile data in the 'file_status.json' file when the macOS localfile
@@ -139,7 +139,7 @@ def test_macos_file_status_when_no_macos(restart_logcollector_required_daemons_p
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
 
