@@ -21,7 +21,7 @@ from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FI
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, start_daemons, stop_daemons
+from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs, daemons_handler
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
@@ -799,11 +799,11 @@ def daemons_handler_function(request):
         logger.error('daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
-    start_daemons(daemons_handler_configuration['function'])
+    daemons_handler(daemons_handler_configuration['function'], 'restart')
 
     yield
 
-    stop_daemons(daemons_handler_configuration['function'])
+    daemons_handler(daemons_handler_configuration['function'], 'stop')
 
 
 @pytest.fixture(scope='module')
@@ -820,11 +820,11 @@ def daemons_handler_module(request):
         logger.error('daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
-    start_daemons(daemons_handler_configuration['module'])
+    daemons_handler(daemons_handler_configuration['module'], 'restart')
 
     yield
 
-    stop_daemons(daemons_handler_configuration['module'])
+    daemons_handler(daemons_handler_configuration['module'], 'stop')
 
 
 @pytest.fixture(scope='module')
@@ -842,11 +842,11 @@ def daemons_handler_configuration(get_configuration, request):
         logger.error('daemons_handler_configuration is not set')
         raise daemon_configuration_not_set
 
-    start_daemons(daemons_handler_configuration['configuration'])
+    daemons_handler(daemons_handler_configuration['configuration'], 'restart')
 
     yield
 
-    stop_daemons(daemons_handler_configuration['configuration'])
+    daemons_handler(daemons_handler_configuration['configuration'], 'stop')
 
 
 @pytest.fixture(scope='function')
