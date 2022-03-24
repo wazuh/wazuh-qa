@@ -78,7 +78,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'server_address_configuration.yaml')
-daemons_handler_configuration = {'module': {'daemons': ['wazuh-agentd'], 'ignore_errors': True}}
+daemons_handler_configuration = {'configuration': {'daemons': ['wazuh-agentd'], 'ignore_errors': True}}
 local_internal_options = {'windows.debug': '2'} if sys.platform == 'win32' else {'agent.debug': '2'}
 monitored_sockets_params = []
 log_monitor_paths = []
@@ -145,7 +145,7 @@ def clean_client_keys(get_configuration):
 def test_agentd_server_address_configuration(configure_local_internal_options_module, clean_client_keys,
                                              get_configuration, configure_environment,
                                              configure_sockets_environment, configure_socket_listener,
-                                             create_certificates, edit_hosts, daemons_handler_module, file_monitoring):
+                                             create_certificates, edit_hosts, daemons_handler_configuration, file_monitoring):
 
     '''
     description: Check the messages produced by the agent when introducing
@@ -166,7 +166,7 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
         - edit_hosts:
             type: fixture
             brief: Edit the hosts file to add custom hostnames for testing.
-        - daemons_handler_module:
+        - daemons_handler_configuration:
             type: fixture
             brief: Handler of Wazuh daemons.
         - file_monitoring:

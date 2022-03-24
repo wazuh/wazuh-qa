@@ -63,7 +63,7 @@ configurations_path = join(test_data_path, 'wazuh_macos_file_status_predicate.ya
 parameters = [{'ONLY_FUTURE_EVENTS': 'yes'}, {'ONLY_FUTURE_EVENTS': 'no'}]
 metadata = [{'only-future-events': 'yes'}, {'only-future-events': 'no'}]
 
-daemons_handler_configuration = {'module': {'daemons': ['wazuh-logcollector'], 'ignore_errors': False}}
+daemons_handler_configuration = {'configuration': {'daemons': ['wazuh-logcollector'], 'ignore_errors': False}}
 
 # Configuration data
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -86,7 +86,7 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
                                      delete_file_status_json,
                                      configure_local_internal_options_module,
                                      get_configuration, configure_environment,
-                                     file_monitoring, daemons_handler_module):
+                                     file_monitoring, daemons_handler_configuration):
     """
     description: Check if the 'wazuh-logcollector' does not update the 'file_status.json' file from logging
                  events when using an invalid predicate in the 'query' tag of the 'localfile' section.
@@ -124,7 +124,7 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
-        - daemons_handler_module:
+        - daemons_handler_configuration:
             type: fixture
             brief: Handler of Wazuh daemons.
 

@@ -78,7 +78,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'module': {'daemons': ['wazuh-modulesd', 'wazuh-analysisd']}}
+daemons_handler_configuration = {'configuration': {'daemons': ['wazuh-modulesd', 'wazuh-analysisd']}}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -108,7 +108,7 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_rules(get_configuration, configure_environment,
-               daemons_handler_module, wait_for_gcp_start):
+               daemons_handler_configuration, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module gets messages matching the GCP rules. It also checks
                  if the triggered alerts contain the proper rule ID. For this purpose, the test will
@@ -126,7 +126,7 @@ def test_rules(get_configuration, configure_environment,
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - daemons_handler_module:
+        - daemons_handler_configuration:
             type: fixture
             brief: Handler of Wazuh daemons.
         - wait_for_gcp_start:

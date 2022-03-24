@@ -57,7 +57,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_macos_format_basic.yam
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
-daemons_handler_configuration = {'module': {'daemons': ['wazuh-logcollector']}}
+daemons_handler_configuration = {'configuration': {'daemons': ['wazuh-logcollector']}}
 
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
@@ -99,7 +99,7 @@ def restart_logcollector_function():
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
 def test_macos_format_basic(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
-                            configure_local_internal_options_module, macos_message, file_monitoring, daemons_handler_module,
+                            configure_local_internal_options_module, macos_message, file_monitoring, daemons_handler_configuration,
                             restart_logcollector_function):
     '''
     description: Check if the 'wazuh-logcollector' gathers properly macOS unified logging system (ULS) events.
@@ -133,7 +133,7 @@ def test_macos_format_basic(restart_logcollector_required_daemons_package, get_c
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
-        - daemons_handler_module:
+        - daemons_handler_configuration:
             type: fixture
             brief: Handler of Wazuh daemons.
         - restart_logcollector_function:

@@ -81,7 +81,7 @@ conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
 parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 local_internal_options = {'syscheck.debug': '2', 'monitord.rotate_log': '0'}
-daemons_handler_configuration = {'module': {'daemons': ['wazuh-syscheckd']}}
+daemons_handler_configuration = {'configuration': {'daemons': ['wazuh-syscheckd']}}
 
 # fixtures
 
@@ -96,7 +96,7 @@ def get_configuration(request):
 
 
 def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
-                              configure_local_internal_options_module, daemons_handler_module):
+                              configure_local_internal_options_module, daemons_handler_configuration):
     '''
     description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
                  For this purpose, the test performs a CUD set of operations to a file with 'realtime' mode set as
@@ -122,7 +122,7 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - daemons_handler_module:
+        - daemons_handler_configuration:
             type: fixture
             brief: Handle the Wazuh daemons.
 
