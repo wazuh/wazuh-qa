@@ -60,9 +60,9 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 id_group = 'group_test'
-enrollment_group = """ 
+enrollment_group = f""" 
     <enrollment>
-    <groups>group_test</groups>
+    <groups>{id_group}</groups>
     </enrollment>
                        """
 
