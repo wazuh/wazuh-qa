@@ -111,13 +111,13 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     # Modify local_internal_options
     replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
 
-    if (int(status_guess_agent_group) == 1):
-        for host in test_infra_managers:
-            host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                           after="upgrades.", before="authd.debug=2", replace=replace)
-        # Restart managers
-        restart_cluster(test_infra_managers, host_manager)
-        time.sleep(timeout)
+
+    for host in test_infra_managers:
+        host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
+                                        after="upgrades.", before="authd.debug=2", replace=replace)
+    # Restart managers
+    restart_cluster(test_infra_managers, host_manager)
+    time.sleep(timeout)
 
     # Register agent with agent-auth
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target,
