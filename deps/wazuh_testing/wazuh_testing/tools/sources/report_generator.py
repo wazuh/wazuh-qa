@@ -6,7 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from logging import logger
+import logging
 from itertools import groupby
 from mmap import ACCESS_READ, mmap
 
@@ -516,28 +516,28 @@ class ReportGenerator:
             report['agents']['wazuh-agentd'] = self.agentd_report()
         except Exception:
             unexpected_error = 'Unexpected error calculating agentd statistics'
-            logger.error(unexpected_error)
+            logging.error(unexpected_error)
             report['agents']['wazuh-agentd'] = {'ERROR': unexpected_error}
 
         try:
             report['managers']['wazuh-remoted'] = self.remoted_report()
         except Exception:
             unexpected_error = 'Unexpected error calculating remoted statistics'
-            logger.error(unexpected_error)
+            logging.error(unexpected_error)
             report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
 
         try:
             report['agents']['metrics'] = self.metric_report('agents', '.*centos.*')
         except Exception:
             unexpected_error = 'Unexpected error calculating agents metrics'
-            logger.error(unexpected_error)
+            logging.error(unexpected_error)
             report['agents']['metrics'] = {'ERROR': unexpected_error}
 
         try:
             report['managers']['metrics'] = self.metric_report('managers')
         except Exception:
             unexpected_error = 'Unexpected error calculating managers metrics'
-            logger.error(unexpected_error)
+            logging.error(unexpected_error)
             report['managers']['metrics'] = {'ERROR': unexpected_error}
 
         return report
