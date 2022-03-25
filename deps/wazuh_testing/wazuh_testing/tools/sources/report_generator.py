@@ -6,6 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from logging import logger
 from itertools import groupby
 from mmap import ACCESS_READ, mmap
 
@@ -42,7 +43,7 @@ class LogAnalyzer:
         return error_lines
 
     @staticmethod
-    def get_error_log_file(log_path, type='error'):
+    def get_error_log_file(log_path, type='error', duplicated_logs=False):
         """Get all the lines of the specified type of the log file.
 
         Args:
@@ -56,7 +57,13 @@ class LogAnalyzer:
 
                 error_lines = LogAnalyzer.findall_regex_line(lines=log_file_content, regex=f"(^.*?{type}\:.*?$)",
                                                              flags=re.MULTILINE | re.IGNORECASE)
-        return error_lines
+        if not duplicated_logs:
+            error_lines_no_repeated = [' '.join(error_line.split()[2:]) for error_line in error_lines]
+            error_lines_no_repeated = list(set(error_lines_no_repeated))
+
+            return error_lines_no_repeated
+        else:
+            return error_lines
 
     @staticmethod
     def get_error_logs_hosts(log_dict):
@@ -140,7 +147,8 @@ class LogAnalyzer:
         return keep_alives_report
 
 
-class StatisticsAnalyzer():
+class StatisticsAnalyzer:
+    """This class group several statics methods to gather specific information from Wazuh statistics."""
 
     @staticmethod
     def calculate_values(statistis_files, fields):
@@ -303,7 +311,8 @@ class ReportGenerator:
     """
     def __init__(self, artifact_path):
         self.daemons_manager = ['wazuh-modulesd', 'wazuh-monitord', 'wazuh-remoted', 'wazuh-authd',
-                                'wazuh-apid', 'wazuh-db', 'wazuh-apid', 'wazuh-syscheckd', 'wazuh-analysisd']
+                                'wazuh-db', 'wazuh-syscheckd', 'wazuh-analysisd']
+
         self.daemons_agent = ['wazuh-modulesd', 'wazuh-logcollector', 'wazuh-syscheckd',
                               'wazuh-agentd', 'wazuh-execd']
 
@@ -311,7 +320,10 @@ class ReportGenerator:
         self.daemons_agent_statistics = ['agent', 'logcollector']
 
         self.metric_fields = ['CPU(%)', 'RSS(KB)', 'VMS(KB)', 'FD', 'Read_Ops', 'Write_Ops', 'SWAP(KB)',
-                              'USS(KB)', 'PSS(KB)', 'Disk_Read(KB)', 'Disk_Written(KB)']
+                              'USS(KB)', 'PSS(KB)']
+
+
+
 
         if os.path.isdir(artifact_path):
             self.artifact_path = artifact_path
@@ -483,11 +495,10 @@ class ReportGenerator:
                                                      in ['managers', 'workers', 'master']) else self.daemons_agent
 
         for daemon in metric_daemons:
+
             metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex)
-            try:
-                metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
-            except Exception as e:
-                pass
+
+            metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
 
         # name = f"{component}-{hosts_regex}" if hosts_regex != '.*' else component
         return metric_total
@@ -495,21 +506,38 @@ class ReportGenerator:
     def make_report(self):
         """Build the JSON report of the environment."""
         report = {}
-
         report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
 
         report['agents'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
                                                                                              component='agents'))
         report['managers'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
                                                                                                component='managers'))
+        try:
+            report['agents']['wazuh-agentd'] = self.agentd_report()
+        except Exception:
+            unexpected_error = 'Unexpected error calculating agentd statistics'
+            logger.error(unexpected_error)
+            report['agents']['wazuh-agentd'] = {'ERROR': unexpected_error}
 
-        report['agents']['wazuh-agentd'] = self.agentd_report()
-        report['agents']['wazuh-agentd'] = self.agentd_report()
+        try:
+            report['managers']['wazuh-remoted'] = self.remoted_report()
+        except Exception:
+            unexpected_error = 'Unexpected error calculating remoted statistics'
+            logger.error(unexpected_error)
+            report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
 
-        report['agents']['metrics'] = self.metric_report('agents')
-        report['managers']['metrics'] = self.metric_report('managers')
+        try:
+            report['agents']['metrics'] = self.metric_report('agents', '.*centos.*')
+        except Exception:
+            unexpected_error = 'Unexpected error calculating agents metrics'
+            logger.error(unexpected_error)
+            report['agents']['metrics'] = {'ERROR': unexpected_error}
 
-        # if self.cluster_environment:
-        #     report['metrics'] = {**report['metrics'], 'workers': }
+        try:
+            report['managers']['metrics'] = self.metric_report('managers')
+        except Exception:
+            unexpected_error = 'Unexpected error calculating managers metrics'
+            logger.error(unexpected_error)
+            report['managers']['metrics'] = {'ERROR': unexpected_error}
 
         return report
