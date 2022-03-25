@@ -9,3 +9,8 @@
   configuration:
     logs:
       level: debug
+- tags:
+  - logs_debug2
+  configuration:
+    logs:
+      level: debug2

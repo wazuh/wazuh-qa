@@ -47,9 +47,12 @@ references:
 tags:
     - api
 '''
+import json
 import os
+import re
 
 import pytest
+import requests
 from wazuh_testing.api import callback_detect_api_debug
 from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
@@ -133,3 +136,123 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
     else:
         file_monitor.start(timeout=60, callback=callback_detect_api_debug,
                            error_message='Did not receive expected "DEBUG: ..." event')
+
+
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_request_logging_request_headers(get_api_details, get_configuration, configure_api_environment, restart_api):
+    '''
+    description: Check if the request_logging API middleware works.
+
+    wazuh_min_version: 4.1.0
+
+    tier: 0
+
+    parameters:
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset 'api.log' and start a new monitor.
+
+    assertions:
+        - Verify that request headers are logged when using debug2 as log level.
+
+    tags:
+        - logs
+        - logging
+    '''
+    # Perform test for all the logging levels of data/conf.yaml
+    check_apply_test({'all'}, get_configuration['tags'])
+
+    def callback_request_headers(line):
+        match = re.match(fr".*DEBUG2: (Receiving headers.*{str(request_headers).replace('{', '').replace('}', '')}.*)",
+                         line)
+        if match:
+            return match.group(1)
+
+    api_details = get_api_details()
+
+    # Make an API request
+    request_headers = api_details['auth_headers']
+    requests.get(f"{api_details['base_url']}/agents", headers=request_headers, verify=False)
+
+    # Check request headers were logged in debug mode 2
+    if get_configuration['configuration']['logs']['level'] != 'debug2':
+        with pytest.raises(TimeoutError):
+            file_monitor.start(timeout=15, callback=callback_request_headers,
+                               error_message='"DEBUG2: Receiving headers ..." event received but not '
+                                             'expected.').result()
+    else:
+        file_monitor.start(timeout=60, callback=callback_request_headers,
+                           error_message='"DEBUG2: Receiving headers ..." event expected but not received.').result()
+
+
+@pytest.mark.parametrize('method, json_body', [
+    ('GET', None),
+    ('POST', {"wrong_key": "value"}),
+])
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+def test_request_logging_json_body(get_api_details, get_configuration, configure_api_environment, restart_api, method,
+                                   json_body):
+    '''
+    description: Check if the request_logging API middleware works.
+
+    wazuh_min_version: 4.1.0
+
+    tier: 0
+
+    parameters:
+        - get_api_details:
+            type: fixture
+            brief: Get API information.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_api_environment:
+            type: fixture
+            brief: Configure a custom environment for API testing.
+        - restart_api:
+            type: fixture
+            brief: Reset 'api.log' and start a new monitor.
+        - method:
+            type: str
+            brief: Method used in the /agents API request.
+        - json_body:
+            type: dict
+            brief: JSON body used in the /agents API request.
+
+    assertions:
+        - Verify that if the request has a JSON body, it is logged.
+        - Verify that if the request does not have a JSON body, the default body ({}) is logged.
+
+    tags:
+        - logs
+        - logging
+    '''
+    # Perform test for all the logging levels of data/conf.yaml
+    check_apply_test({'all'}, get_configuration['tags'])
+
+    def callback_body_logged(line):
+        match = re.match(fr'.*INFO: (.*"{method} /agents" with parameters .* and body '
+                         fr'{json.dumps(json_body) if json_body else {} }.*)', line)
+        if match:
+            return match.group(1)
+
+    api_details = get_api_details()
+
+    # Make an API request
+    getattr(requests, method.lower())(f"{api_details['base_url']}/agents", headers=api_details['auth_headers'],
+                                      verify=False, json=json_body)
+
+    # Check the expected body was logged
+    file_monitor.start(timeout=60, callback=callback_body_logged,
+                       error_message=f'API request informative log for endpoint "{method} /agents" with body: '
+                                     f'{json.dumps(json_body) if json_body else {} } expected but not '
+                                     f'received').result()
