@@ -59,8 +59,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: wazuh
-    group: wazuh
+    owner: root
+    group: root
     mode: '0644'
 
 - name: Set cluster key
@@ -101,8 +101,8 @@
       {{agent1_id}} {{agent1_hostname}} any {{ agent1_key }}
       {{agent2_id}} {{agent2_hostname}} any {{ agent2_key }}
       {{agent3_id}} {{agent3_hostname}} any {{ agent3_key }}
-    owner: wazuh
-    group: wazuh
+    owner: root
+    group: root
     mode: "0644"
     create: yes
 
@@ -111,3 +111,11 @@
 
 - name: "Install necessary dependencies"
   command: /var/ossec/framework/python/bin/python3.9 -m pip install lockfile filetype certifi testinfra
+
+- name: Copy wdb-query.py script
+  copy:
+    src: ../../../../scripts/wdb-query.py
+    dest: /var/ossec/bin/wdb-query.py
+    owner: root
+    group: root
+    mode: '0644'
