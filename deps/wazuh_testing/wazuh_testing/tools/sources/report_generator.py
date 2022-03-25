@@ -93,8 +93,8 @@ class LogAnalyzer:
         Args:
             log_files (list): List of manager logs to gather agent connection information.
         """
-        keep_alive_regex = '(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading ' + \
-            "'(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)"
+        keep_alive_regex = '(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* inserting ' + \
+                           '\'(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*"_agent_ip":(\S+)'
 
         keep_alives = {}
         for log_file in log_files:
@@ -514,30 +514,34 @@ class ReportGenerator:
                                                                                                component='managers'))
         try:
             report['agents']['wazuh-agentd'] = self.agentd_report()
-        except Exception:
+        except Exception as e:
             unexpected_error = 'Unexpected error calculating agentd statistics'
             logging.error(unexpected_error)
+            logging.error(e)
             report['agents']['wazuh-agentd'] = {'ERROR': unexpected_error}
 
         try:
             report['managers']['wazuh-remoted'] = self.remoted_report()
-        except Exception:
+        except Exception as e:
             unexpected_error = 'Unexpected error calculating remoted statistics'
             logging.error(unexpected_error)
+            logging.error(e)
             report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
 
         try:
             report['agents']['metrics'] = self.metric_report('agents', '.*centos.*')
-        except Exception:
+        except Exception as e:
             unexpected_error = 'Unexpected error calculating agents metrics'
             logging.error(unexpected_error)
+            logging.error(e)
             report['agents']['metrics'] = {'ERROR': unexpected_error}
 
         try:
             report['managers']['metrics'] = self.metric_report('managers')
-        except Exception:
+        except Exception as e:
             unexpected_error = 'Unexpected error calculating managers metrics'
             logging.error(unexpected_error)
+            logging.error(e)
             report['managers']['metrics'] = {'ERROR': unexpected_error}
 
         return report
