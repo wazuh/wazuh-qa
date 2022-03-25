@@ -17,6 +17,8 @@ AGENT_GROUPS_DEFAULT = 'default'
 
 # Error Messages
 ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
+
 
 
 # Functions
@@ -113,6 +115,9 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
 
 def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     # Uses wdb commands to change the group of an agent
-    query = f'{"id":{agent_id}, "group":"{new_group}"}'
-    group_data = host_manager.run_command(host, f"{WAZUH_PATH}/bin/query-wdb global 'update-agent-group {query}'")
+
+    query = f'{{"mode":"append","sync_status":"syncreq","source":"remote","data":[{{"id":{agent_id}, \
+             "groups":["{new_group}"]}}]}}'
+    group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
+                                          'set-agent-groups {query}'")
     return group_data
