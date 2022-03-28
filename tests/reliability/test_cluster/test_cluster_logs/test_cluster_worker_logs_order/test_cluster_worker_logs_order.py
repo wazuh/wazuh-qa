@@ -82,6 +82,7 @@ def test_check_logs_order_workers(artifacts_path):
                                     'found_log': result.group(0),
                                     'expected_logs': [log.tag for log in tree_info['tree'].children(tree_info['node'])]
                                 })
+
                                 failed_tasks.add(result.group(1))
 
         # Update status of all logs so they point to their tree root.

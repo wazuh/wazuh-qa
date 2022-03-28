@@ -12,28 +12,4 @@
   tag: '.*chunks updated in wazuh-db in.*'
 - log_id: log2
   parent: log1
-  tag: 'Obtained.*chunks of data in.*'
-
-# No need to synchronize after failed synchronization tries.
-- log_id: log3
-  parent: log2
-  tag: 'The checksum of both databases match.*Reset the attempt counter.'
-- log_id: log4
-  parent: log3
-  tag: 'Finished in.*Updated.*chunks.*'
-
-# No need to synchronize.
-- log_id: log15
-  parent: log2
-  tag: 'The checksum of both databases match.*'
-- log_id: log16
-  parent: log15
-  tag: 'Finished in.*Updated.*chunks.*'
-
-# Synchronization needed.
-- log_id: log5
-  parent: log2
-  tag: 'Checksum comparison failed. Attempt.*'
-- log_id: log6
-  parent: log5
   tag: 'Finished in.*Updated.*chunks.*'

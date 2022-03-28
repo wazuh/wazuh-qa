@@ -19,4 +19,4 @@
   tag: 'Sending chunks.*'
 - log_id: log3
   parent: log2
-  tag: 'Finished in.*chunks updated.*'
+  tag: 'Finished in.*Updated.*chunks.'

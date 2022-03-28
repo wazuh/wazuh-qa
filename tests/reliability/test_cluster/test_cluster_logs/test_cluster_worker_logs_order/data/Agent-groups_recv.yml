@@ -31,11 +31,22 @@
   tag: 'Finished in.*Updated.*chunks.*'
 
 # Forced synchronization is required.
+- log_id: log5
+  parent: log2
+  tag: 'Checksum comparison failed. Attempt 10/10.*'
 - log_id: log7
   parent: log5
   tag: 'Sent request to obtain all agent-groups information from the master node.*'
 - log_id: log8
   parent: log7
+  tag: 'Finished in.*Updated.*chunks.*'
+
+# Checksum comparison fails.
+- log_id: log12
+  parent: log2
+  tag: 'Checksum comparison failed. Attempt .*'
+- log_id: log13
+  parent: log12
   tag: 'Finished in.*Updated.*chunks.*'
 
 # The checksum differs
