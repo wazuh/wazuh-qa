@@ -1,10 +1,6 @@
 import { When } from 'cypress-cucumber-preprocessor/steps';
 import { clickElement, getElement} from '../../utils/driver';
-import {
-    stablishedFilter,
-    pinFilterAction,
-    pinnedFilter
-  } from '../../pageobjects/filters/filters.page';
+import { stablishedFilter, pinFilterAction, pinnedFilter} from '../../pageobjects/filters/filters.page';
 When('The user pins a filter', () => {
     getElement(stablishedFilter)
      .should('exist')
