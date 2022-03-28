@@ -264,7 +264,8 @@ class HostManager:
         """
         return self.get_host(host).interface(interface).addresses
 
-    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+    def find_file(self, host: str, path: str, file_type: str = 'file', pattern: str = '*', recurse: bool = False,
+                  use_regex: bool = False):
         """Search and return information of a file inside a path.
 
         Args:

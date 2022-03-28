@@ -27,6 +27,7 @@ import os
 from time import sleep
 
 import pytest
+import time
 
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.file import read_yaml
@@ -50,6 +51,7 @@ manager_conf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'da
 test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_agent_auth_cases.yml'))
 
 wait_agent_start = 20
+authd_start_timeout = 10
 network = {}
 
 
@@ -234,6 +236,7 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
+    time.sleep(authd_start_timeout)
 
     # Start the agent enrollment process using agent-auth
     for configuration in test_case['test_case']:
