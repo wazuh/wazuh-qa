@@ -56,6 +56,7 @@ import datetime
 import os
 import sys
 import tempfile
+import ast
 
 import pytest
 from wazuh_testing import logcollector
@@ -73,13 +74,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
-date = datetime.date.today().strftime(r'%Y-%m-%d')
 
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.txt', 'foo.txt', 'bar.log', 'test.yaml', 'ñ.txt', 'Testing white spaces', 'test.log',
-                     'c1test.txt', 'c2test.txt', 'c3test.txt', f'file.log-{date}'],
+                     'c1test.txt', 'c2test.txt', 'c3test.txt', fr'file.log-%Y-%m-%d'],
         'content': f'Content of testing_file\n'
     },
     {
@@ -156,7 +156,7 @@ metadata = [
      'log_format': 'syslog', 'path_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'file_type': 'duplicated_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing', f"file.log-{date}")], 'log_format': 'syslog',
+     'files': [os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d')], 'log_format': 'syslog',
      'file_type': 'single_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', 'multiple')],
@@ -193,7 +193,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
-    return request.param
+    date = datetime.date.today().strftime(r'%Y-%m-%d')
+    test_case_real_paths_string = str(request.param).replace(r'file.log-%Y-%m-%d',  f"file.log-{date}")
+    test_case_real_paths_dictionary = ast.literal_eval(test_case_real_paths_string)
+
+    return test_case_real_paths_dictionary
 
 
 @pytest.fixture(scope="module")
@@ -202,7 +206,17 @@ def get_files_list():
     return file_structure
 
 
-def test_location(get_files_list, create_file_structure_module, get_configuration, configure_environment,
+@pytest.fixture(scope="module")
+def location_file_date():
+    """Get runtime test date."""
+    global file_structure
+    date = datetime.date.today().strftime(r'%Y-%m-%d')
+
+    file_structure_string_real_paths = str(file_structure).replace(r'file.log-%Y-%m-%d',  f"file.log-{date}")
+    file_structure = ast.literal_eval(file_structure_string_real_paths)
+
+
+def test_location(location_file_date, get_files_list, create_file_structure_module, get_configuration, configure_environment,
                   configure_local_internal_options_module, file_monitoring, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' monitors the log files specified in the 'location' tag.
@@ -267,7 +281,7 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
         if file_type == 'single_file':
             log_callback = logcollector.callback_analyzing_file(file_location)
             log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                              error_message="The expected 'Analyzing file' message has not been produced")
+                              error_message=f"The expected 'Analyzing file {file_location}' message has not been produced")
         elif file_type == 'wildcard_file':
             pattern = get_configuration['metadata']['location']
             log_callback = logcollector.callback_match_pattern_file(pattern, file_location)
