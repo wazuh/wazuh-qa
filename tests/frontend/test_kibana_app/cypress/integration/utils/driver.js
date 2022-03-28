@@ -22,8 +22,13 @@ export const elementTextIncludes = (selector, text) => {
   getElement(selector).should('contain', text);
 };
 
-export const fillField = (selector, text) => {
+export const cleanAndfillField = (selector, text) => {
   getElement(selector).clear().type(text);
+  return this;
+};
+
+export const fillField = (selector, text) => {
+  getElement(selector).type(text);
   return this;
 };
 
@@ -106,4 +111,14 @@ export const getMyCookie = () => {
     return cookie = c;
   })
 }
-
+// Function that's return the selector by xpath
+export const getXpathElement = (selector) => {
+  return cy.xpath(selector);
+}
+export const clickXpathElement = (selector) => {
+  getXpathElement(selector).click();
+  return this;
+};
+export const xpathElementIsVisible = (selector) => {
+  return getXpathElement(selector).should('exist').should('be.visible');
+};

@@ -21,9 +21,8 @@ import { updateCookies, clearSession, updateExpiryValueCookies } from '../integr
 const cookieMock = require('../../cookie.json');
 const loginMethod = 'xpack'
 import './commands';
+require("cypress-xpath");
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
 before(() => {
     clearSession();
 

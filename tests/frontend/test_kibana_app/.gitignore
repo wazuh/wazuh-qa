@@ -10,3 +10,9 @@ cypress.env.json
 #reports
 report/
 
+#cookie
+cookie.json
+
+#package-lick.json
+package-lock.json
+
