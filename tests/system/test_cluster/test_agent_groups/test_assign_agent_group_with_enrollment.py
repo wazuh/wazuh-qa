@@ -3,7 +3,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-brief: Check that when an agent pointing to a worker node is registered using enrrolment method and with 
+brief: Check that when an agent pointing to a worker node is registered using enrrolment method and with
        group the change is sync with the cluster.
 tier: 0
 modules:
@@ -45,8 +45,8 @@ import os
 import time
 import pytest
 from wazuh_testing.tools.system import HostManager
-from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, restart_cluster,
-                    check_keys_file, delete_group_of_agents, get_id_from_agent)
+from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster,
+                    check_keys_file, delete_group_of_agents, check_agent_groups_db)
 from wazuh_testing.tools import WAZUH_PATH
 
 
@@ -59,17 +59,22 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
+
+# Variables
+timeout = 15
 id_group = 'group_test'
-enrollment_group = f""" 
+path_cluster = '/framework/python/lib/python3.9/site-packages/wazuh-4.4.0-py3.9.egg/wazuh/core/cluster/cluster.json'
+enrollment_group = f"""
     <enrollment>
     <groups>{id_group}</groups>
     </enrollment>
                        """
 
+
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ["wazuh-worker1"])
 def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
@@ -100,41 +105,47 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 3000,\n            '
-    # Add modify agent_group_start_delay 
-    for host in test_infra_managers:
-        host_manager.add_block_to_file(host=host, path=f"{WAZUH_PATH}/framework/python/lib/python3.9/site-packages/wazuh-4.4.0-py3.9.egg/wazuh/core/cluster/cluster.json",
-                                       after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,', replace=replace)
+    replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 300,\n'
 
-    restart_cluster(test_infra_managers, host_manager)
-    time.sleep(10)
+    # Add modify agent_group_start_delay
+    host_manager.add_block_to_file(host=test_infra_managers[0], path=f"{WAZUH_PATH}{path_cluster}",
+                                   after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,',
+                                   replace=replace)
 
     # Create new group
     host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
 
     worker_ip = host_manager.run_command(agent_target, f'hostname -i')
-    
+
     # Modify ossec.conf in agent
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
                                    after="</crypto_method>", before="</client>", replace=enrollment_group)
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
                                    after="<address>", before="</address>", replace=worker_ip)
-                     
-    restart_cluster(test_infra_agents, host_manager)
-    time.sleep(10)
-    agent_id = get_id_from_agent(test_infra_agents[0], host_manager)
+
+    restart_cluster([test_infra_managers[0]] + test_infra_agents, host_manager)
+    time.sleep(timeout)
 
     # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
-        check_agent_groups(agent_id, AGENT_GROUPS_DEFAULT, test_infra_managers[1:], host_manager)
-        
-        # add: wait sync agent groups
+        # Chech that the worker has the default group
+        query = 'sql select id, `group` from agent;'
+        check_agent_groups_db(query, AGENT_GROUPS_DEFAULT, test_infra_managers[1], host_manager)
 
+        replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 1,\n'
+
+        # Add modify agent_group_start_delay
+        host_manager.add_block_to_file(host=test_infra_managers[0], path=f"{WAZUH_PATH}{path_cluster}",
+                                       after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,',
+                                       replace=replace)
+
+        restart_cluster([test_infra_managers[0]], host_manager)
+        time.sleep(timeout)
         # Check that agent has group set to default and then override group info
-        check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)
+        check_agent_groups_db(query, id_group, test_infra_managers[1], host_manager)
 
     finally:
         # Delete group of agent
-        delete_group_of_agents('wazuh-master', id_group, host_manager)
+        delete_group_of_agents(test_infra_managers[0], id_group, host_manager)
