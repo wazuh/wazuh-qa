@@ -118,7 +118,7 @@ def callback_integrity_or_whodata(line):
 @pytest.mark.parametrize('tags_to_apply', [
     {'synchronize_events_conf'}
 ])
-def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, install_audit, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects events while the synchronization is performed
                  simultaneously. For this purpose, the test will monitor a testing directory. Then, it
@@ -139,6 +139,9 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - install_audit:
+            type: fixture
+            brief: install audit to check whodata.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
