@@ -81,10 +81,6 @@ def test_check_logs_order_master(artifacts_path):
                 full_log = result.group(3)
 
                 if log_tag in all_managers[name]:
-                    if 'Local agent-groups' in log_tag and 'Starting' in full_log:
-                        for key, item in all_managers.items():
-                            assert item['Agent-groups send'][
-                                       'node'] == 'root', f"Worker {key} did not finished the 'send' task."
                     tree_info = all_managers[name][log_tag]
                     for child in tree_info['tree'].children(tree_info['node']):
                         if re.search(child.tag, full_log):
