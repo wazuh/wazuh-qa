@@ -12,3 +12,5 @@ export const agGDPR = '.WzManagementSideMenu [title="GDPR"] div div';
 export const agHIPAA = '.WzManagementSideMenu [title="HIPAA"] div div';
 export const agNIST = '.WzManagementSideMenu [title="NIST 800-53"] div div';
 export const agTSC = '.WzManagementSideMenu [title="TSC"] div div';
+export const statusChart = '.agents-status-pie > .euiPanel > .euiCard__content > .euiCard__children > .euiFlexGroup';
+export const agentDetails = 'euiFlexItem euiFlexItem--flexGrowZero agents-details-card';

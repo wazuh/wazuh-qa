@@ -22,12 +22,12 @@ export const elementTextIncludes = (selector, text) => {
   getElement(selector).should('contain', text);
 };
 
-export const fillField = (selector, text) => {
+export const cleanAndfillField = (selector, text) => {
   getElement(selector).clear().type(text);
   return this;
 };
 
-export const fillSelectorField = (selector, text) => {
+export const fillField = (selector, text) => {
   getElement(selector).type(text);
   return this;
 };
@@ -112,13 +112,13 @@ export const getMyCookie = () => {
   })
 }
 // Function that's return the selector by xpath
-export const xPathSelector = (selector) => {
+export const getXpathElement = (selector) => {
   return cy.xpath(selector);
 }
 export const clickXpathElement = (selector) => {
-  xPathSelector(selector).click();
+  getXpathElement(selector).click();
   return this;
 };
-export const elementXpathIsVisible = (selector) => {
-  return xPathSelector(selector).should('exist').should('be.visible');
+export const xpathElementIsVisible = (selector) => {
+  return getXpathElement(selector).should('exist').should('be.visible');
 };

@@ -1,12 +1,11 @@
-import { And } from 'cypress-cucumber-preprocessor/steps';
+import { When } from 'cypress-cucumber-preprocessor/steps';
 import { clickElement, getElement} from '../../utils/driver';
 import {
     stablishedFilter,
     pinFilterAction,
     pinnedFilter
   } from '../../pageobjects/filters/filters.page';
-
-And('The user pin a filter', () => {
+When('The user pins a filter', () => {
     getElement(stablishedFilter)
      .should('exist')
      .should('be.visible');
@@ -19,3 +18,4 @@ And('The user pin a filter', () => {
      .should('exist')
      .should('be.visible');
   });
+  

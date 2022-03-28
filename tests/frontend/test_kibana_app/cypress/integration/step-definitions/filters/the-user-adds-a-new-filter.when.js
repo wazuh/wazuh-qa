@@ -1,6 +1,5 @@
-import { And } from 'cypress-cucumber-preprocessor/steps';
-import { clickElement, fillSelectorField, elementIsVisible} from '../../utils/driver';
-
+import { When } from 'cypress-cucumber-preprocessor/steps';
+import { clickElement, fillField, elementIsVisible} from '../../utils/driver';
 import {
   addFilterButton,
   filterSuggestionList,
@@ -9,16 +8,13 @@ import {
   saveFilterButton,
   selectedOperator
 } from '../../pageobjects/filters/filters.page';
- 
-
-And('The user add a new filter', () => {
+When('The user adds a new filter', () => {
   elementIsVisible(addFilterButton);
   clickElement(addFilterButton);
-  fillSelectorField(filterSuggestionList,'rule.level');
-  //fillSelectorField(filterOperatorList,'is');
+  fillField(filterSuggestionList,'rule.level');
   elementIsVisible(filterOperatorList);
   clickElement(filterOperatorList);
   clickElement(selectedOperator);
-  fillSelectorField(filterParams,'7');
+  fillField(filterParams,'7');
   clickElement(saveFilterButton);
 });
