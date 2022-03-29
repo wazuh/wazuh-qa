@@ -114,7 +114,7 @@ def get_local_internal_options(request):
 def configure_local_internal_options_package(get_local_internal_options):
     """Fixture to configure the local internal options file.
 
-    It uses the test variable local_internal_options. This should be
+    It uses the test fixture get_local_internal_options. This should be
     a dictionary wich keys and values corresponds to the internal option configuration, For example:
     local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
     """
@@ -180,6 +180,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
 
     assertions:
         - Verify that the logging level of retrieved GCP events matches the one specified in the 'logging' tag.
+        - Verify that the module outputs messages that correspond to the logging level.
 
     input_description: A test case (ossec_conf) is contained in an external YAML file (wazuh_conf.yaml)
                        which includes configuration settings for the 'gcp-pubsub' module. That is
