@@ -197,22 +197,31 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
     logging_opt = int([x[-2] for x in conf.get_wazuh_local_internal_options()
                    if x.startswith('wazuh_modules.debug')][0])
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
+    mandatory_keywords = {}
     if logging_opt == 0:
         skipped_keywords = ['DEBUG:']
     else:
         skipped_keywords = []
+        mandatory_keywords = {'DEBUG:': 0, 'INFO': 0}
+
+    timeout = global_parameters.default_timeout + time_interval + 5 if \
+        logging_opt != 0 else 5
 
     for nevents in range(0, 12):
         try:
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
-                                            callback=callback_detect_all_gcp,
-                                            accum_results=1,
-                                            error_message='Did not receive expected '
-                                                          'wazuh-modulesd:gcp-pubsub[]').result()
+            event = wazuh_log_monitor.start(
+                timeout=timeout, callback=callback_detect_all_gcp,
+                accum_results=1, error_message='Did not receive expected '
+                'wazuh-modulesd:gcp-pubsub[]').result()
         except TimeoutError:
             if logging_opt == 0:
                 continue
             else:
                 raise
+        for k in mandatory_keywords.keys():
+            if k in event:
+                mandatory_keywords[k] += 1
+
         for key in skipped_keywords:
             assert key not in event
+    assert all(mandatory_keywords.values())
