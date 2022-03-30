@@ -8,12 +8,12 @@ Feature: Validate that the pinned filter label is displayed
     Given The kibana admin user is logged in using xpack and the wazuh logo is displayed
     When The user navigates to the agent page
     And The user navigates to the agent dashboard
-    And The user navigates to <Module Name>
+    And The user navigates to agentModule <Module Name>
     And The user adds a new filter
     And The user pins a filter
     And The user navigates to the agent page
     And The user navigates to the agent dashboard
-    And The user navigates to <Module Name>
+    And The user navigates to agentModule <Module Name>
     Then The user checks if the filter is displayed
     Examples:
       | Module Name           |

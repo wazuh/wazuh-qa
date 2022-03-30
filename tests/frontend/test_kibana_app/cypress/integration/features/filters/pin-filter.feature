@@ -13,7 +13,7 @@ Feature: Pin filter
     And The user checks if the filter is displayed
     And The user navigates overview page
     And The user goes to <Module Name>
-    Then The user check if the filter is displayed
+    Then The user checks if the filter is displayed
     Examples:
       | Module Name           |
       | Security Events       |
