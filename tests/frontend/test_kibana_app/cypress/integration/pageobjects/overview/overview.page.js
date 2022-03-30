@@ -1,0 +1,1 @@
+export const securityEvents = '[data-test-subj="overviewWelcomeGeneral"]';
