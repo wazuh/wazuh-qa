@@ -115,6 +115,14 @@ def get_check_files_data(path='/', ignored_paths=[]):
     script_logger.info(f"Ignoring the following paths: {ignored_paths}")
     script_logger.info(f"Getting check-files data from {path}")
 
+    # If the given path is not a dir
+    if os.path.exists(path) and not os.path.isdir(path):
+        try:
+            files_items_dict[path] = get_data_information(path)
+        except OSError:  # Ignore errors like "No such device or address" due to dynamic and temporary files
+            pass
+
+    # If the given path is a dir, walk through the dir tree
     for (dirpath, _, filenames) in os.walk(path, followlinks=False):
         skip_path_checking = False
 
@@ -123,13 +131,16 @@ def get_check_files_data(path='/', ignored_paths=[]):
                 skip_path_checking = True
 
         if not skip_path_checking:
+            # Get the dir data
+            if os.path.exists(dirpath):
+                try:
+                    files_items_dict[dirpath] = get_data_information(dirpath)
+                except OSError:  # Ignore errors like "No such device or address" due to dynamic and temporary files
+                    pass
+
+            # Get the dir content data
             for filename in filenames:
                 file_path = os.path.join(dirpath, filename)
-                if os.path.exists(dirpath):
-                    try:
-                        files_items_dict[dirpath] = get_data_information(dirpath)
-                    except OSError:  # Ignore errors like "No such device or address" due to dynamic and temporary files
-                        pass
 
                 if file_path not in ignored_paths and os.path.exists(file_path):
                     try:
