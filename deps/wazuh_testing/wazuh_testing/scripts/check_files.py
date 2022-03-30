@@ -175,11 +175,14 @@ def get_data_information(item):
         dict: Dictionary with checkfile data.
     """
     stat_info = os.stat(item)
-    user = pwd.getpwuid(stat_info.st_uid)[0]
+    try:
+        user = pwd.getpwuid(stat_info.st_uid)[0]
+    except KeyError:
+        user = 'user has no entry in etc/passwd.'
     try:
         group = grp.getgrgid(stat_info.st_gid)[0]
     except KeyError:
-        group = 'group is not in /etc/group.'
+        group = 'group has no entry in /etc/group.'
     mode = oct(stat.S_IMODE(stat_info.st_mode))
     mode_str = str(mode).replace('o', '')
     mode = mode_str[-3:] if len(mode_str) > 3 else mode_str
