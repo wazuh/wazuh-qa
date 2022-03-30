@@ -10,4 +10,3 @@ export const nist = '[data-test-subj="overviewWelcomeNist"]';
 export const tsc = '[data-test-subj="overviewWelcomeTsc"]';
 export const gdpr = '[data-test-subj="overviewWelcomeGdpr"]';
 export const hipaa = '[data-test-subj="overviewWelcomeHipaa"]';
-export const agentStatus = ('react-component p span');
