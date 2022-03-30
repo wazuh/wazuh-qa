@@ -1,4 +1,4 @@
-export const securityEvents = '[data-test-subj="overviewWelcomeGeneral"]';
+export const securityEvents = '[data-test-subj="overviewWelcomeGeneral"] .euiCard__content';
 export const integrityMonitoring = '[data-test-subj="overviewWelcomeFim"]';
 export const policyMonitoring = '[data-test-subj="overviewWelcomePm"]';
 export const systemAuditing = '[data-test-subj="overviewWelcomeAudit"]';
@@ -10,3 +10,4 @@ export const nist = '[data-test-subj="overviewWelcomeNist"]';
 export const tsc = '[data-test-subj="overviewWelcomeTsc"]';
 export const gdpr = '[data-test-subj="overviewWelcomeGdpr"]';
 export const hipaa = '[data-test-subj="overviewWelcomeHipaa"]';
+export const agentStatus = ('react-component p span');

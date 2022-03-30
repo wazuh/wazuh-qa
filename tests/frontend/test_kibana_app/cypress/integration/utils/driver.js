@@ -5,6 +5,7 @@ export const clickElement = (selector) => {
 };
 
 export const forceClickElement = (selector) => {
+  cy.wait(1000);
   getElement(selector).click({force:true})
   return this;
 };
