@@ -1,26 +1,27 @@
 import { 
-    securityEventsLink,
-    integrityMonitoringLink,
-    policyMonitoringLink,
-    systemAuditingLink,
-    vulnerabilitiesLink,
-    mitreAttackLink,
-    pciDssLink,
-    gdprLink,
-    hipaaLink,
-    nistLink,
-    tscLink
- } from "../../pageobjects/wazuh-menu/wazuh-menu.page";
+    securityEvents,
+    integrityMonitoring,
+    policyMonitoring,
+    systemAuditing,
+    vulnerabilities,
+    mitre,
+    pciDSS,
+    gdpr,
+    hipaa,
+    nist,
+    tsc
+ } from "../../pageobjects/overview/overview.page";
  export const BASIC_MODULES = {
-    'Security Events': securityEventsLink,
-    'Integrity Monitoring': integrityMonitoringLink,
-    'System Auditing': systemAuditingLink,
-    'Vulnerabilities': vulnerabilitiesLink,
-    'Mitre & Attack': mitreAttackLink,
-    'GDPR': gdprLink,
-    'HIPAA': hipaaLink,
-    'NIST': nistLink,
-    'TSC': tscLink,
-    'PCI DSS': pciDssLink,
-    'Policiy Monitoring': policyMonitoringLink
+    'Security Events': securityEvents,
+    'Integrity Monitoring': integrityMonitoring,
+    'System Auditing': systemAuditing,
+    'Vulnerabilities': vulnerabilities,
+    'Mitre & Attack': mitre,
+    'GDPR': gdpr,
+    'HIPAA': hipaa,
+    'NIST': nist,
+    'TSC': tsc,
+    'PCI DSS': pciDSS,
+    'Policiy Monitoring': policyMonitoring
   }
+  

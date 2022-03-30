@@ -1,5 +1,11 @@
+/// <reference types="cypress" />
 export const clickElement = (selector) => {
-  getElement(selector).click();
+  getElement(selector).should('not.be.disabled').click();
+  return this;
+};
+
+export const forceClickElement = (selector) => {
+  getElement(selector).click({force:true})
   return this;
 };
 

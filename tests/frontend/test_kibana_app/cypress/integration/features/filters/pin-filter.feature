@@ -16,7 +16,7 @@ Feature: Pin filter
     Then The user checks if the filter is displayed
     Examples:
       | Module Name           |
-      | Security Events       |
+      ##| Security Events       |
       | Integrity Monitoring  |
       | System Auditing       |
       | Vulnerabilities       |
