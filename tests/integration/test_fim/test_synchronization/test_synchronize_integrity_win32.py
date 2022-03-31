@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: synchronization
+
+targets:
     - agent
 
 daemons:
@@ -141,6 +141,8 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - tags_to_apply:
             type: set
@@ -207,13 +209,13 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     create_file(REGULAR, folder, file_name, content='')
     modify_registry_value(key_h, "test_value", REG_SZ, 'added')
 
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
 
     TimeMachine.travel_to_future(timedelta(hours=13))
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
     assert sending_event['data']['path'] == os.path.join(key, subkey)

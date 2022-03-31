@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        through text files or Windows event logs. It can also directly receive logs via remote
        syslog which is useful for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: macos
+
+targets:
     - agent
 
 daemons:
@@ -30,6 +30,7 @@ os_platform:
 
 os_version:
     - macOS Catalina
+    - macOS Server
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -60,6 +61,8 @@ daemons_handler_configuration = {'daemons': ['wazuh-logcollector']}
 
 local_internal_options = {'logcollector.debug': 2,
                           'logcollector.sample_log_length': 200}
+
+macos_timeout_process_init = 3
 
 macos_log_messages = [
     {
@@ -108,6 +111,8 @@ def test_macos_format_basic(restart_logcollector_required_daemons_package, get_c
                  the logcollector event with the testing log message has been generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_logcollector_required_daemons_package:
@@ -158,7 +163,7 @@ def test_macos_format_basic(restart_logcollector_required_daemons_package, get_c
                       callback=logcollector.callback_monitoring_macos_logs,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_TARGET_SOCKET)
 
-    time.sleep(3)
+    time.sleep(macos_timeout_process_init)
 
     if log_command == 'logger':
         logcollector.generate_macos_logger_log(macos_message['message'])

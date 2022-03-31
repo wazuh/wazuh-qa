@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: These tests will check if the 'wazuh-syscheckd' and 'auditd' daemons work
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_audit
+
+targets:
     - agent
     - manager
 
@@ -37,18 +37,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://man7.org/linux/man-pages/man8/auditd.8.html
@@ -106,6 +98,7 @@ def get_configuration(request):
 
 # Test
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply, folder', [
     ({'config1'}, testdir1),
     ({'config1'}, testdir2),
@@ -122,6 +115,8 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                  Finally, it creates again the same folder and checks that the 'audit' rule is added.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -158,7 +153,7 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
         - r'.*Added audit rule for monitoring directory'
 
     tags:
-        - who-data
+        - who_data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
@@ -173,6 +168,7 @@ def test_remove_and_read_folder(tags_to_apply, folder, get_configuration,
                             error_message='Did not receive expected "added" event')
 
 
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     {'config1'}
 ])
@@ -184,6 +180,8 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
                  the connection closing and opening events are generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - tags_to_apply:
@@ -214,7 +212,7 @@ def test_reconnect_to_audit(tags_to_apply, get_configuration, configure_environm
         - r'Audit: connected'
 
     tags:
-        - who-data
+        - who_data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

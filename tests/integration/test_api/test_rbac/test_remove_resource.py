@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: These tests will check if the 'RBAC' (Role-Based Access Control) feature 
        can be correctly removed. The 'RBAC' capability allows users accessing the API to be assigned a role that
        will define the privileges they have.
 
-tier: 0
-
-modules:
+components:
     - api
 
-components:
+suite: rbac
+
+targets:
     - manager
 
 daemons:
@@ -35,18 +35,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/api/getting-started.html
@@ -114,6 +106,8 @@ def test_remove_rule(set_security_resources, get_api_details):
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - set_security_resources:
             type: fixture
@@ -165,6 +159,8 @@ def test_remove_policy(set_security_resources, get_api_details):
                  after removing the linked policy.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - set_security_resources:
@@ -218,6 +214,8 @@ def test_remove_user(set_security_resources, get_api_details):
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - set_security_resources:
             type: fixture
@@ -269,6 +267,8 @@ def test_remove_role(set_security_resources, get_api_details):
                  after removing the linked role.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - set_security_resources:

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -9,12 +9,12 @@ brief: The 'wazuh-remoted' program is the server side daemon that communicates w
        Specifically, this test will check that 'wazuh-remoted' doesn't start and produces an error
        message when 'allowed-ips' values are invalid.
 
-tier: 0
-
-modules:
+components:
     - remoted
 
-components:
+suite: configuration
+
+targets:
     - manager
 
 daemons:
@@ -29,18 +29,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-remoted.html
@@ -61,29 +53,37 @@ import wazuh_testing.generic_callbacks as gc
 from wazuh_testing.tools import WAZUH_CONF_RELATIVE
 
 # Marks
-pytestmark = pytest.mark.tier(level=0)
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=0)]
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 parameters = [
-    {'ALLOWED': '127.0.0.0.0', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': 'Testing', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1'},
-    {'ALLOWED': '127.0.0.0/7890', 'DENIED': '192.168.1.1.1'}
+    {'ALLOWED': '127.0.0.0.0'},
+    {'ALLOWED': 'Testing'},
+    {'ALLOWED': '127.0.0.0/7890'},
+    {'ALLOWED': '127.0.0.0/7890'},
+    {'ALLOWED': '::1::1'},
+    {'ALLOWED': 'Testing'},
+    {'ALLOWED': '::1/512'},
+    {'ALLOWED': '::1/512'}
 ]
 
 metadata = [
-    {'allowed-ips': '127.0.0.0.0', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': 'Testing', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1'},
-    {'allowed-ips': '127.0.0.0/7890', 'denied-ips': '192.168.1.1.1'}
+    {'allowed-ips': '127.0.0.0.0'},
+    {'allowed-ips': 'Testing'},
+    {'allowed-ips': '127.0.0.0/7890'},
+    {'allowed-ips': '127.0.0.0/7890'},
+    {'allowed-ips': '::1::1'},
+    {'allowed-ips': 'Testing'},
+    {'allowed-ips': '::1/512'},
+    {'allowed-ips': '::1/512'}
 ]
 
-configurations = load_wazuh_configurations(configurations_path, "test_basic_configuration_allowed_denied_ips",
+configurations = load_wazuh_configurations(configurations_path, "test_allowed_ips_invalid",
                                            params=parameters, metadata=metadata)
-configuration_ids = [f"{x['ALLOWED']}_{x['DENIED']}" for x in parameters]
+configuration_ids = [f"{x['ALLOWED']}" for x in parameters]
 
 
 # fixtures
@@ -100,7 +100,9 @@ def test_allowed_ips_invalid(get_configuration, configure_environment, restart_r
                  logged correctly.
     
     wazuh_min_version: 4.2.0
-    
+
+    tier: 0
+
     parameters:
         - get_configuration:
             type: fixture

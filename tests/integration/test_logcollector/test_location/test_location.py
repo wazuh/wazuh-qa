@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -15,12 +15,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        receive logs through text files or Windows event logs. It can also directly receive logs
        via remote syslog which is useful for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: location
+
+targets:
     - agent
     - manager
 
@@ -37,26 +37,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -86,7 +73,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
-date = datetime.date.today().strftime("%Y-%m-%d")
+date = datetime.date.today().strftime(r'%Y-%m-%d')
 
 file_structure = [
     {
@@ -129,7 +116,7 @@ parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'c*test.txt'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'LOG_FORMAT': 'syslog', 'PATH_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')},
-    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'), 'LOG_FORMAT': 'syslog'}
 ]
 
@@ -168,8 +155,8 @@ metadata = [
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')],
      'log_format': 'syslog', 'path_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'file_type': 'duplicated_file'},
-    {'location': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing', f'file.log-{date}')], 'log_format': 'syslog',
+    {'location': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'),
+     'files': [os.path.join(temp_dir, 'wazuh-testing', f"file.log-{date}")], 'log_format': 'syslog',
      'file_type': 'single_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', 'multiple')],
@@ -226,6 +213,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
                  will verify that the expected events are generated for those special situations.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_files_list:
@@ -299,8 +288,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
 
             try:
                 wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' "
-                                                  f"message has not been produced")
-            except:                                      
+                                        error_message=f"The expected 'File limit has been reached' "
+                                                      f"message has not been produced")
+            except Exception:
                 if sys.platform == 'sunos5':
                     pytest.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/10751')

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_recursion_level
+
+targets:
     - agent
 
 daemons:
@@ -126,7 +126,7 @@ def extra_configuration_before_yield():
 
 # Tests
 
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('root_key, registry, arch, edge_limit, ignored_levels', [
     (key, registry_no_recursion, KEY_WOW64_64KEY, 2, 1),
     (key, registry_recursion_1, KEY_WOW64_64KEY, 2, 1),
@@ -134,7 +134,6 @@ def extra_configuration_before_yield():
     (key, registry_recursion_29, KEY_WOW64_64KEY, 2, 1)
 
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_recursion_level(root_key, registry, arch, edge_limit, ignored_levels,
                          get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     # Example:
@@ -167,6 +166,8 @@ def test_recursion_level(root_key, registry, arch, edge_limit, ignored_levels,
                  in the edge level limits, and no FIM events are generated in the ignored levels.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - root_key:

@@ -8,14 +8,26 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+
+- Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
+- Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
 - Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
 - Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
 - CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
 - Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
 - Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
+- Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
+- Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 
 ### Changed
+
+- Refactor VDT integration tests: feeds and scan types ([#2650](https://github.com/wazuh/wazuh-qa/pull/2650))
+- Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
+- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
+- Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501))
+- Fix the unstable FIM tests that need refactoring. ([#2421](https://github.com/wazuh/wazuh-qa/pull/2458))
+- Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
 - Adapt logtest ITs given the rules skipping ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
 - Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454))
 - Migrate test_age, test_command_monitoring, and test_keep_running of test_logcollector documentation to qa-docs ([#2162](https://github.com/wazuh/wazuh-qa/pull/2162))
@@ -25,7 +37,8 @@ Release report: TBD
 - Migrate several test groups of test_logcollector documentation to qa-docs ([#2180](https://github.com/wazuh/wazuh-qa/pull/2180))
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
 - Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
-
+- Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
+- Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546))
 
 ### Deleted
 - Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
@@ -39,6 +52,7 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 ### Added
 
 - Added specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
+- Add system test to check synchronization between agent and manager. ([#2443](https://github.com/wazuh/wazuh-qa/pull/2443))
 - Make `simulate-api-load` CLI run tasks simultaneously. ([#2392](https://github.com/wazuh/wazuh-qa/pull/2392))
 - Add `qa-ctl` `v0.3`. ([#2307](https://github.com/wazuh/wazuh-qa/pull/2307))
 - Add `qa-ctl` `v0.2`. ([#2299](https://github.com/wazuh/wazuh-qa/pull/2299))
@@ -141,9 +155,9 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 
 ## [v4.2.0]
 ### Added
-- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153) 
+- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153)
 - Add the capability to know which CVE’s affect an agent [#7479](https://github.com/wazuh/wazuh/issues/7479)
-- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092) 
+- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092)
 - Add integration tests for syslog [#1086](https://github.com/wazuh/wazuh-qa/pull/1086)
 - Add remoted integration tests: basic configuration tests [#1073](https://github.com/wazuh/wazuh-qa/pull/1073)
 - Add the tier 0 integration tests for wazuh-remoted [#1024](https://github.com/wazuh/wazuh-qa/issues/1024)

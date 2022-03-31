@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -15,12 +15,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        or Windows event logs. It can also directly receive logs via remote syslog which is useful
        for firewalls and other such devices.
 
-tier: 1
-
-modules:
+components:
     - logcollector
 
-components:
+suite: location_custom_sockets
+
+targets:
     - agent
     - manager
 
@@ -36,36 +36,23 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#location
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/localfile.html#target
-
-tags:
-    - logcollector_location_cust_sockets
 '''
+import pytest
 from os import path, unlink
 from sys import platform
-if platform != 'win32':
-    from socket import AF_UNIX
-
 from socket import SHUT_RDWR, SOCK_STREAM, SOCK_DGRAM, socket
 from tempfile import gettempdir
-
-import pytest
+if platform != 'win32':
+    from socket import AF_UNIX
 
 from wazuh_testing import global_parameters
 from wazuh_testing import logcollector as lg
@@ -179,7 +166,7 @@ def get_files_list():
     return file_structure
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+@pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets(get_local_internal_options, configure_local_internal_options,
                                  get_configuration, configure_environment, create_file_structure_module,
@@ -193,6 +180,8 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
                  the test will verify that events are not dropped by analyzing the 'wazuh-logcollector.state' file.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - get_local_internal_options:
@@ -296,7 +285,7 @@ def test_location_custom_sockets(get_local_internal_options, configure_local_int
         assert global_drops == interval_drops == 0, f"Event drops have been detected in batch {batch}."
 
 
-@pytest.mark.skip(reason="Unexpected false positive, further investigation is required")
+@pytest.mark.xfail(reason='Expected error: https://github.com/wazuh/wazuh/issues/11186')
 @pytest.mark.parametrize("batch", batch_size, ids=[f"batch_{x}" for x in batch_size])
 def test_location_custom_sockets_offline(get_local_internal_options, configure_local_internal_options,
                                          get_configuration, configure_environment, create_file_structure_module,
@@ -311,6 +300,8 @@ def test_location_custom_sockets_offline(get_local_internal_options, configure_l
                  all events sent are dropped by analyzing the 'wazuh-logcollector.state' file.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - get_local_internal_options:

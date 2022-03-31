@@ -1,0 +1,30 @@
+{
+    "agentless_cluster": [
+        "test_jwt_invalidation/test_change_rbac_mode.py",
+        "test_jwt_invalidation/test_change_security_resources.py",
+        "test_jwt_invalidation/test_disconnected_nodes.py",
+        "test_jwt_invalidation/test_revoke_endpoint.py",
+        "test_jwt_invalidation/test_update_password.py",
+        "test_cluster/test_integrity_sync/test_integrity_sync.py"
+    ],
+    "basic_cluster": [
+        "test_cluster/test_agent_files_deletion/test_agent_files_deletion.py",
+        "test_cluster/test_agent_info_sync/test_agent_info_sync.py",
+        "test_cluster/test_agent_key_polling/test_agent_key_polling.py",
+        "test_multigroups/test_multigroups.py"
+    ],
+    "basic_environment": [
+        "test_agent_auth/test_agent_auth.py",
+        "test_enrollment/test_enrollment.py"
+    ],
+    "enrollment_cluster": [
+        "test_cluster/test_agent_enrollment/test_agent_enrollment.py"
+    ],
+    "manager_agent": [
+        "test_active_response_log_format/test_active_response_log_format.py"
+    ],
+    "one_manager_agent": [
+        "test_fim/test_files/test_files_cud.py",
+        "test_fim/test_synchronization/test_synchronization.py"
+    ]
+}
