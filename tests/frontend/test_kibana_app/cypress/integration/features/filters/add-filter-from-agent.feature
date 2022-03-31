@@ -26,4 +26,6 @@ Feature: Validate that the pinned filter label is displayed
       | HIPAA                 |
       | NIST                  |
       | TSC                   |
+      | Policy Monitoring     |
+      | PCIDSS                |
       

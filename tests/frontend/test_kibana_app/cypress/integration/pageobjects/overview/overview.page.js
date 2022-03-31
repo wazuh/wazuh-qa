@@ -1,0 +1,12 @@
+export const securityEvents = '[data-test-subj="overviewWelcomeGeneral"] .euiCard__content';
+export const integrityMonitoring = '[data-test-subj="overviewWelcomeFim"]';
+export const policyMonitoring = '[data-test-subj="overviewWelcomePm"]';
+export const systemAuditing = '[data-test-subj="overviewWelcomeAudit"]';
+export const securityInformationAssessment = '[data-test-subj="overviewWelcomeSca"]';
+export const vulnerabilities = '[data-test-subj="overviewWelcomeVuls"]';
+export const mitre = '[data-test-subj="overviewWelcomeMitre"]';
+export const pciDSS = '[data-test-subj="overviewWelcomePci"]';
+export const nist = '[data-test-subj="overviewWelcomeNist"]';
+export const tsc = '[data-test-subj="overviewWelcomeTsc"]';
+export const gdpr = '[data-test-subj="overviewWelcomeGdpr"]';
+export const hipaa = '[data-test-subj="overviewWelcomeHipaa"]';

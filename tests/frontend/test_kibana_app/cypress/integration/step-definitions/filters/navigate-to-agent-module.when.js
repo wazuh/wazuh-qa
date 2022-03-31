@@ -3,7 +3,6 @@ import { clickElement, elementIsVisible, xpathElementIsVisible, clickXpathElemen
 import { moreLink} from '../../pageobjects/agents/agents.page';
 import { AGENT_MODULES } from '../../utils/mappers/agent-modules-mapper'; 
 When('The user navigates to agentModule {}', (moduleName) => {
-  cy.wait(1000);
   xpathElementIsVisible(moreLink);
   clickXpathElement(moreLink);
   elementIsVisible(AGENT_MODULES[moduleName]);
