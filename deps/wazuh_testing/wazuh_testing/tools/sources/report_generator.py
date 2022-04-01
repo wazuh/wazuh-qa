@@ -322,9 +322,6 @@ class ReportGenerator:
         self.metric_fields = ['CPU(%)', 'RSS(KB)', 'VMS(KB)', 'FD', 'Read_Ops', 'Write_Ops', 'SWAP(KB)',
                               'USS(KB)', 'PSS(KB)']
 
-
-
-
         if os.path.isdir(artifact_path):
             self.artifact_path = artifact_path
 
@@ -495,7 +492,6 @@ class ReportGenerator:
                                                      in ['managers', 'workers', 'master']) else self.daemons_agent
 
         for daemon in metric_daemons:
-
             metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex)
 
             metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
@@ -529,7 +525,7 @@ class ReportGenerator:
             report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
 
         try:
-            report['agents']['metrics'] = self.metric_report('agents', '.*centos.*')
+            report['agents']['metrics'] = self.metric_report('agents')
         except Exception as e:
             unexpected_error = 'Unexpected error calculating agents metrics'
             logging.error(unexpected_error)
