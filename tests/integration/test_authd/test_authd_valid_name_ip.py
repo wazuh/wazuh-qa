@@ -80,11 +80,12 @@ def get_configuration(request):
 # Test
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('test_case', [case for case in test_authd_valid_name_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
                              clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
-                             connect_to_sockets_module, test_case, tear_down):
+                             connect_to_sockets_module, test_case, delete_agents):
     '''
     description:
         Checks that every input message in authd port generates the adequate output.
