@@ -64,6 +64,7 @@ pytestmark = pytest.mark.server
 
 # Variables
 
+LOGS_MONITOR_TIMEOUT = 60
 test_directories = [os.path.join(PREFIX, 'test_logs')]
 file_monitor = FileMonitor(API_LOG_FILE_PATH)
 
@@ -71,12 +72,13 @@ file_monitor = FileMonitor(API_LOG_FILE_PATH)
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'conf.yaml')
-configuration = get_api_conf(configurations_path)
+api_configurations = get_api_conf(configurations_path)
+cases_ids = [configuration['configuration']['logs']['level'] for configuration in api_configurations]
 
 
 # Fixtures
 
-@pytest.fixture(scope='module', params=configuration)
+@pytest.fixture(scope='module', params=api_configurations, ids=cases_ids)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
@@ -84,11 +86,7 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'logs_info'},
-    {'logs_debug'}
-])
-def test_logs(tags_to_apply, get_configuration, configure_api_environment, restart_api):
+def test_logs(get_configuration, configure_api_environment, restart_api):
     '''
     description: Check if the logs are saved with the desired level.
                  Logs are always stored in '/var/ossec/logs/api.log', usually with level 'info'.
@@ -100,9 +98,6 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
     tier: 0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -126,15 +121,15 @@ def test_logs(tags_to_apply, get_configuration, configure_api_environment, resta
     tags:
         - logs
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    check_apply_test({'logs_info', 'logs_debug'}, get_configuration['tags'])
 
     # Detect any "DEBUG:" message in the log path
     if get_configuration['configuration']['logs']['level'] == 'info':
         with pytest.raises(TimeoutError):
-            file_monitor.start(timeout=15, callback=callback_detect_api_debug,
+            file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_detect_api_debug,
                                error_message='"DEBUG: ..." event received but not expected.').result()
     else:
-        file_monitor.start(timeout=60, callback=callback_detect_api_debug,
+        file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_detect_api_debug,
                            error_message='Did not receive expected "DEBUG: ..." event')
 
 
@@ -186,11 +181,11 @@ def test_request_logging_request_headers(get_api_details, get_configuration, con
     # Check request headers were logged in debug mode 2
     if get_configuration['configuration']['logs']['level'] != 'debug2':
         with pytest.raises(TimeoutError):
-            file_monitor.start(timeout=15, callback=callback_request_headers,
+            file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_request_headers,
                                error_message='"DEBUG2: Receiving headers ..." event received but not '
                                              'expected.').result()
     else:
-        file_monitor.start(timeout=60, callback=callback_request_headers,
+        file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_request_headers,
                            error_message='"DEBUG2: Receiving headers ..." event expected but not received.').result()
 
 
@@ -252,7 +247,7 @@ def test_request_logging_json_body(get_api_details, get_configuration, configure
                                       verify=False, json=json_body)
 
     # Check the expected body was logged
-    file_monitor.start(timeout=60, callback=callback_body_logged,
+    file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_body_logged,
                        error_message=f'API request informative log for endpoint "{method} /agents" with body: '
                                      f'{json.dumps(json_body) if json_body else {} } expected but not '
                                      f'received').result()

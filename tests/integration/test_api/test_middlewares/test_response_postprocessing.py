@@ -9,7 +9,7 @@ type: integration
 
 brief: These tests will check if the response_postprocessing middleware of the API handled by the 'wazuh-apid' daemon is
        working properly. The Wazuh API is an open source 'RESTful' API that allows for interaction with the Wazuh
-       manager from a web browser, command line tool like 'cURL' or any script or program that can make web requests.
+       manager from a web browser, command line tools like 'cURL' or any script or program that can make web requests.
 
 components:
     - api
