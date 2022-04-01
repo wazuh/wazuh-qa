@@ -31,7 +31,7 @@ def dict_to_tree(dict_tree):
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 logs_format = re.compile(r'.* \[(Agent-info sync|Integrity check|Integrity sync)] (.*)')
 node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
-incorrect_order = []
+incorrect_order = {}
 logs_order = {
     ' '.join(filename.split('.')[0].split('_')): {
         'tree': dict_to_tree(safe_load(open(os.path.join(test_data_path, filename)))),
@@ -56,10 +56,12 @@ def test_check_logs_order_workers(artifacts_path):
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     for log_file in cluster_log_files:
+        failed_tasks = set()
+
         with open(log_file) as file:
             for line in file.readlines():
                 if result := logs_format.search(line):
-                    if result.group(1) in logs_order:
+                    if result.group(1) in logs_order and result.group(1) not in failed_tasks:
                         tree_info = logs_order[result.group(1)]
                         for child in tree_info['tree'].children(tree_info['node']):
                             if re.search(child.tag, result.group(2)):
@@ -70,19 +72,26 @@ def test_check_logs_order_workers(artifacts_path):
                         else:
                             # Log can be different to the expected one only if permission was not granted.
                             if "Master didn't grant permission to start a new" not in result.group(2):
-                                incorrect_order.append({
-                                    'node': node_name.search(log_file)[1],
+                                if node_name.search(log_file)[1] not in incorrect_order:
+                                    incorrect_order[node_name.search(log_file)[1]] = []
+                                incorrect_order[node_name.search(log_file)[1]].append({
                                     'log_type': result.group(1),
                                     'found_log': result.group(0),
                                     'expected_logs': [log.tag for log in tree_info['tree'].children(tree_info['node'])]
                                 })
-                                break
+                                failed_tasks.add(result.group(1))
 
         # Update status of all logs so they point to their tree root.
         for log_type, tree_info in logs_order.items():
             tree_info['node'] = 'root'
 
-    assert not incorrect_order, '\n\n'.join('{node}:\n'
-                                            ' - Log type: {log_type}\n'
-                                            ' - Expected logs: {expected_logs}\n'
-                                            ' - Found log: {found_log}'.format(**item) for item in incorrect_order)
+    if incorrect_order:
+        result = ''
+        for node, info in incorrect_order.items():
+            result += f"\n\n{node}"
+            for items in info:
+                result += '\n - Log type: {log_type}\n' \
+                          '   Expected logs: {expected_logs}\n' \
+                          '   Found log: {found_log}\n'.format(**items)
+
+        pytest.fail(result)
