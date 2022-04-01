@@ -63,36 +63,61 @@ export const clearSession = () => {
   cy.clearCookies();
 };
 
-export const setCookies = (cookieObj) => {
+export const setCookies = (cookieFromFile) => {
   try {
-  cookieObj.forEach((element) => {
-    cy.setCookie(element.name, element.value);
-  });
-} catch (e) {
-}
+    cy.getCookies().then((currentCookie) => {
+      if (currentCookie.length != 0) {
+        cookieFromFile.forEach((element) => {
+          cy.setCookie(element.name, element.value);
+        });
+      }else{
+        cy.readFile('cookie.json').then((cookieFile) => {
+          cy.log('cookie',cookieFile);
+            cookieFile.forEach(element => { 
+            cy.setCookie(element.name, element.value);
+          })
+        })
+      }
+    });
+  } catch (e) {
+  }
 }
 
 export const updateCookies = () => {
   const filename = 'cookie.json';
   cy.getCookies().then((currentCook) => {
+     if(currentCook.length != 0){
     const parameterToFilter = ['sid', 'wz-token'];
     for (let l = 0; l < parameterToFilter.length; l++) {
       const [cookie] = currentCook.filter(e => e.name == parameterToFilter[l]);
-      // const newCookies = obj.map(e => {
-      //   //ver cookie.value
-      //   if (e.name == parameterToFilter[l]) e.value = cookie.value
-      //   return e;
       cy.readFile(filename).then((obj) => {
-
         const newCookie = obj.map(e => {
         if (e.name == parameterToFilter[l]) e.value = cookie.value
         return e;
         })
         cy.writeFile(filename,  JSON.stringify(newCookie))
-
       })
     }
+   }
   });
+}
+
+export const preserveCookie = () => {
+  let str = [];
+ return cy.getCookies().then((cook) => {
+      if(cook.length != 0){
+      for (let l = 0; l < cook.length; l++) {
+          if (cook.length > 0 && l == 0) {
+              str[l] = cook[l].name;
+              Cypress.Cookies.preserveOnce(str[l]);
+          }
+          else if (cook.length > 1 && l > 1) {
+              str[l] = cook[l].name;
+              Cypress.Cookies.preserveOnce(str[l]);
+          }
+      }
+    }
+  })
 }
 
 export const updateExpiryValueCookies =  () => {
@@ -112,12 +137,6 @@ export const updateExpiryValueCookies =  () => {
   }
 }
 
-export const getMyCookie = () => {
-  let cookie;
-  return cy.getCookie().then((c) => {
-    return cookie = c;
-  })
-}
 // Function that's return the selector by xpath
 export const getXpathElement = (selector) => {
   return cy.xpath(selector);

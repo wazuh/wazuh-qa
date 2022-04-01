@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "cosmiconfig": "^4.0.0",
-    "mocha": "^5.2.0",
+    "mocha": "^9.2.2",
     "prettier": "^2.3.0"
   },
   "devDependencies": {
@@ -25,7 +25,7 @@
     "cypress-cucumber-preprocessor": "^4.0.3",
     "cypress-xpath": "^1.6.2",
     "eslint-plugin-cypress": "^2.11.3",
-    "mochawesome": "^6.2.2",
+    "mochawesome": "^7.1.3",
     "mochawesome-merge": "^4.2.0"
   },
   "cypress-cucumber-preprocessor": {
