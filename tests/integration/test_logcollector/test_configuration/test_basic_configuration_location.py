@@ -132,8 +132,6 @@ def test_configuration_location(get_configuration, configure_environment, restar
 
     wazuh_min_version: 4.2.0
 
-    tier: 0
-
     parameters:
         - get_configuration:
             type: fixture
