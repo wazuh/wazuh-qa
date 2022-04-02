@@ -184,8 +184,8 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
     input_description: A YAML file with the invalid configurations.
 
     expected_output:
-        - Did not receive expected "CRITICAL: ...: Configuration error at event
-        - Did not receive the expected "ERROR: ...: Missing ... element.
+        - Did not receive expected "CRITICAL: ...: Configuration error at" event
+        - Did not receive the expected "ERROR: ...: Missing ... element." event.
 
     tags:
         - logcollector

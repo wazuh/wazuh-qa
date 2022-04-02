@@ -166,8 +166,8 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
     input_description: A YAML file with the invalid configurations.
 
     expected_output:
-        - Did not receive expected "ERROR: ...: Configuration error at event
-        - Did not receive the expected "ERROR: ...: Missing ... element.
+        - Did not receive expected "ERROR: ...: Configuration error at" event
+        - Did not receive the expected "ERROR: ...: Missing ... element." event.
 
     tags:
         - logcollector
