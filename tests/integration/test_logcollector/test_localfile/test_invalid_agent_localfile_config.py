@@ -59,7 +59,6 @@ os_version:
     - Ubuntu Xenial
     - Ubuntu Focal
     - macOS Server
-    - macOS Sierra
     - macOS Catalina
     - Windows XP
     - Windows 7

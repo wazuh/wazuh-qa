@@ -18,12 +18,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
 
 tier: 0
 
-components:
+modules:
     - logcollector
 
 suite: configuration
 
-targets:
+components:
     - agent
     - manager
 
