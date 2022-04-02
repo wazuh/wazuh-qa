@@ -21,8 +21,6 @@ tier: 0
 modules:
     - logcollector
 
-suite: configuration
-
 components:
     - agent
     - manager
