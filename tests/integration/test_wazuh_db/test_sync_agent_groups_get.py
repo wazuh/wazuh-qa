@@ -128,7 +128,7 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     response = query_wdb(case_data["input"])
 
     # Validate response
-    assert str(response) == output
+    assert str(response) == output, "Did not get expected response: {output}, recieved: {response}"
 
     # Validate if the status of the group has change
     if "new_status" in case_data:
