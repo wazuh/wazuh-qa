@@ -56,7 +56,7 @@ before(() => {
 })
 
 beforeEach(() => {
-    setCookies(cook);
+    setCookies(cookieMock);
     cy.setSessionStorage('healthCheck', 'executed');
     updateExpiryValueCookies();
     preserveCookie()
