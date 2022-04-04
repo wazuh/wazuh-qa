@@ -13,6 +13,7 @@ from wazuh_testing.tools.services import control_service, check_daemon_status, d
 from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.authd import DAEMON_NAME
 from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
+from wazuh_testing.tools.wazuh_manager import remove_agents
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -211,3 +212,11 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
 
     keys_file.close()
+
+
+@pytest.fixture(scope='function')
+def delete_agents():
+
+    yield
+
+    remove_agents('all', 'api')
