@@ -129,7 +129,7 @@
   test_case:
   - 
     pre_input: ['global insert-agent {"id":5,"name":"Agent-test5","date_add":1545753642}', 'global set-agent-groups {"mode":"append","sync_status":"syncreq",
-                   "source":"remote","data":[{"id":5,"groups":["Test_group5"]}]}']
+                  "data":[{"id":5,"groups":["Test_group5"]}]}']
     input: 'global sync-agent-groups-get {"condition":"sync_status", "agent_registration_delta":10000}'
     output: "[{'data': [{'id': 5, 'groups': ['Test_group5']}]}]"
 
@@ -138,7 +138,7 @@
   test_case:
   -
     pre_input: ['global insert-agent {"id":6,"name":"Agent-test6","date_add":1545753642}', 'global set-agent-groups {"mode":"append","sync_status":"syncreq",
-                   "source":"remote","data":[{"id":6,"groups":["Test_group6"]}]}']
+                  "data":[{"id":6,"groups":["Test_group6"]}]}']
     input: 'global sync-agent-groups-get {"condition":"all", "agent_registration_delta":10000}'
     output: "[{'data': [{'id': 6, 'groups': ['Test_group6']}]}]"
 
