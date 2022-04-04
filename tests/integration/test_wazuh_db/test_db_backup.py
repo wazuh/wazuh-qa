@@ -108,7 +108,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
     '''
     description: Check that every input message using the 'backup' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a series of queries to the socket with 
-                 paramerters from the list of test_cases, and compare the result with the test_case's 'restore_response'
+                 parameters from the list of test_cases, and compare the result with the test_case's 'restore_response'
                  field, as well as checking that the files have been created and the state of the data in DB in cases
                  where the 'restore' parameter is used.
 
@@ -137,33 +137,33 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         - Verify that after restoring the DB has the expected data.
 
     input_description:
-        - Test cases are defined in the wazuh_db_backup_command.yaml file. This file contains the ammount of backups to
+        - Test cases are defined in the wazuh_db_backup_command.yaml file. This file contains the amount of backups to
           create, if a restore of the DB will be done, and different combinations of parameters used for the restore,
           as well as the expected responses.
 
     expected_output:
         - f'Backup creation failed. Got: {response}'
-        - f'Error - Found {backups.__len__()} files, expected {backups_ammount}'
+        - f'Error - Found {backups.__len__()} files, expected {backups_amount}'
         - f'Error expected value: key:"{test_values[0]}" was not found.'
         - f'Error found unexpected: "key":"{test_values[0]}" value.'
         - f'Did not find expected: {expected} in response: {response}'
-        - f'Error - Found {backups.__len__()} files, expected {backups_ammount + 1}'
+        - f'Error - Found {backups.__len__()} files, expected {backups_amount + 1}'
 
     tags:
         - wazuh_db
         - wdb_socket
     '''
     case_data = test_case[0]
-    backups_ammount = case_data["backups_ammount"]
+    backups_amount = case_data["backups_amount"]
     # Create the database backups and assert they have been created correctly
-    for backup in range(0, backups_ammount):
+    for backup in range(0, backups_amount):
         response = query_wdb(create_db_command)
         time.sleep(1)
         assert 'global.db-backup-' in response[0], f'Backup creation failed. Got: {response}.'
 
-    # Check that the expected ammount of database backups have been created 
+    # Check that the expected amount of database backups have been created 
     backups= query_wdb(get_backups_command)
-    assert backups.__len__() == backups_ammount, f'Found {backups.__len__()} files, expected {backups_ammount}.'
+    assert backups.__len__() == backups_amount, f'Found {backups.__len__()} files, expected {backups_amount}.'
 
     # Manage restoring the DB
     if 'restore' in case_data:
@@ -204,8 +204,8 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         if save_pre_restore == 'true':
             backups= query_wdb(get_backups_command)
             # Check that the pre-restore state backup has been generated.
-            assert backups.__len__() ==  backups_ammount +1, f'Found {backups.__len__()} files, \
-                                                               expected {backups_ammount + 1}'
+            assert backups.__len__() ==  backups_amount +1, f'Found {backups.__len__()} files, \
+                                                               expected {backups_amount + 1}'
             assert "-pre_restore.gz" in backups[-1], f'Did not find the expected "-pre_restore.gz" file"'
 
             if 'restore_pre_restore' in case_data:

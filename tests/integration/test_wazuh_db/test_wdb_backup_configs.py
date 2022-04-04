@@ -117,7 +117,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('backups_path', [backups_path])
 def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs, remove_backups, backups_path):
     '''
-    description: Check that given different wdb backup configuration parámeters, the expected behaviour is achieved.
+    description: Check that given different wdb backup configuration parameters, the expected behavior is achieved.
                  For this, the test gets a series of parameters for the wazuh_db_backups_conf.yaml file and applies
                  them to the manager's ossec.conf. It checks in case of erroneous configurations that the manager was
                  unable to start; otherwise it will check that after creating "max_files+1", there are a total of 
@@ -140,14 +140,14 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
             brief: Creates the folder where the backups will be stored in case it doesn't exist. It clears it when the
                    test yields.
     assertions:
-        - Verify that manager starts behaviour is correct for any given configuration.
+        - Verify that manager starts behavior is correct for any given configuration.
         - Verify that the backup file has been created, wait for "max_files+1".
         - Verify that after "max_files+1" files created, there's only "max_files" in the folder.
 
     input_description:
         - Test cases are defined in the parameters and metada variables, that will be applied to the the 
-          wazuh_db_backup_command.yaml file. The paramerters tested are: "enabled", "interval" and "max_files".
-          With the given input the test will check the correct behaviour of wdb automatic global db backups.
+          wazuh_db_backup_command.yaml file. The parameters tested are: "enabled", "interval" and "max_files".
+          With the given input the test will check the correct behavior of wdb automatic global db backups.
 
     expected_output:
         - f"Invalid value element for interval..."
