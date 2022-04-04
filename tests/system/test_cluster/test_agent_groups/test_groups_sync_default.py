@@ -61,8 +61,8 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
                               'provisioning', 'big_cluster_40_agents', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-test_time = 400
-sync_delay = 40
+test_time = 800
+sync_delay = 80
 
 @pytest.fixture(scope='function')
 def clean_cluster_environment():
@@ -99,8 +99,8 @@ def test_agent_groups_sync_default(agent_host, clean_cluster_environment):
         agent_data.append(data)
 
     # get the time before all the process is started
-    time_before = time.time()
-    end_time = time_before + test_time
+    # time_before = time.time()
+    end_time = time.time() + test_time
     active_agent = 0
     while time.time() < end_time:
         if active_agent < agents_in_cluster:
@@ -113,4 +113,4 @@ def test_agent_groups_sync_default(agent_host, clean_cluster_environment):
     
     # Check that agent has the expected group assigned in all nodes
     for agent in agent_data:
-        check_agent_groups(agent[1], "default", ["wazuh-master"], host_manager) # replace wazuh-master for test_infra_managers
+        check_agent_groups(agent[1], "default", test_infra_managers, host_manager) # replace wazuh-master for test_infra_managers

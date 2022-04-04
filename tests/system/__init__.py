@@ -74,7 +74,7 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
-        assert group_to_check in group_data
+        assert group_to_check in group_data, f"Did not find the expected group {group_to_check} in data: {group_data} in host: {host}"
 
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
