@@ -144,14 +144,12 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
     
     # Add tested group
     response = query_wdb(case_data["input"])
-    print("Response "+str(response))
 
     # validate output
     assert response == output, f"Assertion Error - expected {output}, but got {response}"
 
     # get agent data and validate agent's groups
     response = query_wdb(f'global get-agent-info {agent_id}')
-    print("Groups Response "+str(response))
     if case_data["expected_group"] == 'None':
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
