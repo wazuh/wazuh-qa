@@ -183,3 +183,27 @@
     output: "ok"
     agent_id: 18
     expected_group: "TestGroup1"
+-
+  name: "Wrong group name format - Assign a group with an invalid group name (has invalid '.' character)"
+  test_case:
+  -
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":001,\"groups\":[\"Test.Group1\"]}]}"
+    output: "ok"
+    agent_id: 19
+    expected_group: "None"
+-
+  name: "Wrong group name format - Assign a group with an invalid group name (has invalid ',' character)"
+  test_case:
+  -
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":001,\"groups\":[\"Test,Group1\"]}]}"
+    output: "err An error occurred during the set of the groups"
+    agent_id: 20
+    expected_group: "None"
+-
+  name: "Wrong group name format - Assign a group with an invalid group name (has invalid '@' character)"
+  test_case:
+  -
+    input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":001,\"groups\":[\"TestGroup1@\"]}]}"
+    output: "err An error occurred during the set of the groups"
+    agent_id: 21
+    expected_group: "None"
