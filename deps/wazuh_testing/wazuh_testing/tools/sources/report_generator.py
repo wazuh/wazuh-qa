@@ -496,7 +496,6 @@ class ReportGenerator:
 
             metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
 
-        # name = f"{component}-{hosts_regex}" if hosts_regex != '.*' else component
         return metric_total
 
     def make_report(self):
