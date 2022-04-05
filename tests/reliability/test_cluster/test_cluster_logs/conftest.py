@@ -105,12 +105,13 @@ def pytest_runtest_makereport(item, call):
         elif report.head_line == 'test_check_logs_order_workers' and item.module.incorrect_order:
             extra.append(pytest_html.extras.html("<h2>Wrong logs order</h2>"))
             # Keys are human/natural sorted.
-            for item in sorted(item.module.incorrect_order,
-                               key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d['node'])]):
-                extra.append(pytest_html.extras.html('<p><b>{node}:</b>\n'
-                                                     '<b> - Log type:</b> {log_type}\n'
-                                                     '<b> - Expected logs:</b> {expected_logs}\n'
-                                                     '<b> - Found log:</b> {found_log}</p>'.format(**item)))
+            for key in sorted(item.module.incorrect_order.keys(),
+                              key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d)]):
+                extra.append(pytest_html.extras.html(f"<p><b>{key}:</b>\n"))
+                for failed_task in item.module.incorrect_order[key]:
+                    extra.append(pytest_html.extras.html('<b> - Log type:</b> {log_type}\n'
+                                                         '<b>   Expected logs:</b> {expected_logs}\n'
+                                                         '<b>   Found log:</b> {found_log}'.format(**failed_task)))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         # Attach repeated Integrity synchronizations per each node in the 'test_cluster_sync' test.
