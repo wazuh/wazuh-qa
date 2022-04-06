@@ -8,9 +8,9 @@
     - name: 'logcollector_configuration_block1'
     elements:
     - location:
-        value: LOCATION1
+        value: LOCATION
     -  log_format:
-         value: LOG_FORMAT1
+         value: LOG_FORMAT
   - section: localfile
     attributes:
     - name: 'logcollector_configuration_block2'

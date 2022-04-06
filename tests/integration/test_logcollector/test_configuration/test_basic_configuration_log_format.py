@@ -136,8 +136,8 @@ windows_tcases = [
 
 macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
-                {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
-                 'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
+                {'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
+                 'VALID_VALUE': True, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
                 {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
                  'CONFIGURATION': 'wazuh_no_defined_location_macos_configuration.yaml'}
                 ]
@@ -172,7 +172,7 @@ metadata_multiple_logcollector_configuration = [metadata_value for metadata_valu
                                                 'configuration' in metadata_value and
                                                 metadata_value['configuration'] == multiple_logcollector_configuration]
 
-configuration_ids += [f"{x['location1']}_{x['log_format1']}_{x['location1']}_{x['log_format2']}"
+configuration_ids += [f"{x['location']}_{x['log_format']}_{x['location2']}_{x['log_format2']}"
                       for x in metadata_multiple_logcollector_configuration]
 
 configurations += load_wazuh_configurations(configurations_path_multiple_logcollector, __name__,
@@ -237,6 +237,10 @@ def check_log_format_valid(cfg):
             log_callback = logcollector.callback_missing_location_macos()
             wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                     error_message="The expected warning missing location value has not been produced")
+        if 'location2' in cfg and cfg['location2'] == 'macos':
+            log_callback = logcollector.callback_duplicated_macos_log_file()
+            wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                                    error_message="The expected warning Log file 'macos' is duplicated")
 
         log_callback = logcollector.callback_monitoring_macos_logs()
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
