@@ -35,9 +35,7 @@ os_version:
     - Red Hat 7
     - Red Hat 6
 references:
-    - https://documentation.wazuh.com/current/user-manual/reference/tools/agent-auth.html
-    - https://documentation.wazuh.com/current/user-manual/registering/command-line-registration.html
-    - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
+    - https://github.com/wazuh/wazuh-qa/issues/2514
 tags:
     - wazuh-db
 '''
@@ -47,8 +45,9 @@ import time
 import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
-from system import check_agent_groups, remove_cluster_agents, clean_cluster_logs
+from system import check_agent_groups
 from system.test_cluster.test_agent_groups.common import register_agent
+
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
@@ -62,18 +61,16 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 test_time = 800
-sync_delay = 80
-
-@pytest.fixture(scope='function')
-def clean_cluster_environment():
-    clean_cluster_logs(test_infra_managers + test_infra_agents, host_manager)
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
+sync_delay = 40
 
 
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_agent_groups_sync_default(agent_host, clean_cluster_environment):
+def test_agent_groups_sync_default(agent_host, clean_environment, test_infra_managers, test_infra_agents,
+                                   host_manager):
     '''
     description: Check that after a long time when the manager has been unable to synchronize de databases, because
     new agents are being continually added, database synchronization is forced and the expected information is in
@@ -82,9 +79,21 @@ def test_agent_groups_sync_default(agent_host, clean_cluster_environment):
     in all the cluster nodes.
     wazuh_min_version: 4.4.0
     parameters:
+        - agent_host:
+            type: List
+            brief: name of the host where the agent will register en each case
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_agents
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering and after starting the agent, the agent has the default group is assigned.
         - Assert that all Agents have been restarted
@@ -92,25 +101,25 @@ def test_agent_groups_sync_default(agent_host, clean_cluster_environment):
         - The 'Agent_name' with ID 'Agent_id' belongs to groups: 'group_name'.
     '''
 
-    # Register agents in manager    
+    # Register agents in manager
     agent_data=[]
     for index, agent in enumerate(test_infra_agents):
         data = register_agent(agent, agent_host, host_manager)
         agent_data.append(data)
 
     # get the time before all the process is started
-    # time_before = time.time()
     end_time = time.time() + test_time
     active_agent = 0
     while time.time() < end_time:
         if active_agent < agents_in_cluster:
             host_manager.run_command(test_infra_agents[active_agent], f'{WAZUH_PATH}/bin/wazuh-control start')
             active_agent = active_agent +1
-    
-    assert active_agent == agents_in_cluster, f"Unable to restart all agents in the expected time. Agents restarted: {active_agent}"
+
+    assert active_agent == agents_in_cluster, f"Unable to restart all agents in the expected time. \
+                                                Agents restarted: {active_agent}"
 
     time.sleep(sync_delay)
-    
+
     # Check that agent has the expected group assigned in all nodes
     for agent in agent_data:
-        check_agent_groups(agent[1], "default", test_infra_managers, host_manager) # replace wazuh-master for test_infra_managers
+        check_agent_groups(agent[1], "default", test_infra_managers, host_manager)
