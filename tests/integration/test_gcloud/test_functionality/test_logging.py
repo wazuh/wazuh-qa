@@ -208,7 +208,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
     timeout = global_parameters.default_timeout + time_interval + 5 if \
         logging_opt != 0 else 5
 
-    for nevents in range(0, 12):
+    for _ in range(12):
         try:
             event = wazuh_log_monitor.start(
                 timeout=timeout, callback=callback_detect_all_gcp,
