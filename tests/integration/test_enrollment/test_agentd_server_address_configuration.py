@@ -64,7 +64,7 @@ import sys
 import pytest
 
 from wazuh_testing.agent import callback_connected_to_manager_ip, callback_invalid_server_address, \
-                                callback_unable_to_connect, CLIENT_KEYS_PATH
+                                callback_could_not_resolve_hostname, CLIENT_KEYS_PATH
 from wazuh_testing.tools import HOSTS_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
@@ -211,7 +211,7 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
                               error_message="The expected 'Connected to enrollment service' message has not been \
                                              produced")
         else:
-            callback = callback_unable_to_connect(final_manager_address)
+            callback = callback_could_not_resolve_hostname(final_manager_address)
             log_monitor.start(timeout=DEFAULT_WAIT_FILE_TIMEOUT, callback=callback,
-                              error_message="The expected 'Unable to connect to enrollment service' message has not \
+                              error_message="The expected 'Could not resolve hostname' message has not \
                                              been produced")
