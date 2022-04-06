@@ -45,8 +45,8 @@ import time
 import pytest
 
 from common import register_agent
-from system import (AGENT_STATUS_ACTIVE, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, 
-                    check_agent_status, check_keys_file, delete_group_of_agents, remove_cluster_agents,
+from system import (AGENT_STATUS_ACTIVE, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
+                    check_keys_file, delete_group_of_agents, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
@@ -65,15 +65,15 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 # Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
-timeout = 10
+timeout = 15
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
-@pytest.mark.parametrize("agent_target", ['wazuh-master','wazuh-worker1'])
+@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
 def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
                                  test_infra_agents, host_manager):
     '''
@@ -111,10 +111,9 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     # Modify local_internal_options
     replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
 
-
     for host in test_infra_managers:
         host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                        after="upgrades.", before="authd.debug=2", replace=replace)
+                                       after="upgrades.", before="authd.debug=2", replace=replace)
     # Restart managers
     restart_cluster(test_infra_managers, host_manager)
     time.sleep(timeout)
@@ -137,8 +136,6 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
 
-        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
-
         # Remove the agent
         remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
 
@@ -152,7 +149,6 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         # Restart agent
         restart_cluster(test_infra_agents, host_manager)
         time.sleep(timeout)
-        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
 
         # Check if remoted.guess_agent_group is disabled
         if(int(status_guess_agent_group) == 0):
