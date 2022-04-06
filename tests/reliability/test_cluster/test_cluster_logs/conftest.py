@@ -126,4 +126,19 @@ def pytest_runtest_makereport(item, call):
             extra.append(pytest_html.extras.html('<p>' + '\n\n'.join(output) + '</p>'))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
+        # Attach nodes were some tasks were repeted or not completed in the requested order from the
+        # 'test_cluster_task_order' test.
+        elif report.head_line == 'test_cluster_task_order' and item.module.incorrect_order:
+            for key in item.module.incorrect_order:
+                extra.append(pytest_html.extras.html("<h2>Wrong task order.</h2>"))
+                extra.append(pytest_html.extras.html(f"<p><b>Concatenated tasks '{key}' and "
+                                                     f"'{item.module.incorrect_order[key]['child_task']}'"
+                                                     f" failed due to {item.module.incorrect_order[key]['status']}"
+                                                     f" logs:\n\t{item.module.incorrect_order[key]['log']}</b>"))
+                # for failed_task in item.module.incorrect_order[key]:
+                #     extra.append(pytest_html.extras.html('<b> - Log type:</b> {log_type}\n'
+                #                                          '<b>   Expected logs:</b> {expected_logs}\n'
+                #                                          '<b>   Found log:</b> {found_log}'.format(**failed_task)))
+            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
+
         report.extra = extra
