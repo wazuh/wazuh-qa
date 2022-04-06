@@ -61,6 +61,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import SocketController, FileMonitor
 from wazuh_testing.tools.sockets import wait_for_tcp_port
 from wazuh_testing.tools.wazuh import DEFAULT_SSL_REMOTE_ENROLLMENT_PORT
+from wazuh_testing.authd import DAEMON_NAME
 from contextlib import contextmanager
 
 # Marks
