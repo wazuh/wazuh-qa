@@ -378,6 +378,11 @@ def callback_log_stream_exited_error():
     return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
+def callback_duplicated_macos_log_file():
+    log_format_message = "WARNING: \(\d+\): Log file 'macos' is duplicated."
+    return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
+
+
 def callback_reconnect_eventchannel(location):
     """Create a callback to detect if specified channel has been reconnected successfully.
     Args:
