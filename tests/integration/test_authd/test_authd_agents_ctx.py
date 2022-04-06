@@ -66,6 +66,7 @@ from wazuh_testing.tools.file import truncate_file, remove_file, recursive_direc
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
 from wazuh_testing.api import get_token_login_api, API_PROTOCOL, API_HOST, API_PORT, API_USER,API_PASS,API_LOGIN_ENDPOINT
+from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
 
 
@@ -91,64 +92,58 @@ monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, T
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 groups_infra = ['001','002', '003', '004']
-
+test_group = "TestGroup"
 timeout = 10
 login_attempts = 3
 sleep = 1
-
-
-
-#TOKEN=$(curl -u wazuh:wazuh -k -X GET "https://localhost:55000/security/user/authenticate?raw=true")
-
-# response = requests.post(f"curl -k -X POST 'https://localhost:55000/groups/' -H 'Content-Type: application/json' -d '{{\"group_id\":\"TestGroup\"}}'' -H \"Authorization: Bearer {token}\"")
-#curl -k -X DELETE "https://localhost:55000/groups/?group_ids="all" -H "Authorization: Bearer $TOKEN"
 
 # Aux
 
 def create_groups_api_request(group, token):
     
     headers = {'Authorization': f"Bearer {token}",}
-    json_data = {'group_id': f"'{group}'",}
+    json_data = {'group_id': f"{group}",}
     response = requests.post('https://localhost:55000/groups', headers=headers, json=json_data, verify=False)
-    print("CREATE GROUP RESPONSE "+str(response))
     return response
 
-def delete_group_api_request(group, token):
+def delete_group_api_request(token):
     headers = {'Authorization': f"Bearer {token}",}
     params = (
         ('pretty', 'true'),
         ('groups_list', 'all'),
     )
     response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
-    print("DELETE GROUP RESPONSE "+str(response))
     return response
 
 
 def set_up_groups(groups_list):
     
-    time.sleep(5)
+    time.sleep(3)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
 
-    print("SET UP GROUPS RESPONSE TOKEN "+str(response_token))
     for group in groups_list:
         time.sleep(3)
         response = create_groups_api_request(group, response_token)
 
 
-def remove_groups(groups_list):
-    time.sleep(5)
+def remove_groups():
+    time.sleep(3)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
-
-    print("REMOVE GROUPS RESPONSE TOKEN"+str(response_token))
-    for group in groups_list:
-        time.sleep(3)
-        response = delete_group_api_request(group, response_token)
+    
+    headers = {'Authorization': f"Bearer {response_token}",}
+    params = (
+        ('pretty', 'true'),
+        ('groups_list', 'all'),
+    )
+    response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
+    return response
 
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
     """Get configurations from the module"""
     yield request.param
+
 
 
 def clean_agents_ctx():
@@ -205,12 +200,12 @@ def clean_agents_timestamp():
 
 
 def check_agent_groups(id, expected, timeout=30):
-    subprocess.call(['/var/ossec/bin/agent_groups', '-a', '-g', id, '-q'])
+    subprocess.call(['/var/ossec/bin/agent_groups', '-s', '-i', id, '-q'])
     wait = time.time() + timeout
     while time.time() < wait:
         groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
         print(str(groups_created))
-        if id in str(groups_created):
+        if expected in str(groups_created):
             return True
     return False
 
@@ -250,7 +245,6 @@ def check_agent_timestamp(id, name, ip, expected):
     found = False
     try:
         with open(timestamp_path) as file:
-#            print("TIMESTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMP")
             file_lines = file.read().splitlines()
             for file_line in file_lines:
                 if line in file_line:
@@ -258,7 +252,6 @@ def check_agent_timestamp(id, name, ip, expected):
                     break
     except IOError:
         raise
-#    print("FOUND!!!!!!!!" + str(found))
     if found == expected:
         return True
     else:
@@ -341,7 +334,6 @@ def register_agent_local_server(Name, Group=None, IP=None):
     receiver_sockets[1].send(message, size=True)
     response = receiver_sockets[1].receive(size=True).decode()
     time.sleep(5)
-#    print("RESPONSEEEEEEEEEE LOCAL!---------" + str(response))
     return response
 
 
@@ -366,25 +358,23 @@ def duplicate_ip_agent_delete_test(server):
         raise Exception('Invalid registration server')
 
     # Register first agent
-    response = register_agent('userA', 'TestGroup', '192.0.0.0')
-    print("RESPONSE ----------------1" + str(response))
+    response = register_agent('userA', test_group, '192.0.0.0')
     create_rids('001')  # Simulate rids was created
     create_diff('userA')  # Simulate diff folder was created
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('001', True), 'Agent key was never created'
-    assert check_agent_groups('001', True), 'Agent group was never created'
+    assert check_agent_groups('001', test_group), 'Did not recieve the expected group: {test_group} for the agent'
     assert check_agent_timestamp('001', 'userA', '192.0.0.0', True), 'Agent_timestamp was never created'
     assert check_rids('001', True), 'Rids file was never created'
     assert check_diff('userA', True), 'Agent diff folder was never created'
 
     # Register agent with duplicate IP
-    response = register_agent('userC', 'TestGroup', '192.0.0.0')
-    print("RESPONSE ----------------2" + str(response))
+    response = register_agent('userC', test_group, '192.0.0.0')
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('002', True), 'Agent key was never created'
     assert check_client_keys('001', False), 'Agent key was not removed'
-    assert check_agent_groups('002', True), 'Agent group was never created'
-    assert check_agent_groups('001', False), 'Agent group was not removed'
+    assert check_agent_groups('002', test_group), 'Did not recieve the expected group: {test_group} for the agent'
+    assert check_agent_groups('001', test_group), 'Agent has groups when agent should not exist'
     assert check_agent_timestamp('002', 'userC', '192.0.0.0', True), 'Agent_timestamp was never created'
     assert check_agent_timestamp('001', 'userA', '192.0.0.0', False), 'Agent_timestamp was not removed'
     assert check_rids('001', False), 'Rids file was was not removed'
@@ -410,29 +400,31 @@ def duplicate_name_agent_delete_test(server):
     else:
         raise Exception('Invalid registration server')
     create_diff('userB')  # Simulate diff folder was created
+    create_rids('003')  # Simulate rids was created
+    response = register_agent('userB', test_group)
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('003', True), 'Agent key was never created'
-    assert check_agent_groups('003', True), 'Agent group was never created'
+    assert check_agent_groups('003', test_group), 'Did not recieve the expected group: {test_group} for the agent'
     assert check_agent_timestamp('003', 'userB', 'any', True), 'Agent_timestamp was never created'
     assert check_rids('003', True), 'Rids file was never created'
     assert check_diff('userB', True), 'Agent diff folder was never created'
 
     # Register agent with duplicate Name
-    response = register_agent('userB', 'TestGroup')
-    print("RESPONSE ----------------4" + str(response))
+    response = register_agent('userB', test_group)
     assert response[:len(SUCCESS_RESPONSE)] == SUCCESS_RESPONSE, 'Wrong response received'
     assert check_client_keys('004', True), 'Agent key was never created'
     assert check_client_keys('003', False), 'Agent key was not removed'
-    assert check_agent_groups('004', True), 'Agent group was never created'
-    assert check_agent_groups('003', False), 'Agent group was not removed'
+    assert check_agent_groups('004', test_group), 'Did not recieve the expected group: {test_group} for the agent'
+    assert check_agent_groups('003', test_group), 'Agent has groups when agent should not exist'
     assert check_agent_timestamp('004', 'userB', 'any', True), 'Agent_timestamp was never created'
     assert check_agent_timestamp('003', 'userB', 'any', False), 'Agent_timestamp was not removed'
     assert check_rids('003', False), 'Rids file was was not removed'
     assert check_diff('userB', False), 'Agent diff folder was not removed'
 
 
-def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment,
-                                     configure_sockets_environment, connect_to_sockets_module, restart_wazuh):
+@pytest.mark.parametrize("server_type",["main", "local"])
+def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment, configure_sockets_environment,
+                                     connect_to_sockets_module, restart_wazuh, server_type):
     '''
     description:
         Check if when the 'wazuh-authd' daemon receives an enrollment request from an agent
@@ -444,7 +436,7 @@ def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment,
         4.2.0
 
     parameters:
-        - get_configuration:time.sleep(5)esting.
+        - get_configuration:
         - configure_sockets_environment:
             type: fixture
             brief: Configure environment for sockets and MITM.
@@ -472,75 +464,16 @@ def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment,
     check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
-    clean_agents_ctx()
-    time.sleep(1)
-    control_service('start', daemon='wazuh-authd')
+    clean_agents_ctx()    
+    control_service('restart')
     check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
     
-    set_up_groups(['TestGroup'])
-    duplicate_ip_agent_delete_test("main")
-    duplicate_name_agent_delete_test("main")
+    set_up_groups([test_group])
+    duplicate_ip_agent_delete_test(server_type)
+    duplicate_name_agent_delete_test(server_type)
 
-    clean_agents_ctx()
-    remove_groups(['TestGroup'])
-
-
-def test_ossec_authd_agents_ctx_local(get_configuration, configure_environment,
-                                      configure_sockets_environment, connect_to_sockets_module, restart_wazuh):
-    '''
-    description:
-        Checks if when the 'wazuh-authd' daemon receives an enrollment request from an agent
-        that has an IP address or name that is already registered, 'authd' creates a record
-        for the new agent and deletes the old one. In this case, the enrollment requests
-        are sent to a local 'UNIX' socket.
-
-    wazuh_min_version:
-        4.2.0
-
-    parameters:
-        - get_configuration:
-            type: fixture
-            brief: Get configurations from the module.
-        - set_up_groups:
-            type: fixture
-            brief: Create a testing group for agents.
-        - configure_environment:
-            type: fixture
-            brief: Configure a custom environment for testing.
-        - configure_sockets_environment:
-            type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
-
-    assertions:
-        - Verify that agents using an already registered IP address can successfully enroll.
-        - Verify that agents using an already registered name can successfully enroll.
-
-    input_description: Different test cases are contained in an external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-authd' daemon.
-
-    expected_output:
-        - r'Accepting connections on port 1515' (When the 'wazuh-authd' daemon is ready to accept enrollments)
-        - r'{"error":0,' (When the agent has enrolled)
-    tags:
-        - keys
-    '''
-    control_service('stop', daemon='wazuh-authd')
-    check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
-    time.sleep(1)
-    clean_logs()
-    clean_agents_ctx()
-    time.sleep(1)
-    control_service('start', daemon='wazuh-authd')
-    check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
-    wait_server_connection()
-    time.sleep(1)
-    set_up_groups(['TestGroup'])
-    duplicate_ip_agent_delete_test("local")
-    duplicate_name_agent_delete_test("local")
-    clean_agents_ctx()
-    remove_groups(['TestGroup'])
+    clean_agents_ctx()    
+    remove_all_agents('wazuhdb')
+    remove_groups()
