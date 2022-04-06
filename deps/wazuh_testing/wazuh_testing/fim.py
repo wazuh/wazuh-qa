@@ -425,6 +425,7 @@ def create_file(type_, path, name, **kwargs):
     try:
         logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
         os.makedirs(path, exist_ok=True, mode=0o777)
+        print(os.makedirs(path, exist_ok=True, mode=0o777))
         if type_ != REGULAR:
             try:
                 kwargs.pop('content')
@@ -561,6 +562,7 @@ def _create_regular_windows(path, name, content=''):
     """
     regular_path = os.path.join(path, name)
     os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
+    time.sleep(3)
 
 
 def delete_file(path, name):
@@ -1117,6 +1119,11 @@ def callback_detect_integrity_state(line):
             return event
     return None
 
+
+def callback_start_synchronization(line):
+    if 'FIM sync module started' in line:
+        return line
+    return None
 
 def callback_detect_synchronization(line):
     if 'Executing FIM sync' in line:
@@ -2505,6 +2512,16 @@ def detect_initial_scan_start(file_monitor):
     """
     file_monitor.start(timeout=60, callback=callback_detect_scan_start,
                        error_message='Did not receive expected "File integrity monitoring scan started" event')
+
+
+def detect_sync_initial_scan_start(file_monitor):
+    """Detect initial sync scan start.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_start_synchronization,
+                       error_message='Did not receive expected "FIM sync scan started" event')
 
 
 def detect_realtime_start(file_monitor):

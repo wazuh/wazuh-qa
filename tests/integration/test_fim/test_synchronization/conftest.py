@@ -50,3 +50,12 @@ def wait_for_fim_start_sync_disabled(request):
     """
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     detect_initial_scan(file_monitor)
+
+
+@pytest.fixture(scope='module')
+def wait_for_fim_start_sync(request):
+    """
+    Wait for the sync initial FIM scan.
+    """
+    file_monitor = getattr(request.module, 'wazuh_log_monitor')
+    detect_initial_scan(file_monitor)

@@ -58,7 +58,7 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -101,10 +101,14 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
+@pytest.fixture(scope='module')
+def create_a_file(get_configuration):
+    """Create a file previous to restart syscheckd"""
+    create_file(REGULAR, test_directories[0], 'damaris.txt')
+    
 # Tests
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
+def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd, wait_for_fim_start_sync_disabled):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
