@@ -47,9 +47,9 @@ import time
 import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
-from system import (create_new_agent_group, check_agent_groups, remove_cluster_agents,
-                    clean_cluster_logs, delete_group_of_agents)
+from system import create_new_agent_group, check_agent_groups
 from system.test_cluster.test_agent_groups.common import register_agent
+
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
@@ -67,27 +67,35 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 test_time = 800
 sync_delay = 40
 
-@pytest.fixture(scope='function')
-def clean_cluster_environment():
-    clean_cluster_logs(test_infra_managers + test_infra_agents, host_manager)
-    yield
-    # Remove the agent once the test has finished
-    remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
-    for group in agent_groups:
-        delete_group_of_agents(test_infra_managers[0], group, host_manager)
 
-
+# Tests
+@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
+@pytest.mark.parametrize("host_manager",[host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_agent_groups_sync_time(agent_host, clean_cluster_environment):
+def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_managers, test_infra_agents,
+                                   host_manager):
     '''
     description: Check that after a long time when the manager has been unable to synchronize de databases, because
     new agents are being continually added, database synchronization is forced and the expected information is in
     all nodes after the expected sync time.
     wazuh_min_version: 4.4.0
     parameters:
+        - agent_host:
+            type: List
+            brief: name of the host where the agent will register en each case
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - test_infra_managers
+            type: List
+            brief: list of manager hosts in enviroment
+        - test_infra_agents
+            type: List
+            brief: list of agent hosts in enviroment
+        - host_manager
+            type: HostManager object
+            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
     expected_output:
@@ -112,7 +120,8 @@ def test_agent_groups_sync_time(agent_host, clean_cluster_environment):
             host_manager.run_command(test_infra_agents[active_agent], f'{WAZUH_PATH}/bin/wazuh-control start')
             active_agent = active_agent +1
     
-    assert active_agent == agents_in_cluster, f"Unable to restart all agents in the expected time. Agents restarted: {active_agent}"
+    assert active_agent == agents_in_cluster, f"Unable to restart all agents in the expected time. \
+                                                Agents restarted: {active_agent}"
 
     time.sleep(sync_delay)
     
