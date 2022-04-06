@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -10,12 +10,12 @@ type: integration
 brief: These tests will check if the 'wazuh-authd' daemon correctly responds to the enrollment requests
        messages respecting the valid option values used in the force configuration block.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+suite: force_options
+
+targets:
     - manager
 
 daemons:
@@ -31,30 +31,23 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 tags:
     - enrollment
+    - authd
 '''
 import os
 import time
 import pytest
-from wazuh_testing.tools.monitoring import make_callback, AUTHD_DETECTOR_PREFIX
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.authd import create_authd_request, validate_authd_response, validate_authd_logs, \
-                                insert_pre_existent_agents, AUTHD_KEY_REQUEST_TIMEOUT
+                                AUTHD_KEY_REQUEST_TIMEOUT
 
 
 # Data paths
@@ -70,7 +63,7 @@ local_internal_options = {'authd.debug': '2'}
 tests = []
 test_case_ids = []
 for file in os.listdir(tests_path):
-    group_name = file.split(".")[0]
+    group_name = file.split('.')[0]
     file_tests = read_yaml(os.path.join(tests_path, file))
     tests = tests + file_tests
     test_case_ids = test_case_ids + [f"{group_name} {test_case['name']}" for test_case in file_tests]
@@ -78,7 +71,7 @@ for file in os.listdir(tests_path):
 # Variables
 log_monitor_paths = []
 
-receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
+receiver_sockets_params = [(('localhost', 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-authd', None, True), ('wazuh-db', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 
@@ -109,6 +102,8 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
 
     wazuh_min_version:
         4.3.0
+
+    tier: 0
 
     parameters:
         - get_current_test_case:

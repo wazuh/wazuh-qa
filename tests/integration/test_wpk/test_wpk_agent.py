@@ -1,7 +1,55 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: Agents can be upgraded remotely. This upgrade is performed by the manager which
+        sends each registered agent a WPK (Wazuh signed package) file that contains the files
+        needed to upgrade the agent to the new version. These tests ensure, on the agent side,
+        that the WPK upgrade works correctly.
+
+components:
+    - wpk
+
+targets:
+    - agent
+
+daemons:
+    - wazuh-authd
+    - wazuh-remoted
+
+os_platform:
+    - linux
+    - windows
+
+os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - Debian Buster
+    - Red Hat 8
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
+
+references:
+    - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
+
+pytest_args:
+    - wpk_version: Specify the version to upgrade
+    - wpk_package_path: Specify the path to the wpk package
+
+tags:
+    - wpk
+'''
 import hashlib
 import os
 import platform
@@ -358,6 +406,49 @@ def prepare_agent_version(get_configuration):
 @mark_skip_agentLinux
 def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
                    configure_environment, start_agent):
+    '''
+    description: Upgrade the agent by WPK package, checking
+                 the expected messages are correct.
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - prepare_agent_version:
+            type: fixture
+            brief: Prepare the initial agent version to match the expected.
+        - download_wpk:
+            type: fixture
+            brief: Download the WPK package to upgrade the agent.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - start_agent:
+            type: fixture
+            brief: Start the agent, as well as the remoted and authd simulators.
+
+    input_description: Test case metadata
+
+    assertions:
+        - Verify that initial agent version matches the expected
+        - Verify the successful upgrade proccess
+        - Verify the upgrade result code is the expected or the error message is the expected
+        - Verify notification status was the expected
+        - Verify the end version matches the expected
+
+    expected_output:
+        - r'Upgrade process result'
+        - r'Upgrade result code'
+        - r'Notification status'
+        - r'End version'
+
+    tags:
+        - wpk
+    '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
 

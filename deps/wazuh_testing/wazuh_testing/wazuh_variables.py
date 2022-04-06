@@ -8,6 +8,7 @@ to maintain if one of them changes in the future.
 '''
 # Local internal options
 WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
 VERBOSE_DEBUG_OUTPUT = 2
 
 WAZUH_SERVICES_STOP = 'stop'

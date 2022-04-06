@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
@@ -18,6 +18,8 @@ import zipfile
 import filetype
 import requests
 import yaml
+from wazuh_testing import logger
+
 
 
 def read_json(file_path):
@@ -109,6 +111,30 @@ def random_string(length, encode=None):
 
     return st
 
+def generate_string(stringLength=10, character='0'):
+    """Generate a string with line breaks.
+
+    Parameters
+    ----------
+    stringLength : int, optional
+        Number of characters to add in the string. Default `10`
+    character : str, optional
+        Character to be added. Default `'0'`
+
+    Returns
+    -------
+    random_str : str
+        String with line breaks.
+    """
+    generated_string = ''
+
+    for i in range(stringLength):
+        generated_string += character
+
+        if i % 127 == 0:
+            generated_string += '\n'
+
+    return generated_string
 
 def read_file(file_path):
     with open(file_path) as f:
@@ -116,9 +142,22 @@ def read_file(file_path):
     return data
 
 
-def write_file(file_path, data):
+def write_file(file_path, data=''):
     with open(file_path, 'w') as f:
         f.write(data)
+
+
+def write_file_without_close(file_path, data=''):
+    """
+    Create and write file without close
+
+    Args:
+        file_path: File path where the file will create.
+        data: Data to write.
+
+    """
+    file = open(file_path, "w")
+    file.write(data)
 
 
 def read_json_file(file_path):
@@ -141,6 +180,17 @@ def write_json_file(file_path, data, ensure_ascii=False):
 
 def write_yaml_file(file_path, data, allow_unicode=True, sort_keys=False):
     write_file(file_path, yaml.dump(data, allow_unicode=allow_unicode, sort_keys=sort_keys))
+
+
+def rename_file(file_path, new_path):
+    """
+    Renames a file
+    Args:
+        file_path (str): File path of the file to rename.
+        new_path (str): New file path after rename.
+    """
+    if os.path.exists(file_path):
+        os.rename(file_path, new_path)
 
 
 def delete_file(file_path):
@@ -405,6 +455,25 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def create_large_file(directory, file_path):
+    """ Create a large file
+    Args:
+         directory(str): directory where the file will be genarated
+         file_path(str): absolute path of the file
+    """
+    # If path exists delete it
+    if os.path.exists(directory):
+        delete_path_recursively(directory)
+    # create directory
+    os.mkdir(directory)
+    file_size = 1024 * 1024 * 960  # 968 MB
+    chunksize = 1024 * 768
+    # create file and write to it.
+    with open(file_path, "a") as f:
+        while os.stat(file_path).st_size < file_size:
+            f.write(random.choice(string.printable) * chunksize)
 
 
 def download_text_file(file_url, local_destination_path):

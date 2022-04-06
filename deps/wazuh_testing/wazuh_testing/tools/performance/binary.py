@@ -16,8 +16,6 @@ from time import sleep
 
 import psutil
 
-MONITOR_LIST = []
-
 logger = logging.getLogger('wazuh-monitor')
 logger.setLevel(logging.INFO)
 
@@ -175,15 +173,8 @@ class Monitor:
                         self.previous_read = info[f'Disk_Read({self.value_unit})']
                         self.previous_write = info[f'Disk_Written({self.value_unit})']
         except psutil.NoSuchProcess:
-            logger.warning(f'Lost PID for {self.process_name}. Trying to obtain a new one. '
-                           'If the process has child processes, this test will not be valid')
-            try:
-                # Try to get another PID for the current process name. This could be wrong if there is more than
-                # one process with the same name (child processes)
-                self.pid = Monitor.get_process_pids(self.process_name, check_children=False)[0]
-                self.set_process()
-            except ValueError:
-                logger.warning(f'Could not obtain a new PID for {self.process_name}. Trying again in {self.time_step}s')
+            logger.warning(f'Lost PID for {self.process_name}')
+            self.shutdown()
         finally:
             info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for process {self.pid}')

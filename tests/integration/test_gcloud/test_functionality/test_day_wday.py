@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        will check if the 'gcp-pubsub' module gets the GCP logs at the date-time
        specified in the configuration and sleeps up to it.
 
-tier: 0
-
-modules:
+components:
     - gcloud
 
-components:
+suite: functionality
+
+targets:
     - agent
     - manager
 
@@ -37,18 +37,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#day
@@ -56,7 +48,10 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#time
 
 tags:
-    - gcloud_functionality
+    - week_day
+    - scan
+    - scheduled
+    - interval
 '''
 import datetime
 import os
@@ -86,6 +81,7 @@ today = datetime.date.today()
 day = today.day
 
 weekDays = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+monthDays = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31, "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11": 30, "12": 31}
 wday = weekDays[today.weekday()]
 
 now = datetime.datetime.now()
@@ -94,10 +90,11 @@ day_time = now.strftime("%H:%M")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_schedule_conf.yaml')
-force_restart_after_restoring = True
+force_restart_after_restoring = False
 
 # configurations
 
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -128,8 +125,7 @@ def get_configuration(request):
     ({'ossec_time_conf'})
 ])
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday(tags_to_apply, get_configuration, configure_environment,
-                  restart_wazuh, wait_for_gcp_start):
+def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs according to the day of the week,
                  of the month, or time set in the configuration. For this purpose, the test will use
@@ -139,6 +135,8 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                  the 'fetch' event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:
@@ -195,22 +193,15 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment,
                                                  error_message='Did not receive expected '
                                                                '"Sleeping until ..." event').result()
 
-    TimeMachine.travel_to_future(datetime.timedelta(seconds=get_next_scan(next_scan_time_log)))
-
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_detect_start_fetching_logs,
-                            error_message='Did not receive expected '
-                                          '"Starting fetching of logs" event')
-
 
 @pytest.mark.parametrize('tags_to_apply', [
     ({'ossec_day_multiple_conf'}),
     ({'ossec_wday_multiple_conf'}),
     ({'ossec_time_multiple_conf'})
 ])
+
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment,
-                           restart_wazuh, wait_for_gcp_start):
+def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module calculates the next scan correctly using time intervals
                  greater than one month, one week, or one day. For this purpose, the test will use different
@@ -218,6 +209,8 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
                  will check that the 'sleep' event is triggered and matches with the set interval.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:
@@ -259,7 +252,6 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
 
     next_scan_time_log = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 60,
                                                  callback=callback_detect_start_gcp_sleep,
-                                                 accum_results=1,
                                                  error_message='Did not receive expected '
                                                                '"Sleeping until ..." event').result()
 
@@ -272,11 +264,18 @@ def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environme
 
     if tags_to_apply == {'ossec_day_multiple_conf'}:
         if today.month + time_interval <= 12:
-            assert next_scan_time.month == today.month + time_interval
+            expected_month = today.month + time_interval
         else:
-            assert next_scan_time.month == (today.month + time_interval) % 12
+            expected_month = (today.month + time_interval) % 12
+
+        if today.day > monthDays[str(expected_month)]:
+            expected_month = expected_month + 1
+
+        assert next_scan_time.month == expected_month
+
     if tags_to_apply == {'ossec_wday_multiple_conf'}:
         assert weekDays[next_scan_time.weekday()] == wday
         assert next_scan_time.day == (today + datetime.timedelta(weeks=time_interval)).day
+
     if tags_to_apply == {'ossec_time_multiple_conf'}:
         assert next_scan_time.day == (today + datetime.timedelta(days=time_interval)).day

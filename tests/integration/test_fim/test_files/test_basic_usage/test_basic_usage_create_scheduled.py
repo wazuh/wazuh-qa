@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
     - manager
 
@@ -37,29 +37,17 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2019
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
+    - macOS Server
     - macOS Catalina
+    - Red Hat 8
     - Solaris 10
     - Solaris 11
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -121,36 +109,36 @@ def get_configuration(request):
 
 
 # tests
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('folder', [
     testdir1,
     testdir2
 ])
-@pytest.mark.parametrize('name, filetype, content, checkers, tags_to_apply, encoding', [
-    ('file', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('socketfile', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file3', REGULAR, 'Sample content', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('fifofile', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file4', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None),
-    ('file-ñ', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, None),
-    pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, {'ossec_conf'}, 'cp950', marks=(pytest.mark.linux,
+@pytest.mark.parametrize('name, filetype, content, checkers, encoding', [
+    ('file', REGULAR, 'Sample content', {CHECK_ALL}, None),
+    ('file2', REGULAR, b'Sample content', {CHECK_ALL}, None),
+    ('socketfile', REGULAR if sys.platform == 'win32' else SOCKET, '', {CHECK_ALL}, None),
+    ('file3', REGULAR, 'Sample content', {CHECK_ALL}, None),
+    ('fifofile', REGULAR if sys.platform == 'win32' else FIFO, '', {CHECK_ALL}, None),
+    ('file4', REGULAR, '', {CHECK_ALL}, None),
+    ('file-ñ', REGULAR, b'', {CHECK_ALL}, None),
+    pytest.param('檔案', REGULAR, b'', {CHECK_ALL}, 'cp950', marks=(pytest.mark.linux,
                                                                                   pytest.mark.darwin,
                                                                                   pytest.mark.sunos5)),
-    pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'koi8-r', marks=(pytest.mark.linux,
+    pytest.param('Образецтекста', REGULAR, '', {CHECK_ALL}, 'koi8-r', marks=(pytest.mark.linux,
                                                                                              pytest.mark.darwin,
                                                                                              pytest.mark.sunos5)),
-    pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp737', marks=(pytest.mark.linux,
+    pytest.param('Δείγμακειμένου', REGULAR, '', {CHECK_ALL}, 'cp737', marks=(pytest.mark.linux,
                                                                                              pytest.mark.darwin,
                                                                                              pytest.mark.sunos5)),
-    pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, 'cp720', marks=(pytest.mark.linux,
+    pytest.param('نصبسيط', REGULAR, '', {CHECK_ALL}, 'cp720', marks=(pytest.mark.linux,
                                                                                      pytest.mark.darwin,
                                                                                      pytest.mark.sunos5)),
-    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, {'ossec_conf'}, None,
+    pytest.param('Ξ³ΞµΞΉΞ±', REGULAR, '', {CHECK_ALL}, None,
                  marks=(pytest.mark.win32,
                         pytest.mark.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/4612')))
 ])
-def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_to_apply, encoding, get_configuration,
+def test_create_file_scheduled(folder, name, filetype, content, checkers, encoding, get_configuration,
                                configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if a special or regular file creation is detected by the 'wazuh-syscheckd' daemon using
@@ -160,6 +148,8 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
                  scheduled scan. Finally, it verifies that only the regular testing files have generated FIM events.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - folder:
@@ -212,7 +202,6 @@ def test_create_file_scheduled(folder, name, filetype, content, checkers, tags_t
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create files
     if encoding is not None:

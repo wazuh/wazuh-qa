@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: The Wazuh 'office365' module allows you to collect all the logs from Offi
        and events into tenant-specific content blobs, which are classified by the type and source
        of the content they contain.
 
-tier: 0
-
-modules:
+components:
     - office365
 
-components:
+suite: configuration
+
+targets:
     - manager
 
 daemons:
@@ -35,25 +35,14 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://github.com/wazuh/wazuh-documentation/blob/develop/source/office365/index.rst
     - https://github.com/wazuh/wazuh-documentation/blob/develop/source/office365/monitoring-office365-activity.rst
-
-tags:
-    - office365_configuration
 '''
 import os
 import sys
@@ -259,6 +248,8 @@ def test_invalid(get_local_internal_options, configure_local_internal_options,
                  Finally, it will verify that error events are generated indicating the source of the errors.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_local_internal_options:
