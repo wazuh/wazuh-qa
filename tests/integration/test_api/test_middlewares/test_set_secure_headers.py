@@ -59,7 +59,7 @@ import requests
 # Tests
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_secure_headers(get_api_details):
+def test_secure_headers(restart_api_module, get_api_details):
     '''
     description: Check if the set_secure_headers API middleware works.
                  For this purpose, the test makes an API request and checks that the response headers fulfill the REST

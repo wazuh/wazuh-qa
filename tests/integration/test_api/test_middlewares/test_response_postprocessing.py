@@ -73,7 +73,7 @@ from wazuh_testing import api
          {'title': 'Unauthorized', 'detail': 'Invalid credentials'})
     ])
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_response_postprocessing(get_api_details, method, endpoint_url, json_body, use_login_token,
+def test_response_postprocessing(restart_api_module, get_api_details, method, endpoint_url, json_body, use_login_token,
                                  expected_status_code, expected_response_text):
     '''
     description: Check if the response_postprocessing API middleware works.
