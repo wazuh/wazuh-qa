@@ -100,7 +100,7 @@ sleep = 1
 # Aux
 
 def create_groups_api_request(group, token):
-    
+
     headers = {'Authorization': f"Bearer {token}",}
     json_data = {'group_id': f"{group}",}
     response = requests.post('https://localhost:55000/groups', headers=headers, json=json_data, verify=False)
@@ -117,7 +117,6 @@ def delete_group_api_request(token):
 
 
 def set_up_groups(groups_list):
-    
     time.sleep(3)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
 
@@ -129,7 +128,6 @@ def set_up_groups(groups_list):
 def remove_groups():
     time.sleep(3)
     response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
-    
     headers = {'Authorization': f"Bearer {response_token}",}
     params = (
         ('pretty', 'true'),
@@ -423,7 +421,7 @@ def duplicate_name_agent_delete_test(server):
 
 
 @pytest.mark.parametrize("server_type",["main", "local"])
-def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment, configure_sockets_environment,
+def test_ossec_authd_agents_ctx(get_configuration, configure_environment, configure_sockets_environment,
                                      connect_to_sockets_module, restart_wazuh, server_type):
     '''
     description:
@@ -459,21 +457,20 @@ def test_ossec_authd_agents_ctx_main(get_configuration, configure_environment, c
         - keys
         - ssl
     '''
-    
+
     control_service('stop', daemon='wazuh-authd')
     check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
-    clean_agents_ctx()    
+    clean_agents_ctx()
     control_service('restart')
     check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
-    
     set_up_groups([test_group])
     duplicate_ip_agent_delete_test(server_type)
     duplicate_name_agent_delete_test(server_type)
 
-    clean_agents_ctx()    
+    clean_agents_ctx()
     remove_all_agents('wazuhdb')
     remove_groups()
