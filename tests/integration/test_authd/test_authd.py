@@ -169,6 +169,6 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'Manager did not respond to sent message!'
         assert response[:len(expected)] == expected, \
             'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)

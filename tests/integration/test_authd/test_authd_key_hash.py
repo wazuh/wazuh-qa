@@ -175,7 +175,7 @@ def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sock
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'Manager did not respond to sent message!'
         assert response[:len(expected)] == expected, \
             'Failed stage "{}". Response was: {} instead of: {}' \
             .format(index+1, response, expected)
