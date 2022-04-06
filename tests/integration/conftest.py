@@ -92,6 +92,24 @@ def restart_wazuh(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
+def restart_wazuh_daemon(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='function')
+def restart_wazuh_daemon_function(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)
@@ -903,7 +921,7 @@ def configure_local_internal_options_function(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
-    
+
 @pytest.fixture(scope='function')
 def truncate_log_files():
     """Truncate all the log files before and after the test execution"""
