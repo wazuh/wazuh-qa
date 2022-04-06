@@ -11,16 +11,19 @@ def get_script_arguments():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description='Wazuh data sources generator',
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-p', '--path', dest='artifact_path', default=None,
-                        help='Artifact path.', action='store')
+                        help='Artifact path.', action='store', required=True)
 
     parser.add_argument('-r', '--report', dest='report_path', default='report.json',
                         help='Report path.', action='store')
+
+    parser.add_argument('-c', '--configuration', dest='configuration_path', default=None,
+                        help='Configuration file path.', action='store')
     return parser.parse_args()
 
 
 def main():
     options = get_script_arguments()
-    parser = ReportGenerator(options.artifact_path)
+    parser = ReportGenerator(options.artifact_path, options.configuration_path)
 
     json_report = parser.make_report()
 

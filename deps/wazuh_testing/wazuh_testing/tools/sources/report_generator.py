@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import re
+import yaml
+import csv
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -290,9 +292,11 @@ class ReportGenerator:
 
     Args:
         target (str): Artifact path.
+        configuration (str): Configuration file path.
 
     Attributes:
         artifact_path (str): Root artifact path.
+        configuration_path (str): Root configuration path.
         agents_path (str): Agents artifact path.
         managers_path (str): Managers artifact path.
         master_path (str): Master artifact path.
@@ -301,7 +305,7 @@ class ReportGenerator:
         n_agents (str): Number of agents.
         cluster_environment (boolean): Cluster or single node environment.
     """
-    def __init__(self, artifact_path):
+    def __init__(self, artifact_path, configuration_path=None):
 
         if os.path.isdir(artifact_path):
             self.artifact_path = artifact_path
@@ -352,6 +356,82 @@ class ReportGenerator:
             self.cluster_environment = False
 
         self.n_agents = len(os.listdir(agents_path))
+
+        if configuration_path:
+            if os.path.isfile(configuration_path):
+                self.configuration_path = configuration_path
+                with open(configuration_path, 'r') as configuration_file:
+                    configurations = yaml.full_load(configuration_file)
+                    for phase in configurations:
+                        if phase['phase']['timeframe'] != 'all':
+                            start = datetime.strptime(phase['phase']['timeframe']['start'], '%Y/%m/%d %H:%M:%S')
+                            end = datetime.strptime(phase['phase']['timeframe']['end'], '%Y/%m/%d %H:%M:%S')
+                            for component_path in self.get_instances_artifacts(component=phase['phase']['hosts']):
+                                phase_dir = os.path.join(component_path['path'], f"phase-{phase['phase']['timeframe']['start'].replace('/','.')}-{phase['phase']['timeframe']['end'].replace('/','.')}")
+                                if not os.path.exists(phase_dir):
+                                    os.makedirs(os.path.join(phase_dir, 'logs'))
+                                    os.makedirs(os.path.join(phase_dir, 'data', 'stats'))
+                                    os.makedirs(os.path.join(phase_dir, 'data', 'binaries'))
+                                ## LOGS
+                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['hosts'], hosts_regex=f"{component_path['name']}"):
+                                    for log_files, path in component_logs['logs'].items():
+                                        if os.path.isfile(path):
+                                            with open(path) as f:
+                                                log_file_content = f.readlines()
+                                                phase_content = []
+                                                for line in log_file_content:
+                                                    timestamp = LogAnalyzer.get_log_timestamp(line)
+                                                    if timestamp:
+                                                        if start <= timestamp <= end:
+                                                            phase_content += line
+                                            with open(os.path.join(phase_dir, 'logs', log_files), 'w') as file:
+                                                file.writelines(phase_content)
+                                ## STATISTICS
+                                statistics_path = os.path.join(component_path['path'], 'data', 'stats')
+                                for component_statistics in os.listdir(statistics_path):
+                                    dataframe = pd.DataFrame()
+                                    dataframe = pd.read_csv(os.path.join(statistics_path, component_statistics))
+                                    timestamp = dataframe['Timestamp']
+                                    phase_dataframe = dataframe[pd.to_datetime(dataframe["Timestamp"]) > start]
+                                    phase_dataframe.to_csv(os.path.join(phase_dir, 'data', 'stats', component_statistics))
+                                ## BINARIES
+                                binaries_path = os.path.join(component_path['path'], 'data', 'binaries')
+                                for component_binaries in os.listdir(binaries_path):
+                                    dataframe = pd.DataFrame()
+                                    dataframe = pd.read_csv(os.path.join(binaries_path, component_binaries))
+                                    timestamp = dataframe['Timestamp']
+                                    phase_dataframe = dataframe[pd.to_datetime(dataframe["Timestamp"]) > start]
+                                    phase_dataframe.to_csv(os.path.join(phase_dir, 'data', 'binaries', component_binaries))
+
+                        else:
+                            for component_path in self.get_instances_artifacts(component=phase['phase']['hosts']):
+                                phase_dir = os.path.join(component_path['path'], f"phase-{phase['phase']['timeframe']}")
+                                if not os.path.exists(phase_dir):
+                                    os.makedirs(os.path.join(phase_dir, 'logs'))
+                                    os.makedirs(os.path.join(phase_dir, 'data', 'stats'))
+                                    os.makedirs(os.path.join(phase_dir, 'data', 'binaries'))
+                                ## LOGS
+                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['hosts'], hosts_regex=f"{component_path['name']}"):
+                                    for log_files, path in component_logs['logs'].items():
+                                        if os.path.isfile(path):
+                                            with open(path) as f:
+                                                log_file_content = f.readlines()
+                                            with open(os.path.join(phase_dir, 'logs', log_files), 'w') as file:
+                                                file.writelines(log_file_content)
+                                ## STATISTICS
+                                statistics_path = os.path.join(component_path['path'], 'data', 'stats')
+                                for component_statistics in os.listdir(statistics_path):
+                                    dataframe = pd.DataFrame()
+                                    dataframe = pd.read_csv(os.path.join(statistics_path, component_statistics))
+                                    dataframe.to_csv(os.path.join(phase_dir, 'data', 'stats', component_statistics))
+                                ## BINARIES
+                                binaries_path = os.path.join(component_path['path'], 'data', 'binaries')
+                                for component_binaries in os.listdir(binaries_path):
+                                    dataframe = pd.DataFrame()
+                                    dataframe = pd.read_csv(os.path.join(binaries_path, component_binaries))
+                                    dataframe.to_csv(os.path.join(phase_dir, 'data', 'binaries', component_binaries))
+        else:
+            self.configuration_path = None
 
     def get_instances_artifacts(self, component, hosts_regex=".*"):
         """Get the artifact path for specified hosts_regex
