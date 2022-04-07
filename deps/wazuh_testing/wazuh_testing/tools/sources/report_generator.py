@@ -61,7 +61,7 @@ class LogAnalyzer:
         return error_lines
 
     @staticmethod
-    def get_error_logs_hosts(log_dict, conf=False):
+    def get_error_logs_hosts(log_dict):
         """Get all the error/warning/critical logs of the logs dictionary.
 
         Args:
@@ -71,21 +71,12 @@ class LogAnalyzer:
         for type in LogAnalyzer.error_codes:
             for host_log in log_dict:
                 error_list_host = []
-                if conf:
-                    for phase_name, phase_logs in host_log['phase_logs'].items():
-                        for log_name, log_path in phase_logs.items():
-                            if os.path.exists(log_path):
-                                host_error = LogAnalyzer.get_error_log_file(log_path, type)
-                                if host_error:
-                                    error_list_host += \
-                                                      [f"[{log_name}] " + host_error_line for host_error_line in host_error]
-                else:
-                    for log_name, log_path in host_log['logs'].items():
-                        if os.path.exists(log_path):
-                            host_error = LogAnalyzer.get_error_log_file(log_path, type)
-                            if host_error:
-                                error_list_host += \
-                                                  [f"[{log_name}] " + host_error_line for host_error_line in host_error]
+                for log_name, log_path in host_log['logs'].items():
+                    if os.path.exists(log_path):
+                        host_error = LogAnalyzer.get_error_log_file(log_path, type)
+                        if host_error:
+                            error_list_host += \
+                                              [f"[{log_name}] " + host_error_line for host_error_line in host_error]
                 if error_list_host:
                     error_dict[type] += [{host_log['name']:  error_list_host}]
         return error_dict
@@ -473,7 +464,7 @@ class ReportGenerator:
         host_log_list = [log for log in os.listdir(files)]
         return host_log_list
 
-    def get_instances_logs(self, log, component, hosts_regex=".*", conf=False):
+    def get_instances_logs(self, log, component, hosts_regex=".*", phase=None):
         """Get the logs path for specified hosts_regex
 
         Args:
@@ -483,21 +474,15 @@ class ReportGenerator:
         """
         artifacts_paths = self.get_instances_artifacts(component, hosts_regex)
         for host_artifact_path in artifacts_paths:
-            if conf:
-                host_artifact_path['phase_logs'] = {}
-                for phase_files in os.listdir(host_artifact_path['path']):
-                    if 'phase' in phase_files:
-                        host_artifact_path['phase_logs'][phase_files] = {}
-            else:
-                host_artifact_path['logs'] = {}
+            host_artifact_path['logs'] = {}
             log_files = self.get_instance_all_log_files(host_artifact_path['name']) if log == 'all' else [log]
 
             for log_file in log_files:
-                if conf:
+                if phase:
                     for phase_files in os.listdir(host_artifact_path['path']):
-                        if 'phase' in phase_files:
+                        if phase.replace('/', '.') in phase_files:
                             phase_path = os.path.join(host_artifact_path['path'], phase_files, 'logs')
-                            host_artifact_path['phase_logs'][phase_files][log_file] = os.path.join(phase_path, log_file)
+                            host_artifact_path['logs'][log_file] = os.path.join(phase_path, log_file)
                 else:
                     general_path = os.path.join(host_artifact_path['path'], 'logs')
                     host_artifact_path['logs'][log_file] = os.path.join(general_path, log_file)
@@ -518,7 +503,7 @@ class ReportGenerator:
                         for host, artifact_path in file.items())
         return files
 
-    def get_instances_statistics(self, statistic, component, hosts_regex='.*'):
+    def get_instances_statistics(self, statistic, component, hosts_regex='.*', phase=None):
         """Get the daemons statistics path for specified hosts_regex
 
         Args:
@@ -526,36 +511,52 @@ class ReportGenerator:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        files = self.get_instances_artifacts(component, hosts_regex)
-        for file in files:
-            file['path'] = os.path.join(file['path'], 'data', 'stats', statistic + '_stats.csv')
-        return files
+        artifacts_paths = self.get_instances_artifacts(component, hosts_regex)
+        for host_artifact_path in artifacts_paths:
+            if phase:
+                for phase_files in os.listdir(host_artifact_path['path']):
+                    if phase.replace('/', '.') in phase_files:
+                        host_artifact_path['path'] = (os.path.join(host_artifact_path['path'], phase_files, 'data', 'stats', statistic + '_stats.csv'))
+            else:
+                host_artifact_path['path'] = os.path.join(host_artifact_path['path'], 'data', 'stats', statistic + '_stats.csv')
+        return artifacts_paths
 
-    def agentd_report(self, component='agents', hosts_regex='.*'):
+    def agentd_report(self, component='agents', hosts_regex='.*', phase=None):
         """Generate wazuh-agentd daemon report, combining metric and statistics.
 
         Args:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        agentd_report = StatisticsAnalyzer.analyze_agentd_statistics(self.get_instances_statistics('wazuh-agentd',
-                                                                                                   component,
+        if self.configuration_path:
+            agentd_statistics_files = self.get_instances_statistics('wazuh-agentd', component, hosts_regex, phase=phase)
+            agentd_report = StatisticsAnalyzer.analyze_agentd_statistics(agentd_statistics_files)
+        else:
+            agentd_report = StatisticsAnalyzer.analyze_agentd_statistics(self.get_instances_statistics('wazuh-agentd',
+                                                                                                       component,
                                                                                                    hosts_regex))
         return agentd_report
 
-    def remoted_report(self, component='managers', hosts_regex='.*'):
+    def remoted_report(self, component='managers', hosts_regex='.*', phase=None):
         """Generate wazuh-remoted daemon report, combining metric and statistics.
 
         Args:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        remoted_report = StatisticsAnalyzer.analyze_remoted_statistics(self.get_instances_statistics('wazuh-remoted',
-                                                                                                     component,
-                                                                                                     hosts_regex))
-        remoted_report = {**remoted_report, **LogAnalyzer.keep_alive_log_parser(self.get_instances_logs(log='ossec.log',
-                                                                                component=component,
-                                                                                hosts_regex=hosts_regex))}
+        if self.configuration_path:
+            remoted_statistics_files = self.get_instances_statistics('wazuh-remoted', component, hosts_regex, phase=phase)
+            remoted_report = StatisticsAnalyzer.analyze_remoted_statistics(remoted_statistics_files)
+            remoted_report = {**remoted_report, **LogAnalyzer.keep_alive_log_parser(self.get_instances_logs(log='ossec.log',
+                                                                                    component=component,
+                                                                                    hosts_regex=hosts_regex, phase=phase))}
+        else:
+            remoted_report = StatisticsAnalyzer.analyze_remoted_statistics(self.get_instances_statistics('wazuh-remoted',
+                                                                                                         component,
+                                                                                                         hosts_regex))
+            remoted_report = {**remoted_report, **LogAnalyzer.keep_alive_log_parser(self.get_instances_logs(log='ossec.log',
+                                                                                    component=component,
+                                                                                    hosts_regex=hosts_regex))}
 
         return remoted_report
 
@@ -564,6 +565,8 @@ class ReportGenerator:
         report = {}
         report['agents'] = {}
         report['managers'] = {}
+        report['agents']['wazuh-agentd'] = {}
+        report['managers']['wazuh-remoted'] = {}
         report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
 
         if self.configuration_path:
@@ -578,12 +581,16 @@ class ReportGenerator:
                     else:
                         timeframe = 'all'
                     phases_metadata.append(timeframe)
-                    report['agents'][f'{timeframe}'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
-                                                                                                         component='agents', conf=True), conf=True)
-                    report['managers'][f'{timeframe}'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
-                                                                                                   component='managers', conf=True), conf=True)
-                    report['metadata'].update({'phases': phases_metadata})
 
+                    report['agents'][f'{timeframe}'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
+                                                                                                         component='agents', phase=timeframe))
+                    report['managers'][f'{timeframe}'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
+                                                                                                   component='managers', phase=timeframe))
+
+                    report['agents']['wazuh-agentd'][f'{timeframe}'] = self.agentd_report(phase=timeframe)
+                    report['managers']['wazuh-remoted'][f'{timeframe}'] = self.remoted_report(phase=timeframe)
+
+                    report['metadata'].update({'phases': phases_metadata})
 
         else:
             report['agents'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
