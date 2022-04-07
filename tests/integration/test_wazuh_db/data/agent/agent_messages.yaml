@@ -106,7 +106,7 @@
                                         "severity":"Untriaged",
                                         "cvss2_score":0,
                                         "cvss3_score":0}'
-    output: 'ok {"action":"INSERT","status":"ERROR"}'
+    output: 'ok {"action":"INSERT","status":"SUCCESS"}'
     stage: "agent vuln_cves insert package with same CVE without checking if the package is present in sys_programs"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package2"'
