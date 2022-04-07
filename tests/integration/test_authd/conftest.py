@@ -15,6 +15,7 @@ from wazuh_testing.tools.services import control_service, check_daemon_status, d
 from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.authd import DAEMON_NAME
 from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
+from wazuh_testing.tools.wazuh_manager import remove_agents
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -233,3 +234,11 @@ def copy_tmp_script(request):
         raise script_path_not_set
 
     shutil.copy(os.path.join(script_path, script_filename), os.path.join("/tmp", script_filename))
+
+
+@pytest.fixture(scope='function')
+def delete_agents():
+
+    yield
+
+    remove_agents('all', 'api')
