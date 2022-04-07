@@ -56,7 +56,7 @@ def detect_gcp_start(file_monitor):
 
 
 def callback_received_messages_number(line):
-    match = re.match(r'.*wm_gcp_pubsub_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages', line)
+    match = re.match(r'.*INFO: Received and acknowledged (\d+) messages', line)
     if match:
         return match.group(1)
     return None
@@ -95,8 +95,8 @@ def callback_detect_schedule_validate_parameters_err(line):
 
 
 def callback_detect_gcp_read_err(line):
-    match_err = re.match(r'.*wm_gcp_pubsub_read\(\): ERROR:.*', line)
-    match_warn = re.match(r'.*wm_gcp_pubsub_read\(\): WARNING: File \'\S+\' not found.*', line)
+    match_err = re.match(r'.*ERROR:.*', line)
+    match_warn = re.match(r'.*WARNING: File \'\S+\' not found.*', line)
 
     if match_err:
         return line
