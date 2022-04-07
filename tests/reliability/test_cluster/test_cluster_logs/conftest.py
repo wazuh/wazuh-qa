@@ -135,10 +135,7 @@ def pytest_runtest_makereport(item, call):
                                                      f"'{item.module.incorrect_order[key]['child_task']}'"
                                                      f" failed due to {item.module.incorrect_order[key]['status']}"
                                                      f" logs:\n\t{item.module.incorrect_order[key]['log']}</b>"))
-                # for failed_task in item.module.incorrect_order[key]:
-                #     extra.append(pytest_html.extras.html('<b> - Log type:</b> {log_type}\n'
-                #                                          '<b>   Expected logs:</b> {expected_logs}\n'
-                #                                          '<b>   Found log:</b> {found_log}'.format(**failed_task)))
+
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         report.extra = extra

@@ -13,7 +13,7 @@ To verify that:
 
 ## General info
 ### Parameters
-The test needs to receive one parameter  (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
+The test needs to receive one parameter (artifacts) in order to be run. If this parameter is not specified, the test will fail. The required parameter is:
 - `--artifacts_path`: Path where cluster logs can be found inside each worker folder. It should follow the structure below:
     ```.
     ├── worker_x

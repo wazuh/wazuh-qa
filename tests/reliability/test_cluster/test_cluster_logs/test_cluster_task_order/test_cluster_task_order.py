@@ -49,14 +49,13 @@ def test_cluster_task_order(artifacts_path):
 
                 if info['parent_end_log'] in line and parent_task in line:
                     if info['started']:
-                        if len(info['workers']) != len(worker_names):
-                            # Check if the information is already there, so we are not storing repeated situations
-                            if parent_task not in incorrect_order:
-                                incorrect_order[parent_task] = {'child_task': info['child_task'], 'log':
-                                                                f"The following worker(s) did not performed the "
-                                                                f"expected task: "
-                                                                f"{set(worker_names) ^ set(info['workers'])}",
-                                                                'status': 'missing'}
+                        # Check if the information is already there, so we are not storing repeated situations
+                        if len(info['workers']) != len(worker_names) and parent_task not in incorrect_order:
+                            incorrect_order[parent_task] = {'child_task': info['child_task'],
+                                                            'log': f"The following worker(s) did not performed "
+                                                                   f"the '{info['child_task']}' task: "
+                                                                   f"{set(worker_names) ^ set(info['workers'])}",
+                                                            'status': 'missing'}
                         info['workers'].clear()
                     else:
                         info['started'] = True
@@ -66,11 +65,8 @@ def test_cluster_task_order(artifacts_path):
     if incorrect_order:
         result = ''
         for key, value in incorrect_order.items():
-            if value['status'] == 'repeated':
-                result += f"Concatenated tasks '{key}' and '{value['child_task']}' failed due to {value['status']} " \
-                          f"logs:\n\t{value['log']}"
-            elif value['status'] == 'missing':
-                result += f"Concatenated tasks '{key}' and '{value['child_task']}' failed due to {value['status']} " \
-                          f"logs:\n\t{value['log']}"
+            result = result.join(
+                f"Concatenated tasks '{key}' and '{value['child_task']}' failed due to {value['status']} "
+                f"logs:\n\t{value['log']}")
 
         pytest.fail(result)
