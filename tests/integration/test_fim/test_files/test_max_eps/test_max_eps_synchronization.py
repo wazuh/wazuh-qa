@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_max_eps
+
+targets:
     - agent
 
 daemons:
@@ -34,26 +34,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -71,7 +58,6 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim_max_eps
     - fim_max_eps_sync
 '''
 import os
@@ -157,6 +143,8 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - configure_local_internal_options_module:
             type: fixture
@@ -192,7 +180,7 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
     tags:
         - scheduled
         - realtime
-        - whodata
+        - who_data
     '''
     try:
         max_eps = int(get_configuration['metadata']['max_eps'])

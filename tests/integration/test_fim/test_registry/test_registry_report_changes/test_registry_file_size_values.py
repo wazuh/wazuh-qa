@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes
+
+targets:
     - agent
 
 daemons:
@@ -115,12 +115,14 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
                  its size on each test case. Finally, the test will verify that the compressed 'diff' file
                  has been created, and the related FIM event includes the 'content_changes' field if the
                  value size does not exceed the specified limit and vice versa.
-                - Case 1: small size - The file is smaller than the file_limit configured, the diff_file is 
+                 - Case 1, small size - The file is smaller than the file_limit configured, the diff_file is 
                  generated and there is content_changes information
-                 - Case 2: big size - The file is smaller than the file_limit configured,sp the diff_file is 
+                 - Case 2, big size - The file is smaller than the file_limit configured,sp the diff_file is 
                  not generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:

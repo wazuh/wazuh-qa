@@ -252,6 +252,14 @@ class HostManager:
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
 
+    def get_host_ip(self, host: str, interface: str):
+        """Get the Ansible object for communicating with the specified host.
+        Args:
+            host (str): Hostname
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
+        """
+        return self.get_host(host).interface(interface).addresses
 
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager

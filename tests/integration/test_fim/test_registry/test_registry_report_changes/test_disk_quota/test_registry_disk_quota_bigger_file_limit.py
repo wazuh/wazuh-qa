@@ -1,5 +1,5 @@
 """
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes_disk_quota
+
+targets:
     - agent
 
 daemons:
@@ -122,12 +122,14 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  'disk_quota' limit, and increase its size on each test case. Finally, the test will verify
                  that the compressed diff file has been created, and the related FIM event includes the
                  'content_changes' field if the value size does not exceed the specified limit.
-                 - Case 1: File size smaller than size_limit - tests that disk_quota is higher than the one originally
+                 - Case 1, File size smaller than size_limit - tests that disk_quota is higher than the one originally
                    configured.
-                 - Case 2: File size bigger than size_limit - tests that disk_quota does not allow for compressed files
+                 - Case 2, File size bigger than size_limit - tests that disk_quota does not allow for compressed files
                    bigger than size_limit (that is the value actually applied to disk_quota as well).
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:
@@ -200,6 +202,6 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
     registry_value_update(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True,
                           validators_after_update=[test_callback])
-    # Delete the vaue created to clean up enviroment
+    # Delete the value created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

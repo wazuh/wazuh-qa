@@ -15,11 +15,11 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -923,9 +923,9 @@ def configure_local_internal_options_function(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 @pytest.fixture(scope='function')
-def truncate_log_files():
-    """Truncate all the log files before and after the test execution"""
-    log_files = [LOG_FILE_PATH]
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)
@@ -934,6 +934,7 @@ def truncate_log_files():
 
     for log_file in log_files:
         truncate_file(log_file)
+
 
 
 @pytest.fixture(scope='function')
@@ -985,13 +986,13 @@ def mock_system_parametrized(system):
 
 
 @pytest.fixture(scope='function')
-def mock_agent_packages():
-    """Add 10 mocked packages to the agent 001 DB"""
-    package_names = mocking.insert_mocked_packages(agent_id='001')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
 
     yield package_names
 
-    mocking.delete_mocked_packages(agent_id='001')
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
 
 
 @pytest.fixture(scope='function')
@@ -1025,3 +1026,52 @@ def mock_agent_function(request):
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='function')
+def remove_backups(backups_path):
+    "Creates backups folder in case it does not exist."
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+    yield
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+
+    
+@pytest.fixture(scope='function')    
+def mock_agent_with_custom_system(agent_system):
+    """Fixture to create a mocked agent with custom system specified as parameter"""
+    if agent_system not in mocking.SYSTEM_DATA:
+        raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
+
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def setup_log_monitor():
+    """Create the log monitor"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def setup_alert_monitor():
+    """Create the alert monitor"""
+    log_monitor = FileMonitor(ALERTS_JSON_PATH)
+
+    yield log_monitor
