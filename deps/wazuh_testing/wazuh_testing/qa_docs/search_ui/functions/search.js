@@ -13,10 +13,12 @@ const httpsAgent = new https.Agent({
 const httpAgent = new http.Agent();
 
 exports.handler = function(event, context, callback) {
-  const host = process.env.ELASTICSEARCH_HOST;
+  // npm config var cannot have '_' within its name
+  const host = process.env.npm_config_elastichost;
   const agent = host.startsWith("http:") ? httpAgent : httpsAgent;
+  const index = process.env.npm_config_index;
 
-  fetch(`${host}/qa-doc/_search`, {
+  fetch(`${host}/${index}/_search`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: event.body,

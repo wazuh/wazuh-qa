@@ -487,6 +487,7 @@ class RemotedSimulator:
         """
         self.upgrade_errors = False
         self.upgrade_success = False
+        upgrade_socket_closed_timeout = 100
 
         while not self.upgrade_errors and self.running:
             try:

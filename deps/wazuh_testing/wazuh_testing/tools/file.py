@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
@@ -10,6 +10,7 @@ import random
 import shutil
 import socket
 import stat
+import sys
 import string
 import xml.etree.ElementTree as ET
 import zipfile
@@ -17,6 +18,8 @@ import zipfile
 import filetype
 import requests
 import yaml
+from wazuh_testing import logger
+
 
 
 def read_json(file_path):
@@ -108,6 +111,30 @@ def random_string(length, encode=None):
 
     return st
 
+def generate_string(stringLength=10, character='0'):
+    """Generate a string with line breaks.
+
+    Parameters
+    ----------
+    stringLength : int, optional
+        Number of characters to add in the string. Default `10`
+    character : str, optional
+        Character to be added. Default `'0'`
+
+    Returns
+    -------
+    random_str : str
+        String with line breaks.
+    """
+    generated_string = ''
+
+    for i in range(stringLength):
+        generated_string += character
+
+        if i % 127 == 0:
+            generated_string += '\n'
+
+    return generated_string
 
 def read_file(file_path):
     with open(file_path) as f:
@@ -115,9 +142,22 @@ def read_file(file_path):
     return data
 
 
-def write_file(file_path, data):
+def write_file(file_path, data=''):
     with open(file_path, 'w') as f:
         f.write(data)
+
+
+def write_file_without_close(file_path, data=''):
+    """
+    Create and write file without close
+
+    Args:
+        file_path: File path where the file will create.
+        data: Data to write.
+
+    """
+    file = open(file_path, "w")
+    file.write(data)
 
 
 def read_json_file(file_path):
@@ -142,6 +182,17 @@ def write_yaml_file(file_path, data, allow_unicode=True, sort_keys=False):
     write_file(file_path, yaml.dump(data, allow_unicode=allow_unicode, sort_keys=sort_keys))
 
 
+def rename_file(file_path, new_path):
+    """
+    Renames a file
+    Args:
+        file_path (str): File path of the file to rename.
+        new_path (str): New file path after rename.
+    """
+    if os.path.exists(file_path):
+        os.rename(file_path, new_path)
+
+
 def delete_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -159,8 +210,16 @@ def download_file(source_url, dest_path):
 
 
 def remove_file(file_path):
+    """Remove a file or a directory path.
+
+    Args:
+        file_path (str): File or directory path to remove.
+    """
     if os.path.exists(file_path):
-        os.remove(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            delete_path_recursively(file_path)
 
 
 def validate_json_file(file_path):
@@ -252,7 +311,9 @@ def copy(source, destination):
     """
     shutil.copy2(source, destination)
     source_stats = os.stat(source)
-    os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
+
+    if sys.platform != 'win32':
+        os.chown(destination, source_stats[stat.ST_UID], source_stats[stat.ST_GID])
 
 
 def bind_unix_socket(socket_path, protocol='TCP'):
@@ -264,7 +325,7 @@ def bind_unix_socket(socket_path, protocol='TCP'):
         socket_path (str): Path where create the unix socket.
         protocol (str): It can be TCP or UDP.
     """
-    if not os.path.exists(socket_path):
+    if not os.path.exists(socket_path) and sys.platform != 'win32':
         sock_type = socket.SOCK_STREAM if protocol.upper() == 'TCP' else socket.SOCK_DGRAM
         new_socket = socket.socket(socket.AF_UNIX, sock_type)
         new_socket.bind(socket_path)
@@ -298,14 +359,15 @@ def set_file_owner_and_group(file_path, owner, group):
     Raises:
         KeyError: If owner or group does not exist.
     """
-    from pwd import getpwnam
-    from grp import getgrnam
+    if sys.platform != 'win32':
+        from pwd import getpwnam
+        from grp import getgrnam
 
-    if os.path.exists(file_path):
-        uid = getpwnam(owner).pw_uid
-        gid = getgrnam(group).gr_gid
+        if os.path.exists(file_path):
+            uid = getpwnam(owner).pw_uid
+            gid = getgrnam(group).gr_gid
 
-        os.chown(file_path, uid, gid)
+            os.chown(file_path, uid, gid)
 
 
 def recursive_directory_creation(path):
@@ -345,7 +407,35 @@ def move_everything_from_one_directory_to_another(source_directory, destination_
 
     for file_name in file_names:
         shutil.move(os.path.join(source_directory, file_name), destination_directory)
-        
+
+
+def join_path(path, system):
+    """Create the path using the separator indicated for the operating system. Used for remote hosts configuration.
+
+    Path can be defined by the following formats
+       path = ['tmp', 'user', 'test']
+       path = ['/tmp/user', test]
+
+    Parameters:
+        path (list(str)): Path list (one item for level).
+        system (str): host system.
+
+    Returns:
+        str: Joined path.
+    """
+    result_path = []
+
+    for item in path:
+        if '\\' in item:
+            result_path.extend([path_item for path_item in item.split('\\')])
+        elif '/' in item:
+            result_path.extend([path_item for path_item in item.split('/')])
+        else:
+            result_path.append(item)
+
+    return '\\'.join(result_path) if system == 'windows' else '/'.join(result_path)
+
+
 def count_file_lines(filepath):
     """Count number of lines of a specified file.
 
@@ -357,3 +447,41 @@ def count_file_lines(filepath):
     """
     with open(filepath, "r") as file:
         return sum(1 for line in file if line.strip())
+
+
+def create_large_file(directory, file_path):
+    """ Create a large file
+    Args:
+         directory(str): directory where the file will be genarated
+         file_path(str): absolute path of the file
+    """
+    # If path exists delete it
+    if os.path.exists(directory):
+        delete_path_recursively(directory)
+    # create directory
+    os.mkdir(directory)
+    file_size = 1024 * 1024 * 960  # 968 MB
+    chunksize = 1024 * 768
+    # create file and write to it.
+    with open(file_path, "a") as f:
+        while os.stat(file_path).st_size < file_size:
+            f.write(random.choice(string.printable) * chunksize)
+
+
+def download_text_file(file_url, local_destination_path):
+    """Download a remote file with text/plain content type.
+
+    Args:
+        file_url (str): Remote URL path where the text file is located.
+        local_destination_path (str): Local path where to save the file content.
+
+    Raises:
+        ValueError: if the URL content type is not 'text/plain'.
+
+    """
+    request = requests.get(file_url, allow_redirects=True)
+
+    if 'text/plain' not in request.headers.get('content-type'):
+        raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
+
+    open(local_destination_path, 'wb').write(request.content)

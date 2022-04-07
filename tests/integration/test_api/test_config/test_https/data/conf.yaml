@@ -4,16 +4,8 @@
   configuration:
      https:
       enabled: no
-      key: "/test_cert/server.key"
-      cert: "/test_cert/server.crt"
-      use_ca: no
-      ca: "/test_cert/ca.crt"
 - tags:
   - https_enabled
   configuration:
      https:
       enabled: yes
-      key: "/test_cert/server.key"
-      cert: "/test_cert/server.crt"
-      use_ca: no
-      ca: "/test_cert/ca.crt"

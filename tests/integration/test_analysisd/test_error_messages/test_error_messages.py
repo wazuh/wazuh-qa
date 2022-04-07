@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: The 'wazuh-analysisd' daemon receives the log messages and compares them 
        Specifically, these tests will check if the 'wazuh-analysisd' daemon handles correctly
        the invalid events it receives.
 
-tier: 0
-
-modules:
+components:
     - analysisd
 
-components:
+suite: error_messages
+
+targets:
     - manager
 
 daemons:
@@ -33,18 +33,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
@@ -103,6 +95,8 @@ def test_error_messages(configure_sockets_environment, connect_to_sockets_module
                  it generates the corresponding error that sends to the 'wazuh-db' daemon socket.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - configure_sockets_environment:

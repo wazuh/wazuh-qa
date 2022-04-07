@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes
+
+targets:
     - agent
 
 daemons:
@@ -58,13 +58,13 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, \
-    callback_diff_size_limit_value, create_registry, registry_parser, modify_registry_value, \
+from wazuh_testing.fim import LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, create_registry, registry_parser, modify_registry_value, \
     check_time_travel, validate_registry_value_event, callback_value_event, REG_SZ
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.fim_module.fim_variables import CB_MAXIMUM_FILE_SIZE
 
 # Marks
 
@@ -116,7 +116,7 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_report_changes'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", {'test_report_changes'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
                            get_configuration, configure_environment, restart_syscheckd_each_time):
     '''
@@ -129,6 +129,8 @@ def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
                  'added' y 'modified' events from the testing value have been generated properly.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:
@@ -178,7 +180,7 @@ def test_file_size_default(key, subkey, arch, value_name, tags_to_apply,
     mode = get_configuration['metadata']['fim_mode']
 
     file_size_values = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=callback_diff_size_limit_value,
+                                               callback=generate_monitoring_callback(CB_MAXIMUM_FILE_SIZE),
                                                accum_results=3,
                                                error_message='Did not receive expected '
                                                              '"Maximum file size limit to generate diff information '

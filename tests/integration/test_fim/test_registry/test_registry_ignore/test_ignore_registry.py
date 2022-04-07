@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_ignore
+
+targets:
     - agent
 
 daemons:
@@ -120,7 +120,6 @@ def get_configuration(request):
     (key, subkey_2, fim.KEY_WOW64_64KEY, ignore_key, False, {'ignore_registry_key'}),
     (key, subkey_2, fim.KEY_WOW64_64KEY, "regex_ignored_key", False, {'ignore_registry_key'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, tags_to_apply,
                              get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start,
                              reset_registry_ignore_path):
@@ -133,6 +132,8 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
                  with the ignored keys and monitored subkey.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - root_key:
@@ -226,7 +227,6 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
     (key, subkey_1, fim.KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'}),
     (key, subkey_2, fim.KEY_WOW64_64KEY, ignore_value, False, {'ignore_registry_value'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, tags_to_apply,
                                get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
@@ -238,6 +238,8 @@ def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, 
                  with the ignored values and monitored subkey.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - root_key:

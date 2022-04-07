@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
     - manager
 
@@ -35,26 +35,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -84,6 +71,7 @@ from wazuh_testing.fim import generate_params, regular_file_cud, callback_non_ex
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+
 
 # Marks
 
@@ -128,7 +116,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('tags_to_apply', [
     {'ossec_conf'}
 ])
@@ -142,6 +130,8 @@ def test_new_directory(tags_to_apply, get_configuration, configure_environment, 
                  the expected FIM events to be generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - tags_to_apply:

@@ -2,7 +2,7 @@ import os
 import sys
 from tempfile import gettempdir
 
-from wazuh_testing.qa_ctl.provisioning.ansible.ansible_instance import AnsibleInstance
+from wazuh_testing.qa_ctl.provisioning.ansible import read_ansible_instance, remove_known_host
 from wazuh_testing.qa_ctl.provisioning.ansible.ansible_inventory import AnsibleInventory
 from wazuh_testing.qa_ctl.run_tests.test_launcher import TestLauncher
 from wazuh_testing.qa_ctl.run_tests.pytest import Pytest
@@ -12,6 +12,7 @@ from wazuh_testing.tools.logging import Logging
 from wazuh_testing.tools.time import get_current_timestamp
 from wazuh_testing.tools import file
 from wazuh_testing.qa_ctl.provisioning.local_actions import qa_ctl_docker_run
+
 
 class QATestRunner():
     """The class encapsulates the build of the tests from the test parameters read from the configuration file
@@ -24,7 +25,7 @@ class QATestRunner():
             inventory_file_path (string): Path of the inventory file generated.
             test_launchers (list(TestLauncher)): Test launchers objects (one for each host).
             qa_ctl_configuration (QACTLConfiguration): QACTL configuration.
-             test_parameters (dict): a dictionary containing all the required data to build the tests
+            test_parameters (dict): a dictionary containing all the required data to build the tests
     """
     LOGGER = Logging.get_logger(QACTL_LOGGER)
 
@@ -36,26 +37,6 @@ class QATestRunner():
 
         self.__process_inventory_data(tests_parameters)
         self.__process_test_data(tests_parameters)
-
-    def __read_ansible_instance(self, host_info):
-        """Read every host info and generate the AnsibleInstance object.
-
-        Attributes:
-            host_info (dict): Dict with the host info needed coming from config file.
-
-        Returns:
-            instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
-        """
-        extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
-        private_key_path = None if 'local_private_key_file_path' not in host_info \
-                                   else host_info['local_private_key_file_path']
-        instance = AnsibleInstance(host=host_info['host'], host_vars=extra_vars,
-                                   connection_method=host_info['connection_method'],
-                                   connection_port=host_info['connection_port'], connection_user=host_info['user'],
-                                   connection_user_password=host_info['password'],
-                                   ssh_private_key_file_path=private_key_path,
-                                   ansible_python_interpreter=host_info['ansible_python_interpreter'])
-        return instance
 
     def __process_inventory_data(self, instances_info):
         """Process config file info to generate the ansible inventory file.
@@ -70,8 +51,12 @@ class QATestRunner():
             for module_key, module_value in host_value.items():
                 if module_key == 'host_info':
                     current_host = module_value['host']
+
+                    # Remove the host IP from known host file to avoid the SSH key fingerprint error
+                    remove_known_host(current_host, QATestRunner.LOGGER)
+
                     if current_host:
-                        instances_list.append(self.__read_ansible_instance(module_value))
+                        instances_list.append(read_ansible_instance(module_value))
 
         inventory_instance = AnsibleInventory(ansible_instances=instances_list)
         self.inventory_file_path = inventory_instance.inventory_file_path
@@ -89,12 +74,14 @@ class QATestRunner():
             test_launcher = TestLauncher([], self.inventory_file_path, self.qa_ctl_configuration)
             for module_key, module_value in host_value.items():
                 hosts = host_value['host_info']['host']
+                ansible_admin_user = host_value['host_info']['ansible_admin_user'] if 'ansible_admin_user' \
+                    in host_value['host_info'] else None
                 if module_key == 'test':
-                    test_launcher.add(self.__build_test(module_value, hosts))
+                    test_launcher.add(self.__build_test(module_value, hosts, ansible_admin_user))
             self.test_launchers.append(test_launcher)
         QATestRunner.LOGGER.debug('Testing data from hosts info was processed successfully')
 
-    def __build_test(self, test_params, host=['all']):
+    def __build_test(self, test_params, host=['all'], ansible_admin_user=None):
         """Private method in charge of reading all the required fields to build one test of type Pytest
 
             Args:
@@ -114,6 +101,13 @@ class QATestRunner():
                 test_dict['tests_path'] = paths['test_files_path']
                 test_dict['tests_result_path'] = paths['test_results_path']
                 test_dict['tests_run_dir'] = paths['run_tests_dir_path']
+
+            test_dict['component'] = test_params['component'] if 'component' in test_params else None
+            test_dict['modules'] = test_params['modules'] if 'modules' in test_params else None
+            test_dict['system'] = test_params['system'] if 'system' in test_params else None
+            test_dict['wazuh_install_path'] = test_params['wazuh_install_path'] if 'wazuh_install_path' in test_params \
+                else None
+            test_dict['ansible_admin_user'] = ansible_admin_user
 
             if 'parameters' in test_params:
                 parameters = test_params['parameters']
@@ -140,16 +134,16 @@ class QATestRunner():
         # If Windows, then run a Linux docker container to run testing stage with qa-ctl testing
         if sys.platform == 'win32':
             tmp_config_file_name = f"config_{get_current_timestamp()}.yaml"
-            tmp_config_file = os.path.join(gettempdir(), 'qa_ctl', tmp_config_file_name)
+            tmp_config_file = os.path.join(gettempdir(), 'wazuh_qa_ctl', tmp_config_file_name)
 
             # Save original directory where to store the results in Windows host
-            original_result_paths = [ self.test_parameters[host_key]['test']['path']['test_results_path'] \
-                for host_key, _ in self.test_parameters.items()]
+            original_result_paths = [self.test_parameters[host_key]['test']['path']['test_results_path']
+                                     for host_key, _ in self.test_parameters.items()]
 
             # Change the destination directory, as the results will initially be stored in the shared volume between
-            # the Windows host and the docker container (Windows tmp as /qa_ctl).
+            # the Windows host and the docker container (Windows tmp as /wazuh_qa_ctl).
             test_results_folder = f"test_results_{get_current_timestamp()}"
-            temp_test_results_files_path = f"/qa_ctl/{test_results_folder}"
+            temp_test_results_files_path = f"/wazuh_qa_ctl/{test_results_folder}"
 
             index = 0
             for host_key, _ in self.test_parameters.items():
@@ -161,12 +155,12 @@ class QATestRunner():
             file.write_yaml_file(tmp_config_file, {'tests': self.test_parameters})
 
             try:
-                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.script_parameters.qa_branch,
+                qa_ctl_docker_run(tmp_config_file_name, self.qa_ctl_configuration.qa_ctl_launcher_branch,
                                   self.qa_ctl_configuration.debug_level, topic='launching the tests')
                 # Move all test results to their original paths specified in Windows qa-ctl configuration
                 index = 0
                 for _, host_data in self.test_parameters.items():
-                    source_directory = os.path.join(gettempdir(), 'qa_ctl', f"{test_results_folder}_{index}")
+                    source_directory = os.path.join(gettempdir(), 'wazuh_qa_ctl', f"{test_results_folder}_{index}")
                     file.move_everything_from_one_directory_to_another(source_directory,  original_result_paths[index])
                     file.delete_path_recursively(source_directory)
                     QATestRunner.LOGGER.info(f"The results of {host_data['test']['path']['test_files_path']} tests "

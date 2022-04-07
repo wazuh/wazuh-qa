@@ -63,14 +63,16 @@
 - tags:
   - file_limit_conf
   apply_to_modules:
-  - MODULE_NAME
+  - test_file_limit_full
+  - test_file_limit_values
+  - test_file_limit_capacity_alerts
   sections:
   - section: syscheck
     elements:
     - disabled:
         value: 'no'
     - frequency:
-        value: 30
+        value: 10
     - directories:
         value: TEST_DIRECTORIES
         attributes:

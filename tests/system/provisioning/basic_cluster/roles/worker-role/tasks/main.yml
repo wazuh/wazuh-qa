@@ -29,6 +29,13 @@
     dest: /wazuh
     version: "{{ wazuh_branch }}"
 
+- name: "Clone wazuh-qa repository"
+  git:
+    repo: "https://github.com/wazuh/wazuh-qa"
+    dest: /wazuh-qa
+    version: "{{ wazuh_qa_branch }}"
+    depth: '1'
+
 - name: Install worker
   args:
     chdir: /wazuh
@@ -85,6 +92,10 @@
       authd.debug=2
       wazuh_clusterd.debug=2
       wazuh_db.debug=2
+      wazuh_modules.debug=2
 
 - name: Restart Wazuh
   command: /var/ossec/bin/wazuh-control restart
+
+- name: "Install necessary dependencies"
+  command: /var/ossec/framework/python/bin/python3.9 -m pip install lockfile filetype certifi testinfra

@@ -27,19 +27,19 @@ def validate_gcp_event(event):
 
 
 def callback_detect_start_gcp(line):
-    if 'wm_gcp_main(): INFO: Module started.' in line:
+    if 'wm_gcp_pubsub_main(): INFO: Module started.' in line:
         return line
     return None
 
 
 def callback_detect_start_fetching_logs(line):
-    if 'wm_gcp_main(): DEBUG: Starting fetching of logs.' in line:
+    if 'wm_gcp_pubsub_main(): DEBUG: Starting fetching of logs.' in line:
         return line
     return None
 
 
 def callback_detect_start_gcp_sleep(line):
-    match = re.match(r'.*wm_gcp_main\(\): DEBUG: Sleeping until: (\S+ \S+)', line)
+    match = re.match(r'.*wm_gcp_pubsub_main\(\): DEBUG: Sleeping until: (\S+ \S+)', line)
 
     if match:
         return match.group(1)
@@ -56,7 +56,7 @@ def detect_gcp_start(file_monitor):
 
 
 def callback_received_messages_number(line):
-    match = re.match(r'.*wm_gcp_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages', line)
+    match = re.match(r'.*wm_gcp_pubsub_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages', line)
     if match:
         return match.group(1)
     return None
@@ -95,8 +95,8 @@ def callback_detect_schedule_validate_parameters_err(line):
 
 
 def callback_detect_gcp_read_err(line):
-    match_err = re.match(r'.*wm_gcp_read\(\): ERROR:.*', line)
-    match_warn = re.match(r'.*wm_gcp_read\(\): WARNING: File \'\S+\' not found.*', line)
+    match_err = re.match(r'.*wm_gcp_pubsub_read\(\): ERROR:.*', line)
+    match_warn = re.match(r'.*wm_gcp_pubsub_read\(\): WARNING: File \'\S+\' not found.*', line)
 
     if match_err:
         return line
@@ -107,7 +107,7 @@ def callback_detect_gcp_read_err(line):
 
 def callback_detect_gcp_wmodule_err(line):
     match_err = re.match(r'.*read_main_elements\(\): ERROR: \(\d+\): Invalid element in the configuration.*', line)
-    match_deb = re.match(r'.*Read_GCP\(\): DEBUG: Empty configuration for module \'gcp-pubsub\'', line)
+    match_deb = re.match(r'.*Read_GCP_pubsub\(\): DEBUG: Empty configuration for module \'gcp-pubsub\'', line)
 
     if match_err:
         return line
