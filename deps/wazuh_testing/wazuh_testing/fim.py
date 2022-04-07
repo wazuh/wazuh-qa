@@ -425,7 +425,6 @@ def create_file(type_, path, name, **kwargs):
     try:
         logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
         os.makedirs(path, exist_ok=True, mode=0o777)
-        print(os.makedirs(path, exist_ok=True, mode=0o777))
         if type_ != REGULAR:
             try:
                 kwargs.pop('content')

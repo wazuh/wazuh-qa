@@ -105,7 +105,7 @@ def get_configuration(request):
 def create_a_file(get_configuration):
     """Create a file previous to restart syscheckd"""
     create_file(REGULAR, test_directories[0], 'damaris.txt')
-    
+
 # Tests
 
 def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd, wait_for_fim_start_sync_disabled):

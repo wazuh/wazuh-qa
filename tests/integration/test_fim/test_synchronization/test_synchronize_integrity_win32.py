@@ -65,23 +65,25 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.modules.fim import WINDOWS_HKEY_LOCAL_MACHINE
+from wazuh_testing.modules import TIER2, WINDOWS
 
 # Marks
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
+pytestmark = [WINDOWS, TIER2]
 
 # variables
-key = "HKEY_LOCAL_MACHINE"
+
 subkey = "SOFTWARE\\test_key"
 
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
-test_regs = [os.path.join(key, subkey)]
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_integrity_scan_win32.yaml')
 testdir1, testdir2 = test_directories
 conf_params = {'TEST_DIRECTORIES': test_directories,
-               'TEST_REGS': os.path.join(key, subkey)}
+               'TEST_REGS': os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)}
 
 file_list = []
 subkey_list = []
@@ -111,7 +113,7 @@ def extra_configuration_before_yield():
     for testdir in test_directories:
         for file, reg in zip(file_list, subkey_list):
             create_file(REGULAR, testdir, file, content='Sample content')
-            create_registry(registry_parser[key], os.path.join(key, 'SOFTWARE', reg), KEY_WOW64_64KEY)
+            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, 'SOFTWARE', reg), KEY_WOW64_64KEY)
 
 
 def callback_integrity_or_whodata(line):
@@ -173,7 +175,7 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
-    key_h = create_registry(registry_parser[key], subkey, KEY_WOW64_64KEY)
+    key_h = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
 
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
@@ -212,5 +214,5 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
     sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
-    assert sending_event['data']['path'] == os.path.join(key, subkey)
+    assert sending_event['data']['path'] == os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)
     assert sending_event['data']['arch'] == '[x64]'
