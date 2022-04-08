@@ -252,23 +252,6 @@
     - interval:
         value: ''
 
-# conf 18
-- tags:
-  - invalid_logging
-  apply_to_modules:
-  - 'MODULE_NAME'
-  sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - logging:
-        value: ''
-
 # conf 19
 - tags:
   - invalid_schedule
