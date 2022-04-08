@@ -51,30 +51,26 @@ import json
 import random
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import make_callback, WAZUH_DB_PREFIX
-from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
+from wazuh_testing.tools.file import get_list_of_content_yml
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations
 
+# Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 agent_message_files = os.path.join(test_data_path, 'agent')
-global_message_files = os.path.join(test_data_path, 'global')
+global_message_file = os.path.join(test_data_path, 'global', 'global_messages.yaml')
 
+global_module_tests = get_list_of_content_yml(global_message_file)
 agent_module_tests = []
-global_module_tests = []
-
 for file in os.listdir(agent_message_files):
     with open(os.path.join(agent_message_files, file)) as f:
         agent_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
-for file in os.listdir(global_message_files):
-    with open(os.path.join(global_message_files, file)) as f:
-        global_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
 # Variables
 log_monitor_paths = []

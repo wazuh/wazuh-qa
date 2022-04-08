@@ -157,7 +157,7 @@
     stage: 'agent vuln_cves update status by type "PACKAGE"'
   -
     input: 'agent 000 sql SELECT count(status) FROM vuln_cves WHERE type = "PACKAGE"'
-    output: 'ok [{"count(status)":3}]'
+    output: 'ok [{"count(status)":4}]'
     stage: 'agent vuln_cves checking update status by type "PACKAGE"'
   -
     input: 'agent 000 vuln_cves update_status {"new_status":"VALID",
@@ -166,7 +166,7 @@
     stage: 'agent vuln_cves update status by type "PACKAGE" again'
   -
     input: 'agent 000 sql SELECT count(status) FROM vuln_cves WHERE type = "PACKAGE"'
-    output: 'ok [{"count(status)":3}]'
+    output: 'ok [{"count(status)":4}]'
     stage: 'agent vuln_cves checking update status by type "PACKAGE" again'
   -
     input: 'agent 000 vuln_cves remove {"cve":"CVE-2021-1001",
