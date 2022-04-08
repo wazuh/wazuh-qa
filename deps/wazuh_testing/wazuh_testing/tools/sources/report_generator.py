@@ -398,11 +398,18 @@ class ReportGenerator:
                                             with open(path) as f:
                                                 log_file_content = f.readlines()
                                                 phase_content = []
+                                                previous_line = None
                                                 for line in log_file_content:
                                                     timestamp = LogAnalyzer.get_log_timestamp(line)
                                                     if timestamp:
                                                         if start <= timestamp <= end:
                                                             phase_content += line
+                                                            if 'inserting' in line or 'Sending keep alive' in line:
+                                                                previous_line = line
+                                                    else:
+                                                        if previous_line:
+                                                            if 'merged.mg' in line or 'agent_ip' in line or "'" in line:
+                                                                phase_content += line
                                             with open(os.path.join(phase_dir, 'logs', log_files), 'w') as file:
                                                 file.writelines(phase_content)
                                 ## STATISTICS
