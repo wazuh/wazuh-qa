@@ -23,7 +23,8 @@ import {
     navigate,
     validateURLIncludes,
     setCookies,
-    preserveCookie
+    preserveCookie,
+    timestampToDate
 } from '../integration/utils/driver';
 const cookieMock = require('../../cookie.json');
 const loginMethod = 'xpack'
@@ -56,7 +57,17 @@ before(() => {
 })
 
 beforeEach(() => {
-    setCookies(cookieMock);
+    cy.getCookies().then((currentCookie) => {
+        let today = new Date();
+        let todayDate = timestampToDate(today);
+        const [cookie] = cookieMock.map(e => new Date(e.expiry));
+        let expiryDateCookieSaved = timestampToDate([cookie][0]);
+        if ( expiryDateCookieSaved < todayDate) {
+            setCookies(currentCookie)
+        } else {
+            setCookies(cookieMock)
+        };
+    });
     cy.setSessionStorage('healthCheck', 'executed');
     updateExpiryValueCookies();
     preserveCookie()

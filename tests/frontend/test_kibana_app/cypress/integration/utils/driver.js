@@ -148,3 +148,7 @@ export const clickXpathElement = (selector) => {
 export const xpathElementIsVisible = (selector) => {
   return getXpathElement(selector).should('exist').should('be.visible');
 };
+export const timestampToDate = (e) => {
+  let newDates = e.getDate()+"/"+(e.getMonth()+1)+"/"+e.getFullYear()+" "+e.getHours()+":"+e.getMinutes()+":"+e.getSeconds();
+  return newDates;
+};
