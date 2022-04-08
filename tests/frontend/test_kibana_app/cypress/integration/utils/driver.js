@@ -151,4 +151,4 @@ export const xpathElementIsVisible = (selector) => {
 export const timestampToDate = (e) => {
   let newDates = e.getDate()+"/"+(e.getMonth()+1)+"/"+e.getFullYear()+" "+e.getHours()+":"+e.getMinutes()+":"+e.getSeconds();
   return newDates;
-}
+};
