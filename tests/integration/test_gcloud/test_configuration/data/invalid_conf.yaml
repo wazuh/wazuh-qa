@@ -251,6 +251,7 @@
         value: 'CREDENTIALS_FILE'
     - interval:
         value: ''
+
 # conf 18
 - tags:
   - invalid_logging
@@ -266,10 +267,11 @@
     - credentials_file:
         value: 'CREDENTIALS_FILE'
     - logging:
-        value: 'aaaaa'
+        value: ''
+
 # conf 19
 - tags:
-  - invalid_logging
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   sections:
@@ -281,8 +283,8 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - logging:
-        value: ''
+    - day:
+        value: 'aaaaa'
 # conf 20
 - tags:
   - invalid_schedule
@@ -298,7 +300,7 @@
     - credentials_file:
         value: 'CREDENTIALS_FILE'
     - day:
-        value: 'aaaaa'
+        value: ''
 # conf 21
 - tags:
   - invalid_schedule
@@ -313,8 +315,9 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - day:
-        value: ''
+    - wday:
+        value: 'aaaaa'
+
 # conf 22
 - tags:
   - invalid_schedule
@@ -330,7 +333,8 @@
     - credentials_file:
         value: 'CREDENTIALS_FILE'
     - wday:
-        value: 'aaaaa'
+        value: ''
+
 # conf 23
 - tags:
   - invalid_schedule
@@ -345,8 +349,9 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - wday:
-        value: ''
+    - time:
+        value: 'aaaaa'
+
 # conf 24
 - tags:
   - invalid_schedule
@@ -362,24 +367,9 @@
     - credentials_file:
         value: 'CREDENTIALS_FILE'
     - time:
-        value: 'aaaaa'
-# conf 25
-- tags:
-  - invalid_schedule
-  apply_to_modules:
-  - 'MODULE_NAME'
-  sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - time:
         value: ''
-# conf 26
+
+# conf 25
 - tags:
   - invalid_day_wday
   apply_to_modules:
@@ -397,7 +387,8 @@
         value: 1
     - wday:
         value: 'monday'
-# conf 27
+
+# conf 26
 - tags:
   - invalid_gcp_wmodule
   apply_to_modules:
