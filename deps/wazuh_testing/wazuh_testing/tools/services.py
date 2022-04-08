@@ -206,14 +206,13 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
         TimeoutError: If the daemon status is wrong after timeout seconds.
     """
     condition_met = False
-    if sys.platform == 'win32':
-        condition_met = check_if_process_is_running('wazuh-agent.exe') == running_condition
-    else:
-        start_time = time.time()
-        elapsed_time = 0
+    start_time = time.time()
+    elapsed_time = 0
 
-        while elapsed_time < timeout and not condition_met:
-
+    while elapsed_time < timeout and not condition_met:
+        if sys.platform == 'win32':
+            condition_met = check_if_process_is_running('wazuh-agent.exe') == running_condition
+        else:
             control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
                                                    stdout=subprocess.PIPE).stdout.decode()
             condition_met = True
@@ -236,9 +235,10 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
                             condition_met = False
                     if daemon_running != running_condition:
                         condition_met = False
-            if not condition_met:
-                time.sleep(1)
-            elapsed_time = time.time() - start_time
+        if not condition_met:
+            time.sleep(1)
+        elapsed_time = time.time() - start_time
+
     if not condition_met:
         raise TimeoutError(f"{target_daemon} does not meet condition: running = {running_condition}")
     return condition_met
