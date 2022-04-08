@@ -71,7 +71,6 @@ enabled = 'yes'
 pull_on_start = 'yes'
 max_messages = 200
 interval = '2h'
-logging = "debug"
 day = 9
 wday = 'tuesday'
 time = '08:00'
@@ -89,7 +88,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'ENABLED': enabled,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'INTERVAL': interval, 'LOGGING': logging, 'DAY': day, 'WDAY': wday,
+               'INTERVAL': interval, 'DAY': day, 'WDAY': wday,
                'TIME': time, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
@@ -211,5 +210,4 @@ def test_remote_configuration(get_configuration, configure_environment, reset_os
         assert gcp_remote['enabled'] == 'yes'
         assert gcp_remote['pull_on_start'] == 'yes'
         assert gcp_remote['max_messages'] == 100
-        assert gcp_remote['logging'] == 'info'
         assert gcp_remote['interval'] == 3600

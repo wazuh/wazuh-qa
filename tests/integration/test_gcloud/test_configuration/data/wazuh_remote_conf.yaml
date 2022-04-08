@@ -33,8 +33,6 @@
         value: 'PULL_ON_START'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
     - interval:
         value: 'INTERVAL'
     - day:
@@ -67,8 +65,6 @@
         value: 'MAX_MESSAGES'
     - max_messages:
         value: 50
-    - logging:
-        value: 'LOGGING'
     - wday:
         value: 'WDAY'
     - wday:

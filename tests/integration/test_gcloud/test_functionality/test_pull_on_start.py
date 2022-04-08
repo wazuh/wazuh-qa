@@ -84,7 +84,7 @@ monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'INTERVAL': interval,
-               'MAX_MESSAGES': max_messages, 'LOGGING': logging, 'MODULE_NAME': __name__}
+               'MAX_MESSAGES': max_messages, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        apply_to_all=({'PULL_ON_START': pull_on_start_value} for pull_on_start_value in pull_on_start),
