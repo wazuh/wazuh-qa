@@ -385,14 +385,14 @@ class ReportGenerator:
                         if phase['phase']['timeframe'] != 'all':
                             start = datetime.strptime(phase['phase']['timeframe']['start'], '%Y/%m/%d %H:%M:%S')
                             end = datetime.strptime(phase['phase']['timeframe']['end'], '%Y/%m/%d %H:%M:%S')
-                            for component_path in self.get_instances_artifacts(component=phase['phase']['hosts']):
+                            for component_path in self.get_instances_artifacts(component=phase['phase']['component']):
                                 phase_dir = os.path.join(component_path['path'], f"phase-{phase['phase']['timeframe']['start'].replace('/','.')}-{phase['phase']['timeframe']['end'].replace('/','.')}")
                                 if not os.path.exists(phase_dir):
                                     os.makedirs(os.path.join(phase_dir, 'logs'))
                                     os.makedirs(os.path.join(phase_dir, 'data', 'stats'))
                                     os.makedirs(os.path.join(phase_dir, 'data', 'binaries'))
                                 ## LOGS
-                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['hosts'], hosts_regex=f"{component_path['name']}"):
+                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['component'], hosts_regex=f"{component_path['name']}"):
                                     for log_files, path in component_logs['logs'].items():
                                         if os.path.isfile(path):
                                             with open(path) as f:
@@ -430,14 +430,14 @@ class ReportGenerator:
                                     phase_dataframe.to_csv(os.path.join(phase_dir, 'data', 'binaries', component_binaries))
 
                         else:
-                            for component_path in self.get_instances_artifacts(component=phase['phase']['hosts']):
+                            for component_path in self.get_instances_artifacts(component=phase['phase']['component']):
                                 phase_dir = os.path.join(component_path['path'], f"phase-{phase['phase']['timeframe']}")
                                 if not os.path.exists(phase_dir):
                                     os.makedirs(os.path.join(phase_dir, 'logs'))
                                     os.makedirs(os.path.join(phase_dir, 'data', 'stats'))
                                     os.makedirs(os.path.join(phase_dir, 'data', 'binaries'))
                                 ## LOGS
-                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['hosts'], hosts_regex=f"{component_path['name']}"):
+                                for component_logs in self.get_instances_logs(log="all", component=phase['phase']['component'], hosts_regex=f"{component_path['name']}"):
                                     for log_files, path in component_logs['logs'].items():
                                         if os.path.isfile(path):
                                             with open(path) as f:
@@ -515,7 +515,7 @@ class ReportGenerator:
             del host_artifact_path['path']
         return artifacts_paths
 
-    def get_instances_process_metrics(self, process, component, hosts_regex='.*'):
+    def get_instances_process_metrics(self, process, component, hosts_regex='.*', phase=None):
         """Get the metrics statistics path for specified hosts_regex
 
         Args:
@@ -523,11 +523,16 @@ class ReportGenerator:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        files = self.get_instances_artifacts(component, hosts_regex)
-        for file in files:
-            file.update((host, os.path.join(artifact_path, 'data', 'binaries', process + '.csv'))
-                        for host, artifact_path in file.items())
-        return files
+        artifacts_paths = self.get_instances_artifacts(component, hosts_regex)
+        for host_artifact_path in artifacts_paths:
+            if phase:
+                for phase_files in os.listdir(host_artifact_path['path']):
+                    if phase.replace('/', '.') in phase_files:
+                        host_artifact_path['path'] = (os.path.join(host_artifact_path['path'], phase_files, 'data', 'binaries', process + '.csv'))
+            else:
+                host_artifact_path.update((host, os.path.join(artifact_path, 'data', 'binaries', process + '.csv'))
+                            for host, artifact_path in host_artifact_path.items())
+        return artifacts_paths
 
     def get_instances_statistics(self, statistic, component, hosts_regex='.*', phase=None):
         """Get the daemons statistics path for specified hosts_regex
@@ -586,7 +591,7 @@ class ReportGenerator:
 
         return remoted_report
 
-    def metric_report(self, component='manager', hosts_regex='.*'):
+    def metric_report(self, component='manager', hosts_regex='.*', phase=None):
         """Generate all Wazuh metrics report.
 
         Args:
@@ -599,7 +604,11 @@ class ReportGenerator:
                                                      in ['managers', 'workers', 'master']) else self.daemons_agent
 
         for daemon in metric_daemons:
-            metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex)
+            if self.configuration_path:
+                metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex, phase=phase)
+
+            else:
+                metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex)
 
             metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
 
@@ -613,6 +622,8 @@ class ReportGenerator:
         report['managers'] = {}
         report['agents']['wazuh-agentd'] = {}
         report['managers']['wazuh-remoted'] = {}
+        report['agents']['metrics'] = {}
+        report['managers']['metrics'] = {}
         report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
 
         if self.configuration_path:
@@ -639,7 +650,7 @@ class ReportGenerator:
                         unexpected_error = 'Unexpected error calculating agentd statistics'
                         logging.error(unexpected_error)
                         logging.error(e)
-                        report['agents']['wazuh-agentd'] = {'ERROR': unexpected_error}
+                        report['agents']['wazuh-agentd'][f'{timeframe}'] = {'ERROR': unexpected_error}
 
                     try:
                         report['managers']['wazuh-remoted'][f'{timeframe}'] = self.remoted_report(phase=timeframe)
@@ -647,7 +658,23 @@ class ReportGenerator:
                         unexpected_error = 'Unexpected error calculating remoted statistics'
                         logging.error(unexpected_error)
                         logging.error(e)
-                        report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
+                        report['managers']['wazuh-remoted'][f'{timeframe}'] = {'ERROR': unexpected_error}
+
+                    try:
+                        report['agents']['metrics'][f'{timeframe}'] = self.metric_report('agents', phase=timeframe)
+                    except Exception as e:
+                        unexpected_error = 'Unexpected error calculating agents metrics'
+                        logging.error(unexpected_error)
+                        logging.error(e)
+                        report['agents']['metrics'][f'{timeframe}'] = {'ERROR': unexpected_error}
+
+                    try:
+                        report['managers']['metrics'][f'{timeframe}'] = self.metric_report('managers', phase=timeframe)
+                    except Exception as e:
+                        unexpected_error = 'Unexpected error calculating managers metrics'
+                        logging.error(unexpected_error)
+                        logging.error(e)
+                        report['managers']['metrics'][f'{timeframe}'] = {'ERROR': unexpected_error}
 
                     report['metadata'].update({'phases': phases_metadata})
 
