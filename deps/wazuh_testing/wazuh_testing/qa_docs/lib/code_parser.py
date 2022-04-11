@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -18,7 +18,7 @@ STOP_FIELDS = ['tests', 'test_cases']
 
 
 class CodeParser:
-    """Class that parses the content of the test files.
+    """Class that parses the content of the module files.
 
     Attributes:
         conf (Config): A `Config` instance with the loaded configuration.
@@ -56,12 +56,15 @@ class CodeParser:
         return False
 
     def remove_ignored_fields(self, doc):
-        """Remove the fields from a parsed test file to delete the fields that are not mandatory or optional.
+        """Remove the fields from a parsed module file to delete the fields that are not mandatory or optional.
+
+        It may disappear because the fields that are parsed and not specified in the `qa-docs` schema raise an error.
 
         Args:
             doc (dict): A dict that contains the parsed documentation block"
         """
-        allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional + INTERNAL_FIELDS
+        allowed_fields = self.conf.module_fields.mandatory + self.conf.module_fields.optional \
+                                                           + self.conf.module_fields.auto + INTERNAL_FIELDS
         remove_inexistent(doc, allowed_fields, STOP_FIELDS)
 
         if 'tests' in doc:
@@ -72,7 +75,7 @@ class CodeParser:
 
     def check_fields(self, doc, doc_type, path):
         """Check if the fields that a documentation block has, are valids.
-        
+
         You can check them in the `schema.yaml` file.
 
         Args:
@@ -93,7 +96,8 @@ class CodeParser:
 
         # check that only schema fields are documented
         for field in doc.keys():
-            if field not in expected_fields.mandatory and field not in expected_fields.optional and field != 'name':
+            if field not in expected_fields.mandatory and field not in expected_fields.optional \
+               and field not in expected_fields.auto and field != 'name':
                 CodeParser.LOGGER.error(f"{field} is not specified in qa-docs schema.")
                 raise QAValueError(f"{field} is not specified in qa-docs schema.", CodeParser.LOGGER.error)
 
@@ -163,9 +167,9 @@ class CodeParser:
         except Exception as inst:
             if hasattr(function, 'name'):
                 CodeParser.LOGGER.error(f"Failed to parse test documentation in {function.name} "
-                                        "from module {self.scan_file}. Error: {inst}")
+                                        f"from module {self.scan_file}. Error: {inst}")
                 raise QAValueError(f"Failed to parse test documentation in {function.name} "
-                                   "from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
+                                   f"from module {self.scan_file}. Error: {inst}", CodeParser.LOGGER.error)
             else:
                 CodeParser.LOGGER.error(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}")
                 raise QAValueError(f"Failed to parse module documentation in  {self.scan_file}. Error: {inst}",
@@ -177,18 +181,18 @@ class CodeParser:
 
         return doc
 
-    def parse_test(self, path, id, group_id):
-        """Parse the content of a test file.
+    def parse_module(self, path, id, group_id):
+        """Parse the content of a module file.
 
         Args:
-            path (str): A string with the path of the test file to be parsed.
-            id (str): An integer with the ID of the new test document.
-            group_id (int): An integer with the ID of the group where the new test document belongs.
+            path (str): A string with the path of the module file to be parsed.
+            id (str): An integer with the ID of the new module document.
+            group_id (int): An integer with the ID of the group where the new module document belongs.
 
         Returns:
             module_doc (dict): A dictionary with the documentation block parsed with module and tests fields.
         """
-        CodeParser.LOGGER.debug(f"Parsing test file '{path}'")
+        CodeParser.LOGGER.debug(f"Parsing module file '{path}'")
         self.scan_file = path
         with open(path) as fd:
             file_content = fd.read()
@@ -200,11 +204,14 @@ class CodeParser:
             module_doc['name'] = os.path.basename(path)
             module_doc['id'] = id
             module_doc['group_id'] = group_id
-            module_doc['path'] = re.sub(r'.*wazuh-qa\/', '', path)
 
-            test_cases = None
-            if self.conf.test_cases_field:
-                test_cases = self.pytest.collect_test_cases(path)
+            # If the path is specified within the documentation block, it logs an error
+            if 'path' in module_doc.keys():
+                CodeParser.LOGGER.error('Path field is an autogenerated field, you must not specify it.')
+                raise QAValueError('Path field is an autogenerated field, you must not specify it.',
+                                   CodeParser.LOGGER.error)
+
+            module_doc['path'] = re.sub(r'.*wazuh-qa\/', '', path)
 
             functions_doc = []
             for function in functions:
@@ -212,9 +219,22 @@ class CodeParser:
                     function_doc = self.parse_comment(function, 'test', path)
 
                     if function_doc:
-                        if test_cases and not (self.conf.test_cases_field in function_doc) \
-                           and test_cases[function.name]:
-                            function_doc[self.conf.test_cases_field] = test_cases[function.name]
+                        if 'inputs' not in function_doc:
+                            test_cases = self.pytest.collect_test_cases(path)
+                            if test_cases and test_cases[function.name]:
+                                function_doc['inputs'] = test_cases[function.name]
+                        # ES throwing errors because of the expected_output format in some cases
+                        # -> Inserting the raw string and its comment between double quotes fixes it
+                        if 'expected_output' in function_doc:
+                            new_expected_output = []
+                            for string in function_doc['expected_output']:
+                                if isinstance(string, dict):
+                                    for key, value in string.items():
+                                        # example: r'.*Sending: FIM event (.+)$' ('added', 'modified' events)
+                                        new_expected_output.append(f"{key}: {value}")
+                                else:
+                                    new_expected_output.append(f"{string}")
+                            function_doc['expected_output'] = new_expected_output
 
                         functions_doc.append(function_doc)
 
@@ -234,8 +254,8 @@ class CodeParser:
 
         Args:
             group_file (str): A string with the path of the group file to be parsed.
-            id (int): An integer with the ID of the new test document.
-            group_id (int): An integer with the ID of the group where the new test document belongs.
+            id (int): An integer with the ID of the new module document.
+            group_id (int): An integer with the ID of the group where the new module document belongs.
 
         Returns:
             group_doc (dict): A dictionary with the parsed information from `group_file`.

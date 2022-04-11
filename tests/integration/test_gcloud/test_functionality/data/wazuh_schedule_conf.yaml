@@ -23,8 +23,6 @@
         value: 'DAY_TIME'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
 # conf 2
 - tags:
   - ossec_wday_conf
@@ -49,8 +47,6 @@
         value: 'WDAY_TIME'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
 # conf 3
 - tags:
   - ossec_time_conf
@@ -73,8 +69,6 @@
         value: 'INTERVAL'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
 # conf 4
 - tags:
   - ossec_day_multiple_conf
@@ -95,8 +89,6 @@
         value: '2M'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
 # conf 5
 - tags:
   - ossec_wday_multiple_conf
@@ -117,8 +109,6 @@
         value: '3w'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'
 # conf 6
 - tags:
   - ossec_time_multiple_conf
@@ -137,5 +127,3 @@
         value: 'MAX_MESSAGES'
     - interval:
         value: '4d'
-    - logging:
-        value: 'LOGGING'

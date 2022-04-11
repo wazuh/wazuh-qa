@@ -20,6 +20,13 @@ else:
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
 DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
+QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
+QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
+WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
+CVE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
+LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
+CPE_HELPER_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'dictionaries', 'cpe_helper.json')
 
 UDP = 'UDP'
 TCP = 'TCP'

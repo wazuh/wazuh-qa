@@ -27,8 +27,25 @@ RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add - && \
     apt-get update && \
     apt-get install wazuh-manager
 
-ADD https://raw.githubusercontent.com/wazuh/wazuh-qa/master/requirements.txt /tmp/requirements.txt
-RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt --ignore-installed
+WORKDIR /
+RUN git clone https://github.com/wazuh/wazuh-qa
+WORKDIR /wazuh-qa/
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install -r requirements.txt --ignore-installed
+
+# Install the QA framework
+WORKDIR /wazuh-qa/deps/wazuh_testing
+RUN python3 setup.py install
+
+# Install search-ui deps
+WORKDIR /usr/local/lib/python3.8/dist-packages/wazuh_testing-*/wazuh_testing/qa_docs/search_ui
+RUN npm install
+
+# Limit ES RAM
+RUN echo "-Xms1g" >> /etc/elasticsearch/jvm.options && \
+    echo "-Xmx1g" >> /etc/elasticsearch/jvm.options && \
+    # Disable xpack to prevent ES showing security warning
+    echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml
 
 # copy entrypoint and grant permission
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh

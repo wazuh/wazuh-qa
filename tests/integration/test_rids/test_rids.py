@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: The RIDS(Remote Identifiers) are the agent-manager remoted messages count
        This functionality has a closing time value, which allows removing an agent's file handler when it does not send
        a message during a period of time(five minutes by default).
 
-tier: 0
-
-modules:
+components:
     - rids
 
-components:
+targets:
     - manager
 
 daemons:
@@ -33,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://github.com/wazuh/wazuh/blob/master/src/os_crypto/shared/msgs.c
@@ -164,6 +154,8 @@ def test_rids(get_configuration, configure_environment, restart_service):
                  closed(when it`s needed).
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

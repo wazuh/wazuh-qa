@@ -1,7 +1,9 @@
 import os
 import subprocess
+import requests
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.api import get_api_details_dict
 
 
 def list_agents_ids():
@@ -12,7 +14,7 @@ def list_agents_ids():
 
 
 def remove_agents(agents_id, remove_type='wazuhdb'):
-    if remove_type not in ['wazuhdb', 'manage_agents']:
+    if remove_type not in ['wazuhdb', 'manage_agents', 'api']:
         raise ValueError("Invalid type of agent removal: %s" % remove_type)
 
     if agents_id:
@@ -22,6 +24,10 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
                                 stderr=subprocess.STDOUT)
             elif remove_type == 'wazuhdb':
                 result = query_wdb(f"global delete-agent {str(agent_id)}")
+            elif remove_type == 'api':
+                api_details = get_api_details_dict()
+                api_query = f"{api_details['base_url']}/agents?older_than=0s&agents_list={agents_id}&status=all"
+                response = requests.delete(api_query, headers=api_details['auth_headers'], verify=False)
 
 
 def remove_all_agents(remove_type):

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -15,12 +15,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        It can also directly receive logs via remote syslog which is useful for firewalls and
        other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: configuration
+
+targets:
     - agent
     - manager
 
@@ -38,27 +38,15 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
+    - macOS Catalina
+    - macOS Server
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
-    - macOS Catalina
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -93,7 +81,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
 
 wazuh_component = get_service()
-first_macos_log_process=False
+first_macos_log_process = False
+macos_process_timeout_init = 10
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -183,10 +172,12 @@ configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size'
 def generate_macos_logs(get_configuration):
     """Get configurations from the module."""
     global first_macos_log_process
-    if not first_macos_log_process and sys.platform == 'darwin' and get_configuration['metadata']['log_format'] == 'macos':
+    if not first_macos_log_process and sys.platform == 'darwin' and \
+       get_configuration['metadata']['log_format'] == 'macos':
         control_service('restart', 'wazuh-logcollector')
-        time.sleep(10)
-        first_macos_log_process=True
+        time.sleep(macos_process_timeout_init)
+
+        first_macos_log_process = True
 
 
 def check_only_future_events_valid(cfg):
@@ -259,6 +250,8 @@ def test_only_future_events(get_configuration, configure_environment, generate_m
                  error event is generated when using an invalid one.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

@@ -3,6 +3,7 @@ import platform
 import yaml
 import pytest
 import ssl
+import socket
 
 from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH
 from wazuh_testing.tools.monitoring import ManInTheMiddle
@@ -70,11 +71,16 @@ def configure_socket_listener(request, get_current_test_case):
         expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
     else:
         expected = None
+    address_family = 'AF_INET6' if 'ipv6' in get_current_test_case else 'AF_INET'
+    manager_address = '::1' if 'ipv6' in get_current_test_case else MANAGER_ADDRESS
+
+    address_family = 'AF_INET6' if 'ipv6' in get_current_test_case else 'AF_INET'
+    manager_address = '::1' if 'ipv6' in get_current_test_case else MANAGER_ADDRESS
 
     def receiver_callback(received_event):
         return response if not expected or expected == received_event else "".encode()
 
-    socket_listener = ManInTheMiddle(address=(MANAGER_ADDRESS, MANAGER_PORT), family='AF_INET',
+    socket_listener = ManInTheMiddle(address=(manager_address, MANAGER_PORT), family=address_family,
                                      connection_protocol='SSL', func=receiver_callback)
     socket_listener.start()
     socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,

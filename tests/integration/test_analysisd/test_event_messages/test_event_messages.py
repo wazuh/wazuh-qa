@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,12 @@ brief: The 'wazuh-analysisd' daemon receives the log messages and compares them 
        Specifically, these tests will check if the 'wazuh-analysisd' daemon correctly handles
        incoming events related to file modification.
 
-tier: 0
-
-modules:
+components:
     - analysisd
 
-components:
+suite: event_messages
+
+targets:
     - manager
 
 daemons:
@@ -33,18 +33,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-analysisd.html
@@ -110,6 +102,8 @@ def test_event_messages(configure_sockets_environment, connect_to_sockets_module
                  is properly formatted.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_sockets_environment:

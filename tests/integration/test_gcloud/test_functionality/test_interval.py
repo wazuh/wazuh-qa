@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        will check if the 'gcp-pubsub' module gets the GCP logs at the intervals
        specified in the configuration and sleeps up to them.
 
-tier: 0
-
-modules:
+components:
     - gcloud
 
-components:
+suite: functionality
+
+targets:
     - agent
     - manager
 
@@ -37,18 +37,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html#interval
@@ -94,7 +86,7 @@ monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'PULL_ON_START': pull_on_start,
-               'MAX_MESSAGES': max_messages, 'LOGGING': logging, 'MODULE_NAME': __name__}
+               'MAX_MESSAGES': max_messages, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        apply_to_all=({'INTERVAL': interval_value} for interval_value in interval),
@@ -125,6 +117,8 @@ def test_interval(get_configuration, configure_environment, reset_ossec_log, dae
                  the time specified in that interval and verify that the 'fetch' event is generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

@@ -22,13 +22,25 @@ def modify_system(os_name='CentOS Linux', os_major='7', name='centos7', agent_id
     query_wdb(query_string)
 
 
+def get_system(agent_id='000'):
+    """Get current system info.
+
+    Returns:
+        dict: A dict with the AGENT and SYS_OSINFO tables content.
+    """
+    global_query = f"global sql SELECT * from agent where id='{int(agent_id)}'"
+    agent_query = f"agent {agent_id} sql SELECT * FROM sys_osinfo"
+
+    return {'agent_query': query_wdb(global_query)[0], 'osinfo_query': query_wdb(agent_query)[0]}
+
+
 def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1', register_ip='127.0.0.1',
                            internal_key='', os_name='CentOS Linux', os_version='8.4', os_major='8', os_minor='4',
                            os_codename='centos-8', os_build='4.18.0-147.8.1.el8_1.x86_64',
                            os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020', os_uname='x86_64', os_arch='x86_64',
-                           version='4.2', config_sum='', merged_sum='', manager_host='centos-8', node_name='node01',
-                           date_add='1612942494', last_keepalive='253402300799', group='', sync_status='synced',
-                           connection_status='active'):
+                           version='Wazuh v4.3.0', config_sum='', merged_sum='', manager_host='centos-8',
+                           node_name='node01', date_add='1612942494', last_keepalive='253402300799', group='',
+                           sync_status='synced', connection_status='active', disconnection_time='0'):
     """Create an agent or update its info if it already exists (checking agent_id).
 
     Args:
@@ -56,15 +68,17 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
         group (str): Group of the agent.
         sync_status (str): Status of the syncronization.
         connection_status (str): Status of the connection.
+        disconnection_time (str): Last disconnection time.
     """
-
     query = 'global sql INSERT OR REPLACE INTO AGENT  (id, name, ip, register_ip, internal_key, os_name, os_version, ' \
             'os_major, os_minor, os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, ' \
-            'merged_sum, manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status) ' \
-            f"VALUES  ('{agent_id}', '{name}', '{ip}', '{register_ip}', '{internal_key}', '{os_name}', " \
-            f"'{os_version}', '{os_major}', '{os_minor}', '{os_codename}', '{os_build}', '{os_platform}', " \
-            f"'{os_uname}', '{os_arch}', '{version}', '{config_sum}', '{merged_sum}', '{manager_host}', " \
-            f"'{node_name}', '{date_add}', '{last_keepalive}', '{group}', '{sync_status}', '{connection_status}')"
+            'merged_sum, manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status, ' \
+            f"disconnection_time) VALUES  ('{agent_id}', '{name}', '{ip}', '{register_ip}', '{internal_key}', " \
+            f"'{os_name}', '{os_version}', '{os_major}', '{os_minor}', '{os_codename}', '{os_build}', " \
+            f"'{os_platform}', '{os_uname}', '{os_arch}', '{version}', '{config_sum}', '{merged_sum}', " \
+            f"'{manager_host}', '{node_name}', '{date_add}', '{last_keepalive}', '{group}', '{sync_status}', " \
+            f"'{connection_status}', '{disconnection_time}')"
+
     query_wdb(query)
 
 
@@ -85,3 +99,25 @@ def delete_agent(agent_id):
         agent_id (str): Agent ID.
     """
     query_wdb(f"global sql DELETE FROM agent where id={int(agent_id)}")
+
+
+def get_agent_ids(agent_name):
+    """Get the agent ids from a specific name.
+
+    Args:
+        agent_name (str): Agent names to get their ids.
+
+    Returns:
+        list(str): list of ids matching that name. e.g ['001', '005', ...] or [] if there is none.
+    """
+    return [str(item['id']).zfill(3) for item in query_wdb(f"global sql SELECT id FROM agent WHERE "
+                                                           f"name='{agent_name}'")]
+
+
+def get_all_agent_ids():
+    """Get all agent ids except the 000
+
+    Returns:
+        list(str): list of ids e.g ['001', '002', ...] or [] if there is none.
+    """
+    return [str(item['id']).zfill(3) for item in query_wdb("global sql SELECT id FROM agent WHERE id!='000'")]

@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import stat
 import sys
@@ -77,6 +78,13 @@ else:
         'agent.debug': '0',
     }
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
+
+def callback_missing_element_error(line):
+    match = re.match(r'.* \(\d+\): Missing \'(.+)\' element.', line)
+    if match:
+        return True
+    return None
 
 
 def callback_read_macos_message(msg):
@@ -170,7 +178,7 @@ def callback_eventchannel_bad_format(event_location):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Could not EvtSubscribe() for ({event_location}) which returned \(\d+\)"
+    msg = fr"ERROR: Could not EvtSubscribe\(\) for \({event_location}\) which returned \(\d+\)"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 
