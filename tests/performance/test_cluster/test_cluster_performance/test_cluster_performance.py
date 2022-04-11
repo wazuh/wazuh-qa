@@ -1,8 +1,7 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from datetime import datetime
 from os import listdir
 from os.path import join, dirname, realpath
 
@@ -10,6 +9,7 @@ import pytest
 from yaml import safe_load
 
 from wazuh_testing.tools.performance.csv_parser import ClusterCSVTasksParser, ClusterCSVResourcesParser, ClusterEnvInfo
+from wazuh_testing.tools.utils import get_datetime_diff
 
 test_data_path = join(dirname(realpath(__file__)), 'data')
 configurations = {file.replace('_thresholds.yaml', ''): safe_load(open(join(test_data_path, file))) for file in
@@ -27,16 +27,6 @@ def n_workers(pytestconfig):
 @pytest.fixture()
 def n_agents(pytestconfig):
     return pytestconfig.getoption("n_agents")
-
-
-# Functions
-def get_datetime_diff(phase_datetimes):
-    """Calculate the difference between two datetimes.
-
-    Args:
-        phase_datetimes (list): List containing start and end datetimes.
-    """
-    return datetime.strptime(phase_datetimes[1], date_format) - datetime.strptime(phase_datetimes[0], date_format)
 
 
 def test_cluster_performance(artifacts_path, n_workers, n_agents):
@@ -98,10 +88,9 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
     finally:
         # Add useful information to report as stdout
         try:
-            print('\n')
-            print(f'Setup phase took {get_datetime_diff(cluster_info["phases"]["setup_phase"])}s '
+            print(f'\nSetup phase took {get_datetime_diff(cluster_info["phases"]["setup_phase"], date_format)}s '
                   f'({cluster_info["phases"]["setup_phase"][0]} - {cluster_info["phases"]["setup_phase"][1]}).')
-            print(f'Stable phase took {get_datetime_diff(cluster_info["phases"]["stable_phase"])}s '
+            print(f'Stable phase took {get_datetime_diff(cluster_info["phases"]["stable_phase"], date_format)}s '
                   f'({cluster_info["phases"]["stable_phase"][0]} - {cluster_info["phases"]["stable_phase"][1]}).')
         except KeyError:
             print('No information available about test phases.')
