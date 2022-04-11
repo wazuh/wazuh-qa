@@ -54,9 +54,9 @@ from system.test_cluster.test_agent_groups.common import register_agent
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 agents_in_cluster = 40
-test_infra_agents=[]
-agent_groups=[]
-for x in range(agents_in_cluster): 
+test_infra_agents = []
+agent_groups = []
+for x in range(agents_in_cluster):
     test_infra_agents.append("wazuh-agent" + str(x+1))
     agent_groups.append("Group" + str(x+1))
 
@@ -69,12 +69,12 @@ sync_delay = 40
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
 def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_managers, test_infra_agents,
-                                   host_manager):
+                                host_manager):
     '''
     description: Check that after a long time when the manager has been unable to synchronize de databases, because
     new agents are being continually added, database synchronization is forced and the expected information is in
@@ -105,8 +105,8 @@ def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_manage
     for group in agent_groups:
         create_new_agent_group(test_infra_managers[0], group, host_manager)
 
-    # Register agents with their groups in manager    
-    agent_data=[]
+    # Register agents with their groups in manager
+    agent_data = []
     for index, agent in enumerate(test_infra_agents):
         data = register_agent(agent, agent_host, host_manager, agent_groups[index])
         agent_data.append(data)
@@ -118,13 +118,13 @@ def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_manage
     while time.time() < end_time:
         if active_agent < agents_in_cluster:
             host_manager.run_command(test_infra_agents[active_agent], f'{WAZUH_PATH}/bin/wazuh-control start')
-            active_agent = active_agent +1
-    
+            active_agent = active_agent + 1
+
     assert active_agent == agents_in_cluster, f"Unable to restart all agents in the expected time. \
                                                 Agents restarted: {active_agent}"
 
     time.sleep(sync_delay)
-    
+
     # Check that agent has the expected group assigned in all nodes
     for index, agent in enumerate(agent_data):
         data = agent_data[index]
