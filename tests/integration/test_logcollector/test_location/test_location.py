@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -15,12 +15,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        receive logs through text files or Windows event logs. It can also directly receive logs
        via remote syslog which is useful for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: location
+
+targets:
     - agent
     - manager
 
@@ -37,26 +37,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -69,6 +56,7 @@ import datetime
 import os
 import sys
 import tempfile
+import ast
 
 import pytest
 from wazuh_testing import logcollector
@@ -86,13 +74,12 @@ configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
 local_internal_options = {'logcollector.debug': '2'}
 
 temp_dir = tempfile.gettempdir()
-date = datetime.date.today().strftime("%Y-%m-%d")
 
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.txt', 'foo.txt', 'bar.log', 'test.yaml', 'ñ.txt', 'Testing white spaces', 'test.log',
-                     'c1test.txt', 'c2test.txt', 'c3test.txt', f'file.log-{date}'],
+                     'c1test.txt', 'c2test.txt', 'c3test.txt', fr'file.log-%Y-%m-%d'],
         'content': f'Content of testing_file\n'
     },
     {
@@ -129,7 +116,7 @@ parameters = [
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'c*test.txt'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'LOG_FORMAT': 'syslog', 'PATH_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')},
-    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'), 'LOG_FORMAT': 'syslog'},
     {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'), 'LOG_FORMAT': 'syslog'}
 ]
 
@@ -168,8 +155,8 @@ metadata = [
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt')],
      'log_format': 'syslog', 'path_2': os.path.join(temp_dir, 'wazuh-testing', 'duplicated', 'duplicated.txt'),
      'file_type': 'duplicated_file'},
-    {'location': os.path.join(temp_dir, 'wazuh-testing', 'file.log-%Y-%m-%d'),
-     'files': [os.path.join(temp_dir, 'wazuh-testing', f'file.log-{date}')], 'log_format': 'syslog',
+    {'location': os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d'),
+     'files': [os.path.join(temp_dir, 'wazuh-testing', r'file.log-%Y-%m-%d')], 'log_format': 'syslog',
      'file_type': 'single_file'},
     {'location': os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', '*'),
      'files': [os.path.join(temp_dir, 'wazuh-testing', 'multiple-logs', 'multiple')],
@@ -206,7 +193,11 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
-    return request.param
+    date = datetime.date.today().strftime(r'%Y-%m-%d')
+    test_case_real_paths_string = str(request.param).replace(r'file.log-%Y-%m-%d',  f"file.log-{date}")
+    test_case_real_paths_dictionary = ast.literal_eval(test_case_real_paths_string)
+
+    return test_case_real_paths_dictionary
 
 
 @pytest.fixture(scope="module")
@@ -215,7 +206,17 @@ def get_files_list():
     return file_structure
 
 
-def test_location(get_files_list, create_file_structure_module, get_configuration, configure_environment,
+@pytest.fixture(scope="module")
+def location_file_date():
+    """Get runtime test date."""
+    global file_structure
+    date = datetime.date.today().strftime(r'%Y-%m-%d')
+
+    file_structure_string_real_paths = str(file_structure).replace(r'file.log-%Y-%m-%d',  f"file.log-{date}")
+    file_structure = ast.literal_eval(file_structure_string_real_paths)
+
+
+def test_location(location_file_date, get_files_list, create_file_structure_module, get_configuration, configure_environment,
                   configure_local_internal_options_module, file_monitoring, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' monitors the log files specified in the 'location' tag.
@@ -226,6 +227,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
                  will verify that the expected events are generated for those special situations.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_files_list:
@@ -278,7 +281,7 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
         if file_type == 'single_file':
             log_callback = logcollector.callback_analyzing_file(file_location)
             log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                              error_message="The expected 'Analyzing file' message has not been produced")
+                              error_message=f"The expected 'Analyzing file {file_location}' message has not been produced")
         elif file_type == 'wildcard_file':
             pattern = get_configuration['metadata']['location']
             log_callback = logcollector.callback_match_pattern_file(pattern, file_location)
@@ -299,8 +302,8 @@ def test_location(get_files_list, create_file_structure_module, get_configuratio
 
             try:
                 wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                                    error_message=f"The expected 'File limit has been reached' "
-                                                  f"message has not been produced")
-            except:                                      
+                                        error_message=f"The expected 'File limit has been reached' "
+                                                      f"message has not been produced")
+            except Exception:
                 if sys.platform == 'sunos5':
                     pytest.xfail(reason='Xfail due to issue: https://github.com/wazuh/wazuh/issues/10751')

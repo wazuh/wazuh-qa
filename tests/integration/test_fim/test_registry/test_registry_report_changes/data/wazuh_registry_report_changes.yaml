@@ -37,6 +37,7 @@
     elements:
       - disabled:
           value: 'yes'
+
 - tags:
   - test_duplicate_report
   apply_to_modules:
@@ -80,6 +81,7 @@
     elements:
       - disabled:
           value: 'yes'
+
 - tags:
   - test_delete_after_restart
   apply_to_modules:

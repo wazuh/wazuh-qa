@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: These tests will check if the 'who-data' feature of the File Integrity Mo
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: files_ambiguous_complex
+
+targets:
     - manager
 
 daemons:
@@ -34,18 +34,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/auditing-whodata/who-linux.html
@@ -119,6 +111,8 @@ def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_va
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - directory:
             type: str
@@ -152,7 +146,7 @@ def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_va
 
     tags:
         - realtime
-        - who-data
+        - who_data
     '''
     filename = "testfile"
 

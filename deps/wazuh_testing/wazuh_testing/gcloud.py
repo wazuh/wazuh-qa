@@ -27,7 +27,8 @@ def validate_gcp_event(event):
 
 
 def callback_detect_start_gcp(line):
-    if 'wm_gcp_pubsub_main(): INFO: Module started.' in line:
+    match = re.match(r'.*wazuh-modulesd:gcp-pubsub.*INFO: Module started.$', line)
+    if match:
         return line
     return None
 
@@ -56,14 +57,14 @@ def detect_gcp_start(file_monitor):
 
 
 def callback_received_messages_number(line):
-    match = re.match(r'.*wm_gcp_pubsub_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages', line)
+    match = re.match(r'.*wm_gcp_parse_output\(\): INFO: Received and acknowledged (\d+) messages', line)
     if match:
         return match.group(1)
     return None
 
 
 def callback_detect_all_gcp(line):
-    match = re.match(r'.*wazuh-modulesd:gcp-pubsub\[\d+\].*', line)
+    match = re.match(r'.*wazuh-modulesd:gcp-pubsub.*', line)
     if match:
         return line
     return None

@@ -17,6 +17,8 @@ AGENT_GROUPS_DEFAULT = 'default'
 
 # Error Messages
 ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys generated in the master node.'
+ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
+
 
 
 # Functions
@@ -91,14 +93,23 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
     # Check the expected group is in the group data for the agent
     for host in hosts_list:
         group_data = host_manager.run_command(host, f'{WAZUH_PATH}/bin/agent_groups -s -i {agent_id}')
-        assert group_to_check in group_data, f"Did not find the expected group {group_to_check} in data: {group_data} in host: {host}"
+        assert group_to_check in group_data, f"Did not recieve expected agent group: {group_to_check} in data \
+                                               {str(group_data)}"
 
+
+# Check the expected group is in the group data for the agent in db
+def check_agent_groups_db(query, group_to_check, host, host_manager):
+    group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
+                                          '{query}'")
+    assert group_to_check in group_data, f"Did not recieve expected agent group: {group_to_check} in data \
+                                         {str(group_data)}"
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
+    expected_status = f"{agent_id}  {agent_name}  {agent_ip}  {status}"
     for host in hosts_list:
         data = get_agents_in_cluster(host, host_manager)
-        assert f"{agent_id}  {agent_name}  {agent_ip}  {status}" in data
+        assert expected_status in data, f" Did not recieve expected agent status {expected_status} in data {str(data)}"
 
 
 def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
@@ -106,11 +117,14 @@ def check_agents_status_in_node(agent_expected_status_list, host, host_manager):
     # List format: [f"{agent_id}  {agent_name}  {agent_ip}  {status}",...]
     data = get_agents_in_cluster(host, host_manager)
     for status in agent_expected_status_list:
-        assert status in data
+        assert status in data, f" Did not recieve expected agent status: {status} in data {str(data)}"
 
 
 def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     # Uses wdb commands to change the group of an agent
-    query = f'{"id":{agent_id}, "group":"{new_group}"}'
-    group_data = host_manager.run_command(host, f"{WAZUH_PATH}/bin/query-wdb global 'update-agent-group {query}'")
+
+    query = f'{{"mode":"append","sync_status":"syncreq","source":"remote","data":[{{"id":{agent_id}, \
+             "groups":["{new_group}"]}}]}}'
+    group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
+                                          'set-agent-groups {query}'")
     return group_data

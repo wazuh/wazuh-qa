@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
     - manager
 
@@ -35,26 +35,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -100,7 +87,6 @@ expresion_str = ','.join(expressions)
 wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_wildcards_rt.yml')
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
 # configurations
 
@@ -138,10 +124,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
+@pytest.mark.xfail(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('subfolder_name', test_subdirectories)
 @pytest.mark.parametrize('file_name', ['regular_1'])
 @pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_wildcards_runtime'}])
-@mark_skip_agentWindows
 def test_basic_usage_wildcards_runtime(subfolder_name, file_name, tags_to_apply,
                                        get_configuration, configure_environment, restart_syscheckd,
                                        wait_for_initial_scan, create_test_folders, wait_for_wildcards_scan):
@@ -155,6 +142,8 @@ def test_basic_usage_wildcards_runtime(subfolder_name, file_name, tags_to_apply,
                  only if it matches a configured expression.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - subfolder_name:
@@ -198,7 +187,7 @@ def test_basic_usage_wildcards_runtime(subfolder_name, file_name, tags_to_apply,
 
     tags:
         - scheduled
-        - who-data
+        - who_data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     if sys.platform == 'win32':

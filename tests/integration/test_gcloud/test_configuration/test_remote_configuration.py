@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        will check if the remote configuration used by GCP matches
        the local one set in the 'ossec.conf' file.
 
-tier: 1
-
-modules:
+components:
     - gcloud
 
-components:
+suite: configuration
+
+targets:
     - agent
     - manager
 
@@ -37,18 +37,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
@@ -79,7 +71,6 @@ enabled = 'yes'
 pull_on_start = 'yes'
 max_messages = 200
 interval = '2h'
-logging = "debug"
 day = 9
 wday = 'tuesday'
 time = '08:00'
@@ -97,7 +88,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'ENABLED': enabled,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'INTERVAL': interval, 'LOGGING': logging, 'DAY': day, 'WDAY': wday,
+               'INTERVAL': interval, 'DAY': day, 'WDAY': wday,
                'TIME': time, 'MODULE_NAME': __name__}
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
@@ -158,6 +149,8 @@ def test_remote_configuration(get_configuration, configure_environment, reset_os
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -217,5 +210,4 @@ def test_remote_configuration(get_configuration, configure_environment, reset_os
         assert gcp_remote['enabled'] == 'yes'
         assert gcp_remote['pull_on_start'] == 'yes'
         assert gcp_remote['max_messages'] == 100
-        assert gcp_remote['logging'] == 'info'
         assert gcp_remote['interval'] == 3600
