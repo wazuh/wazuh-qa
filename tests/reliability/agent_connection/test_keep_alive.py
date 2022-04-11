@@ -94,19 +94,43 @@ def test_keep_alives(get_report):
     expected_output:
         - None
     '''
-    # Agent
-    assert get_report['agents']['wazuh-agentd']['max_diff_ack_keep_alive'] < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
-        f"Some agents keep alive interval surpassed {MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"
+    try:
+        phases = get_report['metadata']['phases']
+    except KeyError:
+        phases = None
 
-    # Manager
-    keep_alives = get_report['managers']['wazuh-remoted']['keep_alives']
+    if phases:
+        for phase in phases:
+            # Agent
+            assert get_report['agents']['wazuh-agentd'][phase]['max_diff_ack_keep_alive'] < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+                f"Some agents keep alive interval surpassed {MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"
 
-    max_differences = [keep_alives[agent]['max_difference'] for agent in keep_alives.keys()]
-    assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
-        f"Some managers received keep-alives from agents at an interval that exceeded {MAX_DIFFERENCE_ACK_KEEP_ALIVE}" \
-        + 'seconds maximun'
+            # Manager
+            keep_alives = get_report['managers']['wazuh-remoted'][phase]['keep_alives']
 
-    remainder = [keep_alives[agent]['remainder'] for agent in keep_alives.keys()]
-    assert max(remainder) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
-        'Some managers does not received keep-alives from agents at the required interval' + \
-        f"{MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"
+            max_differences = [keep_alives[agent]['max_difference'] for agent in keep_alives.keys()]
+            assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+                f"Some managers received keep-alives from agents at an interval that exceeded {MAX_DIFFERENCE_ACK_KEEP_ALIVE}" \
+                + 'seconds maximun'
+
+            remainder = [keep_alives[agent]['remainder'] for agent in keep_alives.keys()]
+            assert max(remainder) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+                'Some managers does not received keep-alives from agents at the required interval' + \
+                f"{MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"
+    else:
+        # Agent
+        assert get_report['agents']['wazuh-agentd']['max_diff_ack_keep_alive'] < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+            f"Some agents keep alive interval surpassed {MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"
+
+        # Manager
+        keep_alives = get_report['managers']['wazuh-remoted']['keep_alives']
+
+        max_differences = [keep_alives[agent]['max_difference'] for agent in keep_alives.keys()]
+        assert max(max_differences) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+            f"Some managers received keep-alives from agents at an interval that exceeded {MAX_DIFFERENCE_ACK_KEEP_ALIVE}" \
+            + 'seconds maximun'
+
+        remainder = [keep_alives[agent]['remainder'] for agent in keep_alives.keys()]
+        assert max(remainder) < MAX_DIFFERENCE_ACK_KEEP_ALIVE, \
+            'Some managers does not received keep-alives from agents at the required interval' + \
+            f"{MAX_DIFFERENCE_ACK_KEEP_ALIVE} seconds maximun"

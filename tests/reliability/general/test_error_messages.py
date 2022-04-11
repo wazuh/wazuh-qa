@@ -139,23 +139,49 @@ def test_error_messages(get_report, code, target):
     with open(known_messages_path) as f:
         expected_error_messages = json.loads(f.read())
 
-    for target_messages in get_report[target][code]:
-        for error_messages in target_messages.values():
-            for error_message in error_messages:
-                target_message = True
-                if global_parameters.target_daemons:
-                    target_message = False
-                    for daemon in global_parameters.target_daemons:
-                        if get_log_daemon(error_message) == daemon:
-                            target_message = True
-                            break            
-                if target_message:
-                    known_error = False
-                    if expected_error_messages[code]:
-                        combined_known_regex = '(' + ')|('.join(expected_error_messages[code]) + ')'
-                        known_error = re.match(combined_known_regex, error_message)
+    try:
+        phases = get_report['metadata']['phases']
+    except KeyError:
+        phases = None
 
-                    if not known_error:
-                        unexpected_errors += [error_message]
+    if phases:
+        for phase in phases:
+            for target_messages in get_report[target][phase][code]:
+                for error_messages in target_messages.values():
+                    for error_message in error_messages:
+                        target_message = True
+                        if global_parameters.target_daemons:
+                            target_message = False
+                            for daemon in global_parameters.target_daemons:
+                                if get_log_daemon(error_message) == daemon:
+                                    target_message = True
+                                    break
+                        if target_message:
+                            known_error = False
+                            if expected_error_messages[code]:
+                                combined_known_regex = '(' + ')|('.join(expected_error_messages[code]) + ')'
+                                known_error = re.match(combined_known_regex, error_message)
+
+                            if not known_error:
+                                unexpected_errors += [error_message]
+    else:
+        for target_messages in get_report[target][code]:
+            for error_messages in target_messages.values():
+                for error_message in error_messages:
+                    target_message = True
+                    if global_parameters.target_daemons:
+                        target_message = False
+                        for daemon in global_parameters.target_daemons:
+                            if get_log_daemon(error_message) == daemon:
+                                target_message = True
+                                break
+                    if target_message:
+                        known_error = False
+                        if expected_error_messages[code]:
+                            combined_known_regex = '(' + ')|('.join(expected_error_messages[code]) + ')'
+                            known_error = re.match(combined_known_regex, error_message)
+
+                        if not known_error:
+                            unexpected_errors += [error_message]
 
     assert not unexpected_errors, f"Unexpected error message detected {unexpected_errors}"
