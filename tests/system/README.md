@@ -116,6 +116,8 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_integrity_sync                                      | agentless_cluster    |
 | test_jwt_invalidation                                                 | agentless_cluster    |
 | test_active_response_log_format                                       | manager_agent        |
+| test_fim/test_synchronization                                         | one_manager_agent    |
+| test_multigroups/test_multigroups                                     | basic_cluster        |
 | test_cluster/test_agent_groups/test_agent_groups_forced_change        | basic_cluster        |
 
 ### Test structure
@@ -213,7 +215,7 @@ cd wazuh-qa/tests/system/cluster
 
 To run any test, we just need to call `pytest` from `python3` using the following line:
 
-```shell script
+```shell scrip
 python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 ```
 

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_checks
+
+targets:
     - agent
 
 daemons:
@@ -162,7 +162,6 @@ def get_configuration(request):
     (sub_key_3, KEY_WOW64_64KEY, key_all_attrs, attrs_value_sum_3, {'test_checksum'}, True),
     (sub_key_4, KEY_WOW64_64KEY, key_all_attrs, attrs_value_sum_4, {'test_checksum'}, True)
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_checkers(key, subkey, arch, key_attrs, value_attrs, tags_to_apply, triggers_modification,
                   get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
@@ -177,6 +176,8 @@ def test_checkers(key, subkey, arch, key_attrs, value_attrs, tags_to_apply, trig
                  the monitored keys/values.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:

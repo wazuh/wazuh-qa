@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: The 'wazuh-agentd' program is the client-side daemon that communicates wi
        between connection attempts to the 'wazuh-remoted' daemon using TCP and UDP protocols.
        The 'wazuh-remoted' program is the server side daemon that communicates with the agents.
 
-tier: 0
-
-modules:
+components:
     - agentd
 
-components:
+targets:
     - agent
 
 daemons:
@@ -48,13 +46,8 @@ os_version:
     - Red Hat 7
     - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/registering/index.html
@@ -322,6 +315,8 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
                  'max_retries' and 'retry_interval' parameters are tested.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_authd_server:

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 0
-
-modules:
+components:
     - fim
 
-components:
+suite: files_basic_usage
+
+targets:
     - agent
     - manager
 
@@ -35,26 +35,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -113,6 +100,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
 @pytest.mark.parametrize('sleep, tags_to_apply', [
     (0.25, {'ossec_conf'}),
     (0.5, {'ossec_conf'}),
@@ -123,7 +111,6 @@ def get_configuration(request):
     (1.75, {'ossec_conf'}),
     (2, {'ossec_conf'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
                               wait_for_fim_start):
     '''
@@ -133,6 +120,8 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
                  will check that the  expected FIM events have been generated.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - sleep:
@@ -167,7 +156,7 @@ def test_regular_file_changes(sleep, tags_to_apply, get_configuration, configure
 
     tags:
         - realtime
-        - who-data
+        - who_data
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 

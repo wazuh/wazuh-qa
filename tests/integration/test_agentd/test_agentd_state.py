@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -11,12 +11,10 @@ brief: The 'wazuh-agentd' program is the client-side daemon that communicates wi
        These tests will check if the content of the 'wazuh-agentd' daemon statistics file is valid.
        The statistics files are documents that show real-time information about the Wazuh environment.
 
-tier: 0
-
-modules:
+components:
     - agentd
 
-components:
+targets:
     - agent
 
 daemons:
@@ -33,26 +31,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/statistics-files/wazuh-agentd-state.html
@@ -142,6 +127,8 @@ def test_agentd_state(configure_environment, test_case: list):
                  and verify that the content of its fields is correct.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - configure_environment:

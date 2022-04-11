@@ -91,10 +91,11 @@ def control_service(action, daemon=None, debug_mode=False):
                     if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
                         result = 0
                         break
-                    if action == 'start' and 'The requested service has already been started.' in command.stderr.decode():
-                        result= 0
+                    if action == 'start' and 'The requested service has already been started.' \
+                       in command.stderr.decode():
+                        result = 0
                         break
-                    elif not "System error 109 has occurred" in command.stderr.decode():
+                    elif "System error 109 has occurred" not in command.stderr.decode():
                         break
     else:  # Default Unix
         if daemon is None:
@@ -205,14 +206,13 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
         TimeoutError: If the daemon status is wrong after timeout seconds.
     """
     condition_met = False
-    if sys.platform == 'win32':
-        condition_met = check_if_process_is_running('wazuh-agent.exe') == running_condition
-    else:
-        start_time = time.time()
-        elapsed_time = 0
+    start_time = time.time()
+    elapsed_time = 0
 
-        while elapsed_time < timeout and not condition_met:
-
+    while elapsed_time < timeout and not condition_met:
+        if sys.platform == 'win32':
+            condition_met = check_if_process_is_running('wazuh-agent.exe') == running_condition
+        else:
             control_status_output = subprocess.run([f'{WAZUH_PATH}/bin/wazuh-control', 'status'],
                                                    stdout=subprocess.PIPE).stdout.decode()
             condition_met = True
@@ -235,9 +235,10 @@ def check_daemon_status(target_daemon=None, running_condition=True, timeout=10, 
                             condition_met = False
                     if daemon_running != running_condition:
                         condition_met = False
-            if not condition_met:
-                time.sleep(1)
-            elapsed_time = time.time() - start_time
+        if not condition_met:
+            time.sleep(1)
+        elapsed_time = time.time() - start_time
+
     if not condition_met:
         raise TimeoutError(f"{target_daemon} does not meet condition: running = {running_condition}")
     return condition_met
@@ -280,18 +281,29 @@ def control_event_log_service(control):
     for _ in range(10):
         control_sc = 'disabled' if control == 'stop' else 'auto'
 
+        try:
+            subprocess.run(f'sc.exe config netprofm start= {control_sc}', stderr=subprocess.PIPE)
+        except Exception:
+            pass
+
         command = subprocess.run(f'sc.exe config eventlog start= {control_sc}', stderr=subprocess.PIPE)
+
         result = command.returncode
         if result != 0:
             raise ValueError(f'Event log service did not stop correctly')
 
         command = subprocess.run(f"net {control} eventlog /y", stderr=subprocess.PIPE)
+
+        try:
+            subprocess.run(f"net {control} netprofm /y", stderr=subprocess.PIPE)
+        except Exception:
+            pass
+
         result = command.returncode
 
         if ("The requested service has already been started." in str(command.stderr)) or  \
-           ("The Windows Event Log service is not started." in str(command.stderr)):
+           ("The Windows Event Log service is not started." in str(command.stderr)) or result == 0:
             break
-
         time.sleep(1)
     else:
         raise ValueError(f"Event log service did not stop correctly")

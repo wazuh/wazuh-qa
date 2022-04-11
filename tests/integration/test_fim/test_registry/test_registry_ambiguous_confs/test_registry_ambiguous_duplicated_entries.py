@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -16,12 +16,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 2
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_ambiguous_confs
+
+targets:
     - agent
 
 daemons:
@@ -152,6 +152,8 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
 
     wazuh_min_version: 4.2.0
 
+    tier: 2
+
     parameters:
         - key:
             type: str
@@ -220,7 +222,6 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
     (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
     (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, report_changes,
                               get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
@@ -232,6 +233,8 @@ def test_duplicate_entries_rc(key, subkey, arch, value_list, tags_to_apply, repo
                  when this option is enabled in the last entry of the configuration.
 
     wazuh_min_version: 4.2.0
+
+    tier: 2
 
     parameters:
         - key:
