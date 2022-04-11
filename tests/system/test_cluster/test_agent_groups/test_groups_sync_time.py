@@ -83,19 +83,19 @@ def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_manage
     parameters:
         - agent_host:
             type: List
-            brief: name of the host where the agent will register en each case
+            brief: Name of the host where the agent will register en each case.
         - clean_enviroment:
-            type: fixture
+            type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
             type: List
-            brief: list of manager hosts in enviroment
+            brief: List of manager hosts in enviroment.
         - test_infra_agents
             type: List
-            brief: list of agent hosts in enviroment
+            brief: List of agent hosts in enviroment.
         - host_manager
             type: HostManager object
-            brief: handles connection the enviroment's hosts.
+            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
     expected_output:
