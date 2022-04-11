@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: Agents can be upgraded remotely. This upgrade is performed by the manager
         needed to upgrade the agent to the new version. These tests ensure, on the manager side,
         that the WPK upgrade works correctly.
 
-tier: 0
-
-modules:
+components:
     - wpk
 
-components:
+targets:
     - manager
 
 daemons:
@@ -36,18 +34,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
 
 references:
     - https://documentation.wazuh.com/current/user-manual/agents/remote-upgrading/upgrading-agent.html
@@ -938,6 +931,8 @@ def test_wpk_manager(remove_current_wpk, set_debug_mode, get_configuration, conf
                  can not be updated, repository not reachable, disconnected agents, etc.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - set_debug_mode:

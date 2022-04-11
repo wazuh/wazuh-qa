@@ -51,13 +51,13 @@ def clean_cluster_logs(hosts_list, host_manager):
 def remove_cluster_agents(wazuh_master, agents_list, host_manager):
     # Removes a list of agents from the cluster using manage_agents
     agent_id = get_agent_id(host_manager)
+    for agent in agents_list:
+        host_manager.control_service(host=agent, service='wazuh', state="stopped")
+        host_manager.clear_file(agent, file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     while (agent_id != ''):
         host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
                                                     check=False)
         agent_id = get_agent_id(host_manager)
-    for agent in agents_list:
-        host_manager.control_service(host=agent, service='wazuh', state="stopped")
-        host_manager.clear_file(agent, file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
 
 
 def get_agents_in_cluster(host, host_manager):
@@ -97,8 +97,16 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
                                                {str(group_data)} in host {host}"
 
 
+# Check the expected group is in the group data for the agent in db
+def check_agent_groups_db(query, group_to_check, host, host_manager):
+    group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
+                                          '{query}'")
+    assert group_to_check in group_data, f"Did not recieve expected agent group: {group_to_check} in data \
+                                         {str(group_data)}"
+
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)
+    expected_status = f"{agent_id}  {agent_name}  {agent_ip}  {status}"
     for host in hosts_list:
         expected_status = f"{agent_id}  {agent_name}  {agent_ip}  {status}"
         data = get_agents_in_cluster(host, host_manager)

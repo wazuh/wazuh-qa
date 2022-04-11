@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -15,12 +15,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        event logs. It can also directly receive logs via remote syslog which is useful
        for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: macos
+
+targets:
     - agent
 
 daemons:
@@ -31,6 +31,7 @@ os_platform:
 
 os_version:
     - macOS Catalina
+    - macOS Server
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -104,6 +105,8 @@ def test_macos_file_status_basic(restart_logcollector_required_daemons_package, 
                  Finally, the test will verify that the 'file_status.json' file has valid content.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_logcollector_required_daemons_package:
