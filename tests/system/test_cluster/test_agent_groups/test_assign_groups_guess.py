@@ -45,7 +45,7 @@ import time
 import pytest
 
 from common import register_agent
-from system import (AGENT_STATUS_ACTIVE, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
+from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
                     check_keys_file, delete_group_of_agents, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
@@ -82,23 +82,23 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
-            type: string
-            brief: name of the host where the agent will register.
+            type: String
+            brief: Name of the host where the agent will register.
         - status_guess_agent_group
-            type: string
-            brief: determine if the group guessing mechanism is enabled or disabled.
+            type: String
+            brief: Determine if the group guessing mechanism is enabled or disabled.
         - clean_enviroment:
-            type: fixture
+            type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
             type: List
-            brief: list of manager hosts in enviroment
+            brief: List of manager hosts in enviroment.
         - test_infra_agents
             type: List
-            brief: list of agent hosts in enviroment
+            brief: List of agent hosts in enviroment.
         - host_manager
             type: HostManager object
-            brief: handles connection the enviroment's hosts.
+            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
