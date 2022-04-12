@@ -4,7 +4,7 @@
 
 Check that logs in the cluster nodes are printed in the expected order.
 
-This test checks the order of the logs for the three cluster tasks (`agent-info sync`, `integrity check` and `integrity sync`) in the worker nodes. 
+This test checks the order of the logs for the three cluster tasks (`agent-info sync`, `agent-groups recv`, `agent-groups sync`, `integrity check` and `integrity sync`) in the worker nodes. 
 
 ## Objective
 
@@ -31,14 +31,14 @@ The test needs to receive one parameter (artifacts) in order to be run. If this 
 
 #### Example output
 ```shell
-python3 -m pytest test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py --artifacts_path='/tmp/artifacts/cluster_performance/59' --html=report.html --self-contained-html
+python3 -m pytest test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py --artifacts_path='/tmp/artifacts/cluster_performance/59' --html=report.html --self-contained-html
 ============================================== test session starts ==============================================
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
 plugins: metadata-1.10.0, html-3.1.1, testinfra-5.0.0, tavern-1.2.2, pep8-1.0.6, cov-2.10.0, asyncio-0.14.0
 collected 1 item                                                                                                
 
-test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py F                                    [100%]
+test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py F                                    [100%]
 
 =================================================== FAILURES ====================================================
 _________________________________________ test_check_logs_order_workers _________________________________________
@@ -94,7 +94,7 @@ E          - Expected logs: ['Permission to synchronize granted.*']
 E          - Found log: 2021/09/29 12:05:57 INFO: [Worker CLUSTER-Workload_benchmarks_metrics_B59_manager_4] [Agent-info sync] Finished in 6.936s (67 chunks updated).
 E       assert not [{'expected_logs': ['Permission to synchronize granted.*'], 'found_log': '2021/09/29 12:05:57 INFO: [Worker CLUSTER-Wo...ager_4] [Agent-info sync] Finished in 6.936s (67 chunks updated).', 'log_type': 'Agent-info sync', 'node': 'worker_4'}]
 
-test_cluster_logs/test_cluster_logs_order/test_cluster_logs_order.py:131: AssertionError
+test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py:131: AssertionError
 -------- generated html file: file:///home/selu/Git/wazuh-qa/tests/performance/test_cluster/report.html ---------
 =========================================== 1 failed in 0.20 seconds ============================================
 ```

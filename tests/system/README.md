@@ -88,7 +88,7 @@ To install it:
 
 ```shell script
 cd wazuh-qa/deps/wazuh_testing
-pip3 install .
+pip3 install .Description
 ```
 
 _**NOTE:** It is important to reinstall this package every time we modify anything
@@ -129,6 +129,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_groups/test_assign_groups_guess                   | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_groups_sync_default                   | big_cluster_40_agents          |
 | test_cluster/test_agent_groups/test_groups_sync_time                      | big_cluster_40_agents          |
+
 ### Test structure
 
 Every group will have the following structure:
