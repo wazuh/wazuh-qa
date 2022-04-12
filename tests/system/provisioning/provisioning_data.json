@@ -8,6 +8,7 @@
         "test_cluster/test_integrity_sync/test_integrity_sync.py"
     ],
     "basic_cluster": [
+        "test_cluster/test_agent_groups/test_agent_groups.py",
         "test_cluster/test_agent_files_deletion/test_agent_files_deletion.py",
         "test_cluster/test_agent_info_sync/test_agent_info_sync.py",
         "test_cluster/test_agent_key_polling/test_agent_key_polling.py",

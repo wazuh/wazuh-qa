@@ -29,7 +29,9 @@ def dict_to_tree(dict_tree):
 
 # Configuration
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-logs_format = re.compile(r'.* \[(Agent-info sync|Integrity check|Integrity sync)] (.*)')
+worker_logs_format = re.compile(
+    r'.* \[(Agent-info sync|Integrity check|Integrity sync|Agent-groups sync|Agent-groups recv|Agent-groups recv full)]'
+    r' (.*)')
 node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
 incorrect_order = {}
 logs_order = {
@@ -60,7 +62,7 @@ def test_check_logs_order_workers(artifacts_path):
 
         with open(log_file) as file:
             for line in file.readlines():
-                if result := logs_format.search(line):
+                if result := worker_logs_format.search(line):
                     if result.group(1) in logs_order and result.group(1) not in failed_tasks:
                         tree_info = logs_order[result.group(1)]
                         for child in tree_info['tree'].children(tree_info['node']):
@@ -68,6 +70,7 @@ def test_check_logs_order_workers(artifacts_path):
                                 # Current node is updated so the tree points to the next expected log.
                                 logs_order[result.group(1)]['node'] = child.identifier if \
                                     tree_info['tree'].children(child.identifier) else 'root'
+
                                 break
                         else:
                             # Log can be different to the expected one only if permission was not granted.
@@ -79,6 +82,7 @@ def test_check_logs_order_workers(artifacts_path):
                                     'found_log': result.group(0),
                                     'expected_logs': [log.tag for log in tree_info['tree'].children(tree_info['node'])]
                                 })
+
                                 failed_tasks.add(result.group(1))
 
         # Update status of all logs so they point to their tree root.
