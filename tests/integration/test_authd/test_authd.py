@@ -49,7 +49,6 @@ import subprocess
 import time
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 
