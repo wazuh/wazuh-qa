@@ -52,6 +52,7 @@ from wazuh_testing.remote import DEFAULT_TESTING_GROUP_NAME, new_agent_group, \
 from wazuh_testing.tools import REMOTE_DAEMON, WAZUH_PATH, configuration
 from wazuh_testing.tools.file import delete_file
 from wazuh_testing.tools.services import check_daemon_status, control_service
+from wazuh_testing.tools.wazuh_manager import remove_agents
 
 # Marks
 pytestmarks = [pytest.mark.linux, pytest.mark.server, pytest.mark.tier(level=0)]
@@ -131,19 +132,8 @@ def register_agent(request):
 
     yield
 
-    url = f"{api_details['base_url']}/agents"
-    payload = {
-        'agents_list': [getattr(request.module, 'response_data')['id']],
-        'status': ['never_connected'],
-        'older_than': '0s'
-    }
-    response = requests.delete(url=url, headers=api_details['auth_headers'], params=payload, verify=False)
-    response_data = response.json()
-
-    if response.status_code != 200:
-        raise RuntimeError(f"Error deleting an agent: {response_data}")
-    elif len(response_data['data']['affected_items']) != 1:
-        raise RuntimeError(f"Only 1 agent should have been deleted: {response_data}")
+    registered_agent = getattr(request.module, 'response_data')['id']
+    remove_agents(agents_id=[registered_agent], remove_type='api')
 
 
 def manipulate_file(action, file_path):
