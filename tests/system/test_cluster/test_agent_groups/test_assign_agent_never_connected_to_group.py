@@ -43,7 +43,7 @@ tags:
 import os
 import pytest
 
-from common import register_agent
+from system.test_cluster.test_agent_groups.common import register_agent
 from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
                     AGENT_STATUS_NEVER_CONNECTED, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
 from wazuh_testing.tools.system import HostManager

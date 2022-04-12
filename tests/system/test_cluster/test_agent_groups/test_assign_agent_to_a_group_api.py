@@ -43,7 +43,7 @@ import os
 import time
 import pytest
 
-from common import register_agent
+from system.test_cluster.test_agent_groups.common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, ERR_MSG_FAILED_TO_SET_AGENT_GROUP,
                     ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_agent_status, restart_cluster,
                     check_keys_file, delete_group_of_agents, create_new_agent_group)

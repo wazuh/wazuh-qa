@@ -44,7 +44,7 @@ import os
 import time
 import pytest
 
-from common import register_agent
+from system.test_cluster.test_agent_groups.common import register_agent
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
                     check_keys_file, delete_group_of_agents, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)

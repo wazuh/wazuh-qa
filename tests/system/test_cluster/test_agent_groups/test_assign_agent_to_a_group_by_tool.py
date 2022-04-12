@@ -46,7 +46,7 @@ import time
 
 import pytest
 
-from common import register_agent
+from system.test_cluster.test_agent_groups.common import register_agent
 from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
                     assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
 from wazuh_testing.tools.system import HostManager
