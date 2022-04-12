@@ -46,9 +46,8 @@ import pytest
 
 from socket import timeout
 from system.test_cluster.test_agent_groups.common import register_agent
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
-from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_NEVER_CONNECTED, AGENT_GROUPS_DEFAULT, 
+from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_NEVER_CONNECTED, AGENT_GROUPS_DEFAULT,
                     check_agent_groups, check_agent_status, restart_cluster, check_keys_file)
 
 
@@ -63,12 +62,14 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 timeout = 5
 
+
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", test_infra_managers)
-def test_agent_default_group_added(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_agent_default_group_added(agent_target, clean_environment, test_infra_managers,
+                                   test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and default group assignment works as expected in a cluster enviroment.
     An agent pointing to a master/worker node is registered using cli tool, and it gets assigned the default group
@@ -76,20 +77,20 @@ def test_agent_default_group_added(agent_target, clean_environment, test_infra_m
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
-            type: string
-            brief: name of the host where the agent will register
+            type: String
+            brief: Name of the host where the agent will register.
         - clean_cluster_enviroment:
-            type: fixture
+            type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
             type: List
-            brief: list of manager hosts in enviroment
+            brief: List of manager hosts in enviroment.
         - test_infra_managers
             type: List
-            brief: list of agent hosts in enviroment
+            brief: List of agent hosts in enviroment.
         - host_manager
             type: HostManager object
-            brief: handles connection the enviroment's hosts.
+            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -102,7 +103,6 @@ def test_agent_default_group_added(agent_target, clean_environment, test_infra_m
     '''
 
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target, host_manager)
-
 
     # Check that agent status is never-connected in cluster
     time.sleep(timeout)

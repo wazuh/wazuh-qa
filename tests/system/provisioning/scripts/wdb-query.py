@@ -1,5 +1,5 @@
 #! /usr/bin/python3
-# September 16, 2019
+# 2022
 
 # Syntax: wdb-query.py <AGENT ID> <QUERY>
 #         wdb-query.py global "<COMMAND> <PARAMS>"

@@ -44,11 +44,11 @@ tags:
 import os
 import time
 import pytest
-from wazuh_testing.tools.system import HostManager
+
 from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster,
                     check_keys_file, delete_group_of_agents, check_agent_groups_db)
+from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
-
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]

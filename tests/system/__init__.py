@@ -20,7 +20,6 @@ ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND = f'Did not find the expected keys gener
 ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
 
 
-
 # Functions
 def get_agent_id(host_manager):
     # Gets the first agent id in the master's client.keys file
@@ -96,12 +95,14 @@ def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
         assert group_to_check in group_data, f"Did not recieve expected agent group: {group_to_check} in data \
                                                {str(group_data)}"
 
+
 # Check the expected group is in the group data for the agent in db
 def check_agent_groups_db(query, group_to_check, host, host_manager):
     group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
                                           '{query}'")
     assert group_to_check in group_data, f"Did not recieve expected agent group: {group_to_check} in data \
                                          {str(group_data)}"
+
 
 def check_agent_status(agent_id, agent_name, agent_ip, status, host_manager, hosts_list):
     # Check the agent has the expected status (never_connected, pending, active, disconnected)

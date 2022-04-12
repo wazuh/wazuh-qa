@@ -4,7 +4,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
 brief: Check that when an agent with status never_connected, pointing to a master/worker node is
-       registered using agent-auth and when it is assigned to a group with agent-group, the change is 
+       registered using agent-auth and when it is assigned to a group with agent-group, the change is
        synced in the cluster.
 tier: 1
 modules:
@@ -66,11 +66,12 @@ wait_time = 10
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
-def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_infra_managers,
+                                         test_infra_agents, host_manager):
     '''
     description: Check that when an agent with status never_connected, pointing to a master/worker node is
                  registered using agent-auth and when it is assigned to a group with agent-group, the change is synced

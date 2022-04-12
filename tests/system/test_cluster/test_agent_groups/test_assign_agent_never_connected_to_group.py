@@ -62,9 +62,9 @@ id_group = 'group_test'
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
 def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
     '''
@@ -73,20 +73,20 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
-            type: string
-            brief: name of the host where the agent will register
+            type: String
+            brief: Name of the host where the agent will register.
         - clean_enviroment:
-            type: fixture
+            type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
             type: List
-            brief: list of manager hosts in enviroment
+            brief: List of manager hosts in enviroment.
         - test_infra_agents
             type: List
-            brief: list of agent hosts in enviroment
+            brief: List of agent hosts in enviroment.
         - host_manager
             type: HostManager object
-            brief: handles connection the enviroment's hosts.
+            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -104,7 +104,8 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
                                                                     host_manager, id_group)
 
         # Check that agent status is never_connected in cluster
-        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_NEVER_CONNECTED, host_manager, test_infra_managers)
+        check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_NEVER_CONNECTED,
+                           host_manager, test_infra_managers)
 
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, id_group, test_infra_managers, host_manager)

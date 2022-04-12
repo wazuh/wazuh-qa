@@ -66,13 +66,13 @@ test_group = 'group_test'
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers",[test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents",[test_infra_agents])
-@pytest.mark.parametrize("host_manager",[host_manager])
+@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
+@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
+@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("initial_status", [AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED])
 @pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker1"])
-def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers, test_infra_agents,
-                                 host_manager):
+def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers,
+                                 test_infra_agents, host_manager):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
                  Check that when an agent pointing to a master/worker node is registered, and when
@@ -80,23 +80,23 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
-            type: string
-            brief: name of the host where the agent will register
+            type: String
+            brief: Name of the host where the agent will register.
         - initial_status:
-            type: string
-            brief: status of the agent when the assign the new group
+            type: String
+            brief: Status of the agent when the assign the new group.
         - clean_enviroment:
-            type: fixture
+            type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
             type: List
-            brief: list of manager hosts in enviroment
+            brief: List of manager hosts in enviroment.
         - test_infra_agents
             type: List
-            brief: list of agent hosts in enviroment
+            brief: List of agent hosts in enviroment.
         - host_manager
             type: HostManager object
-            brief: handles connection the enviroment's hosts.
+            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before starting the agent, it has no groups assigned.
@@ -133,13 +133,13 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
     token = host_manager.get_api_token(test_infra_managers[0])
     try:
         response = host_manager.make_api_call(test_infra_managers[0], method='PUT',
-                                          endpoint=f'/agents/{agent_id}/group/group_test?pretty=true',
-                                          token=token)
+                                              endpoint=f'/agents/{agent_id}/group/group_test?pretty=true',
+                                              token=token)
         assert response['status'] == 200, ERR_MSG_FAILED_TO_SET_AGENT_GROUP
 
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, test_group, test_infra_managers, host_manager)
 
     # Delete group of agent
-    finally: 
+    finally:
         delete_group_of_agents(test_infra_managers[0], test_group, host_manager)
