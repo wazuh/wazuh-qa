@@ -47,7 +47,6 @@ tags:
 import os
 import subprocess
 import time
-import requests
 
 import pytest
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
@@ -55,9 +54,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file, remove_file, recursive_directory_creation
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service, check_daemon_status
-from wazuh_testing.api import get_token_login_api, API_PROTOCOL, API_HOST, API_PORT, API_USER,API_PASS,API_LOGIN_ENDPOINT
+from wazuh_testing.api import remove_groups, set_up_groups
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
-
 
 
 # Marks
@@ -86,46 +84,6 @@ test_group = "TestGroup"
 timeout = 10
 login_attempts = 3
 sleep = 1
-
-# Aux
-
-def create_groups_api_request(group, token):
-
-    headers = {'Authorization': f"Bearer {token}",}
-    json_data = {'group_id': f"{group}",}
-    response = requests.post('https://localhost:55000/groups', headers=headers, json=json_data, verify=False)
-    return response
-
-def delete_group_api_request(token):
-    headers = {'Authorization': f"Bearer {token}",}
-    params = (
-        ('pretty', 'true'),
-        ('groups_list', 'all'),
-    )
-    response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
-    return response
-
-
-def set_up_groups(groups_list):
-    time.sleep(3)
-    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
-
-    for group in groups_list:
-        time.sleep(3)
-        response = create_groups_api_request(group, response_token)
-
-
-def remove_groups():
-    time.sleep(3)
-    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT, timeout,login_attempts,sleep)
-    headers = {'Authorization': f"Bearer {response_token}",}
-    params = (
-        ('pretty', 'true'),
-        ('groups_list', 'all'),
-    )
-    response = requests.delete('https://localhost:55000/groups', headers=headers, params=params, verify=False)
-    return response
-
 
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request):
@@ -449,12 +407,12 @@ def test_ossec_authd_agents_ctx(get_configuration, configure_environment, config
         - keys
         - ssl
     '''
-    control_service('stop', daemon='wazuh-authd')
+    control_service('stop')
     check_daemon_status(running_condition=False, target_daemon='wazuh-authd')
     time.sleep(1)
     clean_logs()
     clean_agents_ctx()
-    control_service('restart')
+    control_service('start')
     check_daemon_status(running_condition=True, target_daemon='wazuh-authd')
     wait_server_connection()
     time.sleep(1)
