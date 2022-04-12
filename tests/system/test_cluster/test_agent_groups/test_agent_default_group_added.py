@@ -79,7 +79,7 @@ def test_agent_default_group_added(agent_target, clean_environment, test_infra_m
         - agent_target:
             type: String
             brief: Name of the host where the agent will register.
-        - clean_cluster_enviroment:
+        - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
         - test_infra_managers
