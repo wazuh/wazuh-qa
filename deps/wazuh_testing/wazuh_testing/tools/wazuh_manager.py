@@ -1,7 +1,9 @@
 import os
 import subprocess
+import requests
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.api import get_api_details_dict
 
 
 def list_agents_ids():
@@ -22,6 +24,18 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
                                 stderr=subprocess.STDOUT)
             elif remove_type == 'wazuhdb':
                 result = query_wdb(f"global delete-agent {str(agent_id)}")
+        if remove_type == 'api':
+            api_details = get_api_details_dict()
+            payload = {
+                'agents_list': agents_id,
+                'status': 'all',
+                'older_than': '0s'
+            }
+            url = f"{api_details['base_url']}/agents"
+            response = requests.delete(url, headers=api_details['auth_headers'], params=payload, verify=False)
+            response_data = response.json()
+            if response.status_code != 200:
+                raise RuntimeError(f"Error deleting an agent: {response_data}")
 
 
 def remove_all_agents(remove_type):
