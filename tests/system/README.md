@@ -224,7 +224,7 @@ cd wazuh-qa/tests/system/cluster
 
 To run any test, we just need to call `pytest` from `python3` using the following line:
 
-```shell scrip
+```shell script
 python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
 ```
 
