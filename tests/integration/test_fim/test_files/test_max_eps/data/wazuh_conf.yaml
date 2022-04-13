@@ -4,7 +4,7 @@
 - tags:
   - max_eps
   apply_to_modules:
-  - MODULE_NAME
+  - test_max_eps
   sections:
   - section: syscheck
     elements:
