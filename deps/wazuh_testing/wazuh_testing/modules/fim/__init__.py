@@ -42,7 +42,7 @@ DIFF_DEFAULT_LIMIT_VALUE = 51200
 
 
 # FIM modules
-SCHEDULE_MODE = 'scheduled'
+SCHEDULED_MODE = 'scheduled'
 REALTIME_MODE = 'realtime'
 WHODATA_MODE = 'whodata'
 
@@ -70,6 +70,7 @@ CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
+CB_PATH_MONITORED_REALTIME = r".*Monitoring path: '(.*)',.*"
 
 
 # Error message
@@ -91,6 +92,7 @@ ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
 ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
+ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
 
 
 # Setting Local_internal_option file

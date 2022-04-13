@@ -74,7 +74,6 @@ tags:
     - fim_max_eps_sync
 '''
 import os
-from tracemalloc import stop
 import pytest
 
 from collections import Counter
@@ -84,12 +83,14 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
-from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       ERR_MSG_INTEGRITY_CONTROL_MSG, REALTIME_MODE, WHODATA_MODE)
+from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,CB_PATH_MONITORED_REALTIME,
+                                       ERR_MSG_INTEGRITY_CONTROL_MSG, REALTIME_MODE, WHODATA_MODE,
+                                       ERR_MSG_MONITORING_PATH, ERR_MSG_MULTIPLE_FILES_CREATION)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_detect_event
-from wazuh_testing.tools.file import delete_path_recursively, write_file
+from wazuh_testing.tools.file import modify_all_files_in_folder, delete_all_files_in_folder, write_file
 from wazuh_testing.tools.services import control_service
+
 
 # Marks
 pytestmark = [TIER1, AGENT, WINDOWS, LINUX]
@@ -103,36 +104,27 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
 test_directory = os.path.join(PREFIX, TEST_DIR_1)
 conf_params = {TEST_DIRECTORIES: test_directory}
 
-ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
 TIMEOUT_SYSCHECK_FILE_EVENT = 30
 TIMEOUT_CHECK_INTEGRATY_START = 30
 TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 90
 
-# Configurations
 
+# Configurations
 # Test with the minimum, and the default value
-eps_values = ['1']
+eps_values = ['1', '100']
 
 parameters, metadata = generate_params(extra_params=conf_params,
-                                       modes=[REALTIME_MODE],
+                                       modes=[REALTIME_MODE, WHODATA_MODE],
                                        apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
-
-# Fixtures
-
-@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
 
 
 def create_multiple_files(get_configuration):
     """Create multiple files of a specific type."""
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
-    os.makedirs(test_directory, exist_ok=True)#, mode=0o777)
     try:
         for i in range(int(max_eps) + 5):
             file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode'
@@ -142,13 +134,21 @@ def create_multiple_files(get_configuration):
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
-def delete_all_files_in_folder(folder_path):
-    for f in os.listdir(folder_path):
-        os.remove(os.path.join(folder_path, f))
+# Fixtures
+@pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
+def get_configuration(request):
+    """Get configurations from the module."""
+    return request.param
+
+
+@pytest.fixture(scope='module')
+def create_test_folder():
+    os.makedirs(test_directory, exist_ok=True)
+
 
 # Tests
-def test_max_eps_sync_rt_wd(configure_local_internal_options_module, get_configuration,
-                                         configure_environment, restart_wazuh):
+def test_max_eps_sync_rt_wd(configure_local_internal_options_module, get_configuration, create_test_folder,
+                            configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
                  a lot of synchronization events are generated. For this purpose, the test will monitor
@@ -199,8 +199,8 @@ def test_max_eps_sync_rt_wd(configure_local_internal_options_module, get_configu
         max_eps = int(get_configuration['metadata']['max_eps'])
         total_file_created = max_eps + 5
         wazuh_log_monitor.start(timeout=TIMEOUT_SYSCHECK_FILE_EVENT,
-                                callback=generate_monitoring_callback(r".*Monitoring path: '(.*)',.*"),
-                                error_message=f'Did not get monitoring path line').result()
+                                callback=generate_monitoring_callback(CB_PATH_MONITORED_REALTIME),
+                                error_message=ERR_MSG_MONITORING_PATH).result()
         create_multiple_files(get_configuration)
 
         result = wazuh_log_monitor.start(timeout=TIMEOUT_SYSCHECK_FILE_EVENT,
@@ -209,7 +209,7 @@ def test_max_eps_sync_rt_wd(configure_local_internal_options_module, get_configu
                                 error_message=f'Received less results than expected ({total_file_created})').result()
 
         control_service("stop")
-        delete_all_files_in_folder(test_directory)
+        modify_all_files_in_folder(test_directory, "test_data")
         control_service("restart")
 
         # Find integrity start before attempting to read max_eps.
@@ -231,4 +231,4 @@ def test_max_eps_sync_rt_wd(configure_local_internal_options_module, get_configu
             assert total_occurrences <= max_eps, f'Sent {total_occurrences} but a maximum of {max_eps} was set'
     finally:
         # Delete all files created.
-        delete_path_recursively(test_directory)
+        delete_all_files_in_folder(test_directory)

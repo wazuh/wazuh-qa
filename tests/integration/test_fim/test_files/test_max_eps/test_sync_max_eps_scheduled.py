@@ -169,9 +169,6 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
         - restart_wazuh:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - delete_files:
-            type: fixture
-            brief: Delete the testing files when the test ends.
 
     assertions:
         - Verify that FIM 'integrity' events are generated for each testing file created.
@@ -182,7 +179,6 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
                        the 'wazuh-syscheckd' daemon and, these are combined with the
                        testing directories to be monitored defined in the module.
     expected_output:
-        - r'.* Connected to the server .*'
         - r'.*Sending integrity control message'
 
     tags:
