@@ -8,3 +8,4 @@ export const pinFilterAction = '[data-test-subj="pinFilter"]';
 export const selectedOperator = '[title="is"]';
 export const pinnedFilter= '[data-test-subj="filter filter-enabled filter-key-rule.level filter-value-7 filter-pinned"]';
 export const eventsButton = '//*[contains(@class,"euiTabs")]//*[contains(text(),"Events")]'
+export const removeFilterButton = '//*[contains(@class,"euiContextMenuPanel")]//*[contains(text(),"Delete")]'
