@@ -189,7 +189,7 @@ def test_merged_mg_file_content(metadata, configure_local_internal_options_modul
             match_regex = re.compile(rf"^{expected_line}$")
             match_expected_line = list(filter(match_regex.match, merged_file_lines))
     else:
-        raise RuntimeError(f"The file: {merged_mg_file} was not created.")
+        raise FileNotFoundError(f"The file: {merged_mg_file} was not created.")
 
     expected_conditions = [True, [expected_line + '\n']] if action == 'create' else [False, []]
 
