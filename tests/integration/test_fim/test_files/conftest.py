@@ -48,7 +48,7 @@ def wait_for_fim_start_function(get_configuration, request):
     """
     Wait for fim to start
     """
-    wait_for_fim_start(get_configuration, request)
+    wait_for_fim_active(get_configuration, request)
 
 
 @pytest.fixture(scope="function")
