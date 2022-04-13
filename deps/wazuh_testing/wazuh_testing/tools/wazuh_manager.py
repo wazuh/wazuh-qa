@@ -24,10 +24,18 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
                                 stderr=subprocess.STDOUT)
             elif remove_type == 'wazuhdb':
                 result = query_wdb(f"global delete-agent {str(agent_id)}")
-            elif remove_type == 'api':
-                api_details = get_api_details_dict()
-                api_query = f"{api_details['base_url']}/agents?older_than=0s&agents_list={agents_id}&status=all"
-                response = requests.delete(api_query, headers=api_details['auth_headers'], verify=False)
+        if remove_type == 'api':
+            api_details = get_api_details_dict()
+            payload = {
+                'agents_list': agents_id,
+                'status': 'all',
+                'older_than': '0s'
+            }
+            url = f"{api_details['base_url']}/agents"
+            response = requests.delete(url, headers=api_details['auth_headers'], params=payload, verify=False)
+            response_data = response.json()
+            if response.status_code != 200:
+                raise RuntimeError(f"Error deleting an agent: {response_data}")
 
 
 def remove_all_agents(remove_type):
