@@ -93,6 +93,7 @@ ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
 ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
 ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
+ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
 
 # Setting Local_internal_option file

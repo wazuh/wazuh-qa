@@ -73,32 +73,30 @@ tags:
     - fim_max_eps
 '''
 import os
-from collections import Counter
-
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_event_message, \
-    check_time_travel
+
+from collections import Counter
+from wazuh_testing import logger
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.modules.fim import TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import write_file,delete_path_recursively
+
 
 # Marks
-
 pytestmark = pytest.mark.tier(level=1)
 
 # Variables
-test_directories = [os.path.join(PREFIX, 'testdir1')]
-
-directory_str = ','.join(test_directories)
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = os.path.join(PREFIX, 'testdir1')
+test_directory = os.path.join(PREFIX, TEST_DIR_1)
 
 # Configurations
-conf_params = {'TEST_DIRECTORIES': directory_str,
-               'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': test_directory}
 
 eps_values = ['50', '10']
 
@@ -115,7 +113,27 @@ def get_configuration(request):
     return request.param
 
 
-def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+@pytest.fixture(scope='function')
+def create_test_directories(get_configuration):
+    os.makedirs(test_directory, exist_ok=True, mode=0o777)
+    yield
+    delete_path_recursively(test_directory)
+
+
+def create_multiple_files(get_configuration):
+    """Create multiple files of a specific type."""
+    max_eps = get_configuration['metadata']['max_eps']
+    mode = get_configuration['metadata']['fim_mode']
+    try:
+        for i in range(int(max_eps) + 5):
+            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode'
+            path = os.path.join(test_directory, file_name)
+            write_file(path)
+    except OSError:
+        logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
+
+
+def test_max_eps(configure_local_internal_options_module, get_configuration, create_test_directories, configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
                  a lot of 'syscheck' events are generated. For this purpose, the test will monitor a folder,
@@ -152,22 +170,13 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
         - r'.*Sending FIM event: (.+)$' ('added' events)
 
     tags:
-        - realtime
         - scheduled
     '''
-    check_apply_test({'max_eps'}, get_configuration['tags'])
-
     max_eps = int(get_configuration['metadata']['max_eps'])
-    mode = get_configuration['metadata']['fim_mode']
-
+    create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
-    for i in range(int(max_eps) * 5):
-        create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
-
-    check_time_travel(mode == "scheduled")
-    n_results = max_eps * 5
-
-    result = wazuh_log_monitor.start(timeout=(n_results / max_eps) * 6,
+    n_results = max_eps + 5
+    result = wazuh_log_monitor.start(timeout=30,
                                      accum_results=n_results,
                                      callback=callback_event_message,
                                      error_message=f'Received less results than expected ({n_results})').result()

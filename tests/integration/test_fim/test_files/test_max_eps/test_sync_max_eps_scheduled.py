@@ -83,7 +83,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       ERR_MSG_INTEGRITY_CONTROL_MSG, SCHEDULED_MODE)
+                                       ERR_MSG_INTEGRITY_CONTROL_MSG, SCHEDULED_MODE, ERR_MSG_MULTIPLE_FILES_CREATION)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import callback_integrity_message
 from wazuh_testing.tools.file import delete_path_recursively, write_file
@@ -100,7 +100,6 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
 test_directory = os.path.join(PREFIX, TEST_DIR_1)
 conf_params = {TEST_DIRECTORIES: test_directory}
 
-ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
 TIMEOUT_CHECK_INTEGRATY_START = 30
 TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 90
