@@ -150,7 +150,6 @@ def check_agent_groups(id, expected, timeout=30):
     wait = time.time() + timeout
     while time.time() < wait:
         groups_created = subprocess.check_output("/var/ossec/bin/agent_groups")
-        print(str(groups_created))
         if expected in str(groups_created):
             return True
     return False

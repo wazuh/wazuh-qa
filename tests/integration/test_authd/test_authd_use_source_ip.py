@@ -174,7 +174,7 @@ def test_authd_use_source_ip(get_configuration, configure_environment, get_curre
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
         if metadata['use_source_ip'] == 'yes' and get_current_test_case['ip_specified'] == 'no':
             if 'ipv6' in get_current_test_case:
                 expected = {"status": "success", "name": "user1", "ip": "0000:0000:0000:0000:0000:0000:0000:0001"}

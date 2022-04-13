@@ -153,7 +153,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                assert response != '', 'Manager did not respond to sent message!'
+                assert response != '', 'The manager did not respond to the message sent.'
 
         result, err_msg = validate_authd_response(response, stage['output'])
         assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
