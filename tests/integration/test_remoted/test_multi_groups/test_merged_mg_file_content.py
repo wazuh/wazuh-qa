@@ -150,8 +150,8 @@ def test_merged_mg_file_content(metadata, configure_local_internal_options_modul
                                 prepare_environment):
     '''
     description: Check the content of the merged.mg file that wazuh-remoted compiles for multi-groups.
-    
-    wazuh_min_version: 4.3.0
+
+    wazuh_min_version: 4.2.2
 
     parameters:
         - metadata:
