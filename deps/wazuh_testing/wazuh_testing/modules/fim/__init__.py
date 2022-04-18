@@ -91,8 +91,6 @@ CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
 CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
 CB_PATH_MONITORED_WHODATA_WINDOWS = r".*Setting up SACL for (.*)"
 
-
-
 # Error message
 
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'

@@ -228,7 +228,7 @@ def modify_all_files_in_folder(folder_path, data):
         file_path (str): File or directory path to modify.
         data (str): what to write into the file.
     """
-    for f in os.listdir(folder_path):
+    for files in os.listdir(folder_path):
         write_file(os.path.join(folder_path, f), data)
 
 def delete_all_files_in_folder(folder_path):

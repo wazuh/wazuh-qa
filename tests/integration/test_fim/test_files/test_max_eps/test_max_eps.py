@@ -165,7 +165,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
     else:    
         monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
 
-    result = wazuh_log_monitor.start(timeout=30,
+    result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START ,
                                      callback=generate_monitoring_callback(monitoring_regex),
                                      error_message=ERR_MSG_MONITORING_PATH).result()
     create_multiple_files(get_configuration)
