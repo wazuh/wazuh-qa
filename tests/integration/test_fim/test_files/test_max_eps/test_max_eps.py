@@ -80,7 +80,8 @@ from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.modules.fim import TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE, CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH
+from wazuh_testing.modules.fim import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE,
+                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -94,7 +95,7 @@ pytestmark = pytest.mark.tier(level=1)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories =[os.path.join(PREFIX, TEST_DIR_1)]
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
 
 # Configurations
 conf_params = {'TEST_DIRECTORIES': test_directories[0]}

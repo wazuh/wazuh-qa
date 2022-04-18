@@ -115,8 +115,8 @@ parameters, metadata = generate_params(extra_params=conf_params,
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
 
-# Fixtures
 
+# Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -136,6 +136,7 @@ def create_multiple_files(get_configuration):
             write_file(path)
     except OSError:
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
+
 
 # Tests
 def test_max_eps_sync_valid_within_range(configure_local_internal_options_module, get_configuration,
@@ -195,11 +196,10 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
 
         # Find integrity message for each file created after read max_eps.
         total_file_created = max_eps + 5
-        result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG,
-                                        accum_results=total_file_created,
-                                        callback=callback_integrity_message,
-                                        error_message=f'Received less results than expected ({total_file_created})').result()
-
+        result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG, accum_results=total_file_created,
+                                         callback=callback_integrity_message,
+                                         error_message=f'Received less results than expected\
+                                                        ({total_file_created})').result()
         # Collect by time received the messages.
         counter = Counter([date_time for date_time, _ in result])
 
