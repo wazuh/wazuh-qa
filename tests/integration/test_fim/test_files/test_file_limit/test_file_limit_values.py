@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_file_limit
+
+targets:
     - agent
     - manager
 
@@ -36,26 +36,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -85,7 +72,8 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import (ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE,
-                                       ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+                                       ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
+                                       ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 from wazuh_testing.modules import TIER1
 
@@ -101,7 +89,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
-monitor_timeout= 40
+monitor_timeout = 40
 
 # Configurations
 
@@ -109,7 +97,8 @@ file_limit_list = ['1', '1000']
 conf_params = {'TEST_DIRECTORIES': testdir1}
 
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list))
+                                   apply_to_all=({'FILE_LIMIT': file_limit_elem} for
+                                                 file_limit_elem in file_limit_list))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -145,6 +134,8 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -177,13 +168,12 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     # assert it matches the expected value
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
-
     # Check number of entries and paths in DB and assert the value matches the expected count
     entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     if sys.platform != 'win32':
         assert (entries == get_configuration['metadata']['file_limit'] and
-                    path_count == get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_INODE_PATH_COUNT
+                path_count == get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_INODE_PATH_COUNT
     else:
         assert entries == str(get_configuration['metadata']['file_limit']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

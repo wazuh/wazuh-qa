@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured files
        for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_file_limit
+
+targets:
     - agent
     - manager
 
@@ -126,6 +126,8 @@ def test_file_limit_no_limit(get_configuration, configure_environment, restart_s
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - get_configuration:
             type: fixture
@@ -150,7 +152,7 @@ def test_file_limit_no_limit(get_configuration, configure_environment, restart_s
     tags:
         - scheduled
         - realtime
-        - whoadata
+        - who_data
     '''
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

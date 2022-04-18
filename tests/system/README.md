@@ -117,6 +117,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_jwt_invalidation                  | agentless_cluster    |
 | test_active_response_log_format        | manager_agent        |
 | test_fim/test_synchronization          | one_manager_agent    |
+| test_multigroups/test_multigroups      | basic_cluster        |
 
 ### Test structure
 

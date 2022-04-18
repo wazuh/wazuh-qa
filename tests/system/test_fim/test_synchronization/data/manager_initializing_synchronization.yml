@@ -1,4 +1,4 @@
 wazuh-manager:
-  - regex: ".*Initializing FIM Integrity Synchronization check. (.+)$"
+  - regex: ".*Finished FIM sync."
     path: "/var/ossec/logs/ossec.log"
     timeout: 60

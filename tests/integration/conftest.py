@@ -15,7 +15,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -53,28 +53,39 @@ def get_report_files():
 ###############################
 
 
-def pytest_runtest_setup(item):
-    # Find if platform applies
-    supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
-    plat = sys.platform
+def pytest_collection_modifyitems(session, config, items):
+    selected_tests = []
+    deselected_tests = []
 
-    if supported_platforms and plat not in supported_platforms:
-        pytest.skip("Cannot run on platform {}".format(plat))
+    for item in items:
+        supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
+        plat = sys.platform
 
-    host_type = 'agent' if 'agent' in get_service() else 'server'
-    supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
-    if supported_types and host_type not in supported_types:
-        pytest.skip("Cannot run on wazuh {}".format(host_type))
-    # Consider only first mark
-    levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-    if levels and len(levels) > 0:
-        tiers = item.config.getoption("--tier")
-        if tiers is not None and levels[0] not in tiers:
-            pytest.skip(f"test requires tier level {levels[0]}")
-        elif item.config.getoption("--tier-minimum") > levels[0]:
-            pytest.skip(f"test requires a minimum tier level {levels[0]}")
-        elif item.config.getoption("--tier-maximum") < levels[0]:
-            pytest.skip(f"test requires a maximum tier level {levels[0]}")
+        selected = True
+        if supported_platforms and plat not in supported_platforms:
+            selected = False
+
+        host_type = 'agent' if 'agent' in get_service() else 'server'
+        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+        if supported_types and host_type not in supported_types:
+            selected = False
+        # Consider only first mark
+        levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+        if levels and len(levels) > 0:
+            tiers = item.config.getoption("--tier")
+            if tiers is not None and levels[0] not in tiers:
+                selected = False
+            elif item.config.getoption("--tier-minimum") > levels[0]:
+                selected = False
+            elif item.config.getoption("--tier-maximum") < levels[0]:
+                selected = False
+        if selected:
+            selected_tests.append(item)
+        else:
+            deselected_tests.append(item)
+
+    config.hook.pytest_deselected(items=deselected_tests)
+    items[:] = selected_tests
 
 
 @pytest.fixture(scope='module')
@@ -903,11 +914,11 @@ def configure_local_internal_options_function(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
-    
+
 @pytest.fixture(scope='function')
-def truncate_log_files():
-    """Truncate all the log files before and after the test execution"""
-    log_files = [LOG_FILE_PATH]
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)
@@ -967,13 +978,13 @@ def mock_system_parametrized(system):
 
 
 @pytest.fixture(scope='function')
-def mock_agent_packages():
-    """Add 10 mocked packages to the agent 001 DB"""
-    package_names = mocking.insert_mocked_packages(agent_id='001')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
 
     yield package_names
 
-    mocking.delete_mocked_packages(agent_id='001')
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
 
 
 @pytest.fixture(scope='function')
@@ -1007,3 +1018,32 @@ def mock_agent_function(request):
     yield agent_id
 
     mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def mock_agent_with_custom_system(agent_system):
+    """Fixture to create a mocked agent with custom system specified as parameter"""
+    if agent_system not in mocking.SYSTEM_DATA:
+        raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
+
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def setup_log_monitor():
+    """Create the log monitor"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def setup_alert_monitor():
+    """Create the alert monitor"""
+    log_monitor = FileMonitor(ALERTS_JSON_PATH)
+
+    yield log_monitor

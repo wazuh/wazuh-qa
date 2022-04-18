@@ -1,5 +1,5 @@
 """
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes_disk_quota
+
+targets:
     - agent
 
 daemons:
@@ -62,8 +62,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, 
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
                                registry_value_delete, registry_parser, create_values_content)
 from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+                                      SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
+                                      ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -73,7 +73,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), 
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -93,8 +93,6 @@ params, metadata = generate_params(modes=["scheduled"], extra_params={
 configurations_path = os.path.join(test_data_path, "wazuh_registry_report_changes_limits_quota.yaml")
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-
-
 # Fixtures
 
 
@@ -104,15 +102,11 @@ def get_configuration(request):
     return request.param
 
 
-
 @pytest.mark.parametrize("size", [(8192), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
-    [
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
-    ],
-)
+                         [(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"), ],)
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """
@@ -122,12 +116,14 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  'disk_quota' limit, and increase its size on each test case. Finally, the test will verify
                  that the compressed diff file has been created, and the related FIM event includes the
                  'content_changes' field if the value size does not exceed the specified limit.
-                 - Case 1: File size smaller than size_limit - tests that disk_quota is higher than the one originally
+                 - Case 1, File size smaller than size_limit - tests that disk_quota is higher than the one originally
                    configured.
-                 - Case 2: File size bigger than size_limit - tests that disk_quota does not allow for compressed files
+                 - Case 2, File size bigger than size_limit - tests that disk_quota does not allow for compressed files
                    bigger than size_limit (that is the value actually applied to disk_quota as well).
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:

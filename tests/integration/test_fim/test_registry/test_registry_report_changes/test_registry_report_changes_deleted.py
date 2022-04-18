@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_report_changes
+
+targets:
     - agent
 
 daemons:
@@ -143,7 +143,6 @@ def get_configuration(request):
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", False, {'test_duplicate_report'}),
     (key, sub_key_2, KEY_WOW64_64KEY, "some_value", True, {'test_duplicate_report'})
 ])
-@pytest.mark.skip(reason="It will be blocked by #1602, when it was solve we can enable again this test")
 def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to_apply,
                                  get_configuration, configure_environment, restart_syscheckd,
                                  wait_for_fim_start):
@@ -156,6 +155,8 @@ def test_report_when_deleted_key(key, subkey, arch, value_name, enabled, tags_to
                  Finally, the test will remove the monitored key and verify that the 'diff' folder has been deleted.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - key:
@@ -255,6 +256,8 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
                  will verify that the 'diff' folders have been deleted.
 
     wazuh_min_version: 4.2.0
+
+    tier: 1
 
     parameters:
         - get_configuration:

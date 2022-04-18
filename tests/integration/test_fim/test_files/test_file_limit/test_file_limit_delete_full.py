@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_file_limit
+
+targets:
     - agent
     - manager
 
@@ -36,26 +36,13 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
     - Windows 10
-    - Windows 8
-    - Windows 7
     - Windows Server 2019
     - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -150,6 +137,8 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - folder:
             type: str
@@ -185,9 +174,9 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
 
     tags:
         - realtime
-        - who-data
+        - who_data
     '''
-    #Check that database is full and assert database usage percentage is 100%
+    # Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
@@ -209,7 +198,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
     # Delete the first file that was created (It is included in DB)
     delete_file(folder, f'{file_name}{0}')
 
-    #Get that the file deleted generetes an event and assert the event data path.
+    # Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
