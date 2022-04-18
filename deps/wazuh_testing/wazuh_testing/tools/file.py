@@ -228,16 +228,17 @@ def modify_all_files_in_folder(folder_path, data):
         file_path (str): File or directory path to modify.
         data (str): what to write into the file.
     """
-    for files in os.listdir(folder_path):
-        write_file(os.path.join(folder_path, f), data)
+    for file in os.listdir(folder_path):
+        write_file(os.path.join(folder_path, file), data)
 
+        
 def delete_all_files_in_folder(folder_path):
     """ Remove al files inside a folder
     Args:
         file_path (str): File or directory path to remove.
     """
-    for f in os.listdir(folder_path):
-        os.remove(os.path.join(folder_path, f))
+    for file in os.listdir(folder_path):
+        os.remove(os.path.join(folder_path, file))
 
 
 def validate_json_file(file_path):
