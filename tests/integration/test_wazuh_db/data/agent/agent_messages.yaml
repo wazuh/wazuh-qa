@@ -103,14 +103,14 @@
                                         "type":"PACKAGE",
                                         "status":"VALID",
                                         "check_pkg_existence":false,
-                                        "severity":"-",
+                                        "severity":"Untriaged",
                                         "cvss2_score":0,
                                         "cvss3_score":0}'
     output: 'ok {"action":"INSERT","status":"SUCCESS"}'
     stage: "agent vuln_cves insert package with same CVE without checking if the package is present in sys_programs"
   -
     input: 'agent 000 sql SELECT * FROM vuln_cves WHERE name = "test_package2"'
-    output: 'ok [{"name":"test_package2","version":"3.0","architecture":"x86","cve":"CVE-2021-1001","detection_time":"*","severity":"-","cvss2_score":0,"cvss3_score":0,"reference":"99efe684b5ff4646b3c754de46cb6a9cbee9fbaa","type":"PACKAGE","status":"VALID"}]'
+    output: 'ok []'
     stage: "agent vuln_cves checking package insertion with same CVE"
     use_regex: "yes"
   -

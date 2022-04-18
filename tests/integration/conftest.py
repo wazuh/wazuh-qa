@@ -92,6 +92,24 @@ def restart_wazuh(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
+def restart_wazuh_daemon(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='function')
+def restart_wazuh_daemon_function(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
     # Reset ossec.log and start a new monitor
     truncate_file(LOG_FILE_PATH)

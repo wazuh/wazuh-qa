@@ -191,7 +191,7 @@ def clean_belongs():
         raise Exception('Unable to clean belongs table.')
 
 
-def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status="never_connected",
+def insert_agent_in_db(id=1, name='TestAgent', ip='any', registration_time=0, connection_status=0,
                        disconnection_time=0):
     """
     Write agent in global.db
