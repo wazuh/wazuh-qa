@@ -118,7 +118,7 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
             brief: Name of the value that will be created in the test.
         - configure_local_internal_options_module:
             type: fixture
-            brief: Configure the local internal options file.    
+            brief: Configure the local internal options file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
