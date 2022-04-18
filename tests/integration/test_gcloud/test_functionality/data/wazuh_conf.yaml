@@ -19,5 +19,3 @@
         value: 'INTERVAL'
     - max_messages:
         value: 'MAX_MESSAGES'
-    - logging:
-        value: 'LOGGING'

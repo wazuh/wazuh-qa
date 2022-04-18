@@ -1,0 +1,55 @@
+---
+wazuh-master:
+  - regex: '.*POST /groups" with parameters {} and body {.*s: 200'
+    path: "/var/ossec/logs/api.log"
+    timeout: 60
+  - regex: '.*PUT /agents.*group.*" with parameters {} and body {} done in.*200'
+    path: "/var/ossec/logs/api.log"
+    timeout: 60
+  - regex: '.*Master.*Local agent-groups.*Starting.'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Master.*Local agent-groups.*Obtained 1 chunks of data in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Master.*Local agent-groups.*Finished in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Starting.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Starting.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Sending chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Sending chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker1.*Agent-groups send.*Finished in.*Updated.*chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Worker wazuh-worker2.*Agent-groups send.*Finished in.*Updated.*chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+
+wazuh-worker1:
+  - regex: '.*Agent-groups recv.*Starting.'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Agent-groups recv.*1/1 chunks updated in wazuh-db in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Agent-groups recv.*Obtained.*chunks of data in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Agent-groups recv.*There is no data requiring synchronization in the local database.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Agent-groups recv.*The checksum of both databases match.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
+  - regex: '.*Agent-groups recv.*Finished in.*Updated.*chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60

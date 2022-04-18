@@ -111,12 +111,14 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 |----------------------------------------|----------------------|
 | test_cluster/test_agent_enrollment     | enrollment_cluster   |
 | test_cluster/test_agent_info_sync      | basic_cluster        |
+| test_cluster/test_agent_groups         | basic_cluster        |
 | test_cluster/test_agent_key_polling    | basic_cluster        |
 | test_cluster/test_agent_files_deletion | basic_cluster        |
 | test_cluster/test_integrity_sync       | agentless_cluster    |
 | test_jwt_invalidation                  | agentless_cluster    |
 | test_active_response_log_format        | manager_agent        |
 | test_fim/test_synchronization          | one_manager_agent    |
+| test_multigroups/test_multigroups      | basic_cluster        |
 
 ### Test structure
 

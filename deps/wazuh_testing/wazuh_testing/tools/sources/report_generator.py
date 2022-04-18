@@ -6,6 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import logging
 from itertools import groupby
 from mmap import ACCESS_READ, mmap
 
@@ -42,7 +43,7 @@ class LogAnalyzer:
         return error_lines
 
     @staticmethod
-    def get_error_log_file(log_path, type='error'):
+    def get_error_log_file(log_path, type='error', duplicated_logs=False):
         """Get all the lines of the specified type of the log file.
 
         Args:
@@ -56,7 +57,13 @@ class LogAnalyzer:
 
                 error_lines = LogAnalyzer.findall_regex_line(lines=log_file_content, regex=f"(^.*?{type}\:.*?$)",
                                                              flags=re.MULTILINE | re.IGNORECASE)
-        return error_lines
+        if not duplicated_logs:
+            error_lines_no_repeated = [' '.join(error_line.split()[2:]) for error_line in error_lines]
+            error_lines_no_repeated = list(set(error_lines_no_repeated))
+
+            return error_lines_no_repeated
+        else:
+            return error_lines
 
     @staticmethod
     def get_error_logs_hosts(log_dict):
@@ -86,8 +93,8 @@ class LogAnalyzer:
         Args:
             log_files (list): List of manager logs to gather agent connection information.
         """
-        keep_alive_regex = '(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* reading ' + \
-            "'(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*:(\d+\.\d+\.\d+\.\d+)"
+        keep_alive_regex = '(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) wazuh\-remoted.* inserting ' + \
+                           '\'(.*)\|(.*)\|(.*)\|(.*)\|(.* \[.*\].*)\n(.*)\n.*"_agent_ip":(\S+)'
 
         keep_alives = {}
         for log_file in log_files:
@@ -142,6 +149,7 @@ class LogAnalyzer:
 
 class StatisticsAnalyzer:
     """This class group several statics methods to gather specific information from Wazuh statistics."""
+
     @staticmethod
     def calculate_values(statistis_files, fields):
         """Calculate statistical values of the specified files.
@@ -165,38 +173,34 @@ class StatisticsAnalyzer:
             mean_fields['max_reg_cof_' + field] = None
             mean_fields['min_reg_cof_' + field] = None
 
-        dataframe = pd.DataFrame()
-
         for statistic in statistis_files:
             for field in fields:
                 dataframe = pd.read_csv(statistic['path'])
-
                 mean = dataframe[field].mean()
                 max = dataframe[field].max()
                 min = dataframe[field].min()
 
-                mean_fields['max_' + field] = int(max) if not mean_fields['max_' + field] or \
-                    max > mean_fields['max_' + field] else int(mean_fields['max_' + field])
+                mean_fields['max_' + field] = float(max) if not mean_fields['max_' + field] or \
+                    max > mean_fields['max_' + field] else float(mean_fields['max_' + field])
 
-                mean_fields['min_' + field] = int(min) if not mean_fields['min_' + field] or \
-                    min < mean_fields['min_' + field] else int(mean_fields['min_' + field])
+                mean_fields['min_' + field] = float(min) if not mean_fields['min_' + field] or \
+                    min < mean_fields['min_' + field] else float(mean_fields['min_' + field])
 
-                mean_fields['max_mean_' + field] = int(mean) if not mean_fields['max_mean_' + field] or \
-                    mean > mean_fields['max_mean_' + field] else int(mean_fields['max_mean_' + field])
+                mean_fields['max_mean_' + field] = float(mean) if not mean_fields['max_mean_' + field] or \
+                    mean > mean_fields['max_mean_' + field] else float(mean_fields['max_mean_' + field])
 
-                mean_fields['min_mean_' + field] = int(mean) if not mean_fields['min_mean_' + field] or \
+                mean_fields['min_mean_' + field] = float(mean) if not mean_fields['min_mean_' + field] or \
                     mean < mean_fields['min_mean_' + field] else \
-                    int(mean_fields['min_mean_' + field])
+                    float(mean_fields['min_mean_' + field])
 
-                mean_fields['mean_' + field] += int(mean)
+                mean_fields['mean_' + field] += float(mean)
 
-                reg_cof = int(np.polyfit(range(len(dataframe)), list(dataframe[field]), 1)[0])
-
+                reg_cof = float(np.polyfit(range(len(dataframe)), list(dataframe[field]), 1)[0])
                 mean_fields['mean_reg_cof_' + field] += reg_cof
-                mean_fields['max_reg_cof_' + field] = int(reg_cof) if not mean_fields['max_reg_cof_' + field] or \
-                    reg_cof > mean_fields['max_reg_cof_' + field] else int(mean_fields['max_reg_cof_' + field])
-                mean_fields['min_reg_cof_' + field] = int(reg_cof) if not mean_fields['min_reg_cof_' + field] or \
-                    reg_cof < mean_fields['min_reg_cof_' + field] else int(mean_fields['min_reg_cof_' + field])
+                mean_fields['max_reg_cof_' + field] = float(reg_cof) if not mean_fields['max_reg_cof_' + field] or \
+                    reg_cof > mean_fields['max_reg_cof_' + field] else float(mean_fields['max_reg_cof_' + field])
+                mean_fields['min_reg_cof_' + field] = float(reg_cof) if not mean_fields['min_reg_cof_' + field] or \
+                    reg_cof < mean_fields['min_reg_cof_' + field] else float(mean_fields['min_reg_cof_' + field])
 
         for field in fields:
             mean_fields['mean_' + field] = mean_fields['mean_' + field] / n_stats
@@ -204,6 +208,10 @@ class StatisticsAnalyzer:
 
         return mean_fields
 
+
+class WazuhStatisticsAnalyzer():
+    """This class group several statics methods to gather specific information from Wazuh statistics."""
+    @staticmethod
     def analyze_agentd_statistics(agentd_statistics_files):
         """Create a report for wazuh-agentd daemon.
 
@@ -302,6 +310,17 @@ class ReportGenerator:
         cluster_environment (boolean): Cluster or single node environment.
     """
     def __init__(self, artifact_path):
+        self.daemons_manager = ['wazuh-modulesd', 'wazuh-monitord', 'wazuh-remoted', 'wazuh-authd',
+                                'wazuh-db', 'wazuh-syscheckd', 'wazuh-analysisd']
+
+        self.daemons_agent = ['wazuh-modulesd', 'wazuh-logcollector', 'wazuh-syscheckd',
+                              'wazuh-agentd', 'wazuh-execd']
+
+        self.daemons_manager_statistics = ['analysis', 'logcollector',  'remote']
+        self.daemons_agent_statistics = ['agent', 'logcollector']
+
+        self.metric_fields = ['CPU(%)', 'RSS(KB)', 'VMS(KB)', 'FD', 'Read_Ops', 'Write_Ops', 'SWAP(KB)',
+                              'USS(KB)', 'PSS(KB)']
 
         if os.path.isdir(artifact_path):
             self.artifact_path = artifact_path
@@ -438,9 +457,9 @@ class ReportGenerator:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        agentd_report = StatisticsAnalyzer.analyze_agentd_statistics(self.get_instances_statistics('wazuh-agentd',
-                                                                                                   component,
-                                                                                                   hosts_regex))
+        agentd_report = WazuhStatisticsAnalyzer.analyze_agentd_statistics(self.get_instances_statistics('wazuh-agentd',
+                                                                          component,
+                                                                          hosts_regex))
         return agentd_report
 
     def remoted_report(self, component='managers', hosts_regex='.*'):
@@ -450,27 +469,74 @@ class ReportGenerator:
             component (str): Wazuh installation type (agents/managers/all).
             hosts_regex (str): Regex to filter by hostname.
         """
-        remoted_report = StatisticsAnalyzer.analyze_remoted_statistics(self.get_instances_statistics('wazuh-remoted',
-                                                                                                     component,
-                                                                                                     hosts_regex))
+        remoted_report = WazuhStatisticsAnalyzer.analyze_remoted_statistics(self.get_instances_statistics(
+                                                                                                        'wazuh-remoted',
+                                                                                                        component,
+                                                                                                        hosts_regex))
         remoted_report = {**remoted_report, **LogAnalyzer.keep_alive_log_parser(self.get_instances_logs(log='ossec.log',
                                                                                 component=component,
                                                                                 hosts_regex=hosts_regex))}
 
         return remoted_report
 
+    def metric_report(self, component='manager', hosts_regex='.*'):
+        """Generate all Wazuh metrics report.
+
+        Args:
+            component (str): Wazuh installation type (agents/managers/all).
+            hosts_regex (str): Regex to filter by hostname.
+        """
+        metric_total = {}
+
+        metric_daemons = self.daemons_manager if any(component == master_component for master_component
+                                                     in ['managers', 'workers', 'master']) else self.daemons_agent
+
+        for daemon in metric_daemons:
+            metric_csv = self.get_instances_process_metrics(daemon, component, hosts_regex)
+
+            metric_total[daemon] = StatisticsAnalyzer.calculate_values(metric_csv, self.metric_fields)
+
+        return metric_total
+
     def make_report(self):
         """Build the JSON report of the environment."""
         report = {}
-
         report['metadata'] = {'n_agents': self.n_agents, 'n_workers': self.n_workers}
 
         report['agents'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
                                                                                              component='agents'))
         report['managers'] = LogAnalyzer.get_error_logs_hosts(log_dict=self.get_instances_logs(log='all',
                                                                                                component='managers'))
+        try:
+            report['agents']['wazuh-agentd'] = self.agentd_report()
+        except Exception as e:
+            unexpected_error = 'Unexpected error calculating agentd statistics'
+            logging.error(unexpected_error)
+            logging.error(e)
+            report['agents']['wazuh-agentd'] = {'ERROR': unexpected_error}
 
-        report['agents']['wazuh-agentd'] = self.agentd_report()
-        report['managers']['wazuh-remoted'] = self.remoted_report()
+        try:
+            report['managers']['wazuh-remoted'] = self.remoted_report()
+        except Exception as e:
+            unexpected_error = 'Unexpected error calculating remoted statistics'
+            logging.error(unexpected_error)
+            logging.error(e)
+            report['managers']['wazuh-remoted'] = {'ERROR': unexpected_error}
+
+        try:
+            report['agents']['metrics'] = self.metric_report('agents')
+        except Exception as e:
+            unexpected_error = 'Unexpected error calculating agents metrics'
+            logging.error(unexpected_error)
+            logging.error(e)
+            report['agents']['metrics'] = {'ERROR': unexpected_error}
+
+        try:
+            report['managers']['metrics'] = self.metric_report('managers')
+        except Exception as e:
+            unexpected_error = 'Unexpected error calculating managers metrics'
+            logging.error(unexpected_error)
+            logging.error(e)
+            report['managers']['metrics'] = {'ERROR': unexpected_error}
 
         return report

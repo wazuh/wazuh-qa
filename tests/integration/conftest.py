@@ -53,28 +53,39 @@ def get_report_files():
 ###############################
 
 
-def pytest_runtest_setup(item):
-    # Find if platform applies
-    supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
-    plat = sys.platform
+def pytest_collection_modifyitems(session, config, items):
+    selected_tests = []
+    deselected_tests = []
 
-    if supported_platforms and plat not in supported_platforms:
-        pytest.skip("Cannot run on platform {}".format(plat))
+    for item in items:
+        supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
+        plat = sys.platform
 
-    host_type = 'agent' if 'agent' in get_service() else 'server'
-    supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
-    if supported_types and host_type not in supported_types:
-        pytest.skip("Cannot run on wazuh {}".format(host_type))
-    # Consider only first mark
-    levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-    if levels and len(levels) > 0:
-        tiers = item.config.getoption("--tier")
-        if tiers is not None and levels[0] not in tiers:
-            pytest.skip(f"test requires tier level {levels[0]}")
-        elif item.config.getoption("--tier-minimum") > levels[0]:
-            pytest.skip(f"test requires a minimum tier level {levels[0]}")
-        elif item.config.getoption("--tier-maximum") < levels[0]:
-            pytest.skip(f"test requires a maximum tier level {levels[0]}")
+        selected = True
+        if supported_platforms and plat not in supported_platforms:
+            selected = False
+
+        host_type = 'agent' if 'agent' in get_service() else 'server'
+        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+        if supported_types and host_type not in supported_types:
+            selected = False
+        # Consider only first mark
+        levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+        if levels and len(levels) > 0:
+            tiers = item.config.getoption("--tier")
+            if tiers is not None and levels[0] not in tiers:
+                selected = False
+            elif item.config.getoption("--tier-minimum") > levels[0]:
+                selected = False
+            elif item.config.getoption("--tier-maximum") < levels[0]:
+                selected = False
+        if selected:
+            selected_tests.append(item)
+        else:
+            deselected_tests.append(item)
+
+    config.hook.pytest_deselected(items=deselected_tests)
+    items[:] = selected_tests
 
 
 @pytest.fixture(scope='module')
@@ -602,6 +613,26 @@ def configure_environment(get_configuration, request):
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
             control_service('restart')
+
+
+@pytest.fixture(scope="module")
+def set_agent_conf(get_configuration):
+    """Set a new configuration in 'agent.conf' file."""
+    backup_config = conf.get_agent_conf()
+    sections = get_configuration.get('sections')
+    # Remove elements with 'None' value
+    for section in sections:
+        for el in section['elements']:
+            for key in el.keys():
+                if el[key]['value'] is None:
+                    section['elements'].remove(el)
+
+    new_config = conf.set_section_wazuh_conf(sections, backup_config)
+    conf.write_agent_conf(new_config)
+
+    yield
+
+    conf.write_agent_conf(backup_config)
 
 
 @pytest.fixture(scope='module')

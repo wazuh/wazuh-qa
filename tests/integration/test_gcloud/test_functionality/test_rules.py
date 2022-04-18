@@ -69,7 +69,6 @@ pytestmark = [pytest.mark.tier(level=0), pytest.mark.server]
 interval = '10s'
 pull_on_start = 'no'
 max_messages = 100
-logging = 'debug'
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -84,7 +83,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'LOGGING': logging, 'MODULE_NAME': __name__}
+               'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)

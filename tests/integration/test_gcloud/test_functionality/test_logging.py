@@ -57,7 +57,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.gcloud import callback_detect_all_gcp
 from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+import wazuh_testing.tools.configuration as conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -69,7 +69,6 @@ pytestmark = pytest.mark.tier(level=0)
 interval = '25s'
 pull_on_start = 'yes'
 max_messages = 100
-logging = ['info', 'debug', 'warning', 'error', 'critical']
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -84,15 +83,54 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
                'MODULE_NAME': __name__}
+log_levels = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']
 
 p, m = generate_params(extra_params=conf_params,
-                       apply_to_all=({'LOGGING': logging_value} for logging_value in logging),
+                       apply_to_all=(),
                        modes=monitoring_modes)
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+configurations = conf.load_wazuh_configurations(configurations_path, __name__,
+                                           params=p, metadata=m)
 
 
 # fixtures
+@pytest.fixture(scope='package', params= [
+    {'wazuh_modules.debug': 0, 'analysisd.debug': 2,
+      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
+      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
+    {'wazuh_modules.debug': 1, 'analysisd.debug': 2,
+     'monitord.rotate_log': 0, 'monitord.day_wait': 0,
+     'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
+    {'wazuh_modules.debug': 2, 'analysisd.debug': 2,
+     'monitord.rotate_log': 0, 'monitord.day_wait': 0,
+     'monitord.keep_log_days': 0, 'monitord.size_rotate': 0}
+])
+def get_local_internal_options(request):
+    """Get internal configuration."""
+    return request.param
+
+
+@pytest.fixture(scope='package')
+def configure_local_internal_options_package(get_local_internal_options):
+    """Fixture to configure the local internal options file.
+
+    It uses the test fixture get_local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
+    """
+    local_internal_options = get_local_internal_options
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    conf.set_local_internal_options_dict(local_internal_options)
+    import wazuh_testing.tools.services as services
+    services.restart_wazuh_daemon('wazuh-modulesd')
+
+
+    yield
+
+    conf.set_local_internal_options_dict(backup_local_internal_options)
+
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
@@ -104,16 +142,18 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 @pytest.mark.parametrize('publish_messages', [
-    ['- DEBUG - GCP message' for _ in range(5)]
+    (['{level} GCP'.format(level=log_level) for log_level in log_levels]),
 ], indirect=True)
-def test_logging(get_configuration, configure_environment, reset_ossec_log, publish_messages, daemons_handler, wait_for_gcp_start):
+def test_logging(get_configuration, configure_environment, reset_ossec_log,
+                 publish_messages, configure_local_internal_options_package,
+                 daemons_handler, wait_for_gcp_start):
     '''
-    description: Check if the 'gcp-pubsub' module generates logs according to the set type in the 'logging' tag.
-                 For this purpose, the test will use different logging levels (depending on the test case) and
+    description: Check if the 'gcp-pubsub' module generates logs according to the debug level set for wazuh_modules.
+                 For this purpose, the test will use different debug levels (depending on the test case) and
                  gets the GCP events. Finally, the test will verify that the type of all retrieved events matches
                  the one specified in the configuration.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.4.0
 
     tier: 0
 
@@ -127,6 +167,10 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log, publ
         - publish_messages:
             type: list
             brief: List of testing GCP logs.
+        - configure_local_internal_options_package:
+            type: fixture
+            brief: Fixture to modify the local_internal_options.conf file
+                   and restart modulesd.
         - restart_wazuh:
             type: fixture
             brief: Reset the 'ossec.log' file and start a new monitor.
@@ -136,6 +180,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log, publ
 
     assertions:
         - Verify that the logging level of retrieved GCP events matches the one specified in the 'logging' tag.
+        - Verify that the module outputs messages that correspond to the logging level.
 
     input_description: A test case (ossec_conf) is contained in an external YAML file (wazuh_conf.yaml)
                        which includes configuration settings for the 'gcp-pubsub' module. That is
@@ -150,26 +195,34 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log, publ
         - scheduled
     '''
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
-    logging_opt = get_configuration['sections'][0]['elements'][6]['logging']['value']
+    logging_opt = int([x[-2] for x in conf.get_wazuh_local_internal_options()
+                   if x.startswith('wazuh_modules.debug')][0])
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
-
-    if logging_opt == 'info':
-        key_words = ['- DEBUG -', '- WARNING -', '- ERROR -', '- CRITICAL -']
-    elif logging_opt == 'debug':
-        key_words = ['- INFO -', '- WARNING -', '- ERROR -', '- CRITICAL -']
-    elif logging_opt == 'warning':
-        key_words = ['- INFO -', '- DEBUG -', '- ERROR -', '- CRITICAL -']
-    elif logging_opt == 'warning':
-        key_words = ['- INFO -', '- DEBUG -', '- WARNING -', '- CRITICAL -']
+    mandatory_keywords = {}
+    if logging_opt == 0:
+        skipped_keywords = ['DEBUG:']
     else:
-        key_words = ['- INFO -', '- DEBUG -', '- WARNING -', '- ERROR -']
+        skipped_keywords = []
+        mandatory_keywords = {'DEBUG:': 0, 'INFO': 0}
 
-    for nevents in range(0, 12):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval + 5,
-                                        callback=callback_detect_all_gcp,
-                                        accum_results=1,
-                                        error_message='Did not receive expected '
-                                                      'wazuh-modulesd:gcp-pubsub[]').result()
+    timeout = global_parameters.default_timeout + time_interval + 5 if \
+        logging_opt != 0 else 5
 
-        for key in key_words:
+    for _ in range(12):
+        try:
+            event = wazuh_log_monitor.start(
+                timeout=timeout, callback=callback_detect_all_gcp,
+                accum_results=1, error_message='Did not receive expected '
+                'wazuh-modulesd:gcp-pubsub[]').result()
+        except TimeoutError:
+            if logging_opt == 0:
+                continue
+            else:
+                raise
+        for k in mandatory_keywords.keys():
+            if k in event:
+                mandatory_keywords[k] += 1
+
+        for key in skipped_keywords:
             assert key not in event
+    assert all(mandatory_keywords.values())
