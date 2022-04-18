@@ -31,6 +31,7 @@ if sys.platform == 'win32':
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
+    ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
 
 else:
 

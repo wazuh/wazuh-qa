@@ -28,3 +28,8 @@ SOLARIS = pytest.mark.sunos5
 
 AGENT = pytest.mark.agent
 SERVER = pytest.mark.server
+
+# Local internal options
+WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
+VERBOSE_DEBUG_OUTPUT = 2
