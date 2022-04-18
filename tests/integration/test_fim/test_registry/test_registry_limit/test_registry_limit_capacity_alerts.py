@@ -15,12 +15,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: registry_file_limit
+
+targets:
     - agent
 
 daemons:
@@ -55,8 +55,8 @@ tags:
     - fim_registry_limit
 '''
 import os
-import pytest
 from sys import platform
+import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
@@ -114,6 +114,8 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                  the FIM 'entries' event, the entries number is one unit more than the number of monitored values.
 
     wazuh_min_version: 4.4.0
+
+    tier: 1
 
     parameters:
         - percentage:

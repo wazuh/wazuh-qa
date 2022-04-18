@@ -14,12 +14,12 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
        files for changes to the checksums, permissions, and ownership.
 
-tier: 1
-
-modules:
+components:
     - fim
 
-components:
+suite: files_report_changes
+
+targets:
     - agent
     - manager
 
@@ -32,36 +32,23 @@ os_platform:
     - macos
     - solaris
 
-
 os_version:
     - Arch Linux
     - Amazon Linux 2
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
-    - Ubuntu Focal
-    - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
     - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
-    - Windows 10
-    - Windows 8
-    - Windows 7
-    - Windows Server 2019
-    - Windows Server 2016
-    - Windows Server 2012
-    - Windows Server 2003
-    - Windows XP
-    - macOS Catalina
     - Solaris 10
     - Solaris 11
+    - macOS Catalina
+    - macOS Server
+    - Ubuntu Focal
+    - Ubuntu Bionic
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -137,6 +124,8 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
 
     wazuh_min_version: 4.2.0
 
+    tier: 1
+
     parameters:
         - configure_local_internal_options_module:
             type: fixture
@@ -167,7 +156,7 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
         - diff
         - scheduled
         - realtime
-        - whodata
+        - who_data
     '''
 
     diff_size_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

@@ -113,7 +113,7 @@ def check_client_keys_file():
     log_monitor = monitoring.FileMonitor(LOG_FILE_PATH)
     try:
         log_monitor.start(timeout=6, callback=wait_key_changes)
-    except:
+    except Exception:
         pass
     try:
         with open(CLIENT_KEYS_PATH) as client_file:
@@ -308,3 +308,18 @@ def callback_exit_cleaning():
         callable: callback to detect this event.
     """
     return monitoring.make_callback(pattern='Exit Cleaning', prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_invalid_server_address(server_ip):
+    msg = fr"ERROR: \(\d+\): Invalid server address found: '{server_ip}'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_unable_to_connect(server_ip, port='1515'):
+    msg = f"ERROR: \(\d+\): Unable to connect to enrollment service at '\[{server_ip}\]:{port}'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)
+
+
+def callback_connected_to_manager_ip(server_ip, port='1515'):
+    msg = f"Connected to enrollment service at '\[{server_ip}\]:{port}'"
+    return monitoring.make_callback(pattern=msg, prefix=monitoring.AGENT_DETECTOR_PREFIX)

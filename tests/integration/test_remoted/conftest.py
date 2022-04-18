@@ -10,7 +10,7 @@ from wazuh_testing.remote import callback_detect_remoted_started, new_agent_grou
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.services import check_daemon_status, control_service
 
 DAEMON_NAME = "wazuh-remoted"
 
