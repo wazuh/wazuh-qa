@@ -69,12 +69,10 @@ from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DE
 
 
 # Marks
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
+
 # variables
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
 conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
@@ -82,14 +80,12 @@ conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITO
 
 
 # configurations
-
 conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -97,8 +93,6 @@ def get_configuration(request):
 
 
 # tests
-
-
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,

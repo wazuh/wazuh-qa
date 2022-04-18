@@ -57,7 +57,8 @@ def find_value_in_event_list(key_path, value_name, event_list):
         if 'value_name' not in event.keys():
             continue
 
-        if event['index'] == key_path and event['value_name'] == value_name:
-            return event
+        if 'path' in event.keys():
+            if event['path'] == key_path and event['value_name'] == value_name:
+                return event
 
     return None
