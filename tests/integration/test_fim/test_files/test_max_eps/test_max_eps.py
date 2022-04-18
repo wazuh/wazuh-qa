@@ -74,15 +74,16 @@ tags:
 '''
 import os
 import pytest
+import time
 
 from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.modules.fim import TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION
+from wazuh_testing.modules.fim import TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE, CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.file import write_file,delete_path_recursively
 
 
@@ -93,15 +94,15 @@ pytestmark = pytest.mark.tier(level=1)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directory = os.path.join(PREFIX, TEST_DIR_1)
+test_directories =[os.path.join(PREFIX, TEST_DIR_1)]
 
 # Configurations
-conf_params = {'TEST_DIRECTORIES': test_directory}
+conf_params = {'TEST_DIRECTORIES': test_directories[0]}
 
 eps_values = ['50', '10']
 
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
-                       modes=['scheduled'])
+                       modes=[REALTIME_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -113,27 +114,20 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.fixture(scope='function')
-def create_test_directories(get_configuration):
-    os.makedirs(test_directory, exist_ok=True, mode=0o777)
-    yield
-    delete_path_recursively(test_directory)
-
-
 def create_multiple_files(get_configuration):
     """Create multiple files of a specific type."""
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
     try:
         for i in range(int(max_eps) + 5):
-            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode'
-            path = os.path.join(test_directory, file_name)
+            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode{time.time()}'
+            path = os.path.join(test_directories[0], file_name)
             write_file(path)
     except OSError:
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
-def test_max_eps(configure_local_internal_options_module, get_configuration, create_test_directories, configure_environment, restart_wazuh):
+def test_max_eps(configure_local_internal_options_module, get_configuration, configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
                  a lot of 'syscheck' events are generated. For this purpose, the test will monitor a folder,
@@ -173,17 +167,18 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, cre
         - scheduled
     '''
     max_eps = int(get_configuration['metadata']['max_eps'])
+    result = wazuh_log_monitor.start(timeout=30,
+                                     callback=generate_monitoring_callback(CB_PATH_MONITORED_REALTIME),
+                                     error_message=ERR_MSG_MONITORING_PATH).result()
     create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
     n_results = max_eps + 5
-    result = wazuh_log_monitor.start(timeout=30,
+    result = wazuh_log_monitor.start(timeout=40,
                                      accum_results=n_results,
                                      callback=callback_event_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
 
     counter = Counter([date_time for date_time, _ in result])
-    error_margin = (max_eps * 0.1)
 
     for _, n_occurrences in counter.items():
-        assert n_occurrences <= round(
-            max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+        assert n_occurrences <= max_eps, f'Sent {n_occurrences} but a maximum of {max_eps} was set'
