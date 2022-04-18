@@ -71,6 +71,7 @@ CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
 CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
+CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
 
 
 # Error message

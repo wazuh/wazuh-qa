@@ -80,8 +80,8 @@ from collections import Counter
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.modules.fim import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE,
-                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH)
+from wazuh_testing.modules.fim import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE, WHODATA_MODE,
+                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH, CB_PATH_MONITORED_WHODATA)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -103,7 +103,7 @@ conf_params = {'TEST_DIRECTORIES': test_directories[0]}
 eps_values = ['50', '10']
 
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
-                       modes=[REALTIME_MODE])
+                       modes=[REALTIME_MODE, WHODATA_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -168,8 +168,11 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
         - scheduled
     '''
     max_eps = int(get_configuration['metadata']['max_eps'])
+    mode = get_configuration['metadata']['fim_mode']
+    monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
+
     result = wazuh_log_monitor.start(timeout=30,
-                                     callback=generate_monitoring_callback(CB_PATH_MONITORED_REALTIME),
+                                     callback=generate_monitoring_callback(monitoring_regex),
                                      error_message=ERR_MSG_MONITORING_PATH).result()
     create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
