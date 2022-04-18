@@ -70,7 +70,7 @@ CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
-CB_PATH_MONITORED_REALTIME = r".*Monitoring path: '(.*)',.*"
+CB_PATH_MONITORED_REALTIME = r".*realtime_adddir.*(Directory added for real time monitoring.*)"
 
 
 # Error message

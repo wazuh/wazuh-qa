@@ -84,7 +84,7 @@ from wazuh_testing.modules.fim import TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATIO
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.tools.file import write_file,delete_path_recursively
+from wazuh_testing.tools.file import write_file
 
 
 # Marks
