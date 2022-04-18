@@ -72,6 +72,8 @@ CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
 CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
 CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
+CB_PATH_MONITORED_WHODATA_WINDOWS = r".*Setting up SACL for (.*)"
+
 
 
 # Error message

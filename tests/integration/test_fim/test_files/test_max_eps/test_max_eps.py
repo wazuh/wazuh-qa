@@ -73,6 +73,7 @@ tags:
     - fim_max_eps
 '''
 import os
+import sys
 import pytest
 import time
 
@@ -81,7 +82,8 @@ from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.modules.fim import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE, WHODATA_MODE,
-                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH, CB_PATH_MONITORED_WHODATA)
+                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH, CB_PATH_MONITORED_WHODATA,
+                                       CB_PATH_MONITORED_WHODATA_WINDOWS)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -169,7 +171,10 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
     '''
     max_eps = int(get_configuration['metadata']['max_eps'])
     mode = get_configuration['metadata']['fim_mode']
-    monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
+    if sys.platform == 'win32':
+        monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA_WINDOWS
+    else:    
+        monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
 
     result = wazuh_log_monitor.start(timeout=30,
                                      callback=generate_monitoring_callback(monitoring_regex),
