@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -62,8 +62,8 @@ from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_va
                                KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
                                create_values_content)
 from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+                                      SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
+                                      ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules import WINDOWS, TIER1
@@ -83,10 +83,9 @@ scan_delay = 2
 # Configurations
 
 params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': test_regs[0],
-                                                          'WINDOWS_REGISTRY_2': test_regs[1],
-                                                          'FILE_SIZE_ENABLED': 'yes',
-                                                          'FILE_SIZE_LIMIT': '10KB'
-                                                        })
+                                                                      'WINDOWS_REGISTRY_2': test_regs[1],
+                                                                      'FILE_SIZE_ENABLED': 'yes',
+                                                                      'FILE_SIZE_LIMIT': '10KB'})
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_file_size_values.yaml')
 
@@ -116,9 +115,9 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
                  its size on each test case. Finally, the test will verify that the compressed 'diff' file
                  has been created, and the related FIM event includes the 'content_changes' field if the
                  value size does not exceed the specified limit and vice versa.
-                - Case 1: small size - The file is smaller than the file_limit configured, the diff_file is 
+                - Case 1: small size - The file is smaller than the file_limit configured, the diff_file is
                  generated and there is content_changes information
-                 - Case 2: big size - The file is smaller than the file_limit configured,sp the diff_file is 
+                 - Case 2: big size - The file is smaller than the file_limit configured,sp the diff_file is
                  not generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
@@ -188,7 +187,7 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
         callback_test = report_changes_validator_no_diff
     else:
         callback_test = report_changes_validator_diff
-    
+
     # Create the value inside the key - we do it here because it key or arch is not known before the test launches
     registry_value_create(key, subkey, wazuh_log_monitor, arch=arch, value_list=values, wait_for_scan=True,
                           scan_delay=scan_delay, min_timeout=global_parameters.default_timeout, triggers_event=True)

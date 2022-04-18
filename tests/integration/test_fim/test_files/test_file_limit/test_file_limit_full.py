@@ -83,9 +83,9 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import(CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
-    ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, CB_DATABASE_FULL_COULD_NOT_INSERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
-    ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.modules.fim import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
+                                       ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_FIM_INODE_ENTRIES,
+                                       ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 
 # Marks
@@ -108,7 +108,8 @@ file_limit_list = ['10']
 conf_params = {'TEST_DIRECTORIES': testdir1}
 
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem in file_limit_list))
+                                   apply_to_all=({'FILE_LIMIT': file_limit_elem} for
+                                                 file_limit_elem in file_limit_list))
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -133,7 +134,7 @@ def extra_configuration_before_yield():
 
 # Tests
 
-def test_file_limit_full( get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of files to monitor set in the 'file_limit' tag.

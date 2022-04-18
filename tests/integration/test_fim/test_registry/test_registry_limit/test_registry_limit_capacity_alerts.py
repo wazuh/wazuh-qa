@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,7 +9,7 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
-       generated while the database is close to for reaching the limit of entries to monitor 
+       generated while the database is close to for reaching the limit of entries to monitor
        set in the 'db_entry_limit'-'registries' tag.
 
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
@@ -62,8 +62,10 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_va
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
-    ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES, CB_REGISTRY_DB_BACK_TO_NORMAL,
-    ERR_MSG_DB_BACK_TO_NORMAL, CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_SCHEDULED_SCAN_ENDED)
+                                       ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES,
+                                       CB_REGISTRY_DB_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL,
+                                       CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
+                                       ERR_MSG_SCHEDULED_SCAN_ENDED)
 from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -86,8 +88,8 @@ scan_delay = 5
 registry_limit_list = ['100']
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
-                       modes=['scheduled'])
+                                   apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem
+                                                 in registry_limit_list), modes=['scheduled'])
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -102,7 +104,7 @@ def get_configuration(request):
 # Tests
 @pytest.mark.parametrize('percentage', [(80), (90), (0)])
 def test_registry_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_fim_start):
+                                       wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a key in which
@@ -154,8 +156,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
     if percentage == 0:
         NUM_REGS = 0
 
-    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-    
+    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS |
+                               KEY_WOW64_64KEY)
+
     # Add registry values to fill the database up to alert generating percentage
     if percentage >= 80:  # Percentages 80 and 90
         for i in range(NUM_REGS):
@@ -193,8 +196,8 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                                 error_message=ERR_MSG_DB_BACK_TO_NORMAL).result()
 
     value_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
-                                      error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
+                                            callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
+                                            error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
 
     # Assert the number of value_entries matches the ammount that was generated.
     assert value_entries == str(NUM_REGS), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

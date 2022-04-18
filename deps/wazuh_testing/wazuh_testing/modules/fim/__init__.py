@@ -84,7 +84,7 @@ CB_REGISTRY_LIMIT_VALUE = r".*Maximum number of registry values to be monitored:
 
 CB_FILE_LIMIT_CAPACITY = r".*File database is (\d+)% full."
 CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
-CB_FIM_ENTRIES_COUNT =r".*Fim file entries count: '(\d+)'"
+CB_FIM_ENTRIES_COUNT = r".*Fim file entries count: '(\d+)'"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
 
@@ -95,11 +95,12 @@ ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
 
 ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: database is ...% full" alert'
-ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT= 'Wrong capacity log for DB file_limit'
+ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT = 'Wrong capacity log for DB file_limit'
 ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ... database status returns to normal." event'
 ERR_MSG_DATABASE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Registry database is 100% full" alert'
 ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = 'Wrong value for full database alert.'
-ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry into DB. The DB is full, ..." event'
+ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = 'Did not receive expected "DEBUG: ...: Couldn\'t insert \'...\' entry \
+                                          into DB. The DB is full, ..." event'
 ERR_MSG_DATABASE_FULL_ALERT_EVENT = 'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
 
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
@@ -108,12 +109,15 @@ ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., p
 
 ERR_MSG_FIM_REGISTRY_ENTRIES = 'Did not receive expected "Fim Registry entries count: ..." event'
 ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry value entries count: ..." event'
-ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to be monitored: ..." event'
-ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE ='Wrong value for db_value_limit registries tag.'
+ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
+                                 be monitored: ..." event'
+ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
 
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
-ERR_MSG_WRONG_FILE_LIMIT_VALUE ='Wrong value for file_limit.'
-ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
+                             ..." event'
+ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
+ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
+                               to be monitored" event'
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
 
 ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
