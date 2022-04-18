@@ -65,15 +65,16 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 # Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
-timeout = 15
+# this timeout is temporality, this test will be update
+timeout = 30
 
 
 # Tests
 @pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
 @pytest.mark.parametrize("host_manager", [host_manager])
-@pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
-@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
+@pytest.mark.parametrize("status_guess_agent_group", ['1'])
+@pytest.mark.parametrize("agent_target", ['wazuh-worker1'])
 def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
                                  test_infra_agents, host_manager):
     '''
