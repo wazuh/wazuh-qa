@@ -70,7 +70,7 @@ CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
-CB_PATH_MONITORED_REALTIME = r".*realtime_adddir.*(Directory added for real time monitoring.*)"
+CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
 
 
 # Error message
@@ -109,5 +109,6 @@ else:
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'syscheck.debug': '2',
         'agent.debug': '2',
-        'monitord.rotate_log': '0'
+        'monitord.rotate_log': '0',
+        'analysisd.debug': '2'
     }
