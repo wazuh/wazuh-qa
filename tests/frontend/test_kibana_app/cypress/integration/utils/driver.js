@@ -10,6 +10,12 @@ export const forceClickElement = (selector) => {
   return this;
 };
 
+export const forceXpathClickElement = (selector) => {
+  cy.wait(1000);
+  getXpathElement(selector).click({force:true})
+  return this;
+};
+
 export const getAttributeElement = (selector) => {
   return getElement(selector).invoke('attr', 'aria-checked').then(($element) => {
     const value = $element
