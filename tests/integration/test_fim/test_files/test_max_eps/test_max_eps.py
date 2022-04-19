@@ -85,6 +85,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+TIMEOUT = 40
 
 # Configurations
 conf_params = {'TEST_DIRECTORIES': test_directories[0]}
@@ -165,13 +166,13 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
     else:    
         monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
 
-    result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START ,
+    result = wazuh_log_monitor.start(timeout=TIMEOUT,
                                      callback=generate_monitoring_callback(monitoring_regex),
                                      error_message=ERR_MSG_MONITORING_PATH).result()
     create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
     n_results = max_eps + 5
-    result = wazuh_log_monitor.start(timeout=40,
+    result = wazuh_log_monitor.start(timeout=TIMEOUT,
                                      accum_results=n_results,
                                      callback=callback_event_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
