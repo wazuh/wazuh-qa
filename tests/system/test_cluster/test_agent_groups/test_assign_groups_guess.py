@@ -70,6 +70,7 @@ timeout = 60
 
 
 # Tests
+@pytest.mark.skip(reason='"It will be blocked by #13172, when it was solve we can enable again this test')
 @pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
 @pytest.mark.parametrize("host_manager", [host_manager])
