@@ -29,14 +29,7 @@
     dest: /wazuh
     version: "{{ wazuh_branch }}"
 
-- name: "Clone wazuh-qa repository"
-  git:
-    repo: "https://github.com/wazuh/wazuh-qa"
-    dest: /wazuh-qa
-    version: "{{ wazuh_qa_branch }}"
-    depth: '1'
-
-- name: Install worker
+- name: Install master
   args:
     chdir: /wazuh
     creates: /var/ossec
@@ -46,9 +39,9 @@
     USER_INSTALL_TYPE: "server"
     USER_DIR: "/var/ossec"
     USER_ENABLE_EMAIL: "n"
-    USER_ENABLE_SYSCHECK: "y"
-    USER_ENABLE_ROOTCHECK: "y"
-    USER_ENABLE_OPENSCAP: "y"
+    USER_ENABLE_SYSCHECK: "n"
+    USER_ENABLE_ROOTCHECK: "n"
+    USER_ENABLE_OPENSCAP: "n"
     USER_WHITE_LIST: "n"
     USER_ENABLE_SYSLOG: "y"
     USER_ENABLE_AUTHD: "y"
@@ -60,8 +53,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: root
-    group: root
+    owner: wazuh
+    group: wazuh
     mode: '0644'
 
 - name: Set cluster key
