@@ -58,6 +58,7 @@ tags:
 
 import os
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
@@ -85,8 +86,8 @@ monitor_timeout = 40
 registry_limit_list = [10]
 conf_params = {'WINDOWS_REGISTRY': test_regs[0]}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'REGISTRIES': registry_elem} for registry_elem in registry_limit_list),
-                       modes=['scheduled'])
+                                   apply_to_all=({'REGISTRIES': registry_elem} for registry_elem
+                                                 in registry_limit_list), modes=['scheduled'])
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -102,7 +103,8 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     """Generate registry entries to fill database"""
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, KEY_WOW64_64KEY)
-    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
+    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0, KEY_ALL_ACCESS |
+                              KEY_WOW64_64KEY)
     # Add values to registry plus 1 values over the registry limit
     for i in range(0, registry_limit_list[0] + 1):
         modify_registry_value(reg_handle, f'value_{i}', REG_SZ, 'added')
@@ -149,17 +151,17 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
         - scheduled
     '''
     registry_limit = get_configuration['metadata']['registries']
-    
+
     # Look for the file limit value has been configured
     registry_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                               callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_VALUE),
-                                               error_message=ERR_MSG_REGISTRY_LIMIT_VALUES).result()
+                                                   callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_VALUE),
+                                                   error_message=ERR_MSG_REGISTRY_LIMIT_VALUES).result()
     # Compare that the value configured is correct
     assert registry_limit_value == str(registry_limit), ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
     # Get the ammount of entries monitored and assert they are the same as the limit and not over
     value_entries = wazuh_log_monitor.start(timeout=monitor_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
-                                      error_message=ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES).result()
-    
+                                            callback=generate_monitoring_callback(CB_COUNT_REGISTRY_VALUE_ENTRIES),
+                                            error_message=ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES).result()
+
     assert value_entries == str(registry_limit), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

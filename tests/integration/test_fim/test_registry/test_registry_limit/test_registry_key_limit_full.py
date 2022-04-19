@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -61,10 +61,11 @@ from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.fim import generate_params, registry_parser, KEY_WOW64_64KEY, \
     KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, CB_REGISTRY_LIMIT_CAPACITY,
-    ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
-    CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
-    ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                       CB_REGISTRY_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT,
+                                       ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+                                       CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
+                                       ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -86,10 +87,10 @@ monitor_timeout = 40
 
 # Configurations
 registry_limit_list = ['2']
-conf_params = {'WINDOWS_REGISTRY_1': test_regs[0], 'WINDOWS_REGISTRY_2': test_regs[1] }
+conf_params = {'WINDOWS_REGISTRY_1': test_regs[0], 'WINDOWS_REGISTRY_2': test_regs[1]}
 params, metadata = generate_params(extra_params=conf_params,
-                       apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in registry_limit_list),
-                       modes=['scheduled'])
+                                   apply_to_all=({'REGISTRIES': registry_limit_elem} for registry_limit_elem in
+                                                 registry_limit_list), modes=['scheduled'])
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
@@ -167,7 +168,7 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
                             callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE))
 
     key_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
-                                      error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
+                                          callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
+                                          error_message=ERR_MSG_FIM_REGISTRY_ENTRIES).result()
 
     assert key_entries == str(get_configuration['metadata']['registries']), ERR_MSG_WRONG_NUMBER_OF_ENTRIES

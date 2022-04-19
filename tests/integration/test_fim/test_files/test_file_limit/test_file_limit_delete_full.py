@@ -176,7 +176,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - realtime
         - who_data
     '''
-    #Check that database is full and assert database usage percentage is 100%
+    # Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
@@ -198,7 +198,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
     # Delete the first file that was created (It is included in DB)
     delete_file(folder, f'{file_name}{0}')
 
-    #Get that the file deleted generetes an event and assert the event data path.
+    # Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
