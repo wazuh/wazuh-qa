@@ -189,7 +189,7 @@ class HostManager:
             login_body = 'body="{}"'.format(json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
         else:
             login_endpoint = '/security/user/authenticate'
-            login_method = 'GET'
+            login_method = 'POST'
             login_body = ''
 
         try:
