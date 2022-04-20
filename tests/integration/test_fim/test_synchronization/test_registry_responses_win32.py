@@ -62,10 +62,11 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.fim_module.fim_variables import (SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE,
                                                     YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE,
                                                     MONITORED_KEY)
-from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
+from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START
 
 
 # Marks
@@ -76,13 +77,13 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
 conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
-               SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
+               SYNC_INTERVAL: 10}
 
 
 # configurations
 conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
-local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # fixtures
@@ -93,6 +94,7 @@ def get_configuration(request):
 
 
 # tests
+@pytest.skip(reason="Blocked by Issue Wazuh/Wazuh #13188, when it is fixed, this test can continue development")
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,
