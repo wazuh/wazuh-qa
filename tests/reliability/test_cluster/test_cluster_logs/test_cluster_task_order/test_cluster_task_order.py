@@ -11,8 +11,8 @@ import pytest
 logs_format = re.compile(r'.* \[(Worker.*|Master)] \[(.*)] (.*)')
 incorrect_order = {}
 concatenated_tasks = {
-    'Local agent-groups': {'child_task': 'Agent-groups send', 'parent_end_log': 'Starting', 'child_log': 'Starting',
-                           'workers': [], 'started': False}}
+    'Local agent-groups': {'child_task': r'Agent-groups send( full)?', 'parent_end_log': 'Starting',
+                           'child_log': 'Starting', 'workers': [], 'started': False}}
 worker_names = []
 
 
@@ -37,7 +37,7 @@ def test_cluster_task_order(artifacts_path):
         for line in file.readlines():
             # Check if the task corresponds to any of the concatenated ones.
             for parent_task, info in concatenated_tasks.items():
-                if info['child_task'] in line and info['child_log'] in line and info['started']:
+                if re.match(info['child_task'], line) and info['child_log'] in line and info['started']:
                     worker_name = logs_format.search(line).group(1).split(' ')[1]
                     if worker_name in info['workers'] and parent_task not in incorrect_order:
                         incorrect_order[parent_task] = {'child_task': info['child_task'], 'log': line,
