@@ -80,13 +80,11 @@ def get_configuration(request):
 
 # Test
 
-
-@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('test_case', [case for case in test_authd_valid_name_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_module, daemons_handler, wait_for_authd_startup_module,
-                             connect_to_sockets_module, test_case, delete_agents):
+                             clean_client_keys_file_module, restart_wazuh_daemon, wait_for_authd_startup_module,
+                             connect_to_sockets_module, test_case, tear_down):
     '''
     description:
         Checks that every input message in authd port generates the adequate output.
@@ -157,7 +155,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
 
         result, err_msg = validate_authd_response(response, stage['output'])
         assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"

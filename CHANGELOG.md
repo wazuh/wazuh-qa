@@ -9,6 +9,11 @@ Release report: TBD
 
 ### Added
 
+- Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
+- Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
+- Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
+- Test `get-groups-integrity` WDB command ([#2607](https://github.com/wazuh/wazuh-qa/pull/2607))
+- Test `set-agent-groups` WDB command ([#2602](https://github.com/wazuh/wazuh-qa/pull/2602))
 - Add system test to check that agent with a state different than never_connected is added to a "group_test" group by CLI ([#2652](https://github.com/wazuh/wazuh-qa/pull/2652))
 - Add system test to check that agent with a state different than never_connected is added to a "group_test" group by API ([#2657](https://github.com/wazuh/wazuh-qa/pull/2657))
 - Add system test to check that agent is never_connected and registers with a group using agent-auth ([#2654](https://github.com/wazuh/wazuh-qa/pull/2654))
