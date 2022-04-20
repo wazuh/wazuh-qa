@@ -19,7 +19,7 @@ worker_names = []
 def test_cluster_task_order(artifacts_path):
     """Check that cluster tasks appear in the expected order.
 
-    Check that for each concatenated tasks, the corresponding logs are apprearing correctly.
+    Check that for each concatenated task, the corresponding logs are appearing correctly.
 
     Args:
         artifacts_path (str): Path where folders with cluster information can be found.
