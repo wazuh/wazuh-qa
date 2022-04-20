@@ -123,8 +123,13 @@ ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit c
 
 ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
+ERR_MSG_FIM_EVENT_NOT_RECIEVED = 'Did not receive expected "Sending FIM event: ..." event'
 ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event '
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
+ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED = 'Did not receive expected "File integrity monitoring real-time Whodata \
+                                            engine started" or "Initializing FIM Integrity Synchronization check"'
+ERR_MSG_INTEGRITY_CHECK_EVENT = 'Did not receive expected "Initializing FIM Integrity Synchronization check" event'
+                                                        
 
 
 # Setting Local_internal_option file
