@@ -20,3 +20,18 @@
             value: SYNC_INTERVAL
         - max_interval:
             value: SYNC_INTERVAL
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+
