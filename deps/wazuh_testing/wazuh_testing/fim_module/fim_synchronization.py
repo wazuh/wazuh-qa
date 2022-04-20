@@ -22,11 +22,12 @@ def get_sync_msgs(tout, new_data=True):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     events = []
-    if new_data:
+    """  if new_data:
         wazuh_log_monitor.start(timeout=tout,
                                 callback=generate_monitoring_callback(CB_REGISTRY_DBSYNC_NO_DATA),
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
+    """
     for _ in range(0, MAX_EVENTS_VALUE):
         try:
             sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -57,8 +58,7 @@ def find_value_in_event_list(key_path, value_name, event_list):
         if 'value_name' not in event.keys():
             continue
 
-        if 'path' in event.keys():
-            if event['path'] == key_path and event['value_name'] == value_name:
-                return event
+        if event['index'] == key_path and event['value_name'] == value_name:
+            return event
 
     return None
