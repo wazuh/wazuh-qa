@@ -65,7 +65,7 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, ERR_MSG_FIM_EVENT_NOT_RECIEVED, MONITORED_KEY,
-                                      ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED, ERR_MSG_INTEGRITY_CHECK_EVENT)
+                                       ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED, ERR_MSG_INTEGRITY_CHECK_EVENT)
 from wazuh_testing.modules import TIER2, WINDOWS
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
@@ -112,7 +112,7 @@ def extra_configuration_before_yield():
     for testdir in test_directories:
         for file, reg in zip(file_list, subkey_list):
             create_file(REGULAR, testdir, file, content='Sample content')
-            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(subkey,reg), KEY_WOW64_64KEY)
+            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(subkey, reg), KEY_WOW64_64KEY)
 
 
 def callback_integrity_or_whodata(line):
@@ -123,7 +123,7 @@ def callback_integrity_or_whodata(line):
 
 
 # tests
-def test_events_while_integrity_scan(get_configuration, configure_environment, restart_syscheckd, 
+def test_events_while_integrity_scan(get_configuration, configure_environment, restart_syscheckd,
                                      configure_local_internal_options_module):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects events while the synchronization is performed
