@@ -51,7 +51,7 @@ def insert_agent_manual(token, agent_id=None, agent_ip=None, agent_name=None, ag
 
 def read_token(new_token=False):
     def obtain_token():
-        response = requests.post(f'{BASE_URL}/security/user/authenticate', headers=login_headers(), verify=False)
+        response = requests.post(f"{BASE_URL}/security/user/authenticate", headers=login_headers(), verify=False)
         return response.json()['data']['token']
 
     if not exists(TOKEN_FILE) or new_token:
