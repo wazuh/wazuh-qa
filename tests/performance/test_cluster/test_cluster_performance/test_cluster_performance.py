@@ -21,12 +21,12 @@ exceeded_thresholds = []
 # Fixtures
 @pytest.fixture()
 def n_workers(pytestconfig):
-    return pytestconfig.getoption("n_workers")
+    return pytestconfig.getoption('n_workers')
 
 
 @pytest.fixture()
 def n_agents(pytestconfig):
-    return pytestconfig.getoption("n_agents")
+    return pytestconfig.getoption('n_agents')
 
 
 # Functions
@@ -64,19 +64,19 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
     try:
         cluster_info = ClusterEnvInfo(artifacts_path).get_all_info()
     except FileNotFoundError:
-        pytest.fail(f'Path "{artifacts_path}" could not be found or it may not follow the proper structure.')
+        pytest.fail(f"Path '{artifacts_path}' could not be found or it may not follow the proper structure.")
 
     if cluster_info.get('worker_nodes', 0) != int(n_workers):
-        pytest.fail(f'Information of {n_workers} workers was expected inside the artifacts folder, but '
-                    f'{cluster_info.get("worker_nodes", 0)} were found.')
+        pytest.fail(f"Information of {n_workers} workers was expected inside the artifacts folder, but "
+                    f"{cluster_info.get('worker_nodes', 0)} were found.")
 
     # Calculate stats from data inside artifacts path.
     data = {'tasks': ClusterCSVTasksParser(artifacts_path).get_stats(),
             'resources': ClusterCSVResourcesParser(artifacts_path).get_stats()}
 
     if not data['tasks'] or not data['resources']:
-        pytest.fail(f'Stats could not be retrieved, "{artifacts_path}" path may not exist, it is empty or it may not'
-                    f' follow the proper structure.')
+        pytest.fail(f"Stats could not be retrieved, '{artifacts_path}' path may not exist, it is empty or it may not"
+                    f" follow the proper structure.")
 
     # Compare each stat with its threshold.
     for data_name, data_stats in data.items():
@@ -92,16 +92,15 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
                                                             'phase': phase})
 
     try:
-        assert not exceeded_thresholds, f"Some thresholds were exceeded:\n- " + '\n- '.join(
+        assert not exceeded_thresholds, 'Some thresholds were exceeded:\n- ' + '\n- '.join(
             '{stat} {column} {value} >= {threshold} ({node}, {file}, {phase})'.format(**item) for item in
             exceeded_thresholds)
     finally:
         # Add useful information to report as stdout
         try:
-            print('\n')
-            print(f'Setup phase took {get_datetime_diff(cluster_info["phases"]["setup_phase"])}s '
-                  f'({cluster_info["phases"]["setup_phase"][0]} - {cluster_info["phases"]["setup_phase"][1]}).')
-            print(f'Stable phase took {get_datetime_diff(cluster_info["phases"]["stable_phase"])}s '
-                  f'({cluster_info["phases"]["stable_phase"][0]} - {cluster_info["phases"]["stable_phase"][1]}).')
+            print(f"\nSetup phase took {get_datetime_diff(cluster_info['phases']['setup_phase'], date_format)}s "
+                  f"({cluster_info['phases']['setup_phase'][0]} - {cluster_info['phases']['setup_phase'][1]}).")
+            print(f"Stable phase took {get_datetime_diff(cluster_info['phases']['stable_phase'], date_format)}s "
+                  f"({cluster_info['phases']['stable_phase'][0]} - {cluster_info['phases']['stable_phase'][1]}).")
         except KeyError:
             print('No information available about test phases.')
