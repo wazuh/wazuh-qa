@@ -70,7 +70,6 @@ timeout = 60
 
 
 # Tests
-@pytest.mark.skip(reason='"It will be blocked by #13172, when it was solve we can enable again this test')
 @pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
 @pytest.mark.parametrize("host_manager", [host_manager])
@@ -132,6 +131,9 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     try:
         # Create new group and assing agent
         assign_agent_to_new_group(test_infra_managers[0], group_id, agent_id, host_manager)
+
+        # Remove agent from default to test single group guess (not multigroup)
+        host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -r -i {agent_id} -g default")
 
         time.sleep(timeout)
 
