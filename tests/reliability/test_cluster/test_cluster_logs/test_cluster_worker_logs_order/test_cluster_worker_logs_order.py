@@ -54,7 +54,8 @@ def test_check_logs_order_workers(artifacts_path):
     if not artifacts_path:
         pytest.fail('Parameter "--artifacts_path=<path>" is required.')
 
-    if len(cluster_log_files := glob(os.path.join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))) == 0:
+    cluster_log_files = glob(os.path.join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))
+    if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     for log_file in cluster_log_files:
@@ -62,7 +63,8 @@ def test_check_logs_order_workers(artifacts_path):
 
         with open(log_file) as file:
             for line in file.readlines():
-                if result := worker_logs_format.search(line):
+                result = worker_logs_format.search(line)
+                if result:
                     if result.group(1) in logs_order and result.group(1) not in failed_tasks:
                         tree_info = logs_order[result.group(1)]
                         for child in tree_info['tree'].children(tree_info['node']):
