@@ -185,6 +185,7 @@ def get_datetime_diff(phase_datetimes, date_format):
 
     Args:
         phase_datetimes (list): List containing start and end datetimes.
+        date_format (str): Expected datetime shape.
     """
     return datetime.strptime(phase_datetimes[1], date_format) - datetime.strptime(phase_datetimes[0], date_format)
 
