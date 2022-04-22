@@ -103,7 +103,13 @@ SYSTEM_DATA = {
     'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
-                'name': 'debian9'}
+                'name': 'debian9'},
+    'SLED11': {'os_name': 'sled', 'os_major': '11', 'os_minor': '', 'os_platform': '', 'name': 'Desktop11'},
+    'SLED12': {'os_name': 'sled', 'os_major': '12', 'os_minor': '', 'os_platform': '', 'name': 'Desktop12'},
+    'SLED15': {'os_name': 'sled', 'os_major': '15', 'os_minor': '', 'os_platform': '', 'name': 'Desktop15'},
+    'SLES11': {'os_name': 'sles', 'os_major': '11', 'os_minor': '', 'os_platform': '', 'name': 'Server11'},
+    'SLES12': {'os_name': 'sles', 'os_major': '12', 'os_minor': '', 'os_platform': '', 'name': 'Server12'},
+    'SLES15': {'os_name': 'sles', 'os_major': '15', 'os_minor': '', 'os_platform': '', 'name': 'Server15'}
 }
 
 
