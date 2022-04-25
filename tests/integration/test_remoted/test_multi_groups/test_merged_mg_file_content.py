@@ -52,6 +52,7 @@ from wazuh_testing.remote import DEFAULT_TESTING_GROUP_NAME, new_agent_group, \
                                   remove_agent_group
 from wazuh_testing.tools import REMOTE_DAEMON, WAZUH_PATH, configuration
 from wazuh_testing.tools.file import delete_file
+import wazuh_testing.tools as tools
 from wazuh_testing.tools.services import check_daemon_status, control_service
 from wazuh_testing.tools.wazuh_manager import remove_agents
 
@@ -105,11 +106,13 @@ def prepare_environment(request, register_agent):
 
     agent_id = getattr(request.module, 'response_data')['id']
 
-    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-i", agent_id, "-g", DEFAULT_TESTING_GROUP_NAME])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", 'default'])
+    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", DEFAULT_TESTING_GROUP_NAME])
 
     yield
 
     remove_agent_group(DEFAULT_TESTING_GROUP_NAME)
+    delete_file(os.path.join(groups_folder, agent_id))
 
 
 @pytest.fixture(scope='function')
@@ -166,13 +169,13 @@ def test_merged_mg_file_content(metadata, configure_local_internal_options_modul
         - prepare_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-    
+
     assertions:
         - Verify that the file exists or not in the multigroups directory.
         - Verify that the file is or is not in the merged.mg file
-    
+
     input_description: Different test cases defined in a YAML file.
-    
+
     expected_output:
         - r'^!0 testing_file$'
     '''
