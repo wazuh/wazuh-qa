@@ -1,12 +1,12 @@
-export const securityEvents = '[data-test-subj="overviewWelcomeGeneral"] .euiCard__content';
-export const integrityMonitoring = '[data-test-subj="overviewWelcomeFim"]';
-export const policyMonitoring = '[data-test-subj="overviewWelcomePm"]';
-export const systemAuditing = '[data-test-subj="overviewWelcomeAudit"]';
-export const securityInformationAssessment = '[data-test-subj="overviewWelcomeSca"]';
-export const vulnerabilities = '[data-test-subj="overviewWelcomeVuls"]';
-export const mitre = '[data-test-subj="overviewWelcomeMitre"]';
-export const pciDSS = '[data-test-subj="overviewWelcomePci"]';
-export const nist = '[data-test-subj="overviewWelcomeNist"]';
-export const tsc = '[data-test-subj="overviewWelcomeTsc"]';
-export const gdpr = '[data-test-subj="overviewWelcomeGdpr"]';
-export const hipaa = '[data-test-subj="overviewWelcomeHipaa"]';
+export const securityEvents = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"Security events")]';
+export const integrityMonitoring = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"Integrity monitoring")]'
+export const policyMonitoring = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"Policy monitoring")]';
+export const systemAuditing = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"System auditing")]';
+export const securityInformationAssessment = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"Security configuration assessment")]';
+export const vulnerabilities = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"Vulnerabilities")]';      
+export const mitre = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"MITRE ATT&CK")]';
+export const pciDSS = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"PCI DSS")]';
+export const nist = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"NIST")]';
+export const tsc = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"TSC")]';
+export const gdpr = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"GDPR")]';
+export const hipaa = '//*[contains(@class,"euiTitle euiTitle--small euiCard__title")]//*[contains(text(),"HIPAA")]';

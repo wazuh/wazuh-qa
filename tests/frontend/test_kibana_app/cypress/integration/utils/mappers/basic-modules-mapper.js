@@ -21,7 +21,7 @@ import {
     'HIPAA': hipaa,
     'NIST': nist,
     'TSC': tsc,
-    'PCI DSS': pciDSS,
-    'Policiy Monitoring': policyMonitoring
+    'PCIDSS': pciDSS,
+    'Policy Monitoring': policyMonitoring
   }
   

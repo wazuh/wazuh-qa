@@ -4,9 +4,15 @@ export const clickElement = (selector) => {
   return this;
 };
 
-export const forceClickElement = (selector) => {
+export const forceClickElement = (cssSelector) => {
   cy.wait(1000);
-  getElement(selector).click({force:true})
+  getElement(cssSelector).click({force:true})
+  return this;
+};
+
+export const forceClickElementByXpath = (xpathSelector) => {
+  cy.wait(1000);
+  getElementByXpath(xpathSelector).click({force:true})
   return this;
 };
 
@@ -138,16 +144,19 @@ export const updateExpiryValueCookies =  () => {
 }
 
 // Function that's return the selector by xpath
-export const getXpathElement = (selector) => {
-  return cy.xpath(selector);
-}
-export const clickXpathElement = (selector) => {
-  getXpathElement(selector).click();
+export const getElementByXpath = (xpathSelector) => {
+  return cy.xpath(xpathSelector);
+};
+
+export const clickElementByXpath = (xpathSelector) => {
+  getElementByXpath(xpathSelector).click();
   return this;
 };
-export const xpathElementIsVisible = (selector) => {
-  return getXpathElement(selector).should('exist').should('be.visible');
+
+export const xpathElementIsVisible = (xpathSelector) => {
+  return getElementByXpath(xpathSelector).should('exist').should('be.visible');
 };
+
 export const timestampToDate = (e) => {
   let newDates = e.getDate()+"/"+(e.getMonth()+1)+"/"+e.getFullYear()+" "+e.getHours()+":"+e.getMinutes()+":"+e.getSeconds();
   return newDates;
