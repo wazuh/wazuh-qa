@@ -42,6 +42,7 @@ tags:
 import hashlib
 import os
 import re
+import subprocess as sb
 from time import sleep
 
 import pytest
@@ -103,13 +104,12 @@ def prepare_environment(request, register_agent):
     new_agent_group()
 
     agent_id = getattr(request.module, 'response_data')['id']
-    with open(os.path.join(groups_folder, agent_id), "w") as f:
-        f.write(f"default,{DEFAULT_TESTING_GROUP_NAME}")
+
+    sb.run([f"{WAZUH_PATH}/bin/agent_groups", "-q", "-i", agent_id, "-g", DEFAULT_TESTING_GROUP_NAME])
 
     yield
 
     remove_agent_group(DEFAULT_TESTING_GROUP_NAME)
-    delete_file(os.path.join(groups_folder, agent_id))
 
 
 @pytest.fixture(scope='function')
