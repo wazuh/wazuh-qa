@@ -41,13 +41,15 @@ def test_cluster_error_logs(artifacts_path):
     if not artifacts_path:
         pytest.fail('Parameter "--artifacts_path=<path>" is required.')
 
-    if len(cluster_log_files := glob(join(artifacts_path, '*', 'logs', 'cluster.log'))) == 0:
+    cluster_log_files = glob(join(artifacts_path, '*', 'logs', 'cluster.log'))
+    if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     for log_file in cluster_log_files:
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
-            if error_lines := re.findall(rb'(^.*?error.*?$)', s, flags=re.MULTILINE | re.IGNORECASE):
+            error_lines = re.findall(rb'(^.*?error.*?$)', s, flags=re.MULTILINE | re.IGNORECASE)
+            if error_lines:
                 error_lines = [error for error in error_lines if not error_in_white_list(error)]
                 if error_lines:
                     nodes_with_errors.update({node_name.search(log_file)[1]: error_lines})
