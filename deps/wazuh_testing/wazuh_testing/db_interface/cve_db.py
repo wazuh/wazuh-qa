@@ -63,7 +63,7 @@ def insert_vulnerability(cveid='CVE-000', target='RHEL7', target_minor='',
                          reference='https://github.com/wazuh/wazuh-qa', target_v='REDHAT', cvss='10.000000',
                          cvss_vector='AV:N/AC:L/Au:N/C:C/I:C/A:C', rationale='Wazuh integration test vulnerability',
                          cvss3='', bugzilla_reference='https://github.com/wazuh/wazuh-qa', cwe='WVE-000 -> WVE-001',
-                         advisory='RHSA-2010:0029', ref_target='RHEL'):
+                         advisory='RHSA-2010:0029', ref_target='RHEL', deps_id='0'):
     """Insert a vulnerability in CVE database.
 
     Args:
@@ -87,10 +87,11 @@ def insert_vulnerability(cveid='CVE-000', target='RHEL7', target_minor='',
         cwe (str): CWE ID.
         advisory (str): Advisory ID.
         ref_target (str): OS target ID.
+        deps_id (str): id of the dependencies related to the vulnerability.
     """
     queries = [
-        'INSERT INTO VULNERABILITIES (cveid, target, target_minor, package, operation, operation_value) VALUES '
-        f"('{cveid}', '{target}', '{target_minor}', '{package}', '{operation}', '{operation_value}')",
+        'INSERT INTO VULNERABILITIES (cveid, target, target_minor, package, operation, operation_value, deps_id) VALUES '
+        f"('{cveid}', '{target}', '{target_minor}', '{package}', '{operation}', '{operation_value}', '{deps_id}')",
 
         'INSERT INTO VULNERABILITIES_INFO (ID, title, severity, published, updated, target, rationale, cvss, '
         f"cvss_vector, CVSS3, cwe) VALUES ('{cveid}', '{title}', '{severity}', '{published}', '{updated}', "
