@@ -228,3 +228,40 @@ def get_nvd_metadata_timestamp(year):
         return None
 
     return result[0]
+
+
+def insert_dependency(id='oval:org.opensuse.security:tst:2009116126', name='sled-release', operation='equals',
+                      operation_value='12.0', target='SLED11', installed='0', package_id='0'):
+    """Insert a new dependency in the dependency database, with the parameters given as arguments
+
+    Args:
+        id (str): id of the dependency
+        name (str): name of the dependency. Defaults to sled-release
+        operation (str): operator used to compare the version
+        operation_value (str): version of the dependency
+        target (str): OS of the pkg
+        installed (str): flag that will be activated in the pre-scan as long as this dependency has been detected in the agent
+        package_id (str): the id to relate the dependency to a package
+    """
+    query_string = f'''INSERT OR IGNORE INTO dependencies
+        (id, name, operation, operation_value, target, installed)
+        VALUES
+        ("{id}", "{name}", "{operation}", "{operation_value}", "{target}","{installed}")
+        '''
+    make_sqlite_query(CVE_DB_PATH, [query_string])
+
+
+def insert_pkg_dep(id="oval:org.opensuse.security:tst:2009116126", target="SLED11",package_id="0"):
+    """Insert a new dependency in the dependency database, with the parameters given as arguments
+
+    Args:
+        id (str): id of the dependency
+        target (str): OS of the pkg
+        package_id (str): the id to relate the dependency to a package
+    """
+    pkg_deps_string = f'''INSERT INTO PKG_DEPS
+        (pkg_id, dep_id, target)
+        VALUES
+        ("{package_id}", "{id}", "{target}")
+        '''
+    make_sqlite_query(CVE_DB_PATH, [pkg_deps_string])
