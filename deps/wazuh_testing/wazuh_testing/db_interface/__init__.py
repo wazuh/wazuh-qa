@@ -10,6 +10,9 @@ from wazuh_testing.tools.monitoring import wazuh_pack, wazuh_unpack
 from wazuh_testing.tools.services import control_service
 
 
+CVE_NUM_TABLES = 26
+
+
 def query_wdb(command):
     """Make queries to wazuh-db using the wdb socket.
 
@@ -87,7 +90,7 @@ def execute_sqlite_query(cursor, query):
             if str(exception_message) == 'database is locked':
                 sleep(0.5)
                 retries += 1
-
+    return cursor.fetchall()
     # If the database is locked after the maximum number of retries, then raise the exception
     if retries == max_retries:
         raise sqlite3.OperationalError('database is locked')
@@ -133,8 +136,8 @@ def get_sqlite_query_result(db_path, query):
         try:
             cursor = db_connection.cursor()
 
-            execute_sqlite_query(cursor, query)
-            records = cursor.fetchall()
+            records = execute_sqlite_query(cursor, query)
+            
             result = []
 
             for row in records:
