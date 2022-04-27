@@ -8,6 +8,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import client_keys
 from wazuh_testing.tools.file import remove_file
 
+MOCKED_AGENT_NAME = 'mocked_agent'
 
 SYSTEM_DATA = {
     'WINDOWS_XP': {'os_name': 'Microsoft Windows XP', 'os_major': '10', 'os_minor': '0',
@@ -104,12 +105,12 @@ SYSTEM_DATA = {
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
                 'name': 'debian9'},
-    'SLED11': {'os_name': 'sled', 'os_major': '11', 'os_minor': '', 'os_platform': '', 'name': 'Desktop11'},
-    'SLED12': {'os_name': 'sled', 'os_major': '12', 'os_minor': '', 'os_platform': '', 'name': 'Desktop12'},
-    'SLED15': {'os_name': 'sled', 'os_major': '15', 'os_minor': '', 'os_platform': '', 'name': 'Desktop15'},
-    'SLES11': {'os_name': 'sles', 'os_major': '11', 'os_minor': '', 'os_platform': '', 'name': 'Server11'},
-    'SLES12': {'os_name': 'sles', 'os_major': '12', 'os_minor': '', 'os_platform': '', 'name': 'Server12'},
-    'SLES15': {'os_name': 'sles', 'os_major': '15', 'os_minor': '', 'os_platform': '', 'name': 'Server15'}
+    'SLED11': {'os_name': 'SLED', 'os_major': '11', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop11'},
+    'SLED12': {'os_name': 'SLED', 'os_major': '12', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop12'},
+    'SLED15': {'os_name': 'SLED', 'os_major': '15', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop15'},
+    'SLES11': {'os_name': 'SLES', 'os_major': '11', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server11'},
+    'SLES12': {'os_name': 'SLES', 'os_major': '12', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server12'},
+    'SLES15': {'os_name': 'SLES', 'os_major': '15', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server15'}
 }
 
 
