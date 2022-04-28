@@ -15,5 +15,11 @@
   },
   "videosFolder": "cypress/report/video",
   "screenshotsFolder": "cypress/report/screenshots",
-  "experimentalSessionSupport": true
+  "experimentalSessionSupport": true,
+  "env": {
+      "type_x": "xpack",
+      "type_o": "odfe",
+      "type_b": "basic",
+      "type_d": "demo"
+    }
 }
