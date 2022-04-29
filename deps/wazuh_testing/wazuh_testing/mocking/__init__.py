@@ -105,12 +105,18 @@ SYSTEM_DATA = {
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
                 'name': 'debian9'},
-    'SLED11': {'os_name': 'SLED', 'os_major': '11', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop11'},
-    'SLED12': {'os_name': 'SLED', 'os_major': '12', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop12'},
-    'SLED15': {'os_name': 'SLED', 'os_major': '15', 'os_minor': '', 'os_platform': 'sled', 'name': 'Desktop15'},
-    'SLES11': {'os_name': 'SLES', 'os_major': '11', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server11'},
-    'SLES12': {'os_name': 'SLES', 'os_major': '12', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server12'},
-    'SLES15': {'os_name': 'SLES', 'os_major': '15', 'os_minor': '', 'os_platform': 'sles', 'name': 'Server15'}
+    'SLED11': {'hostname': 'sled', 'architecture': 'x86_64','os_name': 'SLED', 'os_major': '11', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop11', 'os_codename':'sled'},
+    'SLED12': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '12', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop12', 'os_codename':'sled'},
+    'SLED15': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '15', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop15', 'os_codename':'sled'},
+    'SLES11': {'hostname': 'sles', 'architecture': 'x86_64', 'os_name': 'SLES', 'os_major': '11', 'os_minor': '',
+               'os_platform': 'sles', 'name': 'Server11', 'os_codename':'sles'},
+    'SLES12': {'hostname': 'sles', 'architecture': 'x86_64', 'os_name': 'SLES', 'os_major': '12', 'os_minor': '',
+               'os_platform': 'sles', 'name': 'Server12', 'os_codename':'sles'},
+    'SLES15': {'hostname': 'sles', 'architecture': 'x86_64', 'os_name': 'SLES', 'os_major': '15', 'os_minor': '',
+               'os_platform': 'sles', 'name': 'Server15', 'os_codename':'sles'}
 }
 
 
