@@ -11,7 +11,6 @@
     "cypress:run": "cypress run --browser chrome",
     "merge": "mochawesome-merge cypress/report/mochawesome-report/*.json > cypress/report/output.json",
     "generate_mochawesome_report": "marge cypress/report/output.json --reportDir ./cypress/report --inline",
-    "demo": "./node_modules/.bin/cypress-tags run -e TAGS=\"@about\" --headless --browser chrome",
     "delete:reports": "rm -r cypress/report/* || true"
   },
   "author": "",
