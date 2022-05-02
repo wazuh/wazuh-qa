@@ -48,7 +48,7 @@ DIFF_DEFAULT_LIMIT_VALUE = 51200
 
 
 # FIM modules
-SCHEDULE_MODE = 'scheduled'
+SCHEDULED_MODE = 'scheduled'
 REALTIME_MODE = 'realtime'
 WHODATA_MODE = 'whodata'
 
@@ -87,7 +87,9 @@ CB_FILE_LIMIT_BACK_TO_NORMAL = r".*(Sending DB back to normal alert)."
 CB_FIM_ENTRIES_COUNT = r".*Fim file entries count: '(\d+)'"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of files to be monitored: '(\d+)'"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
-
+CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
+CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
+CB_PATH_MONITORED_WHODATA_WINDOWS = r".*Setting up SACL for (.*)"
 
 # Error message
 
@@ -122,9 +124,10 @@ ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit c
 
 ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
+ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
+ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event '
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
-
 
 # Setting Local_internal_option file
 
@@ -139,5 +142,6 @@ else:
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'syscheck.debug': '2',
         'agent.debug': '2',
-        'monitord.rotate_log': '0'
+        'monitord.rotate_log': '0',
+        'analysisd.debug': '2'
     }
