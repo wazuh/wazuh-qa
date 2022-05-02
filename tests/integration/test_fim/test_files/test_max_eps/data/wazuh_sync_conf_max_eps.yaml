@@ -1,9 +1,6 @@
 # Configuration for sync max eps enabled
 - tags:
   - max_eps_synchronization
-  apply_to_modules:
-  - test_sync_max_eps_rt_wd
-  - test_sync_max_eps_scheduled
   sections:
   - section: syscheck
     elements:
