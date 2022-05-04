@@ -69,7 +69,7 @@ from wazuh_testing import api
          {'title': 'Not Found', 'detail': '404: Not Found'}),
         ('GET', '/agents', None, False, 401,
          {'title': 'Unauthorized', 'detail': 'No authorization token provided'}),
-        ('GET', '/security/user/authenticate', None, False, 401,
+        ('POST', '/security/user/authenticate', None, False, 401,
          {'title': 'Unauthorized', 'detail': 'Invalid credentials'})
     ])
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')

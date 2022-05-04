@@ -92,7 +92,7 @@ class APISimulator:
         for _ in range(10):
             try:
                 self.logger.info('Trying to obtain API token')
-                response = requests.get(f'{self.base_url}{authenticate_url}', headers=basic_auth, verify=False)
+                response = requests.post(f"{self.base_url}{authenticate_url}", headers=basic_auth, verify=False)
                 if response.status_code != 200:
                     self.logger.error(f'Failed to obtain API token: {response.json()}')
                     self.logger.error('Retrying in 1s...')
