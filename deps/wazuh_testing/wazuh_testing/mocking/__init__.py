@@ -103,7 +103,9 @@ SYSTEM_DATA = {
     'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
-                'name': 'debian9'}
+                'name': 'debian9'},
+    'JAMMY': {'os_name': 'jammy', 'os_major': '22', 'os_minor': '04', 'os_platform': 'ubuntu',
+               'name': 'Ubuntu', 'os_version': '22.04 (Jammy Jellyfish)', 'os_codename': 'jammy'}
 }
 
 
