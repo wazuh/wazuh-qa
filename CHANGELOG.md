@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## Rev 450001
+
+Wazuh version: 4.5.0 \
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+### Changed
+
+
 ## Rev 440001
 
 Wazuh version: 4.4.0 \
