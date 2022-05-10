@@ -4,6 +4,7 @@
 import logging
 import re
 import string
+import numbers
 from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
@@ -158,6 +159,15 @@ def get_host_name():
     """
     return socket.gethostname()
 
+
+def validate_interval_format(interval):
+    """Validate that the interval passed has the format in which the last digit is a letter from those passed and
+       the other characters are between 0-9"""
+    if interval=='':
+        return False
+    if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
+        return False
+    return True
 
 def format_ipv6_long(ipv6_address):
     """Return the long form of the address representation in uppercase.

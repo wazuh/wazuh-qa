@@ -47,13 +47,12 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.file import read_yaml
 
-# Marks
 
+# Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 
 # Configurations
-
 class WorkerMID(ManInTheMiddle):
 
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
@@ -91,6 +90,7 @@ params = [{'FERNET_KEY': FERNET_KEY}]
 metadata = [{'fernet_key': FERNET_KEY}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
+
 # Variables
 log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
@@ -105,7 +105,6 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 # Fixtures
-
 @pytest.fixture(scope='function')
 def set_up_groups(request, get_current_test_case):
     """

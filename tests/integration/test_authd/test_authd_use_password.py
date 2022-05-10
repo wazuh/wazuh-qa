@@ -45,8 +45,6 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -157,7 +155,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_password_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_password_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_function, reset_password, restart_authd_function,
+                             clean_client_keys_file_function, reset_password, restart_wazuh_daemon_function,
                              wait_for_authd_startup_function, connect_to_sockets_function,
                              test_case, tear_down):
     '''
