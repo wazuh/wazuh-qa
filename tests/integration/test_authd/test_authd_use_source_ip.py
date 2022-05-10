@@ -44,8 +44,6 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.authd import validate_authd_response
 
 # Marks
@@ -109,7 +107,7 @@ def configure_receiver_sockets(request, get_current_test_case):
 
 
 def test_authd_use_source_ip(get_configuration, configure_environment, get_current_test_case, configure_receiver_sockets,
-                             configure_sockets_environment, clean_client_keys_file_function, restart_authd_function,
+                             configure_sockets_environment, clean_client_keys_file_function, restart_wazuh_daemon_function,
                              wait_for_authd_startup_function, connect_to_sockets_function, tear_down):
     '''
     description:
@@ -176,7 +174,7 @@ def test_authd_use_source_ip(get_configuration, configure_environment, get_curre
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
         if metadata['use_source_ip'] == 'yes' and get_current_test_case['ip_specified'] == 'no':
             if 'ipv6' in get_current_test_case:
                 expected = {"status": "success", "name": "user1", "ip": "0000:0000:0000:0000:0000:0000:0000:0001"}
