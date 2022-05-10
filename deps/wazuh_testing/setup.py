@@ -27,7 +27,7 @@ package_data_list = [
     'qa_ctl/deployment/dockerfiles/qa_ctl/*',
     'qa_ctl/deployment/vagrantfile_template.txt',
     'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
-    'data/qactl_conf_validator_schema.json',
+    'data/qactl_conf_validator_schema.json'
 ]
 
 scripts_list = [
@@ -40,6 +40,7 @@ scripts_list = [
     'wazuh-log-metrics=wazuh_testing.scripts.wazuh_log_metrics:main',
     'qa-docs=wazuh_testing.scripts.qa_docs:main',
     'qa-ctl=wazuh_testing.scripts.qa_ctl:main',
+    'check-files=wazuh_testing.scripts.check_files:main'
     'add-agents-client-keys=wazuh_testing.scripts.add_agents_client_keys:main',
     'unsync-agents=wazuh_testing.scripts.unsync_agents:main'
 ]

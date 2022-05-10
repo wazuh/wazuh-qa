@@ -32,14 +32,16 @@ def test_cluster_sync(artifacts_path):
     if not artifacts_path:
         pytest.fail('Parameter "--artifacts_path=<path>" is required.')
 
-    if len(cluster_log_files := glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))) == 0:
+    cluster_log_files = glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))
+    if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     repeat_counter = 0
     for log_file in cluster_log_files:
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
-            if not (sync_logs := integrity_regex.findall(s)):
+            sync_logs = integrity_regex.findall(s)
+            if not sync_logs:
                 pytest.fail(f'No integrity sync logs found in {node_name.search(log_file)[1]}')
 
             for i in range(len(sync_logs)):

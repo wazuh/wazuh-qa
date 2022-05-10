@@ -56,7 +56,7 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
 
     for _ in range(login_attempts):
-        response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
+        response = requests.post(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
         if response.status_code == 200:
             return json.loads(response.content.decode())['data']['token']

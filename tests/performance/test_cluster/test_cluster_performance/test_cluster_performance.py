@@ -55,7 +55,8 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
         pytest.fail("Parameters '--artifacts_path=<path> --n_workers=<n_workers> --n_agents=<n_agents>' are required.")
 
     # Check if there are threshold data for the specified number of workers and agents.
-    if (selected_conf := f"{n_workers}w_{n_agents}a") not in configurations:
+    selected_conf = f"{n_workers}w_{n_agents}a"
+    if selected_conf not in configurations:
         pytest.fail(f"This is not a supported configuration: {selected_conf}. "
                     f"Supported configurations are: {', '.join(configurations.keys())}.")
 
@@ -97,6 +98,7 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
     finally:
         # Add useful information to report as stdout
         try:
+            print('\n')
             print(f'Setup phase took {get_datetime_diff(cluster_info["phases"]["setup_phase"])}s '
                   f'({cluster_info["phases"]["setup_phase"][0]} - {cluster_info["phases"]["setup_phase"][1]}).')
             print(f'Stable phase took {get_datetime_diff(cluster_info["phases"]["stable_phase"])}s '
