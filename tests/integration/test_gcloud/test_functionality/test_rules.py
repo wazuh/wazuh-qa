@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The Wazuh 'gcp-pubsub' module uses it to fetch different kinds of events
        if the module pulls messages that match the specified GCP rules and
        the generated alerts contain the expected rule ID.
 
-tier: 0
-
-modules:
+components:
     - gcloud
 
-components:
+suite: functionality
+
+targets:
     - manager
 
 daemons:
@@ -36,18 +36,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/gcp-pubsub.html
@@ -77,7 +69,6 @@ pytestmark = [pytest.mark.tier(level=0), pytest.mark.server]
 interval = '10s'
 pull_on_start = 'no'
 max_messages = 100
-logging = 'debug'
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
@@ -92,7 +83,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'LOGGING': logging, 'MODULE_NAME': __name__}
+               'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
@@ -124,6 +115,8 @@ def test_rules(get_configuration, configure_environment,
                  will verify that each alert triggered match the expected rule ID.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

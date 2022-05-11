@@ -303,7 +303,7 @@
                   "type": "string",
                   "default": "empty"
                 },
-                "ssh_private_key_file_path":{
+                "ansible_ssh_private_key_file":{
                   "type": "string"
                 },
                 "ansible_port": {
@@ -316,12 +316,12 @@
                   "type": "string"
                 }
               },
-              "oneOf": [
+              "anyOf": [
                 {
                   "required": ["ansible_password"]
                 },
                 {
-                  "required": ["ssh_private_key_file_path"]
+                  "required": ["ansible_ssh_private_key_file"]
                 }
               ]
             },
@@ -374,7 +374,7 @@
                   "type": "string",
                   "default": "empty"
                 },
-                "ssh_private_key_file_path":{
+                "ansible_ssh_private_key_file":{
                   "type": "string"
                 },
                 "ansible_port": {
@@ -390,12 +390,12 @@
                   "type": "string"
                 }
               },
-              "oneOf": [
+              "anyOf": [
                 {
                   "required": ["ansible_password"]
                 },
                 {
-                  "required": ["ssh_private_key_file_path"]
+                  "required": ["ansible_ssh_private_key_file"]
                 }
               ]
             },

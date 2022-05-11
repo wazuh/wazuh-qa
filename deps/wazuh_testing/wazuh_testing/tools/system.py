@@ -1,12 +1,15 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import json
 import tempfile
 import xml.dom.minidom as minidom
+from typing import Union
 
 import testinfra
 import yaml
+
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
@@ -62,16 +65,16 @@ class HostManager:
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
-    def modify_file_content(self, host: str, path: str = None, content: str = ''):
+    def modify_file_content(self, host: str, path: str = None, content: Union[str, bytes] = ''):
         """Create a file with a specified content and copies it to a path.
 
         Args:
             host (str): Hostname
             path (str): path for the file to create and modify
-            content (str): content to write into the file
+            content (str, bytes): content to write into the file
         """
         tmp_file = tempfile.NamedTemporaryFile()
-        tmp_file.write(content.encode())
+        tmp_file.write(content if isinstance(content, bytes) else content.encode())
         tmp_file.seek(0)
         self.move_file(host, src_path=tmp_file.name, dest_path=path)
         tmp_file.close()
@@ -180,19 +183,18 @@ class HostManager:
         Returns:
             API token (str): Usable API token.
         """
+        login_endpoint = '/security/user/authenticate'
+        login_method = 'POST'
+        login_body = ''
         if auth_context is not None:
             login_endpoint = '/security/user/authenticate/run_as'
-            login_method = 'POST'
             login_body = 'body="{}"'.format(json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
-        else:
-            login_endpoint = '/security/user/authenticate'
-            login_method = 'GET'
-            login_body = ''
 
         try:
-            token_response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}{login_endpoint} '
-                                                                f'user={user} password={password} method={login_method} '
-                                                                f'{login_body} validate_certs=no force_basic_auth=yes',
+            token_response = self.get_host(host).ansible('uri', f"url=https://localhost:{port}{login_endpoint} "
+                                                                f"user={user} password={password} "
+                                                                f"method={login_method} {login_body} validate_certs=no "
+                                                                f"force_basic_auth=yes",
                                                          check=check)
             return token_response['json']['data']['token']
         except KeyError:
@@ -251,6 +253,43 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+    def get_host_ip(self, host: str, interface: str):
+        """Get the Ansible object for communicating with the specified host.
+        Args:
+            host (str): Hostname
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
+        """
+        return self.get_host(host).interface(interface).addresses
+
+    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+        """Search and return information of a file inside a path.
+
+        Args:
+            host (str): Hostname
+            path (str): Path in which to search for the file that matches the pattern.
+            pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+
+        Returns:
+            Files (list): List of found files.
+        """
+        return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
+                                                   f"use_regex={use_regex}")
+
+    def get_stats(self, host: str, path: str):
+        """Retrieve file or file system status.
+
+        Args:
+            host (str): Hostname.
+            path (str): The full path of the file/object to get the facts of.
+
+        Returns:
+            Dictionary containing all the stat data.
+        """
+        return self.get_host(host).ansible("stat", f"path={path}")
 
 
 def clean_environment(host_manager, target_files):

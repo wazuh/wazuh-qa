@@ -63,7 +63,7 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
     login_url = f"{get_base_url(protocol, host, port)}{login_endpoint}"
 
     for _ in range(login_attempts):
-        response = requests.get(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
+        response = requests.post(login_url, headers=get_login_headers(user, password), verify=False, timeout=timeout)
 
         if response.status_code == 200:
             return json.loads(response.content.decode())['data']['token']
@@ -197,3 +197,89 @@ def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
     """
 
     get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, attempts, 1)
+
+
+def make_api_call(port=55000, method='GET', endpoint='/', headers=None, request_json=None, params=None, verify=False,
+                  token=None):
+    """Make an API call
+    
+    Args:
+        port (str, optional): Wazuh manager port.
+        method (str, optional): Request method. Default `GET`
+        endpoint (str, optional): Request endpoint. It must start with '/'.. Default `/`
+        headers (dict, optional): request headers. Default `None`
+        request_json ( dict, optional) : Request body. Default `None`
+        params ( dict, optional) : Request params. Default `None`
+        verify ( bool, optional): Request verify. Default `False`
+        token (str, optional): API auth token. Default `None` cannot be None if headers is None or missing the
+                               Authorization header.
+
+    Returns: response dict.
+    """
+    if headers == None and token == None:
+        return "Request Error - No authorization information passed."
+    elif headers == None:
+        headers = {'Authorization': f"Bearer {token}",}
+    if 'Authorization' not in headers.keys():
+        headers['Authorization'] = f"Bearer {token}"
+
+    response = None
+    if method=='POST':
+        response = requests.post(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+                                 params=params, verify=verify)
+    elif method=='DELETE':
+        response = requests.delete(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+                                   params=params, verify=verify)
+    elif method=='PUT':
+        response = requests.put(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+                                params=params, verify=verify)
+    else:
+        response = requests.get(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+                                params=params, verify=verify)
+    return response
+
+
+def create_groups_api_request(group, token):
+    """ Make API call to create a specified group
+    Args:
+        group (str): name of the group that will be created.
+        token (str): API auth token.
+    
+    Returns: API call response.
+    """
+    headers = {'Authorization': f"Bearer {token}",}
+    json_data = {'group_id': f"{group}",}
+    endpoint = '/groups'
+    response = make_api_call(method='POST', endpoint=endpoint, headers=headers, request_json=json_data)
+    return response
+
+
+def set_up_groups(groups_list):
+    """ Make API calls to create a series of groups
+    Args:
+        group_list (List<str>): List containing the names of the groups to create.
+    
+    Returns: None
+    """
+    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT,
+                                         timeout=10, login_attempts=3, sleep_time=1)
+
+    for group in groups_list:
+        response = create_groups_api_request(group, response_token)
+
+
+def remove_groups():
+    """ Makes API call to remove all groups from the manager
+
+    Returns: API call response
+    """
+    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT,
+                                         timeout=10, login_attempts=3, sleep_time=1)
+    headers = {'Authorization': f"Bearer {response_token}",}
+    params = (
+        ('pretty', 'true'),
+        ('groups_list', 'all'),
+    )
+    endpoint = '/groups'
+    response = make_api_call(method="DELETE", endpoint=endpoint, headers=headers, params=params)
+    return response

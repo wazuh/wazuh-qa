@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,12 +9,10 @@ type: integration
 
 brief: This module verifies the correct behavior of the enrollment daemon 'wazuh-authd' under different messages.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -26,26 +24,20 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
 '''
+
 import os
 import subprocess
 import time
@@ -55,17 +47,17 @@ from wazuh_testing.tools import WAZUH_DB_SOCKET_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 
-# Marks
 
+# Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
+
 # Configurations
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 message_tests = read_yaml(os.path.join(test_data_path, 'authd_key_hash.yaml'))
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=None, metadata=None)
+
 
 # Variables
 log_monitor_paths = []
@@ -76,7 +68,6 @@ test_case_ids = [f"{test_case['name'].lower().replace(' ', '-')}" for test_case 
 
 
 # Tests
-
 @pytest.fixture(scope="module", params=configurations)
 def get_configuration(request, ids=['authd_key_hash_config']):
     """
@@ -112,7 +103,7 @@ def set_up_groups(get_current_test_case, request):
 
 def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sockets_environment,
                                            connect_to_sockets_function, set_up_groups, insert_pre_existent_agents,
-                                           restart_authd_function, wait_for_authd_startup_function,
+                                           restart_wazuh_daemon_function, wait_for_authd_startup_function,
                                            get_current_test_case, tear_down):
     '''
     description:
@@ -120,6 +111,8 @@ def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sock
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - configure_environment:
@@ -137,9 +130,9 @@ def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sock
         - insert_pre_existent_agents:
             type: fixture
             brief: adds the required agents to the client.keys and global.db
-        - restart_authd_function:
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: stops the wazuh-authd daemon.
+            brief: Restarts wazuh or a specific daemon passed.
         - wait_for_authd_startup_function:
             type: fixture
             brief: Waits until Authd is accepting connections.
@@ -175,7 +168,7 @@ def test_ossec_auth_messages_with_key_hash(configure_environment, configure_sock
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
         assert response[:len(expected)] == expected, \
             'Failed stage "{}". Response was: {} instead of: {}' \
             .format(index+1, response, expected)

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -14,12 +14,12 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
        This component can receive logs through text files or Windows event logs. It can also directly
        receive logs via remote syslog which is useful for firewalls and other such devices.
 
-tier: 0
-
-modules:
+components:
     - logcollector
 
-components:
+suite: macos
+
+targets:
     - agent
 
 daemons:
@@ -30,6 +30,7 @@ os_platform:
 
 os_version:
     - macOS Catalina
+    - macOS Server
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/log-data-collection/index.html
@@ -98,6 +99,8 @@ def test_macos_file_status_predicate(restart_logcollector_required_daemons_packa
                  it will verify that the 'macos' key is not inside it since the predicate used is invalid.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_logcollector_required_daemons_package:
