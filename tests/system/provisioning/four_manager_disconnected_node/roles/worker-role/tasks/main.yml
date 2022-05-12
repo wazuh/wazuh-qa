@@ -18,6 +18,7 @@
       - libtool
       - python3-pytest
       - sqlite3
+      - libssl-dev
     force_apt_get: yes
     state: present
     update_cache: yes
