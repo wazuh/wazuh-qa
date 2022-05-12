@@ -8,7 +8,6 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import client_keys
 from wazuh_testing.tools.file import remove_file
 
-MOCKED_AGENT_NAME = 'mocked_agent'
 
 SYSTEM_DATA = {
     'WINDOWS_XP': {'os_name': 'Microsoft Windows XP', 'os_major': '10', 'os_minor': '0',
