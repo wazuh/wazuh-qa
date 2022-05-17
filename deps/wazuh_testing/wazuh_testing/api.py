@@ -21,20 +21,53 @@ API_USER = 'wazuh'
 API_PASS = 'wazuh'
 API_LOGIN_ENDPOINT = '/security/user/authenticate'
 API_GLOBAL_TIMEOUT = 20
+ERROR_LOG_PAYLOAD = 'Timeout executing API request'
 
 
 # Callbacks
 
 def callback_detect_api_start(line):
-    match = re.match(r'.*INFO: Listening on (.+)..', line)
-    if match:
-        return match.group(1)
-
-
-def callback_detect_api_start_json_format(line):
     match = re.match(r'.*Listening on (.+)..', line)
     if match:
         return match.group(1)
+
+
+def callback_json_log_login_info(line):
+    """Match a given line with a regular expression."""
+
+    payload = r'"user": "wazuh", "ip": "127.0.0.1", "http_method": "GET", "uri": "GET ' + f'{API_LOGIN_ENDPOINT}"' + \
+              r', "parameters": {}' + r', "body": {}' + \
+              r', "time": "(\d*\.*\d+)s", "status_code": (\d+)'
+    msg = r'{"timestamp": "(\d+\/\d+\/\d+ \d+:\d+:\d+)", "levelname": "INFO", "data": {"type": "request", ' \
+          r'"payload": {' + f'{payload}' + r'}}}'
+    match = re.match(msg, line)
+    return match
+
+
+def callback_plain_log_login_info(line):
+    """Match a given line with a regular expression."""
+
+    msg = fr'(\d+/\d+/\d+ \d+:\d+:\d+) INFO: wazuh 127.0.0.1 "GET {API_LOGIN_ENDPOINT}" with parameters' \
+          r' {} and body {} done in (\d*\.*\d+)s: (\d+)'
+    match = re.match(msg, line)
+    return match
+
+
+def callback_json_log_error(line):
+    """Match a given line with a regular expression."""
+
+    msg = r'{"timestamp": "(\d+/\d+/\d+ \d+:\d+:\d+)", "levelname": "ERROR", "data": {"type": "informative", ' \
+          fr'"payload": "{ERROR_LOG_PAYLOAD}"}}'
+    match = re.match(msg, line)
+    return match
+
+
+def callback_plain_error(line):
+    """Match a given line with a regular expression."""
+
+    msg = fr"(\d+/\d+/\d+ \d+:\d+:\d+) ERROR: {ERROR_LOG_PAYLOAD}"
+    match = re.match(msg, line)
+    return match
 
 
 def callback_detect_api_debug(line):

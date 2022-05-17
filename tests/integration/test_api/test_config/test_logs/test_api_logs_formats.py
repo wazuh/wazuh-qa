@@ -41,16 +41,16 @@ tags:
     - logging
 '''
 import os
-import re
 
-import requests
 import pytest
-
-from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH
+import requests
+from wazuh_testing.api import  API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
+                               API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
+                               callback_plain_log_login_info, get_login_headers
+from wazuh_testing.tools import (API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH,
+                                 PREFIX)
 from wazuh_testing.tools.configuration import get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, \
-    API_GLOBAL_TIMEOUT, get_login_headers
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
@@ -58,7 +58,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 # Variables
 daemons_handler_configuration = {'all_daemons': True}
 test_directories = [os.path.join(PREFIX, 'test_logs')]
-error_log_payload = 'Timeout executing API request'
 
 # Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -84,44 +83,6 @@ def send_request(login_attempts=5):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
                                 timeout=API_GLOBAL_TIMEOUT)
         if response.status_code == 200: return True
-
-
-def callback_json_log_login_info(line):
-    """Match a given line with a regular expression."""
-
-    payload = r'"user": "wazuh", "ip": "127.0.0.1", "http_method": "GET", "uri": "GET ' + f'{API_LOGIN_ENDPOINT}"' + \
-              r', "parameters": {}' + r', "body": {}' + \
-              r', "time": "(\d*\.*\d+)s", "status_code": (\d+)'
-    msg = r'{"timestamp": "(\d+\/\d+\/\d+ \d+:\d+:\d+)", "levelname": "INFO", "data": {"type": "request", ' \
-          r'"payload": {' + f'{payload}' + r'}}}'
-    match = re.match(msg, line)
-    return match
-
-
-def callback_plain_log_login_info(line):
-    """Match a given line with a regular expression."""
-
-    msg = fr'(\d+/\d+/\d+ \d+:\d+:\d+) INFO: wazuh 127.0.0.1 "GET {API_LOGIN_ENDPOINT}" with parameters' \
-          r' {} and body {} done in (\d*\.*\d+)s: (\d+)'
-    match = re.match(msg, line)
-    return match
-
-
-def callback_json_log_error(line):
-    """Match a given line with a regular expression."""
-
-    msg = r'{"timestamp": "(\d+/\d+/\d+ \d+:\d+:\d+)", "levelname": "ERROR", "data": {"type": "informative", ' \
-          fr'"payload": "{error_log_payload}"}}'
-    match = re.match(msg, line)
-    return match
-
-
-def callback_plain_error(line):
-    """Match a given line with a regular expression."""
-
-    msg = fr"(\d+/\d+/\d+ \d+:\d+:\d+) ERROR: {error_log_payload}"
-    match = re.match(msg, line)
-    return match
 
 
 # Tests
