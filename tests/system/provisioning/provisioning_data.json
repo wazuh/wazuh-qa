@@ -1,0 +1,28 @@
+{
+    "agentless_cluster": [
+        "test_jwt_invalidation/test_change_rbac_mode.py",
+        "test_jwt_invalidation/test_change_security_resources.py",
+        "test_jwt_invalidation/test_disconnected_nodes.py",
+        "test_jwt_invalidation/test_revoke_endpoint.py",
+        "test_jwt_invalidation/test_update_password.py",
+        "test_cluster/test_integrity_sync/test_integrity_sync.py"
+    ],
+    "basic_cluster": [
+        "test_cluster/test_agent_groups/test_agent_groups.py",
+        "test_cluster/test_agent_files_deletion/test_agent_files_deletion.py",
+        "test_cluster/test_agent_info_sync/test_agent_info_sync.py",
+        "test_cluster/test_agent_key_polling/test_agent_key_polling.py",
+        "test_multigroups/test_multigroups.py",
+        "test_cluster/test_agent_groups/test    _agent_groups_forced_change.py"
+    ],
+    "enrollment_cluster": [
+        "test_cluster/test_agent_enrollment/test_agent_enrollment.py",
+        "test_cluster/test_agent_groups/test_agent_default_group_added.py",
+        "test_cluster/test_agent_groups/test_assign_agent_group_with_enrollment.py",
+        "test_cluster/test_agent_groups/test_assign_agent_never_connected_to_group.py",
+        "test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py",
+        "test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool.py",
+        "test_cluster/test_agent_groups/test_assign_agent_to_a_group.py",
+        "test_cluster/test_agent_groups/test_assign_groups_guess.py"
+    ]
+}
