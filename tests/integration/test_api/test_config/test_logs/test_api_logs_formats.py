@@ -82,7 +82,7 @@ def send_request(login_attempts=5):
     for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
                                 timeout=API_GLOBAL_TIMEOUT)
-        if response.status_code == 200: return True
+        assert response.status_code == 200, f"The status code was {response.status_code}. \nExpected: 200"
 
 
 # Tests
@@ -144,10 +144,10 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         assert len(json_result.groups()) == len(plain_result.groups()), 'The length of the subgroups of the match is ' \
                                                                         'not equal.' \
                                                                         'Subgroups of the JSON match:' \
-                                                                        f' {len(json_result.groups())}\n' \
+                                                                        f" {len(json_result.groups())}\n" \
                                                                         'Subgroups of the Plain match:' \
 
         for i in range(len(json_result.groups())):
             assert json_result.group(i + 1) == plain_result.group(i + 1), 'The values of the logs doesn\'t match.' \
-                                                                      f'JSON log values: {json_result.groups()}\n' \
-                                                                      f'Plain log values: {plain_result.groups()}\n'
+                                                                      f"JSON log values: {json_result.groups()}\n" \
+                                                                      f"Plain log values: {plain_result.groups()}\n"
