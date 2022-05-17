@@ -11,7 +11,7 @@ from wazuh_testing.api import callback_detect_api_start, callback_detect_api_sta
 from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF, \
     API_LOG_FOLDER
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
@@ -79,12 +79,7 @@ def configure_api_environment(get_configuration, request):
 def clean_log_files(get_configuration, request):
     """Reset the log files of the API and delete the rotated log files."""
     def clean_api_log_files():
-        for root, directories, files in os.walk(API_LOG_FOLDER):
-            for file in files:
-                os.unlink(os.path.join(root, file))
-            for directory in directories:
-                shutil.rmtree(os.path.join(root, directory))
-
+        remove_file(API_LOG_FOLDER)
         log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
         for log_file in log_files:
             truncate_file(log_file)
