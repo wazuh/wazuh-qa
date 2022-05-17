@@ -54,7 +54,7 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
 
 
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
                    release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
                    reference=''):
@@ -138,6 +138,7 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='cust
               f"{arguments['description']}, {arguments['location']}, {arguments['triaged']}, {arguments['checksum']},"
               f"{arguments['item_id']})")
 
+
 def update_sync_info(agent_id='000', component='syscollector-packages', last_attempt=1, last_completion=1,
                      n_attempts=0, n_completions=0, last_agent_checksum=''):
     """Update the sync_info table of the specified agent for the selected component.
@@ -215,7 +216,7 @@ def delete_os_info(agent_id='000'):
 
 
 def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
                    release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
                    reference=''):
