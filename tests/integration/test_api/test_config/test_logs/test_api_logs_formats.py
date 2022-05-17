@@ -53,7 +53,7 @@ from wazuh_testing.api import API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PA
     API_GLOBAL_TIMEOUT, get_login_headers
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 
 # Variables
 daemons_handler_configuration = {'all_daemons': True}
