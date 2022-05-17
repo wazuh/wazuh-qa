@@ -112,7 +112,7 @@ def wait_for_start(get_configuration, request):
     log_file = API_LOG_FILE_PATH
     callback = callback_detect_api_start
     if get_configuration:
-        configuration = get_configuration.get('configuration')
+        configuration = get_configuration['configuration']
         if configuration:
             try:
                 log_format = configuration['logs']['format']
