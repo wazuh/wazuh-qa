@@ -151,7 +151,7 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         plain_result = wazuh_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
                                                error_message=f'Plain API {current_level} log was not the expected.'
                                                ).result()
-    if len(current_formats) == 2:
+    if 'plain' in current_formats and 'json' in current_formats:
         assert len(json_result.groups()) == len(plain_result.groups()), 'The length of the subgroups of the match is ' \
                                                                         'not equal.' \
                                                                         'Subgroups of the JSON match:' \
