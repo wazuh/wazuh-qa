@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,12 @@ brief: The 'wazuh-logtest' tool allows the testing and verification of rules and
        the 'wazuh-logtest' tool or by making requests via RESTful API. These tests will check if the logtest
        configuration is valid. Also checks rules, decoders, decoders, alerts matching logs correctly.
 
-tier: 0
-
-modules:
+components:
     - logtest
 
-components:
+suite: configuration
+
+targets:
     - manager
 
 daemons:
@@ -33,18 +33,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/tools/wazuh-logtest.html
@@ -90,6 +82,8 @@ def test_configuration_file(get_configuration, configure_environment, restart_wa
                  some values in these configurations from 'wazuh_conf.yaml' file.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

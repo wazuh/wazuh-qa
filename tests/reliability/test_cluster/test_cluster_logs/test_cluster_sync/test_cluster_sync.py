@@ -32,23 +32,25 @@ def test_cluster_sync(artifacts_path):
     if not artifacts_path:
         pytest.fail('Parameter "--artifacts_path=<path>" is required.')
 
-    if len(cluster_log_files := glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))) == 0:
+    cluster_log_files = glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))
+    if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     repeat_counter = 0
     for log_file in cluster_log_files:
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
-            if not (sync_logs := integrity_regex.findall(s)):
+            sync_logs = integrity_regex.findall(s)
+            if not sync_logs:
                 pytest.fail(f'No integrity sync logs found in {node_name.search(log_file)[1]}')
 
             for i in range(len(sync_logs)):
                 # Compare whether current log and the previous one are equal.
                 if sync_logs[i][1] and sync_logs[i-2][1] and sync_logs[i-2][2:] == sync_logs[i][2:]:
-                    # If missing or extra valid files are being synced, the number of calculated MD5 should be different
+                    # If missing files are being synced, the number of calculated MD5 should be different
                     # in the following iteration.
                     if sync_logs[i][2] != b'0' or sync_logs[i][4] != b'0':
-                        # If same number of missing and extra-valid files is synced, MD5 count should remain the same.
+                        # If same number of missing files is synced, MD5 count should remain the same.
                         if sync_logs[i][2] != sync_logs[i][4]:
                             if sync_logs[i-1][0] and sync_logs[i+1][0] and sync_logs[i-1] == sync_logs[i+1]:
                                 repeat_counter += 1

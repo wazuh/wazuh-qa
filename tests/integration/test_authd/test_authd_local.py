@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -10,12 +10,10 @@ type: integration
 brief: This module verifies the correct behavior of 'wazuh-authd' under different messages
        in a Cluster scenario (for Master).
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -26,22 +24,15 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
@@ -113,7 +104,7 @@ def set_up_groups(get_current_test_case, request):
 
 # Tests
 def test_authd_local_messages(configure_environment, configure_sockets_environment, connect_to_sockets_function,
-                              set_up_groups, insert_pre_existent_agents, restart_authd_function,
+                              set_up_groups, insert_pre_existent_agents, restart_wazuh_daemon_function,
                               wait_for_authd_startup_function, get_current_test_case, tear_down):
     '''
     description:
@@ -121,6 +112,8 @@ def test_authd_local_messages(configure_environment, configure_sockets_environme
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - configure_environment:

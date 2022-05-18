@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,12 +9,10 @@ type: integration
 
 brief: This module verifies the correct behavior of 'authd' under different name/IP combinations.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -26,22 +24,15 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
@@ -74,6 +65,7 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 hostname = socket.gethostname()
+daemons_handler_configuration = {'all_daemons': True}
 
 # Fixtures
 
@@ -88,11 +80,10 @@ def get_configuration(request):
 
 # Test
 
-
 @pytest.mark.parametrize('test_case', [case for case in test_authd_valid_name_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
+                             clean_client_keys_file_module, restart_wazuh_daemon, wait_for_authd_startup_module,
                              connect_to_sockets_module, test_case, tear_down):
     '''
     description:
@@ -100,6 +91,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
@@ -162,12 +155,7 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
 
-        if stage.get('expected_fail') == 'yes':
-            with pytest.raises(Exception):
-                result, err_msg = validate_authd_response(response, stage['output'])
-                assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
-        else:
-            result, err_msg = validate_authd_response(response, stage['output'])
-            assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
+        result, err_msg = validate_authd_response(response, stage['output'])
+        assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"

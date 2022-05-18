@@ -9,6 +9,9 @@ copyright:
 import re
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
+from wazuh_testing.tools.services import control_service, check_daemon_status
+from wazuh_testing.tools.configuration import set_section_wazuh_conf, write_wazuh_conf
+from wazuh_testing.tools.file import truncate_file
 
 
 DAEMON_NAME = 'wazuh-authd'
@@ -112,3 +115,8 @@ def validate_authd_response(response, expected):
         if re.match(expected[key], response_dict[key]) is None:
             return 'error', f"Invalid {key}: '{response_dict[key]}' received, '{expected[key]}' expected"
     return 'success', ''
+
+def callback_agentd_startup(line):
+        if 'Accepting connections on port 1515' in line:
+            return line
+        return None

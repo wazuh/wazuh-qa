@@ -253,7 +253,7 @@
         value: ''
 # conf 18
 - tags:
-  - invalid_logging
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   sections:
@@ -265,11 +265,11 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - logging:
+    - day:
         value: 'aaaaa'
 # conf 19
 - tags:
-  - invalid_logging
+  - invalid_schedule
   apply_to_modules:
   - 'MODULE_NAME'
   sections:
@@ -281,7 +281,7 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - logging:
+    - day:
         value: ''
 # conf 20
 - tags:
@@ -297,7 +297,7 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - day:
+    - wday:
         value: 'aaaaa'
 # conf 21
 - tags:
@@ -313,7 +313,7 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - day:
+    - wday:
         value: ''
 # conf 22
 - tags:
@@ -329,7 +329,7 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - wday:
+    - time:
         value: 'aaaaa'
 # conf 23
 - tags:
@@ -345,41 +345,9 @@
         value: 'SUBSCRIPTION_NAME'
     - credentials_file:
         value: 'CREDENTIALS_FILE'
-    - wday:
+    - time:
         value: ''
 # conf 24
-- tags:
-  - invalid_schedule
-  apply_to_modules:
-  - 'MODULE_NAME'
-  sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - time:
-        value: 'aaaaa'
-# conf 25
-- tags:
-  - invalid_schedule
-  apply_to_modules:
-  - 'MODULE_NAME'
-  sections:
-  - section: gcp-pubsub
-    elements:
-    - project_id:
-        value: 'PROJECT_ID'
-    - subscription_name:
-        value: 'SUBSCRIPTION_NAME'
-    - credentials_file:
-        value: 'CREDENTIALS_FILE'
-    - time:
-        value: ''
-# conf 26
 - tags:
   - invalid_day_wday
   apply_to_modules:
@@ -397,7 +365,7 @@
         value: 1
     - wday:
         value: 'monday'
-# conf 27
+# conf 25
 - tags:
   - invalid_gcp_wmodule
   apply_to_modules:

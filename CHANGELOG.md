@@ -9,17 +9,39 @@ Release report: TBD
 
 ### Added
 
+- Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
+- Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
+- Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
+- Test `get-groups-integrity` WDB command ([#2607](https://github.com/wazuh/wazuh-qa/pull/2607))
+- Test `set-agent-groups` WDB command ([#2602](https://github.com/wazuh/wazuh-qa/pull/2602))
+- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by CLI ([#2652](https://github.com/wazuh/wazuh-qa/pull/2652))
+- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by API ([#2657](https://github.com/wazuh/wazuh-qa/pull/2657))
+- Add system test to check that agent is never_connected and registers with a group using agent-auth ([#2654](https://github.com/wazuh/wazuh-qa/pull/2654))
+- Add system test to check that agent is never_connected and registers with a group using CLI [#2658](https://github.com/wazuh/wazuh-qa/pull/2658)
+- Add system test to check guess mechanism [#2664](https://github.com/wazuh/wazuh-qa/pull/2664)
+- Add system test to check that agent in never_connected connects with a default group [#2665](https://github.com/wazuh/wazuh-qa/pull/2665)
+- Add system test to check that agent is forced to change group [#2668](https://github.com/wazuh/wazuh-qa/pull/2668)
+- Add system test to check: adds a new node to a synchronized environment [#2670](https://github.com/wazuh/wazuh-qa/pull/2670)
+- Add system test to check that agent registered in master node with a specific group is synced to worker node [#2686]((https://github.com/wazuh/wazuh-qa/pull/2686))
+- Add system test cluster sync group with 40 agents ([#2761](https://github.com/wazuh/wazuh-qa/pull/2761))
+- Add system test - 40 agents cluster syncs group ([#2764](https://github.com/wazuh/wazuh-qa/pull/2764))
+- Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
+- Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
 - Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
 - Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
 - CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
 - Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
 - Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
+- Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - Test API logs rotation ([#2646](https://github.com/wazuh/wazuh-qa/pull/2646))
+- Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
+
 
 ### Changed
 
+- Refactor VDT integration tests: feeds and scan types ([#2650](https://github.com/wazuh/wazuh-qa/pull/2650))
 - Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
 - Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
 - Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501))
@@ -35,6 +57,7 @@ Release report: TBD
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
 - Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
 - Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
+- Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546))
 
 ### Deleted
 - Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
@@ -151,9 +174,9 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 
 ## [v4.2.0]
 ### Added
-- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153) 
+- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153)
 - Add the capability to know which CVE’s affect an agent [#7479](https://github.com/wazuh/wazuh/issues/7479)
-- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092) 
+- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092)
 - Add integration tests for syslog [#1086](https://github.com/wazuh/wazuh-qa/pull/1086)
 - Add remoted integration tests: basic configuration tests [#1073](https://github.com/wazuh/wazuh-qa/pull/1073)
 - Add the tier 0 integration tests for wazuh-remoted [#1024](https://github.com/wazuh/wazuh-qa/issues/1024)

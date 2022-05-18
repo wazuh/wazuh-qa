@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: These tests will check if the 'remote enrollment' option of the 'wazuh-au
        a Wazuh agent to a Wazuh manager and provide the key to the agent.
        It is used along with the 'agent-auth' application.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -34,18 +32,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/auth.html#remote-enrollment
@@ -70,8 +60,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 parameters = [
-    {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'yes'},
-    {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'yes'},
+    {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'yes', 'NODE_TYPE': 'master'},
+    {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'yes', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'worker'},
@@ -122,7 +112,7 @@ def not_raises(exception):
         raise pytest.fail("DID RAISE {0}".format(exception))
 
 
-def test_remote_enrollment(get_configuration, configure_environment, restart_authd, tear_down):
+def test_remote_enrollment(get_configuration, configure_environment, restart_wazuh_daemon_function, tear_down):
     '''
     description:
         Checks if the 'wazuh-authd' daemon remote enrollment is enabled/disabled according
@@ -132,6 +122,8 @@ def test_remote_enrollment(get_configuration, configure_environment, restart_aut
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

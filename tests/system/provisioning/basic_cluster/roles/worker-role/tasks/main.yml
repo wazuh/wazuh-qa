@@ -60,8 +60,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: wazuh
-    group: wazuh
+    owner: root
+    group: root
     mode: '0644'
 
 - name: Set cluster key

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -13,12 +13,10 @@ brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh pers
        Wazuh-db confirms that is able to save, update and erase the necessary information into the corresponding
        databases, using the proper commands and response strings.
 
-tier: 0
-
-modules:
+components:
     - wazuh_db
 
-components:
+targets:
     - manager
 
 daemons:
@@ -33,18 +31,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-db.html
@@ -61,30 +51,26 @@ import json
 import random
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.monitoring import make_callback, WAZUH_DB_PREFIX
-from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools.services import control_service, delete_dbs
 from wazuh_testing.tools.wazuh_manager import remove_all_agents
+from wazuh_testing.tools.file import get_list_of_content_yml
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
-# Configurations
 
+# Configurations
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 agent_message_files = os.path.join(test_data_path, 'agent')
-global_message_files = os.path.join(test_data_path, 'global')
+global_message_file = os.path.join(test_data_path, 'global', 'global_messages.yaml')
 
+global_module_tests = get_list_of_content_yml(global_message_file)
 agent_module_tests = []
-global_module_tests = []
-
-for file in ['agent_messages.yaml', 'fim_messages.yaml']:  # os.listdir(agent_message_files):
+for file in os.listdir(agent_message_files):
     with open(os.path.join(agent_message_files, file)) as f:
         agent_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
-for file in os.listdir(global_message_files):
-    with open(os.path.join(global_message_files, file)) as f:
-        global_module_tests.append((yaml.safe_load(f), file.split('_')[0]))
 
 # Variables
 log_monitor_paths = []
@@ -338,6 +324,8 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - restart_wazuh:
             type: fixture
@@ -408,6 +396,8 @@ def test_wazuh_db_messages_global(connect_to_sockets_module, restart_wazuh, test
 
     wazuh_min_version: 4.2.0
 
+    tier: 0
+
     parameters:
         - restart_wazuh:
             type: fixture
@@ -460,6 +450,8 @@ def test_wazuh_db_chunks(restart_wazuh, configure_sockets_environment, clean_reg
                  To do this, it sends a command to the wazuh-db socket and checks the response from the socket.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_wazuh:
@@ -518,6 +510,8 @@ def test_wazuh_db_range_checksum(restart_wazuh, configure_sockets_environment, c
                  contains agent checksum information and calculates the checksum range.
 
     wazuh_min_version: 4.2.0
+
+    tier: 0
 
     parameters:
         - restart_wazuh:

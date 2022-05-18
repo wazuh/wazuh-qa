@@ -4,6 +4,7 @@
 import logging
 import re
 import string
+import numbers
 from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
@@ -11,6 +12,7 @@ from random import randint, SystemRandom, choice
 import string
 import json
 import socket
+import ipaddress
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -128,11 +130,13 @@ def get_random_string(string_length, digits=True):
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
+
 def get_version():
     f = open('../../version.json')
     data = json.load(f)
     version = data['version']
     return version
+
 
 def lower_case_key_dictionary_array(array_dict):
     """Given an array of dictionaries, create a copy of it with the keys of each dictionary in lower case.
@@ -149,7 +153,29 @@ def lower_case_key_dictionary_array(array_dict):
 def get_host_name():
     """
     Gets the system host name.
+
     Returns:
         str: The host name.
     """
     return socket.gethostname()
+
+
+def validate_interval_format(interval):
+    """Validate that the interval passed has the format in which the last digit is a letter from those passed and
+       the other characters are between 0-9"""
+    if interval=='':
+        return False
+    if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
+        return False
+    return True
+
+def format_ipv6_long(ipv6_address):
+    """Return the long form of the address representation in uppercase.
+
+    Args:
+        ipv6_address (str): IPV6 address
+
+    Returns:
+        str: IPV6 long form
+    """
+    return (ipaddress.ip_address(ipv6_address).exploded).upper()

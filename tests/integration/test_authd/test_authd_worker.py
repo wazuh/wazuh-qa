@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,12 +9,10 @@ type: integration
 
 brief: This module verifies the correct behavior of authd under different messages in a Cluster scenario (for Worker)
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -25,22 +23,15 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
@@ -56,13 +47,12 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.file import read_yaml
 
-# Marks
 
+# Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 
 
 # Configurations
-
 class WorkerMID(ManInTheMiddle):
 
     def __init__(self, address, family='AF_UNIX', connection_protocol='TCP', func: callable = None):
@@ -100,6 +90,7 @@ params = [{'FERNET_KEY': FERNET_KEY}]
 metadata = [{'fernet_key': FERNET_KEY}]
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
+
 # Variables
 log_monitor_paths = [CLUSTER_LOGS_PATH]
 cluster_socket_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'cluster', 'c-internal.sock'))
@@ -114,7 +105,6 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 
 # Fixtures
-
 @pytest.fixture(scope='function')
 def set_up_groups(request, get_current_test_case):
     """
@@ -157,6 +147,8 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

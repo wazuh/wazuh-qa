@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -12,12 +12,10 @@ brief: These tests will check if the 'wazuh-authd' daemon correctly handles the 
        The 'wazuh-authd' daemon can automatically add a Wazuh agent to a Wazuh manager and provide
        the key to the agent. It is used along with the 'agent-auth' application.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -34,18 +32,10 @@ os_version:
     - Amazon Linux 1
     - CentOS 8
     - CentOS 7
-    - CentOS 6
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Xenial
-    - Ubuntu Trusty
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 8
-    - Red Hat 7
-    - Red Hat 6
 
 references:
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-authd.html
@@ -59,9 +49,7 @@ import subprocess
 import time
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
 
 # Marks
@@ -105,7 +93,7 @@ def get_configuration(request):
 
 
 def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
+                             clean_client_keys_file_module, restart_wazuh_daemon, wait_for_authd_startup_module,
                              connect_to_sockets_module):
     '''
     description:
@@ -115,6 +103,8 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
@@ -169,6 +159,6 @@ def test_ossec_auth_messages(get_configuration, set_up_groups, configure_environ
         while response == '':
             response = receiver_sockets[0].receive().decode()
             if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+                assert response != '', 'The manager did not respond to the message sent.'
         assert response[:len(expected)] == expected, \
             'Failed test case {}: Response was: {} instead of: {}'.format(set_up_groups['name'], response, expected)

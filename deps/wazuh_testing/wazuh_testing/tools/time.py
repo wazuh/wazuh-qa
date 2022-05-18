@@ -241,7 +241,7 @@ def time_to_seconds(time_):
     Args:
         time_ (str): String (1s, 1m, 1h, 1d, 1w).
 
-    Returns
+    Returns:
         time_value (int): Number of seconds.
     """
     time_unit = time_[len(time_) - 1:]
@@ -254,7 +254,11 @@ def time_to_seconds(time_):
 
 
 def get_current_timestamp():
-    """Get the current timestamp. For example: 1627028708.303002"""
+    """Get the current timestamp. For example: 1627028708.303002
+
+    Returns:
+        int: current timestamp.
+    """
     return datetime.now().timestamp()
 
 
@@ -271,3 +275,30 @@ def interval_to_time_modifier(interval):
     time_value = interval[:-1]
     time_unit = interval[-1]
     return f"{time_value} {interval_units_dict[time_unit]}"
+
+
+def parse_date_time_format(date_time):
+    """Parse the specified date_time to return a common format.
+
+    Args:
+        date_time (str): Date time to parse.
+
+    Returns:
+        str: Date time in format '%Y-%m-%d %H:%M:%S'
+
+    Raises:
+        ValueError: If could not parse the specified date_time
+    """
+    regex_list = [
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})Z', 'append': ':00'},  # CPE format
+        {'regex': r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})', 'append': ''},  # RHEL Canonical, ALAS, MSU, Debian, NVD
+        {'regex': r'(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})', 'append': ''}  # Arch
+    ]
+
+    for item in regex_list:
+        match = re.compile(item['regex']).match(date_time)
+
+        if match:
+            return f"{match.group(1)} {match.group(2)}{item['append']}"
+
+    ValueError(f"Could not parse the {date_time} datetime.")

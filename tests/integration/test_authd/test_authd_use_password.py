@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,12 +9,10 @@ type: integration
 
 brief: This module verifies the correct behavior of the setting 'use_password'.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -26,22 +24,15 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
@@ -54,8 +45,6 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.monitoring import SocketController
-from wazuh_testing.tools.services import control_service
 
 # Marks
 
@@ -166,7 +155,7 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_password_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_password_tests])
 def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_function, reset_password, restart_authd_function,
+                             clean_client_keys_file_function, reset_password, restart_wazuh_daemon_function,
                              wait_for_authd_startup_function, connect_to_sockets_function,
                              test_case, tear_down):
     '''
@@ -175,6 +164,8 @@ def test_authd_force_options(get_configuration, configure_environment, configure
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:

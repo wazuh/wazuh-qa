@@ -12,6 +12,7 @@ if sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    AGENT_CONF = os.path.join(WAZUH_PATH, 'shared', 'agent.conf')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys')
     PREFIX = os.path.join('c:', os.sep)
@@ -27,6 +28,9 @@ if sys.platform == 'win32':
     ANALYSIS_STATISTICS_FILE = None
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
+    ANALYSISD_BINARY_PATH = None
+    HOSTS_FILE_PATH = os.path.join("C:", os.sep, "Windows", "System32", "drivers", "etc", "hosts")
+    GLOBAL_DB_PATH = None
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
@@ -50,6 +54,7 @@ else:
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
+    AGENT_CONF = os.path.join(WAZUH_PATH, 'etc', 'shared', 'agent.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
@@ -64,7 +69,13 @@ else:
     REMOTE_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-remoted.state')
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
+    PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
+    ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
+    if sys.platform == 'sunos5':
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
+    else:
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
     try:

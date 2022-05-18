@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -16,6 +16,7 @@ def pytest_addoption(parser):
         type=str,
         help="Path where information of all cluster nodes can be found (logs, stats CSVs, etc)."
     )
+
 
 # Fixtures
 @pytest.fixture()
@@ -67,6 +68,7 @@ def pytest_html_results_table_row(report, cells):
     except AttributeError:
         pass
 
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     def atoi(text):
@@ -101,16 +103,19 @@ def pytest_runtest_makereport(item, call):
                     log_line.decode() for log_line in logs) + '</p>'))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
-        # Attach wrong order logs per each node in the 'test_check_logs_order_workers' test.
-        elif report.head_line == 'test_check_logs_order_workers' and item.module.incorrect_order:
-            extra.append(pytest_html.extras.html("<h2>Wrong logs order</h2>"))
+        # Attach wrong order logs per each node in the 'test_check_logs_order' tests (both master's and workers').
+        elif report.head_line == 'test_check_logs_order_workers' or report.head_line == 'test_check_logs_order_master' \
+                and item.module.incorrect_order:
+            extra.append(pytest_html.extras.html("<h2>Wrong worker logs order</h2>" if 'workers' in report.head_line
+                                                 else "<h2>Wrong master logs order</h2>"))
             # Keys are human/natural sorted.
-            for item in sorted(item.module.incorrect_order,
-                               key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d['node'])]):
-                extra.append(pytest_html.extras.html('<p><b>{node}:</b>\n'
-                                                     '<b> - Log type:</b> {log_type}\n'
-                                                     '<b> - Expected logs:</b> {expected_logs}\n'
-                                                     '<b> - Found log:</b> {found_log}</p>'.format(**item)))
+            for key in sorted(item.module.incorrect_order.keys(),
+                              key=lambda d: [atoi(c) for c in re.split(r'(\d+)', d)]):
+                extra.append(pytest_html.extras.html(f"<p><b>{key}:</b>\n"))
+                for failed_task in item.module.incorrect_order[key]:
+                    extra.append(pytest_html.extras.html('<b> - Log type:</b> {log_type}\n'
+                                                         '<b>   Expected logs:</b> {expected_logs}\n'
+                                                         '<b>   Found log:</b> {found_log}'.format(**failed_task)))
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         # Attach repeated Integrity synchronizations per each node in the 'test_cluster_sync' test.
@@ -123,6 +128,18 @@ def pytest_runtest_makereport(item, call):
                 output.append('<b>{worker} - Log found {repeat_counter} times in a row:</b>\n'
                               '{log}'.format(**values, worker=worker))
             extra.append(pytest_html.extras.html('<p>' + '\n\n'.join(output) + '</p>'))
+            extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
+
+        # Attach nodes were some tasks were repeted or not completed in the requested order from the
+        # 'test_cluster_task_order' test.
+        elif report.head_line == 'test_cluster_task_order' and item.module.incorrect_order:
+            for key in item.module.incorrect_order:
+                extra.append(pytest_html.extras.html("<h2>Wrong task order.</h2>"))
+                extra.append(pytest_html.extras.html(f"<p><b>Concatenated tasks '{key}' and "
+                                                     f"'{item.module.incorrect_order[key]['child_task']}'"
+                                                     f" failed due to {item.module.incorrect_order[key]['status']}"
+                                                     f" logs:\n\t{item.module.incorrect_order[key]['log']}</b>"))
+
             extra.append(pytest_html.extras.html("</p><h2>Test output</h2>"))
 
         report.extra = extra
