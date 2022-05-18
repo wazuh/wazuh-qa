@@ -75,6 +75,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope='function')
 def send_request(login_attempts=5):
     """Send a login request to the API."""
 
@@ -83,15 +84,15 @@ def send_request(login_attempts=5):
     for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
                                 timeout=API_GLOBAL_TIMEOUT)
-        result = response.status_code if response.status_code == 200 else None
+        result = response.status_code
 
-    return result
+    yield result
 
 
 # Tests
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_api_logs_formats(get_configuration, configure_api_environment, clean_log_files, daemons_handler,
-                          wait_for_start):
+                          wait_for_start, send_request):
     '''
     description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
@@ -130,9 +131,12 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
 
     current_formats = get_configuration['configuration']['logs']['format'].split(',')
     current_level = get_configuration['configuration']['logs']['level']
-    response_status_code = send_request()
+    response_status_code = send_request
+
     if current_level == 'error':
-        assert response_status_code is None, f"The status code was {response_status_code}. \nExpected: 500."
+        assert response_status_code == 500, f"The status code was {response_status_code}. \nExpected: 500."
+    else:
+        assert response_status_code == 200, f"The status code was {response_status_code}. \nExpected: 200."
 
     expected_error =  'expected_error' in get_configuration
     if 'json' in current_formats:
