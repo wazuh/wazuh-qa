@@ -21,7 +21,7 @@ API_USER = 'wazuh'
 API_PASS = 'wazuh'
 API_LOGIN_ENDPOINT = '/security/user/authenticate'
 API_GLOBAL_TIMEOUT = 20
-ERROR_LOG_PAYLOAD = 'Timeout executing API request'
+TIMEOUT_ERROR_LOG = 'Timeout executing API request'
 
 
 # Callbacks
@@ -57,7 +57,7 @@ def callback_json_log_error(line):
     """Match a given line with a regular expression."""
 
     msg = r'{"timestamp": "(\d+/\d+/\d+ \d+:\d+:\d+)", "levelname": "ERROR", "data": {"type": "informative", ' \
-          fr'"payload": "{ERROR_LOG_PAYLOAD}"}}'
+          fr'"payload": "{TIMEOUT_ERROR_LOG}"}}'
     match = re.match(msg, line)
     return match
 
@@ -65,7 +65,7 @@ def callback_json_log_error(line):
 def callback_plain_error(line):
     """Match a given line with a regular expression."""
 
-    msg = fr"(\d+/\d+/\d+ \d+:\d+:\d+) ERROR: {ERROR_LOG_PAYLOAD}"
+    msg = fr"(\d+/\d+/\d+ \d+:\d+:\d+) ERROR: {TIMEOUT_ERROR_LOG}"
     match = re.match(msg, line)
     return match
 
