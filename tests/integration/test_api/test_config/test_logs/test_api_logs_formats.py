@@ -44,9 +44,9 @@ import os
 
 import pytest
 import requests
-from wazuh_testing.api import  API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
-                               API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
-                               callback_plain_log_login_info, get_login_headers
+from wazuh_testing.api import  API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
+                               API_USER
+from wazuh_testing.modules import api
 from wazuh_testing.tools import (API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH,
                                  PREFIX)
 from wazuh_testing.tools.configuration import get_api_conf
@@ -81,7 +81,7 @@ def send_request(login_attempts=5):
 
     for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
-                                timeout=API_GLOBAL_TIMEOUT)
+                                timeout=api.T_20)
         result = response.status_code if response.status_code == 200 else None
 
     return result
@@ -136,12 +136,12 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
     expected_error =  'expected_error' in get_configuration
     if 'json' in current_formats:
         callback = callback_json_log_error if expected_error else callback_json_log_login_info
-        json_result = json_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
+        json_result = json_log_monitor.start(timeout=api.T_20, callback=callback,
                                              error_message=f'JSON API {current_level} log was not been generated.'
                                              ).result()
     if 'plain' in current_formats:
         callback = callback_plain_error if expected_error else callback_plain_log_login_info
-        plain_result = wazuh_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
+        plain_result = wazuh_log_monitor.start(timeout=api.T_20, callback=callback,
                                                error_message=f'Plain API {current_level} log was not the expected.'
                                                ).result()
     if len(current_formats) == 2:

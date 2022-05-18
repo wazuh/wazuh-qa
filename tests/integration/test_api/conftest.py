@@ -6,7 +6,8 @@ import os
 import shutil
 
 import pytest
-from wazuh_testing.api import callback_detect_api_start, get_api_details_dict, API_GLOBAL_TIMEOUT
+from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
+from wazuh_testing.modules.api import T_20
 from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF, \
     API_LOG_FOLDER
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
@@ -114,12 +115,12 @@ def wait_for_start(get_configuration, request):
         if configuration:
             try:
                 log_format = configuration['logs']['format']
-                if log_format == 'json': 
+                if log_format == 'json':
                     log_file = API_JSON_LOG_FILE_PATH
             except KeyError:
                 pass
     file_monitor = FileMonitor(log_file)
-    file_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback_detect_api_start,
+    file_monitor.start(timeout=T_20, callback=callback_detect_api_start,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
 
 
@@ -146,5 +147,5 @@ def restart_api_module(request):
 def wait_for_start_module(request):
     # Wait for API to start
     file_monitor = FileMonitor(API_LOG_FILE_PATH)
-    file_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback_detect_api_start,
+    file_monitor.start(timeout=T_20, callback=callback_detect_api_start,
                        error_message='Did not receive expected "INFO: Listening on ..." event')
