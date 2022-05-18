@@ -113,6 +113,9 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
+        - send_request:
+            type: fixture:
+            brief: Send a login request to the API.
     assertions:
         - Verify that the expected log exists in the log file.
         - Verify that the values of the log are the same in both log formats.
