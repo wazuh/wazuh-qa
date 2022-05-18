@@ -108,6 +108,7 @@ def restart_api(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
     # Wait for API to start
+    log_file = API_LOG_FILE_PATH
     if get_configuration:
         configuration = get_configuration['configuration']
         if configuration:
@@ -115,8 +116,6 @@ def wait_for_start(get_configuration, request):
                 log_format = configuration['logs']['format']
                 if log_format == 'json': 
                     log_file = API_JSON_LOG_FILE_PATH
-                else:
-                    log_file = API_LOG_FILE_PATH
             except KeyError:
                 pass
     file_monitor = FileMonitor(log_file)
