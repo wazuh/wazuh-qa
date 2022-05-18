@@ -82,7 +82,9 @@ def send_request(login_attempts=5):
     for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
                                 timeout=API_GLOBAL_TIMEOUT)
-        assert response.status_code == 200, f"The status code was {response.status_code}. \nExpected: 200"
+        result = response.status_code if response.status_code == 200 else None
+
+    return result
 
 
 # Tests
@@ -127,7 +129,9 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
 
     current_formats = get_configuration['configuration']['logs']['format'].split(',')
     current_level = get_configuration['configuration']['logs']['level']
-    send_request()
+    response_status_code = send_request()
+    if current_level == 'error':
+        assert response_status_code is None, f"The status code was {response_status_code}. \nExpected: 500."
 
     expected_error =  'expected_error' in get_configuration
     if 'json' in current_formats:
