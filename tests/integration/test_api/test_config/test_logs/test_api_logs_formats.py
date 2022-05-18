@@ -44,11 +44,11 @@ import os
 
 import pytest
 import requests
-from wazuh_testing.api import  API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
-                               API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
-                               callback_plain_log_login_info, get_login_headers
-from wazuh_testing.tools import (API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH,
-                                 PREFIX)
+from wazuh_testing.api import API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
+                              API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
+                              callback_plain_log_login_info, get_login_headers
+from wazuh_testing.tools import API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH, \
+                                PREFIX
 from wazuh_testing.tools.configuration import get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -63,8 +63,9 @@ test_directories = [os.path.join(PREFIX, 'test_logs')]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'configuration_api_logs_format.yaml')
 configurations = get_api_conf(configurations_path)
-tcase_ids = [f"level_{configuration['configuration']['logs']['level']}" +  \
-             f"_format_{configuration['configuration']['logs']['format']}" for  configuration in configurations]
+tcase_ids = [f"level_{configuration['configuration']['logs']['level']}"
+             f"_format_{configuration['configuration']['logs']['format']}" for configuration in configurations]
+
 
 # Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=tcase_ids)
@@ -150,6 +151,7 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
                                                                         'Subgroups of the JSON match:' \
                                                                         f" {len(json_result.groups())}\n" \
                                                                         'Subgroups of the Plain match:' \
+                                                                        f" {len(plain_result.groups())}\n"
 
         for i in range(len(json_result.groups())):
             assert json_result.group(i + 1) == plain_result.group(i + 1), 'The values of the logs doesn\'t match.' \
