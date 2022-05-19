@@ -17,8 +17,9 @@ def read_ansible_instance(host_info):
         instance (AnsibleInstance): Contains the AnsibleInstance for a given host.
     """
     extra_vars = None if 'host_vars' not in host_info else host_info['host_vars']
-    private_key_path = None if 'local_private_key_file_path' not in host_info \
-        else host_info['local_private_key_file_path']
+    ansible_private_key_path = None if 'ansible_ssh_private_key_file' not in host_info \
+        else host_info['ansible_ssh_private_key_file']
+    ansible_password = None if 'ansible_password' not in host_info else host_info['ansible_password']
 
     if host_info['system'] == 'windows':
         instance = WindowsAnsibleInstance(
@@ -26,7 +27,7 @@ def read_ansible_instance(host_info):
             ansible_connection=host_info['ansible_connection'],
             ansible_port=host_info['ansible_port'],
             ansible_user=host_info['ansible_user'],
-            ansible_password=host_info['ansible_password'],
+            ansible_password=ansible_password,
             ansible_python_interpreter=host_info['ansible_python_interpreter'],
             host_vars=extra_vars
         )
@@ -36,9 +37,9 @@ def read_ansible_instance(host_info):
             ansible_connection=host_info['ansible_connection'],
             ansible_port=host_info['ansible_port'],
             ansible_user=host_info['ansible_user'],
-            ansible_password=host_info['ansible_password'],
+            ansible_password=ansible_password,
             host_vars=extra_vars,
-            ansible_ssh_private_key_file=private_key_path,
+            ansible_ssh_private_key_file=ansible_private_key_path,
             ansible_python_interpreter=host_info['ansible_python_interpreter']
         )
 

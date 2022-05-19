@@ -183,19 +183,18 @@ class HostManager:
         Returns:
             API token (str): Usable API token.
         """
+        login_endpoint = '/security/user/authenticate'
+        login_method = 'POST'
+        login_body = ''
         if auth_context is not None:
             login_endpoint = '/security/user/authenticate/run_as'
-            login_method = 'POST'
             login_body = 'body="{}"'.format(json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
-        else:
-            login_endpoint = '/security/user/authenticate'
-            login_method = 'GET'
-            login_body = ''
 
         try:
-            token_response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}{login_endpoint} '
-                                                                f'user={user} password={password} method={login_method} '
-                                                                f'{login_body} validate_certs=no force_basic_auth=yes',
+            token_response = self.get_host(host).ansible('uri', f"url=https://localhost:{port}{login_endpoint} "
+                                                                f"user={user} password={password} "
+                                                                f"method={login_method} {login_body} validate_certs=no "
+                                                                f"force_basic_auth=yes",
                                                          check=check)
             return token_response['json']['data']['token']
         except KeyError:
