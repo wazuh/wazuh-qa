@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## Rev 450001
+
+Wazuh version: 4.5.0 \
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+### Changed
+
+
 ## Rev 440001
 
 Wazuh version: 4.4.0 \
@@ -9,6 +20,22 @@ Release report: TBD
 
 ### Added
 - Add VDT tests support for ALAS 2022 provider ([#2649](https://github.com/wazuh/wazuh-qa/pull/2903))
+- Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
+- Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
+- Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
+- Test `get-groups-integrity` WDB command ([#2607](https://github.com/wazuh/wazuh-qa/pull/2607))
+- Test `set-agent-groups` WDB command ([#2602](https://github.com/wazuh/wazuh-qa/pull/2602))
+- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by CLI ([#2652](https://github.com/wazuh/wazuh-qa/pull/2652))
+- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by API ([#2657](https://github.com/wazuh/wazuh-qa/pull/2657))
+- Add system test to check that agent is never_connected and registers with a group using agent-auth ([#2654](https://github.com/wazuh/wazuh-qa/pull/2654))
+- Add system test to check that agent is never_connected and registers with a group using CLI [#2658](https://github.com/wazuh/wazuh-qa/pull/2658)
+- Add system test to check guess mechanism [#2664](https://github.com/wazuh/wazuh-qa/pull/2664)
+- Add system test to check that agent in never_connected connects with a default group [#2665](https://github.com/wazuh/wazuh-qa/pull/2665)
+- Add system test to check that agent is forced to change group [#2668](https://github.com/wazuh/wazuh-qa/pull/2668)
+- Add system test to check: adds a new node to a synchronized environment [#2670](https://github.com/wazuh/wazuh-qa/pull/2670)
+- Add system test to check that agent registered in master node with a specific group is synced to worker node [#2686]((https://github.com/wazuh/wazuh-qa/pull/2686))
+- Add system test cluster sync group with 40 agents ([#2761](https://github.com/wazuh/wazuh-qa/pull/2761))
+- Add system test - 40 agents cluster syncs group ([#2764](https://github.com/wazuh/wazuh-qa/pull/2764))
 - Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
@@ -20,7 +47,7 @@ Release report: TBD
 - Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
-
+- Add test_feeds cases for Amazon Linux 2022. ([#2868](https://github.com/wazuh/wazuh-qa/pull/2868))
 ### Changed
 
 - Refactor VDT integration tests: feeds and scan types ([#2650](https://github.com/wazuh/wazuh-qa/pull/2650))

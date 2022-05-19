@@ -42,7 +42,6 @@ scripts_list = [
     'qa-ctl=wazuh_testing.scripts.qa_ctl:main',
     'check-files=wazuh_testing.scripts.check_files:main'
     'add-agents-client-keys=wazuh_testing.scripts.add_agents_client_keys:main',
-    'add-agents-to-default-group=wazuh_testing.scripts.add_agents_to_default_group:main',
     'unsync-agents=wazuh_testing.scripts.unsync_agents:main'
 ]
 
