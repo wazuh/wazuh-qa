@@ -47,6 +47,7 @@ Release report: TBD
 - Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
+- Add test_scan_results cases for Amazon Linux 2022. ([#2905](https://github.com/wazuh/wazuh-qa/pull/2905))
 
 ### Changed
 
