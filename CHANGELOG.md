@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add VD tests support for Ubuntu 2022 feeds ([#2867](https://github.com/wazuh/wazuh-qa/pull/2867))
 - Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
