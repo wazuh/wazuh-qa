@@ -48,6 +48,7 @@ Release report: TBD
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
 - Add test_scan_results cases for Amazon Linux 2022. ([#2905](https://github.com/wazuh/wazuh-qa/pull/2905))
+- Add test_feeds cases for Amazon Linux 2022. ([#2868](https://github.com/wazuh/wazuh-qa/pull/2868))
 
 ### Changed
 
