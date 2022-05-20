@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import sys
 import time
 import tempfile
 from datetime import datetime
@@ -79,6 +80,7 @@ def restart_logcollector_function():
 
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
+@pytest.mark.skipif(sys.platform == 'win32', reason='It will be blocked by https://github.com/wazuh/wazuh-qa/issues/2174.')
 def test_configuration_age_datetime(get_configuration, configure_environment, configure_local_internal_options_module,
                                     restart_monitord, restart_logcollector_function, file_monitoring,
                                     new_datetime, get_files_list, create_file_structure_function):
