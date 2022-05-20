@@ -19,7 +19,7 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
-- Add VDT tests support for ALAS 2022 provider ([#2649](https://github.com/wazuh/wazuh-qa/pull/2903))
+- Add VDT test_providers cases for Amazon Linux 2022. ([#2649](https://github.com/wazuh/wazuh-qa/pull/2903))
 - Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
 - Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
