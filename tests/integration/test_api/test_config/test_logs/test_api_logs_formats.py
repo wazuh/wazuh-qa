@@ -44,11 +44,11 @@ import os
 
 import pytest
 import requests
-from wazuh_testing.api import  API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
-                               API_USER
-from wazuh_testing.modules import api
-from wazuh_testing.tools import (API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH,
-                                 PREFIX)
+from wazuh_testing.api import API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
+                              API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
+                              callback_plain_log_login_info, get_login_headers
+from wazuh_testing.tools import API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH, \
+                                PREFIX
 from wazuh_testing.tools.configuration import get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -63,8 +63,9 @@ test_directories = [os.path.join(PREFIX, 'test_logs')]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'configuration_api_logs_format.yaml')
 configurations = get_api_conf(configurations_path)
-tcase_ids = [f"level_{configuration['configuration']['logs']['level']}" +  \
-             f"_format_{configuration['configuration']['logs']['format']}" for  configuration in configurations]
+tcase_ids = [f"level_{configuration['configuration']['logs']['level']}"
+             f"_format_{configuration['configuration']['logs']['format']}" for configuration in configurations]
+
 
 # Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=tcase_ids)
@@ -74,6 +75,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.fixture(scope='function')
 def send_request(login_attempts=5):
     """Send a login request to the API."""
 
@@ -81,16 +83,21 @@ def send_request(login_attempts=5):
 
     for _ in range(login_attempts):
         response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
+<<<<<<< HEAD
                                 timeout=api.T_20)
         result = response.status_code if response.status_code == 200 else None
+=======
+                                timeout=API_GLOBAL_TIMEOUT)
+        result = response.status_code
+>>>>>>> origin/2580-dev-support-api-json-log
 
-    return result
+    yield result
 
 
 # Tests
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_api_logs_formats(get_configuration, configure_api_environment, clean_log_files, daemons_handler,
-                          wait_for_start):
+                          wait_for_start, send_request):
     '''
     description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
@@ -111,6 +118,9 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         - wait_for_start:
             type: fixture
             brief: Wait until the API starts.
+        - send_request:
+            type: fixture:
+            brief: Send a login request to the API.
     assertions:
         - Verify that the expected log exists in the log file.
         - Verify that the values of the log are the same in both log formats.
@@ -129,12 +139,15 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
 
     current_formats = get_configuration['configuration']['logs']['format'].split(',')
     current_level = get_configuration['configuration']['logs']['level']
-    response_status_code = send_request()
-    if current_level == 'error':
-        assert response_status_code is None, f"The status code was {response_status_code}. \nExpected: 500."
+    response_status_code = send_request
 
-    expected_error =  'expected_error' in get_configuration
+    if current_level == 'error':
+        assert response_status_code == 500, f"The status code was {response_status_code}. \nExpected: 500."
+    else:
+        assert response_status_code == 200, f"The status code was {response_status_code}. \nExpected: 200."
+
     if 'json' in current_formats:
+<<<<<<< HEAD
         callback = callback_json_log_error if expected_error else callback_json_log_login_info
         json_result = json_log_monitor.start(timeout=api.T_20, callback=callback,
                                              error_message=f'JSON API {current_level} log was not been generated.'
@@ -142,14 +155,24 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
     if 'plain' in current_formats:
         callback = callback_plain_error if expected_error else callback_plain_log_login_info
         plain_result = wazuh_log_monitor.start(timeout=api.T_20, callback=callback,
+=======
+        callback = callback_json_log_error if current_level == 'error' else callback_json_log_login_info
+        json_result = json_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
+                                             error_message=f'JSON API {current_level} log was not been generated.'
+                                             ).result()
+    if 'plain' in current_formats:
+        callback = callback_plain_error if current_level == 'error' else callback_plain_log_login_info
+        plain_result = wazuh_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
+>>>>>>> origin/2580-dev-support-api-json-log
                                                error_message=f'Plain API {current_level} log was not the expected.'
                                                ).result()
-    if len(current_formats) == 2:
+    if 'plain' in current_formats and 'json' in current_formats:
         assert len(json_result.groups()) == len(plain_result.groups()), 'The length of the subgroups of the match is ' \
                                                                         'not equal.' \
                                                                         'Subgroups of the JSON match:' \
                                                                         f" {len(json_result.groups())}\n" \
                                                                         'Subgroups of the Plain match:' \
+                                                                        f" {len(plain_result.groups())}\n"
 
         for i in range(len(json_result.groups())):
             assert json_result.group(i + 1) == plain_result.group(i + 1), 'The values of the logs doesn\'t match.' \
