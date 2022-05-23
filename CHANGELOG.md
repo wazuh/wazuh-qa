@@ -19,7 +19,6 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
-- Add VDT test_providers cases for Amazon Linux 2022. ([#2649](https://github.com/wazuh/wazuh-qa/pull/2903))
 - Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
 - Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
@@ -47,8 +46,7 @@ Release report: TBD
 - Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
-- Add test_scan_results cases for Amazon Linux 2022. ([#2905](https://github.com/wazuh/wazuh-qa/pull/2905))
-- Add test_feeds cases for Amazon Linux 2022. ([#2868](https://github.com/wazuh/wazuh-qa/pull/2868))
+- Vulnerability Detector integration tests for Amazon Linux 2022 ([#2911](https://github.com/wazuh/wazuh-qa/pull/2911))
 
 ### Changed
 
