@@ -11,8 +11,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, set_section_wazuh_conf,\
                                               load_wazuh_configurations
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.monitoring import QueueMonitor
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.authd import DAEMON_NAME
 from wazuh_testing.api import get_api_details_dict
 from wazuh_testing.modules.api import event_monitor as evm
@@ -173,7 +172,7 @@ def restart_api_module():
 @pytest.fixture(scope='module')
 def wait_for_start_module():
     """Monitor the API log file to detect whether it has been started or not."""
-    evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH)
+    evm.check_api_start_log()
 
 
 @pytest.fixture(scope='function')

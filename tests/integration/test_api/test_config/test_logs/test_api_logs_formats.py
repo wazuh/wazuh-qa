@@ -116,8 +116,8 @@ def send_request(remaining_attempts=5):
 pytest.mark.tier(level=2)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_log_files, wait_for_start_function,
-                          restart_api_function, send_request):
+def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_log_files, restart_api_function,
+                          wait_for_start_function, send_request):
     '''
     description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
