@@ -14,6 +14,8 @@ import paramiko
 import pytest
 from opensearchpy import OpenSearch
 import yaml
+import datetime
+import time
 
 
 @pytest.fixture
@@ -35,6 +37,10 @@ def test_brute_force(configurations):
     indexer_user = configurations['wazuh-manager-indexer'][2]['username_indexer']
     indexer_password = configurations['wazuh-manager-indexer'][3]['password_ indexer']
 
+    current_time = datetime.datetime.utcnow()
+    timestamp = current_time.timestamp()
+    timestamp_formatted = time.strftime('%Y-%m-%dT%H:%M:%S.%3M+0000', time.localtime(timestamp))
+
     ssh = paramiko.SSHClient()
 
     for i in range(8):
@@ -45,10 +51,13 @@ def test_brute_force(configurations):
             print("Next connection")
 
     open_search_alerts = _get_opensearch_alert(indexer_ip, rule_id, indexer_user, indexer_password)
-    _asserts(open_search_alerts, agent_hostname)
+    _asserts(open_search_alerts, agent_hostname, timestamp_formatted)
 
 
 def _get_opensearch_alert(indexer_ip, rule_id, username, password):
+    """
+    Get alert generated in opensearch
+    """
     auth = (username, password)
     host = indexer_ip
     port = '9200'
@@ -75,11 +84,13 @@ def _get_opensearch_alert(indexer_ip, rule_id, username, password):
     return response
 
 
-def _asserts(response, agent_hostname):
+def _asserts(response, agent_hostname, timestamp_test):
     agent = response['hits']['hits'][0]['_source']['agent']['name']
     description = response['hits']['hits'][0]['_source']['rule']['description']
     rule_id = response['hits']['hits'][0]['_source']['rule']['id']
     mitre_technique = response['hits']['hits'][0]['_source']['rule']['mitre']['technique'][0]
+    timestamp = response['hits']['hits'][0]['_source']['timestamp']
+    assert timestamp >= timestamp_test , 'Alert not generated'
     assert description == 'sshd: brute force trying to get access to the system.', 'Invalid description'
     assert rule_id == '5712', 'Invalid rule id'
     assert mitre_technique == 'Brute Force', 'Invalid mitre technique'
