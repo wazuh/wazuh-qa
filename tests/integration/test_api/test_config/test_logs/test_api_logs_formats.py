@@ -41,6 +41,7 @@ tags:
     - logging
 '''
 import os
+import time
 
 import pytest
 import requests
@@ -79,12 +80,30 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope='function')
-def send_request():
-    """Send a login request to the API."""
+def send_request(remaining_attempts=3):
+    """Send a login request to the API.
+
+    Args:
+        remaining_attempts (int): number of request attemps
+    """
     login_url = f"{API_PROTOCOL}://{API_HOST}:{API_PORT}{API_LOGIN_ENDPOINT}"
-    response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
-                            timeout=api.T_5)
-    result = response.status_code
+    # Initialize variables to avoid the UnboundLocalError
+    result = None
+    response = None
+
+    # Make 3 attempts to wait for the API to start correctly
+    while remaining_attempts > 0:
+        try:
+            response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
+                                    timeout=api.T_5)
+        except requests.exceptions.ConnectionError:
+            # Capture the exception and wait
+            time.sleep(api.T_10)
+            # Decrease the number of remaining attempts
+            remaining_attempts -= 1
+        else:
+            result = response.status_code
+            break
 
     yield result
 
