@@ -1,0 +1,5 @@
+- name: Generate events
+  hosts: wazuh-manager
+  tasks:
+    - name: Ping google
+      shell: ping -c 1 www.google.com
