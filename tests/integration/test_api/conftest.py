@@ -102,7 +102,12 @@ def restart_api(get_configuration, request):
 
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
-    # Wait for API to start
+    """Monitor the API log file to detect whether it has been started or not.
+
+    Args:
+        get_configuration(fixture): Get configurations from the module.
+        request (fixture): Provide information on the executing test function.
+    """
     log_format = 'plain'
     try:
         log_format = get_configuration['configuration']['logs']['format']
@@ -134,5 +139,9 @@ def restart_api_module(request):
 
 @pytest.fixture(scope='module')
 def wait_for_start_module(request):
-    # Wait for API to start
+    """Monitor the API log file to detect whether it has been started or not.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
     evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH)

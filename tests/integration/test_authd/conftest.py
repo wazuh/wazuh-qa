@@ -172,7 +172,7 @@ def restart_api_module():
 
 @pytest.fixture(scope='module')
 def wait_for_start_module():
-    # Wait for API to start
+    """Monitor the API log file to detect whether it has been started or not."""
     evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH)
 
 

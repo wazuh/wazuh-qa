@@ -152,11 +152,13 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
     current_level = get_configuration['configuration']['logs']['level']
     response_status_code = send_request
 
+    # Check if the status code of the response is the expected depending on the configured level
     if current_level == 'error':
         assert response_status_code == 500, f"The status code was {response_status_code}. \nExpected: 500."
     else:
         assert response_status_code == 200, f"The status code was {response_status_code}. \nExpected: 200."
 
+    # Check whether the expected event exists in the log files according to the configured levels
     if 'json' in current_formats:
         if current_level == 'error':
             evm.check_api_timeout_error(file_to_monitor=API_JSON_LOG_FILE_PATH)
