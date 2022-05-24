@@ -112,7 +112,7 @@ def wait_for_start(get_configuration, request):
     log_format = 'plain'
     try:
         log_format = get_configuration['configuration']['logs']['format']
-    except KeyError:
+    except (KeyError, TypeError):
         pass
     file_to_monitor = API_JSON_LOG_FILE_PATH if log_format == 'json' else API_LOG_FILE_PATH
 
