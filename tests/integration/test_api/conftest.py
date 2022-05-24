@@ -6,8 +6,8 @@ import os
 import shutil
 
 import pytest
-from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
-from wazuh_testing.modules.api import T_20
+from wazuh_testing.api import get_api_details_dict
+from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF, \
     API_LOG_FOLDER
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
@@ -109,19 +109,14 @@ def restart_api(get_configuration, request):
 @pytest.fixture(scope='module')
 def wait_for_start(get_configuration, request):
     # Wait for API to start
-    log_file = API_LOG_FILE_PATH
-    if get_configuration:
-        configuration = get_configuration.get('configuration')
-        if configuration:
-            try:
-                log_format = configuration['logs']['format']
-                if log_format == 'json':
-                    log_file = API_JSON_LOG_FILE_PATH
-            except KeyError:
-                pass
-    file_monitor = FileMonitor(log_file)
-    file_monitor.start(timeout=T_20, callback=callback_detect_api_start,
-                       error_message='Did not receive expected "INFO: Listening on ..." event')
+    log_format = 'plain'
+    try:
+        log_format = get_configuration['configuration']['logs']['format']
+    except KeyError:
+        pass
+    file_to_monitor = API_JSON_LOG_FILE_PATH if log_format == 'json' else API_LOG_FILE_PATH
+
+    evm.check_api_start_log(file_to_monitor=file_to_monitor)
 
 
 @pytest.fixture(scope='module')
@@ -146,6 +141,4 @@ def restart_api_module(request):
 @pytest.fixture(scope='module')
 def wait_for_start_module(request):
     # Wait for API to start
-    file_monitor = FileMonitor(API_LOG_FILE_PATH)
-    file_monitor.start(timeout=T_20, callback=callback_detect_api_start,
-                       error_message='Did not receive expected "INFO: Listening on ..." event')
+    evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH)

@@ -44,19 +44,21 @@ import os
 
 import pytest
 import requests
-from wazuh_testing.api import API_GLOBAL_TIMEOUT, API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, \
-                              API_USER, callback_json_log_error, callback_json_log_login_info, callback_plain_error, \
-                              callback_plain_log_login_info, get_login_headers
-from wazuh_testing.tools import API_JSON_LOG_FILE_PATH, API_LOG_FILE_PATH, \
-                                PREFIX
+from wazuh_testing.api import API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, API_USER, \
+                              get_login_headers
+from wazuh_testing.modules import api
+from wazuh_testing.modules.api import event_monitor as evm
+from wazuh_testing.tools import API_JSON_LOG_FILE_PATH, PREFIX, API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, \
+                                EXEC_DAEMON, DB_DAEMON, REMOTE_DAEMON
 from wazuh_testing.tools.configuration import get_api_conf
-from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
 
 # Variables
-daemons_handler_configuration = {'all_daemons': True}
+daemons_handler_configuration = {
+    'daemons': [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_DAEMON, DB_DAEMON, REMOTE_DAEMON]
+}
 test_directories = [os.path.join(PREFIX, 'test_logs')]
 
 # Configurations
@@ -64,7 +66,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'configuration_api_logs_format.yaml')
 configurations = get_api_conf(configurations_path)
 tcase_ids = [f"level_{configuration['configuration']['logs']['level']}"
-             f"_format_{configuration['configuration']['logs']['format']}" for configuration in configurations]
+             f"_format_{configuration['configuration']['logs']['format'].replace(',','_')}"
+             for configuration in configurations]
 
 
 # Fixtures
@@ -76,20 +79,12 @@ def get_configuration(request):
 
 
 @pytest.fixture(scope='function')
-def send_request(login_attempts=5):
+def send_request():
     """Send a login request to the API."""
-
     login_url = f"{API_PROTOCOL}://{API_HOST}:{API_PORT}{API_LOGIN_ENDPOINT}"
-
-    for _ in range(login_attempts):
-        response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
-<<<<<<< HEAD
-                                timeout=api.T_20)
-        result = response.status_code if response.status_code == 200 else None
-=======
-                                timeout=API_GLOBAL_TIMEOUT)
-        result = response.status_code
->>>>>>> origin/2580-dev-support-api-json-log
+    response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
+                            timeout=api.T_5)
+    result = response.status_code
 
     yield result
 
@@ -134,9 +129,6 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         - logs
         - logging
     '''
-    wazuh_log_monitor = FileMonitor(API_LOG_FILE_PATH)
-    json_log_monitor = FileMonitor(API_JSON_LOG_FILE_PATH)
-
     current_formats = get_configuration['configuration']['logs']['format'].split(',')
     current_level = get_configuration['configuration']['logs']['level']
     response_status_code = send_request
@@ -147,34 +139,12 @@ def test_api_logs_formats(get_configuration, configure_api_environment, clean_lo
         assert response_status_code == 200, f"The status code was {response_status_code}. \nExpected: 200."
 
     if 'json' in current_formats:
-<<<<<<< HEAD
-        callback = callback_json_log_error if expected_error else callback_json_log_login_info
-        json_result = json_log_monitor.start(timeout=api.T_20, callback=callback,
-                                             error_message=f'JSON API {current_level} log was not been generated.'
-                                             ).result()
+        if current_level == 'error':
+            evm.check_api_timeout_error(file_to_monitor=API_JSON_LOG_FILE_PATH)
+        else:
+            evm.check_api_login_request(file_to_monitor=API_JSON_LOG_FILE_PATH)
     if 'plain' in current_formats:
-        callback = callback_plain_error if expected_error else callback_plain_log_login_info
-        plain_result = wazuh_log_monitor.start(timeout=api.T_20, callback=callback,
-=======
-        callback = callback_json_log_error if current_level == 'error' else callback_json_log_login_info
-        json_result = json_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
-                                             error_message=f'JSON API {current_level} log was not been generated.'
-                                             ).result()
-    if 'plain' in current_formats:
-        callback = callback_plain_error if current_level == 'error' else callback_plain_log_login_info
-        plain_result = wazuh_log_monitor.start(timeout=API_GLOBAL_TIMEOUT, callback=callback,
->>>>>>> origin/2580-dev-support-api-json-log
-                                               error_message=f'Plain API {current_level} log was not the expected.'
-                                               ).result()
-    if 'plain' in current_formats and 'json' in current_formats:
-        assert len(json_result.groups()) == len(plain_result.groups()), 'The length of the subgroups of the match is ' \
-                                                                        'not equal.' \
-                                                                        'Subgroups of the JSON match:' \
-                                                                        f" {len(json_result.groups())}\n" \
-                                                                        'Subgroups of the Plain match:' \
-                                                                        f" {len(plain_result.groups())}\n"
-
-        for i in range(len(json_result.groups())):
-            assert json_result.group(i + 1) == plain_result.group(i + 1), 'The values of the logs doesn\'t match.' \
-                                                                      f"JSON log values: {json_result.groups()}\n" \
-                                                                      f"Plain log values: {plain_result.groups()}\n"
+        if current_level == 'error':
+            evm.check_api_timeout_error()
+        else:
+            evm.check_api_login_request()

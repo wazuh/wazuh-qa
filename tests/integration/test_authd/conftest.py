@@ -14,7 +14,8 @@ from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, 
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.monitoring import QueueMonitor
 from wazuh_testing.authd import DAEMON_NAME
-from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
+from wazuh_testing.api import get_api_details_dict
+from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools.wazuh_manager import remove_agents
 
 
@@ -172,9 +173,7 @@ def restart_api_module():
 @pytest.fixture(scope='module')
 def wait_for_start_module():
     # Wait for API to start
-    file_monitor = FileMonitor(API_LOG_FILE_PATH)
-    file_monitor.start(timeout=20, callback=callback_detect_api_start,
-                       error_message='Did not receive expected "INFO: Listening on ..." event')
+    evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH)
 
 
 @pytest.fixture(scope='function')

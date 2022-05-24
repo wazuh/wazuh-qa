@@ -53,7 +53,7 @@ import re
 
 import pytest
 import requests
-from wazuh_testing.api import callback_detect_api_debug
+from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -126,11 +126,9 @@ def test_logs(get_configuration, configure_api_environment, restart_api):
     # Detect any "DEBUG:" message in the log path
     if get_configuration['configuration']['logs']['level'] == 'info':
         with pytest.raises(TimeoutError):
-            file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_detect_api_debug,
-                               error_message='"DEBUG: ..." event received but not expected.').result()
+            evm.check_api_debug_log()
     else:
-        file_monitor.start(timeout=LOGS_MONITOR_TIMEOUT, callback=callback_detect_api_debug,
-                           error_message='Did not receive expected "DEBUG: ..." event')
+        evm.check_api_debug_log()
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
