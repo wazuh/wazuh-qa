@@ -155,7 +155,7 @@ def wait_for_start_module(request):
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    evm.check_api_start_log(file_to_monitor=tools.API_LOG_FILE_PATH)
+    evm.check_api_start_log()
 
 
 @pytest.fixture(scope='function')
@@ -177,7 +177,7 @@ def set_api_configuration(configuration):
     yield
 
     # Restore previous configuration
-    conf.write_api_conf(tools.WAZUH_API_CONF, backup_config)
+    conf.write_api_conf(tools.WAZUH_API_CONF, backup_config if backup_config else {})
 
 
 @pytest.fixture(scope='function')
@@ -191,6 +191,7 @@ def restart_api_function():
         tools.DB_DAEMON,
         tools.REMOTE_DAEMON
     ]
+
     for daemon in daemons:
         # Restart daemon instead of starting due to legacy used fixture in the test suite.
         control_service('restart', daemon=daemon)
@@ -198,4 +199,4 @@ def restart_api_function():
     yield
 
     for daemon in daemons:
-            control_service('stop', daemon=daemon)
+        control_service('stop', daemon=daemon)
