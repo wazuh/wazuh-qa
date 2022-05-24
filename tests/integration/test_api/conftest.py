@@ -6,12 +6,11 @@ import os
 import shutil
 
 import pytest
-from wazuh_testing.api import get_api_details_dict
+from wazuh_testing.api import get_api_details_dict, clean_api_log_files
 from wazuh_testing.modules.api import event_monitor as evm
-from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF, \
-    API_LOG_FOLDER
+from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_SECURITY_CONF
 from wazuh_testing.tools.configuration import get_api_conf, write_api_conf, write_security_conf
-from wazuh_testing.tools.file import truncate_file, remove_file
+from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 
@@ -76,13 +75,8 @@ def configure_api_environment(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def clean_log_files(get_configuration, request):
+def clean_log_files():
     """Reset the log files of the API and delete the rotated log files."""
-    def clean_api_log_files():
-        remove_file(API_LOG_FOLDER)
-        log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
-        for log_file in log_files:
-            truncate_file(log_file)
     clean_api_log_files()
 
     yield

@@ -3,12 +3,13 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
-import re
 import time
 from base64 import b64encode
 
 import requests
 from urllib3 import disable_warnings, exceptions
+from wazuh_testing.tools.file import truncate_file, remove_file
+from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, API_LOG_FOLDER
 
 disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -53,9 +54,9 @@ def get_token_login_api(protocol, host, port, user, password, login_endpoint, ti
 
 def get_api_details_dict(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, user=API_USER, password=API_PASS,
                          login_endpoint=API_LOGIN_ENDPOINT, timeout=10, login_attempts=1, sleep_time=0):
+    """Get API details"""
     login_token = get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, login_attempts,
                                       sleep_time)
-    """Get API details"""
     return {
         'base_url': get_base_url(protocol, host, port),
         'auth_headers': {
@@ -262,3 +263,11 @@ def remove_groups():
     endpoint = '/groups'
     response = make_api_call(method="DELETE", endpoint=endpoint, headers=headers, params=params)
     return response
+
+
+def clean_api_log_files():
+    """ Clean all the logs files and delete the ones that have been rotated."""
+    remove_file(API_LOG_FOLDER)
+    log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
+    for log_file in log_files:
+        truncate_file(log_file)
