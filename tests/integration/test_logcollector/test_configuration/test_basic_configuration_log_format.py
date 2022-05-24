@@ -264,20 +264,14 @@ def check_log_format_invalid(cfg):
     if cfg['valid_value']:
         pytest.skip('Valid values provided')
 
-    if 'log_format1' in cfg and 'log_format2' in cfg:
-        log_callback = logcollector.callback_multiple_macos_block_configuration()
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-    else:
+    log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
-        log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-
-        log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                          conf_path=f'{wazuh_configuration}')
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                      conf_path=f'{wazuh_configuration}')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
@@ -289,10 +283,13 @@ def check_log_format_invalid(cfg):
 def check_log_file_duplicated():
     """Check if Wazuh shows a warning message when the configuration is duplicated."""
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    wazuh_log_monitor.start(timeout=5,
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
                             callback=generate_monitoring_callback(
                                      logcollector.GENERIC_CALLBACK_MSG_LOG_FILE_DUPLICATED),
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED)
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
+                            callback=logcollector.callback_monitoring_macos_logs(),
+                            error_message="The expected macos log monitoring has not been produced")
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
