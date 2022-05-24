@@ -5,4 +5,5 @@
       fetch:
         src: /var/ossec/logs/alerts/alerts.json
         dest: /home/juliamagan/Desktop/QA/2893/
+        flat: yes
       become: True
