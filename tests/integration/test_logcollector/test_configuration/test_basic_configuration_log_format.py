@@ -70,7 +70,7 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
@@ -137,7 +137,7 @@ windows_tcases = [
 macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
-                 'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
+                 'VALID_VALUE': True, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
                 {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
                  'CONFIGURATION': 'wazuh_no_defined_location_macos_configuration.yaml'}
                 ]
@@ -286,6 +286,15 @@ def check_log_format_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
+def check_log_file_duplicated():
+    """Check if Wazuh shows a warning message when the configuration is duplicated."""
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    wazuh_log_monitor.start(timeout=5,
+                            callback=generate_monitoring_callback(
+                                     logcollector.GENERIC_CALLBACK_MSG_LOG_FILE_DUPLICATED),
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED)
+
+
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_log_format(configure_local_internal_options_module, get_configuration,
                     configure_environment):
@@ -352,7 +361,10 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
 
     if cfg['valid_value']:
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        check_log_format_valid(cfg)
+        if 'location1' in cfg:
+            check_log_file_duplicated()
+        else:
+            check_log_format_valid(cfg)
     else:
         if sys.platform == 'win32':
             pytest.xfail("Windows agent allows invalid localfile configuration:\
