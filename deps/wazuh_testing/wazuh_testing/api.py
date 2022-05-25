@@ -4,12 +4,12 @@
 
 import json
 import time
+import requests
 from base64 import b64encode
 
-import requests
+import wazuh_testing as fw
 from urllib3 import disable_warnings, exceptions
 from wazuh_testing.tools.file import truncate_file, remove_file
-from wazuh_testing.tools import API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH, API_LOG_FOLDER
 
 disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -120,8 +120,9 @@ def get_manager_configuration(section=None, field=None):
         field   (str): section child. E.g, fields for ruleset section are: decoder_dir, rule_dir, etc
 
     Returns:
-        `obj`(str or map): active configuration indicated by Wazuh API. If section and field are selected, it will return a String,
-        if not, it will return a map for the section/entire configurations with fields/sections as keys
+        `obj`(str or map): active configuration indicated by Wazuh API. If section and field are selected, it will
+         return a String, if not, it will return a map for the section/entire configurations with fields/sections
+         as keys.
     """
     api_details = get_api_details_dict()
     api_query = f"{api_details['base_url']}/manager/configuration?"
@@ -196,21 +197,21 @@ def make_api_call(port=55000, method='GET', endpoint='/', headers=None, request_
 
     Returns: response dict.
     """
-    if headers == None and token == None:
+    if headers is None and token is None:
         return "Request Error - No authorization information passed."
-    elif headers == None:
-        headers = {'Authorization': f"Bearer {token}",}
+    elif headers is None:
+        headers = {'Authorization': f"Bearer {token}"}
     if 'Authorization' not in headers.keys():
         headers['Authorization'] = f"Bearer {token}"
 
     response = None
-    if method=='POST':
+    if method == 'POST':
         response = requests.post(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
                                  params=params, verify=verify)
-    elif method=='DELETE':
+    elif method == 'DELETE':
         response = requests.delete(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
                                    params=params, verify=verify)
-    elif method=='PUT':
+    elif method == 'PUT':
         response = requests.put(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
                                 params=params, verify=verify)
     else:
@@ -227,8 +228,8 @@ def create_groups_api_request(group, token):
 
     Returns: API call response.
     """
-    headers = {'Authorization': f"Bearer {token}",}
-    json_data = {'group_id': f"{group}",}
+    headers = {'Authorization': f"Bearer {token}"}
+    json_data = {'group_id': f"{group}"}
     endpoint = '/groups'
     response = make_api_call(method='POST', endpoint=endpoint, headers=headers, request_json=json_data)
     return response
@@ -241,7 +242,7 @@ def set_up_groups(groups_list):
 
     Returns: None
     """
-    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT,
+    response_token = get_token_login_api(API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT,
                                          timeout=10, login_attempts=3, sleep_time=1)
 
     for group in groups_list:
@@ -253,9 +254,9 @@ def remove_groups():
 
     Returns: API call response
     """
-    response_token = get_token_login_api(API_PROTOCOL,API_HOST,API_PORT,API_USER,API_PASS,API_LOGIN_ENDPOINT,
+    response_token = get_token_login_api(API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT,
                                          timeout=10, login_attempts=3, sleep_time=1)
-    headers = {'Authorization': f"Bearer {response_token}",}
+    headers = {'Authorization': f"Bearer {response_token}"}
     params = (
         ('pretty', 'true'),
         ('groups_list', 'all'),
@@ -267,7 +268,7 @@ def remove_groups():
 
 def clean_api_log_files():
     """ Clean all the logs files and delete the ones that have been rotated."""
-    remove_file(API_LOG_FOLDER)
-    log_files = [API_LOG_FILE_PATH, API_JSON_LOG_FILE_PATH]
+    remove_file(fw.API_LOG_FOLDER)
+    log_files = [fw.API_LOG_FILE_PATH, fw.API_JSON_LOG_FILE_PATH]
     for log_file in log_files:
         truncate_file(log_file)

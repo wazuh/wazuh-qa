@@ -4,15 +4,15 @@
 
 import os
 import shutil
-
 import pytest
-from wazuh_testing.api import get_api_details_dict, clean_api_log_files
-from wazuh_testing.modules.api import event_monitor as evm
-from wazuh_testing import tools
-from wazuh_testing.tools import configuration as conf
+
+import wazuh_testing as fw
+from wazuh_testing import api
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.modules.api import event_monitor as evm
+from wazuh_testing.tools import configuration as conf
 
 
 @pytest.fixture(scope='module')
@@ -20,21 +20,21 @@ def configure_api_environment(get_configuration, request):
     """Configure a custom environment for API testing. Restart API is needed for applying the configuration."""
 
     # Save current configuration
-    backup_config = conf.get_api_conf(tools.WAZUH_API_CONF)
+    backup_config = conf.get_api_conf(fw.WAZUH_API_CONF)
 
     # Save current security config
-    backup_security_config = conf.get_api_conf(tools.WAZUH_SECURITY_CONF) if \
-                             os.path.exists(tools.WAZUH_SECURITY_CONF) else None
+    backup_security_config = conf.get_api_conf(fw.WAZUH_SECURITY_CONF) if \
+        os.path.exists(fw.WAZUH_SECURITY_CONF) else None
 
     # Set new configuration
     api_config = get_configuration.get('configuration', None)
     if api_config:
-        conf.write_api_conf(tools.WAZUH_API_CONF, api_config)
+        conf.write_api_conf(fw.WAZUH_API_CONF, api_config)
 
     # Set security configuration
     security_config = get_configuration.get('security_config', None)
     if security_config:
-        conf.write_security_conf(tools.WAZUH_SECURITY_CONF, security_config)
+        conf.write_security_conf(fw.WAZUH_SECURITY_CONF, security_config)
 
     # Create test directories
     if hasattr(request.module, 'test_directories'):
@@ -57,13 +57,13 @@ def configure_api_environment(get_configuration, request):
             shutil.rmtree(test_dir, ignore_errors=True)
 
     # Restore previous configuration
-    conf.write_api_conf(tools.WAZUH_API_CONF, backup_config if backup_config else {})
+    conf.write_api_conf(fw.WAZUH_API_CONF, backup_config if backup_config else {})
 
     # Restore previous RBAC configuration
     if backup_security_config:
-        conf.write_security_conf(tools.WAZUH_SECURITY_CONF, backup_security_config)
+        conf.write_security_conf(fw.WAZUH_SECURITY_CONF, backup_security_config)
     elif security_config and not backup_security_config:
-        os.remove(tools.WAZUH_SECURITY_CONF)
+        os.remove(fw.WAZUH_SECURITY_CONF)
 
     # Call extra functions after yield
     if hasattr(request.module, 'extra_configuration_after_yield'):
@@ -78,11 +78,11 @@ def configure_api_environment(get_configuration, request):
 @pytest.fixture(scope='module')
 def clean_log_files():
     """Reset the log files of the API and delete the rotated log files."""
-    clean_api_log_files()
+    api.clean_api_log_files()
 
     yield
 
-    clean_api_log_files()
+    api.clean_api_log_files()
 
 
 @pytest.fixture(scope='module')
@@ -91,13 +91,11 @@ def restart_api(get_configuration, request):
     control_service('stop')
 
     # Reset api.log and start a new monitor
-    truncate_file(tools.API_LOG_FILE_PATH)
-    file_monitor = FileMonitor(tools.API_LOG_FILE_PATH)
+    truncate_file(fw.API_LOG_FILE_PATH)
+    file_monitor = FileMonitor(fw.API_LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Start Wazuh API
-    #for process_name in ['wazuh-apid', 'wazuh-modulesd', 'wazuh-analysisd', 'wazuh-execd', 'wazuh-db', 'wazuh-remoted']:
-    #    control_service('start', daemon=process_name)
     control_service('start')
 
 
@@ -124,14 +122,14 @@ def wait_for_start_function(configuration):
         log_format = configuration['configuration']['logs']['format']
     except (KeyError, TypeError):
         pass
-    file_to_monitor = tools.API_JSON_LOG_FILE_PATH if log_format == 'json' else tools.API_LOG_FILE_PATH
+    file_to_monitor = fw.API_JSON_LOG_FILE_PATH if log_format == 'json' else fw.API_LOG_FILE_PATH
 
     evm.check_api_start_log(file_to_monitor=file_to_monitor)
 
 
 @pytest.fixture(scope='module')
 def get_api_details():
-    return get_api_details_dict
+    return api.get_api_details_dict
 
 
 @pytest.fixture(scope='module')
@@ -140,8 +138,8 @@ def restart_api_module(request):
     control_service('stop')
 
     # Reset api.log and start a new monitor
-    truncate_file(tools.API_LOG_FILE_PATH)
-    file_monitor = FileMonitor(tools.API_LOG_FILE_PATH)
+    truncate_file(fw.API_LOG_FILE_PATH)
+    file_monitor = FileMonitor(fw.API_LOG_FILE_PATH)
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Start Wazuh API
@@ -166,30 +164,30 @@ def set_api_configuration(configuration):
         configuration (dict): Configuration template data to write in the api.yaml.
     """
     # Save current configuration
-    backup_config = conf.get_api_conf(tools.WAZUH_API_CONF)
+    backup_config = conf.get_api_conf(fw.WAZUH_API_CONF)
 
     # Get configuration for testing
     test_config = configuration['configuration']
 
     # Set the new configuration
-    conf.write_api_conf(tools.WAZUH_API_CONF, test_config)
+    conf.write_api_conf(fw.WAZUH_API_CONF, test_config)
 
     yield
 
     # Restore previous configuration
-    conf.write_api_conf(tools.WAZUH_API_CONF, backup_config if backup_config else {})
+    conf.write_api_conf(fw.WAZUH_API_CONF, backup_config if backup_config else {})
 
 
 @pytest.fixture(scope='function')
 def restart_api_function():
     """Restart all deamons related to the API before the test and stop them after it finished."""
     daemons = [
-        tools.API_DAEMON,
-        tools.MODULES_DAEMON,
-        tools.ANALYSISD_DAEMON,
-        tools.EXEC_DAEMON,
-        tools.DB_DAEMON,
-        tools.REMOTE_DAEMON
+        fw.API_DAEMON,
+        fw.MODULES_DAEMON,
+        fw.ANALYSISD_DAEMON,
+        fw.EXEC_DAEMON,
+        fw.DB_DAEMON,
+        fw.REMOTE_DAEMON
     ]
 
     for daemon in daemons:

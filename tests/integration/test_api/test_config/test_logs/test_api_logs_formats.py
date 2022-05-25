@@ -57,15 +57,13 @@ tags:
 '''
 import os
 import time
-
 import pytest
 import requests
-from wazuh_testing.api import API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, API_PROTOCOL, API_USER, \
-                              get_login_headers
-from wazuh_testing.modules import api
+
+import wazuh_testing as fw
+from wazuh_testing import api
+from wazuh_testing.tools import configuration as config
 from wazuh_testing.modules.api import event_monitor as evm
-from wazuh_testing.tools import API_JSON_LOG_FILE_PATH
-from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 
 # Marks
 pytestmark = [pytest.mark.server]
@@ -80,8 +78,10 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_api_logs_
 test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_api_logs_formats.yaml')
 
 # API log formats configurations
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(test_cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+configuration_parameters, configuration_metadata, case_ids = config.get_test_cases_data(test_cases_path)
+configurations = config.load_configuration_template(configurations_path, configuration_parameters,
+                                                    configuration_metadata)
+
 
 @pytest.fixture(scope='function')
 def send_request(remaining_attempts=5):
@@ -90,7 +90,7 @@ def send_request(remaining_attempts=5):
     Args:
         remaining_attempts (int): number of request attemps
     """
-    login_url = f"{API_PROTOCOL}://{API_HOST}:{API_PORT}{API_LOGIN_ENDPOINT}"
+    login_url = f"{api.API_PROTOCOL}://{api.API_HOST}:{api.API_PORT}{api.API_LOGIN_ENDPOINT}"
     # Initialize variables to avoid the UnboundLocalError
     result = None
     response = None
@@ -98,11 +98,11 @@ def send_request(remaining_attempts=5):
     # Make 3 attempts to wait for the API to start correctly
     while remaining_attempts > 0:
         try:
-            response = requests.get(login_url, headers=get_login_headers(API_USER, API_PASS), verify=False,
-                                    timeout=api.T_5)
+            response = requests.get(login_url, headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False,
+                                    timeout=fw.T_5)
         except requests.exceptions.ConnectionError:
             # Capture the exception and wait
-            time.sleep(api.T_10)
+            time.sleep(fw.T_10)
             # Decrease the number of remaining attempts
             remaining_attempts -= 1
         else:
@@ -113,7 +113,8 @@ def send_request(remaining_attempts=5):
 
 
 # Tests
-pytest.mark.tier(level=2)
+
+@pytest.mark.tier(level=2)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_log_files, restart_api_function,
@@ -176,9 +177,9 @@ def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_
     # Check whether the expected event exists in the log files according to the configured levels
     if 'json' in current_formats:
         if current_level == 'error':
-            evm.check_api_timeout_error(file_to_monitor=API_JSON_LOG_FILE_PATH)
+            evm.check_api_timeout_error(file_to_monitor=fw.API_JSON_LOG_FILE_PATH)
         else:
-            evm.check_api_login_request(file_to_monitor=API_JSON_LOG_FILE_PATH)
+            evm.check_api_login_request(file_to_monitor=fw.API_JSON_LOG_FILE_PATH)
     if 'plain' in current_formats:
         if current_level == 'error':
             evm.check_api_timeout_error()
