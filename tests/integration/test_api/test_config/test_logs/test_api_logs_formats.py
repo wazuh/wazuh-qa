@@ -2,19 +2,32 @@
 copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: There is an API configuration option, called logs, which allows to log in 4 different ways ("json", "plain",
        "json,plain", and "plain,json") through the format field. When the API is configured with one of those values the
        logs are stored in the api.log and api.json files.
+
 tier: 2
+
 modules:
     - api
+
 components:
     - manager
+
 daemons:
     - wazuh-apid
+    - wazuh-modulesd
+    - wazuh-analysisd
+    - wazuh-execd
+    - wazuh-db
+    - wazuh-remoted
+
 os_platform:
     - linux
+
 os_version:
     - Arch Linux
     - Amazon Linux 2
@@ -33,8 +46,10 @@ os_version:
     - Red Hat 8
     - Red Hat 7
     - Red Hat 6
+
 references:
     - https://documentation.wazuh.com/current/user-manual/api/configuration.html#logs
+
 tags:
     - api
     - logs
@@ -49,38 +64,27 @@ from wazuh_testing.api import API_HOST, API_LOGIN_ENDPOINT, API_PASS, API_PORT, 
                               get_login_headers
 from wazuh_testing.modules import api
 from wazuh_testing.modules.api import event_monitor as evm
-from wazuh_testing.tools import API_JSON_LOG_FILE_PATH, PREFIX, API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, \
-                                EXEC_DAEMON, DB_DAEMON, REMOTE_DAEMON
-from wazuh_testing.tools.configuration import get_api_conf
+from wazuh_testing.tools import API_JSON_LOG_FILE_PATH
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 
 # Marks
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2), pytest.mark.server]
+pytestmark = [pytest.mark.server]
 
-# Variables
-daemons_handler_configuration = {
-    'daemons': [API_DAEMON, MODULES_DAEMON, ANALYSISD_DAEMON, EXEC_DAEMON, DB_DAEMON, REMOTE_DAEMON]
-}
-test_directories = [os.path.join(PREFIX, 'test_logs')]
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-# Configurations
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'configuration_api_logs_format.yaml')
-configurations = get_api_conf(configurations_path)
-tcase_ids = [f"level_{configuration['configuration']['logs']['level']}"
-             f"_format_{configuration['configuration']['logs']['format'].replace(',','_')}"
-             for configuration in configurations]
+# Configuration and test cases data
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_api_logs_format.yaml')
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_api_logs_formats.yaml')
 
-
-# Fixtures
-@pytest.fixture(scope='module', params=configurations, ids=tcase_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-
-    return request.param
-
+# API log formats configurations
+configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(test_cases_path)
+configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
 @pytest.fixture(scope='function')
-def send_request(remaining_attempts=3):
+def send_request(remaining_attempts=5):
     """Send a login request to the API.
 
     Args:
@@ -109,47 +113,58 @@ def send_request(remaining_attempts=3):
 
 
 # Tests
+pytest.mark.tier(level=2)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_api_logs_formats(get_configuration, configure_api_environment, clean_log_files, daemons_handler,
-                          wait_for_start, send_request):
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_log_files, wait_for_start_function,
+                          restart_api_function, send_request):
     '''
     description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
+
     wazuh_min_version: 4.4.0
+
     parameters:
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: API configuration data. Needed for set_api_configuration fixture.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata
+        - set_api_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_api_environment:
-            type: fixture
-            brief: Configure a custom environment for API testing.
+            brief: Set API custom configuration.
         - clean_log_files:
             type: fixture
             brief: Reset the log files of the API and delete the rotated log files.
-        - daemons_handler:
+        - restart_api_function:
             type: fixture
-            brief: Handle the Wazuh daemons.
-        - wait_for_start:
+            brief: Restart all deamons related to the API before the test and stop them after it finished.
+        - wait_for_start_function:
             type: fixture
-            brief: Wait until the API starts.
+            brief: Monitor the API log file to detect whether it has been started or not.
         - send_request:
             type: fixture:
             brief: Send a login request to the API.
+
     assertions:
         - Verify that the expected log exists in the log file.
         - Verify that the values of the log are the same in both log formats.
+
     input_description: The test gets the configuration from the YAML file, which contains the API configuration.
+
     expected_output:
         - The log was not expected.
         - The length of the subgroups of the match is not equal.
         - The values of the logs don't match.
+
     tags:
         - api
         - logs
         - logging
     '''
-    current_formats = get_configuration['configuration']['logs']['format'].split(',')
-    current_level = get_configuration['configuration']['logs']['level']
+    current_formats = metadata['log_format'].split(',')
+    current_level = metadata['log_level']
     response_status_code = send_request
 
     # Check if the status code of the response is the expected depending on the configured level
