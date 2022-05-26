@@ -1,0 +1,6 @@
+---
+- name: Generate events
+	  hosts: wazuh-agent
+	  tasks:
+	    - name: Run netcat
+	      shell: nc -l 8000

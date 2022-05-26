@@ -1,0 +1,10 @@
+---
+name: Get alerts
+	  hosts: wazuh-manager
+	  tasks:
+	    - name: Get alerts.json
+	      fetch:
+	        src: /var/ossec/logs/alerts/alerts.json
+	        dest: C:\Users\elian\OneDrive\Documents\Vagrant\Maquinas\centos-manager-kibana
+	        flat: yes
+	      become: True
