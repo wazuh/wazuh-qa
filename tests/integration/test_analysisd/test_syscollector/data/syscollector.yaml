@@ -6,22 +6,22 @@
   test_case:
   -
     description: 'Process creation'
-    event_payload: '{"data":{"argvs":"180","checksum":"343ed10dc637334a7400d01b8a28deb8db5cba28","cmd":"sleep","egroup":"root","euser":"root","fgroup":"root","name":"sleep","nice":0,"nlwp":1,"pgrp":116167,"pid":"156102","ppid":116169,"priority":20,"processor":3,"resident":129,"rgroup":"root","ruser":"root","scan_time":"2021/10/13 14:57:07","session":116167,"sgroup":"root","share":114,"size":2019,"start_time":5799612,"state":"S","stime":0,"suser":"root","tgid":156102,"tty":0,"utime":0,"vm_size":8076},"operation":"INSERTED","type":"dbsync_processes"}'
+    event_payload: '{"data":{"argvs":"180","checksum":"343ed10dc637334a7400d01b8a28deb8db5cba28","cmd":"","egroup":"root","euser":"root","fgroup":"root","name":"sleep","nice":0,"nlwp":1,"pgrp":116167,"pid":"156102","ppid":116169,"priority":20,"processor":3,"resident":129,"rgroup":"root","ruser":"root","scan_time":"2021/10/13 14:57:07","session":116167,"sgroup":"root","share":114,"size":2019,"start_time":5799612,"state":"S","stime":0,"suser":"root","tgid":156102,"tty":0,"utime":0,"vm_size":8076},"operation":"INSERTED","type":"dbsync_processes"}'
     alert_expected_values:
       rule.id: '100301'
-      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"0","stime":"0","cmd":"sleep","args":"180","euser":"root","ruser":"root","suser":"root","egroup":"root","rgroup":"root","sgroup":"root","fgroup":"root","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"3"},"operation_type":"INSERTED"}'
+      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"0","stime":"0","args":"180","euser":"root","ruser":"root","suser":"root","egroup":"root","rgroup":"root","sgroup":"root","fgroup":"root","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"3"},"operation_type":"INSERTED"}'
   -
     description: 'Process modification'
     event_payload: '{"data":{"checksum":"45cb0637a5b43ed1a819ac6cb4cf4d6d4f15f871","pid":"156102","processor":0,"scan_time":"2021/10/07 13:08:19","stime":72,"utime":54,"egroup":null,"rgroup":"NULL","fgroup":"piped|value"},"operation":"MODIFIED","type":"dbsync_processes"}'
     alert_expected_values:
       rule.id: '100302'
-      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"54","stime":"72","cmd":"sleep","args":"180","euser":"root","ruser":"root","suser":"root","rgroup":"NULL","sgroup":"root","fgroup":"piped|value","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"0"},"operation_type":"MODIFIED"}'
+      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"54","stime":"72","args":"180","euser":"root","ruser":"root","suser":"root","rgroup":"NULL","sgroup":"root","fgroup":"piped|value","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"0"},"operation_type":"MODIFIED"}'
   -
     description: 'Process deletion'
     event_payload: '{"data":{"pid":"156102","scan_time":"2021/10/13 15:55:03"},"operation":"DELETED","type":"dbsync_processes"}'
     alert_expected_values:
       rule.id: '100303'
-      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"54","stime":"72","cmd":"sleep","args":"180","euser":"root","ruser":"root","suser":"root","rgroup":"NULL","sgroup":"root","fgroup":"piped|value","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"0"},"operation_type":"DELETED"}'
+      data: '{"type":"dbsync_processes","process":{"pid":"156102","name":"sleep","state":"S","ppid":"116169","utime":"54","stime":"72","args":"180","euser":"root","ruser":"root","suser":"root","rgroup":"NULL","sgroup":"root","fgroup":"piped|value","priority":"20","nice":"0","size":"2019","vm_size":"8076","resident":"129","share":"114","start_time":"5799612","pgrp":"116167","session":"116167","nlwp":"1","tgid":"156102","tty":"0","processor":"0"},"operation_type":"DELETED"}'
   -
     description: 'Port creation'
     event_payload: '{"data":{"checksum":"eff13e52290143eb5b5b9b8c191902609f37c712","inode":494908,"item_id":"e2c92964ad145a635139f6318057506e386e00a3","local_ip":"0.0.0.0","local_port":34340,"pid":0,"process":null,"protocol":"tcp","remote_ip":"0.0.0.0","remote_port":0,"rx_queue":0,"scan_time":"2021/10/13 14:40:02","state":"listening","tx_queue":0},"operation":"INSERTED","type":"dbsync_ports"}'
