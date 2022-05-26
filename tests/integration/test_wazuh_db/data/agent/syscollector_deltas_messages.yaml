@@ -141,7 +141,7 @@
     stage: 'insert package with invalid field type.'
   -
     input: 'agent 001 dbsync packages MODIFIED 2021/10/01 00:00:20|deb|test-wazuh-1|mandatory|NULL|NULL|NULL|NULL|1.1.1-2|all|NULL|NULL|NULL|NULL|NULL|NULL|NULL|AAAa61b68678180d2debd374df900daa6fe35d73|AAAe5ea454e47141b5c6a8afefd6bd08e87057f9|'
-    output: 'ok 2021/10/01 00:00:20|deb|test-wazuh-1|mandatory|x11|223|Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>||1.1.1-2|all|foreign||Base X bitmaps||0|||AAAa61b68678180d2debd374df900daa6fe35d73|AAAe5ea454e47141b5c6a8afefd6bd08e87057f9|'
+    output: 'ok 2021/10/01 00:00:20|deb|test-wazuh-1|mandatory|x11|223|Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>||1.1.1-2|all|foreign||Base X bitmaps|||||AAAa61b68678180d2debd374df900daa6fe35d73|AAAe5ea454e47141b5c6a8afefd6bd08e87057f9|'
     stage: 'modify package.'
   -
     input: 'agent 001 dbsync packages MODIFIED 2021/10/01 00:00:20|NULL|test-wazuh-1|NULL|NULL|1001|NULL|NULL|1.1.1-2|all|NULL|NULL|NULL|NULL|NULL|NULL|NULL|aaaa61b68678180d2debd374df900daa6fe35d73|'
@@ -161,7 +161,7 @@
     stage: 'delete package without enough fields.'
   -
     input: 'agent 001 dbsync packages DELETED 2021/10/01 00:00:30|NULL|test-wazuh-1|NULL|NULL|NULL|NULL|NULL|1.1.1-2|all|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
-    output: 'ok 2021/10/01 00:00:20|deb|test-wazuh-1|mandatory|x11|223|Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>||1.1.1-2|all|foreign||Base X bitmaps||0|||AAAa61b68678180d2debd374df900daa6fe35d73|AAAe5ea454e47141b5c6a8afefd6bd08e87057f9|'
+    output: 'ok 2021/10/01 00:00:20|deb|test-wazuh-1|mandatory|x11|223|Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>||1.1.1-2|all|foreign||Base X bitmaps|||||AAAa61b68678180d2debd374df900daa6fe35d73|AAAe5ea454e47141b5c6a8afefd6bd08e87057f9|'
     stage: 'delete package.'
   -
     input: 'agent 001 dbsync packages DELETED 2021/10/01 00:00:30|NULL|test-wazuh-1|NULL|NULL|NULL|NULL|NULL|1.1.1-2|all|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
@@ -185,7 +185,7 @@
     stage: 'insert osinfo with invalid field type.'
   -
     input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|1637071785021722800|mydisplayname|NULL|NULL|'
-    output: 'ok 2021/10/01 00:00:20|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1637071785021722800|mydisplayname|||'
+    output: 'ok 2021/10/01 00:00:20|wazuh-dev|x86_64|Ubuntu|20.04.1 LTS (Focal Fossa)|focal|20|04|1||ubuntu|Linux|5.4.0-42-generic|#46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020||1637071785021722800|mydisplayname||'
     stage: 'modify osinfo.'
   -
     input: 'agent 001 dbsync osinfo MODIFIED 2021/10/01 00:00:20|NULL|NULL|Ubuntu|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|NULL|'
