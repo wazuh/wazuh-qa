@@ -9,12 +9,10 @@ brief: There is an API configuration option, called logs, which allows to log in
        "json,plain", and "plain,json") through the format field. When the API is configured with one of those values the
        logs are stored in the api.log and api.json files.
 
-tier: 2
-
-modules:
+components:
     - api
 
-components:
+targets:
     - manager
 
 daemons:
@@ -66,7 +64,7 @@ from wazuh_testing.tools import configuration as config
 from wazuh_testing.modules.api import event_monitor as evm
 
 # Marks
-pytestmark = [pytest.mark.server]
+pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -123,6 +121,14 @@ def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_
     description: Check if the logs of the API are stored in the specified formats and the content of the log
                  files are the expected.
 
+    tier: 2
+
+    test_phases:
+        - Set a custom API configuration, with custom intervals and logs.
+        - Restart the API daemon and the daemons related to it.
+        - Send a request to the API to generate the desired event.
+        - Check in the log file that the expected event has been recorded.
+
     wazuh_min_version: 4.4.0
 
     parameters:
@@ -131,7 +137,7 @@ def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_
             brief: API configuration data. Needed for set_api_configuration fixture.
         - metadata:
             type: dict
-            brief: Wazuh configuration metadata
+            brief: Wazuh configuration metadata.
         - set_api_configuration:
             type: fixture
             brief: Set API custom configuration.
@@ -145,19 +151,18 @@ def test_api_logs_formats(configuration, metadata, set_api_configuration, clean_
             type: fixture
             brief: Monitor the API log file to detect whether it has been started or not.
         - send_request:
-            type: fixture:
+            type: fixture
             brief: Send a login request to the API.
 
     assertions:
+        - Verify that the response status code is the expected one.
         - Verify that the expected log exists in the log file.
-        - Verify that the values of the log are the same in both log formats.
 
     input_description: The test gets the configuration from the YAML file, which contains the API configuration.
 
     expected_output:
-        - The log was not expected.
-        - The length of the subgroups of the match is not equal.
-        - The values of the logs don't match.
+        - r".*ERROR.*{api.TIMEOUT_ERROR_LOG}.*" (Timeout error log)
+        - r".*INFO.*{user}.*{host}.*{API_LOGIN_ENDPOINT}.*" (Authentication log)
 
     tags:
         - api

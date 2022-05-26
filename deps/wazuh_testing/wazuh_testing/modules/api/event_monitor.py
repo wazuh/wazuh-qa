@@ -26,7 +26,7 @@ def make_api_callback(pattern, prefix=api.API_PREFIX):
     return lambda line: regex.match(line) is not None
 
 
-def check_api_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=api.T_20,
+def check_api_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=fw.T_20,
                     prefix=api.API_PREFIX, accum_results=1, file_to_monitor=fw.API_LOG_FILE_PATH):
     """Check if an API event occurs
 
@@ -47,7 +47,7 @@ def check_api_event(file_monitor=None, callback='', error_message=None, update_p
                        callback=make_api_callback(callback, prefix), error_message=error_message)
 
 
-def check_api_start_log(log_monitor=None, timeout=api.T_30, host='0.0.0.0', port='55000',
+def check_api_start_log(log_monitor=None, timeout=fw.T_30, host='0.0.0.0', port='55000',
                         file_to_monitor=fw.API_LOG_FILE_PATH):
     """Check if the start event is in the log file.
 
@@ -62,7 +62,7 @@ def check_api_start_log(log_monitor=None, timeout=api.T_30, host='0.0.0.0', port
                     file_to_monitor=file_to_monitor)
 
 
-def check_api_debug_log(log_monitor=None, timeout=api.T_5, file_to_monitor=fw.API_LOG_FILE_PATH):
+def check_api_debug_log(log_monitor=None, timeout=fw.T_5, file_to_monitor=fw.API_LOG_FILE_PATH):
     """Check if a debug event is in the log file.
 
     Args:
@@ -73,7 +73,7 @@ def check_api_debug_log(log_monitor=None, timeout=api.T_5, file_to_monitor=fw.AP
     check_api_event(log_monitor, callback=r".*DEBUG:.*", timeout=timeout, file_to_monitor=file_to_monitor)
 
 
-def check_api_login_request(log_monitor=None, timeout=api.T_5, user='wazuh', host='127.0.0.1',
+def check_api_login_request(log_monitor=None, timeout=fw.T_5, user='wazuh', host='127.0.0.1',
                             file_to_monitor=fw.API_LOG_FILE_PATH):
     """Check if the login request event is in the log file.
 
@@ -88,7 +88,7 @@ def check_api_login_request(log_monitor=None, timeout=api.T_5, user='wazuh', hos
                     file_to_monitor=file_to_monitor)
 
 
-def check_api_timeout_error(log_monitor=None, timeout=api.T_10, file_to_monitor=fw.API_LOG_FILE_PATH):
+def check_api_timeout_error(log_monitor=None, timeout=fw.T_10, file_to_monitor=fw.API_LOG_FILE_PATH):
     """Check if the timeout error event is in the log file.
 
     Args:
