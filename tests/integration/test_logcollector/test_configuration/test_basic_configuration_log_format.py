@@ -289,7 +289,7 @@ def check_log_file_duplicated():
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED)
     wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
                             callback=logcollector.callback_monitoring_macos_logs(),
-                            error_message="The expected macos log monitoring has not been produced")
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
