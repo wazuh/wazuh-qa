@@ -14,8 +14,8 @@ from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, 
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.authd import DAEMON_NAME
 from wazuh_testing.api import get_api_details_dict
-from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools.wazuh_manager import remove_agents
+from wazuh_testing.modules.api import event_monitor as evm
 
 
 AUTHD_STARTUP_TIMEOUT = 30

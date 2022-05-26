@@ -50,13 +50,14 @@ tags:
 import json
 import os
 import re
-
 import pytest
 import requests
-from wazuh_testing.modules.api import event_monitor as evm
-from wazuh_testing.tools import PREFIX, API_LOG_FILE_PATH
-from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
+
+import wazuh_testing as fw
+from wazuh_testing import tools
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules.api import event_monitor as evm
 
 # Marks
 
@@ -65,14 +66,14 @@ pytestmark = pytest.mark.server
 # Variables
 
 LOGS_MONITOR_TIMEOUT = 60
-test_directories = [os.path.join(PREFIX, 'test_logs')]
-file_monitor = FileMonitor(API_LOG_FILE_PATH)
+test_directories = [os.path.join(tools.PREFIX, 'test_logs')]
+file_monitor = FileMonitor(fw.API_LOG_FILE_PATH)
 
 # Configurations
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'conf.yaml')
-api_configurations = get_api_conf(configurations_path)
+api_configurations = config.get_api_conf(configurations_path)
 cases_ids = [configuration['configuration']['logs']['level'] for configuration in api_configurations]
 
 
@@ -121,7 +122,7 @@ def test_logs(get_configuration, configure_api_environment, restart_api):
     tags:
         - logs
     '''
-    check_apply_test({'logs_info', 'logs_debug'}, get_configuration['tags'])
+    config.check_apply_test({'logs_info', 'logs_debug'}, get_configuration['tags'])
 
     # Detect any "DEBUG:" message in the log path
     if get_configuration['configuration']['logs']['level'] == 'info':
@@ -162,7 +163,7 @@ def test_request_logging_request_headers(get_api_details, get_configuration, con
         - logging
     '''
     # Perform test for all the logging levels of data/conf.yaml
-    check_apply_test({'all'}, get_configuration['tags'])
+    config.check_apply_test({'all'}, get_configuration['tags'])
 
     def callback_request_headers(line):
         match = re.match(fr".*DEBUG2: (Receiving headers.*{str(request_headers).replace('{', '').replace('}', '')}.*)",
@@ -230,7 +231,7 @@ def test_request_logging_json_body(get_api_details, get_configuration, configure
         - logging
     '''
     # Perform test for all the logging levels of data/conf.yaml
-    check_apply_test({'all'}, get_configuration['tags'])
+    config.check_apply_test({'all'}, get_configuration['tags'])
 
     def callback_body_logged(line):
         match = re.match(fr'.*INFO: (.*"{method} /agents" with parameters .* and body '
