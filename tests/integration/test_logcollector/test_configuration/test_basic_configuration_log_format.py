@@ -304,7 +304,7 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
                  Finally, the test will verify that the Wazuh API returns the same values for the 'localfile' section
                  that the configured one.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.3.0
 
     tier: 0
 
