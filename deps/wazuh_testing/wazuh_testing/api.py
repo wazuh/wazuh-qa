@@ -9,7 +9,7 @@ from base64 import b64encode
 
 import wazuh_testing as fw
 from urllib3 import disable_warnings, exceptions
-from wazuh_testing.tools.file import truncate_file, remove_file
+from wazuh_testing.tools import file
 
 disable_warnings(exceptions.InsecureRequestWarning)
 
@@ -268,7 +268,7 @@ def remove_groups():
 
 def clean_api_log_files():
     """ Clean all the logs files and delete the ones that have been rotated."""
-    remove_file(fw.API_LOG_FOLDER)
+    file.remove_file(fw.API_LOG_FOLDER)
     log_files = [fw.API_LOG_FILE_PATH, fw.API_JSON_LOG_FILE_PATH]
     for log_file in log_files:
-        truncate_file(log_file)
+        file.truncate_file(log_file)
