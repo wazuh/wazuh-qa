@@ -82,7 +82,7 @@ configurations = config.load_configuration_template(configurations_path, configu
 
 
 @pytest.fixture(scope='function')
-def send_request(remaining_attempts=5):
+def send_request(remaining_attempts=3):
     """Send a login request to the API.
 
     Args:

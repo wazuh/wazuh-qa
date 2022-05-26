@@ -10,7 +10,7 @@ import wazuh_testing as fw
 from wazuh_testing import api
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools import services as svcs
 from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools import configuration as conf
 
@@ -72,7 +72,7 @@ def configure_api_environment(get_configuration, request):
 
     if hasattr(request.module, 'force_restart_after_restoring'):
         if getattr(request.module, 'force_restart_after_restoring'):
-            control_service('restart')
+            svcs.control_service('restart')
 
 
 @pytest.fixture(scope='module')
@@ -88,7 +88,7 @@ def clean_log_files():
 @pytest.fixture(scope='module')
 def restart_api(get_configuration, request):
     # Stop Wazuh and Wazuh API
-    control_service('stop')
+    svcs.control_service('stop')
 
     # Reset api.log and start a new monitor
     truncate_file(fw.API_LOG_FILE_PATH)
@@ -96,7 +96,7 @@ def restart_api(get_configuration, request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Start Wazuh API
-    control_service('start')
+    svcs.control_service('start')
 
 
 @pytest.fixture(scope='module')
@@ -135,7 +135,7 @@ def get_api_details():
 @pytest.fixture(scope='module')
 def restart_api_module(request):
     # Stop Wazuh and Wazuh API
-    control_service('stop')
+    svcs.control_service('stop')
 
     # Reset api.log and start a new monitor
     truncate_file(fw.API_LOG_FILE_PATH)
@@ -143,7 +143,7 @@ def restart_api_module(request):
     setattr(request.module, 'wazuh_log_monitor', file_monitor)
 
     # Start Wazuh API
-    control_service('start')
+    svcs.control_service('start')
 
 
 @pytest.fixture(scope='module')
@@ -181,20 +181,13 @@ def set_api_configuration(configuration):
 @pytest.fixture(scope='function')
 def restart_api_function():
     """Restart all deamons related to the API before the test and stop them after it finished."""
-    daemons = [
-        fw.API_DAEMON,
-        fw.MODULES_DAEMON,
-        fw.ANALYSISD_DAEMON,
-        fw.EXEC_DAEMON,
-        fw.DB_DAEMON,
-        fw.REMOTE_DAEMON
-    ]
+    daemons = fw.API_DAEMONS_REQUIREMENTS
 
     for daemon in daemons:
-        # Restart daemon instead of starting due to legacy used fixture in the test suite.
-        control_service('restart', daemon=daemon)
+        svcs.control_service('restart', daemon=daemon)
 
     yield
 
-    for daemon in daemons:
-        control_service('stop', daemon=daemon)
+    # Stop daemons in reverse to simulate Wazuh's behavior
+    for daemon in daemons[::-1]:
+        svcs.control_service('stop', daemon=daemon)

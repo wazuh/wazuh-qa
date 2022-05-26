@@ -1,6 +1,5 @@
 ---
--
-  configuration:
+- configuration:
     intervals:
       request_timeout: REQUEST_TIMEOUT
     logs:
