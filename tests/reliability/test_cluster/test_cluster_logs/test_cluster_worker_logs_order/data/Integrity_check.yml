@@ -15,10 +15,10 @@
   tag: "Compressing 'files_metadata.json'.*"
 - log_id: log3
   parent: log2
-  tag: 'Sending zip file to master.*'
+  tag: 'Sending zip file.*'
 - log_id: log4
   parent: log3
-  tag: 'Zip file sent to master.'
+  tag: 'Zip file sent.*'
 - log_id: log5
   parent: log4
   tag: 'Finished in .*'

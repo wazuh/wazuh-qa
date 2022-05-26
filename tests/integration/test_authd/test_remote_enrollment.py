@@ -60,8 +60,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Configurations
 
 parameters = [
-    {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'yes'},
-    {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'yes'},
+    {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'yes', 'NODE_TYPE': 'master'},
+    {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'yes', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'yes', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'master'},
     {'REMOTE_ENROLLMENT': 'no', 'CLUSTER_DISABLED': 'no', 'NODE_TYPE': 'worker'},
@@ -112,7 +112,7 @@ def not_raises(exception):
         raise pytest.fail("DID RAISE {0}".format(exception))
 
 
-def test_remote_enrollment(get_configuration, configure_environment, restart_authd, tear_down):
+def test_remote_enrollment(get_configuration, configure_environment, restart_wazuh_daemon_function, tear_down):
     '''
     description:
         Checks if the 'wazuh-authd' daemon remote enrollment is enabled/disabled according

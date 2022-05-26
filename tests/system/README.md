@@ -88,7 +88,7 @@ To install it:
 
 ```shell script
 cd wazuh-qa/deps/wazuh_testing
-pip3 install .
+pip3 install .Description
 ```
 
 _**NOTE:** It is important to reinstall this package every time we modify anything
@@ -107,18 +107,28 @@ our [testing environment guide](#setting-up-a-test-environment).
 Our cluster system tests are located in `wazuh-qa/tests/system/`. They are organized by functionalities and each one may
 required an specific testing environment located in `wazuh-qa/tests/system/provisioning`:
 
-| Functionality                          | Required environment |
-|----------------------------------------|----------------------|
-| test_cluster/test_agent_enrollment     | enrollment_cluster   |
-| test_cluster/test_agent_info_sync      | basic_cluster        |
-| test_cluster/test_agent_groups         | basic_cluster        |
-| test_cluster/test_agent_key_polling    | basic_cluster        |
-| test_cluster/test_agent_files_deletion | basic_cluster        |
-| test_cluster/test_integrity_sync       | agentless_cluster    |
-| test_jwt_invalidation                  | agentless_cluster    |
-| test_active_response_log_format        | manager_agent        |
-| test_fim/test_synchronization          | one_manager_agent    |
-| test_multigroups/test_multigroups      | basic_cluster        |
+| Functionality                                                             | Required environment           |
+|---------------------------------------------------------------------------|--------------------------------|
+| test_cluster/test_agent_enrollment                                        | enrollment_cluster             |
+| test_cluster/test_agent_info_sync                                         | basic_cluster                  |
+| test_cluster/test_agent_key_polling                                       | basic_cluster                  |
+| test_cluster/test_agent_files_deletion                                    | basic_cluster                  |
+| test_cluster/test_integrity_sync                                          | agentless_cluster              |
+| test_jwt_invalidation                                                     | agentless_cluster              |
+| test_active_response_log_format                                           | manager_agent                  |
+| test_fim/test_synchronization                                             | one_manager_agent              |
+| test_multigroups/test_multigroups                                         | basic_cluster                  |
+| test_cluster/test_agent_groups/test_agent_groups_forced_change            | basic_cluster                  |
+| test_cluster/test_agent_groups/test_agent_default_group_added             | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_agent_groups_new_cluster_node         | four_manager_disconnected_node |
+| test_cluster/test_agent_groups/test_assign_agent_group_with_enrollment    | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_assign_agent_never_connected_to_group | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_assign_agent_to_a_group_api           | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool       | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_assign_agent_to_a_group               | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_assign_groups_guess                   | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_groups_sync_default                   | big_cluster_40_agents          |
+| test_cluster/test_agent_groups/test_groups_sync_time                      | big_cluster_40_agents          |
 
 ### Test structure
 
