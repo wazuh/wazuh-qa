@@ -1,0 +1,55 @@
+---
+- name: Test case configuration
+  hosts: wazuh-manager
+  tasks:
+    - name: Uninstall old versions of Docker (CentOS)
+      become: True
+      shell: >
+        yum -y remove docker
+        docker-client
+        docker-client-latest
+        docker-common
+        docker-latest
+        docker-latest-logrotate
+        docker-logrotate
+        docker-engine
+        docker-ce
+        docker-ce-cli
+        containerd.io
+        docker-compose-plugin
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Uninstall old versions of Docker (Ubuntu)
+      become: True
+      shell: >
+        apt-get -y remove docker
+        docker-engine
+        docker.io
+        containerd
+        runc && apt-get -y purge docker-ce
+        docker-ce-cli
+        containerd.io
+        docker-compose-plugin
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Install Docker using the convenience script
+      become: True
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+
+    - name: Configure the docker-listener module
+      become: True
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertbefore: "^</ossec_config>"
+        block: |
+          <wodle name="docker-listener">
+            <interval>10m</interval>
+            <attempts>5</attempts>
+            <run_on_start>yes</run_on_start>
+            <disabled>no</disabled>
+          </wodle>
+        marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+
+    - name: Restart wazuh-manager
+      become: True
+      shell: systemctl restart wazuh-manager

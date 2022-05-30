@@ -1,0 +1,19 @@
+---
+- name: Generate alerts in the manager
+  hosts: wazuh-manager
+  tasks:
+    - name: Run 'docker pull nginx'
+      become: True
+      shell: docker pull nginx
+
+    - name: Run 'docker run -d -P --name nginx_container nginx'
+      become: True
+      shell: docker run -d -P --name nginx_container nginx
+
+    - name: Run 'docker exec -d nginx_container /bin/bash'
+      become: True
+      shell: docker exec -d nginx_container /bin/bash
+
+    - name: Run 'docker stop `docker ps -a -q` && docker rm `docker ps -a -q`'
+      become: True
+      shell: docker stop `docker ps -a -q` && docker rm `docker ps -a -q`
