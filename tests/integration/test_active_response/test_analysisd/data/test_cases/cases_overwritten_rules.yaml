@@ -1,0 +1,10 @@
+- name: 'Overwritten rules'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'firewall-drop'
+    LOCATION: 'defined-agent'
+    AGENT_ID: '001'
+    LEVEL: '10'
+    RULE: '1000002'
+  metadata:
+    test: 'test metadata'
