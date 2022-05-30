@@ -1,0 +1,52 @@
+- sections:
+    - section: active-response
+      elements:
+        - disabled:
+            value: 'no'
+        - command:
+            value: COMMAND
+        - location:
+            value: LOCATION
+        - agent_id:
+            value: AGENT_ID
+        - level:
+            value: LEVEL
+        - rules_id:
+            value: RULE            
+        
+
+    - section: vulnerability-detector
+      elements:
+      - enabled:
+          value: 'no'
+    - section: sca
+      elements:
+      - enabled:
+          value: 'no'
+
+    - section: rootcheck
+      elements:
+      - disabled:
+          value: 'yes'
+
+    - section: syscheck
+      elements:
+      - disabled:
+          value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: 'syscollector'
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: auth
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: rule_test
+      elements:
+        - enabled:
+            value: 'no'
