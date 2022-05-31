@@ -129,11 +129,9 @@ ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED = 'Did not receive expected "File integrity monitoring real-time Whodata \
                                             engine started" or "Initializing FIM Integrity Synchronization check"'
 ERR_MSG_INTEGRITY_CHECK_EVENT = 'Did not receive expected "Initializing FIM Integrity Synchronization check" event'
-                                                        
 
 
 # Setting Local_internal_option file
-
 if sys.platform == 'win32':
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'windows.debug': '2',

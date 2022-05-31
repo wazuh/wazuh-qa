@@ -59,14 +59,14 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event, REGULAR, create_file, _create_regular_windows
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event, REGULAR, create_file
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.wazuh_variables import DATA
 from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                        YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                        SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
+                                       YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                       SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -95,20 +95,21 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
+
 
 @pytest.fixture(scope='module')
 def create_a_file(get_configuration):
     """Create a file previous to restart syscheckd"""
     create_file(REGULAR, test_directories[0], 'testfile')
 
-# Tests
 
-def test_sync_enabled(get_configuration, configure_environment, create_a_file, restart_syscheckd, wait_for_fim_start_sync):
+# Tests
+def test_sync_enabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
+                      wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -149,9 +150,6 @@ def test_sync_enabled(get_configuration, configure_environment, create_a_file, r
 
     tags:
         - scheduled
-        - time_travel
-        - realtime
-        - who_data
     '''
     # The file synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
@@ -163,4 +161,4 @@ def test_sync_enabled(get_configuration, configure_environment, create_a_file, r
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
                                     callback=callback_detect_integrity_event).result()
 
-    assert event['component'] == 'fim_registry', 'Wrong event component'
+    assert event['component'] == 'fim_registry_key', 'Wrong event component'

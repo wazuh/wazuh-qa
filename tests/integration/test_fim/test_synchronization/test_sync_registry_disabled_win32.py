@@ -65,17 +65,15 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules import DATA
 from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
-                                                    SYNCHRONIZATION_REGISTRY_ENABLED)
-# Marks
+                                       YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                       SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
 
+
+# Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
-
-
 configurations_path = os.path.join(test_data_path, YAML_CONF_SYNC_WIN32)
 
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
@@ -102,6 +100,7 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 @pytest.fixture(scope='module')
 def create_a_file(get_configuration):
     """Create a file previous to restart syscheckd"""
@@ -109,8 +108,8 @@ def create_a_file(get_configuration):
 
 
 # Tests
-
-def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd, wait_for_fim_start_sync_disabled):
+def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
+                       wait_for_fim_start_sync_disabled):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
