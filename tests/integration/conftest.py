@@ -1107,12 +1107,13 @@ def setup_alert_monitor():
 
     yield log_monitor
 
+
 @pytest.fixture(scope='function')
 def copy_file(source_path, destination_path):
     """Copy file from source to destination"""
-    print(source_path)
-    for file in source_path:
-        copy(file, destination_path)
+    for i in range (len(source_path)):
+        copy(source_path[i], destination_path[i])
 
-    # yield
-    # remove_file(destination_path)
+    yield
+    for file in destination_path:
+        remove_file(file)
