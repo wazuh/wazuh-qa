@@ -850,3 +850,217 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def set_wazuh_configuration(configuration):
+    """Set wazuh configuration
+
+    Args:
+        configuration (dict): Configuration template data to write in the ossec.conf
+    """
+    # Save current configuration
+    backup_config = conf.get_wazuh_conf()
+
+    # Configuration for testing
+    test_config = conf.set_section_wazuh_conf(configuration.get('sections'))
+
+    # Set new configuration
+    conf.write_wazuh_conf(test_config)
+
+    # Set current configuration
+    global_parameters.current_configuration = configuration
+
+    yield
+
+    # Restore previous configuration
+    conf.write_wazuh_conf(backup_config)
+
+@pytest.fixture(scope='function')
+def configure_local_internal_options_function(request):
+    """Fixture to configure the local internal options file.
+
+    It uses the test variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
+    """
+    try:
+        local_internal_options = getattr(request.module, 'local_internal_options')
+    except AttributeError as local_internal_configuration_not_set:
+        logger.debug('local_internal_options is not set')
+        raise local_internal_configuration_not_set
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
+    conf.set_local_internal_options_dict(local_internal_options)
+
+    yield
+
+    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    conf.set_local_internal_options_dict(backup_local_internal_options)
+
+@pytest.fixture(scope='function')
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+
+
+@pytest.fixture(scope='function')
+def stop_modules_function_after_execution():
+    """Stop wazuh modules daemon after finishing a test"""
+    yield
+    control_service('stop')
+
+
+@pytest.fixture(scope='function')
+def mock_system(request):
+    """Update the agent system in the global DB using the `mocked_system` variable defined in the test module and
+       restore the initial one after finishing.
+    """
+    system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+
+    # Backup the old system data
+    sys_info = get_system()
+
+    # Set the new system data
+    mocking.set_system(system)
+
+    yield
+
+    # Restore the backup system data
+    modify_system(os_name=sys_info['agent_query']['os_name'], os_major=sys_info['agent_query']['os_major'],
+                  name=sys_info['agent_query']['name'], os_minor=sys_info['agent_query']['os_minor'],
+                  os_arch=sys_info['agent_query']['os_arch'], os_version=sys_info['agent_query']['os_version'],
+                  os_platform=sys_info['agent_query']['os_platform'], version=sys_info['agent_query']['version'])
+
+    update_os_info(scan_id=sys_info['osinfo_query']['scan_id'], scan_time=sys_info['osinfo_query']['scan_time'],
+                   hostname=sys_info['osinfo_query']['hostname'], architecture=sys_info['osinfo_query']['architecture'],
+                   os_name=sys_info['osinfo_query']['os_name'], os_version=sys_info['osinfo_query']['os_version'],
+                   os_major=sys_info['osinfo_query']['os_major'], os_minor=sys_info['osinfo_query']['os_minor'],
+                   os_build=sys_info['osinfo_query']['os_build'], version=sys_info['osinfo_query']['version'],
+                   os_release=sys_info['osinfo_query']['os_release'], os_patch=sys_info['osinfo_query']['os_patch'],
+                   release=sys_info['osinfo_query']['release'], checksum=sys_info['osinfo_query']['checksum'])
+
+
+@pytest.fixture(scope='function')
+def mock_system_parametrized(system):
+    """Update the agent system in the global DB using the `system` variable defined in the parametrized function.
+
+    Args:
+        system (str): System to set. Available systems in SYSTEM_DATA variable from mocking module.
+    """
+    mocking.set_system(system)
+    yield
+
+
+@pytest.fixture(scope='function')
+def mock_agent_packages(mock_agent_function):
+    """Add 10 mocked packages to the mocked agent"""
+    package_names = mocking.insert_mocked_packages(agent_id=mock_agent_function)
+
+    yield package_names
+
+    mocking.delete_mocked_packages(agent_id=mock_agent_function)
+
+
+@pytest.fixture(scope='function')
+def clean_mocked_agents():
+    """Clean all mocked agents"""
+    mocking.delete_all_mocked_agents()
+
+    yield
+
+    mocking.delete_all_mocked_agents()
+
+
+@pytest.fixture(scope='module')
+def mock_agent_module():
+    """Fixture to create a mocked agent in wazuh databases"""
+    agent_id = mocking.create_mocked_agent(name='mocked_agent')
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def mock_agent_function(request):
+    """Fixture to create a mocked agent in wazuh databases"""
+    system = getattr(request.module, 'mocked_system') if hasattr(request.module, 'mocked_system') else 'RHEL8'
+    agent_data = mocking.SYSTEM_DATA[system] if system in mocking.SYSTEM_DATA else {'name': 'mocked_agent'}
+
+    agent_id = mocking.create_mocked_agent(**agent_data)
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='function')
+def remove_backups(backups_path):
+    "Creates backups folder in case it does not exist."
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+    yield
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+
+    
+@pytest.fixture(scope='function')    
+def mock_agent_with_custom_system(agent_system):
+    """Fixture to create a mocked agent with custom system specified as parameter"""
+    if agent_system not in mocking.SYSTEM_DATA:
+        raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
+
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+
+    yield agent_id
+
+    mocking.delete_mocked_agent(agent_id)
+
+
+@pytest.fixture(scope='function')
+def setup_log_monitor():
+    """Create the log monitor"""
+    log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def setup_alert_monitor():
+    """Create the alert monitor"""
+    log_monitor = FileMonitor(ALERTS_JSON_PATH)
+
+    yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def copy_file(source_path, destination_path):
+    """Copy file from source to destination"""
+    for i in range (len(source_path)):
+        copy(source_path[i], destination_path[i])
+
+    yield
+    for file in destination_path:
+        remove_file(file)
