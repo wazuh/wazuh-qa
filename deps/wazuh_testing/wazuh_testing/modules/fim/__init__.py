@@ -77,7 +77,7 @@ CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\
 
 CB_COUNT_REGISTRY_ENTRIES = r".*Fim registry entries count: '(\d+)'"
 CB_COUNT_REGISTRY_VALUE_ENTRIES = r".*Fim registry values entries count: '(\d+)'"
-CB_REGISTRY_DBSYNC_NO_DATA = r".*#!-fim_registry dbsync no_data (.+)"
+CB_REGISTRY_DBSYNC_NO_DATA = r".*#!-fim_registry_key dbsync no_data (.+)"
 CB_REGISTRY_LIMIT_CAPACITY = r".*Registry database is (\d+)% full."
 CB_REGISTRY_DB_BACK_TO_NORMAL = r".*(The registry database status returns to normal)."
 CB_REGISTRY_LIMIT_VALUE = r".*Maximum number of registry values to be monitored: '(\d+)'"
