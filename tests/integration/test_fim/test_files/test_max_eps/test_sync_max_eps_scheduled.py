@@ -48,8 +48,6 @@ references:
 
 pytest_args:
     - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
         scheduled: Implies scheduled scan
 
     - tier:
@@ -62,6 +60,7 @@ tags:
 '''
 import os
 import pytest
+import time
 
 from collections import Counter
 from wazuh_testing import logger
@@ -71,10 +70,9 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       ERR_MSG_AGENT_DISCONNECT, ERR_MSG_INTEGRITY_CONTROL_MSG,
-                                       SCHEDULE_MODE, REALTIME_MODE, WHODATA_MODE)
+                                       ERR_MSG_INTEGRITY_CONTROL_MSG, SCHEDULED_MODE, ERR_MSG_MULTIPLE_FILES_CREATION)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import callback_integrity_message, callback_connection_message
+from wazuh_testing.modules.fim.event_monitor import callback_integrity_message
 from wazuh_testing.tools.file import delete_path_recursively, write_file
 
 # Marks
@@ -89,9 +87,7 @@ configurations_path = os.path.join(test_data_path, YAML_CONF_MAX_EPS_SYNC)
 test_directory = os.path.join(PREFIX, TEST_DIR_1)
 conf_params = {TEST_DIRECTORIES: test_directory}
 
-ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 
-TIMEOUT_CHECK_AGENT_CONNECT = 10
 TIMEOUT_CHECK_INTEGRATY_START = 30
 TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 90
 
@@ -101,13 +97,13 @@ TIMEOUT_CHECK_EACH_INTEGRITY_MSG = 90
 eps_values = ['1', '100']
 
 parameters, metadata = generate_params(extra_params=conf_params,
-                                       modes=[SCHEDULE_MODE, REALTIME_MODE, WHODATA_MODE],
+                                       modes=[SCHEDULED_MODE],
                                        apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values))
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 configuration_ids = [f"{x['fim_mode']}_mode_{x['max_eps']}_max_eps" for x in metadata]
 
-# Fixtures
 
+# Fixtures
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -122,11 +118,12 @@ def create_multiple_files(get_configuration):
     os.makedirs(test_directory, exist_ok=True, mode=0o777)
     try:
         for i in range(int(max_eps) + 5):
-            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode'
+            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode{time.time()}'
             path = os.path.join(test_directory, file_name)
             write_file(path)
     except OSError:
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
+
 
 # Tests
 def test_max_eps_sync_valid_within_range(configure_local_internal_options_module, get_configuration,
@@ -161,9 +158,6 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
         - restart_wazuh:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - delete_files:
-            type: fixture
-            brief: Delete the testing files when the test ends.
 
     assertions:
         - Verify that FIM 'integrity' events are generated for each testing file created.
@@ -174,7 +168,6 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
                        the 'wazuh-syscheckd' daemon and, these are combined with the
                        testing directories to be monitored defined in the module.
     expected_output:
-        - r'.* Connected to the server .*'
         - r'.*Sending integrity control message'
 
     tags:
@@ -185,11 +178,6 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
     try:
         max_eps = int(get_configuration['metadata']['max_eps'])
 
-        # Wait until the agent connects to the manager.
-        wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_AGENT_CONNECT,
-                                callback=callback_connection_message,
-                                error_message=ERR_MSG_AGENT_DISCONNECT).result()
-
         # Find integrity start before attempting to read max_eps.
         wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START,
                                 callback=callback_integrity_message,
@@ -197,11 +185,10 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
 
         # Find integrity message for each file created after read max_eps.
         total_file_created = max_eps + 5
-        result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG,
-                                        accum_results=total_file_created,
-                                        callback=callback_integrity_message,
-                                        error_message=f'Received less results than expected ({total_file_created})').result()
-
+        result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG, accum_results=total_file_created,
+                                         callback=callback_integrity_message,
+                                         error_message=f'Received less results than expected\
+                                                        ({total_file_created})').result()
         # Collect by time received the messages.
         counter = Counter([date_time for date_time, _ in result])
 
