@@ -59,9 +59,8 @@ import pytest
 from wazuh_testing.fim import (generate_params, create_registry, modify_registry_value, registry_parser,
                                KEY_WOW64_64KEY, REG_SZ)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
+from wazuh_testing.modules.fim.utils import find_value_in_event_list, get_sync_msgs
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.fim_module.fim_variables import (SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE,
                                                     YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE,
@@ -94,7 +93,6 @@ def get_configuration(request):
 
 
 # tests
-@pytest.skip(reason="Blocked by Issue Wazuh/Wazuh #13188, when it is fixed, this test can continue development")
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,
@@ -146,7 +144,6 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     tags:
         - scheduled
-        - time_travel
     '''
     key_path = os.path.join(MONITORED_KEY, key_name)
     value_path = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path, value_name)
