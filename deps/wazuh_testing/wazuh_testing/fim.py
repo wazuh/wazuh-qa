@@ -1097,11 +1097,25 @@ def callback_detect_integrity_event(line):
     return None
 
 
-def callback_detect_registry_integrity_state_event(line):
+def callback_detect_registry_integrity_event(line):
     event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry_key' and event['type'] == 'state':
-        return event['data']
-    if event and event['component'] == 'fim_registry_value' and event['type'] == 'state':
+    if event and event['component'] == 'fim_registry_key':
+        return event
+    if event and event['component'] == 'fim_registry_value':
+        return event
+    return None
+
+
+def callback_detect_file_integrity_event(line):
+    event = callback_detect_integrity_event(line)
+    if event and event['component'] == 'fim_file':
+        return event
+    return None
+
+
+def callback_detect_registry_integrity_state_event(line):
+    event = callback_detect_registry_integrity_event(line)
+    if event and event['type'] == 'state':
         return event['data']
     return None
 
