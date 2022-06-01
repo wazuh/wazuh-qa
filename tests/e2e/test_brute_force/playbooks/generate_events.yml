@@ -1,0 +1,23 @@
+---
+    - name: Generate events
+      hosts: localhost
+      ignore_errors: True
+      tasks:
+        - name: ssh connection
+          expect:
+            command: ssh {{item}}@wazuh-agent
+            timeout: 5
+            responses:
+              "Password": "1"
+          loop:
+            - test_user
+            - test_user
+            - test_user
+            - test_user
+            - test_user
+            - test_user
+            - test_user
+            - test_user
+        - name: wait for alert
+          pause:
+            seconds: 5
