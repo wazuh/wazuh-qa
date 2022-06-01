@@ -36,6 +36,10 @@
       become: True
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
+    - name: Start Docker with systemd
+      become: True
+      shell: systemctl start docker
+
     - name: Configure the docker-listener module
       become: True
       blockinfile:
@@ -53,3 +57,17 @@
     - name: Restart wazuh-manager
       become: True
       shell: systemctl restart wazuh-manager
+
+    - name: Unzip Wazuh installation files
+      become: True
+      unarchive:
+        src: /root/wazuh-install-files.tar
+        dest: /root
+        remote_src: yes
+
+    - name: Get credentials file
+      become: True
+      fetch:
+        src: /root/wazuh-install-files/passwords.wazuh
+        dest: /tmp
+        flat: yes
