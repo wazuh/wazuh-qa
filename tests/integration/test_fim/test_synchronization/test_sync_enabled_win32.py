@@ -59,7 +59,8 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event, REGULAR, create_file
+from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, REGULAR, create_file,
+                               callback_detect_registry_integrity_event, callback_detect_file_integrity_event)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -153,12 +154,12 @@ def test_sync_enabled(get_configuration, configure_environment, create_a_file, r
     '''
     # The file synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_detect_integrity_event, update_position=True).result()
+                                    callback=callback_detect_file_integrity_event, update_position=True).result()
 
-    assert event['component'] == 'fim_file', 'Wrong event component'
+    assert event['component'] == 'fim_file', 'Did not recieve the expected "fim_file" event'
 
     # The registry synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
-                                    callback=callback_detect_integrity_event).result()
+                                    callback=callback_detect_registry_integrity_event).result()
 
-    assert event['component'] == 'fim_registry_key', 'Wrong event component'
+    assert event['component'] == 'fim_registry_key', 'Did not recieve the expected "fim_registry_key" event'
