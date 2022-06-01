@@ -38,7 +38,7 @@
 
     - name: Start Docker with systemd
       become: True
-      shell: systemctl start docker
+      shell: systemctl stop docker && systemctl stop docker.socket && systemctl start docker
 
     - name: Configure the docker-listener module
       become: True
@@ -69,5 +69,5 @@
       become: True
       fetch:
         src: /root/wazuh-install-files/passwords.wazuh
-        dest: /tmp
+        dest: /tmp/
         flat: yes

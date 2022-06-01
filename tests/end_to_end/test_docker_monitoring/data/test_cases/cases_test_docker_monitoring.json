@@ -1,0 +1,115 @@
+[
+    {
+        "name": "docker_pull",
+        "description": "Test if an alert is generated when using the `pull` command.",
+        "configuration_parameters": {},
+        "metadata": {
+            "opensearch_query": {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "match_phrase": {
+                                    "data.docker.Action": "pull"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "regex": "'.+\"docker\":.+\"Action\": \"(pull)\".+\"Attributes\":.+\"(nginx)\".+\"description\": \"(Docker: Image or repository nginx pulled)\".+'gm"
+        }
+    },
+    {
+        "name": "docker_run",
+        "description": "Test if an alert is generated when using the `pull` command.",
+        "configuration_parameters": {},
+        "metadata": {
+            "opensearch_query": {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match_phrase": {
+                                                "data.docker.Action": "create"
+                                            }
+                                        },
+                                        {
+                                            "match_phrase": {
+                                                "data.docker.Action": "start"
+                                            }
+                                        },
+                                        {
+                                            "match_phrase": {
+                                                "data.docker.Action": "connect"
+                                            }
+                                        }
+                                    ],
+                                    "minimum_should_match": 1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "regex": ".+\"docker\":.+\"Action\": \"(create)\".+\"image\": \"(nginx)\".+\"description\": \"(Docker: Container nginx_container created)\".+\"docker\":.+\"Action\": \"(connect)\".+\"container\".+\"description\": \"(Docker: Network bridge connected)\".+\"docker\":.+\"Action\": \"(start)\".+\"image\": \"(nginx)\".+\"description\": \"(Docker: Container nginx_container started)\".+"
+        }
+    },
+    {
+        "name": "docker_exec",
+        "description": "Test if an alert is generated when using the `exec` command.",
+        "configuration_parameters": {},
+        "metadata": {
+            "opensearch_query": {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "match_phrase": {
+                                    "data.docker.Action": "exec_start: /bin/bash "
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "regex": ".+\"docker\":.+\"Action\": \"(exec_start: /bin/bash )\".+\"image\": \"(nginx)\".+\"description\": \"(Docker: Started shell session in container nginx_container)\".+"
+        }
+    },
+    {
+        "name": "docker_stop_rm",
+        "description": "Test if an alert is generated when using the `exec` command.",
+        "configuration_parameters": {},
+        "metadata": {
+            "opensearch_query": {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match_phrase": {
+                                                "data.docker.Action": "destroy"
+                                            }
+                                        },
+                                        {
+                                            "match_phrase": {
+                                                "data.docker.Action": "stop"
+                                            }
+                                        }
+                                    ],
+                                    "minimum_should_match": 1
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "regex": ".+\"docker\":.+\"Action\": \"(stop)\".+\"image\": \"(nginx)\".+\"description\": \"(Docker: Container nginx_container stopped)\".+\"docker\":.+\"Action\": \"(destroy)\".+\"image\": \"(nginx)\".+\"description\": \"(Docker: Container nginx_container destroyed)\".+"
+        }
+    }
+]

@@ -15,7 +15,7 @@ def get_opensearch_credentials():
     for line in file.get_file_lines(credentials_file):
         if 'username: admin' in line:
             user = 'admin'
-        if user != '' and 'password: ' in line:
+        if user != '' and password == '' and 'password: ' in line:
             password = line.split()[1]
 
     yield user, password
