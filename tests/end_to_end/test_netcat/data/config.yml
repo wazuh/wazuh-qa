@@ -4,11 +4,6 @@ wazuh-agent-linux:
   - hostname: "centos-agent"
   - rule_id: "100051"
 
-wazuh-agent-windows:
-  - ip: "192.168.0.7"
-  - hostname: "windows"
-  - rule_id: "60204"
-
 wazuh-manager-indexer:
 - ip: "192.168.0.5"
 - hostname: "centos-manager-kibana"
