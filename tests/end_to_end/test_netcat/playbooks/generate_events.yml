@@ -1,6 +1,11 @@
 ---
-- name: Generate events
-	  hosts: wazuh-agent
-	  tasks:
-	    - name: Run netcat
-	      shell: nc -l 8000
+    - name: Generate events
+      hosts: wazuh-agent
+      ignore_errors: True
+      tasks:
+        - name: netcat
+          command: nc -l 8000
+          timeout: 30
+
+
+
