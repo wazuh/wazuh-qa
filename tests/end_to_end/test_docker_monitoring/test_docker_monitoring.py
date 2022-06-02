@@ -17,7 +17,6 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 
 def get_alerts_from_opensearch_api(user, password, query):
-    import pdb; pdb.set_trace()
     hostname = 'wazuh-manager'
     params = {'pretty': 'true'}
     headers = {'Content-Type': 'application/json'}
