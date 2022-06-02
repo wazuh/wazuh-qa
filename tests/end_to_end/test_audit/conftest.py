@@ -29,6 +29,9 @@ def get_dashboard_credentials():
             password_line = line
             password = password_line.split()[1]
 
-    dashboard_credentials = [user, password]
+        if user != '' and password != '':
+            break
+
+    dashboard_credentials = {'user': user, 'password': password}
 
     yield dashboard_credentials
