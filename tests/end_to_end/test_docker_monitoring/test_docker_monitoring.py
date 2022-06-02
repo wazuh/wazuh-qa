@@ -12,6 +12,13 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 test_cases_file_path = os.path.join(TEST_CASES_PATH, 'cases_test_docker_monitoring.json')
 
+# Playbooks
+playbooks = {
+    'setup_playbooks': ['configuration.yaml', 'generate_alerts.yaml'],
+    'teardown_playbooks': [],
+    'skip_teardown': True
+}
+
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path, format='json')
 
@@ -34,9 +41,8 @@ def get_alerts_from_opensearch_api(user, password, query):
     return opensearch_query_result
 
 
-@pytest.mark.ansible_playbook_setup('configuration.yaml', 'generate_alerts.yaml')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_docker_monitoring(ansible_playbook, metadata, get_opensearch_credentials):
+def test_docker_monitoring(run_ansible_playbooks, metadata, get_opensearch_credentials):
     user, password = get_opensearch_credentials
     opensearch_result = get_alerts_from_opensearch_api(user, password, metadata['opensearch_query'])
 
