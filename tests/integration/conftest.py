@@ -119,6 +119,14 @@ def restart_wazuh_daemon_function(daemon=None):
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
 
+@pytest.fixture(scope='module')
+def restart_wazuh_daemon_after_finishing(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    yield
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
