@@ -111,7 +111,26 @@ SYSTEM_DATA = {
     'BUSTER': {'os_name': 'Debian GNU/Linux', 'os_major': '10', 'os_minor': '0', 'os_platform': 'debian',
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
-                'name': 'debian9'}
+                'name': 'debian9'},
+    'SLED11': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '11', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop11', 'os_codename': 'sled'},
+    'SLED12': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '12', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop12', 'os_codename': 'sled'},
+    'SLED15': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '15', 'os_minor': '',
+               'os_platform': 'sled', 'name': 'Desktop15', 'os_codename': 'sled'},
+    'SLES11': {'hostname': 'sles', 'architecture': 'x86_64', 'os_name': 'SLES', 'os_major': '11', 'os_minor': '',
+               'os_platform': 'sles', 'name': 'Server11', 'os_codename': 'sles'},
+    'SLES12': {'hostname': 'sles', 'architecture': 'x86_64', 'os_name': 'SLES', 'os_major': '12', 'os_minor': '',
+               'os_platform': 'sles', 'name': 'Server12', 'os_codename': 'sles'},
+    'SLES15': {'hostname': 'localhost', 'architecture': 'x64', 'os_name': 'SLES', 'os_version': '15.2',
+               'os_codename': '', 'os_major': '15', 'os_minor': '', 'os_patch': '', 'os_build': '',
+               'os_platform': 'sles', 'sysname': 'Linux', 'release': '5.3.18-22-default', 'version': 'Wazuh v4.4.0',
+               'os_release': '', 'checksum': '1652388661375945607', 'name': 'SUSE15', 'ip': '127.0.0.1',
+               'register_ip': 'any', 'internal_key': '',
+               'os_uname': 'Linux |localhost|5.3.18-22-default |#1 SMP Wed Jun 3 12:16:43 UTC 2020 (720aeba)|x86_64',
+               'os_arch': 'x64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'localhost.localdomain',
+               'node_name': 'node01', 'date_add': '1652381429', 'last_keepalive': '253402300799',
+               'sync_status': 'synced', 'connection_status': 'active'}
 }
 
 
