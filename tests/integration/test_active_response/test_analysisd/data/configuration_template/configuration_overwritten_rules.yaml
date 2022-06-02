@@ -7,13 +7,8 @@
             value: COMMAND
         - location:
             value: LOCATION
-        - agent_id:
-            value: AGENT_ID
-        - level:
-            value: LEVEL
         - rules_id:
-            value: RULE            
-        
+            value: RULES
 
     - section: vulnerability-detector
       elements:
