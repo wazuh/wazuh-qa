@@ -8,6 +8,9 @@ to maintain if one of them changes in the future.
 '''
 import pytest
 
+# Services Variables
+WAZUH_SERVICES_STOPPED = 'stopped'
+WAZUH_SERVICE_PREFIX = 'wazuh'
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
 
