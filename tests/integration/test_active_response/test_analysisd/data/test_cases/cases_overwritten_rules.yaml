@@ -1,10 +1,26 @@
-- name: 'Overwritten rules'
+- name: 'Overwritten rules - Rule test 100001'
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
-    COMMAND: 'firewall-drop'
-    LOCATION: 'defined-agent'
-    AGENT_ID: '001'
-    LEVEL: '10'
-    RULE: '1000002'
+    COMMAND: 'restart-wazuh'
+    LOCATION: 'server'
+    RULES: '5710'
+  metadata:
+    test: 'test metadata'
+
+- name: 'Overwritten rules - Rule test 100002'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'restart-wazuh'
+    LOCATION: 'server'
+    RULES: '5710'
+  metadata:
+    test: 'test metadata'
+
+- name: 'Overwritten rules - Rule test 100004'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'restart-wazuh'
+    LOCATION: 'server'
+    RULES: '5710'
   metadata:
     test: 'test metadata'
