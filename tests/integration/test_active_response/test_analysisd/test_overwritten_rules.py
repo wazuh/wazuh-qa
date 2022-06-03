@@ -49,7 +49,6 @@ def wait_shutdown_message_line(line):
 def test_overwritten_rules(configuration, metadata, set_wazuh_configuration_analysisd, copy_file, source_path, destination_path, restart_wazuh_daemon):
     
     time.sleep(20)
-    print('--------------------------imprimiendo')
     write_file('/var/log/secure', log_sample)
 
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -68,4 +67,3 @@ def test_overwritten_rules(configuration, metadata, set_wazuh_configuration_anal
     ## verify that the Analysis daemon starts as expected and Active Response works for rules 100001, 100002, and 100004.
 
     write_file('/var/ossec/logs/active-responses.log')
-    
