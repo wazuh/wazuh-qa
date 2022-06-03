@@ -13,7 +13,7 @@
         "test_cluster/test_agent_info_sync/test_agent_info_sync.py",
         "test_cluster/test_agent_key_polling/test_agent_key_polling.py",
         "test_multigroups/test_multigroups.py",
-        "test_cluster/test_agent_groups/test    _agent_groups_forced_change.py"
+        "test_cluster/test_agent_groups/test_agent_groups_forced_change.py"
     ],
     "enrollment_cluster": [
         "test_cluster/test_agent_enrollment/test_agent_enrollment.py",
