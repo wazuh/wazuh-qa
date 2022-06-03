@@ -135,10 +135,6 @@
     output: 'ok [{"id":1,"key":"TestKey1","value":"TestLabel1"}]'
     stage: "global get-labels success"
   -
-    input: 'global set-labels 1 TestKey2:TestLabel2'
-    output: 'ok'
-    stage: "global set-labels success"
-  -
     input: 'global get-labels 1'
     output: 'ok [{"id":1,"key":"TestKey2","value":"TestLabel2"}]'
     stage: "global get-labels success"
@@ -154,11 +150,6 @@
     input: 'global select-agent-group  1'
     output: 'ok [{"group":"TestGroup1"}]'
     stage: "global select-agent-group success"
-  -
-    input: 'global select-keepalive TestName2 0.0.0.1'
-    output: 'ok []'
-    stage: "global select-keepalive success"
-    use_regex: "yes"
   -
     input: 'global select-groups'
     output: 'ok [{"name":"default"},{"name":"TestGroup1"}]'
