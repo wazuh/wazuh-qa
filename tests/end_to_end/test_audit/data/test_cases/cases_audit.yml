@@ -1,0 +1,10 @@
+- name: ping_google
+  description: Ping www.google.com and check generated alerts
+  configuration_parameters: null
+  metadata:
+    rule.id: 80792
+    level: 3
+    description: "Audit\\: Command\\: \\/usr\\/bin\\/ping."
+    euid: 1000
+    a3: '\\"www\.google\.com\\"'
+    data.audit.command: ping

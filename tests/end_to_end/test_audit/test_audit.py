@@ -3,32 +3,46 @@ import os
 
 from wazuh_testing.tools.end_to_end import get_alert_dashboard_api, make_query
 
+from wazuh_testing.tools import configuration as config
 from wazuh_testing.event_monitor import check_event
 
 alerts_json = os.path.join('/tmp', 'alerts.json')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_audit.yml')
+
+configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.ansible_playbook_setup('credentials.yml', 'configuration.yml', 'generate_events.yml')
-def test_audit(ansible_playbook, get_dashboard_credentials, clean_environment):
+def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_environment):
 
-    expected_alert = r'\{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{"level"\:3,"description"\:"Audit\:'\
-                        r' Command\: \/usr\/bin\/ping\.","id"\:"80792","firedtimes"\:(\d+).*euid=1000.*' \
-                        r'a3=\\"www\.google\.com\\".*\}'
+    level = metadata['level']
+    description = metadata['description']
+    rule_id = metadata['rule.id']
+    euid = metadata['euid']
+    a3 = metadata['a3']
+    data_audit_command = metadata['data.audit.command']
 
-    check_event(callback=expected_alert, file_to_monitor=alerts_json)
+    expected_alert = r'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{},"description"\:"{}",'\
+                     r'"id"\:"{}".*euid={}.*a3={}.*\}}'.format(level, description, rule_id, euid, a3)
 
     query = make_query([
                         {
                            "term": {
-                              "rule.id": "80792"
+                              "rule.id": f"{rule_id}"
                            }
                         },
                         {
                            "term": {
-                              "data.audit.command": "ping"
+                              "data.audit.command": f"{data_audit_command}"
                            }
                         }
                      ])
-
     alert_dashboard = get_alert_dashboard_api(query=query, credentials=get_dashboard_credentials)
-    assert alert_dashboard.status_code == 200, 'The alert not found in wazuh-dashboard API'
+
+    try:
+        assert str(rule_id) in alert_dashboard.text
+    except AssertionError:
+        check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
+        raise AssertionError('The alert has occurred, but has not been indexed.')
