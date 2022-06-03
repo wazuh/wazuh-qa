@@ -21,9 +21,9 @@ def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_envi
     level = metadata['level']
     description = metadata['description']
     rule_id = metadata['rule.id']
-    euid = metadata['euid']
-    a3 = metadata['a3']
-    data_audit_command = metadata['data.audit.command']
+    euid = metadata['extra']['euid']
+    a3 = metadata['extra']['a3']
+    data_audit_command = metadata['extra']['data.audit.command']
 
     expected_alert = r'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{},"description"\:"{}",'\
                      r'"id"\:"{}".*euid={}.*a3={}.*\}}'.format(level, description, rule_id, euid, a3)
