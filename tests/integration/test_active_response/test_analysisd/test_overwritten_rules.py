@@ -1,6 +1,8 @@
 import os
 import pytest
 from random import randint
+import platform
+import time
 
 import wazuh_testing.execd as execd
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
@@ -29,24 +31,41 @@ log_sample = f"Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
+def wait_message_line(line):
+    """Callback function to wait for Active Response JSON message."""
+    if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
+        return True
+    elif "active-response/bin/restart-wazuh: {\"version\"" in line:
+        return True
+    return None
+
+def wait_shutdown_message_line(line):
+    """Callback function to wait for Wazuh shutdown message."""
+    return True if "Shutdown received. Deleting responses." in line else None
 
 @pytest.mark.parametrize("source_path", [source_path])
 @pytest.mark.parametrize("destination_path", [destination_path])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_overwritten_rules(configuration, metadata, set_wazuh_configuration_analysisd, copy_file, source_path,
-                           destination_path, restart_wazuh_daemon):
+def test_overwritten_rules(configuration, metadata, set_wazuh_configuration_analysisd, copy_file, source_path, destination_path, restart_wazuh_daemon):
     
+    time.sleep(20)
+    print('--------------------------imprimiendo')
     write_file('/var/log/secure', log_sample)
 
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
     ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in active-response logs
-    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
-    ar_log_monitor.start(timeout=60, callback=execd.wait_message_line)
+    ar_log_monitor.start(timeout=120, callback=execd.wait_start_message_line)
+    ar_log_monitor.start(timeout=120, callback=wait_message_line)
 
     # Checking shutdown message in ossec logs
-    ossec_log_monitor.start(timeout=60, callback=generate_monitoring_callback('Shutdown received. Deleting responses.'))
+    #ossec_log_monitor.start(timeout=120, callback=generate_monitoring_callback('Shutdown received. Deleting responses.'))
+    # Checking shutdown message in ossec logs
+    ossec_log_monitor.start(timeout=120, callback=wait_shutdown_message_line)
 
-    ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
+    ar_log_monitor.start(timeout=120, callback=execd.wait_ended_message_line)
     ## verify that the Analysis daemon starts as expected and Active Response works for rules 100001, 100002, and 100004.
+
+    write_file('/var/ossec/logs/active-responses.log')
+    
