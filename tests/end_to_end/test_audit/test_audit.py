@@ -13,6 +13,7 @@ test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_audit.y
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.ansible_playbook_setup('credentials.yml', 'configuration.yml', 'generate_events.yml')
 def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_environment):
