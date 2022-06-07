@@ -1,13 +1,13 @@
-import pytest
 import os
-
-from wazuh_testing.tools.end_to_end import get_alert_dashboard_api, make_query
+import pytest
+from tempfile import gettempdir
 
 from wazuh_testing.tools import configuration as config
 from wazuh_testing.end_to_end import get_alert_indexer_api, make_query
 from wazuh_testing.event_monitor import check_event
 
-alerts_json = os.path.join('/tmp', 'alerts.json')
+
+alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_audit.yml')
 
