@@ -14,6 +14,14 @@
         attributes:
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 2
 - tags:
   - monitored_file
@@ -40,6 +48,14 @@
         attributes:
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 3
 - tags:
     - monitored_dir
@@ -60,6 +76,14 @@
         attributes:
           - FIM_MODE
           - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 4
 - tags:
     - replace_with_directory
@@ -96,6 +120,14 @@
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
         - check_size: 'no'
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 6
 - tags:
     - symlink_dir_inside_monitored_dir
@@ -117,6 +149,14 @@
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
         - check_size: 'no'
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 8
 - tags:
     - symlink_and_dir
@@ -136,6 +176,14 @@
         attributes:
         - FIM_MODE
         - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 9
 - tags:
     - nested_dir
@@ -155,6 +203,14 @@
         attributes:
           - FIM_MODE
           - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
 # conf 10
 - tags:
   - check_audit_removed_rules
@@ -170,3 +226,11 @@
           attributes:
             - FIM_MODE
             - follow_symbolic_link: FOLLOW_MODE
+    - skip_nfs:
+        value: 'yes'
+    - skip_proc:
+        value: 'yes'
+    - skip_dev:
+        value: 'yes'
+    - skip_sys:
+        value: 'yes'
