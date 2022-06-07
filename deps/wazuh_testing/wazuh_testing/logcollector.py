@@ -11,6 +11,8 @@ from time import sleep
 
 from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, WAZUH_PATH, monitoring
 
+GENERIC_CALLBACK_MSG_LOG_FILE_DUPLICATED = r".*Log file (.+) is duplicated."
+
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not been produced'
@@ -19,6 +21,7 @@ GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has n
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
+GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED = "The expected warning log file duplicated has not been produced."
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 40

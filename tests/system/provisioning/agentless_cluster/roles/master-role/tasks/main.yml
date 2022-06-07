@@ -15,7 +15,7 @@
       - policycoreutils
       - automake
       - autoconf
-      - libtool 
+      - libtool
     force_apt_get: yes
     state: present
     update_cache: yes
