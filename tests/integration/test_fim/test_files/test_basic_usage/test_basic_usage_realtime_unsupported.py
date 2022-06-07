@@ -74,7 +74,7 @@ test_directories = [directory_str]
 
 
 # Configurations
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': directory_str}
 parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 local_internal_options = {'syscheck.debug': '2', 'monitord.rotate_log': '0'}
