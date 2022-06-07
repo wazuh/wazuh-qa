@@ -1,17 +1,14 @@
-- name: Clean alerts.json
-  hosts: wazuh-manager
-  tasks:
-    - name: Truncate file
-      shell: echo "" > /var/ossec/logs/alerts/alerts.json
-      become: True
 - name: Generate events
   hosts: wazuh-manager
   tasks:
+
+    - name: Truncate file
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: True
+
     - name: Ping google
       shell: ping -c 1 www.google.com
-- name: Get alerts
-  hosts: wazuh-manager
-  tasks:
+
     - name: Get alerts.json
       fetch:
         src: /var/ossec/logs/alerts/alerts.json

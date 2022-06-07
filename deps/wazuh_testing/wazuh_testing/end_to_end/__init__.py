@@ -4,7 +4,7 @@
 import requests
 
 
-def get_alert_indexer_api(ip_address='wazuh-manager', index='wazuh-alerts-4.x-*', query=None, credentials=None):
+def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
     """Get an alert from the wazuh-indexer API
 
       Make a request to the wazuh-indexer API to get the last indexed alert that matches the values passed in
@@ -19,7 +19,7 @@ def get_alert_indexer_api(ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'
       Returns:
           `obj`(map): Search results
      """
-    url = f'https://{ip_address}:9200/{index}/_search?'
+    url = f"https://{ip_address}:9200/{index}/_search?"
 
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
@@ -27,8 +27,8 @@ def get_alert_indexer_api(ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'
     return response
 
 
-def make_query(must_match=None):
-    """Creates a query according to the values passed in must_match.
+def make_query(must_match):
+    """Create a query according to the values passed in must_match.
 
      Args:
          must_match (list): Values to be matched with the indexed alert.

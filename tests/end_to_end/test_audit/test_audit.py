@@ -4,6 +4,7 @@ import os
 from wazuh_testing.tools.end_to_end import get_alert_dashboard_api, make_query
 
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.end_to_end import get_alert_indexer_api, make_query
 from wazuh_testing.event_monitor import check_event
 
 alerts_json = os.path.join('/tmp', 'alerts.json')
@@ -40,10 +41,10 @@ def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_envi
                            }
                         }
                      ])
-    alert_dashboard = get_alert_dashboard_api(query=query, credentials=get_dashboard_credentials)
+    indexed_alert = get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
 
     try:
-        assert str(rule_id) in alert_dashboard.text
+        assert str(rule_id) in indexed_alert.text
     except AssertionError:
         check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
         raise AssertionError('The alert has occurred, but has not been indexed.')
