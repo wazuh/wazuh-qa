@@ -1,7 +1,8 @@
 ---
-- name: Generate alerts in the manager
+- name: Generate events in the manager
   hosts: wazuh-manager
   tasks:
+
     - name: Run 'docker pull nginx'
       become: True
       shell: docker pull nginx

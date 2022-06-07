@@ -13,6 +13,11 @@ credentials_file = os.path.join(gettempdir(), 'passwords.wazuh')
 
 @pytest.fixture(scope="function")
 def get_opensearch_credentials():
+    """Get wazuh-dashboard username and password.
+
+    Returns:
+        dict: wazuh-dashboard credentials.
+    """
     user = ''
     password = ''
 

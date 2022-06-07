@@ -2,6 +2,7 @@
 - name: Test case configuration
   hosts: wazuh-manager
   tasks:
+
     - name: Uninstall old versions of Docker (CentOS)
       become: True
       shell: >
