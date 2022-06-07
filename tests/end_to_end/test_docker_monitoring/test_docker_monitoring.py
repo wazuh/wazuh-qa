@@ -42,6 +42,7 @@ def get_alerts_from_opensearch_api(user, password, query):
 
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_docker_monitoring(run_ansible_playbooks, metadata, get_opensearch_credentials):
     user, password = get_opensearch_credentials
     opensearch_result = get_alerts_from_opensearch_api(user, password, metadata['opensearch_query'])
