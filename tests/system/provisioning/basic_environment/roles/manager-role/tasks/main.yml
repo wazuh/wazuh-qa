@@ -16,7 +16,6 @@
       - automake
       - autoconf
       - libtool
-      
     force_apt_get: yes
     state: present
     update_cache: yes
