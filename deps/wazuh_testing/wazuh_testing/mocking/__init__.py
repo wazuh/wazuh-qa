@@ -76,6 +76,8 @@ SYSTEM_DATA = {
               'name': 'centos6'},
     'RHEL5': {'os_name': 'CentOS Linux', 'os_major': '5', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '5.0',
               'name': 'centos5'},
+    'JAMMY': {'os_name': 'Ubuntu', 'os_major': '22', 'os_minor': '04', 'os_platform': 'ubuntu',
+              'name': 'Ubuntu', 'os_version': '22.04 (Jammy Jellyfish)', 'os_codename': 'jammy', 'os_arch': 'x86_64'},
     'FOCAL': {'hostname': 'focal', 'architecture': 'x86_64', 'os_name': 'Ubuntu', 'os_version': '20.04.3 LTS',
               'os_codename': 'Focal Fossa', 'os_major': '20', 'os_minor': '04', 'os_patch': '3', 'os_build': '',
               'os_platform': 'ubuntu', 'sysname': 'Linux', 'release': '5.4.0-99-generic', 'version': 'Wazuh v4.3.0',
@@ -104,8 +106,6 @@ SYSTEM_DATA = {
                'name': 'debian10'},
     'STRETCH': {'os_name': 'Debian GNU/Linux', 'os_major': '9', 'os_minor': '0', 'os_platform': 'debian',
                 'name': 'debian9'},
-    'JAMMY': {'os_name': 'Ubuntu', 'os_major': '22', 'os_minor': '04', 'os_platform': 'ubuntu',
-              'name': 'Ubuntu', 'os_version': '22.04 (Jammy Jellyfish)', 'os_codename': 'jammy', 'os_arch': 'x86_64'}
     'SLED11': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '11', 'os_minor': '',
                'os_platform': 'sled', 'name': 'Desktop11', 'os_codename': 'sled'},
     'SLED12': {'hostname': 'sled', 'architecture': 'x86_64', 'os_name': 'SLED', 'os_major': '12', 'os_minor': '',
