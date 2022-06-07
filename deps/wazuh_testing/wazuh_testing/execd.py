@@ -27,3 +27,17 @@ def wait_received_message_line(line):
 def wait_start_message_line(line):
     """Callback function to wait for the Starting Active Response message."""
     return True if "Starting" in line else None
+
+
+def wait_shutdown_message_line(line):
+    """Callback function to wait for Wazuh shutdown message."""
+    return True if "Shutdown received. Deleting responses." in line else None
+
+
+def wait_message_line(line):
+    """Callback function to wait for Active Response JSON message."""
+    if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
+        return True
+    elif "active-response/bin/restart-wazuh: {\"version\"" in line:
+        return True
+    return None
