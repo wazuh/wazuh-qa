@@ -21,6 +21,7 @@ Release report: TBD
 ### Added
 
 - Add VD tests support for Ubuntu 2022 ([#2920](https://github.com/wazuh/wazuh-qa/pull/2920))
+- Add support for SUSE systems in VDT tests ([#2902](https://github.com/wazuh/wazuh-qa/pull/2902))
 - Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
 - Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
