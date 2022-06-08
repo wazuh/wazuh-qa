@@ -30,17 +30,17 @@ def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_envi
                      r'"id"\:"{}".*euid={}.*a3={}.*\}}'.format(level, description, rule_id, euid, a3)
 
     query = make_query([
-                        {
-                           "term": {
-                              "rule.id": f"{rule_id}"
-                           }
-                        },
-                        {
-                           "term": {
-                              "data.audit.command": f"{data_audit_command}"
-                           }
-                        }
-                     ])
+         {
+            "term": {
+               "rule.id": f"{rule_id}"
+            }
+         },
+         {
+            "term": {
+               "data.audit.command": f"{data_audit_command}"
+            }
+         }
+     ])
     indexed_alert = get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
 
     try:

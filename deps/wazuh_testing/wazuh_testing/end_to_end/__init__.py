@@ -37,19 +37,19 @@ def make_query(must_match):
          dict: Fully formed query.
      """
     query = {
-               "query": {
-                  "bool": {
-                     "must": must_match
-                  }
-               },
-               "size": 1,
-               "sort": [
-                  {
-                     "timestamp": {
-                        "order": "desc"
-                     }
-                  }
-               ]
-            }
+       "query": {
+          "bool": {
+             "must": must_match
+          }
+       },
+       "size": 1,
+       "sort": [
+          {
+             "timestamp": {
+                "order": "desc"
+             }
+          }
+       ]
+    }
 
     return query
