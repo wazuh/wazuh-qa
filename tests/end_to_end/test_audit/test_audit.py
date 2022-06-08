@@ -16,7 +16,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-@pytest.mark.ansible_playbook_setup('credentials.yml', 'configuration.yml', 'generate_events.yml')
+@pytest.mark.ansible_playbook_setup('credentials.yaml', 'configuration.yaml', 'generate_events.yaml')
 def test_audit(ansible_playbook, metadata, get_dashboard_credentials, clean_environment):
 
     level = metadata['level']
