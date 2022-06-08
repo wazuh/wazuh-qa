@@ -17,6 +17,13 @@
         - log_format:
             value: 'syslog'
 
+    - section: command
+      elements:
+        - name:
+            value: 'custom-ar'
+        - executable:
+            value: 'custom-ar'
+
     - section: vulnerability-detector
       elements:
       - enabled:

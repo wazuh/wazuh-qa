@@ -5,7 +5,7 @@ from wazuh_testing.processes import check_if_analysisd_is_running
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import write_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH, CUSTOM_RULES_PATH, LOCAL_RULES_PATH
+from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, AR_SCRIPTS_PATH
 import wazuh_testing.execd as execd
 
 # Reference paths
@@ -19,8 +19,9 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_overwritt
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_overwritten_rules.yaml')
 custom_rule = os.path.join(RULES_PATH, '0270-web_appsec_rules_edit.xml')
 local_rules = os.path.join(RULES_PATH, 'local_rules.xml')
+output_custom_ar_script = '/tmp/file-ar.txt'
 source_path = [custom_rule, local_rules]
-destination_path = [f"{CUSTOM_RULES_PATH}/0270-web_appsec_rules_edit.xml", LOCAL_RULES_PATH]
+destination_path = [f"{CUSTOM_RULES_PATH}/0270-web_appsec_rules_edit.xml", LOCAL_RULES_PATH, f"{AR_SCRIPTS_PATH}/custom-ar.py"]
 
 AR_timeout = 10
 
@@ -37,13 +38,10 @@ def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, f
                               restart_wazuh_daemon):
     write_file(file_to_monitor, metadata['log_sample'])
 
-    ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
     ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
-    # Checking AR in active-response logs
-    ar_log_monitor.start(AR_timeout, callback=execd.wait_start_message_line)
-    ar_log_monitor.start(AR_timeout, callback=execd.wait_message_line)
-    ar_log_monitor.start(AR_timeout, callback=execd.wait_ended_message_line)
+    # Checking if AR works properly
+    assert os.path.exists(output_custom_ar_script)
 
     # Check that wazuh-analysisd is running and has not crashed when trying to parse files with unexpected file types
     check_if_analysisd_is_running()
