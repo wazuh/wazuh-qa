@@ -57,7 +57,6 @@ def configure_environment(request):
     """
     configuration_playbooks = getattr(request.module, 'configuration_playbooks')
     with runner(request, configuration_playbooks):
-
         yield
 
 
@@ -71,5 +70,4 @@ def generate_events(request):
     """
     events_playbooks = getattr(request.module, 'events_playbooks')
     with runner(request, events_playbooks):
-
         yield
