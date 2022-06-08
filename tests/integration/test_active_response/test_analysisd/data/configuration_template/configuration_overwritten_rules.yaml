@@ -10,6 +10,13 @@
         - rules_id:
             value: RULES
 
+    - section: localfile
+      elements:
+        - location:
+            value: '/tmp/file_to_monitor.log'
+        - log_format:
+            value: 'syslog'
+
     - section: vulnerability-detector
       elements:
       - enabled:
