@@ -19,7 +19,7 @@ from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -1117,3 +1117,12 @@ def copy_file(source_path, destination_path):
     yield
     for file in destination_path:
         remove_file(file)
+
+
+@pytest.fixture(scope='function')
+def create_file_to_monitor(file_to_monitor):
+    """Create a file to monitor"""
+    write_file(file_to_monitor)
+
+    yield
+    remove_file(file_to_monitor)
