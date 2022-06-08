@@ -58,7 +58,13 @@ else:
     ANALYSIS_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'var', 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
-
+    ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
+    AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    if sys.platform == 'sunos5':
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
+    else:
+        HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
+    GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
 
     try:
         import grp

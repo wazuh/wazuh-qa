@@ -1,7 +1,7 @@
 - name: 'Overwritten rules - Rule test 100001'
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
-    COMMAND: 'restart-wazuh'
+    COMMAND: 'custom-ar'
     LOCATION: 'server'
     RULES: '100001'
   metadata:
@@ -10,7 +10,7 @@
 - name: 'Overwritten rules - Rule test 100002'
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
-    COMMAND: 'restart-wazuh'
+    COMMAND: 'custom-ar'
     LOCATION: 'server'
     RULES: '100002'
   metadata:
@@ -19,7 +19,7 @@
 - name: 'Overwritten rules - Rule test 100004'
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
-    COMMAND: 'restart-wazuh'
+    COMMAND: 'custom-ar'
     LOCATION: 'server'
     RULES: '100004'
   metadata:
