@@ -1,37 +1,33 @@
 <group name="local,">
   <rule id="100000" level="10">
-    <decoded_as>json</decoded_as>
-    <match>TEST</match>
+    <match>TEST 1</match>
     <description>Rule to bind AR</description>
   </rule>
 
   <rule id="100001" level="10">
-    <decoded_as>json</decoded_as>
-    <match>TEST1</match>
+    <match>TEST 2</match>
     <description>Rule to bind AR</description>
   </rule>
 
   <rule id="100002" level="10">
-    <decoded_as>json</decoded_as>
-    <match>TEST2</match>
+    <match>TEST 3</match>
     <description>Rule to overwrite</description>
   </rule>
 
   <rule id="100002" level="0" overwrite="yes">
-    <decoded_as>json</decoded_as>
-    <match>TEST2</match>
+    <match>TEST 4</match>
     <description>Overwrite rule</description>
   </rule>
 
   <rule id="100003" level="4">
     <if_sid>100001</if_sid>
-    <match>TEST3</match>
+    <match>TEST 5</match>
     <description>Rule to force the fail</description>
   </rule>
 
   <rule id="100004" level="10">
     <if_sid>100003</if_sid>
-    <match>TEST4</match>
+    <match>TEST 6</match>
     <description>Rule to force the fail</description>
   </rule>
 </group>
