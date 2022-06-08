@@ -3,12 +3,14 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
 import pytest
+from tempfile import gettempdir
 from pytest_ansible_playbook import runner
 
 from wazuh_testing.tools.file import remove_file, get_file_lines
 
-alerts_json = os.path.join('/tmp', 'alerts.json')
-credentials_file = os.path.join('/tmp', 'passwords.wazuh')
+
+alerts_json = os.path.join(gettempdir(), 'alerts.json')
+credentials_file = os.path.join(gettempdir(), 'passwords.wazuh')
 
 
 @pytest.fixture(scope='function')
