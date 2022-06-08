@@ -9,6 +9,10 @@
     - name: Ping google
       shell: ping -c 1 www.google.com
 
+    - name: Wait for alert to be generated
+      wait_for:
+        timeout: 5
+
     - name: Get alerts.json
       fetch:
         src: /var/ossec/logs/alerts/alerts.json
