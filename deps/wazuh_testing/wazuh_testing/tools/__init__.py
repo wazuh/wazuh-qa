@@ -103,6 +103,7 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
+CUSTOM_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules')
 LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
 LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
 

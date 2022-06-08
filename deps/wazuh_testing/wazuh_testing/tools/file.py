@@ -116,7 +116,7 @@ def read_file(file_path):
     return data
 
 
-def write_file(file_path, data):
+def write_file(file_path, data=''):
     with open(file_path, 'w') as f:
         f.write(data)
 

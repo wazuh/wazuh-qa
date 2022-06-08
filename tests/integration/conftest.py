@@ -110,6 +110,15 @@ def restart_wazuh_alerts(get_configuration, request):
     control_service('start')
 
 
+@pytest.fixture(scope='module')
+def restart_wazuh_daemon(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--tier",
