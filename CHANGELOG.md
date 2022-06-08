@@ -1,7 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-
 ## Rev 440001
 
 Wazuh version: 4.4.0 \
