@@ -20,6 +20,8 @@ if sys.platform == 'win32':
     WAZUH_API_CONF = None
     WAZUH_SECURITY_CONF = None
     API_LOG_FILE_PATH = None
+    API_JSON_LOG_FILE_PATH = None
+    API_LOG_FOLDER = None
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
@@ -58,6 +60,8 @@ else:
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
+    API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
+    API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')

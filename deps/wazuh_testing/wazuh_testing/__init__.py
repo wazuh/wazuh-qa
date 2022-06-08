@@ -27,7 +27,38 @@ CVE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 CPE_HELPER_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'dictionaries', 'cpe_helper.json')
+WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
+WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
+API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
+API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
+API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 
+# Daemons
+LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
+AGENTLESS_DAEMON = 'wazuh-agentlessd'
+CSYSLOG_DAEMON = 'wazuh-csyslogd'
+REMOTE_DAEMON = 'wazuh-remoted'
+ANALYSISD_DAEMON = 'wazuh-analysisd'
+API_DAEMON = 'wazuh-apid'
+MAIL_DAEMON = 'wazuh-maild'
+SYSCHECK_DAEMON = 'wazuh-syscheckd'
+EXEC_DAEMON = 'wazuh-execd'
+MODULES_DAEMON = 'wazuh-modulesd'
+CLUSTER_DAEMON = 'wazuh-clusterd'
+INTEGRATOR_DAEMON = 'wazuh-integratord'
+MONITOR_DAEMON = 'wazuh-monitord'
+DB_DAEMON = 'wazuh-db'
+AGENT_DAEMON = 'wazuh-agentd'
+
+API_DAEMONS_REQUIREMENTS = [API_DAEMON, DB_DAEMON, EXEC_DAEMON, ANALYSISD_DAEMON, REMOTE_DAEMON, MODULES_DAEMON]
+
+# Timeouts
+T_5 = 5
+T_10 = 10
+T_20 = 20
+T_30 = 30
+
+# Protocols
 UDP = 'UDP'
 TCP = 'TCP'
 TCP_UDP = 'TCP,UDP'
@@ -42,7 +73,7 @@ def is_tcp(protocol):
 
 
 def is_tcp_udp(protocol):
-    _protocol = protocol.replace(' ','').upper().split(',')
+    _protocol = protocol.replace(' ', '').upper().split(',')
     _protocol.sort()
     return ','.join(_protocol) == TCP_UDP
 

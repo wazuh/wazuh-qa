@@ -11,6 +11,7 @@ Release report: TBD
 
 ### Changed
 
+- Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772))
 
 ## Rev 440001
 
@@ -21,6 +22,7 @@ Release report: TBD
 ### Added
 
 - Add support for SUSE systems in VDT tests ([#2902](https://github.com/wazuh/wazuh-qa/pull/2902))
+- Add VD tests support for Ubuntu 2022 feeds ([#2867](https://github.com/wazuh/wazuh-qa/pull/2867))
 - Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
 - Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
@@ -37,6 +39,7 @@ Release report: TBD
 - Add system test to check that agent registered in master node with a specific group is synced to worker node [#2686]((https://github.com/wazuh/wazuh-qa/pull/2686))
 - Add system test cluster sync group with 40 agents ([#2761](https://github.com/wazuh/wazuh-qa/pull/2761))
 - Add system test - 40 agents cluster syncs group ([#2764](https://github.com/wazuh/wazuh-qa/pull/2764))
+- Add support for SUSE systems in VDT tests ([#2902](https://github.com/wazuh/wazuh-qa/pull/2902))
 - Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
@@ -47,6 +50,7 @@ Release report: TBD
 - Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
 - Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
+- API - Test the format of the logs (JSON logs support) ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635/))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
 
 ### Changed
