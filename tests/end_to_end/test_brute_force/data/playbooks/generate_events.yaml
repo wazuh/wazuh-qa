@@ -3,6 +3,7 @@
       hosts: localhost
       ignore_errors: True
       tasks:
+
         - name: ssh connection
           expect:
             command: ssh {{item}}@wazuh-agent
@@ -18,6 +19,19 @@
             - test_user
             - test_user
             - test_user
-        - name: wait for alert
+
+        - name: Wait for alert
           pause:
             seconds: 5
+
+    - name: Get logs
+      hosts: wazuh-manager
+      ignore_errors: True
+      tasks:
+
+        - name: Get alerts.json
+          fetch:
+            src: /var/ossec/logs/alerts/alerts.json
+            dest: /tmp/
+            flat: yes
+          become: True
