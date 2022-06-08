@@ -7,7 +7,7 @@
       shell: echo $EUID
       register: euid
     - debug:
-            var: euid.stdout
+        var: euid.stdout
 
     - name: Create wazuh audit rules file
       become: True
