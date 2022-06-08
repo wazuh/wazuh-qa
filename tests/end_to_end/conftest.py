@@ -4,6 +4,7 @@
 import os
 import pytest
 from tempfile import gettempdir
+from pytest_ansible_playbook import runner
 
 from wazuh_testing.tools.file import remove_file, get_file_lines
 
@@ -43,3 +44,32 @@ def get_dashboard_credentials():
     dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
 
     yield dashboard_credentials
+
+
+@pytest.fixture(scope='module')
+def configure_environment(request):
+    """Fixture to configure environment.
+
+    Execute the configuration playbooks declared in the test to configure the environment.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    configuration_playbooks = getattr(request.module, 'configuration_playbooks')
+    with runner(request, configuration_playbooks):
+
+        yield
+
+
+@pytest.fixture(scope='function')
+def generate_events(request):
+    """Fixture to generate events.
+
+    Execute the playbooks declared in the test to generate events.
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    events_playbooks = getattr(request.module, 'events_playbooks')
+    with runner(request, events_playbooks):
+
+        yield
