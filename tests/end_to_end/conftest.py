@@ -28,20 +28,18 @@ def get_dashboard_credentials():
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    password = ''
-    user = ''
+    passwords_list = []
+    users_list = []
 
     for line in get_file_lines(credentials_file):
-        if 'username: admin' in line:
-            user = 'admin'
+        if 'username:' in line:
+            user = line.split()[1]
+            users_list.append(user)
 
-        if 'password: ' in line and user == 'admin':
-            password_line = line
-            password = password_line.split()[1]
+        if 'password:' in line:
+            password = line.split()[1]
+            passwords_list.append(password)
 
-        if user != '' and password != '':
-            break
-
-    dashboard_credentials = {'user': user, 'password': password}
+    dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
 
     yield dashboard_credentials
