@@ -6,8 +6,8 @@
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
       become: True
 
-    - name: Ping google
-      shell: ping -c 1 www.google.com
+    - name: "{{ event_description }}"
+      shell: "{{ command }}"
 
     - name: Wait for alert to be generated
       wait_for:
