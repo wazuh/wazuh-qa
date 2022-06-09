@@ -2,9 +2,9 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import ansible_runner
 import pytest
 from tempfile import gettempdir
-from pytest_ansible_playbook import runner
 
 from wazuh_testing.tools.file import remove_file, get_file_lines
 
@@ -22,80 +22,85 @@ def clean_environment():
     remove_file(credentials_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
 def get_dashboard_credentials():
     """Get wazuh-dashboard username and password.
 
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    password = ''
-    user = ''
+    passwords_list = []
+    users_list = []
 
     for line in get_file_lines(credentials_file):
-        if 'username: admin' in line:
-            user = 'admin'
+        if 'username:' in line:
+            user = line.split()[1]
+            users_list.append(user)
 
-        if 'password: ' in line and user == 'admin':
-            password_line = line
-            password = password_line.split()[1]
+        if 'password:' in line:
+            password = line.split()[1]
+            passwords_list.append(password)
 
-        if user != '' and password != '':
-            break
+    if len(users_list) == 0 or len(passwords_list) == 0:
+        raise ValueError('No credentials found')
 
-    dashboard_credentials = {'user': user, 'password': password}
+    dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
 
     yield dashboard_credentials
 
 
-@pytest.fixture(scope="module")
-def run_ansible_playbooks(request):
-    """Will run a list of playbooks defined in the 'playbooks' attribute of the executing test function.
-    
-    The 'playbooks' attribute is a python dictionary with the following structure:
-    {
-        'setup_playbooks': (list),
-        'teardown_playbooks': (list),
-        'skip_teardown': (bool)
-    }
+@pytest.fixture(scope='module')
+def configure_environment(request):
+    """Fixture to configure environment.
+
+    Execute the configuration playbooks declared in the test to configure the environment.
 
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    # Check if the required attributes are defined.
-    try:
-        params = request.module.playbooks
-    except AttributeError as e:
-        print(e)
+    inventory_playbook = request.config.getoption('--inventory_path')
 
-    with runner(request, params['setup_playbooks'], params['teardown_playbooks'], params['skip_teardown']):
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
 
-        yield
+    # For each configuration playbook previously declared in the test, get the complete path and run it
+    for playbook in getattr(request.module, 'configuration_playbooks'):
+        configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+        ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook)
 
 
-@pytest.fixture(scope="function")
-def run_extra_playbooks(request):
-    """Will run a list of playbooks if an element called 'extra_playbooks' exists in the metadata list inside the test
-    case YAML file.
+@pytest.fixture(scope='function')
+def generate_events(request, metadata):
+    """Fixture to generate events.
 
-    The 'extra_playbooks' is a list of playbook files. Example: ['run_commands.yaml', 'configure_wodle.yaml']
-
+    Execute the playbooks declared in the test to generate events.
     Args:
         request (fixture): Provide information on the executing test function.
+        metadata (dict): Dictionary with test case metadata.
     """
-    extra_playbooks = None
-    # Get the current test case id
-    current_test_case_id = request.node.name.split('[')[1].replace(']', '')
+    inventory_playbook = request.config.getoption('--inventory_path')
 
-    # Each 'case' has the metadata object of the test case
-    for case in request.module.configuration_metadata:
-        # Check if the current test case has extra playbooks to run
-        if case['name'] == current_test_case_id:
-            try:
-                extra_playbooks = case['extra_playbooks']
-            except KeyError as e:
-                pass
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
 
-    with runner(request, setup_playbooks=extra_playbooks, skip_teardown=True):
+    # For each event generation playbook previously declared in the test, obtain the complete path and execute it.
+    for playbook in getattr(request.module, 'events_playbooks'):
+        events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
-        yield
+        parameters = {'playbook': events_playbook_path, 'inventory': inventory_playbook}
+        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
+        if 'extra_vars' in metadata:
+            parameters.update({'extravars': metadata['extra_vars']})
+
+        ansible_runner.run(**parameters)
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--inventory_path',
+        action='store',
+        metavar='INVENTORY_PATH',
+        default=None,
+        type=str,
+        help='Inventory path',
+    )

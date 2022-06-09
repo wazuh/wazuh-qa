@@ -1,59 +1,61 @@
 import json
 import os
 import re
-import pytest
-import requests
 from tempfile import gettempdir
-from requests.auth import HTTPBasicAuth
+import pytest
 
+from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
 
 # Test cases data
-TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
-test_cases_file_path = os.path.join(TEST_CASES_PATH, 'cases_test_docker_monitoring.json')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_cases_path = os.path.join(test_data_path, 'test_cases')
+test_cases_file_path = os.path.join(test_cases_path, 'cases_test_docker_monitoring.yaml')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
-playbooks = {
-    'setup_playbooks': ['configuration.yaml', 'generate_events.yaml'],
-    'teardown_playbooks': [],
-    'skip_teardown': True
-}
+configuration_playbooks = ['configuration.yaml']
+events_playbooks = ['generate_events.yaml']
 
 # Configuration
-configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path, format='json')
-
-
-def get_alerts_from_opensearch_api(user, password, query):
-    hostname = 'wazuh-manager'
-    params = {'pretty': 'true'}
-    headers = {'Content-Type': 'application/json'}
-    path = 'wazuh-alerts-4.x-*/_search'
-    url = f"https://{hostname}:9200/{path}"
-    
-    response = requests.get(url=url, params=params, verify=False, auth=HTTPBasicAuth(user, password), json=query,
-                            headers=headers)
-
-    assert response.status_code == 200, 'The response is not the expected. ' \
-                                        f"Actual: {response.status_code} - {response.content}"
-
-    opensearch_query_result = json.dumps(response.json())
-
-    return opensearch_query_result
+configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_docker_monitoring(run_ansible_playbooks, metadata, get_dashboard_credentials):
-    user, password = [get_dashboard_credentials['user'], get_dashboard_credentials['password']]
-    opensearch_result = get_alerts_from_opensearch_api(user, password, metadata['opensearch_query'])
+def test_docker_monitoring(configure_environment, metadata, get_dashboard_credentials):
+    rule_description = metadata['rule.description']
+    rule_id = metadata['rule.id']
+    docker_action = metadata['extra']['data.docker.Action']
+    alert_regex = metadata['extra']['regex']
 
-    match = re.search(metadata['regex'], opensearch_result)
+    query = e2e.make_query([
+        {
+            "term": {
+                "rule.id": rule_id
+            }
+        },
+        {
+            "term": {
+                "rule.description": rule_description
+            }
+        },
+        {
+            "term": {
+                "data.docker.Action": docker_action
+            }
+        }
+    ])
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    assert response.status_code == 200, 'The response is not the expected. ' \
+
+    indexed_alert = json.dumps(response.json())
+    match = re.search(alert_regex, indexed_alert)
 
     try:
         assert match is not None
-    except AssertionError:
-        evm.check_event(callback=metadata['regex'], file_to_monitor=alerts_json, error_message='The alert was not triggered.')
-        raise AssertionError('The alert was triggered but not indexed.')
+    except AssertionError as exc:
+        err_msg = 'The alert was not triggered.'
+        evm.check_event(callback=alert_regex, file_to_monitor=alerts_json, error_message=err_msg)
+        raise AssertionError('The alert was triggered but not indexed.') from exc

@@ -70,7 +70,7 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.utils import lower_case_key_dictionary_array
@@ -137,7 +137,7 @@ windows_tcases = [
 macos_tcases = [{'LOCATION': 'macos', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION': '/tmp/log.txt', 'LOG_FORMAT': 'macos', 'VALID_VALUE': True},
                 {'LOCATION1': 'macos', 'LOG_FORMAT1': 'macos', 'LOCATION2': 'macos', 'LOG_FORMAT2': 'macos',
-                 'VALID_VALUE': False, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
+                 'VALID_VALUE': True, 'CONFIGURATION': 'wazuh_duplicated_macos_configuration.yaml'},
                 {'LOG_FORMAT': 'macos', 'VALID_VALUE': True,
                  'CONFIGURATION': 'wazuh_no_defined_location_macos_configuration.yaml'}
                 ]
@@ -264,26 +264,32 @@ def check_log_format_invalid(cfg):
     if cfg['valid_value']:
         pytest.skip('Valid values provided')
 
-    if 'log_format1' in cfg and 'log_format2' in cfg:
-        log_callback = logcollector.callback_multiple_macos_block_configuration()
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-    else:
+    log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
-        log_callback = gc.callback_invalid_value('log_format', cfg['log_format'], prefix)
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-
-        log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                          conf_path=f'{wazuh_configuration}')
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+                                                      conf_path=f'{wazuh_configuration}')
+    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
         log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+
+
+def check_log_file_duplicated():
+    """Check if Wazuh shows a warning message when the configuration is duplicated."""
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
+                            callback=generate_monitoring_callback(
+                                     logcollector.GENERIC_CALLBACK_MSG_LOG_FILE_DUPLICATED),
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED)
+    wazuh_log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT,
+                            callback=logcollector.callback_monitoring_macos_logs(),
+                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS)
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
@@ -298,7 +304,7 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
                  Finally, the test will verify that the Wazuh API returns the same values for the 'localfile' section
                  that the configured one.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.4.0
 
     tier: 0
 
@@ -352,7 +358,10 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
 
     if cfg['valid_value']:
         control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        check_log_format_valid(cfg)
+        if 'location1' in cfg:
+            check_log_file_duplicated()
+        else:
+            check_log_format_valid(cfg)
     else:
         if sys.platform == 'win32':
             pytest.xfail("Windows agent allows invalid localfile configuration:\

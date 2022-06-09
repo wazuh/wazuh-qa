@@ -696,26 +696,15 @@ def load_configuration_template(data_file_path, configuration_parameters=[], con
             for replacement, meta in zip(configuration_parameters, configuration_metadata)]
 
 
-def get_test_cases_data(data_file_path, format='yaml'):
-    """Load a test case template file in YAML or JSON format and get its data.
-
+def get_test_cases_data(data_file_path):
+    """Load a test case template file and get its data.
     Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
-
     Args:
         data_file_path (str): Test case template file path.
-        format (str): File format (yaml or json).
-
     Returns:
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
-    if format.lower() not in ('yaml', 'json'):
-        raise ValueError(f"Invalid argument: 'format' is not `yaml` or `json`. Current value: {format}")
-
-    if format == 'yaml':
-        test_cases_data = file.read_yaml(data_file_path)
-    else:
-        test_cases_data = file.read_json(data_file_path)
-
+    test_cases_data = file.read_yaml(data_file_path)
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
