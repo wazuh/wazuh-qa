@@ -41,6 +41,9 @@ def get_dashboard_credentials():
             password = line.split()[1]
             passwords_list.append(password)
 
+    if len(users_list) == 0 or len(passwords_list) == 0:
+        raise ValueError('No credentials found')
+
     dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
 
     yield dashboard_credentials
