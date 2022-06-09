@@ -19,6 +19,8 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+
+- Add VD tests support for Ubuntu 2022 feeds ([#2867](https://github.com/wazuh/wazuh-qa/pull/2867))
 - Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
 - Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
 - Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
