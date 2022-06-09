@@ -11,6 +11,7 @@
   extra_vars:
     event_description: Run 'docker pull nginx'
     command: docker pull nginx
+
 - name: docker_run
   description: Test if an alert is generated when using the `pull` command.
   configuration_parameters: null
@@ -23,6 +24,7 @@
   extra_vars:
     event_description: Run 'docker run -d -P --name nginx_container nginx'
     command: docker run -d -P --name nginx_container nginx
+
 - name: docker_exec
   description: Test if an alert is generated when using the `exec` command.
   configuration_parameters: null
@@ -35,6 +37,7 @@
   extra_vars:
     event_description: Run 'docker exec -d nginx_container /bin/bash'
     command: docker exec -d nginx_container /bin/bash
+
 - name: docker_stop_rm
   description: Test if an alert is generated when using the `exec` command.
   configuration_parameters: null
