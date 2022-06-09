@@ -26,7 +26,6 @@
 
     - name: Get logs
       hosts: wazuh-manager
-      ignore_errors: True
       tasks:
 
         - name: Get alerts.json
