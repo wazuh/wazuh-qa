@@ -50,7 +50,7 @@ def get_dashboard_credentials():
 
 
 @pytest.fixture(scope='module')
-def configure_environment(request, pytestconfig):
+def configure_environment(request):
     """Fixture to configure environment.
 
     Execute the configuration playbooks declared in the test to configure the environment.
@@ -58,44 +58,38 @@ def configure_environment(request, pytestconfig):
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    metadata = getattr(request.module, 'configuration_metadata')
-    inventory_playbook = pytestconfig.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory_path')
 
     if not inventory_playbook:
-        raise ValueError('No specified inventory')
+        raise ValueError('Inventory not specified')
 
     for playbook in getattr(request.module, 'configuration_playbooks'):
         configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
-
-    for test_case in metadata:
-        if 'extra_vars' in test_case:
-            ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook,
-                               extravars=test_case['extra_vars'])
-        else:
-            ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook)
+        ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook)
 
 
 @pytest.fixture(scope='function')
-def generate_events(request, metadata, pytestconfig):
+def generate_events(request, metadata):
     """Fixture to generate events.
 
     Execute the playbooks declared in the test to generate events.
     Args:
         request (fixture): Provide information on the executing test function.
+        metadata (dict): Dictionary with test case metadata.
     """
-    inventory_playbook = pytestconfig.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory_path')
 
     if not inventory_playbook:
-        raise ValueError('No specified inventory')
+        raise ValueError('Inventory not specified')
 
     for playbook in getattr(request.module, 'events_playbooks'):
-        generate_events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+        events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
-    if 'extra_vars' in metadata:
-        ansible_runner.run(playbook=generate_events_playbook_path, inventory=inventory_playbook,
-                           extravars=metadata['extra_vars'])
-    else:
-        ansible_runner.run(playbook=generate_events_playbook_path, inventory=inventory_playbook)
+        parameters = {'playbook': events_playbook_path, 'inventory': inventory_playbook}
+        if 'extra_vars' in metadata:
+            parameters.update({'extravars': metadata['extra_vars']})
+
+        ansible_runner.run(**parameters)
 
 
 def pytest_addoption(parser):
