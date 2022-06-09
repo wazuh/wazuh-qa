@@ -2,10 +2,9 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
+import ansible_runner
 import pytest
 from tempfile import gettempdir
-from pytest_ansible_playbook import runner
-import ansible_runner
 
 from wazuh_testing.tools.file import remove_file, get_file_lines
 
@@ -23,7 +22,7 @@ def clean_environment():
     remove_file(credentials_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='module')
 def get_dashboard_credentials():
     """Get wazuh-dashboard username and password.
 
