@@ -54,11 +54,9 @@ import os
 
 import pytest
 import re
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import generate_params, regular_file_cud, LOG_FILE_PATH, callback_num_inotify_watches, \
-                              detect_initial_scan, callback_ignore_realtime_flag, CHECK_ALL, REQUIRED_ATTRIBUTES
+from wazuh_testing.fim import generate_params, regular_file_cud, detect_initial_scan, callback_ignore_realtime_flag
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
 
@@ -74,27 +72,23 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf_check_realtime.ya
 test_file = 'testfile.txt'
 test_directories = [directory_str]
 
-# configurations
 
-
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
+# Configurations
+conf_params = {'TEST_DIRECTORIES': directory_str}
 parameters, metadata = generate_params(extra_params=conf_params, modes=['scheduled'])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
 local_internal_options = {'syscheck.debug': '2', 'monitord.rotate_log': '0'}
 daemons_handler_configuration = {'daemons': ['wazuh-syscheckd']}
 
-# fixtures
 
-
+# Fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-# tests
-
-
+# Tests
 def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
                               configure_local_internal_options_module, daemons_handler):
     '''
@@ -147,5 +141,5 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
     detect_initial_scan(log_monitor)
 
     regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=True, triggers_event=True,
-                     event_mode="scheduled")
+                     event_mode="scheduled", min_timeout=15)
 
