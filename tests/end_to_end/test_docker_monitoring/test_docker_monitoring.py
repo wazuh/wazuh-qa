@@ -3,18 +3,21 @@ import os
 import re
 import pytest
 import requests
+from tempfile import gettempdir
 from requests.auth import HTTPBasicAuth
 
+from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
 
 # Test cases data
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 test_cases_file_path = os.path.join(TEST_CASES_PATH, 'cases_test_docker_monitoring.json')
+alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
 playbooks = {
-    'setup_playbooks': ['configuration.yaml', 'generate_alerts.yaml'],
+    'setup_playbooks': ['configuration.yaml', 'generate_events.yaml'],
     'teardown_playbooks': [],
     'skip_teardown': True
 }
@@ -43,10 +46,14 @@ def get_alerts_from_opensearch_api(user, password, query):
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_docker_monitoring(run_ansible_playbooks, metadata, get_opensearch_credentials):
-    user, password = get_opensearch_credentials
+def test_docker_monitoring(run_ansible_playbooks, metadata, get_dashboard_credentials):
+    user, password = [get_dashboard_credentials['user'], get_dashboard_credentials['password']]
     opensearch_result = get_alerts_from_opensearch_api(user, password, metadata['opensearch_query'])
 
     match = re.search(metadata['regex'], opensearch_result)
 
-    assert match is not None, 'The expected alerts were not indexed.'
+    try:
+        assert match is not None
+    except AssertionError:
+        evm.check_event(callback=metadata['regex'], file_to_monitor=alerts_json, error_message='The alert was not triggered.')
+        raise AssertionError('The alert was triggered but not indexed.')

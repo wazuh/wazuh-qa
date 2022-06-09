@@ -15,7 +15,7 @@ credentials_file = os.path.join(gettempdir(), 'passwords.wazuh')
 
 @pytest.fixture(scope='function')
 def clean_environment():
-
+    """Delete alerts and credentials files from the temporary folder."""
     yield
 
     remove_file(alerts_json)
@@ -24,7 +24,11 @@ def clean_environment():
 
 @pytest.fixture(scope='function')
 def get_dashboard_credentials():
+    """Get wazuh-dashboard username and password.
 
+       Returns:
+            dict: wazuh-dashboard credentials.
+    """
     password = ''
     user = ''
 
