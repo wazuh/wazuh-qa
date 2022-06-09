@@ -882,7 +882,7 @@ def modify_file_inode(path, name):
     path_to_file = os.path.join(path, name)
 
     shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
-    os.replace(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
+    shutil.move(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
 
 
 def modify_file_win_attributes(path, name):

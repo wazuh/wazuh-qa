@@ -2,7 +2,7 @@
 - tags:
   - ossec_conf
   apply_to_modules:
-  - MODULE_NAME
+  - test_basic_usage_realtime_unsupported
   sections:
   - section: syscheck
     elements:
@@ -13,3 +13,17 @@
         attributes:
         - check_all: 'yes'
         - realtime: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
