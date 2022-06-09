@@ -5,6 +5,7 @@ import os
 import pytest
 from tempfile import gettempdir
 from pytest_ansible_playbook import runner
+import ansible_runner
 
 from wazuh_testing.tools.file import remove_file, get_file_lines
 
