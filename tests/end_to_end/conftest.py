@@ -63,6 +63,7 @@ def configure_environment(request):
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
 
+    # For each configuration playbook previously declared in the test, get the complete path and run it
     for playbook in getattr(request.module, 'configuration_playbooks'):
         configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
         ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook)
@@ -82,10 +83,12 @@ def generate_events(request, metadata):
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
 
+    # For each event generation playbook previously declared in the test, obtain the complete path and execute it.
     for playbook in getattr(request.module, 'events_playbooks'):
         events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
         parameters = {'playbook': events_playbook_path, 'inventory': inventory_playbook}
+        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
 
