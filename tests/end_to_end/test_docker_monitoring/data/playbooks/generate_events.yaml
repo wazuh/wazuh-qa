@@ -7,9 +7,9 @@
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
       become: True
 
-    - name: {{ event_description }}
+    - name: "{{ event_description }}"
       become: True
-      shell: {{ command }}
+      shell: "{{ command }}"
 
     - name: Wait for alerts to be generated
       wait_for:

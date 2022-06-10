@@ -13,7 +13,7 @@
     command: docker pull nginx
 
 - name: docker_run
-  description: Test if an alert is generated when using the `pull` command.
+  description: Test if an alert is generated when using the `run` command.
   configuration_parameters: null
   metadata:
     rule.id: '87903'
@@ -39,7 +39,7 @@
     command: docker exec -d nginx_container /bin/bash
 
 - name: docker_stop_rm
-  description: Test if an alert is generated when using the `exec` command.
+  description: Test if an alert is generated when using the `stop` and `rm` commands.
   configuration_parameters: null
   metadata:
     rule.id: '87902'

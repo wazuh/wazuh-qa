@@ -1,8 +1,8 @@
 import json
 import os
 import re
-from tempfile import gettempdir
 import pytest
+from tempfile import gettempdir
 
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
