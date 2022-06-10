@@ -1,36 +1,35 @@
----
-    - name: Generate events
-      hosts: localhost
+- name: Generate events
+  hosts: localhost
+  tasks:
+
+    - name: ssh connection
+      expect:
+       command: ssh {{item}}@wazuh-agent
+       timeout: 5
+       responses:
+        Password: 1
+      loop:
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+        - test_user
       ignore_errors: True
-      tasks:
 
-        - name: ssh connection
-          expect:
-            command: ssh {{item}}@wazuh-agent
-            timeout: 5
-            responses:
-              "Password": "1"
-          loop:
-            - test_user
-            - test_user
-            - test_user
-            - test_user
-            - test_user
-            - test_user
-            - test_user
-            - test_user
+    - name: Wait for alert
+      pause:
+        seconds: 5
 
-        - name: Wait for alert
-          pause:
-            seconds: 5
+- name: Get logs
+  hosts: all
+  tasks:
 
-    - name: Get logs
-      hosts: wazuh-manager
-      tasks:
-
-        - name: Get alerts.json
-          fetch:
-            src: /var/ossec/logs/alerts/alerts.json
-            dest: /tmp/
-            flat: yes
-          become: True
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: yes
+      become: True
