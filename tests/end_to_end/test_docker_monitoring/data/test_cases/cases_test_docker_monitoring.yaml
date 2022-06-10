@@ -8,9 +8,9 @@
     extra:
       data.docker.Action: pull
       regex: '.+"docker":.+"Action": "(pull)".+"Attributes":.+"(nginx)".+"description": "(Docker: Image or repository nginx pulled)".+'
-  extra_vars:
-    event_description: Run 'docker pull nginx'
-    command: docker pull nginx
+    extra_vars:
+      event_description: Run 'docker pull nginx'
+      command: docker pull nginx
 
 - name: docker_run
   description: Test if an alert is generated when using the `run` command.
@@ -21,9 +21,9 @@
     extra:
       data.docker.Action: start
       regex: '.+"docker":.+"Action": "(start)".+"image": "(nginx)".+"description": "(Docker: Container nginx_container started)".+'
-  extra_vars:
-    event_description: Run 'docker run -d -P --name nginx_container nginx'
-    command: docker run -d -P --name nginx_container nginx
+    extra_vars:
+      event_description: Run 'docker run -d -P --name nginx_container nginx'
+      command: docker run -d -P --name nginx_container nginx
 
 - name: docker_exec
   description: Test if an alert is generated when using the `exec` command.
@@ -34,9 +34,9 @@
     extra:
       data.docker.Action: 'exec_start: /bin/bash '
       regex: '.+"docker":.+"Action": "(exec_start: /bin/bash )".+"image": "(nginx)".+"description": "(Docker: Started shell session in container nginx_container)".+'
-  extra_vars:
-    event_description: Run 'docker exec -d nginx_container /bin/bash'
-    command: docker exec -d nginx_container /bin/bash
+    extra_vars:
+      event_description: Run 'docker exec -d nginx_container /bin/bash'
+      command: docker exec -d nginx_container /bin/bash
 
 - name: docker_stop_rm
   description: Test if an alert is generated when using the `stop` and `rm` commands.
