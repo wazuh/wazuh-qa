@@ -104,7 +104,7 @@ def get_configuration(request):
 @pytest.fixture(scope='module')
 def create_a_file(get_configuration):
     """Create a file previous to restart syscheckd"""
-    create_file(REGULAR, test_directories[0], 'damaris.txt')
+    create_file(REGULAR, test_directories[0], 'test_file.txt')
 
 
 # Tests
