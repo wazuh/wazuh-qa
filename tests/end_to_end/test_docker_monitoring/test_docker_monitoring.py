@@ -24,11 +24,15 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_docker_monitoring(configure_environment, metadata, get_dashboard_credentials, generate_events):
+def test_docker_monitoring(configure_environment, metadata, get_dashboard_credentials, generate_events,
+                           clean_environment):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     docker_action = metadata['extra']['data.docker.Action']
-    alert_regex = metadata['extra']['regex']
+    expected_api_alert = f".+\"Action\": \"({docker_action})\".+\"description\": \"({rule_description})\".+\"id\": " \
+                         f"\"({rule_id})\""
+    expected_log_alert = f".+\"description\":\"({rule_description})\".+\"id\":\"({rule_id})\"" \
+                         f".+\"Action\":\"({docker_action})\""
 
     query = e2e.make_query([
         {
@@ -48,14 +52,14 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
         }
     ])
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
-    assert response.status_code == 200, 'The response is not the expected. ' \
+    assert response.status_code == 200, f"The response is not the expected. Actual response {response.text}"
 
     indexed_alert = json.dumps(response.json())
-    match = re.search(alert_regex, indexed_alert)
 
     try:
-        assert match is not None
+        match = re.search(expected_api_alert, indexed_alert)
+        assert match is not None, 'The alert was triggered but not indexed.'
     except AssertionError as exc:
         err_msg = 'The alert was not triggered.'
-        evm.check_event(callback=alert_regex, file_to_monitor=alerts_json, error_message=err_msg)
-        raise AssertionError('The alert was triggered but not indexed.') from exc
+        evm.check_event(callback=expected_log_alert, file_to_monitor=alerts_json, error_message=err_msg)
+        raise AssertionError(exc.args[0])
