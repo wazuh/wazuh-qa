@@ -536,34 +536,6 @@ def _create_socket(path, name):
     sock.bind(socket_path)
 
 
-def _create_regular(path, name, content=''):
-    """Create a regular file.
-
-    Args:
-        path (str): path where the regular file will be created.
-        name (str): file name.
-        content (str, optional): content of the created file. Default `''`
-    """
-    regular_path = os.path.join(path, name)
-    mode = 'wb' if isinstance(content, bytes) else 'w'
-
-    with open(regular_path, mode) as f:
-        f.write(content)
-
-
-def _create_regular_windows(path, name, content=''):
-    """Create a regular file in Windows
-
-    Args:
-        path (str): path where the regular file will be created.
-        name (str): file name.
-        content (str, optional): content of the created file. Default `''`
-    """
-    regular_path = os.path.join(path, name)
-    os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
-    time.sleep(3)
-
-
 def delete_file(path, name):
     """Delete a regular file.
 
