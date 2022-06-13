@@ -109,7 +109,7 @@ def create_a_file(get_configuration):
 
 # Tests
 def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
-                       wait_for_fim_start_sync_disabled):
+                       wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -133,7 +133,7 @@ def test_sync_disabled(get_configuration, configure_environment, create_a_file, 
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
     assertions:

@@ -134,7 +134,7 @@ def test_sync_enabled(get_configuration, configure_environment, create_a_file, r
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
 

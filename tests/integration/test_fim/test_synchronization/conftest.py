@@ -43,17 +43,6 @@ def wait_for_fim_start(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def wait_for_fim_start_sync_disabled(request):
-    """
-    Wait for en of initial FIM scan.
-
-    If detect_realtime_start is used, the synchronization event is skipped and the test fails.
-    """
-    file_monitor = getattr(request.module, 'wazuh_log_monitor')
-    detect_initial_scan(file_monitor)
-
-
-@pytest.fixture(scope='module')
 def wait_for_fim_start_sync(request):
     """
     Wait for the sync initial FIM scan.
