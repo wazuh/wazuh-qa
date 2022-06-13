@@ -25,6 +25,7 @@ Release report: TBD
 - Add system test to check that agent registered in master node with a specific group is synced to worker node [#2686]((https://github.com/wazuh/wazuh-qa/pull/2686))
 - Add system test cluster sync group with 40 agents ([#2761](https://github.com/wazuh/wazuh-qa/pull/2761))
 - Add system test - 40 agents cluster syncs group ([#2764](https://github.com/wazuh/wazuh-qa/pull/2764))
+- Add support for SUSE systems in VDT tests ([#2902](https://github.com/wazuh/wazuh-qa/pull/2902))
 - Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
 - Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
