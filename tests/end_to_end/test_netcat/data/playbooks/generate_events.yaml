@@ -6,3 +6,7 @@
         - name: netcat
           command: nc -l 8000
           timeout: 30
+
+        - name: Wait for alert
+          pause:
+            seconds: 5

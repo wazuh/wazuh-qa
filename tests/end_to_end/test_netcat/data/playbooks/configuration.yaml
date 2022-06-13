@@ -1,0 +1,59 @@
+- name: Test agent configuration
+  hosts: wazuh-agent
+  tasks:
+
+    - name: Install netcat (CentOS)
+      become: True
+      shell: yum install -y nmap-ncat
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install netcat (Ubuntu)
+      become: True
+      shell: >
+         apt-get install netcat
+         apt-get -y install nmap
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Test manager configuration
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Configure manager to periodically get a list of running processes
+      become: True
+      blockinfile:
+         path: /var/ossec/etc/ossec.conf
+         insertbefore: "</ossec_config>"
+         block: |
+           <localfile>
+              <log_format>full_command</log_format>
+              <alias>process list</alias>
+              <command>ps -e -o pid,uname,command</command>
+              <frequency>30</frequency>
+           </localfile>
+         marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+
+    - name: Configure local rules
+      become: True
+      blockinfile:
+         path: /var/ossec/etc/rules/local_rules.xml
+         insertafter: "</groups>"
+         block: |
+           <group name="ossec,">
+              <rule id="100050" level="0">
+                  <if_sid>530</if_sid>
+                  <match>^ossec: output: 'process list'</match>
+                  <description>List of running processes.</description>
+                  <group>process_monitor,</group>
+              </rule>
+              <rule id="100051" level="7" ignore="900">
+                  <if_sid>100050</if_sid>
+                  <match>nc -l</match>
+                  <description>Netcat listening for incoming connections.</description>
+                  <group>process_monitor,</group>
+              </rule>
+           </group>
+         marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+
+    - name: Restart wazuh-manager
+      become: True
+      shell: systemctl restart wazuh-manager

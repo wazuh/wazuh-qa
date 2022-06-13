@@ -1,0 +1,8 @@
+- name: Netcat
+  description: Detecting unauthorized processes
+  configuration_parameters: null
+  metadata:
+    rule:
+      id: 100051
+      level: 7
+      description: "Netcat listening for incoming connections."
