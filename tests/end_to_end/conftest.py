@@ -36,6 +36,7 @@ def get_dashboard_credentials(request):
 
     # Inventory is a tuple, with the second value empty, so we must access inventory[0]
     dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
+
     yield dashboard_credentials
 
 

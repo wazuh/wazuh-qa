@@ -38,6 +38,7 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
                              r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     query = e2e.make_query([
+
          {
             "term": {
                "rule.id": f"{rule_id}"
