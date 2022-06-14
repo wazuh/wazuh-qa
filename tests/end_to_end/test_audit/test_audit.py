@@ -1,10 +1,15 @@
 import os
+import json
+import re
 import pytest
+from datetime import datetime
 from tempfile import gettempdir
+from time import sleep
 
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.tools.time import parse_date_time_format
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
@@ -26,8 +31,11 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     a3 = metadata['extra']['a3']
     data_audit_command = metadata['extra']['data.audit.command']
 
-    expected_alert = r'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{},"description"\:"{}",'\
-                     r'"id"\:"{}".*euid={}.*a3={}.*\}}'.format(level, description, rule_id, euid, a3)
+    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{level},' \
+                          fr'"description"\:"{description}","id"\:"{rule_id}".*euid={euid}.*a3={a3}.*\}}'
+    expected_indexed_alert = fr'.*"rule":.*"level": {level}, "description": "{description}".*"id": "{rule_id}".*' \
+                             fr'euid={euid}.*comm=\\"{data_audit_command}\\".*a3={a3}.*' \
+                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     query = e2e.make_query([
          {
@@ -41,10 +49,17 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
             }
          }
      ])
-    indexed_alert = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+                                   error_message='The alert has not occurred').result()
+    raised_alert_timestamp = raised_alert.group(1)
+    raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
-    try:
-        assert str(rule_id) in indexed_alert.text
-    except AssertionError:
-        evm.check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
-        raise AssertionError('The alert has occurred, but has not been indexed.')
+    sleep(wait_indexed_alert)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    assert response.status_code == 200, f"The response is not the expected. Actual response {response.status_code}"
+    indexed_alert = json.dumps(response.json())
+    match = re.search(expected_indexed_alert, indexed_alert)
+    assert match is not None
+    indexed_alert_timestamp = match.group(1)
+    indexed_alert_timestamp = datetime.strptime(parse_date_time_format(indexed_alert_timestamp), '%Y-%m-%d %H:%M:%S')
+    assert indexed_alert_timestamp == raised_alert_timestamp
