@@ -2,9 +2,9 @@ import os
 import pytest
 from tempfile import gettempdir
 
+from wazuh_testing import end_to_end as e2e
+from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
-from wazuh_testing.end_to_end import get_alert_indexer_api, make_query
-from wazuh_testing.event_monitor import check_event
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
@@ -29,7 +29,7 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     expected_alert = r'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{},"description"\:"{}",'\
                      r'"id"\:"{}".*euid={}.*a3={}.*\}}'.format(level, description, rule_id, euid, a3)
 
-    query = make_query([
+    query = e2e.make_query([
          {
             "term": {
                "rule.id": f"{rule_id}"
@@ -41,10 +41,10 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
             }
          }
      ])
-    indexed_alert = get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    indexed_alert = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
 
     try:
         assert str(rule_id) in indexed_alert.text
     except AssertionError:
-        check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
+        evm.check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
         raise AssertionError('The alert has occurred, but has not been indexed.')
