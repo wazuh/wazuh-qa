@@ -59,14 +59,15 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event
+from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, REGULAR, create_file,
+                               callback_detect_registry_integrity_event, callback_detect_file_integrity_event)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+                                       YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                       SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -95,16 +96,21 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-# Tests
+@pytest.fixture(scope='module')
+def create_a_file(get_configuration):
+    """Create a file previous to restart syscheckd"""
+    create_file(REGULAR, test_directories[0], 'testfile')
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
+
+# Tests
+def test_sync_enabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
+                      wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -122,10 +128,13 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - create_a_file:
+            type: fixture
+            brief: It creates a file. It verifies that also appear the files created when is enabled.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
 
@@ -142,18 +151,15 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
 
     tags:
         - scheduled
-        - time_travel
-        - realtime
-        - who_data
     '''
     # The file synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_detect_integrity_event, update_position=True).result()
+                                    callback=callback_detect_file_integrity_event, update_position=True).result()
 
-    assert event['component'] == 'fim_file', 'Wrong event component'
+    assert event['component'] == 'fim_file', 'Did not recieve the expected "fim_file" event'
 
     # The registry synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
-                                    callback=callback_detect_integrity_event).result()
+                                    callback=callback_detect_registry_integrity_event).result()
 
-    assert event['component'] == 'fim_registry', 'Wrong event component'
+    assert event['component'] == 'fim_registry_key', 'Did not recieve the expected "fim_registry_key" event'

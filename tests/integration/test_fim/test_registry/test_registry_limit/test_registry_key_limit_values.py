@@ -1,6 +1,7 @@
 '''
 copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
+
            Created by Wazuh, Inc. <info@wazuh.com>.
 
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
@@ -67,12 +68,12 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
 
-# Marks
 
+# Marks
 pytestmark = [WINDOWS, TIER1]
 
-# Variables
 
+# Variables
 test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_3)]
@@ -80,8 +81,8 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 monitor_timeout = 40
 
-# Configurations
 
+# Configurations
 registry_limit_list = ['1', '2', '3']
 conf_params = {'WINDOWS_REGISTRY_1': test_regs[0],
                'WINDOWS_REGISTRY_2': test_regs[1],
@@ -160,6 +161,7 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
     registry_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                    callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_VALUE),
                                                    error_message=ERR_MSG_REGISTRY_LIMIT_VALUES).result()
+    
     # Compare that the value configured is correct
     assert registry_limit_value == registry_limit, ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE
 

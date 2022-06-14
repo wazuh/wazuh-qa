@@ -1,4 +1,5 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2022, Wazuh Inc.
+
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -42,11 +43,9 @@ def wait_for_fim_start(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def wait_for_fim_start_sync_disabled(request):
+def wait_for_fim_start_sync(request):
     """
-    Wait for en of initial FIM scan.
-
-    If detect_realtime_start is used, the synchronization event is skipped and the test fails.
+    Wait for the sync initial FIM scan.
     """
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     detect_initial_scan(file_monitor)

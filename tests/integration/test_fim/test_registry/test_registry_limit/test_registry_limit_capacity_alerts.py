@@ -9,8 +9,8 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
-       generated while the database is close to for reaching the limit of entries to monitor
-       set in the 'db_entry_limit'-'registries' tag.
+       generated while the database is close to reaching the limit of entries to monitor set
+       in the 'db_entry_limit'-'registries' tag.
 
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.

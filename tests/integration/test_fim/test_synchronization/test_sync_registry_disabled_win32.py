@@ -59,23 +59,21 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event
+from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event, REGULAR, create_file
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
-                                                    SYNCHRONIZATION_REGISTRY_ENABLED)
-# Marks
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules import DATA
+from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+                                       YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
+                                       SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
 
+
+# Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
-
-
 configurations_path = os.path.join(test_data_path, YAML_CONF_SYNC_WIN32)
 
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
@@ -103,10 +101,15 @@ def get_configuration(request):
     return request.param
 
 
-# Tests
+@pytest.fixture(scope='module')
+def create_a_file(get_configuration):
+    """Create a file previous to restart syscheckd"""
+    create_file(REGULAR, test_directories[0], 'testfile')
 
-@pytest.mark.skip(reason="It will be blocked by #2174, when it was solve we can enable again this test")
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
+
+# Tests
+def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
+                       wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -124,10 +127,13 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - create_a_file:
+            type: fixture
+            brief: It creates a file. It verifies that also appear the files created when is enabled.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
     assertions:
@@ -148,9 +154,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
     # The file synchronization event should be triggered
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_integrity_event, update_position=True).result()
-    assert event['component'] == 'fim_file', 'Wrong event component'
+    assert event['component'] == 'fim_file', 'The file synchronization event should be triggered.'
 
     # The registry synchronization event shouldn't be triggered
-    with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, update_position=True,
-                                        callback=generate_monitoring_callback(CB_INTEGRITY_CONTROL_MESSAGE)).result()
+    assert event['component'] != 'fim_registry', 'The registry synchronization event should not be triggered.'

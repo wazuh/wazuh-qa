@@ -168,6 +168,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
     # assert it matches the expected value
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
+
     # Check number of entries and paths in DB and assert the value matches the expected count
     entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()

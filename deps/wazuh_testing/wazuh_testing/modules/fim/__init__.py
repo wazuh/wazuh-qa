@@ -77,7 +77,7 @@ CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert '('.*')?' entry into DB\
 
 CB_COUNT_REGISTRY_ENTRIES = r".*Fim registry entries count: '(\d+)'"
 CB_COUNT_REGISTRY_VALUE_ENTRIES = r".*Fim registry values entries count: '(\d+)'"
-CB_REGISTRY_DBSYNC_NO_DATA = r".*#!-fim_registry dbsync no_data (.+)"
+CB_REGISTRY_DBSYNC_NO_DATA = r".*#!-fim_registry_(.*) dbsync no_data (.+)"
 CB_REGISTRY_LIMIT_CAPACITY = r".*Registry database is (\d+)% full."
 CB_REGISTRY_DB_BACK_TO_NORMAL = r".*(The registry database status returns to normal)."
 CB_REGISTRY_LIMIT_VALUE = r".*Maximum number of registry values to be monitored: '(\d+)'"
@@ -111,6 +111,7 @@ ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., p
 
 ERR_MSG_FIM_REGISTRY_ENTRIES = 'Did not receive expected "Fim Registry entries count: ..." event'
 ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry value entries count: ..." event'
+
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
@@ -124,13 +125,16 @@ ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit c
 
 ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
+ERR_MSG_FIM_EVENT_NOT_RECIEVED = 'Did not receive expected "Sending FIM event: ..." event'
 ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
 ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event '
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
+ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED = 'Did not receive expected "File integrity monitoring real-time Whodata \
+                                            engine started" or "Initializing FIM Integrity Synchronization check"'
+ERR_MSG_INTEGRITY_CHECK_EVENT = 'Did not receive expected "Initializing FIM Integrity Synchronization check" event'
 
 # Setting Local_internal_option file
-
 if sys.platform == 'win32':
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'windows.debug': '2',

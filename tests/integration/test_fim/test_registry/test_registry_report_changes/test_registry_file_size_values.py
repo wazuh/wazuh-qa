@@ -117,7 +117,7 @@ def test_file_size_values(key, subkey, arch, value_name, size, get_configuration
                  value size does not exceed the specified limit and vice versa.
                  - Case 1, small size - The file is smaller than the file_limit configured, the diff_file is
                  generated and there is content_changes information
-                 - Case 2, big size - The file is smaller than the file_limit configured,sp the diff_file is
+                 - Case 2, big size - The file is smaller than the file_limit configured, so the diff_file is
                  not generated and the logs should not have content_changes data.
 
     wazuh_min_version: 4.2.0
