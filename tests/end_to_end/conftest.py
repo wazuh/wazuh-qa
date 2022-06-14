@@ -23,29 +23,17 @@ def clean_environment():
 
 
 @pytest.fixture(scope='module')
-def get_dashboard_credentials():
+def get_dashboard_credentials(request):
     """Get wazuh-dashboard username and password.
 
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    passwords_list = []
-    users_list = []
+    inventory_playbook = [request.config.getoption('--inventory_path')]
+    inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
+                                             host='wazuh-manager')
 
-    for line in get_file_lines(credentials_file):
-        if 'username:' in line:
-            user = line.split()[1]
-            users_list.append(user)
-
-        if 'password:' in line:
-            password = line.split()[1]
-            passwords_list.append(password)
-
-    if len(users_list) == 0 or len(passwords_list) == 0:
-        raise ValueError('No credentials found')
-
-    dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
-
+    dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
     yield dashboard_credentials
 
 
