@@ -6,20 +6,17 @@ import ansible_runner
 import pytest
 from tempfile import gettempdir
 
-from wazuh_testing.tools.file import remove_file, get_file_lines
+from wazuh_testing.tools.file import remove_file
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
-credentials_file = os.path.join(gettempdir(), 'passwords.wazuh')
 
 
 @pytest.fixture(scope='function')
 def clean_environment():
     """Delete alerts and credentials files from the temporary folder."""
     yield
-
     remove_file(alerts_json)
-    remove_file(credentials_file)
 
 
 @pytest.fixture(scope='module')
