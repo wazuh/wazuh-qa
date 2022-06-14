@@ -1,12 +1,27 @@
 ---
-    - name: Generate events
-      hosts: wazuh-agent
-      ignore_errors: True
-      tasks:
-        - name: netcat
-          command: nc -l 8000
-          timeout: 30
+- name: Generate events
+  hosts: wazuh-agent
+  ignore_errors: True
+  tasks:
+    - name: netcat
+      command: nc -l 8000
+      timeout: 30
 
-        - name: Wait for alert
-          pause:
-            seconds: 5
+    - name: Wait for alert
+      pause:
+        seconds: 5
+
+    - name: Kill process
+      become: True
+      command: pkill -fx 'nc -l 8000'
+
+- name: Get logs
+  hosts: all
+  tasks:
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: yes
+      become: True
