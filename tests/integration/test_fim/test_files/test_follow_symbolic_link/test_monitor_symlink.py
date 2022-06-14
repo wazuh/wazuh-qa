@@ -158,14 +158,14 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     if tags_to_apply == {'monitored_dir'}:
         fim.create_file(fim.REGULAR, main_folder, file1, content='')
         fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        add = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event).result()
+        add = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             "'added' event not matching"
 
     # Modify the linked file and expect an event
     fim.modify_file_content(main_folder, file1, 'Sample modification')
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    modify = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event,
+    modify = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
@@ -174,7 +174,7 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
     # Delete the linked file and expect an event
     delete_f(main_folder, file1)
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    delete = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event,
+    delete = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
                                      error_message='Did not receive expected '
                                                    '"Sending FIM event: ..." event').result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
