@@ -27,9 +27,14 @@ def get_dashboard_credentials(request):
             dict: wazuh-dashboard credentials.
     """
     inventory_playbook = [request.config.getoption('--inventory_path')]
+
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
+
     inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
                                              host='wazuh-manager')
 
+    # Inventory is a tuple, with the second value empty, so we must access inventory[0]
     dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
     yield dashboard_credentials
 
