@@ -1,77 +1,54 @@
-'''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
-           Created by Wazuh, Inc. <info@wazuh.com>.
-           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-type: e2e
-brief: Wazuh includes a registration process that provides the user with an automated mechanism to enroll agents with
-       minimal configuration steps. To register an agent using the enrollment method, a manager with a valid IP needs
-       to be configured first. The agent then checks for the registration key in the client.keys file, and when the file
-       is empty, it automatically requests the key from the configured manager the agent is reporting to.
-'''
-
 import os
 import pytest
-from opensearchpy import OpenSearch
-import yaml
+import re
+import json
+from tempfile import gettempdir
+
+from wazuh_testing.tools import configuration as config
+from wazuh_testing import end_to_end as e2e
+from wazuh_testing import event_monitor as evm
+
+## Test cases data
+alerts_json = os.path.join(gettempdir(), 'alerts.json')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_netcat.yaml')
+
+# Playbooks
+configuration_playbooks = ['configuration.yaml', 'credentials.yaml']
+events_playbooks = ['generate_events.yaml']
+
+#Configuration
+configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
-@pytest.fixture
-def configurations():
-    yaml_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml')
-    with open(yaml_file_path) as stream:
-        configurations = yaml.safe_load(stream)
-    return configurations
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
+def test_audit(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_environment):
+    level = metadata['rule']['level']
+    description = metadata['rule']['description']
+    rule_id = metadata['rule']['id']
 
-@pytest.mark.ansible_playbook_setup('generate_events.yml')
-def test_netcat(configurations, ansible_playbook):
-    """
-    Test to detect Netcat
-    """
-    agent_hostname = configurations['wazuh-agent-linux'][1]['hostname']
-    rule_id = configurations['wazuh-agent-linux'][2]['rule_id']
-    indexer_ip = configurations['wazuh-manager-indexer'][0]['ip']
-    indexer_user = configurations['wazuh-manager-indexer'][2]['username_indexer']
-    indexer_password = configurations['wazuh-manager-indexer'][3]['password_ indexer']
+    expected_alert = r'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{},"description"\:"{}",'\
+                     r'"id"\:"{}".*\}}'.format(level, description, rule_id)
+    expected_api_alert = f".+\"description\": \"({description})\".+\"id\": " \
+                         f"\"({rule_id})\""
 
-    open_search_alerts = _get_opensearch_alert(indexer_ip, rule_id, indexer_user, indexer_password)
-    _asserts(open_search_alerts, agent_hostname)
+    query = e2e.make_query([
+         {
+            "term": {
+               "rule.id": f"{rule_id}"
+            }
+         }
+     ])
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    assert response.status_code == 200, f"The response is not the expected. Actual response {response.text}"
 
+    indexed_alert = json.dumps(response.json())
 
-def _get_opensearch_alert(indexer_ip, rule_id, username, password):
-    """
-    Get alert generated in opensearch
-    """
-    auth = (username, password)
-    host = indexer_ip
-    port = '9200'
-    index_name = 'wazuh-alerts-4.x-*'
-    query = '{"query": {"bool": {"must": []}}, "size": 1, "sort": [{"timestamp": {"order": "desc"}}]}'
-
-    client = OpenSearch(
-        hosts= [{'host': host, 'port': port}],
-        http_auth = auth,
-        use_ssl = True,
-        verify_certs = False,
-        timeout = 30,
-        max_retries = 10,
-        retry_on_timeout = True
-
-    )
-
-    response = client.search(
-        body = query,
-        index= index_name
-    )
-
-    print(response)
-    return response
-
-
-def _asserts(response, agent_hostname):
-    agent = response['hits']['hits'][0]['_source']['agent']['name']
-    description = response['hits']['hits'][0]['_source']['rule']['description']
-    rule_id = response['hits']['hits'][0]['_source']['rule']['id']
-    print(response['hits']['hits'][0]['_source']['timestamp'])
-    assert description == 'Netcat listening for incoming connections.'
-    assert rule_id == '100051', 'Invalid rule id'
-    assert agent == agent_hostname, 'Invalid agent'
+    try:
+        match = re.search(expected_api_alert, indexed_alert)
+        assert match is not None, 'The alert was triggered but not indexed'
+    except AssertionError as exc:
+        err_msg = 'THe alert was not triggered'
+        evm.check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
+        raise AssertionError(exc.args[0])
