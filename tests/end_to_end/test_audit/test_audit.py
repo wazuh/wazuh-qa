@@ -60,7 +60,7 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     assert response.status_code == 200, f"The response is not the expected. Actual response {response.status_code}"
     indexed_alert = json.dumps(response.json())
     match = re.search(expected_indexed_alert, indexed_alert)
-    assert match is not None
+    assert match is not None, 'Alert triggered, but not indexed'
     indexed_alert_timestamp = match.group(1)
     indexed_alert_timestamp = datetime.strptime(parse_date_time_format(indexed_alert_timestamp), '%Y-%m-%d %H:%M:%S')
     assert indexed_alert_timestamp == raised_alert_timestamp
