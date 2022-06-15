@@ -1,8 +1,7 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from datetime import datetime
 from os import listdir
 from os.path import join, dirname, realpath
 
@@ -10,6 +9,7 @@ import pytest
 from yaml import safe_load
 
 from wazuh_testing.tools.performance.csv_parser import ClusterCSVTasksParser, ClusterCSVResourcesParser, ClusterEnvInfo
+from wazuh_testing.tools.utils import get_datetime_diff
 
 test_data_path = join(dirname(realpath(__file__)), 'data')
 configurations = {file.replace('_thresholds.yaml', ''): safe_load(open(join(test_data_path, file))) for file in
@@ -21,22 +21,12 @@ exceeded_thresholds = []
 # Fixtures
 @pytest.fixture()
 def n_workers(pytestconfig):
-    return pytestconfig.getoption("n_workers")
+    return pytestconfig.getoption('n_workers')
 
 
 @pytest.fixture()
 def n_agents(pytestconfig):
-    return pytestconfig.getoption("n_agents")
-
-
-# Functions
-def get_datetime_diff(phase_datetimes):
-    """Calculate the difference between two datetimes.
-
-    Args:
-        phase_datetimes (list): List containing start and end datetimes.
-    """
-    return datetime.strptime(phase_datetimes[1], date_format) - datetime.strptime(phase_datetimes[0], date_format)
+    return pytestconfig.getoption('n_agents')
 
 
 def test_cluster_performance(artifacts_path, n_workers, n_agents):
@@ -64,19 +54,19 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
     try:
         cluster_info = ClusterEnvInfo(artifacts_path).get_all_info()
     except FileNotFoundError:
-        pytest.fail(f'Path "{artifacts_path}" could not be found or it may not follow the proper structure.')
+        pytest.fail(f"Path '{artifacts_path}' could not be found or it may not follow the proper structure.")
 
     if cluster_info.get('worker_nodes', 0) != int(n_workers):
-        pytest.fail(f'Information of {n_workers} workers was expected inside the artifacts folder, but '
-                    f'{cluster_info.get("worker_nodes", 0)} were found.')
+        pytest.fail(f"Information of {n_workers} workers was expected inside the artifacts folder, but "
+                    f"{cluster_info.get('worker_nodes', 0)} were found.")
 
     # Calculate stats from data inside artifacts path.
     data = {'tasks': ClusterCSVTasksParser(artifacts_path).get_stats(),
             'resources': ClusterCSVResourcesParser(artifacts_path).get_stats()}
 
     if not data['tasks'] or not data['resources']:
-        pytest.fail(f'Stats could not be retrieved, "{artifacts_path}" path may not exist, it is empty or it may not'
-                    f' follow the proper structure.')
+        pytest.fail(f"Stats could not be retrieved, '{artifacts_path}' path may not exist, it is empty or it may not"
+                    f" follow the proper structure.")
 
     # Compare each stat with its threshold.
     for data_name, data_stats in data.items():
@@ -92,16 +82,15 @@ def test_cluster_performance(artifacts_path, n_workers, n_agents):
                                                             'phase': phase})
 
     try:
-        assert not exceeded_thresholds, f"Some thresholds were exceeded:\n- " + '\n- '.join(
+        assert not exceeded_thresholds, 'Some thresholds were exceeded:\n- ' + '\n- '.join(
             '{stat} {column} {value} >= {threshold} ({node}, {file}, {phase})'.format(**item) for item in
             exceeded_thresholds)
     finally:
         # Add useful information to report as stdout
         try:
-            print('\n')
-            print(f'Setup phase took {get_datetime_diff(cluster_info["phases"]["setup_phase"])}s '
-                  f'({cluster_info["phases"]["setup_phase"][0]} - {cluster_info["phases"]["setup_phase"][1]}).')
-            print(f'Stable phase took {get_datetime_diff(cluster_info["phases"]["stable_phase"])}s '
-                  f'({cluster_info["phases"]["stable_phase"][0]} - {cluster_info["phases"]["stable_phase"][1]}).')
+            print(f"\nSetup phase took {get_datetime_diff(cluster_info['phases']['setup_phase'], date_format)}s "
+                  f"({cluster_info['phases']['setup_phase'][0]} - {cluster_info['phases']['setup_phase'][1]}).")
+            print(f"Stable phase took {get_datetime_diff(cluster_info['phases']['stable_phase'], date_format)}s "
+                  f"({cluster_info['phases']['stable_phase'][0]} - {cluster_info['phases']['stable_phase'][1]}).")
         except KeyError:
             print('No information available about test phases.')
