@@ -1,19 +1,26 @@
----
+- name: Truncate files
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate file alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: True
+
 - name: Generate events
   hosts: wazuh-agent
-  ignore_errors: True
+  ignore_errors: true
   tasks:
-    - name: netcat
-      command: nc -l 8000
+    - name: "{{ event_description_netcat }}"
+      command: "{{ command_netcat }}"
       timeout: 30
 
     - name: Wait for alert
       pause:
         seconds: 5
 
-    - name: Kill process
-      become: True
-      command: pkill -fx 'nc -l 8000'
+    - name: "{{ event_description_kill_netcat }}"
+      become: true
+      command: "{{ command_kill_netcat }}"
 
 - name: Get logs
   hosts: all
@@ -24,4 +31,4 @@
         src: /var/ossec/logs/alerts/alerts.json
         dest: /tmp/
         flat: yes
-      become: True
+      become: true

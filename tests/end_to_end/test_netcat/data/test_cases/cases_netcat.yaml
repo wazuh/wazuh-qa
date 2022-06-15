@@ -2,7 +2,11 @@
   description: Detecting unauthorized processes
   configuration_parameters: null
   metadata:
-    rule:
-      id: 100051
-      level: 7
-      description: "Netcat listening for incoming connections."
+    extra_vars:
+      event_description_netcat: Run netcat
+      command_netcat: nc -l 8000
+      event_description_kill_netcat: Kill netcat
+      command_kill_netcat: pkill -fx 'nc -l 8000'
+    rule.id: 100051
+    rule.level: 7
+    rule.description: "Netcat listening for incoming connections."
