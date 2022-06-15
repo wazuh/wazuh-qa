@@ -24,6 +24,9 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
 
+    if response.status_code != 200:
+        raise Exception(f"The response is not the expected. Actual response {response.status_code}")
+
     return response
 
 

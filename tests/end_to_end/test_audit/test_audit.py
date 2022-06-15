@@ -58,7 +58,6 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
 
     sleep(wait_indexed_alert)
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
-    assert response.status_code == 200, f"The response is not the expected. Actual response {response.status_code}"
     indexed_alert = json.dumps(response.json())
     match = re.search(expected_indexed_alert, indexed_alert)
     assert match is not None, 'Alert triggered, but not indexed'
