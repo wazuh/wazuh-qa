@@ -65,17 +65,3 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
 
     # Check that alert has been indexed (checking that the timestamp is the expected one)
     assert indexed_alert_timestamp == raised_alert_timestamp, 'Alert triggered, but not indexed'
-
-
-    # response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
-    # assert response.status_code == 200, f"The response is not the expected. Actual response {response.text}"
-
-    # indexed_alert = json.dumps(response.json())
-
-    # try:
-    #     match = re.search(expected_api_alert, indexed_alert)
-    #     assert match is not None, 'The alert was triggered but not indexed'
-    # except AssertionError as exc:
-    #     err_msg = 'THe alert was not triggered'
-    #     evm.check_event(callback=expected_alert, file_to_monitor=alerts_json, error_message='The alert has not occurred')
-    #     raise AssertionError(exc.args[0])
