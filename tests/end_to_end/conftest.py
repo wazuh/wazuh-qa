@@ -6,45 +6,36 @@ import ansible_runner
 import pytest
 from tempfile import gettempdir
 
-from wazuh_testing.tools.file import remove_file, get_file_lines
+from wazuh_testing.tools.file import remove_file
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
-credentials_file = os.path.join(gettempdir(), 'passwords.wazuh')
 
 
 @pytest.fixture(scope='function')
 def clean_environment():
     """Delete alerts and credentials files from the temporary folder."""
     yield
-
     remove_file(alerts_json)
-    remove_file(credentials_file)
 
 
 @pytest.fixture(scope='module')
-def get_dashboard_credentials():
+def get_dashboard_credentials(request):
     """Get wazuh-dashboard username and password.
 
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    passwords_list = []
-    users_list = []
+    inventory_playbook = [request.config.getoption('--inventory_path')]
 
-    for line in get_file_lines(credentials_file):
-        if 'username:' in line:
-            user = line.split()[1]
-            users_list.append(user)
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
 
-        if 'password:' in line:
-            password = line.split()[1]
-            passwords_list.append(password)
+    inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
+                                             host='wazuh-manager')
 
-    if len(users_list) == 0 or len(passwords_list) == 0:
-        raise ValueError('No credentials found')
-
-    dashboard_credentials = {'user': users_list[0], 'password': passwords_list[0]}
+    # Inventory is a tuple, with the second value empty, so we must access inventory[0]
+    dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
 
     yield dashboard_credentials
 

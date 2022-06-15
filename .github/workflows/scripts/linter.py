@@ -77,7 +77,7 @@ def get_yaml_files(updated_files):
     Returns:
         list(str): Updated yaml files list.
     """
-    return [yaml_file for yaml_file in updated_files if '.yaml' or '.yml' in yaml_file]
+    return [yaml_file for yaml_file in updated_files if '.yaml' in yaml_file or '.yml' in yaml_file]
 
 
 def run_python_linter(python_files):
