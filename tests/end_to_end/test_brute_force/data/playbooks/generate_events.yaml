@@ -1,3 +1,11 @@
+- name: Truncate file
+  hosts: all
+  tasks:
+
+    - name: Truncate alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: True
+
 - name: Generate events
   hosts: localhost
   tasks:
