@@ -100,6 +100,7 @@ truncate_file(LOG_FILE_PATH)
 
 # fixtures
 
+
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -175,9 +176,9 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
                                           '"Starting fetching of logs" event')
 
     numbers_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
-                                                callback=callback_received_messages_number,
-                                                error_message='Did not receive expected '
-                                                              '- INFO - Received and acknowledged x messages').result()
+                                             callback=callback_received_messages_number,
+                                             error_message='Did not receive expected '
+                                                           '- INFO - Received and acknowledged x messages').result()
     if publish_messages <= max_messages:
         # GCP might log messages from sources other than ourselves
         for number_pulled in numbers_pulled:
