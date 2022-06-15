@@ -166,7 +166,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     if tags_to_apply == {'monitored_dir'}:
         fim.create_file(fim.REGULAR, main_folder, file1, content='')
         fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event,
+        wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
                                 error_message='Did not receive expected "Sending FIM event: ..." event')
 
     # Remove symlink and don't expect events
@@ -176,7 +176,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
     fim.modify_file_content(main_folder, file1, new_content='Sample modification')
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
+        event = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event)
         logger.error(f'Unexpected event {event.result()}')
         raise AttributeError(f'Unexpected event {event.result()}')
 
@@ -188,6 +188,6 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
 
     fim.modify_file_content(main_folder, file1, new_content='Sample modification 2')
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    modify = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event).result()
+    modify = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event).result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         f"'modified' event not matching for {file1}"
