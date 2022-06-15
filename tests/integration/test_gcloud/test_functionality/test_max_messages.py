@@ -59,6 +59,7 @@ tags:
     - scan
     - maximum
 '''
+from itertools import count
 import os
 import sys
 
@@ -82,6 +83,7 @@ interval = '25s'
 pull_messages_timeout = global_parameters.default_timeout + 60
 pull_on_start = 'no'
 max_messages = 100
+count_message = 0
 logging = 'info'
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -190,8 +192,10 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
         # GCP might log messages from sources other than ourselves
         for number_pulled in numbers_pulled:
             if int(number_pulled) != 0:
-                assert int(number_pulled) >= publish_messages
+                if (int(number_pulled) >= publish_messages):
+                    count_message += 1
                 assert int(number_pulled) <= max_messages
+        assert count_message >=1
     else:
         for number_pulled in numbers_pulled:
             if int(number_pulled) != 0:
