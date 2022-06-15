@@ -6,4 +6,4 @@
     rule.level: 10
     rule.description: "sshd: brute force trying to get access to the system. Non existent user."
     extra:
-      mitre_technique: "Brute Force"
+      mitre_technique: Brute Force

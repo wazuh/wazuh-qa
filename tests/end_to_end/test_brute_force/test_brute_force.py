@@ -36,7 +36,8 @@ def test_brute_force(metadata, get_dashboard_credentials, generate_events, clean
     expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
-    expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}".*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'\
+    expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
+                             fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'\
                              r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     query = e2e.make_query([
@@ -67,4 +68,3 @@ def test_brute_force(metadata, get_dashboard_credentials, generate_events, clean
 
     # Check that alert has been indexed (checking that the timestamp is the expected one)
     assert indexed_alert_timestamp == raised_alert_timestamp, 'Alert triggered, but not indexed'
-
