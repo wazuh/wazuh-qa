@@ -16,7 +16,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_netcat.yaml')
 
 # Playbooks
-configuration_playbooks = ['configuration.yaml', 'credentials.yaml']
+configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
 
 #Configuration
