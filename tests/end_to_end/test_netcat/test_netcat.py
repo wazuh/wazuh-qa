@@ -5,12 +5,12 @@ import pytest
 from datetime import datetime
 from tempfile import gettempdir
 
+from wazuh_testing.tools.time import parse_date_time_format
 from wazuh_testing.tools import configuration as config
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
-from wazuh_testing.tools.time import parse_date_time_format
 
-## Test cases data
+# Test cases data
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_netcat.yaml')
@@ -19,7 +19,7 @@ test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_netcat.
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
 
-#Configuration
+# Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 

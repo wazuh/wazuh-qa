@@ -3,15 +3,15 @@
   tasks:
 
     - name: Install netcat (CentOS)
-      become: True
+      become: true
       shell: yum install -y nmap-ncat
       when: ansible_facts['distribution'] == "CentOS"
 
     - name: Install netcat (Ubuntu)
-      become: True
+      become: true
       shell: >
-         apt-get install netcat
-         apt-get -y install nmap
+        apt-get install netcat
+        apt-get -y install nmap
       when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Test manager configuration
@@ -19,25 +19,25 @@
   tasks:
 
     - name: Configure manager to periodically get a list of running processes
-      become: True
+      become: true
       blockinfile:
-         path: /var/ossec/etc/ossec.conf
-         insertbefore: "</ossec_config>"
-         block: |
-           <localfile>
-              <log_format>full_command</log_format>
-              <alias>process list</alias>
-              <command>ps -e -o pid,uname,command</command>
-              <frequency>30</frequency>
-           </localfile>
-         marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+        path: /var/ossec/etc/ossec.conf
+        insertbefore: </ossec_config>
+        block: |
+         <localfile>
+           <log_format>full_command</log_format>
+           <alias>process list</alias>
+           <command>ps -e -o pid,uname,command</command>
+           <frequency>30</frequency>
+         </localfile>
+         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Configure local rules
-      become: True
+      become: true
       blockinfile:
-         path: /var/ossec/etc/rules/local_rules.xml
-         insertafter: "</groups>"
-         block: |
+        path: /var/ossec/etc/rules/local_rules.xml
+        insertafter: </groups>
+        block: |
            <group name="ossec,">
               <rule id="100050" level="0">
                   <if_sid>530</if_sid>
@@ -52,8 +52,8 @@
                   <group>process_monitor,</group>
               </rule>
            </group>
-         marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-manager
-      become: True
+      become: true
       shell: systemctl restart wazuh-manager

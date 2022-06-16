@@ -9,4 +9,4 @@
       command_kill_netcat: pkill -fx 'nc -l 8000'
     rule.id: 100051
     rule.level: 7
-    rule.description: "Netcat listening for incoming connections."
+    rule.description: Netcat listening for incoming connections.
