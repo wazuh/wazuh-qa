@@ -116,7 +116,8 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
-def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages, daemons_handler, wait_for_gcp_start):
+def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages,
+                      daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls a message number less than or equal to the limit set
                  in the 'max_messages' tag. For this purpose, the test will use a fixed limit and generate a
@@ -189,7 +190,7 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
                     # A counter is used to prevent it from failing due to logs from other sources
                     count_message += 1
                 assert int(number_pulled) <= max_messages
-        assert count_message >=1
+        assert count_message >= 1
     else:
         for number_pulled in numbers_pulled:
             if int(number_pulled) != 0:
