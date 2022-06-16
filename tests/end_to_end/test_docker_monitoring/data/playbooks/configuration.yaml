@@ -52,10 +52,10 @@
       unarchive:
         src: /root/wazuh-install-files.tar
         dest: /root
-        remote_src: yes
+        remote_src: true
 
     - name: Get credentials file
       fetch:
         src: /root/wazuh-install-files/passwords.wazuh
         dest: /tmp/
-        flat: yes
+        flat: true
