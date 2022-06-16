@@ -2,23 +2,7 @@
   hosts: wazuh-agent
   tasks:
 
-    - name: Install netcat (CentOS)
-      become: true
-      shell: yum install -y nmap-ncat
-      when: ansible_facts['distribution'] == "CentOS"
-
-    - name: Install netcat (Ubuntu)
-      become: true
-      shell: >
-        apt-get install netcat
-        apt-get -y install nmap
-      when: ansible_facts['distribution'] == "Ubuntu"
-
-- name: Test manager configuration
-  hosts: wazuh-manager
-  tasks:
-
-    - name: Configure manager to periodically get a list of running processes
+    - name: Configure agent to get a list of running processes
       become: true
       blockinfile:
         path: /var/ossec/etc/ossec.conf
@@ -31,6 +15,24 @@
           <frequency>30</frequency>
           </localfile>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-agent
+      become: true
+      shell: systemctl restart wazuh-agent
+
+    - name: Install netcat (CentOS)
+      become: true
+      shell: yum install -y nmap-ncat
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install netcat (Ubuntu)
+      become: true
+      shell: apt install ncat nmap -y
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Test manager configuration
+  hosts: wazuh-manager
+  tasks:
 
     - name: Configure local rules
       become: true
