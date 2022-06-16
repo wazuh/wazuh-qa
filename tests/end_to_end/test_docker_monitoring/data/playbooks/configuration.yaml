@@ -4,30 +4,14 @@
   tasks:
 
     - name: Check if Docker is installed or not on CentOS
-      command: rpm -q docker
+      command: docker info
       register: docker_check
       when: ansible_facts['distribution'] == "CentOS"
       ignore_errors: true
 
-    - name: Uninstall old versions of Docker (CentOS)
-      shell: >
-        yum -y remove docker
-        docker-client
-        docker-client-latest
-        docker-common
-        docker-latest
-        docker-latest-logrotate
-        docker-logrotate
-        docker-engine
-        docker-ce
-        docker-ce-cli
-        containerd.io
-        docker-compose-plugin
-      when: (ansible_facts['distribution'] == "CentOS" and "is not installed" not in docker_check.stdout)
-
     - name: Install Docker using the convenience script
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-      when: ("is not installed" in docker_check.stdout)
+      when: docker_check.rc != 0
 
     - name: Start Docker with systemd
       shell: systemctl stop docker && systemctl stop docker.socket && systemctl start docker
@@ -47,15 +31,3 @@
 
     - name: Restart wazuh-manager
       shell: systemctl restart wazuh-manager
-
-    - name: Unzip Wazuh installation files
-      unarchive:
-        src: /root/wazuh-install-files.tar
-        dest: /root
-        remote_src: true
-
-    - name: Get credentials file
-      fetch:
-        src: /root/wazuh-install-files/passwords.wazuh
-        dest: /tmp/
-        flat: true
