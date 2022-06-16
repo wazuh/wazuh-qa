@@ -54,7 +54,7 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
 
 
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
                    release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
                    reference=''):
@@ -138,6 +138,7 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='cust
               f"{arguments['description']}, {arguments['location']}, {arguments['triaged']}, {arguments['checksum']},"
               f"{arguments['item_id']})")
 
+
 def update_sync_info(agent_id='000', component='syscollector-packages', last_attempt=1, last_completion=1,
                      n_attempts=0, n_completions=0, last_agent_checksum=''):
     """Update the sync_info table of the specified agent for the selected component.
@@ -215,7 +216,7 @@ def delete_os_info(agent_id='000'):
 
 
 def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename= '',
+                   hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
                    release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
                    reference=''):
@@ -329,26 +330,33 @@ def get_vulnerability_inventory_data(agent_id='000', name=None, status=None, cve
     return query_wdb(query)
 
 
-def insert_vulnerability_in_agent_inventory(agent_id='000', name='', status='PENDING', cve='', version='',
-                                            type='PACKAGE', architecture='', severity='-', cvss2_score=0,
-                                            cvss3_score=0, reference='', detection_time=''):
+def insert_vulnerability_in_agent_inventory(agent_id='000', name='', version='', architecture='', cve='',
+                                            detection_time='', severity='None', cvss2_score=0, cvss3_score=0,
+                                            reference='', type='PACKAGE', status='PENDING', external_references='',
+                                            condition='', title='', published='', updated=''):
     """Insert a vulnerability in the agent vulnerabilities inventory.
 
     Args:
         agent_id (str): Agent ID.
         name (str): Vulnerability name.
-        status (str): Vulnerability status.
-        cve (str): Vulnerability CVE.
         version (str): Version.
-        type (str): Vulnerability type.
         architecture (str): Architecture.
+        cve (str): Vulnerability CVE.
+        detection_time (str): Vulnerability detection time.
         severity (str): Vulnerability severity.
         cvss2_score (float): CVSS2 score.
         cvss3_score (float): CVSS3 score
         reference (str): Vulnerability reference.
-        detection_time (str): Vulnerability detection time.
+        type (str): Vulnerability type.
+        status (str): Vulnerability status.
+        external_references (str): Vulnerability external reference.
+        condition (str): Vulnerability condition.
+        title (str): Vulnerability title.
+        published (str): Vulnerability published.
+        updated (str): Vulnerability updated.
     """
-    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, reference, " \
-              f"type, status, severity, cvss2_score, cvss3_score, detection_time) VALUES ('{name}', '{version}', " \
-              f"'{architecture}', '{cve}', '{reference}', '{type}', '{status}', '{severity}', {cvss2_score}, " \
-              f"{cvss3_score}, '{detection_time}')")
+    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, " \
+              f"detection_time, severity, cvss2_score, cvss3_score, reference, type, status, external_references," \
+              f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', " \
+              f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}',  " \
+              f"'{external_references}', '{condition}', '{title}', '{published}', '{updated}')")

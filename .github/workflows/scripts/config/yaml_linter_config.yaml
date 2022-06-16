@@ -1,0 +1,28 @@
+# Documentation: https://yamllint.readthedocs.io/en/stable/rules.html
+extends: default
+rules:
+  line-length:
+    max: 120
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: true
+  quoted-strings:
+    required: only-when-needed
+    quote-type: any
+  trailing-spaces: {}
+  braces:
+    forbid: non-empty
+  brackets:
+    forbid: non-empty
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 2
+  document-start:
+    present: false
+  empty-lines:
+    max: 1
+  hyphens:
+    max-spaces-after: 1

@@ -12,6 +12,7 @@ if sys.platform == 'win32':
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
+    AGENT_CONF = os.path.join(WAZUH_PATH, 'shared', 'agent.conf')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
     CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'client.keys')
     PREFIX = os.path.join('c:', os.sep)
@@ -19,6 +20,8 @@ if sys.platform == 'win32':
     WAZUH_API_CONF = None
     WAZUH_SECURITY_CONF = None
     API_LOG_FILE_PATH = None
+    API_JSON_LOG_FILE_PATH = None
+    API_LOG_FOLDER = None
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-agent.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'wazuh-logcollector.state')
     REMOTE_STATISTICS_FILE = None
@@ -52,11 +55,14 @@ else:
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
+    AGENT_CONF = os.path.join(WAZUH_PATH, 'etc', 'shared', 'agent.conf')
     WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
+    API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
+    API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
     ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     AGENT_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-agentd.state')
     LOGCOLLECTOR_STATISTICS_FILE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-logcollector.state')

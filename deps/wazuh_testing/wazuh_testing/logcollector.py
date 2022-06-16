@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import stat
 import sys
@@ -10,6 +11,8 @@ from time import sleep
 
 from wazuh_testing.tools import LOGCOLLECTOR_STATISTICS_FILE, WAZUH_PATH, monitoring
 
+GENERIC_CALLBACK_MSG_LOG_FILE_DUPLICATED = r".*Log file (.+) is duplicated."
+
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 GENERIC_CALLBACK_ERROR_INVALID_LOCATION = 'The expected invalid location error log has not been produced'
 GENERIC_CALLBACK_ERROR_ANALYZING_FILE = 'The expected analyzing file log has not been produced'
@@ -18,6 +21,7 @@ GENERIC_CALLBACK_ERROR_ANALYZING_MACOS = "The expected analyzing macos log has n
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET = "The expected target socket log has not been produced"
 GENERIC_CALLBACK_ERROR_TARGET_SOCKET_NOT_FOUND = "The expected target socket not found error has not been produced"
 GENERIC_CALLBACK_ERROR_READING_FILE = "The expected invalid content error log has not been produced"
+GENERIC_CALLBACK_ERROR_LOG_FILE_DUPLICATED = "The expected warning log file duplicated has not been produced."
 GENERIC_CALLBACK_ERROR = 'The expected error output has not been produced'
 
 LOG_COLLECTOR_GLOBAL_TIMEOUT = 40
@@ -77,6 +81,13 @@ else:
         'agent.debug': '0',
     }
     prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
+
+
+def callback_missing_element_error(line):
+    match = re.match(r'.* \(\d+\): Missing \'(.+)\' element.', line)
+    if match:
+        return True
+    return None
 
 
 def callback_read_macos_message(msg):
@@ -170,7 +181,7 @@ def callback_eventchannel_bad_format(event_location):
     Returns:
         callable: callback to detect this event.
     """
-    msg = fr"ERROR: Could not EvtSubscribe() for ({event_location}) which returned \(\d+\)"
+    msg = fr"ERROR: Could not EvtSubscribe\(\) for \({event_location}\) which returned \(\d+\)"
     return monitoring.make_callback(pattern=msg, prefix=prefix)
 
 

@@ -100,7 +100,7 @@ conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
                'CREDENTIALS_FILE': global_parameters.gcp_credentials_file, 'INTERVAL': interval,
                'PULL_ON_START': pull_on_start, 'MAX_MESSAGES': max_messages,
-               'LOGGING': logging, 'DAY': day, 'WDAY': wday, 'DAY_TIME': day_time,
+               'DAY': day, 'WDAY': wday, 'DAY_TIME': day_time,
                'WDAY_TIME': day_time, 'TIME': day_time, 'MODULE_NAME': __name__}
 
 p, m = generate_params(extra_params=conf_params,

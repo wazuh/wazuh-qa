@@ -19,7 +19,7 @@ from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -101,6 +101,32 @@ def restart_wazuh(get_configuration, request):
     # Start Wazuh
     control_service('start')
 
+
+@pytest.fixture(scope='module')
+def restart_wazuh_daemon(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='function')
+def restart_wazuh_daemon_function(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+@pytest.fixture(scope='module')
+def restart_wazuh_daemon_after_finishing(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    yield
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
@@ -597,6 +623,26 @@ def configure_environment(get_configuration, request):
             control_service('restart')
 
 
+@pytest.fixture(scope="module")
+def set_agent_conf(get_configuration):
+    """Set a new configuration in 'agent.conf' file."""
+    backup_config = conf.get_agent_conf()
+    sections = get_configuration.get('sections')
+    # Remove elements with 'None' value
+    for section in sections:
+        for el in section['elements']:
+            for key in el.keys():
+                if el[key]['value'] is None:
+                    section['elements'].remove(el)
+
+    new_config = conf.set_section_wazuh_conf(sections, backup_config)
+    conf.write_agent_conf(new_config)
+
+    yield
+
+    conf.write_agent_conf(backup_config)
+
+
 @pytest.fixture(scope='module')
 def configure_sockets_environment(request):
     """Configure environment for sockets and MITM"""
@@ -929,6 +975,7 @@ def truncate_monitored_files():
         truncate_file(log_file)
 
 
+
 @pytest.fixture(scope='function')
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
@@ -1021,6 +1068,26 @@ def mock_agent_function(request):
 
 
 @pytest.fixture(scope='function')
+def clear_logs(get_configuration, request):
+    """Reset the ossec.log and start a new monitor"""
+    truncate_file(LOG_FILE_PATH)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    setattr(request.module, 'wazuh_log_monitor', file_monitor)
+
+
+@pytest.fixture(scope='function')
+def remove_backups(backups_path):
+    "Creates backups folder in case it does not exist."
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+    yield
+    remove_file(backups_path)
+    recursive_directory_creation(backups_path)
+    os.chmod(backups_path, 0o777)
+
+    
+@pytest.fixture(scope='function')    
 def mock_agent_with_custom_system(agent_system):
     """Fixture to create a mocked agent with custom system specified as parameter"""
     if agent_system not in mocking.SYSTEM_DATA:

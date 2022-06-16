@@ -53,7 +53,7 @@ resources:
         workers:
           max: 47.85
           mean: 9.35
-          reg_cof: 0.06
+          reg_cof: 0.1
       FD:
         master:
           max: 160

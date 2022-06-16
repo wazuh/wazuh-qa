@@ -1,17 +1,17 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import ipaddress
+import json
 import logging
+import numbers
 import re
+import socket
 import string
+from datetime import datetime
 from functools import wraps
 from random import randint, SystemRandom
 from time import sleep
-from random import randint, SystemRandom, choice
-import string
-import json
-import socket
-import ipaddress
 
 
 def retry(exceptions, attempts=5, delay=1, delay_multiplier=2):
@@ -159,6 +159,15 @@ def get_host_name():
     return socket.gethostname()
 
 
+def validate_interval_format(interval):
+    """Validate that the interval passed has the format in which the last digit is a letter from those passed and
+       the other characters are between 0-9"""
+    if interval=='':
+        return False
+    if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
+        return False
+    return True
+
 def format_ipv6_long(ipv6_address):
     """Return the long form of the address representation in uppercase.
 
@@ -169,3 +178,13 @@ def format_ipv6_long(ipv6_address):
         str: IPV6 long form
     """
     return (ipaddress.ip_address(ipv6_address).exploded).upper()
+
+
+def get_datetime_diff(phase_datetimes, date_format):
+    """Calculate the difference between two datetimes.
+
+    Args:
+        phase_datetimes (list): List containing start and end datetimes.
+        date_format (str): Expected datetime shape.
+    """
+    return datetime.strptime(phase_datetimes[1], date_format) - datetime.strptime(phase_datetimes[0], date_format)

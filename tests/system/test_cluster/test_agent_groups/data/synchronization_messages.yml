@@ -1,0 +1,14 @@
+---
+wazuh-worker1:
+  - regex: '.*Agent-groups sync.*Permission to synchronize granted.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 120
+  - regex: '.*Agent-groups sync.*Starting.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 90
+  - regex: '.*Agent-groups sync.*Obtained.*chunks of data in.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 90
+  - regex: '.*Agent-groups sync.*Finished in.*Updated.*chunks.*'
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 90

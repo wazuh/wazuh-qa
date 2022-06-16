@@ -51,8 +51,7 @@ import os
 
 import pytest
 import requests
-from wazuh_testing import global_parameters
-from wazuh_testing.api import callback_detect_api_start
+from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools import API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import check_apply_test, get_api_conf
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -67,8 +66,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 configurations_path = os.path.join(test_data_path, 'conf.yaml')
 configuration = get_api_conf(configurations_path)
 force_restart_after_restoring = True
-
-wazuh_log_monitor = FileMonitor(API_LOG_FILE_PATH)
 
 
 # Fixtures
@@ -135,10 +132,7 @@ def test_host_port(expected_exception, tags_to_apply,
     port = get_configuration['configuration']['port']
 
     # Check that expected host and port are shown in api.log
-    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout + 10,
-                                    callback=callback_detect_api_start,
-                                    error_message='Did not receive expected "Listening on ..." event').result()
-    assert event == f"{host}:{port}", f'Expected API log was "{host}:{port}", but the returned one is "{event}".'
+    evm.check_api_start_log(file_to_monitor=API_LOG_FILE_PATH, host=host, port=port)
 
     # Perform actual request and verify if response code is the expected one.
     try:

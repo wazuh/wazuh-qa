@@ -17,6 +17,7 @@
       - autoconf
       - libtool
       - python3-pytest
+      - libssl-dev
     force_apt_get: yes
     state: present
     update_cache: yes
@@ -86,3 +87,11 @@
 
 - name: Restart Wazuh
   command: /var/ossec/bin/wazuh-control restart
+
+- name: Copy wdb-query.py script
+  copy:
+    src: ../../../../scripts/wdb-query.py
+    dest: /var/ossec/bin/wdb-query.py
+    owner: root
+    group: root
+    mode: '0644'

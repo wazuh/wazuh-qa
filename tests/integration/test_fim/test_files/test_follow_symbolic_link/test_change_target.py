@@ -187,19 +187,19 @@ def test_symbolic_change_target(tags_to_apply, main_folder, aux_folder, get_conf
         fim.create_file(fim.REGULAR, main_folder, file1, content='')
         fim.create_file(fim.REGULAR, aux_folder, file1, content='')
         fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        add = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event,
+        add = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
                                       error_message='Did not receive expected "Sending FIM event: ..." event'
                                       ).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             f"'added' event not matching for {file1}"
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event)
             logger.error(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
     else:
         fim.create_file(fim.REGULAR, aux_folder, file1, content='')
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=3, callback=fim.callback_detect_event)
+            event = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event)
             logger.error(f'Unexpected event {event.result()}')
             raise AttributeError(f'Unexpected event {event.result()}')
 

@@ -1,18 +1,21 @@
+import shutil
 import pytest
 import time
 import os
 import yaml
 
+from wazuh_testing import logger
 from wazuh_testing.tools import LOG_FILE_PATH, CLIENT_KEYS_PATH, API_LOG_FILE_PATH
 from wazuh_testing.wazuh_db import insert_agent_in_db, clean_agents_from_db
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, AUTHD_DETECTOR_PREFIX
 from wazuh_testing.tools.configuration import write_wazuh_conf, get_wazuh_conf, set_section_wazuh_conf,\
                                               load_wazuh_configurations
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.monitoring import QueueMonitor
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.authd import DAEMON_NAME
-from wazuh_testing.api import callback_detect_api_start, get_api_details_dict
+from wazuh_testing.api import get_api_details_dict
+from wazuh_testing.tools.wazuh_manager import remove_agents
+from wazuh_testing.modules.api import event_monitor as evm
 
 
 AUTHD_STARTUP_TIMEOUT = 30
@@ -168,10 +171,8 @@ def restart_api_module():
 
 @pytest.fixture(scope='module')
 def wait_for_start_module():
-    # Wait for API to start
-    file_monitor = FileMonitor(API_LOG_FILE_PATH)
-    file_monitor.start(timeout=20, callback=callback_detect_api_start,
-                       error_message='Did not receive expected "INFO: Listening on ..." event')
+    """Monitor the API log file to detect whether it has been started or not."""
+    evm.check_api_start_log()
 
 
 @pytest.fixture(scope='function')
@@ -211,3 +212,31 @@ def insert_pre_existent_agents(get_current_test_case, stop_authd_function):
         insert_agent_in_db(id, name, ip, registration_time, connection_status, disconnection_time)
 
     keys_file.close()
+
+
+@pytest.fixture(scope='function')
+def copy_tmp_script(request):
+    """
+    Copy the script named 'script_filename' and found in 'script_path' to a temporary folder for use in the test.
+    """
+    try:
+        script_filename = getattr(request.module, 'script_filename')
+    except AttributeError as script_filename_not_set:
+        logger.debug('script_filename is not set')
+        raise script_filename_not_set
+
+    try:
+        script_path = getattr(request.module, 'script_path')
+    except AttributeError as script_path_not_set:
+        logger.debug('script_path is not set')
+        raise script_path_not_set
+
+    shutil.copy(os.path.join(script_path, script_filename), os.path.join("/tmp", script_filename))
+
+
+@pytest.fixture(scope='function')
+def delete_agents():
+
+    yield
+
+    remove_agents('all', 'api')

@@ -14,6 +14,7 @@ VERBOSE_DEBUG_OUTPUT = 2
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
 
+
 # Configurations
 DATA = 'data'
 WAZUH_LOG_MONITOR = 'wazuh_log_monitor'

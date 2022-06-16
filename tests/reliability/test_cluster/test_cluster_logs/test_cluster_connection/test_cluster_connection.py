@@ -25,14 +25,16 @@ def test_cluster_connection(artifacts_path):
     if not artifacts_path:
         pytest.fail("Parameter '--artifacts_path=<path>' is required.")
 
-    if len(cluster_log_files := glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))) == 0:
+    cluster_log_files = glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))
+    if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
     for log_file in cluster_log_files:
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
             # Search first successful connection message.
-            if not (conn := re.search(rb'^.*Sucessfully connected to master.*$', s, flags=re.MULTILINE)):
+            conn = re.search(rb'^.*Successfully connected to master.*$', s, flags=re.MULTILINE)
+            if not conn:
                 pytest.fail(f'Could not find "Sucessfully connected to master" message in the '
                             f'{node_name.search(log_file)[1]}')
 
