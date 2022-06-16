@@ -11,7 +11,7 @@ from wazuh_testing.tools import configuration as config
 # Test cases data
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_path = os.path.join(test_data_path, 'test_cases')
-test_cases_file_path = os.path.join(test_cases_path, 'cases_test_docker_monitoring.yaml')
+test_cases_file_path = os.path.join(test_cases_path, 'cases_docker_monitoring.yaml')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
