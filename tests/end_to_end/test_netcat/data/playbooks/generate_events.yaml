@@ -4,7 +4,7 @@
 
     - name: Truncate file alert.json
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
-      become: True
+      become: true
 
 - name: Generate events
   hosts: wazuh-agent
