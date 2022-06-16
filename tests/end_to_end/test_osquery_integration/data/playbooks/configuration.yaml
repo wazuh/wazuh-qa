@@ -1,0 +1,71 @@
+---
+- name: Test configuration
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Check if Osquery is installed or not on CentOS
+      command: rpm -q osquery
+      register: osquery_check
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install Osquery on CentOS
+      shell: >
+        curl -L https://pkg.osquery.io/rpm/GPG | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
+        yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
+        yum-config-manager --enable osquery-s3-rpm-repo
+        yum -y install osquery
+      when: (ansible_facts['distribution'] == "CentOS" and "is not installed" in osquery_check.stdout)
+
+    - name: Configure Osquery
+      copy:
+        src: "{{ configuration_file }}"
+        dest: /etc/osquery/osquery.conf
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes
+
+    - name: Configure the Osquery module
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+        insertbefore: "^</ossec_config>"
+        block: |
+          <wodle name="osquery">
+            <disabled>no</disabled>
+            <run_daemon>yes</run_daemon>
+            <bin_path>/usr/bin</bin_path>
+            <log_path>/var/log/osquery/osqueryd.results.log</log_path>
+            <config_path>/etc/osquery/osquery.conf</config_path>
+            <add_labels>no</add_labels>
+          </wodle>
+
+    - name: Enable and start Osquery
+      shell: systemctl enable osqueryd && systemctl start osqueryd
+
+    - name: Restart the manager
+      shell: systemctl restart wazuh-manager
+
+    - name: Check if stress is installed or not on CentOS
+      command: rpm -q stress
+      register: stress_check
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install stress
+      shell: >
+        yum install -y epel-release
+        yum -y install stress
+      when: (ansible_facts['distribution'] == "CentOS" and "is not installed" in stress_check.stdout)
+
+    - name: Unzip Wazuh installation files
+      unarchive:
+        src: /root/wazuh-install-files.tar
+        dest: /root
+        remote_src: yes
+
+    - name: Get credentials file
+      fetch:
+        src: /root/wazuh-install-files/passwords.wazuh
+        dest: /tmp/
+        flat: yes

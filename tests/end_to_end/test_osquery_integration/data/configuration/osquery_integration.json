@@ -1,0 +1,22 @@
+{
+    "options": {
+        "config_plugin": "filesystem",
+        "logger_plugin": "filesystem",
+        "utc": "true"
+    },
+    "schedule": {
+        "low_free_memory": {
+            "query": "SELECT memory_total, memory_free, CAST(memory_free AS real) / memory_total AS memory_free_perc, '10%' AS threshold FROM memory_info WHERE memory_free_perc < 0.1;",
+            "interval": 60,
+            "description": "Free RAM is under 10%."
+        }
+    },
+    "packs": {
+        "osquery-monitoring": "/opt/osquery/share/osquery/packs/osquery-monitoring.conf",
+        "incident-response": "/opt/osquery/share/osquery/packs/incident-response.conf",
+        "it-compliance": "/opt/osquery/share/osquery/packs/it-compliance.conf",
+        "vuln-management": "/opt/osquery/share/osquery/packs/vuln-management.conf",
+        "hardware-monitoring": "/opt/osquery/share/osquery/packs/hardware-monitoring.conf",
+        "ossec-rootkit": "/opt/osquery/share/osquery/packs/ossec-rootkit.conf"
+    }
+}

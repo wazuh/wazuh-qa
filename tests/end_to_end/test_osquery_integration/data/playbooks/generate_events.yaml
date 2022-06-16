@@ -1,0 +1,24 @@
+---
+- name: Generate events
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Truncate alerts file
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+
+    - name: Truncate osquery results file
+      shell: echo "" > /var/log/osquery/osqueryd.results.log
+
+    - name: "{{ event_description }}"
+      shell: "{{ command }}"
+
+    - name: Wait for alerts to be generated
+      wait_for:
+        timeout: 5
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: yes
