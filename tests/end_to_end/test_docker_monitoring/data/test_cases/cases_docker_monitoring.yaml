@@ -5,6 +5,7 @@
   metadata:
     rule.id: '87932'
     rule.description: 'Docker: Image or repository nginx pulled'
+    rule.level: 3
     extra:
       data.docker.Action: pull
     extra_vars:
@@ -17,6 +18,7 @@
   metadata:
     rule.id: '87903'
     rule.description: 'Docker: Container nginx_container started'
+    rule.level: 3
     extra:
       data.docker.Action: start
     extra_vars:
@@ -29,6 +31,7 @@
   metadata:
     rule.id: '87908'
     rule.description: 'Docker: Started shell session in container nginx_container'
+    rule.level: 5
     extra:
       data.docker.Action: 'exec_start: /bin/bash '
     extra_vars:
@@ -41,6 +44,7 @@
   metadata:
     rule.id: '87902'
     rule.description: 'Docker: Container nginx_container destroyed'
+    rule.level: 5
     extra:
       data.docker.Action: destroy
     extra_vars:

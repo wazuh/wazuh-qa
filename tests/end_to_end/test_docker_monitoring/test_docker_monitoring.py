@@ -28,11 +28,12 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
                            clean_environment):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
+    rule_level = metadata['rule.level']
     docker_action = metadata['extra']['data.docker.Action']
-    expected_api_alert = f".+\"Action\": \"({docker_action})\".+\"description\": \"({rule_description})\".+\"id\": " \
-                         f"\"({rule_id})\""
-    expected_log_alert = f".+\"description\":\"({rule_description})\".+\"id\":\"({rule_id})\"" \
-                         f".+\"Action\":\"({docker_action})\""
+    expected_api_alert = f".+Action.+{docker_action}.+level.+{rule_level}.+description.+{rule_description}.+" \
+                         f"id.+{rule_id}.+"
+    expected_log_alert = f".+level.+{rule_level}.+description.+{rule_description}.+id.+{rule_id}.+" \
+                         f"Action.+{docker_action}.+"
 
     query = e2e.make_query([
         {
