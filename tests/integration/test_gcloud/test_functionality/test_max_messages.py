@@ -51,11 +51,10 @@ tags:
     - scan
     - maximum
 '''
-from itertools import count
 import os
 import sys
-
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_received_messages_number
@@ -187,6 +186,7 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
         for number_pulled in numbers_pulled:
             if int(number_pulled) != 0:
                 if (int(number_pulled) >= publish_messages):
+                    # A counter is used to prevent it from failing due to logs from other sources
                     count_message += 1
                 assert int(number_pulled) <= max_messages
         assert count_message >=1
