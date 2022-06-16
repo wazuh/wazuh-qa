@@ -1,4 +1,3 @@
----
 - name: docker_pull
   description: Test if an alert is generated when using the `pull` command.
   configuration_parameters: null

@@ -1,14 +1,12 @@
----
 - name: Generate events in the manager
   hosts: wazuh-manager
+  become: true
   tasks:
 
     - name: Truncate alerts file
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
-      become: True
 
     - name: "{{ event_description }}"
-      become: True
       shell: "{{ command }}"
 
     - name: Wait for alerts to be generated
@@ -20,4 +18,3 @@
         src: /var/ossec/logs/alerts/alerts.json
         dest: /tmp/
         flat: yes
-      become: True
