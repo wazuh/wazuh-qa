@@ -25,10 +25,10 @@
         insertbefore: </ossec_config>
         block: |
           <localfile>
-            <log_format>full_command</log_format>
-            <alias>process list</alias>
-            <command>ps -e -o pid,uname,command</command>
-            <frequency>30</frequency>
+          <log_format>full_command</log_format>
+          <alias>process list</alias>
+          <command>ps -e -o pid,uname,command</command>
+          <frequency>30</frequency>
           </localfile>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
@@ -39,18 +39,18 @@
         insertafter: </groups>
         block: |
           <group name="ossec,">
-            <rule id="100050" level="0">
-              <if_sid>530</if_sid>
-              <match>^ossec: output: 'process list'</match>
-              <description>List of running processes.</description>
-              <group>process_monitor,</group>
-            </rule>
-            <rule id="100051" level="7" ignore="900">
-              <if_sid>100050</if_sid>
-              <match>nc -l</match>
-              <description>Netcat listening for incoming connections.</description>
-              <group>process_monitor,</group>
-            </rule>
+          <rule id="100050" level="0">
+          <if_sid>530</if_sid>
+          <match>^ossec: output: 'process list'</match>
+          <description>List of running processes.</description>
+          <group>process_monitor,</group>
+          </rule>
+          <rule id="100051" level="7" ignore="900">
+          <if_sid>100050</if_sid>
+          <match>nc -l</match>
+          <description>Netcat listening for incoming connections.</description>
+          <group>process_monitor,</group>
+          </rule>
           </group>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
