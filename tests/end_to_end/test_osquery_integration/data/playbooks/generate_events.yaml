@@ -1,7 +1,6 @@
----
 - name: Generate events
   hosts: wazuh-manager
-  become: True
+  become: true
   tasks:
 
     - name: Truncate alerts file
@@ -21,4 +20,4 @@
       fetch:
         src: /var/ossec/logs/alerts/alerts.json
         dest: /tmp/
-        flat: yes
+        flat: true

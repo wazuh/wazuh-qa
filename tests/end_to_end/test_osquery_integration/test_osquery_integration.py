@@ -14,7 +14,7 @@ from wazuh_testing.tools import configuration as config
 
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_test_osquery_integration.yaml')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_osquery_integration.yaml')
 osquery_configuration_file_path = os.path.join(test_data_path, 'configuration', 'osquery_integration.json')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 configuration_playbooks = ['configuration.yaml']

@@ -1,7 +1,6 @@
----
 - name: Test configuration
   hosts: wazuh-manager
-  become: True
+  become: true
   tasks:
 
     - name: Check if Osquery is installed or not on CentOS
@@ -24,13 +23,13 @@
         owner: root
         group: root
         mode: '0644'
-        backup: yes
+        backup: true
 
     - name: Configure the Osquery module
       blockinfile:
         path: /var/ossec/etc/ossec.conf
-        marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
-        insertbefore: "^</ossec_config>"
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        insertbefore: ^</ossec_config>
         block: |
           <wodle name="osquery">
             <disabled>no</disabled>
@@ -57,15 +56,3 @@
         yum install -y epel-release
         yum -y install stress
       when: (ansible_facts['distribution'] == "CentOS" and "is not installed" in stress_check.stdout)
-
-    - name: Unzip Wazuh installation files
-      unarchive:
-        src: /root/wazuh-install-files.tar
-        dest: /root
-        remote_src: yes
-
-    - name: Get credentials file
-      fetch:
-        src: /root/wazuh-install-files/passwords.wazuh
-        dest: /tmp/
-        flat: yes

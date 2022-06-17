@@ -1,4 +1,3 @@
----
 - name: low_free_memory
   description: Test if an osquery alert is generated when the host is stressed
   configuration_parameters: null
