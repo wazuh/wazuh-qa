@@ -64,8 +64,6 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
     sleep(fw.T_5)
 
     # Get indexed alert
-    get_dashboard_credentials['user'] = get_dashboard_credentials['user'].replace("'",'')
-    get_dashboard_credentials['password'] = get_dashboard_credentials['password'].replace("'",'')
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
 
