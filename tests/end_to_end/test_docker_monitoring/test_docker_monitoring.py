@@ -35,11 +35,12 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
     rule_level = metadata['rule.level']
     docker_action = metadata['extra']['data.docker.Action']
 
-    expected_alert_json = f".+timestamp\":\"(.+)\",.+level.+{rule_level}.+description.+{rule_description}.+" \
-                          f"id.+{rule_id}.+Action.+{docker_action}.+"
+    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level.+{rule_level}.+description.+{rule_description}.+" \
+                          fr"id.+{rule_id}.+Action.+{docker_action}.+"
 
-    expected_indexed_alert = f".+Action.+{docker_action}.+level.+{rule_level}.+description.+{rule_description}.+" \
-                             f"id.+{rule_id}.+timestamp\": \"(.+)\",.+"
+    expected_indexed_alert = fr".+Action.+{docker_action}.+level.+{rule_level}.+description.+{rule_description}.+" \
+                             fr"id.+{rule_id}.+timestamp\": \"(.+)\"" \
+                             r'},.+'
 
     query = e2e.make_query([
         {
@@ -71,7 +72,6 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
-
 
     # Check that the alert data is the expected one
     alert_data = re.search(expected_indexed_alert, indexed_alert)
