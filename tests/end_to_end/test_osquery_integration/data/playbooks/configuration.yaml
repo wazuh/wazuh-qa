@@ -32,12 +32,12 @@
         insertbefore: ^</ossec_config>
         block: |
           <wodle name="osquery">
-            <disabled>no</disabled>
-            <run_daemon>yes</run_daemon>
-            <bin_path>/usr/bin</bin_path>
-            <log_path>/var/log/osquery/osqueryd.results.log</log_path>
-            <config_path>/etc/osquery/osquery.conf</config_path>
-            <add_labels>no</add_labels>
+          <disabled>no</disabled>
+          <run_daemon>yes</run_daemon>
+          <bin_path>/usr/bin</bin_path>
+          <log_path>/var/log/osquery/osqueryd.results.log</log_path>
+          <config_path>/etc/osquery/osquery.conf</config_path>
+          <add_labels>no</add_labels>
           </wodle>
 
     - name: Enable and start Osquery

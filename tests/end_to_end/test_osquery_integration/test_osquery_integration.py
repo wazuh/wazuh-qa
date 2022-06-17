@@ -24,7 +24,6 @@ events_playbooks = ['generate_events.yaml']
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
-
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_osquery_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
@@ -66,7 +65,6 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
-
 
     # Check that the alert data is the expected one
     alert_data = re.search(expected_indexed_alert, indexed_alert)

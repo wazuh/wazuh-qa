@@ -6,7 +6,8 @@
     rule.description: "osquery: System memory is under 10%"
     rule.level: 4
     extra:
-      data.osquery.name: "low_free_memory"
+      data.osquery.name: low_free_memory
     extra_vars:
       event_description: Stress system memory
-      command: stress --vm-bytes $(awk '/MemAvailable/{printf "%d\n", $2 * 0.98;}' < /proc/meminfo)k --vm-keep -m 1 -t 60
+      command: >
+        stress --vm-bytes $(awk '/MemAvailable/{printf "%d\n", $2 * 0.98;}' < /proc/meminfo)k --vm-keep -m 1 -t 60
