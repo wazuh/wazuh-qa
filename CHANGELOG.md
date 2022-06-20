@@ -52,6 +52,7 @@ Release report: TBD
 - Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
 - API - Test the format of the logs (JSON logs support) ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635/))
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
+- Vulnerability Detector integration tests for Amazon Linux 2022 ([#2911](https://github.com/wazuh/wazuh-qa/pull/2911))
 
 ### Changed
 
