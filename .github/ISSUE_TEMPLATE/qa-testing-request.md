@@ -1,7 +1,6 @@
 ---
 name: QA testing request
-about: Request the QA team to perform some type of testing, either manually or automatically.ly
-  or automatically.
+about: Request the QA team to perform some type of testing, either manually or automatically.
 title: QA testing - <title>
 labels: status/not-tracked, team/qa, type/qa-testing
 assignees: ''
