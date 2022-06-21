@@ -1,0 +1,29 @@
+- name: Truncate file
+  hosts: all
+  tasks:
+
+    - name: Truncate alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: true
+
+- name: Generate events
+  hosts: localhost
+  tasks:
+
+    - name: sql injection
+      command: curl -XGET "http://wazuh-agent/?id=SELECT+*+FROM+users";
+
+    - name: Wait for alert
+      pause:
+        seconds: 5
+
+- name: Get logs
+  hosts: all
+  tasks:
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: yes
+      become: true

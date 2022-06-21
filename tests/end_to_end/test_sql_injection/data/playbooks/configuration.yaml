@@ -1,0 +1,28 @@
+- name: Test agent configuration
+  hosts: wazuh-agent
+  tasks:
+
+    - name: Install apache (CentOS)
+      become: true
+      shell: dnf install httpd -y
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Start apache
+      become: true
+      shell: systemctl start httpd
+
+    - name: Configure agent to monitor the Apache access logs
+      become: true
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertbefore: </ossec_config>
+        block: |
+          <localfile>
+          <log_format>apache</log_format>
+          <location>/var/log/httpd/access_log</location>
+          </localfile>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-agent
+      become: true
+      shell: systemctl restart wazuh-agent

@@ -1,0 +1,9 @@
+- name: sql_injection
+  description: Execute a sql injection attack and check generated alerts
+  configuration_parameters: null
+  metadata:
+    rule.id: 31103
+    rule.level: 7
+    rule.description: "SQL injection attemp."
+    extra:
+      mitre_technique: Exploit Public-Facing Application
