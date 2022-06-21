@@ -30,6 +30,30 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
     return response
 
 
+def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+    """Delete indices from wazuh-indexer using its API.
+
+      Make a request to the wazuh-indexer API to delete indices that match a given name.
+
+      Args:
+          ip_address (str): wazuh-indexer IP address.
+          index (str): Name of the index to be deleted.
+          credentials(dict): wazuh-indexer credentials.
+
+      Returns:
+          obj(class): `Response <Response>` object
+     """
+    url = f"https://{ip_address}:9200/{index}"
+
+    response = requests.delete(url=url, params={'pretty': 'true'}, verify=False,
+                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
+
+    if response.status_code != 200:
+        raise Exception(f"The response is not the expected. Actual response {response.status_code}")
+
+    return response
+
+
 def make_query(must_match):
     """Create a query according to the values passed in must_match.
 
