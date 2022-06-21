@@ -16,7 +16,7 @@
 
     - name: Wait for alert
       wait_for:
-        seconds: 5
+        timeout: 5
 
     - name: Kill netcat
       become: true
