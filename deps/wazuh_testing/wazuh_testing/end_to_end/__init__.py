@@ -46,7 +46,7 @@ def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alert
     url = f"https://{ip_address}:9200/{index}"
 
     response = requests.delete(url=url, params={'pretty': 'true'}, verify=False,
-                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
+                               auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
 
     if response.status_code != 200:
         raise Exception(f"The response is not the expected. Actual response {response.status_code}")
