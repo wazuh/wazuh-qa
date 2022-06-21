@@ -74,7 +74,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT,
                                        ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
-                                       ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_CAPACITY, SCHEDULE_MODE)
+                                       ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_CAPACITY, SCHEDULED_MODE)
 from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 from wazuh_testing.modules import TIER1
 
@@ -98,7 +98,7 @@ scan_delay = 10
 file_limit_list = ['100']
 conf_params = {'TEST_DIRECTORIES': testdir1}
 
-params, metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE],
+params, metadata = generate_params(extra_params=conf_params, modes=[SCHEDULED_MODE],
                                    apply_to_all=({'FILE_LIMIT': file_limit_elem} for file_limit_elem
                                    in file_limit_list))
 
