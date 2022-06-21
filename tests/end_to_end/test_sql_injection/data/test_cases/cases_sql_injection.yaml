@@ -4,6 +4,6 @@
   metadata:
     rule.id: 31103
     rule.level: 7
-    rule.description: "SQL injection attemp."
+    rule.description: "SQL injection attempt."
     extra:
       mitre_technique: Exploit Public-Facing Application
