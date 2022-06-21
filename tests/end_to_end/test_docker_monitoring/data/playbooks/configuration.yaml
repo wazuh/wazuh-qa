@@ -4,17 +4,21 @@
   tasks:
 
     - name: Check if Docker is installed or not on CentOS
-      command: docker info
+      command: systemctl status docker --no-pager
       register: docker_check
       when: ansible_facts['distribution'] == "CentOS"
       ignore_errors: true
 
     - name: Install Docker using the convenience script
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-      when: docker_check.rc != 0
+      when: (docker_check.rc != 0 and docker_check.rc != 3)
 
-    - name: Start Docker with systemd
-      shell: systemctl stop docker && systemctl stop docker.socket && systemctl start docker
+    - name: Stop docker to avoid errors and start it
+      shell: |
+        systemctl stop docker
+        systemctl stop docker.socket
+        systemctl start docker
+      when: docker_check.rc == 3
 
     - name: Configure the docker-listener module
       blockinfile:

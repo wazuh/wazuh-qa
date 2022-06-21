@@ -9,6 +9,9 @@
     - name: "{{ event_description }}"
       shell: "{{ command }}"
 
+    - name: Dummy alert
+      shell: 'echo "$(date +"%b %d %T") agent sshd[29205]: Invalid user a from 18.18.1.1 port 22" >> /var/log/messages'
+
     - name: Wait for alerts to be generated
       wait_for:
         timeout: 5
