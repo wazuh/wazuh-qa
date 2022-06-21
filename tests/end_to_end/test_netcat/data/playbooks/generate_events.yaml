@@ -15,12 +15,12 @@
       timeout: 30
 
     - name: Wait for alert
-      pause:
+      wait_for:
         seconds: 5
 
-    - name: "{{ event_description_kill_netcat }}"
+    - name: Kill netcat
       become: true
-      command: "{{ command_kill_netcat }}"
+      command: pkill -fx 'nc -l 8000'
 
 - name: Get logs
   hosts: all
