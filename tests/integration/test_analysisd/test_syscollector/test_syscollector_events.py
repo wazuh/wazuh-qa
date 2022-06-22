@@ -38,7 +38,8 @@ os_version:
     - Ubuntu Bionic
 
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html#using-syscollector-information-to-trigger-alerts
+    - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html\
+        #using-syscollector-information-to-trigger-alerts
 '''
 import os
 import yaml
