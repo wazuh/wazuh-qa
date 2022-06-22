@@ -2,6 +2,9 @@
   description: Execute a sql injection attack and check generated alerts
   configuration_parameters: null
   metadata:
+    extra_vars:
+      event_description: Run SQL injection
+      command: curl -XGET "http://wazuh-agent/?id=SELECT+*+FROM+users";
     rule.id: 31103
     rule.level: 7
     rule.description: "SQL injection attempt."

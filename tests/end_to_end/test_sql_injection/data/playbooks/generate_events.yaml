@@ -10,12 +10,12 @@
   hosts: localhost
   tasks:
 
-    - name: sql injection
-      command: curl -XGET "http://wazuh-agent/?id=SELECT+*+FROM+users";
+    - name: "{{ event_description }}"
+      command: "{{ command }}"
 
     - name: Wait for alert
-      pause:
-        seconds: 5
+      wait_for:
+        timeout: 5
 
 - name: Get logs
   hosts: all
