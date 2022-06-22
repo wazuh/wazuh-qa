@@ -1,4 +1,3 @@
-from cmath import exp
 import os
 import json
 import re
@@ -34,7 +33,8 @@ def test_brute_force(metadata, get_dashboard_credentials, generate_events, clean
     rule_description = metadata['rule.description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
 
-    expected_alert_json = fr'.*"rule":.*"level":{rule_level},"description:"{rule_description}".*"id":"{rule_id}'
+    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{rule_level},' \
+                          fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
                              fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'\
@@ -49,7 +49,6 @@ def test_brute_force(metadata, get_dashboard_credentials, generate_events, clean
      ])
 
     # Check that alert has been raised and save timestamp
-    print(expected_alert_json)
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
                                    error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
