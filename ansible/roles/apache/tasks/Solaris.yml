@@ -1,0 +1,37 @@
+# Works on Solaris 11
+# - name: Install solaris wazuh agent custom package
+#   become: true
+#   shell: pkg install web/server/{{ program }}
+#   environment:
+#     PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+
+- name: Install CSWpkgutil
+  become: true
+  shell: pkgadd -d http://get.opencsw.org/now -n
+  environment:
+    PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+
+- name: Fetch new catalog and descriptions
+  become: true
+  shell: /opt/csw/bin/pkgutil -U
+  environment:
+    PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+
+- name: Install apache2
+  become: true
+  shell: /opt/csw/bin/pkgutil -y -i apache2
+  environment:
+    PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+
+- name: List files
+  become: true
+  shell: /usr/sbin/pkgchk -L CSWapache2
+  environment:
+    PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+
+- name: Enable service
+  become: true
+  shell: svcadm -v enable /network/http:apache2
+  environment:
+    PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+

@@ -1,0 +1,3 @@
+program : apache-24
+service: apache24
+home_dir: /export/home/vagrant

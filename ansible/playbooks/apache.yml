@@ -1,0 +1,27 @@
+- hosts: linux solaris
+  become: yes
+  become_user: root
+  roles:
+    - ../roles/apache
+  vars:
+    apache_hosts:
+      - port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5
+
+- hosts: windows macos
+  roles:
+    - ../roles/apache
+  vars:
+    apache_hosts:
+      - port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5

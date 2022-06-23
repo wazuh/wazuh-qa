@@ -1,0 +1,17 @@
+  # - name: Install MacOS package Apache
+  #   become: true
+  #   shell: installer -pkg wazuh-* -target /
+  #   args:
+  #     chdir: /Users/vagrant
+
+- name: Install {{ program }} with brew | MacOS
+  homebrew:
+    name: "{{ program }}"
+    update_homebrew: yes
+
+# - name: Install {{ program }} with brew | MacOS
+#   become: false
+#   shell: /usr/local/bin/brew install {{ program }}
+
+- name: Start {{ program }} with brew | MacOS
+  shell: /usr/local/bin/brew services start {{ program }}

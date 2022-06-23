@@ -1,0 +1,12 @@
+- hosts: qa_framework
+  roles:
+    - ../roles/qa_framework
+  vars:
+    apache_hosts:
+      - port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5

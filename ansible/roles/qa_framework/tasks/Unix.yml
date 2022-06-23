@@ -1,0 +1,35 @@
+- name: Clone Wazuh-QA repo | UNIX
+  git:
+    repo: "{{ qa_repository_url }}"
+    dest: "{{ build_dir }}"
+    version: "{{ qa_repository_reference }}"
+    depth: 1
+  register: clone_result
+  retries: 6
+  delay: 10
+  until: clone_result is success
+  when: ansible_os_family != "Solaris"
+
+- name: Clone Wazuh-QA repo | Solaris
+  git:
+    repo: "{{ qa_repository_url }}"
+    dest: "{{ build_dir }}"
+    version: "{{ qa_repository_reference }}"
+    depth: 1
+  register: clone_result
+  retries: 6
+  delay: 10
+  until: clone_result is success
+  environment:
+    PATH: "/opt/python3/bin/:/usr/bin:/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
+  when: ansible_os_family == "Solaris"
+
+- name: Install python requirements | UNIX
+  command: "{{ python_executable }} -m pip install -r {{ qa_requirements_file }} --no-cache-dir --only-binary=:cryptography,grpcio: --user"
+  args:
+    chdir: "{{ build_dir }}"
+
+- name: Install setup.py | UNIX
+  command: "{{ python_executable }} {{ setup_installer }} install --user"
+  args:
+    chdir: "{{ build_dir }}/{{ test_setup_qa_path }}"
