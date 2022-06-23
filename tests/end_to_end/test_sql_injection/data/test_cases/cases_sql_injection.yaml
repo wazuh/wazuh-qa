@@ -7,6 +7,6 @@
       command: curl -XGET "http://wazuh-agent/?id=SELECT+*+FROM+users";
     rule.id: 31103
     rule.level: 7
-    rule.description: "SQL injection attempt."
+    rule.description: SQL injection attempt.
     extra:
       mitre_technique: Exploit Public-Facing Application
