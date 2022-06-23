@@ -1,0 +1,45 @@
+- name: Test setup
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Check if Firewalld is installed on CentOS
+      shell: systemctl status firewalld --no-pager
+      register: firewall_check
+      when: ansible_facts['distribution'] == "CentOS"
+      ignore_errors: true
+
+    - name: Stop Firewalld if it's installed and active
+      shell: systemctl stop firewalld
+      when: (ansible_facts['distribution'] == "CentOS" and firewall_check.rc == 0)
+
+    - name: Check if Apache is installed or not on CentOS
+      shell: systemctl status httpd --no-pager
+      register: apache_check
+      when: ansible_facts['distribution'] == "CentOS"
+      ignore_errors: true
+
+    - name: Install Apache Server on CentOS
+      shell: |
+        yum update httpd -y
+        yum install httpd -y
+      register: installation
+      when: (ansible_facts['distribution'] == "CentOS" and apache_check.rc != 0 and apache_check.rc != 3)
+
+    - name: Configure a localfile instance to collect the logs from Apache
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        insertbefore: ^</ossec_config>
+        block: |
+          <localfile>
+          <log_format>apache</log_format>
+          <location>/var/log/httpd/access_log</location>
+          </localfile>
+
+    - name: Start Apache
+      shell: systemctl start httpd
+      when: (apache_check.rc == 3 or installation is succeeded)
+
+    - name: Restart the manager
+      shell: systemctl restart wazuh-manager
