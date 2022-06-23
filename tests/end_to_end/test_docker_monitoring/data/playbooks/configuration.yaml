@@ -18,7 +18,7 @@
         systemctl stop docker
         systemctl stop docker.socket
         systemctl start docker
-      when: docker_check.rc == 3
+      when: (docker_check.rc == 3 or docker_check.rc == 0)
 
     - name: Configure the docker-listener module
       blockinfile:
