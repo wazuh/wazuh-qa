@@ -33,12 +33,12 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
     rule_id = metadata['rule.id']
     osquery_name = metadata['extra']['data.osquery.name']
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\".+level\":{rule_level},\"description\":\"{rule_description}\"," \
+    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
                           fr"\"id\":\"{rule_id}\".+osquery\":.+\"name\":\"{osquery_name}\""
 
     expected_indexed_alert = fr".+osquery\":.+\"name\": \"{osquery_name}\".+level\": {rule_level}, " \
                              fr"\"description\": \"{rule_description}\".+\"id\": \"{rule_id}\"" \
-                             r'.+"timestamp": "(.+)"'
+                             r'.+timestamp\": \"(.+)\"},.+'
 
     query = e2e.make_query([
         {
@@ -60,7 +60,7 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
     raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
     # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_5)
+    sleep(fw.T_10)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
