@@ -45,17 +45,17 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
     query = e2e.make_query([
         {
             "term": {
-                "rule.id": rule_id
+                "rule.id": f"{rule_id}"
             }
         },
         {
             "term": {
-                "rule.description": rule_description
+                "rule.description": f"{rule_description}"
             }
         },
         {
             "term": {
-                "data.docker.Action": docker_action
+                "data.docker.Action": f"{docker_action}"
             }
         }
     ])
@@ -67,7 +67,7 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
     raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
     # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_10)
+    sleep(fw.T_5)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)

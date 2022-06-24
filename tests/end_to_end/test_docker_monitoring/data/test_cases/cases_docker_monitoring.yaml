@@ -2,7 +2,7 @@
   description: Test if an alert is generated when using the `pull` command.
   configuration_parameters: null
   metadata:
-    rule.id: '87932'
+    rule.id: 87932
     rule.description: 'Docker: Image or repository nginx pulled'
     rule.level: 3
     extra:
@@ -15,7 +15,7 @@
   description: Test if an alert is generated when using the `run` command.
   configuration_parameters: null
   metadata:
-    rule.id: '87903'
+    rule.id: 87903
     rule.description: 'Docker: Container nginx_container started'
     rule.level: 3
     extra:
@@ -28,7 +28,7 @@
   description: Test if an alert is generated when using the `exec` command.
   configuration_parameters: null
   metadata:
-    rule.id: '87908'
+    rule.id: 87908
     rule.description: 'Docker: Started shell session in container nginx_container'
     rule.level: 5
     extra:
@@ -41,7 +41,7 @@
   description: Test if an alert is generated when using the `stop` and `rm` commands.
   configuration_parameters: null
   metadata:
-    rule.id: '87902'
+    rule.id: 87902
     rule.description: 'Docker: Container nginx_container destroyed'
     rule.level: 5
     extra:

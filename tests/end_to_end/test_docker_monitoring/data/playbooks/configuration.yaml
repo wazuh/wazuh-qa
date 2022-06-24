@@ -11,6 +11,7 @@
 
     - name: Install Docker using the convenience script
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+      register: installation
       when: (docker_check.rc != 0 and docker_check.rc != 3)
 
     - name: Stop docker to avoid errors and start it
@@ -18,7 +19,6 @@
         systemctl stop docker
         systemctl stop docker.socket
         systemctl start docker
-      when: (docker_check.rc == 3 or docker_check.rc == 0)
 
     - name: Configure the docker-listener module
       blockinfile:
