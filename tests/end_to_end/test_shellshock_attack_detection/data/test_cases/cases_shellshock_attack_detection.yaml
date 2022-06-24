@@ -7,4 +7,4 @@
     rule.level: 6
     extra_vars:
       event_description: Shellshock attack
-      command: 'curl -k "localhost" -H "User-Agent: () { :; }; /bin/cat /etc/passwd"'
+      command: 'curl -k "localhost" -H "User-Agent{{ ":" }} () { :; }; /bin/cat /etc/passwd"'
