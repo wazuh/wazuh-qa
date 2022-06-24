@@ -33,7 +33,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
                           fr"\"id\":\"{rule_id}\""
 
-    expected_indexed_alert = fr".+level\": {rule_level}, \"description\": \"{rule_description}\"" \
+    expected_indexed_alert = fr".+level\": {rule_level}.+\"description\": \"{rule_description}\"" \
                              fr".+\"id\": \"{rule_id}\".+timestamp\": \"(.+)\"" \
                              r'},.+'
 
@@ -45,7 +45,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
         },
         {
             "term": {
-                "rule.level": rule_level
+                "rule.level": f"{rule_level}"
             }
         }
     ])
@@ -57,7 +57,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
     # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_5)
+    sleep(fw.T_10)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
