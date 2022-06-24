@@ -40,7 +40,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     query = e2e.make_query([
         {
             "term": {
-                "rule.id": rule_id
+                "rule.id": f"{rule_id}"
             }
         },
         {
