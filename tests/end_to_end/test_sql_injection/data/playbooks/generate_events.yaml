@@ -1,0 +1,29 @@
+- name: Truncate file
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: true
+
+- name: Generate events
+  hosts: localhost
+  tasks:
+
+    - name: "{{ event_description }}"
+      command: "{{ command }}"
+
+    - name: Wait for alert
+      wait_for:
+        timeout: 5
+
+- name: Get logs
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true
