@@ -193,5 +193,4 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
         assert count_message >= 1
     else:
         for number_pulled in numbers_pulled:
-            if int(number_pulled) != 0:
-                assert int(number_pulled) <= max_messages
+            assert int(number_pulled) <= max_messages
