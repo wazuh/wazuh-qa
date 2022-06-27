@@ -7,14 +7,18 @@
       command: systemctl status docker --no-pager
       register: docker_check
       when: ansible_facts['distribution'] == "CentOS"
+      # Ignore non-zero return codes for use in subsequent checks
       ignore_errors: true
 
     - name: Install Docker using the convenience script
       shell: curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-      register: installation
+      # If the return code is 0 means that Docker is already installed and running
+      # If the return code is 3 means that Docker is installed but not running
       when: (docker_check.rc != 0 and docker_check.rc != 3)
 
-    - name: Stop docker to avoid errors and start it
+    - name: Stop Docker to avoid errors and start it
+      # Sometimes the service fails when running any command even if it is running
+      # The solution is to stop Docker and then start it again.
       shell: |
         systemctl stop docker
         systemctl stop docker.socket
