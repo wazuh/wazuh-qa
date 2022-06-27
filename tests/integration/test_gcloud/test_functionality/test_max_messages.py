@@ -182,6 +182,8 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
                                              callback=callback_received_messages_number,
                                              error_message='Did not receive expected '
                                                            '- INFO - Received and acknowledged x messages').result()
+    # Validate that the number pulled is at least once greater or equal than the published messages
+    # and less than the maximum number of messages extracted allowed in each iteration
     if publish_messages <= max_messages:
         # GCP might log messages from sources other than ourselves
         for number_pulled in numbers_pulled:
@@ -192,5 +194,6 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
                 assert int(number_pulled) <= max_messages
         assert count_message >= 1
     else:
+        # Validate that the number pulled always is less than the maximum messages pulled allowed in each iteration
         for number_pulled in numbers_pulled:
             assert int(number_pulled) <= max_messages
