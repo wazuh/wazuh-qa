@@ -37,8 +37,9 @@
       event_description: Run 'docker exec -d nginx_container /bin/bash'
       command: docker exec -d nginx_container /bin/bash
 
-- name: docker_stop_rm
-  description: Test if an alert is generated when using the `stop` and `rm` commands.
+- name: docker_rm
+  # Two commands are executed, but only the `destroy` action is tested.
+  description: Test if an alert is generated when using the `rm` command.
   configuration_parameters: null
   metadata:
     rule.id: 87902
