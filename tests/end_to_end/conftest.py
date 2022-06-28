@@ -57,7 +57,14 @@ def configure_environment(request):
     # For each configuration playbook previously declared in the test, get the complete path and run it
     for playbook in getattr(request.module, 'configuration_playbooks'):
         configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
-        ansible_runner.run(playbook=configuration_playbook_path, inventory=inventory_playbook)
+        parameters = {'playbook': configuration_playbook_path, 'inventory': inventory_playbook}
+
+        # Check if the module has extra variables to pass to the playbook
+        configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
+        if configuration_extra_vars is not None:
+            parameters.update({'extravars': configuration_extra_vars})
+
+        ansible_runner.run(**parameters)
 
 
 @pytest.fixture(scope='function')
