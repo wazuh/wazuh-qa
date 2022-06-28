@@ -57,7 +57,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
     # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_10)
+    sleep(fw.T_5)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
