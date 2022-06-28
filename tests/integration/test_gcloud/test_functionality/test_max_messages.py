@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -61,8 +61,8 @@ tags:
 '''
 import os
 import sys
-
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import generate_params
 from wazuh_testing.gcloud import callback_detect_start_fetching_logs, callback_received_messages_number
@@ -109,6 +109,7 @@ truncate_file(LOG_FILE_PATH)
 
 # fixtures
 
+
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -123,7 +124,8 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
-def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages, daemons_handler, wait_for_gcp_start):
+def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages,
+                      daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls a message number less than or equal to the limit set
                  in the 'max_messages' tag. For this purpose, the test will use a fixed limit and generate a
@@ -172,6 +174,7 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
         - logs
         - scheduled
     '''
+    count_message = 0
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
 
@@ -181,26 +184,22 @@ def test_max_messages(get_configuration, configure_environment, reset_ossec_log,
                             error_message='Did not receive expected '
                                           '"Starting fetching of logs" event')
 
+    numbers_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
+                                             callback=callback_received_messages_number,
+                                             error_message='Did not receive expected '
+                                                           '- INFO - Received and acknowledged x messages').result()
+    # Validate that the number pulled is at least once greater or equal than the published messages
+    # and less than the maximum number of messages extracted allowed in each iteration
     if publish_messages <= max_messages:
-        number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
-                                                callback=callback_received_messages_number,
-                                                error_message='Did not receive expected '
-                                                              '- INFO - Received and acknowledged x messages').result()
         # GCP might log messages from sources other than ourselves
-        assert int(number_pulled) >= publish_messages
+        for number_pulled in numbers_pulled:
+            if int(number_pulled) != 0:
+                if (int(number_pulled) >= publish_messages):
+                    # A counter is used to prevent it from failing due to logs from other sources
+                    count_message += 1
+                assert int(number_pulled) <= max_messages
+        assert count_message >= 1
     else:
-        ntimes = int(publish_messages / max_messages)
-        remainder = int(publish_messages % max_messages)
-
-        for i in range(ntimes):
-            number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
-                                                    callback=callback_received_messages_number,
-                                                    error_message='Did not receive expected '
-                                                                  'Received and acknowledged x messages').result()
-            assert int(number_pulled) == max_messages
-        number_pulled = wazuh_log_monitor.start(timeout=pull_messages_timeout,
-                                                callback=callback_received_messages_number,
-                                                error_message='Did not receive expected '
-                                                              '- INFO - Received and acknowledged x messages').result()
-        # GCP might log messages from sources other than ourselves
-        assert int(number_pulled) >= remainder
+        # Validate that the number pulled always is less than the maximum messages pulled allowed in each iteration
+        for number_pulled in numbers_pulled:
+            assert int(number_pulled) <= max_messages
