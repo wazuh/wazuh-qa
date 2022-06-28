@@ -15,7 +15,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 @pytest.fixture(scope='function')
 def clean_environment(get_dashboard_credentials):
-    """Delete alerts and delete indices using the API.
+    """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
           credentials(dict): wazuh-indexer credentials.
