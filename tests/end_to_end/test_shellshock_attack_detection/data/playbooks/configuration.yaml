@@ -43,11 +43,11 @@
           <location>/var/log/httpd/access_log</location>
           </localfile>
 
+    - name: Restart the manager
+      shell: systemctl restart wazuh-manager
+
     - name: Start Apache
       shell: systemctl start httpd
       # If the return code is 3, it means that Apache is not running.
       # If Apache has been recently installed, it is necessary to start it
       when: (apache_check.rc == 3 or installation is succeeded)
-
-    - name: Restart the manager
-      shell: systemctl restart wazuh-manager
