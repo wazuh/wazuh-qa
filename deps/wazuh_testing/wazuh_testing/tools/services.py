@@ -117,7 +117,7 @@ def control_service(action, daemon=None, debug_mode=False):
                             for file in os.listdir(f'{WAZUH_PATH}/var/run'):
                                 if daemon in file:
                                     pid = file.split("-")
-                                    pid= pid[2][0:-4]
+                                    pid = pid[2][0:-4]
                                     if pid == str(proc.pid):
                                         processes.append(proc)
                         elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
