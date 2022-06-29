@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+from http import HTTPStatus
 import requests
 
 
@@ -24,9 +25,40 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
 
-    if response.status_code != 200:
-        raise Exception(f"The response is not the expected. Actual response {response.status_code}")
+    assert response.status_code == HTTPStatus.OK, 'The document(s) have not been obtained successfully.'\
+                                                  f"Actual response {response.status_code}"
 
+    return response
+
+
+def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+    """Delete indices from wazuh-indexer using its API.
+
+      Make a request to the wazuh-indexer API to delete indices that match a given name.
+
+      Args:
+          ip_address (str): wazuh-indexer IP address.
+          index (str): Name of the index to be deleted.
+          credentials(dict): wazuh-indexer credentials.
+
+      Returns:
+          obj(class): `Response <Response>` object
+          obj(class): `NoneType` object
+    """
+    get_indices_route = f"_cat/indices/{index}"
+    url = f"https://{ip_address}:9200/"
+    authorization = requests.auth.HTTPBasicAuth(credentials['user'], credentials['password'])
+
+    response = requests.get(url=url+get_indices_route, params={'pretty': 'true'}, verify=False, auth=authorization)
+    assert response.status_code == HTTPStatus.OK, 'The index(es) have not been obtained successfully.' \
+                                                  f"Actual response {response.status_code}"
+
+    if response.text == '':
+        return None
+
+    response = requests.delete(url=url+index, params={'pretty': 'true'}, verify=False, auth=authorization)
+    assert response.status_code == HTTPStatus.OK, 'The index(es) have not been deleted successfully.' \
+                                                  f"Actual response {response.status_code}"
     return response
 
 
