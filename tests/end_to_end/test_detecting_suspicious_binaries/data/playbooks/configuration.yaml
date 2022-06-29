@@ -1,0 +1,15 @@
+- name: Configure environment
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Create a copy of the system binary
+      copy:
+        src: /usr/bin/w
+        dest: /usr/bin/w.copy
+        mode: preserve
+        remote_src: true
+
+    - name: Replace the content of the system binary with the trojan script
+      copy:
+        src: "{{ trojan_script_path }}"
+        dest: /usr/bin/w
