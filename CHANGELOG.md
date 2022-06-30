@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [4.3.6] - Development (unreleased)
 
 Wazuh commit: TBD \
-Release report: TBD \
+Release report: TBD
 
-## Fixed
+### Fixed
 
 - (Framework + Testing): Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006))
 
@@ -16,7 +16,7 @@ Release report: TBD \
 Wazuh commit: https://github.com/wazuh/wazuh/commit/2a2b88bfb2ea30903728372471b33540a3b3d976 \
 Release report: https://github.com/wazuh/wazuh/issues/13966
 
-## Fixed
+### Fixed
 
 - (Framework + Testing): IT FIM - Fix Solaris and Macos fails ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977))
 
