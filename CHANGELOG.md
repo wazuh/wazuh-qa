@@ -1,9 +1,9 @@
-# Change Log
+# Changelog
+
 All notable changes to this project will be documented in this file.
 
-## Rev 440001
+## [4.4.0] - Development (unreleased)
 
-Wazuh version: 4.4.0 \
 Wazuh commit: TBD \
 Release report: TBD
 
@@ -60,14 +60,59 @@ Release report: TBD
 - Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
 - Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546))
 
-### Deleted
+### Removed
+
 - Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
 
-## Rev 430031
 
-Wazuh version: 4.3.0 \
-Wazuh commit: https://github.com/wazuh/wazuh/commit/3a833c142983b83081d8208a6cbbab0620178f1d \
-Release report: https://github.com/wazuh/wazuh-qa/issues/2500
+## [4.3.6] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Fixed
+
+- (Framework + Testing): Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006))
+
+
+## [4.3.5] - 29-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2a2b88bfb2ea30903728372471b33540a3b3d976 \
+Release report: https://github.com/wazuh/wazuh/issues/13966
+
+### Fixed
+
+- (Framework + Testing): IT FIM - Fix Solaris and Macos fails ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977))
+
+
+## [4.3.4] - 09-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: https://github.com/wazuh/wazuh/issues/13669
+
+
+## [4.3.3] - 01-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: -
+
+
+## [4.3.2] - 30-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5b3d501f5a10c5134b53771f13c48dc94c54beb2 \
+Release report: https://github.com/wazuh/wazuh/issues/13629
+
+
+## [4.3.1] - 18-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8ee2a5646a12d22bf662b2f59a19c12b4b8d0a4e \
+Release report: https://github.com/wazuh/wazuh/issues/13448
+
+
+## [4.3.0] - 05-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5bae1c1830dbf11acc8a06e01f7a5a134b767760 \
+Release report: https://github.com/wazuh/wazuh/issues/13321
 
 ### Added
 
@@ -162,8 +207,7 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Fix missing argument in test_macos_format_basic IT. ([#1478](https://github.com/wazuh/wazuh-qa/pull/1478))
 - Check if scheduled mode is set when realtime is not available. ([#1474](https://github.com/wazuh/wazuh-qa/pull/1474))
 
-
-### Deleted
+### Removed
 - Delete unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
 - Remove deprecated configurations. ([#2380](https://github.com/wazuh/wazuh-qa/pull/2380))
 - Remove deprecated test_use_only_authd. ([#2294](https://github.com/wazuh/wazuh-qa/pull/2294))
