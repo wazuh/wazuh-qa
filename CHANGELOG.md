@@ -12,6 +12,7 @@ Release report: TBD
 ### Changed
 
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772))
+- Modify how control_service stops clusterd and apid ([#3045](https://github.com/wazuh/wazuh-qa/pull/3045))
 
 ## Rev 440001
 
