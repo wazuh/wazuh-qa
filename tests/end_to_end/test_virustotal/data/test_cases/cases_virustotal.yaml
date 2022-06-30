@@ -1,0 +1,26 @@
+# - name: Scan file linux
+#   description: Scanning a file and check generated alerts
+#   configuration_parameters: null
+#   metadata:
+#     extra_vars:
+#       event_description: Create a file into the monitored folder
+#       path: /test/virus_total.txt
+#       content: |
+#          test_virus_total
+#     rule.id: 87103
+#     rule.level: 3
+#     rule.description: "VirusTotal: Alert - No records in VirusTotal database"
+
+- name: Remove malicious file
+  description: Detecting and removing malware
+  configuration_parameters: null
+  metadata:
+    extra_vars:
+      event_description: Run malicious file
+      shell: |
+        cd /root
+        curl -LO http://www.eicar.org/download/eicar.com
+    rule.id: 100092
+    rule.level: 12
+    rule.description: "active-response\/bin\/remove-threat.sh removed threat located at \/root\/eicar.com "
+    program: "active-response\/bin\/remove-threat.sh"

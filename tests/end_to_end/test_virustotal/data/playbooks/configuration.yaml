@@ -1,0 +1,51 @@
+- name: Test manager configuration
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Configure Virustotal integration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertafter: </cluster>
+        block: |
+          <integration>
+          <name>virustotal</name>
+          <api_key>3a794171c57dbde000594062ce703e299c8812b76d4821f5577e42d3108be4a9</api_key>
+          <group>syscheck</group>
+          <alert_format>json</alert_format>
+          </integration>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Truncate alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+
+    - name: Restart the manager
+      shell: systemctl restart wazuh-manager
+
+- name: Test agent configuration
+  hosts: wazuh-agent
+  become: true
+  tasks:
+
+    - name: Delete folder
+      command: rm -r /test
+      ignore_errors: true
+
+    - name: Create folder
+      command: mkdir /test
+      ignore_errors: true
+
+    - name: Configure syscheck
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertafter: </directories>
+        block: |
+          <directories check_all="yes" realtime="yes">/test</directories>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart the agent
+      shell: systemctl restart wazuh-agent
+
+    # - name: Wait until realtime is started
+    #   wait_for:
+    #     timeout: 5
