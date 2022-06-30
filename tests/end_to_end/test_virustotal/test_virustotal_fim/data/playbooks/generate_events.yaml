@@ -1,0 +1,24 @@
+- name: Generate events
+  hosts: wazuh-agent
+  tasks:
+
+    - name: "{{ event_description }}"
+      become: true
+      copy:
+        dest: "{{ path }}"
+        content: "{{ content }}"
+
+    - name: Wait for alert
+      wait_for:
+        timeout: 5
+
+- name: Get logs
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true
