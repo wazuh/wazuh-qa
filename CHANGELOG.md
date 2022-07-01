@@ -77,7 +77,7 @@ Release report: TBD
 
 ### Fixed
 
-- (Framework + Testing): Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006))
+- Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006)) \- (Framework + Tests)
 
 
 ## [4.3.5] - 29-06-2022
@@ -87,7 +87,7 @@ Release report: https://github.com/wazuh/wazuh/issues/13966
 
 ### Fixed
 
-- (Framework + Testing): IT FIM - Fix Solaris and Macos fails ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977))
+- Fix Solaris and Macos FIM integration failures ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977)) \- (Framework + Tests)
 
 
 ## [4.3.4] - 09-06-2022
