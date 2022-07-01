@@ -11,6 +11,10 @@ Release report: TBD
 
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772))
 
+### Fixed
+
+- Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999))
+
 ## [4.4.0] - Development (unreleased)
 
 Wazuh commit: TBD \
