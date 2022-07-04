@@ -7,6 +7,7 @@ from tempfile import gettempdir
 from time import sleep
 
 from wazuh_testing.tools.time import parse_date_time_format
+from wazuh_testing.tools import file
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
@@ -14,8 +15,12 @@ from wazuh_testing.tools import configuration as config
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_general_configuration_path= os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_virustotal.yaml')
 configuration_playbooks = ['configuration.yaml']
+virustotal_key_path = os.path.join(test_general_configuration_path, 'configuration', 'virustotal_key')
+data_virustotal_key = file.read_file(virustotal_key_path)
+configuration_extra_vars = {'virustotal_key': data_virustotal_key}
 events_playbooks = ['generate_events.yaml']
 wait_indexed_alert = 5
 
@@ -38,8 +43,6 @@ def test_virustotal(configure_environment, metadata, get_dashboard_credentials, 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
                              r'.*"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
-    print(expected_indexed_alert)
-
     query = e2e.make_query([
 
          {
@@ -61,7 +64,7 @@ def test_virustotal(configure_environment, metadata, get_dashboard_credentials, 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
-    print(indexed_alert)
+
     # Check that the alert data is the expected one
     alert_data = re.search(expected_indexed_alert, indexed_alert)
     assert alert_data is not None, 'Alert triggered, but not indexed'

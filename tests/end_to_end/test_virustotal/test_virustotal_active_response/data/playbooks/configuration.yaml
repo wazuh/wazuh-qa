@@ -10,7 +10,7 @@
         block: |
           <integration>
           <name>virustotal</name>
-          <api_key>3a794171c57dbde000594062ce703e299c8812b76d4821f5577e42d3108be4a9</api_key>
+          <api_key>{{ virustotal_key }}</api_key>
           <rule_id>100200,100201</rule_id>
           <alert_format>json</alert_format>
           </integration>
