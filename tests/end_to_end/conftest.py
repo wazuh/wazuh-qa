@@ -7,16 +7,22 @@ import pytest
 from tempfile import gettempdir
 
 from wazuh_testing.tools.file import remove_file
+from wazuh_testing import end_to_end as e2e
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 
 @pytest.fixture(scope='function')
-def clean_environment():
-    """Delete alerts and credentials files from the temporary folder."""
+def clean_environment(get_dashboard_credentials):
+    """Remove the temporary file that contains the alerts and delete indices using the API.
+
+      Args:
+          credentials(dict): wazuh-indexer credentials.
+    """
     yield
     remove_file(alerts_json)
+    e2e.delete_index_api(credentials=get_dashboard_credentials)
 
 
 @pytest.fixture(scope='module')
