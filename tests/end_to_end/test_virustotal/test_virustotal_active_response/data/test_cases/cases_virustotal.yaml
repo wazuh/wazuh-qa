@@ -10,4 +10,4 @@
     rule.id: 100092
     rule.level: 12
     rule.description: "active-response\/bin\/remove-threat.sh removed threat located at \/root\/eicar.com "
-    program: "active-response\/bin\/remove-threat.sh"
+    program: active-response/bin/remove-threat.sh
