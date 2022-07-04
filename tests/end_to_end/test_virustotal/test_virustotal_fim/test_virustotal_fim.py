@@ -15,7 +15,7 @@ from wazuh_testing.tools import configuration as config
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_general_configuration_path= os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
+test_general_configuration_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_virustotal.yaml')
 configuration_playbooks = ['configuration.yaml']
 virustotal_key_path = os.path.join(test_general_configuration_path, 'configuration', 'virustotal_key')
