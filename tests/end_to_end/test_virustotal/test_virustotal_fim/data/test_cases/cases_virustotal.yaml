@@ -6,7 +6,7 @@
       event_description: Create a file into the monitored folder
       path: /test/virus_total.txt
       content: |
-         test_virus_total
+        test_virus_total
     rule.id: 87103
     rule.level: 3
     rule.description: "VirusTotal: Alert - No records in VirusTotal database"

@@ -45,4 +45,3 @@
 
     - name: Restart the agent
       shell: systemctl restart wazuh-agent
-

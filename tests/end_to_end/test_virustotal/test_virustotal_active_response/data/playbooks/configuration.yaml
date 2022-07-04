@@ -86,18 +86,16 @@
         src: "{{ active_response_script }}"
         dest: /var/ossec/active-response
 
-
     - name: Install jq (CentOS)
       become: true
       shell: yum install jq
       when: ansible_facts['distribution'] == "CentOS"
 
-
     - name: Change remove threat owner and permissions
       become: true
       shell: |
-         chmod 750 /var/ossec/active-response/bin/remove-threat.sh
-         chown root:ossec /var/ossec/active-response/bin/remove-threat.sh
+        chmod 750 /var/ossec/active-response/bin/remove-threat.sh
+        chown root:ossec /var/ossec/active-response/bin/remove-threat.sh
 
     - name: Restart the agent
       shell: systemctl restart wazuh-agent

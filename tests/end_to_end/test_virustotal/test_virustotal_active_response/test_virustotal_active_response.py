@@ -43,7 +43,8 @@ def test_virustotal(configure_environment, metadata, get_dashboard_credentials, 
     expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
-    expected_indexed_alert = fr'.*"program": "{program}".*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
+    expected_indexed_alert = fr'.*"program": "{program}".*"rule":.*"level": {rule_level},' \
+                             fr'.*"description": "{rule_description}"' \
                              r'.*"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     query = e2e.make_query([
