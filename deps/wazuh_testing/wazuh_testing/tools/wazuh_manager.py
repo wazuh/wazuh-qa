@@ -14,7 +14,7 @@ def list_agents_ids():
 
 
 def remove_agents(agents_id, remove_type='wazuhdb'):
-    if remove_type not in ['wazuhdb', 'manage_agents']:
+    if remove_type not in ['wazuhdb', 'manage_agents', 'api']:
         raise ValueError("Invalid type of agent removal: %s" % remove_type)
 
     if agents_id:

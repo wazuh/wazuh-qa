@@ -14,6 +14,7 @@ import yaml
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing import global_parameters, logger
+from wazuh_testing.tools import file
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -642,3 +643,29 @@ def set_local_internal_options_dict(dict_local_internal_options):
         for option_name, option_value in dict_local_internal_options.items():
             local_internal_configuration_string = f"{str(option_name)}={str(option_value)}\n"
             local_internal_option_file.write(local_internal_configuration_string)
+
+
+def get_test_cases_data(data_file_path):
+    """Load a test case template file and get its data.
+
+    Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
+
+    Args:
+        data_file_path (str): Test case template file path.
+
+    Returns:
+        (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
+    """
+    test_cases_data = file.read_yaml(data_file_path)
+    configuration_parameters = []
+    configuration_metadata = []
+    test_cases_ids = []
+
+    for test_case in test_cases_data:
+        configuration_parameters.append(test_case['configuration_parameters'])
+        metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
+        metadata_parameters.update(test_case['metadata'])
+        configuration_metadata.append(metadata_parameters)
+        test_cases_ids.append(test_case['name'])
+
+    return configuration_parameters, configuration_metadata, test_cases_ids
