@@ -106,8 +106,9 @@ def prepare_environment(request, register_agent):
 
     agent_id = getattr(request.module, 'response_data')['id']
 
-    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", 'default'])
-    sb.run([f"{tools.WAZUH_PATH}/bin/agent_groups", "-q", "-a", "-i", agent_id, "-g", DEFAULT_TESTING_GROUP_NAME])
+    # Delete this in 4.4, we have to use the agent_groups script to assign the groups
+    with open(f"{tools.WAZUH_PATH}/queue/agent-groups/{agent_id}", 'w') as agent_group_file:
+        agent_group_file.write(f"default,{DEFAULT_TESTING_GROUP_NAME}")
 
     yield
 
