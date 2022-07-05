@@ -1,4 +1,4 @@
-- name: Scan file linux
+- name: scanning_file
   description: Scanning a file and check generated alerts
   configuration_parameters: null
   metadata:

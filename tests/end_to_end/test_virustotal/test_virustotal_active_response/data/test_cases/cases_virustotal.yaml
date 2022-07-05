@@ -1,4 +1,4 @@
-- name: Remove malicious file
+- name: remove_malicious_file
   description: Detecting and removing malware
   configuration_parameters: null
   metadata:

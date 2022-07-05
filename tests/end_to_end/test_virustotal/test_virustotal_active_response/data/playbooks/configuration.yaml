@@ -91,7 +91,7 @@
       shell: yum install jq
       when: ansible_facts['distribution'] == "CentOS"
 
-    - name: Change remove threat owner and permissions
+    - name: Change remove-threat.sh owner and permissions
       become: true
       shell: |
         chmod 750 /var/ossec/active-response/bin/remove-threat.sh

@@ -27,13 +27,8 @@
   become: true
   tasks:
 
-    - name: Delete folder
-      command: rm -r /test
-      ignore_errors: true
-
     - name: Create folder
       command: mkdir /test
-      ignore_errors: true
 
     - name: Configure syscheck
       blockinfile:
