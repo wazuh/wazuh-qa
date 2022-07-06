@@ -121,6 +121,25 @@ def generate_events(request, metadata):
 
         ansible_runner.run(**parameters)
 
+    yield
+    inventory_playbook = request.config.getoption('--inventory_path')
+    # Get the hostname from the inventory
+    hostname = [*yaml.safe_load(open(inventory_playbook))['all']['hosts'].keys()][0]
+
+    # Execute each playbook for the teardown
+    for playbook in getattr(request.module, 'teardown_playbook'):
+        teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+        parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
+
+        # Add the hostname to the extravars dictionary
+        parameters.update({'extravars': {'inventory_hostname': hostname}})
+
+        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
+        if 'extra_vars' in metadata:
+            parameters['extravars'].update(metadata['extra_vars'])
+
+        ansible_runner.run(**parameters)
+
 
 def pytest_addoption(parser):
     parser.addoption(
