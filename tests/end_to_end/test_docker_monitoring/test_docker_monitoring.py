@@ -2,12 +2,8 @@ import os
 import json
 import re
 import pytest
-from datetime import datetime
 from tempfile import gettempdir
-from time import sleep
 
-import wazuh_testing as fw
-from wazuh_testing.tools.time import parse_date_time_format
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
