@@ -2,7 +2,7 @@
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
     COMMAND: 'custom-ar'
-    LOCATION: 'server'
+    LOCATION: 'local'
     RULES: '100001'
   metadata:
     log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 2'
@@ -11,7 +11,7 @@
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
     COMMAND: 'custom-ar'
-    LOCATION: 'server'
+    LOCATION: 'local'
     RULES: '100002'
   metadata:
     log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 3'
@@ -20,7 +20,7 @@
   description: 'Verify Active Response works with overwritten rules'
   configuration_parameters:
     COMMAND: 'custom-ar'
-    LOCATION: 'server'
+    LOCATION: 'local'
     RULES: '100004'
   metadata:
     log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 6'

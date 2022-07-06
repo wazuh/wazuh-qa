@@ -22,7 +22,9 @@
         - name:
             value: 'custom-ar'
         - executable:
-            value: 'custom-ar'
+            value: 'custom-ar.sh'
+        - timeout_allowed:
+            value: 'no'
 
     - section: vulnerability-detector
       elements:
