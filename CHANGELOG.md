@@ -1,77 +1,113 @@
-# Change Log
+# Changelog
+
 All notable changes to this project will be documented in this file.
 
-## Rev 440001
+## [4.4.0] - Development (unreleased)
 
-Wazuh version: 4.4.0 \
 Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
 
-- Add VD tests support for Ubuntu 2022 feeds ([#2867](https://github.com/wazuh/wazuh-qa/pull/2867))
-- Test `global backup` WDB command ([#2637](https://github.com/wazuh/wazuh-qa/pull/2637)
-- Test `sync-agens-groups-get` WDB command ([#2626](https://github.com/wazuh/wazuh-qa/pull/2626)
-- Test `wazuhdb getconfig` WDB command ([2627#](https://github.com/wazuh/wazuh-qa/pull/2627))
-- Test `get-groups-integrity` WDB command ([#2607](https://github.com/wazuh/wazuh-qa/pull/2607))
-- Test `set-agent-groups` WDB command ([#2602](https://github.com/wazuh/wazuh-qa/pull/2602))
-- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by CLI ([#2652](https://github.com/wazuh/wazuh-qa/pull/2652))
-- Add system test to check that agent with a state different than never_connected is added to a "group_test" group by API ([#2657](https://github.com/wazuh/wazuh-qa/pull/2657))
-- Add system test to check that agent is never_connected and registers with a group using agent-auth ([#2654](https://github.com/wazuh/wazuh-qa/pull/2654))
-- Add system test to check that agent is never_connected and registers with a group using CLI [#2658](https://github.com/wazuh/wazuh-qa/pull/2658)
-- Add system test to check guess mechanism [#2664](https://github.com/wazuh/wazuh-qa/pull/2664)
-- Add system test to check that agent in never_connected connects with a default group [#2665](https://github.com/wazuh/wazuh-qa/pull/2665)
-- Add system test to check that agent is forced to change group [#2668](https://github.com/wazuh/wazuh-qa/pull/2668)
-- Add system test to check: adds a new node to a synchronized environment [#2670](https://github.com/wazuh/wazuh-qa/pull/2670)
-- Add system test to check that agent registered in master node with a specific group is synced to worker node [#2686]((https://github.com/wazuh/wazuh-qa/pull/2686))
-- Add system test cluster sync group with 40 agents ([#2761](https://github.com/wazuh/wazuh-qa/pull/2761))
-- Add system test - 40 agents cluster syncs group ([#2764](https://github.com/wazuh/wazuh-qa/pull/2764))
-- Add support for SUSE systems in VDT tests ([#2902](https://github.com/wazuh/wazuh-qa/pull/2902))
-- Add `qa-docs` `v0.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
-- Add `qa-ctl` `v0.3.1`([#2649](https://github.com/wazuh/wazuh-qa/pull/2649))
-- Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300))
-- Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347))
-- Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
-- CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243))
-- Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406))
-- Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705))
-- Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
-- Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536))
-- API - Test the format of the logs (JSON logs support) ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635/))
-- Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746))
+- New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
+- New vulnerability Detector integration tests for Amazon Linux 2022 ([#2955](https://github.com/wazuh/wazuh-qa/pull/2955)) \- (Framework + Tests)
+- New vulnerability detector tests for SUSE Linux Enterpise Support ([#2945](https://github.com/wazuh/wazuh-qa/pull/2945)) \- (Framework + Tests)
+- New tests for checking API log formats ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635)) \- (Framework + Tests)
+- New tests for the migration of agent-group files ([#2815](https://github.com/wazuh/wazuh-qa/pull/2815)) \- (Framework + Tests)
+- Add `qa-docs` `v0.1` ([#2649](https://github.com/wazuh/wazuh-qa/pull/2649)) \- (Framework + Tools + Documentation)
+- Add test fim with file currently open ([#2300](https://github.com/wazuh/wazuh-qa/pull/2300)) \- (Framework + Tests)
+- Test manager sends AR log format as expected ([#2347](https://github.com/wazuh/wazuh-qa/pull/2347)) \- (Framework + Tests)
+- Syscollector deltas IT ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146)) \- (Framework + Tests)
+- CVEs alerts inventory for Vulnerability Detector - VDT and WDB Integration Tests implementation ([#1243](https://github.com/wazuh/wazuh-qa/pull/1243)) \- (Framework + Tests)
+- Analysisd - add new test to check the pre-decoding stage of analysisd ([#2406](https://github.com/wazuh/wazuh-qa/pull/2406)) \- (Tests)
+- Add test to check if files can be accessed while FIM has them opened ([#705](https://github.com/wazuh/wazuh-qa/pull/705)) \- (Framework + Tests)
+- Analysisd - add a new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405)) \- (Framework + Tests)
+- Add system test to check synchronization between agent and manager when one of this was stopped. ([#2536](https://github.com/wazuh/wazuh-qa/pull/2536)) \- (Tests)
+- API - Test the format of the logs (JSON logs support) ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635/)) \- (Tests)
+- Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746)) \- (Framework + Tests)
+- Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409)) \- (Documentation)
 
 ### Changed
 
-- Refactor VDT integration tests: feeds and scan types ([#2650](https://github.com/wazuh/wazuh-qa/pull/2650))
-- Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358))
-- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478))
-- Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501))
-- Fix the unstable FIM tests that need refactoring. ([#2421](https://github.com/wazuh/wazuh-qa/pull/2458))
-- Skip : FIM `test_registry_limit_values` until expected message is added to Windows Agent ([#2446](https://github.com/wazuh/wazuh-qa/pull/2446))
-- Adapt logtest ITs given the rules skipping ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146))
-- Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454))
-- Migrate test_age, test_command_monitoring, and test_keep_running of test_logcollector documentation to qa-docs ([#2162](https://github.com/wazuh/wazuh-qa/pull/2162))
-- Migrate test_configuration (1/2) of test_logcollector documentation to qa-docs ([#2163](https://github.com/wazuh/wazuh-qa/pull/2163))
-- Migrate test_configuration (2/2) of test_logcollector documentation to qa-docs ([#2165](https://github.com/wazuh/wazuh-qa/pull/2165))
-- Migrate test_macos of test_logcollector documentation to qa-docs ([#2175](https://github.com/wazuh/wazuh-qa/pull/2175))
-- Migrate several test groups of test_logcollector documentation to qa-docs ([#2180](https://github.com/wazuh/wazuh-qa/pull/2180))
-- Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409))
-- Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426))
-- Fix FIM test: Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535))
-- Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546))
+- Update syscollector deltas integration tests ([#2921](https://github.com/wazuh/wazuh-qa/pull/2921)) \- (Tests)
+- Update deprecated WDB commands ([#2966](https://github.com/wazuh/wazuh-qa/pull/2966)) \- (Tests)
+- Move the 'get_datetime_diff' function to 'wazuh-testing' utils module ([#2782](https://github.com/wazuh/wazuh-qa/pull/2782)) \- (Framework + Tests)
+- Change method from GET to POST in API login requests ([#2810](https://github.com/wazuh/wazuh-qa/pull/2810)) \- (Framework + Tests)
+- Update failed test_basic_configuration_log_format ([#2924](https://github.com/wazuh/wazuh-qa/pull/2650)) \- (Framework + Tests)
+- Refactor VDT integration tests: feeds and scan types ([#2650](https://github.com/wazuh/wazuh-qa/pull/2650)) \- (Framework + Tests)
+- Refactor: FIM `test_synchronization` according to new standard. Phase 1. ([#2358](https://github.com/wazuh/wazuh-qa/pull/2358)) \- (Framework + Tests)
+- Refactor: FIM `test_registry_file_limit` and `test_registry_report_changes`. ([#2478](https://github.com/wazuh/wazuh-qa/pull/2478)) \- (Framework + Tests)
+- Refactor: FIM `test_files/test_file_limit` and updated imports to new standard. ([#2501](https://github.com/wazuh/wazuh-qa/pull/2501)) \- (Framework + Tests)
+- Adapt ITs related to syscollector deltas ([#2146](https://github.com/wazuh/wazuh-qa/pull/2146)) \- (Framework + Tests)
+- Migrate test_age, test_command_monitoring, and test_keep_running of test_logcollector documentation to qa-docs ([#2162](https://github.com/wazuh/wazuh-qa/pull/2162)) \- (Documentation)
+- Migrate test_configuration (1/2) of test_logcollector documentation to qa-docs ([#2163](https://github.com/wazuh/wazuh-qa/pull/2163)) \- (Documentation)
+- Migrate test_configuration (2/2) of test_logcollector documentation to qa-docs ([#2165](https://github.com/wazuh/wazuh-qa/pull/2165)) \- (Documentation)
+- Migrate test_macos of test_logcollector documentation to qa-docs ([#2175](https://github.com/wazuh/wazuh-qa/pull/2175)) \- (Documentation)
+- Migrate several test groups of test_logcollector documentation to qa-docs ([#2180](https://github.com/wazuh/wazuh-qa/pull/2180)) \- (Documentation)
+- Migrate test_remoted documentation to schema 2.0 ([#2426](https://github.com/wazuh/wazuh-qa/pull/2426)) \- (Documentation)
+- Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535)) \- (Framework + Tests)
+- Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546)) \- (Tests)
+- Adapt logtest ITs given the rules skipping ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200)) \- (Tests)
 
-### Deleted
-- Delete FIM tests deprecated ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200))
+### Fixed
 
-## Rev 430031
+- Fix Solaris and Macos FIM integration tests failures ([#2976](https://github.com/wazuh/wazuh-qa/pull/2976)) \- (Framework + Tests)
+- Fix the unstable FIM tests that need refactoring ([#2458](https://github.com/wazuh/wazuh-qa/pull/2458)) \- (Framework + Tests)
+- Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454)) \- (Framework)
 
-Wazuh version: 4.3.0 \
-Wazuh commit: https://github.com/wazuh/wazuh/commit/3a833c142983b83081d8208a6cbbab0620178f1d \
-Release report: https://github.com/wazuh/wazuh-qa/issues/2500
+
+## [4.3.6] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Fixed
+
+- Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006)) \- (Framework + Tests)
+
+
+## [4.3.5] - 29-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2a2b88bfb2ea30903728372471b33540a3b3d976 \
+Release report: https://github.com/wazuh/wazuh/issues/13966
+
+### Fixed
+
+- Fix Solaris and Macos FIM integration failures ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977)) \- (Framework + Tests)
+
+
+## [4.3.4] - 09-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: https://github.com/wazuh/wazuh/issues/13669
+
+
+## [4.3.3] - 01-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: -
+
+
+## [4.3.2] - 30-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5b3d501f5a10c5134b53771f13c48dc94c54beb2 \
+Release report: https://github.com/wazuh/wazuh/issues/13629
+
+
+## [4.3.1] - 18-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8ee2a5646a12d22bf662b2f59a19c12b4b8d0a4e \
+Release report: https://github.com/wazuh/wazuh/issues/13448
+
+
+## [4.3.0] - 05-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5bae1c1830dbf11acc8a06e01f7a5a134b767760 \
+Release report: https://github.com/wazuh/wazuh/issues/13321
 
 ### Added
 
-- Added specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
+- Add specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
 - Add system test to check synchronization between agent and manager. ([#2443](https://github.com/wazuh/wazuh-qa/pull/2443))
 - Make `simulate-api-load` CLI run tasks simultaneously. ([#2392](https://github.com/wazuh/wazuh-qa/pull/2392))
 - Add `qa-ctl` `v0.3`. ([#2307](https://github.com/wazuh/wazuh-qa/pull/2307))
@@ -162,9 +198,8 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Fix missing argument in test_macos_format_basic IT. ([#1478](https://github.com/wazuh/wazuh-qa/pull/1478))
 - Check if scheduled mode is set when realtime is not available. ([#1474](https://github.com/wazuh/wazuh-qa/pull/1474))
 
-
-### Deleted
-- Delete unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
+### Removed
+- Remove unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
 - Remove deprecated configurations. ([#2380](https://github.com/wazuh/wazuh-qa/pull/2380))
 - Remove deprecated test_use_only_authd. ([#2294](https://github.com/wazuh/wazuh-qa/pull/2294))
 - Remove expected `force` option from the received request in the `agent_enrollment` system tests. ([#2289](https://github.com/wazuh/wazuh-qa/pull/2289))
