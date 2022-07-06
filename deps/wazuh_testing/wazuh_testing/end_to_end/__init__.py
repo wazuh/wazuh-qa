@@ -1,8 +1,8 @@
 # Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-from http import HTTPStatus
 import requests
+from http import HTTPStatus
 
 
 def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
