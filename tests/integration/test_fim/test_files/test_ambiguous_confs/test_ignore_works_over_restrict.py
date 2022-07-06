@@ -67,6 +67,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params, check_time_travel
+from wazuh_testing.fim_module import CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -193,11 +194,10 @@ def test_ignore_works_over_restrict(
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
-        regex = r".*?Ignoring path '(.*)' due to (sregex|pattern)? '(.*)'.*"
         while True:
             ignored_file = wazuh_log_monitor.start(
                 timeout=global_parameters.default_timeout,
-                callback=generate_monitoring_callback(regex),
+                callback=generate_monitoring_callback(CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN),
                 error_message=f"Did not receive expected "
                               f'"Ignoring ... due to ..." event for file '
                               f"{os.path.join(testdir1, filename)}",

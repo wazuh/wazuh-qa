@@ -50,6 +50,7 @@ CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be m
 CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: (\d+), path count: (\d+)"
 CB_FIM_ENTRIES_COUNT =r".*Fim entries: (\d+)"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
+CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN = r".*?Ignoring path '(.*)' due to (sregex|pattern)? '(.*)'.*"
 
 #Error Messages
 ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
