@@ -37,15 +37,13 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     rule_level = metadata['rule.level']
     data_title = metadata['extra']['data.title']
     data_file = metadata['extra']['data.file']
-    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+\+\d+'
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
     expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level}.+description\"" \
-                          fr":\"{re.escape(rule_description)}.+id.+{rule_id}.+title.+{data_title}.+" \
-                          fr"file.+{re.escape(data_file)}"
+                          fr":\"{rule_description}.+id.+{rule_id}.+title.+{data_title}.+file.+{data_file}"
 
-    expected_indexed_alert = fr".+file.+{re.escape(data_file)}.+title.+{data_title}.+level.+{rule_level}.+" \
-                             fr"description.+{re.escape(rule_description)}.+id.+{rule_id}.+"\
-                             fr"timestamp\": \"({timestamp_regex})\""
+    expected_indexed_alert = fr".+file.+{data_file}.+title.+{data_title}.+level.+{rule_level}.+" \
+                             fr"description.+{rule_description}.+id.+{rule_id}.+timestamp\": \"({timestamp_regex})\""
 
     query = e2e.make_query([
         {
@@ -75,7 +73,9 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     sleep(fw.T_5)
 
     # Get indexed alert
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    # current_hostname is defined in conftest (configure_environment)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials,
+                                         ip_address=current_hostname)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

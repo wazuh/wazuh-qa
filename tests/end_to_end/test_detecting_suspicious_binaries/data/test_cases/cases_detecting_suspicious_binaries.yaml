@@ -3,7 +3,7 @@
   configuration_parameters: null
   metadata:
     rule.id: 510
-    rule.description: Host-based anomaly detection event (rootcheck).
+    rule.description: Host-based anomaly detection event \(rootcheck\).
     rule.level: 7
     extra:
       data.title: Trojaned version of file detected.
