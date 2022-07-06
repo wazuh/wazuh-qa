@@ -66,11 +66,10 @@ import sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing import logger
-from wazuh_testing.fim import LOG_FILE_PATH, callback_ignore, callback_detect_event, create_file, REGULAR, \
-    generate_params, check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params, check_time_travel
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 # Marks
 
@@ -90,7 +89,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # Configurations
 
 conf_params, conf_metadata = generate_params()
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
+configurations = load_wazuh_configurations(
+    configurations_path, __name__, params=conf_params, metadata=conf_metadata
+)
 
 
 # Fixtures
@@ -110,8 +111,10 @@ def get_configuration(request):
     (testdir1, 'ignore_testfile2', False, {'valid_regex'}),
     (testdir2, 'not_ignored_sregex', True, {'valid_regex'})
 ])
-def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
-                                    configure_environment, restart_syscheckd, wait_for_fim_start):
+def test_ignore_works_over_restrict(
+    folder, filename, triggers_event, tags_to_apply, get_configuration,
+    configure_environment, restart_syscheckd, wait_for_fim_start
+):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same directory.
                  For example, when a directory is ignored and at the same time monitoring is restricted to a file
@@ -180,19 +183,25 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
 
     if triggers_event:
         logger.info('Checking the event...')
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event,
-                                        error_message=f'Did not receive expected "Sending FIM event" '
-                                                      f'event for file {os.path.join(testdir1, filename)}').result()
+        event = wazuh_log_monitor.start(
+            timeout=global_parameters.default_timeout,
+            callback=callback_detect_event,
+            error_message=f'Did not receive expected "Sending FIM event" '
+                          f'event for file {os.path.join(testdir1, filename)}',
+            ).result()
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
+        regex = r".*?Ignoring path '(.*)' due to (sregex|pattern)? '(.*)'.*"
         while True:
-            ignored_file = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_ignore,
-                                                   error_message=f'Did not receive expected '
-                                                                 f'"Ignoring ... due to ..." event for file '
-                                                                 f'{os.path.join(testdir1, filename)}').result()
+            ignored_file = wazuh_log_monitor.start(
+                timeout=global_parameters.default_timeout,
+                callback=generate_monitoring_callback(regex),
+                error_message=f"Did not receive expected "
+                              f'"Ignoring ... due to ..." event for file '
+                              f"{os.path.join(testdir1, filename)}",
+            ).result()
 
             if ignored_file == os.path.join(folder, filename):
                 break
