@@ -44,7 +44,6 @@ def test_brute_force(metadata, get_dashboard_credentials, generate_events, clean
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
                                    error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
-    raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
 
     query = e2e.make_query([
         {
