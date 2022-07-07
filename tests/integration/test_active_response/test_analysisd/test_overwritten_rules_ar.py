@@ -2,6 +2,7 @@ import os
 import pytest
 import time
 
+from wazuh_testing import global_parameters
 from wazuh_testing.processes import check_if_analysisd_is_running
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import change_permission, remove_file
@@ -45,7 +46,7 @@ def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, f
     os.system(cmd)
 
     # Checking if AR works properly
-    time.sleep(2)
+    time.sleep(global_parameters.default_timeout)
     assert os.path.exists(output_custom_ar_script)
 
     # Check that wazuh-analysisd is running and has not crashed when trying to parse files with unexpected file types
