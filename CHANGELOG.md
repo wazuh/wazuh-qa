@@ -1,15 +1,60 @@
-# Change Log
+# Changelog
+
 All notable changes to this project will be documented in this file.
 
-## Rev 430031
+## [4.3.6] - Development (unreleased)
 
-Wazuh version: 4.3.0 \
-Wazuh commit: https://github.com/wazuh/wazuh/commit/3a833c142983b83081d8208a6cbbab0620178f1d \
-Release report: https://github.com/wazuh/wazuh-qa/issues/2500
+Wazuh commit: TBD \
+Release report: TBD
+
+### Fixed
+
+- Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006)) \- (Framework + Tests)
+
+
+## [4.3.5] - 29-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2a2b88bfb2ea30903728372471b33540a3b3d976 \
+Release report: https://github.com/wazuh/wazuh/issues/13966
+
+### Fixed
+
+- Fix Solaris and Macos FIM integration failures ([#2977](https://github.com/wazuh/wazuh-qa/pull/2977)) \- (Framework + Tests)
+
+
+## [4.3.4] - 09-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: https://github.com/wazuh/wazuh/issues/13669
+
+
+## [4.3.3] - 01-06-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/ccbc9490bc38718717233c50e3d6daeff102e388 \
+Release report: -
+
+
+## [4.3.2] - 30-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5b3d501f5a10c5134b53771f13c48dc94c54beb2 \
+Release report: https://github.com/wazuh/wazuh/issues/13629
+
+
+## [4.3.1] - 18-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8ee2a5646a12d22bf662b2f59a19c12b4b8d0a4e \
+Release report: https://github.com/wazuh/wazuh/issues/13448
+
+
+## [4.3.0] - 05-05-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/5bae1c1830dbf11acc8a06e01f7a5a134b767760 \
+Release report: https://github.com/wazuh/wazuh/issues/13321
 
 ### Added
 - Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984))
-- Added specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
+- Add specific version of libcst to install in python lower than 3.7. ([#2459](https://github.com/wazuh/wazuh-qa/pull/2459))
+- Add system test to check synchronization between agent and manager. ([#2443](https://github.com/wazuh/wazuh-qa/pull/2443))
 - Make `simulate-api-load` CLI run tasks simultaneously. ([#2392](https://github.com/wazuh/wazuh-qa/pull/2392))
 - Add `qa-ctl` `v0.3`. ([#2307](https://github.com/wazuh/wazuh-qa/pull/2307))
 - Add `qa-ctl` `v0.2`. ([#2299](https://github.com/wazuh/wazuh-qa/pull/2299))
@@ -37,6 +82,7 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 ### Changed
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
+- Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))
 - Fix `wazuh-metrics` CLI bug when child processes restart. ([#2416](https://github.com/wazuh/wazuh-qa/pull/2416))
 - IT Solaris Jenkins: Fix requirements. ([#2415](https://github.com/wazuh/wazuh-qa/pull/2415))
 - Fix the `agent_info_sync` test according to new changes. ([#2411](https://github.com/wazuh/wazuh-qa/pull/2411))
@@ -98,8 +144,8 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Fix missing argument in test_macos_format_basic IT. ([#1478](https://github.com/wazuh/wazuh-qa/pull/1478))
 - Check if scheduled mode is set when realtime is not available. ([#1474](https://github.com/wazuh/wazuh-qa/pull/1474))
 
-### Deleted
-- Delete unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
+### Removed
+- Remove unnecessary `CLIENT_KEYS_PATH`. ([#2419](https://github.com/wazuh/wazuh-qa/pull/2419))
 - Remove deprecated configurations. ([#2380](https://github.com/wazuh/wazuh-qa/pull/2380))
 - Remove deprecated test_use_only_authd. ([#2294](https://github.com/wazuh/wazuh-qa/pull/2294))
 - Remove expected `force` option from the received request in the `agent_enrollment` system tests. ([#2289](https://github.com/wazuh/wazuh-qa/pull/2289))
@@ -110,9 +156,9 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 
 ## [v4.2.0]
 ### Added
-- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153) 
+- Add agent labels to agent simulator tool [#1153](https://github.com/wazuh/wazuh-qa/pull/1153)
 - Add the capability to know which CVE’s affect an agent [#7479](https://github.com/wazuh/wazuh/issues/7479)
-- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092) 
+- Add new tests for Wazuh-DB insert commands in agents' CVEs table [#1092](https://github.com/wazuh/wazuh-qa/pull/1092)
 - Add integration tests for syslog [#1086](https://github.com/wazuh/wazuh-qa/pull/1086)
 - Add remoted integration tests: basic configuration tests [#1073](https://github.com/wazuh/wazuh-qa/pull/1073)
 - Add the tier 0 integration tests for wazuh-remoted [#1024](https://github.com/wazuh/wazuh-qa/issues/1024)
