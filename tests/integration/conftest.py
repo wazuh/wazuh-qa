@@ -898,7 +898,7 @@ def set_wazuh_configuration(configuration):
 @pytest.fixture(scope='function')
 def copy_file(source_path, destination_path):
     """Copy file from source to destination"""
-    for i in range (len(source_path)):
+    for i in range(len(source_path)):
         copy(source_path[i], destination_path[i])
 
     yield

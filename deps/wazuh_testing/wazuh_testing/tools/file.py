@@ -417,6 +417,7 @@ def download_text_file(file_url, local_destination_path):
 
     open(local_destination_path, 'wb').write(request.content)
 
+
 def change_permission(file_path, permissions):
     """change the mode of path to the numeric mode.
 
