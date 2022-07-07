@@ -7,6 +7,8 @@ from wazuh_testing.tools.configuration import load_configuration_template, get_t
 from wazuh_testing.tools.file import change_permission, remove_file
 from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, AR_SCRIPTS_PATH
 
+pytestmark = [pytest.mark.tier(level=0), pytest.mark.server]
+
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
