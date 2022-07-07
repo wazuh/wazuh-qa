@@ -14,7 +14,7 @@
     <description>Rule to overwrite</description>
   </rule>
 
-  <rule id="100002" level="0" overwrite="yes">
+  <rule id="100002" level="6" overwrite="yes">
     <match>TEST 4</match>
     <description>Overwrite rule</description>
   </rule>
