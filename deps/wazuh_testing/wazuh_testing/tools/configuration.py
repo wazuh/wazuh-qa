@@ -648,7 +648,7 @@ def set_local_internal_options_dict(dict_local_internal_options):
 def get_test_cases_data(data_file_path):
     """Load a test case template file and get its data.
 
-    Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
+    Template example file: tests/integration/test_remoted/test_multi_groups/data/test_cases/case_file_actions.yaml
 
     Args:
         data_file_path (str): Test case template file path.

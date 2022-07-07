@@ -42,22 +42,20 @@ tags:
 import hashlib
 import os
 import re
-import subprocess as sb
-from time import sleep
-
 import pytest
 import requests
+from time import sleep
+
 from wazuh_testing.api import get_api_details_dict
 from wazuh_testing.remote import DEFAULT_TESTING_GROUP_NAME, new_agent_group, \
                                   remove_agent_group
 from wazuh_testing.tools import REMOTE_DAEMON, WAZUH_PATH, configuration
 from wazuh_testing.tools.file import delete_file
-import wazuh_testing.tools as tools
 from wazuh_testing.tools.services import check_daemon_status, control_service
 from wazuh_testing.tools.wazuh_manager import remove_agents
 
 # Marks
-pytestmarks = [pytest.mark.linux, pytest.mark.server, pytest.mark.tier(level=0)]
+pytestmarks = [pytest.mark.server]
 
 # Variables
 agent_name = 'testing_agent'
@@ -100,14 +98,20 @@ def restart_remoted():
 
 @pytest.fixture(scope='function')
 def prepare_environment(request, register_agent):
-    """Configure a custom environment for testing."""
+    '''
+    Configure a custom environment for testing:
+    1) Register a new agent using the API.
+    2) Create a new group using the agent_groups tool.
+    3) Assign the new group to the agent.
+    4) After the execution of the test, remove the group created.
+    '''
 
     new_agent_group()
 
     agent_id = getattr(request.module, 'response_data')['id']
 
     # Delete this in 4.4, we have to use the agent_groups script to assign the groups
-    with open(f"{tools.WAZUH_PATH}/queue/agent-groups/{agent_id}", 'w') as agent_group_file:
+    with open(f"{WAZUH_PATH}/queue/agent-groups/{agent_id}", 'w') as agent_group_file:
         agent_group_file.write(f"default,{DEFAULT_TESTING_GROUP_NAME}")
 
     yield
@@ -148,6 +152,7 @@ def manipulate_file(action, file_path):
         delete_file(file_path)
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=test_case_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_merged_mg_file_content(metadata, configure_local_internal_options_module, restart_remoted,
@@ -155,7 +160,16 @@ def test_merged_mg_file_content(metadata, configure_local_internal_options_modul
     '''
     description: Check the content of the merged.mg file that wazuh-remoted compiles for multi-groups.
 
-    wazuh_min_version: 4.2.2
+    wazuh_min_version: 4.3.6
+
+    tier: 0
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Restart wazuh-remoted.
+        - Register an agent, create a group and assign it to the agent.
+        - Execute an action (create/delete file) inside the group folder.
+        - Verify that the action (create/delete file) was applied in the multigroup folder.
 
     parameters:
         - metadata:
