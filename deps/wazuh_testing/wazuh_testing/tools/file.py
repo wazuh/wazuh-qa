@@ -516,3 +516,12 @@ def download_text_file(file_url, local_destination_path):
 def get_file_lines(path):
     with open(path, "r+") as file_to_read:
         return file_to_read.readlines()
+
+
+def change_permission(file_path, permissions):
+    """change the mode of path to the numeric mode.
+    Args:
+        file_path (str): Path to file.
+        permissions (str): level of permission.
+    """
+    os.chmod(file_path, permissions)
