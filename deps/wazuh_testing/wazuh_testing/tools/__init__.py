@@ -72,6 +72,7 @@ else:
     PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
+    AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
     if sys.platform == 'sunos5':
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
     else:
