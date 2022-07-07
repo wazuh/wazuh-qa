@@ -1,0 +1,26 @@
+- name: 'Overwritten rules - Rule test 100001'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'custom-ar'
+    LOCATION: 'local'
+    RULES: '100001'
+  metadata:
+    log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 2'
+
+- name: 'Overwritten rules - Rule test 100002'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'custom-ar'
+    LOCATION: 'local'
+    RULES: '100002'
+  metadata:
+    log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 4'
+
+- name: 'Overwritten rules - Rule test 100004'
+  description: 'Verify Active Response works with overwritten rules'
+  configuration_parameters:
+    COMMAND: 'custom-ar'
+    LOCATION: 'local'
+    RULES: '100004'
+  metadata:
+    log_sample: 'Dec 25 20:45:02 MyHost example[12345]: TEST 2 TEST 5 TEST 6'
