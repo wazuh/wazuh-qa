@@ -2,9 +2,9 @@
     - section: command
       elements:
         - name:
-            value: 'test'
+            value: 'custom-ar'
         - executable:
-            value: 'test.sh'
+            value: 'custom-ar.sh'
         - timeout_allowed:
             value: 'no'
 
