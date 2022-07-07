@@ -1,4 +1,13 @@
 - sections:
+    - section: command
+      elements:
+        - name:
+            value: 'test'
+        - executable:
+            value: 'test.sh'
+        - timeout_allowed:
+            value: 'no'
+
     - section: active-response
       elements:
         - disabled:
@@ -16,15 +25,6 @@
             value: '/tmp/file_to_monitor.log'
         - log_format:
             value: 'syslog'
-
-    - section: command
-      elements:
-        - name:
-            value: 'custom-ar'
-        - executable:
-            value: 'custom-ar.sh'
-        - timeout_allowed:
-            value: 'no'
 
     - section: vulnerability-detector
       elements:
@@ -61,4 +61,4 @@
     - section: rule_test
       elements:
         - enabled:
-            value: 'no'
+            value: 'yes'
