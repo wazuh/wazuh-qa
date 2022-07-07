@@ -74,9 +74,7 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     sleep(fw.T_5)
 
     # Get indexed alert
-    # current_hostname is defined in conftest (configure_environment)
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials,
-                                         ip_address=current_hostname)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

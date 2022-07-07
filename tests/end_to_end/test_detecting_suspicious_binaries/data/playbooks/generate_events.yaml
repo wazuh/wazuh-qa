@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: "{{ inventory_hostname }}"
+  hosts: wazuh-manager
   become: true
   tasks:
 
