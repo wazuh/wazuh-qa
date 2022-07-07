@@ -168,24 +168,22 @@ def test_ignore_works_over_restrict(
 
     tags:
         - scheduled
-        - time_travel
     '''
     logger.info('Applying the test configuration')
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     # Create file that must be ignored
     logger.info(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
-    # Go ahead in time to let syscheck perform a new scan if mode is scheduled
-    logger.info(f'Time travel: {scheduled}')
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    # Timeout for FIM to generate the log.
+    test_timeout = 5 # seconds
+    logger.info(f'Waiting up to {test_timeout} seconds for FIM to generate the log')
 
     if triggers_event:
         logger.info('Checking the event...')
         event = wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=test_timeout,
             callback=callback_detect_event,
             error_message=f'Did not receive expected "Sending FIM event" '
                           f'event for file {os.path.join(testdir1, filename)}',
@@ -196,7 +194,7 @@ def test_ignore_works_over_restrict(
     else:
         while True:
             ignored_file = wazuh_log_monitor.start(
-                timeout=global_parameters.default_timeout,
+                timeout=test_timeout,
                 callback=generate_monitoring_callback(CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN),
                 error_message=f"Did not receive expected "
                               f'"Ignoring ... due to ..." event for file '
