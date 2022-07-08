@@ -8,6 +8,13 @@ import os
 import yaml
 from collections import defaultdict
 
+# Timeouts
+T_5 = 5
+T_10 = 10
+T_20 = 20
+T_30 = 30
+
+# Protocols
 UDP = 'UDP'
 TCP = 'TCP'
 TCP_UDP = 'TCP,UDP'
@@ -22,7 +29,7 @@ def is_tcp(protocol):
 
 
 def is_tcp_udp(protocol):
-    _protocol = protocol.replace(' ','').upper().split(',')
+    _protocol = protocol.replace(' ', '').upper().split(',')
     _protocol.sort()
     return ','.join(_protocol) == TCP_UDP
 
