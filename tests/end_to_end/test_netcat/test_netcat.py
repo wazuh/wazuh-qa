@@ -2,10 +2,8 @@ import os
 import json
 import re
 import pytest
-from datetime import datetime
 from tempfile import gettempdir
 
-from wazuh_testing.tools.time import parse_date_time_format
 from wazuh_testing.tools import configuration as config
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
@@ -37,19 +35,23 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
                              fr'.*"id": "{rule_id}".*' \
                              r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
-    query = e2e.make_query([
-         {
-            "term": {
-               "rule.id": f"{rule_id}"
-            }
-         }
-     ])
-
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
                                    error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
-    raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
+
+    query = e2e.make_query([
+        {
+           "term": {
+              "rule.id": f"{rule_id}"
+           }
+        },
+        {
+           "term": {
+              "timestamp": f"{raised_alert_timestamp}"
+           }
+        }
+    ])
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
@@ -58,10 +60,3 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     # Check that the alert data is the expected one
     alert_data = re.search(expected_indexed_alert, indexed_alert)
     assert alert_data is not None, 'Alert triggered, but not indexed'
-
-    # Get indexed alert timestamp
-    indexed_alert_timestamp = alert_data.group(1)
-    indexed_alert_timestamp = datetime.strptime(parse_date_time_format(indexed_alert_timestamp), '%Y-%m-%d %H:%M:%S')
-
-    # Check that alert has been indexed (checking that the timestamp is the expected one)
-    assert indexed_alert_timestamp == raised_alert_timestamp, 'Alert triggered, but not indexed'
