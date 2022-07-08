@@ -2,12 +2,8 @@ import os
 import json
 import re
 import pytest
-from datetime import datetime
 from tempfile import gettempdir
-from time import sleep
 
-import wazuh_testing as fw
-from wazuh_testing.tools.time import parse_date_time_format
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
@@ -22,8 +18,8 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
-configuration_extra_vars = {'trojan_script_path': trojan_script_path}
 teardown_playbook = ['teardown_playbook.yaml']
+configuration_extra_vars = {'trojan_script_path': trojan_script_path}
 
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
@@ -46,6 +42,11 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     expected_indexed_alert = fr".+file.+{data_file}.+title.+{data_title}.+level.+{rule_level}.+" \
                              fr"description.+{rule_description}.+id.+{rule_id}.+timestamp\": \"({timestamp_regex})\""
 
+    # Check that alert has been raised and save timestamp
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+                                   error_message='The alert has not occurred').result()
+    raised_alert_timestamp = raised_alert.group(1)
+
     query = e2e.make_query([
         {
           "term": {
@@ -61,17 +62,13 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
           "term": {
             "data.title": f"{data_title}"
           }
+        },
+        {
+          "term": {
+            "timestamp": f"{raised_alert_timestamp}"
+          }
         }
     ])
-
-    # Check that alert has been raised and save timestamp
-    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                   error_message='The alert has not occurred').result()
-    raised_alert_timestamp = raised_alert.group(1)
-    raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
-
-    # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_5)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
@@ -80,10 +77,3 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     # Check that the alert data is the expected one
     alert_data = re.search(expected_indexed_alert, indexed_alert)
     assert alert_data is not None, 'Alert triggered, but not indexed'
-
-    # Get indexed alert timestamp
-    indexed_alert_timestamp = alert_data.group(1)
-    indexed_alert_timestamp = datetime.strptime(parse_date_time_format(indexed_alert_timestamp), '%Y-%m-%d %H:%M:%S')
-
-    # Check that alert has been indexed (checking that the timestamp is the expected one)
-    assert indexed_alert_timestamp == raised_alert_timestamp, 'Alert triggered, but not indexed'
