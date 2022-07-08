@@ -23,6 +23,7 @@ Release report: TBD
 
 ### Added
 
+- Add test to verify Active Response works with overwritten rules ([#3080](https://github.com/wazuh/wazuh-qa/pull/3080)) \- (Framework + Tests)
 - New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
 - New vulnerability Detector integration tests for Amazon Linux 2022 ([#2955](https://github.com/wazuh/wazuh-qa/pull/2955)) \- (Framework + Tests)
 - New vulnerability detector tests for SUSE Linux Enterpise Support ([#2945](https://github.com/wazuh/wazuh-qa/pull/2945)) \- (Framework + Tests)
