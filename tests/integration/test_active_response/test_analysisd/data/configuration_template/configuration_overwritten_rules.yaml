@@ -2,9 +2,9 @@
     - section: command
       elements:
         - name:
-            value: 'custom-ar'
+            value: custom-ar
         - executable:
-            value: 'custom-ar.sh'
+            value: custom-ar.sh
         - timeout_allowed:
             value: 'no'
 
@@ -22,33 +22,33 @@
     - section: localfile
       elements:
         - location:
-            value: '/tmp/file_to_monitor.log'
+            value: /tmp/file_to_monitor.log
         - log_format:
-            value: 'syslog'
+            value: syslog
 
     - section: vulnerability-detector
       elements:
-      - enabled:
-          value: 'no'
+        - enabled:
+            value: 'no'
 
     - section: sca
       elements:
-      - enabled:
-          value: 'no'
+        - enabled:
+            value: 'no'
 
     - section: rootcheck
       elements:
-      - disabled:
-          value: 'yes'
+        - disabled:
+            value: 'yes'
 
     - section: syscheck
       elements:
-      - disabled:
-          value: 'yes'
+        - disabled:
+            value: 'yes'
 
     - section: wodle
       attributes:
-        - name: 'syscollector'
+        - name: syscollector
       elements:
         - disabled:
             value: 'yes'
