@@ -1,0 +1,22 @@
+- name: Generate events
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Truncate alerts file
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+
+    - name: Restart manager to run the rootcheck scan
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+    - name: Wait for alerts to be generated
+      wait_for:
+        timeout: 10
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
