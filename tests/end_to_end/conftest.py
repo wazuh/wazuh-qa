@@ -14,15 +14,29 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 
 @pytest.fixture(scope='function')
-def clean_environment(get_dashboard_credentials):
+def clean_environment(get_dashboard_credentials, request, metadata):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
-          credentials(dict): wazuh-indexer credentials.
+          credentials (dict): wazuh-indexer credentials.
+          request (fixture): Provide information on the executing test function.
+          metadata (dict): Dictionary with test case metadata.
     """
     yield
     remove_file(alerts_json)
     e2e.delete_index_api(credentials=get_dashboard_credentials)
+    inventory_playbook = request.config.getoption('--inventory_path')
+
+    # Execute each playbook for the teardown
+    for playbook in getattr(request.module, 'teardown_playbook'):
+        teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+
+        parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
+        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
+        if 'extra_vars' in metadata:
+            parameters.update({'extravars': metadata['extra_vars']})
+
+        ansible_runner.run(**parameters)
 
 
 @pytest.fixture(scope='module')
