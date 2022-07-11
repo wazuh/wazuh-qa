@@ -636,7 +636,7 @@ def check_push_shared_config(agent, sender, injector=None):
             sender.send_event(agent.keep_alive_event)
             time.sleep(10)
 
-        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=10,
+        check_agent_received_message(agent, r'#!-up file .* merged.mg', timeout=10,
                                      error_message="New group shared config not received")
 
     finally:
