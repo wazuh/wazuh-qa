@@ -38,7 +38,8 @@ os_version:
     - Ubuntu Bionic
 
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html#using-syscollector-information-to-trigger-alerts
+    - https://documentation.wazuh.com/current/user-manual/capabilities/syscollector.html\
+        #using-syscollector-information-to-trigger-alerts
 '''
 import os
 import yaml
@@ -73,7 +74,6 @@ def get_configuration(request):
 
 
 # Tests
-@pytest.mark.skip(reason='Temporarily disabled until merge this PR https://github.com/wazuh/wazuh/pull/10843')
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
