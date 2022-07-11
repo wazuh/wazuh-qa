@@ -1,10 +1,3 @@
-# Works on Solaris 11
-# - name: Install solaris wazuh agent custom package
-#   become: true
-#   shell: pkg install web/server/{{ program }}
-#   environment:
-#     PATH: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
-
 - name: Install CSWpkgutil
   become: true
   shell: pkgadd -d http://get.opencsw.org/now -n
