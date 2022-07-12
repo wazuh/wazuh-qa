@@ -1,10 +1,10 @@
 ---
 - name: Cleanup environment
   hosts: wazuh-manager
+  become: True
   tasks:
 
     - name: Delete the docker-listener module configuration
-      become: True
       blockinfile:
         path: /var/ossec/etc/ossec.conf
         block: ''
