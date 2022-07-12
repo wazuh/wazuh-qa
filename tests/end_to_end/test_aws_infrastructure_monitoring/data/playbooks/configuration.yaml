@@ -47,6 +47,5 @@
         make -j 8
         make altinstall
 
-
     - name: Install boto3 python package (script dependency)
       shell: python3.8 -m pip install boto3
