@@ -4,7 +4,7 @@
   become: True
   tasks:
 
-    - name: Delete Configure Virustotal integration and active response configuration
+    - name: Delete Virustotal integration and active response configuration
       blockinfile:
         path: /var/ossec/etc/ossec.conf
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
