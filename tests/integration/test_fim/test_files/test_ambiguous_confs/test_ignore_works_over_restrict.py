@@ -66,7 +66,7 @@ import sys
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing import logger
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params, check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params
 from wazuh_testing.fim_module import CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -177,7 +177,7 @@ def test_ignore_works_over_restrict(
     create_file(REGULAR, folder, filename, content='')
 
     # Timeout for FIM to generate the log.
-    test_timeout = 5 # seconds
+    test_timeout = 5  # seconds
     logger.info(f'Waiting up to {test_timeout} seconds for FIM to generate the log')
 
     if triggers_event:
