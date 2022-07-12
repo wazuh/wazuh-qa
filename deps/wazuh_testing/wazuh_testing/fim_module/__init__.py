@@ -75,13 +75,21 @@ ERR_MSG_DB_BACK_TO_NORMAL = (
 ERR_MSG_DATABASE_FULL_ALERT_EVENT = (
     'Did not receive expected "DEBUG: ...: Sending DB 100% full alert." event'
 )
-ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = "Did not receive expected \"DEBUG: ...: Couldn't insert '...' entry into DB. The DB is full, ...\" event"
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT = (
+    "Did not receive expected \"DEBUG: ...: Couldn't insert '...' entry into DB. The DB is full, ...\" event"
+)
+ERR_MSG_FILE_LIMIT_VALUES = (
+    'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: ..." event'
+)
 ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL = "Wrong value for full database alert."
-ERR_MSG_DISK_QUOTA_MUST_BE_GREATER = "Did not receive expected 'DEBUG: ... disk_quota must be greater than file_size message'"
+ERR_MSG_DISK_QUOTA_MUST_BE_GREATER = (
+    "Did not receive expected 'DEBUG: ... disk_quota must be greater than file_size message'"
+)
 ERR_MSG_CONTENT_CHANGES_EMPTY = "content_changes is empty"
 ERR_MSG_CONTENT_CHANGES_NOT_EMPTY = "content_changes isn't empty"
-ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
+ERR_MSG_FILE_LIMIT_DISABLED = (
+    'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries to be monitored" event'
+)
 ERR_MSG_NO_EVENTS_EXPECTED = "No events should be detected."
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = "Did not receive expected deleted event"
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = "Wrong number of entries counted."
