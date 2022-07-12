@@ -40,6 +40,10 @@
 - name: Include Solaris custom tasks
   include_tasks: "Solaris.yml"
   when: ansible_os_family == "Solaris"
+  args:
+    apply:
+      environment:
+        PATH: "{{ environment_paths }}"
 
 # macOS
 - name: Include MacOS custom tasks
