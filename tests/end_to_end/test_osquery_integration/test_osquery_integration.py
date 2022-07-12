@@ -16,6 +16,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 configuration_playbooks = ['configuration.yaml']
 configuration_extra_vars = {'configuration_file': osquery_configuration_file_path}
 events_playbooks = ['generate_events.yaml']
+teardown_playbooks = ['teardown.yaml']
 
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
