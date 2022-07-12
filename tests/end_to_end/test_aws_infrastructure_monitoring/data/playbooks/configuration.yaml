@@ -1,0 +1,52 @@
+- name: Configure environment
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Configure the aws-s3 wodle
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        insertbefore: ^</ossec_config>
+        block: |
+          <wodle name="aws-s3">
+          <disabled>no</disabled>
+          <remove_from_bucket>no</remove_from_bucket>
+          <interval>1m</interval>
+          <run_on_start>yes</run_on_start>
+          <skip_on_error>no</skip_on_error>
+          <bucket type="cloudtrail">
+          <name>{{ bucket_name }}</name>
+          <access_key>{{ aws_access_key_id }}</access_key>
+          <secret_key>{{ aws_secret_access_key }}</secret_key>
+          <only_logs_after>{{ date }}</only_logs_after>
+          <regions>{{ aws_region }}</regions>
+          </bucket>
+          </wodle>
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+    - name: Copy the script to send a request to the AWS API
+      copy:
+        src: "{{ aws_s3_script }}"
+        dest: /tmp
+        mode: '0710'
+
+    - name: Install python v3.8.4
+      shell: |
+        yum -y update
+        yum -y groupinstall "Development Tools"
+        yum -y install gcc openssl-devel bzip2-devel libffi-devel
+        curl -O https://www.python.org/ftp/python/3.8.4/Python-3.8.4.tgz
+        tar xvf Python-3.8.4.tgz
+        cd Python-3.8.4
+        ./configure --enable-optimizations --with-ensurepip=install
+        make -j 8
+        make altinstall
+
+
+    - name: Install boto3 python package (script dependency)
+      shell: python3.8 -m pip install boto3

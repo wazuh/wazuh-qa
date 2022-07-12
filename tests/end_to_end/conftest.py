@@ -14,13 +14,12 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 
 @pytest.fixture(scope='function')
-def clean_environment(get_dashboard_credentials, request, metadata):
+def clean_environment(get_dashboard_credentials, request):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
           credentials (dict): wazuh-indexer credentials.
           request (fixture): Provide information on the executing test function.
-          metadata (dict): Dictionary with test case metadata.
     """
     yield
     remove_file(alerts_json)
@@ -32,9 +31,11 @@ def clean_environment(get_dashboard_credentials, request, metadata):
         teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
         parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
-        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
-        if 'extra_vars' in metadata:
-            parameters.update({'extravars': metadata['extra_vars']})
+
+        # Check if the module has extra variables to pass to the playbook
+        configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
+        if configuration_extra_vars is not None:
+            parameters.update({'extravars': configuration_extra_vars})
 
         ansible_runner.run(**parameters)
 
@@ -106,9 +107,16 @@ def generate_events(request, metadata):
         events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
         parameters = {'playbook': events_playbook_path, 'inventory': inventory_playbook}
+
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
+        # Also, add the module extra vars if it is configured.
+        module_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
+            if module_extra_vars is not None:
+                parameters['extravars'].update(module_extra_vars)
+        elif module_extra_vars is not None:
+            parameters.update({'extravars': module_extra_vars})
 
         ansible_runner.run(**parameters)
 
