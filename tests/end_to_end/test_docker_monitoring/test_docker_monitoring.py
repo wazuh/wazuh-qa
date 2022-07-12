@@ -17,6 +17,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
+teardown_playbooks = ['teardown.yaml']
 
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
