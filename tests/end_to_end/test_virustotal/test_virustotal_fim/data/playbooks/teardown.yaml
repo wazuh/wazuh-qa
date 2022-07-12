@@ -1,0 +1,37 @@
+---
+- name: Cleanup manager environment
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Delete Virustotal integration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: ''
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+- name: Cleanup agent environment
+  hosts: wazuh-agent
+  become: True
+  tasks:
+
+    - name: Delete syscheck configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: ''
+
+    - name: Delete folder
+      file:
+        path: /test
+        state: absent
+
+    - name: Restart wazuh-agent
+      systemd:
+        state: restarted
+        name: wazuh-agent

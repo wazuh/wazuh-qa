@@ -15,6 +15,7 @@ test_general_configuration_path = os.path.join(os.path.dirname(os.path.realpath(
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_virustotal.yaml')
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
+teardown_playbooks = ['teardown.yaml']
 
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
