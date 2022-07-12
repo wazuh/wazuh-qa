@@ -16,6 +16,7 @@ test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_netcat.
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
+teardown_playbooks = ['teardown.yaml']
 
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
