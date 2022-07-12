@@ -8,7 +8,7 @@
 
     # Create a bucket using the AWS API
     - name: Run the script using python3 (create S3 bucket)
-      script: "{{ aws_s3_script }} --a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
+      script: "{{ aws_s3_script }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
 
     - name: Wait for alerts to be generated
       wait_for:
