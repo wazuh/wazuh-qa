@@ -18,7 +18,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
-teardown_playbook = ['teardown.yaml']
+teardown_playbooks = ['teardown.yaml']
 configuration_extra_vars = {'trojan_script_path': trojan_script_path}
 
 # Configuration

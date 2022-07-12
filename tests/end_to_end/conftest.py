@@ -28,7 +28,7 @@ def clean_environment(get_dashboard_credentials, request, metadata):
     inventory_playbook = request.config.getoption('--inventory_path')
 
     # Execute each playbook for the teardown
-    for playbook in getattr(request.module, 'teardown_playbook'):
+    for playbook in getattr(request.module, 'teardown_playbooks'):
         teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
         parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
