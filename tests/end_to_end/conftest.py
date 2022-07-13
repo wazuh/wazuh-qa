@@ -27,16 +27,22 @@ def clean_environment(get_dashboard_credentials, request, metadata):
     e2e.delete_index_api(credentials=get_dashboard_credentials)
     inventory_playbook = request.config.getoption('--inventory_path')
 
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
+
+    teardown_playbooks = getattr(request.module, 'teardown_playbooks')
+
     # Execute each playbook for the teardown
-    for playbook in getattr(request.module, 'teardown_playbooks'):
-        teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+    if teardown_playbooks is not None:
+        for playbook in teardown_playbooks:
+            teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
-        parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
-        # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
-        if 'extra_vars' in metadata:
-            parameters.update({'extravars': metadata['extra_vars']})
+            parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
+            # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
+            if 'extra_vars' in metadata:
+                parameters.update({'extravars': metadata['extra_vars']})
 
-        ansible_runner.run(**parameters)
+            ansible_runner.run(**parameters)
 
 
 @pytest.fixture(scope='module')
