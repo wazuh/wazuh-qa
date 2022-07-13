@@ -1,4 +1,3 @@
-
 # Conf 1
 - tags:
     - valid_no_regex
@@ -40,7 +39,7 @@
             value: /testdir1
             attributes:
               - check_all: "yes"
-              - restrict: "testfile2$"
+              - restrict: testfile2$
               - FIM_MODE
         - directories:
             value: /testdir2
