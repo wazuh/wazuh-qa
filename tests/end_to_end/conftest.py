@@ -22,8 +22,6 @@ def clean_environment(get_dashboard_credentials, request):
           request (fixture): Provide information on the executing test function.
     """
     yield
-    remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials)
     inventory_playbook = request.config.getoption('--inventory_path')
 
     # Execute each playbook for the teardown
@@ -38,6 +36,9 @@ def clean_environment(get_dashboard_credentials, request):
             parameters.update({'extravars': configuration_extra_vars})
 
         ansible_runner.run(**parameters)
+
+    remove_file(alerts_json)
+    e2e.delete_index_api(credentials=get_dashboard_credentials)
 
 
 @pytest.fixture(scope='module')

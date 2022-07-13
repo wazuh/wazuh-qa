@@ -1,9 +1,13 @@
-#!/usr/local/bin/python3.8
+#!/usr/bin/python3.8
 
 import argparse
 import logging
+from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
+
+
+formats = ['%a, %d %b %Y %H:%M:%S %Z', '%Y-%m-%dT%H:%M:%SZ']
 
 
 def get_parameters():
@@ -32,7 +36,9 @@ def create_bucket(access_key_id, secret_access_key):
     try:
         client = boto3.client('s3', aws_access_key_id=access_key_id,
                             aws_secret_access_key=secret_access_key)
-        client.create_bucket(Bucket='delete-this-dummy-bucket')
+        response = client.create_bucket(Bucket='delete-this-dummy-bucket')
+        response_date = response['ResponseMetadata']['HTTPHeaders']['date']
+        print(str(datetime.strptime(response_date, formats[0]).strftime(formats[1]))[:-3])
     except ClientError as e:
         logging.error(e)
 

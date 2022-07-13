@@ -1,21 +1,32 @@
 - name: Generate events
   hosts: wazuh-manager
+  vars:
+    w_path: /var/ossec/logs/alerts/alerts.json
   become: true
   tasks:
 
     - name: Truncate alerts file
-      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      shell: echo "" > {{ w_path }}
 
     # Create a bucket using the AWS API
     - name: Run the script using python3 (create S3 bucket)
       script: "{{ aws_s3_script }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
+      register: result
 
-    - name: Wait for alerts to be generated
-      wait_for:
-        timeout: 10
+    - debug:
+        var: result
+
+    - name: Wait for the alert to be generated
+      shell: "( tail -f -n0 {{ w_path }} & ) | grep -q '{{ result.stdout_lines[0] }}.*{{ex}}' && echo '' > {{ w_path }}"
+      register: result
+      async: 480
+      poll: 60
+
+    - debug:
+        var: result.stderr
 
     - name: Get alerts.json
       fetch:
-        src: /var/ossec/logs/alerts/alerts.json
+        src: "{{ w_path }}"
         dest: /tmp/
         flat: true

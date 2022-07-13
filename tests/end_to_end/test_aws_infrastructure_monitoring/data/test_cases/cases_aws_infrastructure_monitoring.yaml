@@ -8,3 +8,5 @@
     rule.id: 80202
     rule.description: AWS Cloudtrail{{":"}} s3.amazonaws.com - CreateBucket.
     rule.level: 3
+    extra_vars:
+      ex: CreateBucket

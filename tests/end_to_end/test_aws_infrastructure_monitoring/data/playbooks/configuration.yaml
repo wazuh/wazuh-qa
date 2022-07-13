@@ -12,7 +12,7 @@
           <wodle name="aws-s3">
           <disabled>no</disabled>
           <remove_from_bucket>no</remove_from_bucket>
-          <interval>1m</interval>
+          <interval>10s</interval>
           <run_on_start>yes</run_on_start>
           <skip_on_error>no</skip_on_error>
           <bucket type="cloudtrail">
@@ -35,17 +35,24 @@
         dest: /tmp
         mode: '0710'
 
-    - name: Install python v3.8.4
+    - name: Check if python3 is installed
+      shell: python3.8 --version
+      ignore_errors: true
+      register: python_check
+
+    - name: Install python v3.8.7
       shell: |
         yum -y update
-        yum -y groupinstall "Development Tools"
-        yum -y install gcc openssl-devel bzip2-devel libffi-devel
-        curl -O https://www.python.org/ftp/python/3.8.4/Python-3.8.4.tgz
-        tar xvf Python-3.8.4.tgz
-        cd Python-3.8.4
-        ./configure --enable-optimizations --with-ensurepip=install
-        make -j 8
+        yum -y install wget make gcc openssl-devel bzip2-devel
+        wget https://www.python.org/ftp/python/3.8.7/Python-3.8.7.tgz
+        tar xzf Python-3.8.7.tgz
+        cd Python-3.8.7
+        ./configure --enable-optimizations
         make altinstall
+        ln -sfn /usr/local/bin/python3.8 /usr/bin/python3.8
+        ln -sfn /usr/local/bin/pip3.8 /usr/bin/pip3.8
+      # Do not install python3 if it is already installed
+      when: python_check is failed
 
     - name: Install boto3 python package (script dependency)
       shell: python3.8 -m pip install boto3
