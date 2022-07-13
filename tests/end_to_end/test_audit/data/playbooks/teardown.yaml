@@ -8,3 +8,7 @@
       file:
         path: /etc/audit/rules.d/wazuh.rules
         state: absent
+
+    - name: Delete audit rules
+      become: True
+      shell: auditctl -D
