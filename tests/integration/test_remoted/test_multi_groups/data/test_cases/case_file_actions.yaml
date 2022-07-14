@@ -7,7 +7,7 @@
     action: create
 - name: check_that_the_old_file_is_deleted
   description: When a file is deleted in the group directory, the merged.mg file should be updated without the file in
-                it.
+               it.
   configuration_parameters:
     ACTION: delete
   metadata:
