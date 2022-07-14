@@ -64,10 +64,9 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params
-from wazuh_testing.fim_module import CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN
+from wazuh_testing.fim_module import CB_IGNORING_DUE_TO_SREGEX, CB_IGNORING_DUE_TO_PATTERN
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -79,9 +78,9 @@ pytestmark = pytest.mark.tier(level=2)
 # Variables
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(
-    test_data_path, 'wazuh_conf_ignore_restrict_win32.yaml'
-    if sys.platform == 'win32' else 'wazuh_conf_ignore_restrict.yaml')
+conf_path = os.path.join(test_data_path,
+                         'wazuh_conf_ignore_restrict_win32.yaml'if sys.platform == 'win32'
+                         else 'wazuh_conf_ignore_restrict.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
 testdir1, testdir2 = test_directories
 
@@ -89,11 +88,8 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
 
-conf_params, conf_metadata = generate_params()
-configurations = load_wazuh_configurations(
-    configurations_path, __name__, params=conf_params, metadata=conf_metadata
-)
-
+params, metadata = generate_params()
+configurations = load_wazuh_configurations(conf_path, __name__, params=params, metadata=metadata)
 
 # Fixtures
 
@@ -101,7 +97,6 @@ configurations = load_wazuh_configurations(
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
-
 
 # Tests
 
@@ -112,10 +107,8 @@ def get_configuration(request):
     (testdir1, 'ignore_testfile2', False, {'valid_regex'}),
     (testdir2, 'not_ignored_sregex', True, {'valid_regex'})
 ])
-def test_ignore_works_over_restrict(
-    folder, filename, triggers_event, tags_to_apply, get_configuration,
-    configure_environment, restart_syscheckd, wait_for_fim_start
-):
+def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
+                                    configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same directory.
                  For example, when a directory is ignored and at the same time monitoring is restricted to a file
@@ -182,24 +175,20 @@ def test_ignore_works_over_restrict(
 
     if triggers_event:
         logger.info('Checking the event...')
-        event = wazuh_log_monitor.start(
-            timeout=test_timeout,
-            callback=callback_detect_event,
-            error_message=f'Did not receive expected "Sending FIM event" '
-                          f'event for file {os.path.join(testdir1, filename)}',
-            ).result()
+        event = wazuh_log_monitor.start(timeout=test_timeout,
+                                        callback=callback_detect_event,
+                                        error_message=f'Did not receive expected "Sending FIM event" '
+                                                      f'event for file {os.path.join(testdir1, filename)}').result()
 
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
-        while True:
-            ignored_file = wazuh_log_monitor.start(
-                timeout=test_timeout,
-                callback=generate_monitoring_callback(CB_IGNORING_PATH_DUE_TO_SREGEX_OR_PATTERN),
-                error_message=f"Did not receive expected "
-                              f'"Ignoring ... due to ..." event for file '
-                              f"{os.path.join(testdir1, filename)}",
-            ).result()
+        regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
+        logger.info('Checking the logs...')
+        ignored_file = wazuh_log_monitor.start(timeout=test_timeout,
+                                               callback=generate_monitoring_callback(regex),
+                                               error_message=f'Did not receive expected '
+                                                             f'"Ignoring ... due to ..." event for file '
+                                                             f'{os.path.join(testdir1, filename)}').result()
 
-            if ignored_file == os.path.join(folder, filename):
-                break
+        assert ignored_file == os.path.join(folder, filename)
