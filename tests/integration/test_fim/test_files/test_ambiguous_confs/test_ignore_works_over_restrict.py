@@ -169,13 +169,13 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     logger.info(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
-    # Timeout for FIM to generate the log.
-    test_timeout = 5  # seconds
-    logger.info(f'Waiting up to {test_timeout} seconds for FIM to generate the log')
+    # Time that the test will wait for the event or log to be generated.
+    logs_generation_timeout = 5  # seconds
+    logger.info(f'Waiting up to {logs_generation_timeout} seconds for FIM to generate the log')
 
     if triggers_event:
         logger.info('Checking the event...')
-        event = wazuh_log_monitor.start(timeout=test_timeout,
+        event = wazuh_log_monitor.start(timeout=logs_generation_timeout,
                                         callback=callback_detect_event,
                                         error_message=f'Did not receive expected "Sending FIM event" '
                                                       f'event for file {os.path.join(testdir1, filename)}').result()
@@ -185,7 +185,7 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     else:
         regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
         logger.info('Checking the logs...')
-        ignored_file = wazuh_log_monitor.start(timeout=test_timeout,
+        ignored_file = wazuh_log_monitor.start(timeout=logs_generation_timeout,
                                                callback=generate_monitoring_callback(regex),
                                                error_message=f'Did not receive expected '
                                                              f'"Ignoring ... due to ..." event for file '
