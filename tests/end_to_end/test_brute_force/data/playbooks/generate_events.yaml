@@ -10,26 +10,31 @@
   hosts: localhost
   tasks:
 
-    - name: ssh connection
+    - name: SSH fingerprint
+      expect:
+        command: ssh test_user@wazuh-agent
+        responses:
+          (.*)continue connecting(.*): 'yes'
+        timeout: 5
+      register: result
+      failed_when:
+        - "'password' not in result.stdout"
+
+    - name: SSH connection
       expect:
         command: ssh {{item}}@wazuh-agent
         timeout: 5
         responses:
-          Password: 1
+          (?i)password: 1
       loop:
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-        - test_user
         - test_user
         - test_user
         - test_user
       ignore_errors: true
 
     - name: Wait for alert
-      pause:
-        seconds: 5
+      wait_for:
+        timeout: 5
 
 - name: Get logs
   hosts: wazuh-manager
