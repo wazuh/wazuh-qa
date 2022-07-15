@@ -135,7 +135,7 @@ Release report: https://github.com/wazuh/wazuh/issues/13321
 
 ### Changed
 
-- Fix Analysisd IT: test_syscollector_events failure on wait_for_analysisd_startup. ([#3109]())
+- Fix Analysisd IT: test_syscollector_events failure on wait_for_analysisd_startup. ([#3110](https://github.com/wazuh/wazuh-qa/pull/3110))
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
 - Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))
