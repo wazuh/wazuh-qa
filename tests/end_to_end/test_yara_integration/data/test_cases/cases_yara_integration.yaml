@@ -1,0 +1,10 @@
+- name: Run Yara scan to detect malware
+  description: Test the detection of a trojaned file
+  configuration_parameters: null
+  metadata:
+    rule.id: 108001
+    rule.level: 12
+    rule.description: 'File \"/tmp/yara/malware/mirai\" is a positive match. Yara rule: Mirai_Botnet_Malware_RID2EF6'
+    #extra_vars:
+    #  task_name: Run Yara scan
+    #  command: yara /tmp/yara/rules/yara_rules.yar /tmp/yara/malware/mirai

@@ -1,0 +1,48 @@
+- name: Configure environment
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Remove local rules for Yara
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        state: absent
+
+    - name: Remove local decoders for Yara
+      blockinfile:
+        path: /var/ossec/etc/decoders/local_decoder.xml
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        state: absent
+
+    - name: Remove the Yara configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        state: absent
+
+    - name: Remove Yara and epel-release from CentOS
+      package:
+        name:
+          - epel-release
+          - yara
+        state: absent
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Remove the directory with malware
+      file:
+        path: /tmp/yara/
+        state: absent
+
+    - name: Remove the Yara script
+      file:
+        path: /tmp/yara_script.sh
+        state: absent
+
+    - name: Remove jq (JSON Processor) on CentOS
+      package:
+        name:
+          - jq
+        state: absent
+      when: ansible_facts['distribution'] == "CentOS"
+
