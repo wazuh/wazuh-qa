@@ -93,12 +93,14 @@ configurations = load_wazuh_configurations(conf_path, __name__, params=params, m
 
 # Fixtures
 
+
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 # Tests
+
 
 @pytest.mark.parametrize('folder, filename, triggers_event, tags_to_apply', [
     (testdir1, 'testfile', False, {'valid_no_regex'}),
@@ -185,10 +187,17 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     else:
         regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
         logger.info('Checking the logs...')
+
         ignored_file = wazuh_log_monitor.start(timeout=logs_generation_timeout,
                                                callback=generate_monitoring_callback(regex),
                                                error_message=f'Did not receive expected '
                                                              f'"Ignoring ... due to ..." event for file '
                                                              f'{os.path.join(testdir1, filename)}').result()
 
-        assert ignored_file == os.path.join(folder, filename)
+        if ignored_file == os.path.join(folder, filename):
+            # The ignored file is the same as the one we are looking for.
+            return
+
+        # In some ocations ignored_file is the previous file that was ignored, so we check again.
+        test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
+                                        configure_environment, restart_syscheckd, wait_for_fim_start)
