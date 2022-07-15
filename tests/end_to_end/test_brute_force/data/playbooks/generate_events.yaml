@@ -10,27 +10,25 @@
   hosts: localhost
   tasks:
 
-    - name: SSH fingerprint
-      expect:
-        command: ssh test_user@wazuh-agent
-        responses:
-          (.*)continue connecting(.*): 'yes'
-        timeout: 5
-      register: result
-      failed_when:
-        - "'password' not in result.stdout"
-
     - name: SSH connection
       expect:
-        command: ssh {{item}}@wazuh-agent
-        timeout: 5
+        command: ssh {{item}}@wazuh-agent -i {{hostvars['wazuh-agent']['ansible_ssh_private_key_file']}}
         responses:
+          (.*)continue connecting(.*): 'yes'
           (?i)password: 1
+        timeout: 5
       loop:
         - test_user
         - test_user
         - test_user
-      ignore_errors: true
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+        - test_user
+      register: result
+      failed_when:
+        - "'Permission denied' not in result.stdout"
 
     - name: Wait for alert
       wait_for:
