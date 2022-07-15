@@ -25,14 +25,13 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     level = metadata['level']
     description = metadata['description']
     rule_id = metadata['rule.id']
-    euid = metadata['extra']['euid']
     a3 = metadata['extra']['a3']
     data_audit_command = metadata['extra']['data.audit.command']
 
     expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{level},' \
-                          fr'"description"\:"{description}","id"\:"{rule_id}".*euid={euid}.*a3={a3}.*\}}'
+                          fr'"description"\:"{description}","id"\:"{rule_id}".*a3={a3}.*\}}'
     expected_indexed_alert = fr'.*"rule":.*"level": {level}, "description": "{description}".*"id": "{rule_id}".*' \
-                             fr'euid={euid}.*comm=\\"{data_audit_command}\\".*a3={a3}.*' \
+                             fr'comm=\\"{data_audit_command}\\".*a3={a3}.*' \
                              r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     # Check that alert has been raised and save timestamp
