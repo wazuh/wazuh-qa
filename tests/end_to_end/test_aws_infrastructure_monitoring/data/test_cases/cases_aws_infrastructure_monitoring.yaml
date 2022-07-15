@@ -2,11 +2,11 @@
   description: >
     AWS CloudTrail is a service used for auditing AWS accounts.
     It logs API calls (CloudTrail Event) stored for 90 days by default.
-    There are 2 types of events{{":"}} Management events (active by default) and data events.
+    There are 2 types of events: Management events (active by default) and data events.
   configuration_parameters: null
   metadata:
     rule.id: 80202
-    rule.description: AWS Cloudtrail{{":"}} s3.amazonaws.com - CreateBucket.
+    rule.description: "AWS Cloudtrail: s3.amazonaws.com - CreateBucket."
     rule.level: 3
     extra_vars:
-      ex: CreateBucket
+      ev: CreateBucket

@@ -19,14 +19,14 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 test_cases_path = os.path.join(test_data_path, 'test_cases')
 test_cases_file_path = os.path.join(test_cases_path, 'cases_aws_infrastructure_monitoring.yaml')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
-aws_s3_script = os.path.join(test_data_path, 'configuration', 'aws_s3_api.py')
+aws_api_script = os.path.join(test_data_path, 'configuration', 'aws_cloudtrail_event.py')
 
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
 teardown_playbook = ['teardown_playbook.yaml']
 configuration_extra_vars = {
-    'aws_s3_script': aws_s3_script,
+    'aws_api_script': aws_api_script,
     'date': datetime.strftime(datetime.now(), '%Y-%b-%d').upper()
 }
 
@@ -43,6 +43,7 @@ def test_aws_infrastructure_monitoring(configure_environment, metadata, get_dash
     rule_level = metadata['rule.level']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
+    import pdb; pdb.set_trace()
     expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level}.+description\"" \
                           fr":\"{rule_description}.+id.+{rule_id}.+"
 
@@ -67,9 +68,6 @@ def test_aws_infrastructure_monitoring(configure_environment, metadata, get_dash
                                    error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
     raised_alert_timestamp = datetime.strptime(parse_date_time_format(raised_alert_timestamp), '%Y-%m-%d %H:%M:%S')
-
-    # Wait a few seconds for the alert to be indexed (alert.json -> filebeat -> wazuh-indexer)
-    sleep(fw.T_5)
 
     # Get indexed alert
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)

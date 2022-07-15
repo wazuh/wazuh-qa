@@ -29,12 +29,6 @@
         state: restarted
         name: wazuh-manager
 
-    - name: Copy the script to send a request to the AWS API
-      copy:
-        src: "{{ aws_s3_script }}"
-        dest: /tmp
-        mode: '0710'
-
     - name: Check if python3 is installed
       shell: python3.8 --version
       ignore_errors: true

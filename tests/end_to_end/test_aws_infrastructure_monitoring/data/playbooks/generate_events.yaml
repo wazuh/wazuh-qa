@@ -10,20 +10,18 @@
 
     # Create a bucket using the AWS API
     - name: Run the script using python3 (create S3 bucket)
-      script: "{{ aws_s3_script }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
-      register: result
-
-    - debug:
-        var: result
+      script: "{{ aws_api_script }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
+      register: time
 
     - name: Wait for the alert to be generated
-      shell: "( tail -f -n0 {{ w_path }} & ) | grep -q '{{ result.stdout_lines[0] }}.*{{ex}}' && echo '' > {{ w_path }}"
-      register: result
+      shell: "(tail -f -n0 {{ w_path }} &) | grep -q '{{ time.stdout_lines[0] }}.*{{ ev }}' && echo '' >> {{ w_path }}"
+      # Waiting 8 minutes, because that is the time for Cloudtrail to deliver the logs to the S3 bucket.
       async: 480
-      poll: 60
+      poll: 5
 
-    - debug:
-        var: result.stderr
+    - name: Wait for alerts to be indexed
+      wait_for:
+        timeout: 10
 
     - name: Get alerts.json
       fetch:
