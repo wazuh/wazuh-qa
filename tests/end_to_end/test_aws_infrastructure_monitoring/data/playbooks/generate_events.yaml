@@ -14,7 +14,7 @@
       register: time
 
     - name: Wait for the alert to be generated
-      shell: "(tail -f -n0 {{ w_path }} &) | grep -q '{{ time.stdout_lines[0] }}.*{{ ev }}' && echo '' >> {{ w_path }}"
+      shell: (tail -f -n0 {{ w_path }} &) | grep -q '{{ time.stdout_lines[0] }}.*{{ ev }}' && echo '' >> {{ w_path }}
       # Waiting 8 minutes, because that is the time for Cloudtrail to deliver the logs to the S3 bucket.
       async: 480
       poll: 5

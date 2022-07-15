@@ -34,8 +34,7 @@ def create_bucket(access_key_id, secret_access_key):
         secret_access_key (str): AWS secret access key
     """
     try:
-        client = boto3.client('s3', aws_access_key_id=access_key_id,
-                            aws_secret_access_key=secret_access_key)
+        client = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
         response = client.create_bucket(Bucket='delete-this-dummy-bucket')
         response_date = response['ResponseMetadata']['HTTPHeaders']['date']
         print(str(datetime.strptime(response_date, formats[0]).strftime(formats[1]))[:-3])
