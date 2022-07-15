@@ -43,7 +43,6 @@ def test_aws_infrastructure_monitoring(configure_environment, metadata, get_dash
     rule_level = metadata['rule.level']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
-    import pdb; pdb.set_trace()
     expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level}.+description\"" \
                           fr":\"{rule_description}.+id.+{rule_id}.+"
 
