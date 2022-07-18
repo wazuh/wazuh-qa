@@ -1,0 +1,4 @@
+program : apache-24
+service: apache24
+home_dir: /export/home/vagrant
+environment_paths: "/opt/python3/bin/:/usr/sbin:/usr/bin:/usr/sbin/:/opt/csw/gnu/:/usr/sfw/bin/:/opt/csw/bin/"
