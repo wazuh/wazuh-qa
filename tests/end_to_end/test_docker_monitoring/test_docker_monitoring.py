@@ -67,7 +67,7 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
         }
     ])
 
-    # Get indexed alert
+    # Check if the alert has been indexed and get its data
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
 
