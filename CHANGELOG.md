@@ -9,7 +9,7 @@ Release report: TBD
 
 ### Added
 
-- Add 'Force reconnect' feature to agent_simulator tool. ([#3093](https://github.com/wazuh/wazuh-qa/issues/3093)) \- (Tools)
+- Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
 
 ### Changed
 
