@@ -45,4 +45,3 @@
           - jq
         state: absent
       when: ansible_facts['distribution'] == "CentOS"
-
