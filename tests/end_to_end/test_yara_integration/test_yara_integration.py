@@ -21,7 +21,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
-teardown_playbook = ['teardown.yaml']
+teardown_playbooks = ['teardown.yaml']
 configuration_extra_vars = {'yara_script': yara_script, 'malware_downloader_script': malware_downloader_script}
 
 # Configuration
@@ -31,7 +31,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_yara_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
-                          clean_environment):
+                          clean_alerts_index):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
