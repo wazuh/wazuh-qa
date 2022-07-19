@@ -1,0 +1,16 @@
+---
+- name: Cleanup environment
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Delete the docker-listener module configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager

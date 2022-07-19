@@ -9,6 +9,5 @@
     level: 3
     description: "Audit\\: Command\\: \\/usr\\/bin\\/ping."
     extra:
-      euid: 1000
       a3: \\"www\.google\.com\\"
       data.audit.command: ping
