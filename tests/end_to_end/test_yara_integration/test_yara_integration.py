@@ -14,7 +14,7 @@ from wazuh_testing.tools import configuration as config
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_path = os.path.join(test_data_path, 'test_cases')
 test_cases_file_path = os.path.join(test_cases_path, 'cases_yara_integration.yaml')
-yara_script = os.path.join(test_data_path, 'configuration', 'yara_script.sh')
+yara_script = os.path.join(test_data_path, 'configuration', 'yara.sh')
 malware_downloader_script = os.path.join(test_data_path, 'configuration', 'malware_downloader.sh')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
@@ -35,12 +35,13 @@ def test_yara_integration(configure_environment, metadata, get_dashboard_credent
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
+    data_yara_rule = metadata['extra']['data.yara_rule']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
     expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level}.+description\"" \
                           fr":\"{rule_description}.+id.+{rule_id}"
 
-    expected_indexed_alert = fr".+level.+{rule_level}.+description.+{rule_description}.+id.+{rule_id}.+" \
+    expected_indexed_alert = fr".+yara_rule\": \"{data_yara_rule}.+level.+{rule_level}.+id.+{rule_id}.+" \
                              fr"timestamp\": \"({timestamp_regex})\""
 
     query = e2e.make_query([
@@ -56,7 +57,7 @@ def test_yara_integration(configure_environment, metadata, get_dashboard_credent
         },
         {
           "term": {
-            "rule.description": f"{rule_description}"
+            "data.yara_rule": f"{data_yara_rule}"
           }
         }
     ])

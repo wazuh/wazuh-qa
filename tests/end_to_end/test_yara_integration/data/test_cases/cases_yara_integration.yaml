@@ -4,7 +4,6 @@
   metadata:
     rule.id: 108001
     rule.level: 12
-    rule.description: 'File \"/tmp/yara/malware/mirai\" is a positive match. Yara rule: Mirai_Botnet_Malware_RID2EF6'
-    #extra_vars:
-    #  task_name: Run Yara scan
-    #  command: yara /tmp/yara/rules/yara_rules.yar /tmp/yara/malware/mirai
+    rule.description: 'File \\"/tmp/yara/malware/mirai\\" is a positive match. Yara rule: Mirai_Botnet_Malware_RID2EF6'
+    extra:
+      data.yara_rule: Mirai_Botnet_Malware_RID2EF6

@@ -55,7 +55,7 @@
           <command>
           <name>yara</name>
           <executable>yara.sh</executable>
-          <extra_args>-yara_path /usr/local/bin -yara_rules /tmp/yara/rules/yara_rules.yar</extra_args>
+          <extra_args>-yara_path /usr/bin -yara_rules /tmp/yara/rules/yara_rules.yar</extra_args>
           <timeout_allowed>no</timeout_allowed>
           </command>
           <active-response>
@@ -94,19 +94,27 @@
         body: demo=demo&apikey=1111111111111111111111111111111111111111111111111111111111111111&format=text
         dest: /tmp/yara/rules/yara_rules.yar
 
+    - name: Check if epel-release is installed
+      shell: rpm -qa epel-release
+      register: check_epel_release
+
     - name: Install epel-release
       package:
         name:
           - epel-release
         state: present
-      when: ansible_facts['distribution'] == "CentOS"
+      when: ( ansible_facts['distribution'] == "CentOS" and "epel" not in check_epel_release.stdout)
+
+    - name: Check if yara is installed
+      shell: rpm -qa yara
+      register: check_yara
 
     - name: Install Yara on CentOS
       package:
         name:
           - yara
         state: present
-      when: ansible_facts['distribution'] == "CentOS"
+      when: ( ansible_facts['distribution'] == "CentOS" and "yara" not in check_yara.stdout)
 
     - name: Create a directory to store malware
       file:
@@ -130,9 +138,13 @@
         group: wazuh
         mode: '0750'
 
+    - name: Check if jq is installed
+      shell: rpm -qa jq
+      register: check_jq
+
     - name: Install jq (JSON Processor) on CentOS
       package:
         name:
           - jq
         state: present
-      when: ansible_facts['distribution'] == "CentOS"
+      when: ( ansible_facts['distribution'] == "CentOS" and "jq" not in check_jq.stdout)
