@@ -478,6 +478,8 @@ class Agent:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
+        elif '#!-force_reconnect' in msg_decoded_list[0]:
+            sender.reconnect()
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -1491,11 +1493,21 @@ class Sender:
         self.manager_address = manager_address
         self.manager_port = manager_port
         self.protocol = protocol.upper()
+        self.socket = None
+        self.connect()
+
+    def connect(self):
         if is_tcp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
         if is_udp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def reconnect(self):
+        if is_tcp(self.protocol):
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            self.connect()
 
     def send_event(self, event):
         if is_tcp(self.protocol):

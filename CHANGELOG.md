@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+
+- Add 'Force reconnect' feature to agent_simulator tool. ([#3093](https://github.com/wazuh/wazuh-qa/issues/3093)) \- (Tools)
+
 ### Changed
 
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
