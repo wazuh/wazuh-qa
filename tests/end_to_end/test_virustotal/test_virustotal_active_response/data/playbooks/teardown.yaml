@@ -1,0 +1,43 @@
+---
+- name: Cleanup manager environment
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Delete Virustotal integration and active response configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: ''
+
+    - name: Delete local rules virus total integration
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+- name: Cleanup agent environment
+  hosts: wazuh-agent
+  become: True
+  tasks:
+
+    - name: Delete syscheck configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: ''
+
+    - name: Delete active response script
+      file:
+        path: /var/ossec/active-response/remove-threat.sh
+        state: absent
+
+    - name: Restart wazuh-agent
+      systemd:
+        state: restarted
+        name: wazuh-agent

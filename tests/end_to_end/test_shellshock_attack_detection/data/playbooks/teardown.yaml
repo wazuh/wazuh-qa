@@ -1,0 +1,16 @@
+---
+- name: Cleanup manager environment
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Delete localfile configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: ''
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager

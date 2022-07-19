@@ -1,0 +1,14 @@
+---
+- name: Cleanup environment
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Delete wazuh audit rules file
+      become: True
+      file:
+        path: /etc/audit/rules.d/wazuh.rules
+        state: absent
+
+    - name: Delete audit rules
+      become: True
+      shell: auditctl -D
