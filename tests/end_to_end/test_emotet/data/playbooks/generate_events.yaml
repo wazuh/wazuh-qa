@@ -1,0 +1,38 @@
+- name: Truncate files
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate file alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: true
+
+
+- name: Generate events windows
+  hosts: wazuh-windows
+
+  tasks:
+
+    - name: Open Word document
+      ansible.windows.win_shell: |
+        $MSWORD = New-Object -ComObject word.application
+        $MSWORD.visible = $true
+
+    - name: Run trigger-emotet.exe
+      ansible.windows.win_shell: |
+        cd C:\Users\Administrator\Desktop
+        ./trigger-emotet.exe
+
+- name: Wait alert
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Wait for alert
+      wait_for:
+        timeout: 5
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true
