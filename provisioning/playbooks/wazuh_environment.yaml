@@ -2,7 +2,7 @@
 # Certificates generation
     - hosts: wi1
       roles:
-        - role: ../../roles/wazuh/wazuh-indexer
+        - role: "{{ wazuh_ansible_roles }}/wazuh/wazuh-indexer"
           indexer_network_host: "{{ private_ip }}"
           perform_installation: false
       become: true
@@ -15,31 +15,30 @@
     - hosts: wi_cluster
       strategy: free
       roles:
-        - role: ../../roles/wazuh/wazuh-indexer
+        - role: "{{ wazuh_ansible_roles }}/wazuh/wazuh-indexer"
           indexer_network_host: "{{ private_ip }}"
       become: true
       become_user: root
       vars:
         indexer_node_master: true
 
-
     - hosts: manager
       roles:
-        - role: "../../roles/wazuh/ansible-wazuh-manager"
+        - role: "{{wazuh_ansible_roles }}/wazuh/ansible-wazuh-manager"
       become: true
       become_user: root
 
     - hosts: filebeat
       roles:
-        - role: "../../roles/wazuh/ansible-filebeat-oss"
+        - role: "{{wazuh_ansible_roles }}/wazuh/ansible-filebeat-oss"
       become: true
       become_user: root
 
 # Indexer + dashboard node
     - hosts: dashboard
       roles:
-        - role: "../../roles/wazuh/wazuh-indexer"
-        - role: "../../roles/wazuh/wazuh-dashboard"
+        - role: "{{wazuh_ansible_roles }}/wazuh/wazuh-indexer"
+        - role: "{{wazuh_ansible_roles }}/wazuh/wazuh-dashboard"
       become: true
       become_user: root
       vars:
@@ -62,4 +61,4 @@
       become: yes
       become_user: root
       roles:
-        - ../../roles/wazuh/ansible-wazuh-agent
+        - "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
