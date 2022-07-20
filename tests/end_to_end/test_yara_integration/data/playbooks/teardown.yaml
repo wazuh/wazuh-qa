@@ -21,14 +21,6 @@
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         state: absent
 
-    - name: Remove Yara and epel-release from CentOS
-      package:
-        name:
-          - epel-release
-          - yara
-        state: absent
-      when: ansible_facts['distribution'] == "CentOS"
-
     - name: Remove the directory with malware
       file:
         path: /tmp/yara/
@@ -38,10 +30,3 @@
       file:
         path: /tmp/yara_script.sh
         state: absent
-
-    - name: Remove jq (JSON Processor) on CentOS
-      package:
-        name:
-          - jq
-        state: absent
-      when: ansible_facts['distribution'] == "CentOS"
