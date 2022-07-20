@@ -1,23 +1,24 @@
 - name: Generate events
   hosts: wazuh-manager
   vars:
-    w_path: /var/ossec/logs/alerts/alerts.json
+    alerts_log: /var/ossec/logs/alerts/alerts.json
   become: true
   tasks:
 
     - name: Truncate alerts file
-      shell: echo "" > {{ w_path }}
+      shell: echo "" > {{ alerts_log }}
 
     # Create a bucket using the AWS API
     - name: Run the script using python3 (create S3 bucket)
-      script: "{{ aws_api_script }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
+      script: "{{ AWS_API_SCRIPT }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
       register: time
 
     - name: Wait for the alert to be generated
-      shell: (tail -f -n0 {{ w_path }} &) | grep -q '{{ time.stdout_lines[0] }}.*{{ ev }}' && echo '' >> {{ w_path }}
-      # Waiting 8 minutes, because that is the time for Cloudtrail to deliver the logs to the S3 bucket.
-      async: 480
-      poll: 5
+      wait_for:
+        path: "{{ alerts_log }}"
+        search_regex: "{{ time.stdout_lines[0] }}.*{{ event_name }}"
+        # Waiting 8 minutes, because that is the time for Cloudtrail to deliver the logs to the S3 bucket.
+        timeout: 480
 
     - name: Wait for alerts to be indexed
       wait_for:
@@ -25,6 +26,6 @@
 
     - name: Get alerts.json
       fetch:
-        src: "{{ w_path }}"
+        src: "{{ alerts_log }}"
         dest: /tmp/
         flat: true

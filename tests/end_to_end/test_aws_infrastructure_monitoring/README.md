@@ -5,6 +5,7 @@ from AWS services matches a rule.
 
 ## Global requirements
 
+- Python 3 installed in the managed node
 - Credentials (access key ID and secret access key) of an IAM User with permissions to:
   - Create S3 Buckets
   - Get data from S3 Buckets

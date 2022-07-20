@@ -8,13 +8,3 @@
         path: /var/ossec/etc/ossec.conf
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         state: absent
-
-    - name: Remove python3 installation file
-      file:
-        path: ./Python-3.8.4.tgz
-        state: absent
-
-    - name: Remove python3 installation folder
-      file:
-        path: ./Python-3.8.4/
-        state: absent

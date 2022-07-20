@@ -1,10 +1,8 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 
 import argparse
-import logging
 from datetime import datetime
 import boto3
-from botocore.exceptions import ClientError
 
 
 formats = ['%a, %d %b %Y %H:%M:%S %Z', '%Y-%m-%dT%H:%M:%SZ']
@@ -33,13 +31,16 @@ def create_bucket(access_key_id, secret_access_key):
         access_key_id (str): AWS access key ID
         secret_access_key (str): AWS secret access key
     """
-    try:
-        client = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
-        response = client.create_bucket(Bucket='delete-this-dummy-bucket')
-        response_date = response['ResponseMetadata']['HTTPHeaders']['date']
-        print(str(datetime.strptime(response_date, formats[0]).strftime(formats[1]))[:-3])
-    except ClientError as e:
-        logging.error(e)
+    client = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
+    response = client.create_bucket(Bucket='delete-this-dummy-bucket')
+    response_date = response['ResponseMetadata']['HTTPHeaders']['date']
+    # The format of the request datetieme is changed here to match the timestamp of the AWS event in the alerts.json log
+    request_datetime = datetime.strptime(response_date, formats[0])
+    # The last 3 characters are removed due to the difference with the server in seconds.
+    # e.g: 2022-07-20T15:41:05Z --> 2022-07-20T15:41:
+    datetime_str = request_datetime.strftime(formats[1])[:-3]
+    # Print the formatted time from the request because Ansible will pick it up from the standard output
+    print(datetime_str)
 
 
 def main():

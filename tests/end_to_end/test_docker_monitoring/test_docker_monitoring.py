@@ -23,9 +23,9 @@ teardown_playbooks = ['teardown.yaml']
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
-@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
+@pytest.mark.parametrize('configuration,metadata', zip(configurations, configuration_metadata), ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_docker_monitoring(configure_environment, metadata, get_dashboard_credentials, generate_events,
+def test_docker_monitoring(configure_environment, configuration, metadata, get_dashboard_credentials, generate_events,
                            clean_alerts_index):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
