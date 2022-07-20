@@ -31,7 +31,7 @@ aws_api_script = os.path.join(test_data_path, 'configuration', 'aws_cloudtrail_e
 t1_configuration = config.update_configuration_template(t1_configuration, ['CUSTOM_AWS_SCRIPT_PATH'], [aws_api_script])
 
 
-@pytest.mark.parametrize('configuration,metadata', zip(t1_configuration,metadata), ids=cases_ids)
+@pytest.mark.parametrize('configuration,metadata', zip(t1_configuration, metadata), ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_aws_infrastructure_monitoring(configuration, metadata, configure_environment, get_dashboard_credentials,
                                        generate_events, clean_alerts_index):
