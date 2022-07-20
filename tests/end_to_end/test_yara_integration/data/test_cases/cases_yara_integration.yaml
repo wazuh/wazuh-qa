@@ -1,6 +1,8 @@
 - name: Run Yara scan to detect malware
   description: Test the detection of a trojaned file
-  configuration_parameters: null
+  configuration_parameters:
+    YARA_SCRIPT: CUSTOM_YARA_SCRIPT_PATH
+    MALWARE_DOWNLOADER_SCRIPT: CUSTOM_MALWARE_SCRIPT_PATH
   metadata:
     rule.id: 108001
     rule.level: 12
