@@ -98,6 +98,8 @@ Release report: https://github.com/wazuh/wazuh-qa/issues/2500
 - Add FIM Windows 4659 events tests. ([#648](https://github.com/wazuh/wazuh-qa/pull/648))
 
 ### Changed
+
+- Increase framework version of jq and pytest to support python3.10 ([#3107](https://github.com/wazuh/wazuh-qa/pull/3107))
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
 - Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))
