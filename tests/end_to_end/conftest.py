@@ -14,28 +14,15 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 
 @pytest.fixture(scope='function')
-def clean_environment(get_dashboard_credentials, request):
+def clean_alerts_index(get_dashboard_credentials):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
           credentials (dict): wazuh-indexer credentials.
-          request (fixture): Provide information on the executing test function.
     """
     yield
-    inventory_playbook = request.config.getoption('--inventory_path')
-
-    # Execute each playbook for the teardown
-    for playbook in getattr(request.module, 'teardown_playbook'):
-        teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
-
-        parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
-
-        # Check if the module has extra variables to pass to the playbook
-        configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
-        if configuration_extra_vars is not None:
-            parameters.update({'extravars': configuration_extra_vars})
-
-        ansible_runner.run(**parameters)
+    remove_file(alerts_json)
+    e2e.delete_index_api(credentials=get_dashboard_credentials)
 
     remove_file(alerts_json)
     e2e.delete_index_api(credentials=get_dashboard_credentials)
@@ -87,6 +74,19 @@ def configure_environment(request):
             parameters.update({'extravars': configuration_extra_vars})
 
         ansible_runner.run(**parameters)
+
+    yield
+
+    teardown_playbooks = getattr(request.module, 'teardown_playbooks')
+
+    # Execute each playbook for the teardown
+    if teardown_playbooks is not None:
+        for playbook in teardown_playbooks:
+            teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
+
+            parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
+
+            ansible_runner.run(**parameters)
 
 
 @pytest.fixture(scope='function')
