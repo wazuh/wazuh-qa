@@ -132,7 +132,7 @@
 
     - name: Copy the Yara script
       copy:
-        src: "{{ YARA_SCRIPT }}"
+        src: "{{ yara_script }}"
         dest: /var/ossec/active-response/bin/
         owner: root
         group: wazuh
