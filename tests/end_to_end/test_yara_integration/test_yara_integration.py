@@ -22,7 +22,6 @@ teardown_playbooks = ['teardown.yaml']
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
-
 # Custom paths
 yara_script = os.path.join(test_data_path, 'configuration', 'yara.sh')
 malware_downloader_script = os.path.join(test_data_path, 'configuration', 'malware_downloader.sh')

@@ -21,12 +21,18 @@
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         state: absent
 
+    - name: Remove the syscheck configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ADDING SYSCHECK CONFIG -->
+        state: absent
+
     - name: Remove the directory with malware
       file:
         path: /tmp/yara/
         state: absent
 
-    - name: Remove the Yara script
+    - name: Remove the Yara active-response script
       file:
-        path: /tmp/yara_script.sh
+        path: /var/ossec/active-response/bin/yara.sh
         state: absent

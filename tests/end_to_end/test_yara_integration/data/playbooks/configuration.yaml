@@ -68,6 +68,7 @@
       blockinfile:
         path: /var/ossec/etc/ossec.conf
         insertafter: <syscheck>
+        marker: <!-- {mark} ADDING SYSCHECK CONFIG -->
         block: |
           <directories whodata="yes">/tmp/yara/malware</directories>
 
@@ -120,15 +121,6 @@
       file:
         path: /tmp/yara/malware
         state: directory
-
-    - name: Download Mirai malware
-      uri:
-        url: https://wazuh-demo.s3-us-west-1.amazonaws.com/mirai
-        follow_redirects: all
-        dest: /tmp/yara/malware/mirai
-
-    - name: Run Yara scan
-      shell: yara /tmp/yara/rules/yara_rules.yar /tmp/yara/malware/mirai
 
     - name: Copy the Yara script
       copy:
