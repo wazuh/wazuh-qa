@@ -1,0 +1,219 @@
+{% if vars['indexer'] is defined %}
+{%- set indexer = vars['indexer'] -%}
+{%- set last_indexer_node = indexer|length  - 1-%}
+
+{% endif %}
+
+{% if vars['dashboard'] is defined %}
+{%- set dashboard = vars['dashboard'] -%}
+{%- set dashboard_node = last_indexer_node + 2 -%}
+{% else %}
+{%- set dashboard_node = last_indexer_node + 1-%}
+{% endif %}
+
+{% if vars['manager'] is defined %}
+{%- set manager = vars['manager'] -%}
+{%- set master_node = dashboard_node + 1 -%}
+
+    {% if manager['workers'] is not defined %}
+        {%- set workers = {} -%}
+    {% else %}
+            {%- set workers = vars['manager']['workers'] -%}
+
+    {% endif %}
+{% endif %}
+
+{% if vars['agent'] is defined %}
+{%- set agent = vars['agent'] -%}
+{% endif %}
+
+{% if vars['filebeat'] is defined %}
+{%- set filebeat = vars['filebeat'] -%}
+{% endif %}
+
+{% macro expand_ansible_connection_attributes(attributes_map) %}
+{% for attr_key, attr_value in attributes_map.items() %}
+{{- attr_key }}: {{ attr_value }}
+{% endfor %}
+{%- endmacro -%}
+
+
+{% if indexer is defined%}
+wi_cluster:
+  hosts:
+  {%- for indexer_key, indexer_value in indexer.items() %}
+
+    wi{{ loop.index }}:
+      {{ expand_ansible_connection_attributes(indexer_value['connection_attributes']) | indent(6) }}
+      ansible_host: {{ indexer_value['ip'] }}
+      private_ip: {{ indexer_value['ip'] }}
+  {% endfor %}
+
+  {% if dashboard is defined %}
+    dashboard:
+      ansible_host: {{ dashboard['ip'] }}
+      {{ expand_ansible_connection_attributes(dashboard['connection_attributes']) | indent(6) }}
+      private_ip:  {{ dashboard['ip'] }}
+      dashboard_node_name: "node-{{ dashboard_node }}"
+  {% endif %}
+
+  vars:
+  {% raw %}
+    indexer_network_host: "{{ private_ip }}"
+  {% endraw %}
+
+    indexer_discovery_nodes:
+
+    {% for indexer_key, indexer_value in indexer.items() %}
+      - "{{ indexer_value['ip'] }}"
+    {% endfor %}
+
+    indexer_cluster_nodes:
+
+    {% for indexer_key, indexer_value in indexer.items() %}
+      - "{{ indexer_value['ip'] }}"
+    {% endfor %}
+
+    instances:
+
+      {%- for indexer_key, indexer_value in indexer.items() %}
+
+      node{{ loop.index }}:
+        name: node-{{loop.index}}
+        ip: "{{ indexer_value['ip'] }}"
+        role: indexer
+      {% endfor %}
+
+    {%- if dashboard is defined %}
+
+      node{{dashboard_node}}:
+        name: node-{{dashboard_node}}
+        ip: "{{ dashboard['ip'] }}"
+        role: dashboard
+    {% endif %}
+
+    {%- if manager is defined %}
+
+      node{{master_node}}:
+        name: node-{{master_node}}
+        ip: "{{ manager['master']['ip'] }}"
+        role: wazuh
+        node_type: master
+
+        {%- for worker_key, worker_value in workers.items() %}
+        {% set real_node_index =  master_node + loop.index %}
+
+      node{{real_node_index}}:
+        name: node-{{real_node_index}}
+        ip: "{{ worker_value['ip'] }}"
+        role: wazuh
+        node_type: worker
+        {% endfor %}
+    {% endif %}
+{% endif %}
+
+
+{% if manager is defined -%}
+manager:
+  hosts:
+	  {%- if manager['master'] %}
+
+      master:
+        ansible_host: {{ manager['master']['ip'] }}
+        {{ expand_ansible_connection_attributes(manager['master']['connection_attributes']) | indent(8) }}
+        private_ip:  {{ manager['master']['ip'] }}
+        wazuh_manager_config:
+          cluster:
+            disable: 'no'
+            node_name: 'master'
+            node_type: 'master'
+            key: 'c98b62a9b6169ac5f67dae55ae4a9088'
+            nodes:
+                - "{{ manager['master']['ip'] }}"
+            hidden: 'no'
+        {%- endif -%}
+
+	    {%- for worker_key, worker_values in workers.items() %}
+
+      worker{{loop.index}}:
+        ansible_host: {{ worker_values['ip'] }}
+        {{ expand_ansible_connection_attributes(worker_values['connection_attributes']) | indent(8) }}
+        private_ip:  {{ worker_values['ip'] }}
+        wazuh_manager_config:
+          cluster:
+            disable: 'no'
+            node_name:  "{{worker_key}}"
+            node_type: 'worker'
+            key: 'c98b62a9b6169ac5f67dae55ae4a9088'
+            nodes:
+                - "{{manager['master']['ip']}}"
+            hidden: 'no'
+        {% endfor %}
+
+
+{% if filebeat is defined%}
+filebeat:
+  hosts:
+  {%- for filebeat_key, filebeat_value in filebeat.items() %}
+
+    filebeat{{ loop.index }}:
+      ansible_host: {{ filebeat_value['ip'] }}
+      {{ expand_ansible_connection_attributes(filebeat_value['connection_attributes']) | indent(6) }}
+      filebeat_node_name: node-{{ loop.index + master_node - 1 }}
+ {%- endfor %}
+
+  vars:
+    filebeat_output_indexer_hosts:
+      - "{{ indexer['indexer1']['ip'] }}"
+{%- endif -%}
+{% endif %}
+
+{% if agent is defined%}
+
+agent:
+  hosts:
+    {% for agent_key, agent_value in agent.items() -%}
+    agent{{loop.index}}:
+      ansible_host: {{ agent_value['ip'] }}
+      {{ expand_ansible_connection_attributes(agent_value['connection_attributes']) | indent(6) }}
+      wazuh_managers:
+      - address: {{ agent_value['manager_ip'] }}
+        port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5
+    {% endfor %}
+{% endif %}
+
+all:
+  vars:
+    # General ansible connection parameters
+    ansible_ssh_common_args: -o StrictHostKeyChecking=no
+    ansible_winrm_server_cert_validation: ignore
+    # Custom Packages parameters
+    wazuh_custom_packages_installation_agent_enabled: true
+    wazuh_custom_packages_installation_manager_enabled: true
+    {% if custom_package_deb_agent is defined%}
+    wazuh_custom_packages_installation_agent_deb_url: {{ custom_package_deb_agent }}
+    {% endif %}
+    {% if custom_package_rpm_agent is defined%}
+    wazuh_custom_packages_installation_agent_rpm_url: {{ custom_package_rpm_agent }}
+    {% endif %}
+    {% if custom_pakckage_msi_agent is defined%}
+    wazuh_custom_packages_installation_agent_msi_url: {{ custom_pakckage_msi_agent}}
+    {% endif %}
+    {% if macos_agent_pkg is defined%}
+    macos_agent_pkg: {{ custom_package_macos_agent}}
+    {% endif %}
+    {% if solaris_agent_pkg is defined%}
+    solaris_agent_pkg: {{ custom_package_solaris_agent}}
+    {% endif %}
+    {% if custom_package_deb_manager is defined%}
+    wazuh_custom_packages_installation_manager_deb_url: {{ custom_package_deb_manager}}
+    {% endif %}
+    {% if wazuh_custom_packages_installation_manager_rpm_url is defined%}
+    wazuh_custom_packages_installation_manager_rpm_url: {{ custom_package_rpm_manager}}
+    {% endif %}
