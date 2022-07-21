@@ -22,19 +22,19 @@ teardown_playbooks = ['teardown.yaml']
 configuration_extra_vars = {'date': datetime.strftime(datetime.now(), '%Y-%b-%d').upper()}
 
 # Configuration
-t1_configuration, metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
+configuration, metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 # Custom paths
 aws_api_script = os.path.join(test_data_path, 'configuration', 'aws_cloudtrail_event.py')
 
 # Update configuration with custom paths
-t1_configuration = config.update_configuration_template(t1_configuration, ['CUSTOM_AWS_SCRIPT_PATH'], [aws_api_script])
+metadata = config.update_configuration_template(metadata, ['CUSTOM_AWS_SCRIPT_PATH'], [aws_api_script])
 
 
-@pytest.mark.parametrize('configuration,metadata', zip(t1_configuration, metadata), ids=cases_ids)
+@pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_aws_infrastructure_monitoring(configuration, metadata, configure_environment, get_dashboard_credentials,
-                                       generate_events, clean_alerts_index):
+def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dashboard_credentials, generate_events,
+                                       clean_alerts_index):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
@@ -69,7 +69,7 @@ def test_aws_infrastructure_monitoring(configuration, metadata, configure_enviro
         }
     ])
 
-    # Get indexed alert
+    # Check if the alert has been indexed and get its data
     response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
     indexed_alert = json.dumps(response.json())
 

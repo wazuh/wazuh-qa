@@ -90,14 +90,13 @@ def configure_environment(request):
 
 
 @pytest.fixture(scope='function')
-def generate_events(request, metadata, configuration):
+def generate_events(request, metadata):
     """Fixture to generate events.
 
     Execute the playbooks declared in the test to generate events.
     Args:
         request (fixture): Provide information on the executing test function.
         metadata (dict): Dictionary with test case metadata.
-        configuration (dict): Dictionary with test case configuration.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
 
@@ -112,11 +111,6 @@ def generate_events(request, metadata, configuration):
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
-        if configuration is not None:
-            if 'extra_vars' not in metadata:
-                parameters.update({'extravars': configuration})
-            else:
-                parameters['extravars'].update(configuration)
 
         ansible_runner.run(**parameters)
 
