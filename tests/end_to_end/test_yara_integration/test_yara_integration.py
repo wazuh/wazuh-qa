@@ -27,8 +27,8 @@ yara_script = os.path.join(test_data_path, 'configuration', 'yara.sh')
 malware_downloader_script = os.path.join(test_data_path, 'configuration', 'malware_downloader.sh')
 
 # Update configuration with custom paths
-configurations = config.update_configuration_template(configurations, ['CUSTOM_MALWARE_SCRIPT_PATH'],
-                                                      [malware_downloader_script])
+configuration_metadata = config.update_configuration_template(configuration_metadata, ['CUSTOM_MALWARE_SCRIPT_PATH'],
+                                                              [malware_downloader_script])
 configuration_extra_vars = {'yara_script': yara_script}
 
 

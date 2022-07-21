@@ -1,8 +1,9 @@
 - name: Run Yara scan to detect malware
   description: Test the detection of a trojaned file
-  configuration_parameters:
-    MALWARE_DOWNLOADER_SCRIPT: CUSTOM_MALWARE_SCRIPT_PATH
+  configuration_parameters: null
   metadata:
+    extra_vars:
+      MALWARE_DOWNLOADER_SCRIPT: CUSTOM_MALWARE_SCRIPT_PATH
     rule.id: 108001
     rule.level: 12
     rule.description: 'File \\"/tmp/yara/malware/mirai\\" is a positive match. Yara rule: Mirai_Botnet_Malware_RID2EF6'

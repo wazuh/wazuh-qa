@@ -109,11 +109,6 @@ def generate_events(request, metadata, configuration):
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
-        if configuration is not None:
-            if 'extra_vars' not in metadata:
-                parameters.update({'extravars': configuration})
-            else:
-                parameters['extravars'].update(configuration)
 
         ansible_runner.run(**parameters)
 
