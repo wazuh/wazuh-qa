@@ -32,9 +32,9 @@ configuration_metadata = config.update_configuration_template(configuration_meta
 configuration_extra_vars = {'yara_script': yara_script}
 
 
-@pytest.mark.parametrize('configuration,metadata', zip(configurations, configuration_metadata), ids=cases_ids)
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_yara_integration(configure_environment, configuration, metadata, get_dashboard_credentials, generate_events,
+def test_yara_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
                           clean_alerts_index):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']

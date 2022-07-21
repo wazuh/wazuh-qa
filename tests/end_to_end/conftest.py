@@ -87,14 +87,13 @@ def configure_environment(request):
 
 
 @pytest.fixture(scope='function')
-def generate_events(request, metadata, configuration):
+def generate_events(request, metadata):
     """Fixture to generate events.
 
     Execute the playbooks declared in the test to generate events.
     Args:
         request (fixture): Provide information on the executing test function.
         metadata (dict): Dictionary with test case metadata.
-        configuration (dict): Dictionary with test case configuration.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
 
