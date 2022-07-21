@@ -20,7 +20,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-@pytest.mark.parametrize('configuration,metadata', zip(configurations, configuration_metadata), ids=cases_ids)
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_audit(configure_environment, configuration, metadata, get_dashboard_credentials, generate_events,
                clean_alerts_index):
     level = metadata['level']
