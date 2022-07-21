@@ -8,16 +8,12 @@
     - name: Truncate alerts file
       shell: echo "" > {{ alerts_path }}
 
-    - name: Wait for Wazuh to initilize correctly
-      wait_for:
-        timeout: 10
-
     - name: Download malware
       script: "{{ MALWARE_DOWNLOADER_SCRIPT }}"
 
     - name: Wait for alerts to be generated
       wait_for:
-        timeout: 10
+        timeout: 15
 
     - name: Get alerts.json
       fetch:
