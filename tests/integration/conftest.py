@@ -88,6 +88,19 @@ def restart_wazuh(get_configuration, request):
     control_service('start')
 
 
+@pytest.fixture(scope='function')
+def restart_wazuh_function(daemons=None):
+    """Restarts before starting a test, and stop it after finishing, and cleans the log files."""
+    truncate_file(LOG_FILE_PATH)
+    truncate_file(ALERT_FILE_PATH)
+    control_service('restart', daemons)
+    yield
+    control_service('stop',daemons)
+    truncate_file(LOG_FILE_PATH)
+    truncate_file(ALERT_FILE_PATH)
+
+
+
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
     # Reset ossec.log and start a new monitor
@@ -730,6 +743,7 @@ def create_file_structure_function(get_files_list):
     yield
 
     delete_file_structure(get_files_list)
+
 
 @pytest.fixture(scope='module')
 def daemons_handler(get_configuration, request):
