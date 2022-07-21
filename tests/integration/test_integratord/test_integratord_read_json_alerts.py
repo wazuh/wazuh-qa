@@ -2,46 +2,44 @@
 copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
-brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
-       when these files are modified. In particular, these tests will check if FIM changes
-       the monitoring mode from 'realtime' to 'scheduled' when it is not supported.
-       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
-       files for changes to the checksums, permissions, and ownership.
+brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
+the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
+given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
+overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
 components:
-    - fim
-suite: files_basic_usage
+    - integratord
+suite: integratord_read_json_alerts
 targets:
     - agent
 daemons:
-    - wazuh-syscheckd
+    - wazuh-integratord
 os_platform:
-    - macos
-    - solaris
+    - Linux
 os_version:
-    - macOS Catalina
-    - macOS Server
-    - Solaris 10
-    - Solaris 11
+    - Centos 8
+    - Ubuntu Focal
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html
+    - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
 pytest_args:
-    - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 tags:
-    - fim_basic_usage
+    - virustotal
 '''
 import os
+import time
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
-from wazuh_testing.tools.file import truncate_file, write_file
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
+from wazuh_testing.tools.file import remove_file, copy
+from wazuh_testing.modules.integratord import (ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED, ERR_MSG_INVALID_ALERT_NOT_FOUND,
+                    ERR_MSG_OVERLONG_ALERT_NOT_FOUND,ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND, CB_VIRUSTOTAL_JSON_ALERT,
+                    CB_INVALID_JSON_ALERT_READ,CB_OVERLONG_JSON_ALERT_READ,CB_ALERTS_FILE_INODE_CHANGED)
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -62,11 +60,10 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_alerts.y
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                                 configuration_metadata)
-local_internal_options = {'integrator.debug': '2', 'syscheck.debug':'2'}
+local_internal_options = {'integrator.debug': '2'}
 
 # Variables
-JSON_LOG_FILE = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json')
-
+TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
 
 
 # Tests
@@ -74,16 +71,13 @@ JSON_LOG_FILE = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json')
 @pytest.mark.parametrize('configuration, metadata',
                          zip(configurations, configuration_metadata), ids=case_ids)
 def test_integratord_read_json_alerts(configuration, metadata,
-                              configure_local_internal_options_module,restart_wazuh_function):
+                              configure_local_internal_options_module,restart_wazuh_function, wait_for_start_module):
     '''
-    description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
-                 For this purpose, the test performs a CUD set of operations to a file with 'realtime' mode set as
-                 the monitoring option in the 'ossec.conf' file. Firstly it checks for the initial 'realtime' event
-                 appearing in the logs, and if the current OS does not support it, wait for the initial FIM scan
-                 mode. After this, the set of operations takes place and the expected behavior is the events will be
-                 generated with 'scheduled' mode and not 'realtime' as it is set in the configuration.
-    wazuh_min_version: 4.2.0
-    tier: 0
+    description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
+    of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
+    broken, or overly long a message will appear in the ossec.log file. Also, in case that 
+    wazuh_min_version: 4.3.5
+    tier: 1
     parameters:
         - configure_local_internal_options_module:
             type: fixture
@@ -100,21 +94,40 @@ def test_integratord_read_json_alerts(configuration, metadata,
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     if metadata['alert_type'] == 'valid':
-        callback = '.*VirusTotal: Alert - .*integration\":\"virustotal\".*'
-        wazuh_monitor = FileMonitor(JSON_LOG_FILE)
+        wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
+        callback = CB_VIRUSTOTAL_JSON_ALERT
+        error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
     elif metadata['alert_type'] == 'invalid':
-        callback = '.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
+        callback = CB_INVALID_JSON_ALERT_READ
+        error_message = ERR_MSG_INVALID_ALERT_NOT_FOUND
     elif metadata['alert_type'] == 'overlong':
         padding = "0"*90000
         sample = sample.replace("padding_input","agent_"+padding)
-        callback = '.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
+        callback = CB_OVERLONG_JSON_ALERT_READ
+        error_message = ERR_MSG_OVERLONG_ALERT_NOT_FOUND
     elif metadata['alert_type'] == 'inode_changed':
-        callback = '.*wazuh-integratord.*DEBUG: jqueue_next\(\): Alert file inode changed.*'
+        callback = CB_ALERTS_FILE_INODE_CHANGED
+        error_message = ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND
+        
+    # Insert custom Alert
+    if metadata['alert_type'] == 'inode_changed':
+        for n in range(3):
+            os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+        copy(ALERT_FILE_PATH, TEMP_FILE_PATH)
+        remove_file(ALERT_FILE_PATH)
+        result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
+                            callback=callback_generator(callback),
+                            error_message=error_message).result()
+        time.sleep(3)
+        copy(TEMP_FILE_PATH,ALERT_FILE_PATH)
+        wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
+        callback = CB_VIRUSTOTAL_JSON_ALERT
+        error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
     
-    # Insert custom Alert   
-    os.system(f"echo '{sample}' >> {JSON_LOG_FILE}")
+    else:
+        os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
     
     # Read Response in ossec.log
     result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
                             callback=callback_generator(callback),
-                            error_message=metadata['error_message']).result()
+                            error_message=error_message).result()
