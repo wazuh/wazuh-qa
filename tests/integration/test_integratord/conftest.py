@@ -1,14 +1,20 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
 
 import pytest
 
-from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.modules.integratord import (CB_VIRUSTOTAL_ENABLED,ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
+
+
 
 @pytest.fixture(scope='function')
-def restart_wazuh_function():
-    """Restart wazuh-modulesd daemon before starting a test, and stop it after finishing"""
-    control_service('restart')
-    yield
-    control_service('stop')
+def wait_for_start_module(request):
+    # Wait for Virustotal Integration to start
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    file_monitor.start(timeout=20, callback=callback_generator(CB_VIRUSTOTAL_ENABLED),
+                       error_message=ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
