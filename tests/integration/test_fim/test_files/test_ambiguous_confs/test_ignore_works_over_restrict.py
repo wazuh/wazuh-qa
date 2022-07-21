@@ -159,7 +159,7 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' (When the FIM event should be generated)
-        - r".*Ignoring '.*?' '(.*?)' due to( sregex)? '.*?'" (When the FIM event should be ignored)
+        - r".*Ignoring '.*?' '(.*?)' due to (sregex|pattern)? '.*?'" (When the FIM event should be ignored)
 
     tags:
         - scheduled
@@ -171,13 +171,13 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     logger.info(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
-    # Time that the test will wait for the event or log to be generated.
-    logs_generation_timeout = 5  # seconds
-    logger.info(f'Waiting up to {logs_generation_timeout} seconds for FIM to generate the log')
+    # Waiting time for the new scan to be generated.
+    timeout = 5  # seconds
+    logger.info(f'Waiting up to {timeout} seconds for the new scan to be detected.')
 
     if triggers_event:
         logger.info('Checking the event...')
-        event = wazuh_log_monitor.start(timeout=logs_generation_timeout,
+        event = wazuh_log_monitor.start(timeout=timeout,
                                         callback=callback_detect_event,
                                         error_message=f'Did not receive expected "Sending FIM event" '
                                                       f'event for file {os.path.join(testdir1, filename)}').result()
@@ -188,16 +188,11 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
         logger.info('Checking the logs...')
 
-        ignored_file = wazuh_log_monitor.start(timeout=logs_generation_timeout,
+        matching_log = wazuh_log_monitor.start(timeout=timeout,
+                                               accum_results=2,
                                                callback=generate_monitoring_callback(regex),
                                                error_message=f'Did not receive expected '
                                                              f'"Ignoring ... due to ..." event for file '
                                                              f'{os.path.join(testdir1, filename)}').result()
 
-        if ignored_file == os.path.join(folder, filename):
-            # The ignored file is the same as the one we are looking for.
-            return
-
-        # In some ocations ignored_file is the previous file that was ignored, so we check again.
-        test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
-                                        configure_environment, restart_syscheckd, wait_for_fim_start)
+        assert os.path.join(folder, filename) in matching_log, "Ignored file log is not generated."
