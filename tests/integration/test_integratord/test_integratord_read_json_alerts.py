@@ -101,7 +101,9 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_alerts` file provides the test cases.    
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
+        - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
+        - r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
 
     '''
     sample = metadata['alert_sample']

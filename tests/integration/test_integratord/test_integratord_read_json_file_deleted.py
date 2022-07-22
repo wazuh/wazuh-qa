@@ -75,16 +75,35 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
     wazuh_min_version: 4.3.5
     tier: 1
     parameters:
+        - configuration:
+            type: dict
+            brief: Configuration loaded from `configuration_template`.
+        - metadata:
+            type: dict
+            brief: Test case metadata.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Set wazuh configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
+        - restart_wazuh_function:
+            type: fixture
+            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+        - wait_for_start_module:
+            type: fixture
+            brief: Detect the start of the Integratord module in the ossec.log
     assertions:
-        - Verify that FIM changes the monitoring mode from 'realtime' to 'scheduled' when it is not supported.
-    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf_check_realtime.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it is combined
-                       with the testing directory to be monitored defined in this module.
+        - Verify the expected response with for a given alert is recieved
+    input_description: 
+        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `cases_integratord_read_json_file_deleted` file provides the test cases.    
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+        - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts\.json.*No such file.*'
+        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
 
     '''
     sample = metadata['alert_sample']
