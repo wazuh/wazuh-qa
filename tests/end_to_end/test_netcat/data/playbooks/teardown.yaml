@@ -1,0 +1,32 @@
+---
+- name: Cleanup agent environment
+  hosts: wazuh-agent
+  become: True
+  tasks:
+
+    - name: Delete agent configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-agent
+      systemd:
+        state: restarted
+        name: wazuh-agent
+
+- name: Cleanup manager environment
+  hosts: wazuh-manager
+  become: True
+  tasks:
+
+    - name: Delete added rules
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager

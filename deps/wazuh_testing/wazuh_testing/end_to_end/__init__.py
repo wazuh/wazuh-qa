@@ -1,10 +1,13 @@
 # Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-from http import HTTPStatus
 import requests
+from http import HTTPStatus
+
+from wazuh_testing.tools.utils import retry
 
 
+@retry(Exception, attempts=3, delay=5)
 def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
     """Get an alert from the wazuh-indexer API
 
@@ -24,9 +27,8 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
 
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
-
-    assert response.status_code == HTTPStatus.OK, 'The document(s) have not been obtained successfully.'\
-                                                  f"Actual response {response.status_code}"
+    if '"hits" : [ ]' in response.text:
+        raise Exception('Alert not indexed')
 
     return response
 
