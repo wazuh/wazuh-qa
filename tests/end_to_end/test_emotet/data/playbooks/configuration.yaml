@@ -2,6 +2,17 @@
   hosts: wazuh-windows
   tasks:
 
+    - name: Create temp folder
+      win_file:
+        path: C:\temp
+        state: directory
+
+    - name: Copy ossec.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
     - name:  Configure Wazuh to collect Sysmon events
       ansible.windows.win_shell: |
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
@@ -14,7 +25,7 @@
     - name: Copy trigger_emotet.exe in the agent
       ansible.windows.win_copy:
         src: "{{ emotet_file }}"
-        dest: C:\Users\Administrator\Desktop
+        dest: C:\temp
 
     - name: Restart wazuh-agent (Windows)
       ansible.windows.win_shell: |
