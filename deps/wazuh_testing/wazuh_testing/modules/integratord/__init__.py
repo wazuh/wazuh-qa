@@ -8,7 +8,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 # Callbacks
 CB_VIRUSTOTAL_ENABLED = ".*wazuh-integratord.*Enabling integration for: 'virustotal'.*"
-CB_VIRUSTOTAL_JSON_ALERT = '.*VirusTotal: Alert - .*integration\":\"virustotal\".*'
+CB_VIRUSTOTAL_ALERT = '.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
 CB_INVALID_JSON_ALERT_READ = '.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
 CB_OVERLONG_JSON_ALERT_READ = '.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
 CB_ALERTS_FILE_INODE_CHANGED = '.*wazuh-integratord.*DEBUG: jqueue_next\(\): Alert file inode changed.*'

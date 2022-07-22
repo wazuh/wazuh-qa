@@ -3,6 +3,8 @@
     - all
   apply_to_modules:
     - test_integratord_read_json_alerts
+    - test_integratord_change_inode_alert
+    - test_integratord_read_json_file_deleted
   sections:
     - section: integration
       elements:

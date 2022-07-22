@@ -32,14 +32,13 @@ tags:
     - virustotal
 '''
 import os
-import time
 import pytest
+import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
-from wazuh_testing.tools.file import remove_file, copy
 from wazuh_testing.modules.integratord import (ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED, ERR_MSG_INVALID_ALERT_NOT_FOUND,
-                    ERR_MSG_OVERLONG_ALERT_NOT_FOUND,ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND, CB_VIRUSTOTAL_JSON_ALERT,
-                    CB_INVALID_JSON_ALERT_READ,CB_OVERLONG_JSON_ALERT_READ,CB_ALERTS_FILE_INODE_CHANGED)
+                                ERR_MSG_OVERLONG_ALERT_NOT_FOUND,CB_VIRUSTOTAL_ALERT, CB_INVALID_JSON_ALERT_READ,
+                                CB_OVERLONG_JSON_ALERT_READ)
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -62,15 +61,11 @@ configurations = load_configuration_template(configurations_path, configuration_
                                                 configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
 
-# Variables
-TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
-
-
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(configurations, configuration_metadata), ids=case_ids)
-def test_integratord_read_json_alerts(configuration, metadata,
+def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
                               configure_local_internal_options_module,restart_wazuh_function, wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
@@ -79,55 +74,57 @@ def test_integratord_read_json_alerts(configuration, metadata,
     wazuh_min_version: 4.3.5
     tier: 1
     parameters:
+        - configuration:
+            type: dict
+            brief: Configuration loaded from `configuration_template`.
+        - metadata:
+            type: dict
+            brief: Test case metadata.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Set wazuh configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
+        - restart_wazuh_function:
+            type: fixture
+            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+        - wait_for_start_module:
+            type: fixture
+            brief: Detect the start of the Integratord module in the ossec.log
     assertions:
-        - Verify that FIM changes the monitoring mode from 'realtime' to 'scheduled' when it is not supported.
-    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf_check_realtime.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it is combined
-                       with the testing directory to be monitored defined in this module.
+        - Verify the expected response with for a given alert is recieved
+    input_description: 
+        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `cases_integratord_read_json_alerts` file provides the test cases.    
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
 
     '''
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+
     if metadata['alert_type'] == 'valid':
-        wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
-        callback = CB_VIRUSTOTAL_JSON_ALERT
+        #wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
+        callback = CB_VIRUSTOTAL_ALERT
         error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
+
     elif metadata['alert_type'] == 'invalid':
         callback = CB_INVALID_JSON_ALERT_READ
         error_message = ERR_MSG_INVALID_ALERT_NOT_FOUND
+
     elif metadata['alert_type'] == 'overlong':
-        padding = "0"*90000
-        sample = sample.replace("padding_input","agent_"+padding)
         callback = CB_OVERLONG_JSON_ALERT_READ
         error_message = ERR_MSG_OVERLONG_ALERT_NOT_FOUND
-    elif metadata['alert_type'] == 'inode_changed':
-        callback = CB_ALERTS_FILE_INODE_CHANGED
-        error_message = ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND
-        
-    # Insert custom Alert
-    if metadata['alert_type'] == 'inode_changed':
-        for n in range(3):
-            os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
-        copy(ALERT_FILE_PATH, TEMP_FILE_PATH)
-        remove_file(ALERT_FILE_PATH)
-        result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_generator(callback),
-                            error_message=error_message).result()
-        time.sleep(3)
-        copy(TEMP_FILE_PATH,ALERT_FILE_PATH)
-        wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
-        callback = CB_VIRUSTOTAL_JSON_ALERT
-        error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
-    
-    else:
-        os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
-    
+    # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
+        padding = "0"*90000
+        sample = sample.replace("padding_input","agent_"+padding)
+
+    os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+
     # Read Response in ossec.log
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_generator(callback),
-                            error_message=error_message).result()
+    wazuh_monitor.start(timeout=global_parameters.default_timeout, callback=callback_generator(callback),
+                        error_message=error_message).result()
