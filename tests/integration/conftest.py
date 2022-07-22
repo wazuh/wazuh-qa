@@ -90,15 +90,13 @@ def restart_wazuh(get_configuration, request):
 
 @pytest.fixture(scope='function')
 def restart_wazuh_function(daemons=None):
-    """Restarts before starting a test, and stop it after finishing, and cleans the log files."""
-    truncate_file(LOG_FILE_PATH)
-    truncate_file(ALERT_FILE_PATH)
+    """Restarts before starting a test, and stop it after finishing.
+       Args:
+            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+    """
     control_service('restart', daemons)
     yield
     control_service('stop',daemons)
-    truncate_file(LOG_FILE_PATH)
-    truncate_file(ALERT_FILE_PATH)
-
 
 
 @pytest.fixture(scope='module')
@@ -864,6 +862,22 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+
+@pytest.fixture(scope='function')
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
 
 @pytest.fixture(scope='function')
 def set_wazuh_configuration(configuration):
