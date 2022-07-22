@@ -1,0 +1,7 @@
+- name: emotet_attack
+  description: Execute emotet attack and check generated alerts
+  configuration_parameters: null
+  metadata:
+    rule.id: 92151
+    rule.level: 12
+    rule.description: Binary loaded PowerShell automation library - Possible unmanaged Powershell execution by suspicious process
