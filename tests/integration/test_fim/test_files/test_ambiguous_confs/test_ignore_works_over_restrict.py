@@ -176,7 +176,6 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
     logger.info(f'Waiting up to {timeout} seconds for the new scan to be detected.')
 
     if triggers_event:
-        logger.info('Checking the event...')
         event = wazuh_log_monitor.start(timeout=timeout,
                                         callback=callback_detect_event,
                                         error_message=f'Did not receive expected "Sending FIM event" '
@@ -186,8 +185,6 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
         assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
     else:
         regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
-        logger.info('Checking the logs...')
-
         matching_log = wazuh_log_monitor.start(timeout=timeout,
                                                accum_results=2,
                                                callback=generate_monitoring_callback(regex),
