@@ -24,9 +24,6 @@ def clean_alerts_index(get_dashboard_credentials):
     remove_file(alerts_json)
     e2e.delete_index_api(credentials=get_dashboard_credentials)
 
-    remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials)
-
 
 @pytest.fixture(scope='module')
 def get_dashboard_credentials(request):

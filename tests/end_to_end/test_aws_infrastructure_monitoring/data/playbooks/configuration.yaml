@@ -30,4 +30,4 @@
         name: wazuh-manager
 
     - name: Install boto3 python package (script dependency)
-      shell: python3.8 -m pip install boto3
+      shell: python3 -m pip install boto3
