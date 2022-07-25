@@ -58,7 +58,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_file_del
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters,
-                                                configuration_metadata)
+                                             configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
 
 
@@ -66,10 +66,11 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(configurations, configuration_metadata), ids=case_ids)
-def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                              configure_local_internal_options_module,restart_wazuh_function, wait_for_start_module):
+def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                                            configure_local_internal_options_module, restart_wazuh_function,
+                                            wait_for_start_module):
     '''
-    description: Check that if while integratord is reading from the alerts.json file, it is deleted, the expected 
+    description: Check that if while integratord is reading from the alerts.json file, it is deleted, the expected
     error message is displayed, and if the file is created again and alerts are inserted, integratord continues
     working and alerts are read
     wazuh_min_version: 4.3.5
@@ -98,9 +99,9 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
             brief: Detect the start of the Integratord module in the ossec.log
     assertions:
         - Verify the expected response with for a given alert is recieved
-    input_description: 
+    input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_json_file_deleted` file provides the test cases.    
+        - The `cases_integratord_read_json_file_deleted` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts\.json.*No such file.*'
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
@@ -108,18 +109,17 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
     '''
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
-     
+
     remove_file(ALERT_FILE_PATH)
-    
     result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=callback_generator(CB_CANNOT_RETRIEVE_JSON_FILE),
-                            error_message=ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND).result()
-    # Create file and insert alert. Wait one seconf so Integrator detects the file before the insertion
+                                 callback=callback_generator(CB_CANNOT_RETRIEVE_JSON_FILE),
+                                 error_message=ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND).result()
+    # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
     os.system(f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}")
-    time.sleep(1)
+    time.sleep(2)
     os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
-              
+
     # Read Response in ossec.log
     result = wazuh_monitor.start(timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(CB_VIRUSTOTAL_ALERT),
-                            error_message=ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED).result()
+                                 callback=callback_generator(CB_VIRUSTOTAL_ALERT),
+                                 error_message=ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED).result()
