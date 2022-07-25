@@ -677,7 +677,8 @@ class Agent:
     def init_rootcheck(self):
         """Initialize rootcheck module."""
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(os = self.os, agent_name = self.name, agent_id = self.id, rootcheck_sample = self.rootcheck_sample)
+            self.rootcheck = Rootcheck(os=self.os, agent_name=self.name, agent_id=self.id,
+                                       rootcheck_sample=self.rootcheck_sample)
 
     def init_fim(self):
         """Initialize fim module."""
