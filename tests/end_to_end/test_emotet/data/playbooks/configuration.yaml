@@ -34,11 +34,12 @@
         cd C:\temp\Sysmon
         ./Sysmon64.exe -accepteula -i sysconfig.xml
 
-    - name:  Configure Wazuh to collect Sysmon events
+    - name: Configure Wazuh to collect Sysmon events
       ansible.windows.win_shell: |
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+        "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
@@ -52,7 +53,6 @@
       ansible.windows.win_shell: |
         net stop wazuh
         net start wazuh
-
 
 - name: Test manager configuration
   hosts: wazuh-manager

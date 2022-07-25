@@ -6,7 +6,6 @@
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
       become: true
 
-
 - name: Generate events windows
   hosts: wazuh-windows
 
