@@ -13,6 +13,27 @@
         dest: C:\temp
         remote_src: true
 
+    - name: Install sysmon
+      ansible.windows.win_shell: |
+        Set-Location C:\temp
+        Write-Host "Location set $path"
+        Write-Host "Retrieving Sysmon..."
+        Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -Outfile Sysmon.zip
+
+    - name: Unzip sysmon
+      ansible.windows.win_shell: |
+        Expand-Archive -Path C:\temp\Sysmon.zip -DestinationPath C:\temp\Sysmon
+
+    - name: Copy Sysmon configuration file
+      ansible.windows.win_copy:
+        src: "{{ sysmon_config }}"
+        dest: C:\temp\Sysmon
+
+    - name: Install sysmon
+      ansible.windows.win_shell: |
+        cd C:\temp\Sysmon
+        ./Sysmon64.exe -accepteula -i sysconfig.xml
+
     - name:  Configure Wazuh to collect Sysmon events
       ansible.windows.win_shell: |
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"

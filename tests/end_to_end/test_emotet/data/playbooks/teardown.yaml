@@ -8,6 +8,11 @@
         dest: C:\Program Files (x86)\ossec-agent
         remote_src: true
 
+    - name: Uninstall Sysmon
+      ansible.windows.win_shell: |
+        cd C:\temp\Sysmon
+        ./Sysmon64.exe -u force
+
     - name: Delete C:\temp folder
       ansible.windows.win_file:
         path: C:\temp
