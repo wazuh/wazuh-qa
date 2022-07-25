@@ -4,5 +4,5 @@
   metadata:
     rule.id: 92151
     rule.level: 12
-    rule.description: "Binary loaded PowerShell automation library -
-                    Possible unmanaged Powershell execution by suspicious process"
+    rule.description: Binary loaded PowerShell automation library -
+                      Possible unmanaged Powershell execution by suspicious process
