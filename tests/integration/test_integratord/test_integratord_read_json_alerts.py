@@ -35,10 +35,10 @@ import os
 import pytest
 import yaml
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.modules.integratord import (ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED, ERR_MSG_INVALID_ALERT_NOT_FOUND,
-                                ERR_MSG_OVERLONG_ALERT_NOT_FOUND,CB_VIRUSTOTAL_ALERT, CB_INVALID_JSON_ALERT_READ,
-                                CB_OVERLONG_JSON_ALERT_READ)
+                                               ERR_MSG_OVERLONG_ALERT_NOT_FOUND, CB_VIRUSTOTAL_ALERT,
+                                               CB_INVALID_JSON_ALERT_READ, CB_OVERLONG_JSON_ALERT_READ)
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -58,7 +58,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_alerts.y
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters,
-                                                configuration_metadata)
+                                             configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
 
 # Tests
@@ -66,11 +66,12 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.parametrize('configuration, metadata',
                          zip(configurations, configuration_metadata), ids=case_ids)
 def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                              configure_local_internal_options_module,restart_wazuh_function, wait_for_start_module):
+                                      configure_local_internal_options_module, restart_wazuh_function,
+                                      wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
-    broken, or overly long a message will appear in the ossec.log file. Also, in case that 
+    broken, or overly long a message will appear in the ossec.log file.
     wazuh_min_version: 4.3.5
     tier: 1
     parameters:
@@ -97,9 +98,9 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
             brief: Detect the start of the Integratord module in the ossec.log
     assertions:
         - Verify the expected response with for a given alert is recieved
-    input_description: 
+    input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_json_alerts` file provides the test cases.    
+        - The `cases_integratord_read_json_alerts` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
         - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
@@ -110,7 +111,6 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['alert_type'] == 'valid':
-        #wazuh_monitor = FileMonitor(ALERT_FILE_PATH)
         callback = CB_VIRUSTOTAL_ALERT
         error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
 
@@ -123,7 +123,7 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
         error_message = ERR_MSG_OVERLONG_ALERT_NOT_FOUND
     # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
         padding = "0"*90000
-        sample = sample.replace("padding_input","agent_"+padding)
+        sample = sample.replace("padding_input", "agent_" + padding)
 
     os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
