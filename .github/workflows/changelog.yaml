@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Get the updated files
         id: updated_files
-        uses: jitterbit/get-changed-files@v1
+        uses: Ana06/get-changed-files@v2.1.0
         with:
           format: csv
 
