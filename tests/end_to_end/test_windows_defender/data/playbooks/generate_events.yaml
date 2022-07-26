@@ -10,16 +10,16 @@
   hosts: wazuh-windows
   tasks:
 
-    - name: Disable Windows Defender
-      ansible.windows.win_shell: Set-MpPreference -DisableRealtimeMonitoring 1
+    - name: "{{ event_description }}"
+      ansible.windows.win_shell: "{{ command }}"
 
 - name: Wait alert
   hosts: wazuh-manager
   tasks:
 
-    - name: Waiting for vulnerability scan, alert reporting and indexing
+    - name: Waiting for alert
       wait_for:
-        timeout: 60
+        timeout: 5
 
     - name: Get alerts.json
       fetch:
