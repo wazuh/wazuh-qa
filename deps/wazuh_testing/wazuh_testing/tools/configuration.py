@@ -15,6 +15,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing import global_parameters, logger
+from wazuh_testing.tools import file
 
 
 # customize _serialize_xml to avoid lexicographical order in XML attributes
@@ -678,6 +679,7 @@ def get_test_cases_data(data_file_path):
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
     test_cases_data = read_yaml(data_file_path)
+
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []

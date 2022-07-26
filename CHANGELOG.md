@@ -2,14 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.3.6] - Development (unreleased)
+## [4.3.6] - 20-07-2022
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: TBD https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1ee18b3b953173211
+Release report: https://github.com/wazuh/wazuh/issues/14188
+
+## Added
+
+- Add Remoted IT - test_multi_groups ([#3060](https://github.com/wazuh/wazuh-qa/pull/3060)) \- (Framework + Tests)
 
 ### Fixed
 
 - Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006)) \- (Framework + Tests)
+- Fix Remoted IT - test_agent_communication ([#3088](https://github.com/wazuh/wazuh-qa/pull/3088)) \- (Framework)
 
 
 ## [4.3.5] - 29-06-2022
