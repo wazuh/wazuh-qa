@@ -21,7 +21,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_audit(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_suricata_integration(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
    rule_level = metadata['rule.level']
    rule_description = metadata['rule.description']
    rule_id = metadata['rule.id']
@@ -32,7 +32,6 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
                         f".+{rule_description}.+id.+{rule_id}.+hostname.+{data_hostname}"
    expected_indexed_alert = fr".+hostname\" : \"{data_hostname}.+level.+{rule_level}.+description.+" \
                            fr"{rule_description}.+id.+{rule_id}"
-   import pdb; pdb.set_trace()
 
    # Check that alert has been raised and save timestamp
    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
