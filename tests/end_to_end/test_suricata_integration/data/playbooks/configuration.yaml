@@ -38,6 +38,8 @@
         wget -O /etc/suricata/suricata.yaml http://www.branchnetconsulting.com/wazuh/suricata.yaml
       when: '"suricata" not in check_suricata.stdout'
 
+    # Get the default interface from the Suricata configuration and replace it with the first interface obtained from
+    # the output of the nmcli command
     - name: Change the default interface
       shell: sed -i "s/eth0/$(nmcli device status | awk 'NR==2 {print $1}')/g" /etc/sysconfig/suricata
       when: '"suricata" not in check_suricata.stdout'
