@@ -16,7 +16,6 @@ configuration_playbooks = ['configuration.yaml']
 emotet_file_path = os.path.join(test_data_path, 'emotet_file', 'trigger-emotet.exe')
 sysmon_config = os.path.join(test_data_path, 'sysmon_config', 'sysconfig.xml')
 configuration_extra_vars = {'emotet_file': emotet_file_path, 'sysmon_config': sysmon_config}
-
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
