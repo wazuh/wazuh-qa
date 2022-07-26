@@ -13,7 +13,7 @@
         dest: C:\temp
         remote_src: true
 
-    - name: Install sysmon
+    - name: Download sysmon
       ansible.windows.win_shell: |
         Set-Location C:\temp
         Write-Host "Location set $path"
