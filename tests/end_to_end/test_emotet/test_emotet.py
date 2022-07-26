@@ -33,13 +33,15 @@ def test_emotet(configure_environment, metadata, get_dashboard_credentials, gene
     rule_level = metadata['rule.level']
     rule_id = metadata['rule.id']
     rule_description = metadata['rule.description']
+    process = metadata['process']
 
     expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
                           fr'"rule"\:{{"level"\:{rule_level},' \
-                          fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
+                          fr'"description"\:"{rule_description}","id"\:"{rule_id}".*' \
+                          fr'"full_log"\:.*{process}.*\}}'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
-                             fr'.*"id": "{rule_id}".*' \
+                             fr'.*"id": "{rule_id}".*"full_log":.*{process}.*' \
                              r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     # Check that alert has been raised and save timestamp

@@ -6,3 +6,4 @@
     rule.level: 12
     rule.description: Binary loaded PowerShell automation library -
                       Possible unmanaged Powershell execution by suspicious process
+    process: trigger-emotet.exe
