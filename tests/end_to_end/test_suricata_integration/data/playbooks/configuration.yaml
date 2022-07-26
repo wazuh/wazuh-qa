@@ -1,0 +1,66 @@
+- name: Prepare environment
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Check if Suricata is installed
+      shell: rpm -qa suricata
+      register: check_suricata
+
+    - name: Download Suricata repo and install dependencies
+      shell: |
+        cd /etc/yum.repos.d
+        yum -y install epel-release wget jq
+        curl -O https://copr.fedorainfracloud.org/coprs/jasonish/suricata-6.0-testing/repo/epel-7/jasonish-suricata-6.0-testing-epel-7.repo
+        cd ~
+      when: '"suricata" not in check_suricata.stdout'
+
+    - name: Upgrade all packages, excluding kernel related packages
+      yum:
+        name: '*'
+        state: latest
+        exclude: kernel*
+      when: '"suricata" not in check_suricata.stdout'
+
+    - name: Install the latest version of Suricata
+      yum:
+        name: suricata
+        state: present
+      when: '"suricata" not in check_suricata.stdout'
+
+    - name: Download and extract Emerging rules
+      shell: |
+        wget https://rules.emergingthreats.net/open/suricata-6.0.3/emerging.rules.tar.gz
+        tar zxvf emerging.rules.tar.gz
+        rm /etc/suricata/rules/* -f
+        mv rules/*.rules /etc/suricata/rules/
+        rm -f /etc/suricata/suricata.yaml
+        wget -O /etc/suricata/suricata.yaml http://www.branchnetconsulting.com/wazuh/suricata.yaml
+      when: '"suricata" not in check_suricata.stdout'
+
+    - name: Change the default interface
+      shell: sed -i "s/eth0/$(nmcli device status | awk 'NR==2 {print $1}')/g" /etc/sysconfig/suricata
+      when: '"suricata" not in check_suricata.stdout'
+
+    - name: Start Suricata
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        state: started
+        name: suricata
+
+    - name: Configure Wazuh to read Suricata logs file
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} READ SURICATA LOGS CONFIG -->
+        insertbefore: ^</ossec_config>
+        block: |
+          <localfile>
+          <log_format>syslog</log_format>
+          <location>/var/log/suricata/eve.json</location>
+          </localfile>
+
+    - name: Restart Wazuh to apply the change
+      systemd:
+        state: started
+        name: wazuh-manager

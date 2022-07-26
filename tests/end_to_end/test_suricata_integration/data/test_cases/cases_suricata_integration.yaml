@@ -1,0 +1,9 @@
+- name: Generate a specific web request known to trip NIDS rules
+  description: Test the detection of threats by monitoring network traffic
+  configuration_parameters: null
+  metadata:
+    rule.id: 86601
+    rule.level: 3
+    rule.description: "Suricata: Alert - ET POLICY curl User-Agent Outbound"
+    extra:
+      data.hostname: testmynids.org
