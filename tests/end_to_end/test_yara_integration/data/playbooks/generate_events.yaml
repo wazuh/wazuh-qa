@@ -8,8 +8,12 @@
     - name: Truncate alerts file
       shell: echo "" > {{ alerts_path }}
 
+    - name: Wait until the server is ready
+      wait_for:
+        timeout: 5
+
     - name: Download malware
-      script: "{{ MALWARE_DOWNLOADER_SCRIPT }}"
+      shell: curl -s -XGET {{ url }} -o "/tmp/yara/malware/mirai"
 
     - name: Wait for alerts to be generated
       wait_for:

@@ -104,7 +104,7 @@
         name:
           - epel-release
         state: present
-      when: ( ansible_facts['distribution'] == "CentOS" and "epel" not in check_epel_release.stdout)
+      when: '"epel" not in check_epel_release.stdout'
 
     - name: Check if yara is installed
       shell: rpm -qa yara
@@ -115,7 +115,7 @@
         name:
           - yara
         state: present
-      when: ( ansible_facts['distribution'] == "CentOS" and "yara" not in check_yara.stdout)
+      when: '"yara" not in check_yara.stdout'
 
     - name: Create a directory to store malware
       file:
@@ -139,4 +139,4 @@
         name:
           - jq
         state: present
-      when: ( ansible_facts['distribution'] == "CentOS" and "jq" not in check_jq.stdout)
+      when: '"jq" not in check_jq.stdout'

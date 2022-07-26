@@ -24,11 +24,6 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 # Custom paths
 yara_script = os.path.join(test_data_path, 'configuration', 'yara.sh')
-malware_downloader_script = os.path.join(test_data_path, 'configuration', 'malware_downloader.sh')
-
-# Update configuration with custom paths
-configuration_metadata = config.update_configuration_template(configuration_metadata, ['CUSTOM_MALWARE_SCRIPT_PATH'],
-                                                              [malware_downloader_script])
 configuration_extra_vars = {'yara_script': yara_script}
 
 
@@ -50,7 +45,7 @@ def test_yara_integration(configure_environment, metadata, get_dashboard_credent
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                   error_message='The alert has not occurred').result()
+                                   timeout=1, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 
     query = e2e.make_query([

@@ -3,7 +3,7 @@
   configuration_parameters: null
   metadata:
     extra_vars:
-      MALWARE_DOWNLOADER_SCRIPT: CUSTOM_MALWARE_SCRIPT_PATH
+      url: https://wazuh-demo.s3-us-west-1.amazonaws.com/mirai
     rule.id: 108001
     rule.level: 12
     rule.description: 'File \\"/tmp/yara/malware/mirai\\" is a positive match. Yara rule: Mirai_Botnet_Malware_RID2EF6'
