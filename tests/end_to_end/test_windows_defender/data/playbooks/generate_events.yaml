@@ -1,0 +1,29 @@
+- name: Truncate files
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate file alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: true
+
+- name: Generate events
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Disable Windows Defender
+      ansible.windows.win_shell: Set-MpPreference -DisableRealtimeMonitoring 1
+
+- name: Wait alert
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Waiting for vulnerability scan, alert reporting and indexing
+      wait_for:
+        timeout: 60
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true
