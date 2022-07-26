@@ -21,45 +21,46 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_suricata_integration(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
-   rule_level = metadata['rule.level']
-   rule_description = metadata['rule.description']
-   rule_id = metadata['rule.id']
-   data_hostname = metadata['extra']['data.hostname']
-   timestamp = r'\d{4}-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+def test_suricata_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
+                              clean_alerts_index):
+    rule_level = metadata['rule.level']
+    rule_description = metadata['rule.description']
+    rule_id = metadata['rule.id']
+    data_hostname = metadata['extra']['data.hostname']
+    timestamp = r'\d{4}-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-   expected_alert_json = f"timestamp.+({timestamp}).+level.+{rule_level}.+description" \
-                        f".+{rule_description}.+id.+{rule_id}.+hostname.+{data_hostname}"
-   expected_indexed_alert = fr".+hostname\" : \"{data_hostname}.+level.+{rule_level}.+description.+" \
-                           fr"{rule_description}.+id.+{rule_id}"
+    expected_alert_json = fr".*timestamp.+({timestamp}).+level.+{rule_level}.+description.+{rule_description}.+id.+" \
+                          fr"{rule_id}.+hostname.+{data_hostname}"
+    expected_indexed_alert = fr".*hostname.*{data_hostname}.+level.+{rule_level}.+description.+" \
+                             fr"{rule_description}.+id.+{rule_id}"
 
-   # Check that alert has been raised and save timestamp
-   raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                  error_message='The alert has not occurred').result()
-   raised_alert_timestamp = raised_alert.group(1)
+    # Check that alert has been raised and save timestamp
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+                                   error_message='The alert has not occurred').result()
+    raised_alert_timestamp = raised_alert.group(1)
 
-   query = e2e.make_query([
-      {
-         "term": {
-            "rule.id": f"{rule_id}"
-         }
-      },
-      {
-         "term": {
-            "rule.description": f"{rule_description}"
-         }
-      },
-      {
-         "term": {
-            "timestamp": f"{raised_alert_timestamp}"
-         }
-      }
-   ])
+    query = e2e.make_query([
+       {
+          "term": {
+             "rule.id": f"{rule_id}"
+          }
+       },
+       {
+          "term": {
+             "rule.description": f"{rule_description}"
+          }
+       },
+       {
+          "term": {
+             "timestamp": f"{raised_alert_timestamp}"
+          }
+       }
+    ])
 
-   # Check if the alert has been indexed and get its data
-   response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
-   indexed_alert = json.dumps(response.json())
+    # Check if the alert has been indexed and get its data
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    indexed_alert = json.dumps(response.json())
 
-   # Check that the alert data is the expected one
-   alert_data = re.search(expected_indexed_alert, indexed_alert)
-   assert alert_data is not None, 'Alert triggered, but not indexed'
+    # Check that the alert data is the expected one
+    alert_data = re.search(expected_indexed_alert, indexed_alert)
+    assert alert_data is not None, 'Alert triggered, but not indexed'
