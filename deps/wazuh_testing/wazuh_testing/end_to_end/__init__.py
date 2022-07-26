@@ -27,11 +27,11 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
 
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
+
     if '"hits" : [ ]' in response.text:
         raise Exception('Alert not indexed')
-    else:
-        assert response.status_code == HTTPStatus.OK, "The request wasn't successful. " \
-                                                      f"Actual response: {response.text}"
+    elif response.status_code != HTTPStatus.OK:
+        raise Exception(f"The request wasn't successful.\nActual response: {response.text}")
 
     return response
 
@@ -54,8 +54,10 @@ def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alert
     authorization = requests.auth.HTTPBasicAuth(credentials['user'], credentials['password'])
 
     response = requests.delete(url=url+index, params={'pretty': 'true'}, verify=False, auth=authorization)
-    assert response.status_code == HTTPStatus.OK, 'The index(es) have not been deleted successfully. ' \
-                                                  f"Actual response {response.text}"
+
+    if response.status_code != HTTPStatus.OK:
+        raise Exception(f"The index(es) have not been deleted successfully. Actual response {response.text}")
+
     return response
 
 
