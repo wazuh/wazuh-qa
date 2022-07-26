@@ -8,11 +8,10 @@
       register: check_suricata
 
     - name: Download Suricata repo and install dependencies
-      shell: |
-        cd /etc/yum.repos.d
-        yum -y install epel-release wget jq
-        curl -O https://copr.fedorainfracloud.org/coprs/jasonish/suricata-6.0-testing/repo/epel-7/jasonish-suricata-6.0-testing-epel-7.repo
-        cd ~
+      shell: >
+        cd /etc/yum.repos.d && yum -y install epel-release wget jq &&
+        curl -O https://copr.fedorainfracloud.org/coprs/jasonish/suricata-6.0-testing/repo/epel-7/
+        jasonish-suricata-6.0-testing-epel-7.repo && cd ~
       when: '"suricata" not in check_suricata.stdout'
 
     - name: Upgrade all packages, excluding kernel related packages
@@ -46,8 +45,8 @@
 
     - name: Start Suricata
       systemd:
-        daemon_reload: yes
-        enabled: yes
+        daemon_reload: true
+        enabled: true
         state: started
         name: suricata
 
