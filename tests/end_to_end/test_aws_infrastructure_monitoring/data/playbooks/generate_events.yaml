@@ -10,13 +10,12 @@
 
     # Create a bucket using the AWS API
     - name: Run the script using python3 (create S3 bucket)
-      script: "{{ AWS_API_SCRIPT }} -a {{ aws_access_key_id }} -s {{ aws_secret_access_key }}"
-      register: time
+      script: "{{ AWS_API_SCRIPT }} -i {{ aws_access_key_id }} -k {{ aws_secret_access_key }} -b {{ bucket }} -c"
 
     - name: Wait for the alert to be generated
       wait_for:
         path: "{{ alerts_path }}"
-        search_regex: "{{ time.stdout_lines[0] }}.*{{ event_name }}"
+        search_regex: "{{ event_name }}.*{{ bucket }}"
         # Waiting 8 minutes, because that is the time for Cloudtrail to deliver the logs to the S3 bucket.
         timeout: 480
 

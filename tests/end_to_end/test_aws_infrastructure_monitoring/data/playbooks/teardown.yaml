@@ -8,3 +8,11 @@
         path: /var/ossec/etc/ossec.conf
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         state: absent
+
+    - name: Delete the created bucket using the AWS API
+      script: "{{ AWS_API_SCRIPT }} -i {{ aws_access_key_id }} -k {{ aws_secret_access_key }} -b {{ bucket }}"
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager

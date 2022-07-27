@@ -29,6 +29,8 @@ aws_api_script = os.path.join(test_data_path, 'configuration', 'aws_cloudtrail_e
 
 # Update configuration with custom paths
 metadata = config.update_configuration_template(metadata, ['CUSTOM_AWS_SCRIPT_PATH'], [aws_api_script])
+bucket_name = metadata[0]['extra_vars']['bucket']
+configuration_extra_vars.update({'AWS_API_SCRIPT': aws_api_script, 'bucket': bucket_name})
 
 
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)

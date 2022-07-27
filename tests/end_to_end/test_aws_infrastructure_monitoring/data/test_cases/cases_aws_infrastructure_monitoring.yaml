@@ -10,4 +10,5 @@
     rule.level: 3
     extra_vars:
       event_name: CreateBucket
+      bucket: delete-this-dummy-bucket
       AWS_API_SCRIPT: CUSTOM_AWS_SCRIPT_PATH
