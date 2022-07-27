@@ -29,7 +29,6 @@ Release report: TBD
 
 ### Changed
 
-- Fix GCloud IT: test_max_messages error not received expected messages - ([#3083](https://github.com/wazuh/wazuh-qa/pull/3083)) \- (Tests)
 - Update syscollector deltas integration tests ([#2921](https://github.com/wazuh/wazuh-qa/pull/2921)) \- (Tests)
 - Update deprecated WDB commands ([#2966](https://github.com/wazuh/wazuh-qa/pull/2966)) \- (Tests)
 - Move the 'get_datetime_diff' function to 'wazuh-testing' utils module ([#2782](https://github.com/wazuh/wazuh-qa/pull/2782)) \- (Framework + Tests)
@@ -52,6 +51,8 @@ Release report: TBD
 
 ### Fixed
 
+- Fix Analysisd IT: test_syscollector_events failure on wait_for_analysisd_startup. ([#3110](https://github.com/wazuh/wazuh-qa/pull/3110)) \- (Tests)
+- Fix GCloud IT: test_max_messages error not received expected messages - ([#3083](https://github.com/wazuh/wazuh-qa/pull/3083)) \- (Tests)
 - Fix Solaris and Macos FIM integration tests failures ([#2976](https://github.com/wazuh/wazuh-qa/pull/2976)) \- (Framework + Tests)
 - Fix the unstable FIM tests that need refactoring ([#2458](https://github.com/wazuh/wazuh-qa/pull/2458)) \- (Framework + Tests)
 - Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454)) \- (Framework)
