@@ -1,0 +1,9 @@
+- name: Slac integration - SSH Brute force attack
+  description: Test that Wazuh sends the alert via Slack by attempting a brute force SSH attack.
+  configuration_parameters: null
+  metadata:
+    rule.id: 5712
+    rule.description: "sshd: brute force trying to get access to the system. Non existent user."
+    rule.level: 10
+    extra:
+      srcuser: not-a-user

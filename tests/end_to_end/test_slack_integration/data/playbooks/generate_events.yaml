@@ -1,0 +1,44 @@
+- name: Generate events
+  hosts: wazuh-manager
+  vars:
+    alerts_path: /var/ossec/logs/alerts/alerts.json
+    integrations_log: /var/ossec/logs/integrations.log
+  become: true
+  tasks:
+
+    - name: Truncate integrations log
+      shell: echo "" > {{ integrations_log }}
+
+    - name: Attempt a brute force SSH attack
+      expect:
+        command: ssh {{ item }}@localhost
+        timeout: 5
+        responses:
+          Password: invalid_password
+      loop:
+        - not-a-user
+        - not-a-user
+        - not-a-user
+        - not-a-user
+        - not-a-user
+        - not-a-user
+        - not-a-user
+        - not-a-user
+      ignore_errors: true
+
+    - name: Wait for alert to be read
+      pause:
+        seconds: 5
+
+    # Check if the alert has been sent to Slack
+    - name: Get integrations.log
+      wait_for:
+        path: "{{ integrations_log }}"
+        search_regex: "hooks.slack.com"
+        timeout: 5
+
+    - name: Get alerts.json
+      fetch:
+        src: "{{ alerts_path }}"
+        dest: /tmp/
+        flat: true

@@ -1,0 +1,31 @@
+- name: Configure environment
+  hosts: wazuh-manager
+  become: true
+  vars:
+    alerts_path: /var/ossec/logs/alerts/alerts.json
+    conf_path: /var/ossec/etc/ossec.conf
+  tasks:
+
+    - name: Set the Slack integration block
+      blockinfile:
+        path: "{{ conf_path }}"
+        marker: <!-- {mark} SLACK INTEGRATION BLOCK -->
+        insertbefore: ^</ossec_config>
+        block: |
+          <integration>
+          <name>slack</name>
+          <hook_url>{{ web_hook_url }}</hook_url>
+          <level>10</level>
+          <alert_format>json</alert_format>
+          </integration>
+
+    - name: Truncate integrations log
+      shell: echo "" > {{ alerts_path }}
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+    - name: Install pexpect using pip
+      shell: python3 -m pip install pexpect>=3.3
