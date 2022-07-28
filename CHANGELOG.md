@@ -29,7 +29,7 @@ Release report: TBD
 
 ### Changed
 
-- Change scan test modules to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
+- Change scan test module fixtures to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
 - Update syscollector deltas integration tests ([#2921](https://github.com/wazuh/wazuh-qa/pull/2921)) \- (Tests)
 - Update deprecated WDB commands ([#2966](https://github.com/wazuh/wazuh-qa/pull/2966)) \- (Tests)
 - Move the 'get_datetime_diff' function to 'wazuh-testing' utils module ([#2782](https://github.com/wazuh/wazuh-qa/pull/2782)) \- (Framework + Tests)
