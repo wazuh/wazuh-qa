@@ -7,3 +7,5 @@ def pytest_addoption(parser):
                      help=f"Set the repository used. Default: {DEFAULT_REPOSITORY}")
     parser.addoption("--repo", action="store", default=DEFAULT_REPOSITORY,
                      help=f"Set the repository branch. Default: {DEFAULT_BRANCH}")
+    parser.addoption("--commit", action="store", default=None,
+                     help=f"Set the repository commit. Default: None")
