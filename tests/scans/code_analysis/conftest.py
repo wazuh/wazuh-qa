@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-
 import pytest
 import git
 
@@ -54,9 +53,9 @@ def clone_wazuh_repository(pytestconfig):
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
         if not commit:
             git.Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
-                            repository_path,
-                            depth=1,
-                            branch=branch)
+                                repository_path,
+                                depth=1,
+                                branch=branch)
         else:
             repo = git.Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                                        repository_path, branch='master', no_single_branch=True)
@@ -66,6 +65,7 @@ def clone_wazuh_repository(pytestconfig):
             repo.git.checkout(commit_branch)
 
         yield repository_path
+
     except Exception as e:
         print(f"Error cloning {repository_name}: {str(e)}")
         yield None
