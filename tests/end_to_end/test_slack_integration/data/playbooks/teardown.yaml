@@ -7,7 +7,7 @@
 
     - name: Remove the Slack integration block
       blockinfile:
-        path: "{{ conf_path }"
+        path: "{{ conf_path }}"
         marker: <!-- {mark} SLACK INTEGRATION BLOCK -->
         state: absent
 

@@ -34,7 +34,7 @@
     - name: Get integrations.log
       wait_for:
         path: "{{ integrations_log }}"
-        search_regex: "hooks.slack.com"
+        search_regex: hooks.slack.com
         timeout: 5
 
     - name: Get alerts.json
