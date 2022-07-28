@@ -1,8 +1,7 @@
 import shutil
 import tempfile
 import pytest
-import git
-
+from git import Git, Repo
 
 DEFAULT_DIRECTORIES_TO_CHECK = 'framework/,api/,wodles/'
 DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests/,test/'
@@ -52,15 +51,15 @@ def clone_wazuh_repository(pytestconfig):
         # Clone into temporary dir
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
         if not commit:
-            git.Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
-                                repository_path,
-                                depth=1,
-                                branch=branch)
+            Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
+                            repository_path,
+                            depth=1,
+                            branch=branch)
         else:
-            repo = git.Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
-                                       repository_path, branch='master', no_single_branch=True)
+            repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
+                                   repository_path, branch='master', no_single_branch=True)
 
-            git_local = git.Git(repository_path)
+            git_local = Git(repository_path)
             commit_branch = git_local.branch('-a', '--contains', commit).split('\n')[0].strip()
 
             repo.git.checkout(commit_branch)
