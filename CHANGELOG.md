@@ -8,7 +8,7 @@ Wazuh commit: TBD https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1
 Release report: https://github.com/wazuh/wazuh/issues/14188
 
 ## Added
-
+- Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add Remoted IT - test_multi_groups ([#3060](https://github.com/wazuh/wazuh-qa/pull/3060)) \- (Framework + Tests)
 
 ### Fixed
