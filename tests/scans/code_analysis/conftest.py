@@ -62,7 +62,9 @@ def clone_wazuh_repository(pytestconfig):
 
             git_local = git.Git(repository_path)
             commit_branch = git_local.branch('-a', '--contains', commit).split('\n')[0].strip()
+
             repo.git.checkout(commit_branch)
+            repo.git.checkout(commit)
 
         yield repository_path
 
