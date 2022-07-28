@@ -19,7 +19,7 @@
           <alert_format>json</alert_format>
           </integration>
 
-    - name: Truncate integrations log
+    - name: Truncate alerts log
       shell: echo "" > {{ alerts_path }}
 
     - name: Restart wazuh-manager

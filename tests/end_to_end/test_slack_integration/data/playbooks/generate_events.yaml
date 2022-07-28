@@ -26,7 +26,7 @@
         - not-a-user
       ignore_errors: true
 
-    - name: Wait for alert to be read
+    - name: Wait for the alert to be generated
       pause:
         seconds: 5
 

@@ -1,11 +1,13 @@
 - name: Cleanup environment
   hosts: wazuh-manager
   become: true
+  vars:
+    conf_path: /var/ossec/etc/ossec.conf
   tasks:
 
     - name: Remove the Slack integration block
       blockinfile:
-        path: /var/ossec/etc/ossec.conf
+        path: "{{ conf_path }"
         marker: <!-- {mark} SLACK INTEGRATION BLOCK -->
         state: absent
 
