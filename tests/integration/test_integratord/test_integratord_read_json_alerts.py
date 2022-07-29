@@ -61,6 +61,7 @@ configurations = load_configuration_template(configurations_path, configuration_
                                              configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
 
+
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',

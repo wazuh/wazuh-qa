@@ -1,5 +1,5 @@
-- name: 'Cannot read alerts - Inode changed'
-  description: 'The alerts.json file inode has changed and it cannot read alerts from it until it reloads.'
+- name: Cannot read alerts - Inode changed
+  description: The alerts.json file inode has changed and it cannot read alerts from it until it reloads.
   configuration_parameters:
     API_KEY: 8512012a5ebf7eee0eb2adaf85444f76ab1a615ad1f2376b45716c370d74868d
   metadata:

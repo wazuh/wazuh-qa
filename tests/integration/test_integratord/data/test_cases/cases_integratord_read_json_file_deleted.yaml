@@ -1,5 +1,5 @@
-- name: 'Cannot read alerts - Json File Deleted'
-  description: 'The alerts.json file is missing and it cannot read alerts from it. If a new file is created it will read it.'
+- name: Cannot read alerts - Json File Deleted
+  description: The alerts.json file is missing and it cannot read alerts from it. If a new file is created it will read it.
   configuration_parameters:
     API_KEY: 8512012a5ebf7eee0eb2adaf85444f76ab1a615ad1f2376b45716c370d74868d
   metadata:

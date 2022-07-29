@@ -1,4 +1,3 @@
----
 - tags:
     - all
   apply_to_modules:
@@ -9,13 +8,13 @@
     - section: integration
       elements:
         - name:
-            value: "virustotal"
+            value: 'virustotal'
         - api_key:
             value: API_KEY
         - rule_id:
-            value: "554"
+            value: '554'
         - alert_format:
-            value: "json"
+            value: 'json'
     - section: sca
       elements:
         - enabled:
