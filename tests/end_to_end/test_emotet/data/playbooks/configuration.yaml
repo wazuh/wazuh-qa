@@ -46,7 +46,7 @@
 
     - name: Copy exec_emotet_script.vbs in the agent
       ansible.windows.win_copy:
-        src: "{{ vbs_script_path }}"
+        src: "{{ vbs_script }}"
         dest: C:\temp
 
     - name: Copy trigger_emotet.exe in the agent
