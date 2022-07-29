@@ -2,9 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.7] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Changed
+
+- Increase framework version of jq and pytest in the requirements file to support python3.10 ([#3107](https://github.com/wazuh/wazuh-qa/pull/3108)) \- (Framework)
+
 ## [4.3.6] - 20-07-2022
 
-Wazuh commit: TBD https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1ee18b3b953173211
+Wazuh commit: https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1ee18b3b953173211 \
 Release report: https://github.com/wazuh/wazuh/issues/14188
 
 ## Added
@@ -85,6 +94,7 @@ Release report: https://github.com/wazuh/wazuh/issues/13321
 - Add FIM Windows 4659 events tests. ([#648](https://github.com/wazuh/wazuh-qa/pull/648))
 
 ### Changed
+
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
 - Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))
