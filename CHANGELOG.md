@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+## Added
+- Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
+
 ### Changed
 
 - Increase framework version of jq and pytest in the requirements file to support python3.10 ([#3107](https://github.com/wazuh/wazuh-qa/pull/3108)) \- (Framework)
@@ -17,7 +20,6 @@ Wazuh commit: https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1ee18
 Release report: https://github.com/wazuh/wazuh/issues/14188
 
 ## Added
-- Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add Remoted IT - test_multi_groups ([#3060](https://github.com/wazuh/wazuh-qa/pull/3060)) \- (Framework + Tests)
 
 ### Fixed
