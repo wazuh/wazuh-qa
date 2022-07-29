@@ -5,7 +5,7 @@ import time
 from wazuh_testing import global_parameters
 from wazuh_testing.processes import check_if_analysisd_is_running
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.file import change_permission, remove_file
+from wazuh_testing.tools.file import remove_file
 from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, AR_SCRIPTS_PATH
 
 pytestmark = [pytest.mark.tier(level=0), pytest.mark.server]
@@ -41,7 +41,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, file_to_monitor,
                               set_wazuh_configuration_analysisd, copy_file, source_path, destination_path,
                               restart_wazuh_daemon_function):
-    change_permission(wazuh_ar_script, 0o777)
+    os.chmod(wazuh_ar_script, 0o777)
     cmd = "echo '{}' >> '{}'".format(metadata['log_sample'], file_to_monitor)
     os.system(cmd)
 

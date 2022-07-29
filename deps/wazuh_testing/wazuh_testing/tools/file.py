@@ -416,14 +416,3 @@ def download_text_file(file_url, local_destination_path):
         raise ValueError(f"The remote url {file_url} does not have text/plain content type to download it")
 
     open(local_destination_path, 'wb').write(request.content)
-
-
-def change_permission(file_path, permissions):
-    """change the mode of path to the numeric mode.
-
-    Args:
-        file_path (str): Path to file.
-        permissions (str): level of permission.
-
-    """
-    os.chmod(file_path, permissions)
