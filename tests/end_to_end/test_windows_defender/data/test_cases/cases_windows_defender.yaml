@@ -3,7 +3,6 @@
   configuration_parameters: null
   metadata:
     extra_vars:
-      os: Windows
       event_description: Disable Windows Defender
       command: Set-MpPreference -DisableRealtimeMonitoring 1
     rule.id: 255303
