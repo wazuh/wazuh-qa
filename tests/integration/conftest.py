@@ -897,7 +897,12 @@ def set_wazuh_configuration(configuration):
 
 @pytest.fixture(scope='function')
 def copy_file(source_path, destination_path):
-    """Copy file from source to destination"""
+    """Copy file from source to destination
+
+    Args:
+        source_path (list): list that contains sources path of files
+        destination_path (list): list that contains destination path of files
+    """
     for i in range(len(source_path)):
         copy(source_path[i], destination_path[i])
 
@@ -908,7 +913,11 @@ def copy_file(source_path, destination_path):
 
 @pytest.fixture(scope='function')
 def create_file_to_monitor(file_to_monitor):
-    """Create a file to monitor"""
+    """Create a file to monitor
+
+    Args:
+        file_to_monitor (str): Path of file that will monitored by Wazuh
+    """
     write_file(file_to_monitor)
 
     yield
