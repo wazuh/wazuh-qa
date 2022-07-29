@@ -1,0 +1,7 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Template a file
+    ansible.builtin.template:
+      src: {{ source_template }}
+      dest: {{ dest_inventory}}
