@@ -18,8 +18,7 @@
 
     - name: Run trigger-emotet.exe
       ansible.windows.win_shell: |
-        cd C:\Users\Administrator\Desktop
-        ./trigger-emotet.exe
+        cscript C:\temp\exec_emotet_script.vbs
 
 - name: Wait alert
   hosts: wazuh-manager
