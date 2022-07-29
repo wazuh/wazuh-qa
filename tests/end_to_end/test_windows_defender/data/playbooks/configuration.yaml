@@ -17,7 +17,8 @@
       ansible.windows.win_shell: |
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<location>Microsoft-Windows-Windows Defender/Operational</location>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+        "`n<location>Microsoft-Windows-Windows Defender/Operational</location>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
@@ -50,4 +51,3 @@
     - name: Restart wazuh-manager
       become: true
       shell: systemctl restart wazuh-manager
-
