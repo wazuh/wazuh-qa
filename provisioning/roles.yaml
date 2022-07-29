@@ -34,7 +34,7 @@ manager:
   os: LINUX_BASED_OS
   service: ANY
   resources:
-    default:
+    minimal:
       cpu: 2
       memory: 2048
   vars:
