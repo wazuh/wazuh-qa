@@ -37,7 +37,9 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import remove_file, copy
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.modules import integratord as integrator
+from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -106,18 +108,17 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
         - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
 
     '''
-    sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
-
+    command = f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}"
     # Insert Alerts
     for n in range(5):
-        os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+        run_local_command_returning_output(command)
 
     # Get that alert is read
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout * 2,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                                  callback=callback_generator(integrator.CB_INTEGRATORD_SENDING_ALERT),
                                  error_message=integrator.ERR_MSG_SENDING_ALERT_NOT_FOUND,
-                                 update_position=False).result()
+                                 update_position=False)
 
     # Change file to change inode
     copy(ALERT_FILE_PATH, TEMP_FILE_PATH)
@@ -126,15 +127,16 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
 
     # Wait for Inode change to be detected and insert new alert
     time.sleep(3)
-    os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+    run_local_command_returning_output(command)
 
     # Monitor Inode Changed
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout * 2,
+    
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout * 2,
                                  callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
-                                 error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND).result()
-    os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+                                 error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
+    run_local_command_returning_output(command)
 
-    # Read Response in ossec.log
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
+    # Read Response in ossec.log    
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                                  callback=callback_generator(integrator.CB_PROCESSING_ALERT),
-                                 error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED).result()
+                                 error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
