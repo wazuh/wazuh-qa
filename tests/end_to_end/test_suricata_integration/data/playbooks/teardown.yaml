@@ -8,3 +8,8 @@
         path: /var/ossec/etc/ossec.conf
         marker: <!-- {mark} READ SURICATA LOGS CONFIG -->
         state: absent
+
+    - name: Restart Wazuh to apply the change
+      systemd:
+        state: restarted
+        name: wazuh-manager
