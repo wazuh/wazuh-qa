@@ -58,6 +58,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_file_del
 
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
+configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
@@ -108,7 +109,6 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
 
     '''
-    
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     command = f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}"
 

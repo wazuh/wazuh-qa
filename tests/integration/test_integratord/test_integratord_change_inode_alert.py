@@ -58,6 +58,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_change_inode_alert
 
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
+configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
