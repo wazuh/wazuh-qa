@@ -36,9 +36,9 @@ import pytest
 import yaml
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
-from wazuh_testing.modules.integratord import (ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED, ERR_MSG_INVALID_ALERT_NOT_FOUND,
-                                               ERR_MSG_OVERLONG_ALERT_NOT_FOUND, CB_VIRUSTOTAL_ALERT,
-                                               CB_INVALID_JSON_ALERT_READ, CB_OVERLONG_JSON_ALERT_READ)
+from wazuh_testing.modules import integratord as integrator
+from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -53,27 +53,33 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integratord_read_json_alerts.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_alerts.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_valid_json_alerts.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_json_alerts.yaml')
+
 
 # Configurations
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters,
-                                             configuration_metadata)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
+                                             t1_configuration_metadata)
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
+                                             t2_configuration_metadata)
+
+
 local_internal_options = {'integrator.debug': '2'}
 
 
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
-                         zip(configurations, configuration_metadata), ids=case_ids)
-def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                         zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_integratord_read_valid_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
                                       configure_local_internal_options_module, restart_wazuh_function,
                                       wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
-    broken, or overly long a message will appear in the ossec.log file.
-    wazuh_min_version: 4.3.5
+    of a valid alert, a virustotal integration alert is expected in the alerts.json file.
+    wazuh_min_version: 4.3.7
     tier: 1
     parameters:
         - configuration:
@@ -101,9 +107,61 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
         - Verify the expected response with for a given alert is recieved
     input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_json_alerts` file provides the test cases.
+        - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
+    '''
+    sample = metadata['alert_sample']
+    wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+
+    run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+
+    # Read Response in ossec.log
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+                            callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT), 
+                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+
+
+@pytest.mark.tier(level=1)
+@pytest.mark.parametrize('configuration, metadata',
+                         zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+def test_integratord_read_invalid_json_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                                      configure_local_internal_options_module, restart_wazuh_function,
+                                      wait_for_start_module):
+    '''
+    description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
+    of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
+    broken, or overly long a message will appear in the ossec.log file.
+    wazuh_min_version: 4.3.7
+    tier: 1
+    parameters:
+        - configuration:
+            type: dict
+            brief: Configuration loaded from `configuration_template`.
+        - metadata:
+            type: dict
+            brief: Test case metadata.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Set wazuh configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
+        - restart_wazuh_function:
+            type: fixture
+            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+        - wait_for_start_module:
+            type: fixture
+            brief: Detect the start of the Integratord module in the ossec.log
+    assertions:
+        - Verify the expected response with for a given alert is recieved
+    input_description:
+        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `cases_integratord_read_invalid_json_alerts` file provides the test cases.
+    expected_output:
         - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
         - r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
 
@@ -111,23 +169,19 @@ def test_integratord_read_json_alerts(configuration, metadata, set_wazuh_configu
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if metadata['alert_type'] == 'valid':
-        callback = CB_VIRUSTOTAL_ALERT
-        error_message = ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED
-
-    elif metadata['alert_type'] == 'invalid':
-        callback = CB_INVALID_JSON_ALERT_READ
-        error_message = ERR_MSG_INVALID_ALERT_NOT_FOUND
+    if metadata['alert_type'] == 'invalid':
+        callback = integrator.CB_INVALID_JSON_ALERT_READ
+        error_message = integrator.ERR_MSG_INVALID_ALERT_NOT_FOUND
 
     elif metadata['alert_type'] == 'overlong':
-        callback = CB_OVERLONG_JSON_ALERT_READ
-        error_message = ERR_MSG_OVERLONG_ALERT_NOT_FOUND
-    # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
+        callback = integrator.CB_OVERLONG_JSON_ALERT_READ
+        error_message = integrator. ERR_MSG_OVERLONG_ALERT_NOT_FOUND
+        # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
         padding = "0"*90000
         sample = sample.replace("padding_input", "agent_" + padding)
 
-    os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+    run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    wazuh_monitor.start(timeout=global_parameters.default_timeout, callback=callback_generator(callback),
-                        error_message=error_message).result()
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+                            callback=callback_generator(callback), error_message=error_message)
