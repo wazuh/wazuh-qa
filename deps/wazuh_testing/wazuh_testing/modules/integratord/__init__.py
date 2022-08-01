@@ -5,8 +5,9 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 '''
 
 # Variables
+INTEGRATORD_PREFIX = 'wazuh-integratord'
 
-# Callbacks
+# Callback Messages
 CB_VIRUSTOTAL_ENABLED = r".*wazuh-integratord.*Enabling integration for: 'virustotal'.*"
 CB_INTEGRATORD_SENDING_ALERT = r'.*wazuh-integratord.*DEBUG: sending new alert'
 CB_PROCESSING_ALERT = r'.*wazuh-integratord.*Processing alert.*'
