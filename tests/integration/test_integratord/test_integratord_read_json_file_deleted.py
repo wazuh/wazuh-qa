@@ -37,8 +37,9 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import remove_file
-from wazuh_testing.modules.integratord import (ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED, CB_VIRUSTOTAL_ALERT,
-                                               ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND, CB_CANNOT_RETRIEVE_JSON_FILE)
+from wazuh_testing.modules import integratord as integrator
+from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 
@@ -107,19 +108,20 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
 
     '''
-    sample = metadata['alert_sample']
+    
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+    command = f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}"
 
     remove_file(ALERT_FILE_PATH)
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout,
-                                 callback=callback_generator(CB_CANNOT_RETRIEVE_JSON_FILE),
-                                 error_message=ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND).result()
+    check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
+                                 callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
+                                 error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
     # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
-    os.system(f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}")
+    run_local_command_returning_output(command)
     time.sleep(2)
-    os.system(f"echo '{sample}' >> {ALERT_FILE_PATH}")
+    run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    result = wazuh_monitor.start(timeout=global_parameters.default_timeout*2,
-                                 callback=callback_generator(CB_VIRUSTOTAL_ALERT),
-                                 error_message=ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED).result()
+    check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
+                                 callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT),
+                                 error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
