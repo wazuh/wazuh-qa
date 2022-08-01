@@ -10,13 +10,13 @@ import pytest
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
 from wazuh_testing.modules import integratord as integrator
+from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 
-
-# Fixtures
 
 @pytest.fixture(scope='function')
 def wait_for_start_module(request):
-    # Wait for Virustotal Integration to start
+    # Wait for integratord thread to start
     file_monitor = FileMonitor(LOG_FILE_PATH)
-    file_monitor.start(timeout=20, callback=callback_generator(integrator.CB_INTEGRATORD_THREAD_READY),
-                       error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
+    check_integratord_event(file_monitor=file_monitor, timeout=20, 
+                            callback=callback_generator(integrator.CB_INTEGRATORD_THREAD_READY),
+                            error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
