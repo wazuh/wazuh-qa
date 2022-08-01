@@ -115,8 +115,12 @@ def control_service(action, daemon=None, debug_mode=False):
                 for proc in psutil.process_iter():
                     try:
                         if daemon in ['wazuh-clusterd', 'wazuh-apid']:
-                            if any(filter(lambda x: f"{daemon}.py" in x, proc.cmdline())):
-                                processes.append(proc)
+                                for file in os.listdir(f'{WAZUH_PATH}/var/run'):
+                                    if daemon in file:
+                                        pid = file.split("-")
+                                        pid = pid[2][0:-4]
+                                        if pid == str(proc.pid):
+                                            processes.append(proc)
                         elif daemon in proc.name() or daemon in ' '.join(proc.cmdline()):
                             processes.append(proc)
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
