@@ -43,6 +43,7 @@ class Parameters:
         self._gcp_configuration_file = None
         self._gcp_credentials = None
         self._fim_mode = []
+        self._integration_api_key = None
 
     @property
     def default_timeout(self):
@@ -241,6 +242,24 @@ class Parameters:
             value (list): New value for the `fim_mode`.
         """
         self._fim_mode = value
+
+    @property
+    def integration_api_key(self):
+        """Getter method for the `integration_api_key` property
+
+        Returns:
+            string: api key value to be used by integratord tests
+        """
+        return self._integration_api_key
+
+    @integration_api_key.setter
+    def integration_api_key(self, value):
+        """Setter method for the `integration_api_key` property
+
+        Args:
+            value (str): New value for the `integration_api_key`.
+        """
+        self._integration_api_key = value
 
 
 global_parameters = Parameters()
