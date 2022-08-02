@@ -1,5 +1,7 @@
 {% if vars['indexer'] is defined %}
 {%- set indexer = vars['indexer'] -%}
+{%- set indexer_nodes = indexer.keys() | list -%}
+{%- set first_indexer_node = indexer_nodes | first -%}
 {%- set last_indexer_node = indexer|length  - 1-%}
 {% else %}
 {%- set last_indexer_node = 0-%}
@@ -51,9 +53,15 @@ wi_cluster:
     wi{{ loop.index }}:
       {{ expand_ansible_connection_attributes(indexer_value) | indent(6) }}
       private_ip: {{ indexer_value['ip'] }}
-  {% endfor %}
+      {%- if indexer|length == 1 %}
 
-  {% if dashboard is defined %}
+      single_node: true
+      {% endif %}
+
+  {%- endfor -%}
+
+  {%- if dashboard is defined %}
+
     dashboard:
       {{ expand_ansible_connection_attributes(dashboard) | indent(6) }}
       private_ip:  {{ dashboard['ip'] }}
@@ -101,7 +109,10 @@ wi_cluster:
         name: node-{{master_node}}
         ip: "{{ manager['master']['ip'] }}"
         role: wazuh
+    {%- if workers|length != 0 %}
+
         node_type: master
+    {% endif %}
 
         {%- for worker_key, worker_value in workers.items() %}
         {% set real_node_index =  master_node + loop.index %}
@@ -164,7 +175,7 @@ filebeat:
 
   vars:
     filebeat_output_indexer_hosts:
-      - "{{ indexer['indexer1']['ip'] }}"
+      - "{{ indexer[first_indexer_node]['ip'] }}"
 {%- endif -%}
 {% endif %}
 
