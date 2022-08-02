@@ -24,7 +24,7 @@ agent:
       version: VERSION
       revision: REVISION
       repository: REPOSITORY
-      manager: MANAGER_HOST
+      manager_ip: MANAGER_HOST
 
 #----------------------
 
