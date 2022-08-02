@@ -3,13 +3,15 @@
   configuration_parameters: null
   metadata:
     extra_vars:
-      event_description: Access Apache wen server
+      event_description: Access Apache web server
       command: |
         $Web = New-Object Net.WebClient
-        $Web.DownloadString("http://192.168.0.17")
-    rule.id: 641
-    rule.level: 12
-    rule.description: 
-    rule.id.alienvault: 100100
-    rule.level.alienvault: 10
-    rule.description.alienvault: IP address found in AlienVault reputation database
+        $Web.DownloadString("http://wazuh-manager")
+    malicious_ip:
+      rule.id: 100100
+      rule.level: 10
+      rule.description: IP address found in AlienVault reputation database.
+    active_response:
+      rule.id: 651
+      rule.level: 3
+      rule.description : Host Blocked by firewall-drop Active Response

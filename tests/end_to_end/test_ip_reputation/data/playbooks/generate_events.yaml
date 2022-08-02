@@ -10,19 +10,17 @@
   hosts: wazuh-windows
   tasks:
 
-    - name: apache
-      ansible.windows.win_shell: |
-        $Web = New-Object Net.WebClient
-        $Web.DownloadString("http://192.168.0.17")
-      ignore_errors: yes
+    - name: "{{ event_description }}"
+      ansible.windows.win_shell:   "{{ command }}"
+      ignore_errors: yes # Added 'ignore errors' because the IP is blacklisted
 
 - name: Wait alert
   hosts: wazuh-manager
   tasks:
 
-    - name: Waiting for vulnerability scan, alert reporting and indexing
+    - name: Waiting for alert
       wait_for:
-        timeout: 60
+        timeout: 5
 
     - name: Get alerts.json
       fetch:
