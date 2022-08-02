@@ -1,6 +1,8 @@
 - name: Prepare environment
   hosts: wazuh-manager
   become: true
+  vars:
+    suricata_conf_path: /etc/suricata/suricata.yaml
   tasks:
 
     - name: Configure Wazuh to read Suricata logs file
@@ -20,44 +22,47 @@
         name: wazuh-manager
 
     - name: Check if Suricata is installed
-      shell: rpm -qa suricata
+      shell: dpkg -l suricata | grep suricata
       register: check_suricata
+      ignore_errors: true
 
-    - name: Download Suricata repo and install dependencies
-      shell: >
-        cd /etc/yum.repos.d && yum -y install epel-release wget jq &&
-        curl -O https://copr.fedorainfracloud.org/coprs/jasonish/suricata-6.0-testing/repo/epel-7/
-        jasonish-suricata-6.0-testing-epel-7.repo && cd ~
-      when: '"suricata" not in check_suricata.stdout'
+    - name: Add and configure the repo to install Suricata
+      shell: |
+        add-apt-repository ppa:oisf/suricata-5.0 -y
+        apt-get update -y
+      when: '"no packages found matching suricata" in check_suricata.stderr'
 
-    - name: Upgrade all packages, excluding kernel related packages
-      yum:
-        name: '*'
-        state: latest
-        exclude: kernel*
-      when: '"suricata" not in check_suricata.stdout'
-
-    - name: Install the latest version of Suricata
-      yum:
-        name: suricata
+    - name: Install Suricata
+      package:
+        name: suricata=5.0.9-0ubuntu4
         state: present
-      when: '"suricata" not in check_suricata.stdout'
+      when: '"no packages found matching suricata" in check_suricata.stderr'
 
     - name: Download and extract Emerging rules
       shell: |
-        wget https://rules.emergingthreats.net/open/suricata-6.0.3/emerging.rules.tar.gz
-        tar zxvf emerging.rules.tar.gz
-        rm /etc/suricata/rules/* -f
-        mv rules/*.rules /etc/suricata/rules/
-        rm -f /etc/suricata/suricata.yaml
-        wget -O /etc/suricata/suricata.yaml http://www.branchnetconsulting.com/wazuh/suricata.yaml
-      when: '"suricata" not in check_suricata.stdout'
+        cd /tmp/
+        curl -LO https://rules.emergingthreats.net/open/suricata-5.0.8/emerging.rules.tar.gz
+        tar -xvzf emerging.rules.tar.gz && mv rules/*.rules /etc/suricata/rules/
+        chmod 640 /etc/suricata/rules/*.rules
+      when: '"no packages found matching suricata" in check_suricata.stderr'
 
-    # Get the default interface from the Suricata configuration and replace it with the first interface obtained from
-    # the output of the nmcli command
     - name: Change the default interface
-      shell: sed -i "s/eth0/$(nmcli device status | awk 'NR==2 {print $1}')/g" /etc/sysconfig/suricata
-      when: '"suricata" not in check_suricata.stdout'
+      replace:
+        path: "{{ suricata_conf_path }}"
+        regexp: 'af-packet:\n  - interface: eth0'
+        replace: 'af-packet:\n  - interface: {{ ansible_default_ipv4.interface }}'
+
+    - name: Configure external network in Suricata
+      replace:
+        path: "{{ suricata_conf_path }}"
+        regexp: 'EXTERNAL_NET: "!\$HOME_NET"'
+        replace: 'EXTERNAL_NET: "any"'
+
+    - name: Configure rules path in Suricata
+      replace:
+        path: "{{ suricata_conf_path }}"
+        regexp: 'default-rule-path: \S.*\n\nrule-files:\n.*- suricata.rules'
+        replace: 'default-rule-path: /etc/suricata/rules\n\nrule-files:\n  - "*.rules"'
 
     - name: Start Suricata
       systemd:

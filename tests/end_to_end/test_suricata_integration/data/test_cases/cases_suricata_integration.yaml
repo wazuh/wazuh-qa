@@ -1,5 +1,7 @@
-- name: Generate a specific web request known to trip NIDS rules
-  description: Test the detection of threats by monitoring network traffic
+- name: trigger_emerging_policy_rule
+  description: |
+    Test the detection of threats by monitoring network traffic. The test generates a specific web request
+    known to trip NIDS rules.
   configuration_parameters: null
   metadata:
     rule.id: 86601
