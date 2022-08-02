@@ -1,0 +1,10 @@
+- name: Configure environment
+  hosts: localhost
+  become: true
+  tasks:
+
+    # Install hydra to attempt the RDP brute force attack
+    - name: Install hydra
+      package:
+        name: hydra
+        state: present
