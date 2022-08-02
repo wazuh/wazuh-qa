@@ -4,41 +4,37 @@ import re
 import pytest
 from tempfile import gettempdir
 
-from wazuh_testing.tools import configuration as config
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
+from wazuh_testing.tools import configuration as config
 
-# Test cases data
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_brute_force.yaml')
-
-# Playbooks
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_fim.yaml')
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
-teardown_playbooks = None
+teardown_playbooks = ['teardown.yaml']
 
-# Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_brute_force(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_fim(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
     """
-    Test to detect a SSH/RDP Brute Force attack
+     Test to scanning a file using FIM
     """
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
-    rule_mitre_technique = metadata['extra']['mitre_technique']
-    timestamp = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+    syscheck_path = metadata['extra']['syscheck.path']
 
-    expected_alert_json = fr'\{{"timestamp":"({timestamp})","rule"\:{{"level"\:{rule_level},' \
-                          fr'"description"\:"{rule_description}","id"\:"{rule_id}".*'
+    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule":{{"level":{rule_level},' \
+                          fr'"description":"{rule_description}","id":"{rule_id}".*"syscheck":{{"path":' \
+                          fr'"{syscheck_path}".*\}}'
 
-    expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
-                             fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'
+    expected_indexed_alert = fr'.*"path": "{syscheck_path}".*"rule":.*"level": {rule_level},.*"description": ' \
+                             fr'"{rule_description}".*"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
@@ -47,14 +43,14 @@ def test_brute_force(configure_environment, metadata, get_dashboard_credentials,
 
     query = e2e.make_query([
         {
-            "term": {
-                "rule.id": f"{rule_id}"
-            }
+           "term": {
+              "rule.id": f"{rule_id}"
+           }
         },
         {
-            "term": {
-                "timestamp": f"{raised_alert_timestamp}"
-            }
+           "term": {
+              "timestamp": f"{raised_alert_timestamp}"
+           }
         }
     ])
 
