@@ -38,13 +38,13 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
 
     for alert in ip_alerts:
         expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
-                            fr'"rule"\:{{"level"\:{alert["rule_level"]},' \
-                            fr'"description"\:"{alert["rule_description"]}","id"\:"{alert["rule_id"]}".*\}}'
+                              fr'"rule"\:{{"level"\:{alert["rule_level"]},' \
+                              fr'"description"\:"{alert["rule_description"]}","id"\:"{alert["rule_id"]}".*\}}'
 
         expected_indexed_alert = fr'.*"rule":.*"level": {alert["rule_level"]},' \
-                                fr'.*"description": "{alert["rule_description"]}"' \
-                                fr'.*"id": "{alert["rule_id"]}".*'\
-                                r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                                 fr'.*"description": "{alert["rule_description"]}"' \
+                                 fr'.*"id": "{alert["rule_id"]}".*'\
+                                 r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
         # Check that alert has been raised and save timestamp
         raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
