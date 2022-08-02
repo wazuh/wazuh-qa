@@ -1,4 +1,4 @@
-- name: Slack integration - SSH Brute force attack
+- name: slack_integration_brute_force_attack
   description: Test that Wazuh sends the alert via Slack by attempting a brute force SSH attack.
   configuration_parameters: null
   metadata:

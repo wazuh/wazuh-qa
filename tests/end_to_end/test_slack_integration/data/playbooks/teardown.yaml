@@ -5,6 +5,9 @@
     conf_path: /var/ossec/etc/ossec.conf
   tasks:
 
+    - name: Clean added host
+      shell: ssh-keygen -R localhost
+
     - name: Remove the Slack integration block
       blockinfile:
         path: "{{ conf_path }}"

@@ -14,7 +14,8 @@
         command: ssh {{ item }}@localhost
         timeout: 5
         responses:
-          Password: invalid_password
+          (.*)continue connecting(.*): 'yes'
+          (?i)password: invalid_password
       loop:
         - not-a-user
         - not-a-user
@@ -24,7 +25,8 @@
         - not-a-user
         - not-a-user
         - not-a-user
-      ignore_errors: true
+      register: command_result
+      failed_when: "'Permission denied' not in command_result.stdout"
 
     - name: Wait for the alert to be generated
       pause:

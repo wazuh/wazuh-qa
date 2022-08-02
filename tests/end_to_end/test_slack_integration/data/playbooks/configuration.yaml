@@ -26,6 +26,3 @@
       systemd:
         state: restarted
         name: wazuh-manager
-
-    - name: Install pexpect using pip
-      shell: python3 -m pip install pexpect>=3.3
