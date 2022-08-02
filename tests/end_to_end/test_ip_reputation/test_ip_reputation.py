@@ -11,56 +11,62 @@ from wazuh_testing.tools import configuration as config
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_sql_injection.yaml')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_ip_reputation.yaml')
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
-#configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
+configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-#@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, generate_events,
                        clean_alerts_index):
     """
-    Test to detect a SQL injection attack
+    Test to detect a IP Reputation
     """
-    # rule_id = metadata['rule.id']
-    # rule_level = metadata['rule.level']
-    # rule_description = metadata['rule.description']
-    # rule_mitre_technique = metadata['extra']['mitre_technique']
 
-    # expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{rule_level},' \
-    #                       fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
+    first_alert = {"rule_id": metadata['malicious_ip']['rule.id'], "rule_level": metadata['malicious_ip']['rule.level'],
+                   "rule_description": metadata['malicious_ip']['rule.description']}
+    second_alert = {"rule_id": metadata['active_response']['rule.id'], "rule_level": metadata['active_response']['rule.level'],
+                    "rule_description": metadata['active_response']['rule.description']}
 
-    # expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
-    #                          fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'\
-    #                          r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+    ip_alerts = [first_alert, second_alert]
 
-    # # Check that alert has been raised and save timestamp
-    # raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-    #                                error_message='The alert has not occurred').result()
-    # raised_alert_timestamp = raised_alert.group(1)
+    for alert in ip_alerts:
+        expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{alert["rule_level"]},' \
+                            fr'"description"\:"{alert["rule_description"]}","id"\:"{alert["rule_id"]}".*\}}'
 
-    # query = e2e.make_query([
+        expected_indexed_alert = fr'.*"rule":.*"level": {alert["rule_level"]},.*"description": "{alert["rule_description"]}"' \
+                                fr'.*"id": "{alert["rule_id"]}".*'\
+                                r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
-    #      {
-    #         "term": {
-    #            "rule.id": f"{rule_id}"
-    #         }
-    #      },
-    #      {
-    #         "term": {
-    #            "timestamp": f"{raised_alert_timestamp}"
-    #         }
-    #      }
-    #  ])
+        # Check that alert has been raised and save timestamp
+        raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+                                    error_message='The alert has not occurred').result()
+        raised_alert_timestamp = raised_alert.group(1)
 
-    # # Check if the alert has been indexed and get its data
-    # response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
-    # indexed_alert = json.dumps(response.json())
+        rule_id = alert["rule_id"]
 
-    # # Check that the alert data is the expected one
-    # alert_data = re.search(expected_indexed_alert, indexed_alert)
-    # assert alert_data is not None, 'Alert triggered, but not indexed'
+        query = e2e.make_query([
+
+            {
+                "term": {
+                "rule.id": f"{rule_id}"
+                }
+            },
+            {
+                "term": {
+                "timestamp": f"{raised_alert_timestamp}"
+                }
+            }
+        ])
+
+        # Check if the alert has been indexed and get its data
+        response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+        indexed_alert = json.dumps(response.json())
+
+        # Check that the alert data is the expected one
+        alert_data = re.search(expected_indexed_alert, indexed_alert)
+        assert alert_data is not None, 'Alert triggered, but not indexed'
