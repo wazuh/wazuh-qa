@@ -78,7 +78,7 @@
           </active-response>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Configure local rules active response
+    - name: Configure local rules
       become: true
       blockinfile:
         path: /var/ossec/etc/rules/local_rules.xml
