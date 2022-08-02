@@ -14,4 +14,4 @@
     active_response:
       rule.id: 651
       rule.level: 3
-      rule.description : Host Blocked by firewall-drop Active Response
+      rule.description: Host Blocked by firewall-drop Active Response

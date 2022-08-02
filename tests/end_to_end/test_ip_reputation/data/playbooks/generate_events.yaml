@@ -11,8 +11,8 @@
   tasks:
 
     - name: "{{ event_description }}"
-      ansible.windows.win_shell:   "{{ command }}"
-      ignore_errors: yes # Ignore powershell error
+      ansible.windows.win_shell: "{{ command }}"
+      ignore_errors: true # Ignore powershell error
 
 - name: Wait alert
   hosts: wazuh-manager

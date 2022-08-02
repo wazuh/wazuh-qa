@@ -27,24 +27,28 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
     Test to detect a IP Reputation
     """
 
-    first_alert = {"rule_id": metadata['malicious_ip']['rule.id'], "rule_level": metadata['malicious_ip']['rule.level'],
+    first_alert = {"rule_id": metadata['malicious_ip']['rule.id'],
+                   "rule_level": metadata['malicious_ip']['rule.level'],
                    "rule_description": metadata['malicious_ip']['rule.description']}
-    second_alert = {"rule_id": metadata['active_response']['rule.id'], "rule_level": metadata['active_response']['rule.level'],
+    second_alert = {"rule_id": metadata['active_response']['rule.id'],
+                    "rule_level": metadata['active_response']['rule.level'],
                     "rule_description": metadata['active_response']['rule.description']}
 
     ip_alerts = [first_alert, second_alert]
 
     for alert in ip_alerts:
-        expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{alert["rule_level"]},' \
+        expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
+                            fr'"rule"\:{{"level"\:{alert["rule_level"]},' \
                             fr'"description"\:"{alert["rule_description"]}","id"\:"{alert["rule_id"]}".*\}}'
 
-        expected_indexed_alert = fr'.*"rule":.*"level": {alert["rule_level"]},.*"description": "{alert["rule_description"]}"' \
+        expected_indexed_alert = fr'.*"rule":.*"level": {alert["rule_level"]},' \
+                                fr'.*"description": "{alert["rule_description"]}"' \
                                 fr'.*"id": "{alert["rule_id"]}".*'\
                                 r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
         # Check that alert has been raised and save timestamp
         raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                    error_message='The alert has not occurred').result()
+                                       error_message='The alert has not occurred').result()
         raised_alert_timestamp = raised_alert.group(1)
 
         rule_id = alert["rule_id"]
@@ -53,12 +57,12 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
 
             {
                 "term": {
-                "rule.id": f"{rule_id}"
+                   "rule.id": f"{rule_id}"
                 }
             },
             {
                 "term": {
-                "timestamp": f"{raised_alert_timestamp}"
+                  "timestamp": f"{raised_alert_timestamp}"
                 }
             }
         ])
