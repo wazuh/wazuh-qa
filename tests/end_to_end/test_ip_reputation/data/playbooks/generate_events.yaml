@@ -12,7 +12,7 @@
 
     - name: "{{ event_description }}"
       ansible.windows.win_shell:   "{{ command }}"
-      ignore_errors: yes # Added 'ignore errors' because the IP is blacklisted
+      ignore_errors: yes # Ignore powershell error
 
 - name: Wait alert
   hosts: wazuh-manager
