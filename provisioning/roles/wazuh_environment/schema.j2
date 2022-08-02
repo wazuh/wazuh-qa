@@ -192,27 +192,52 @@ all:
     # General ansible connection parameters
     ansible_ssh_common_args: -o StrictHostKeyChecking=no
     ansible_winrm_server_cert_validation: ignore
+
     # Custom Packages parameters
     wazuh_custom_packages_installation_agent_enabled: true
     wazuh_custom_packages_installation_manager_enabled: true
+
+    wazuh_custom_packages_installation_dashboard_enabled: true
+    wazuh_custom_packages_installation_indexer_enabled: true
+
+
     {% if custom_package_deb_agent is defined%}
     wazuh_custom_packages_installation_agent_deb_url: {{ custom_package_deb_agent }}
     {% endif %}
+
     {% if custom_package_rpm_agent is defined%}
     wazuh_custom_packages_installation_agent_rpm_url: {{ custom_package_rpm_agent }}
     {% endif %}
     {% if custom_pakckage_msi_agent is defined%}
     wazuh_custom_packages_installation_agent_msi_url: {{ custom_pakckage_msi_agent}}
     {% endif %}
-    {% if macos_agent_pkg is defined%}
+    {% if custom_package_macos_agent is defined%}
     macos_agent_pkg: {{ custom_package_macos_agent}}
     {% endif %}
-    {% if solaris_agent_pkg is defined%}
+    {% if custom_package_solaris_agent is defined%}
     solaris_agent_pkg: {{ custom_package_solaris_agent}}
     {% endif %}
     {% if custom_package_deb_manager is defined%}
     wazuh_custom_packages_installation_manager_deb_url: {{ custom_package_deb_manager}}
     {% endif %}
-    {% if wazuh_custom_packages_installation_manager_rpm_url is defined%}
+    {% if custom_package_rpm_manager is defined%}
     wazuh_custom_packages_installation_manager_rpm_url: {{ custom_package_rpm_manager}}
+    {% endif %}
+
+    {% if custom_package_deb_dashboard is defined%}
+    wazuh_custom_packages_installation_dashboard_deb_url: {{ custom_package_deb_dashboard}}
+    {% endif %}
+
+
+    {% if custom_package_rpm_dashboard is defined%}
+    wazuh_custom_packages_installation_dashboard_rpm_url: {{ custom_package_rpm_dashboard}}
+    {% endif %}
+
+
+    {% if custom_package_deb_indexer is defined%}
+    wazuh_custom_packages_installation_indexer_deb_url: {{ custom_package_deb_indexer}}
+    {% endif %}
+
+    {% if custom_package_rpm_indexer is defined%}
+    wazuh_custom_packages_installation_indexer_rpm_url: {{ custom_package_rpm_indexer}}
     {% endif %}
