@@ -46,7 +46,6 @@ def get_slack_log_path():
     remove_file(slack_messages_log)
 
 
-
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_slack_integration(metadata, configure_environment, get_dashboard_credentials, generate_events,
