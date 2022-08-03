@@ -9,8 +9,20 @@
 
 
 {% if vars['dashboard'] is defined %}
-{%- set dashboard = vars['dashboard'] -%}
+
+  {% if vars['dashboard']['ip'] ==  vars['indexer'][first_indexer_node]['ip'] %}
+    {%- set all_in_one = true-%}
+  {% else %}
+    {%- set all_in_one = false-%}
+{% endif %}
+
+  {% if all_in_one %}
+{%- set dashboard_node = last_indexer_node  + 1 -%}
+  {% else %}
 {%- set dashboard_node = last_indexer_node + 2 -%}
+  {% endif %}
+{%- set dashboard = vars['dashboard'] -%}
+
 {% else %}
 {%- set dashboard_node = last_indexer_node + 1-%}
 {% endif %}
@@ -63,9 +75,22 @@ wi_cluster:
   {%- if dashboard is defined %}
 
     dashboard:
+      {%- if all_in_one %}
+
+      perform_installation: false
+      indexer_node_name: "node-1"
+      dashboard_node_name: "node-1"
+
+      {% else %}
+
+
+      dashboard_node_name: "node-{{ dashboard_node }}"
+
+      {% endif %}
+
       {{ expand_ansible_connection_attributes(dashboard) | indent(6) }}
       private_ip:  {{ dashboard['ip'] }}
-      dashboard_node_name: "node-{{ dashboard_node }}"
+
   {% endif %}
 
   vars:
@@ -95,7 +120,7 @@ wi_cluster:
         role: indexer
       {% endfor %}
 
-    {%- if dashboard is defined %}
+    {%- if dashboard is defined and not all_in_one %}
 
       node{{dashboard_node}}:
         name: node-{{dashboard_node}}
