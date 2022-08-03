@@ -12,8 +12,8 @@
 
     - name: "{{ event_description }}"
       ansible.windows.win_shell: "{{ command }}"
-      # Ignore powershell error
-      ignore_errors: true
+      register: result
+      failed_when: "'Forbidden' not in result.stderr"
 
 - name: Wait alert
   hosts: wazuh-manager
