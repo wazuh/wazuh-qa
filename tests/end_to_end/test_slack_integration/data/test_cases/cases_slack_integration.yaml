@@ -7,3 +7,5 @@
     rule.level: 10
     extra:
       srcuser: not-a-user
+    extra_vars:
+      SLACK_API_SCRIPT: CUSTOM_SLACK_SCRIPT_PATH

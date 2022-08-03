@@ -3,6 +3,7 @@
   vars:
     alerts_path: /var/ossec/logs/alerts/alerts.json
     integrations_log: /var/ossec/logs/integrations.log
+    slack_messages_log: /tmp/slack_messages.log
   become: true
   tasks:
 
@@ -32,8 +33,7 @@
       pause:
         seconds: 5
 
-    # Check if the alert has been sent to Slack
-    - name: Get integrations.log
+    - name: Check if the alert has been sent to Slack
       wait_for:
         path: "{{ integrations_log }}"
         search_regex: hooks.slack.com
@@ -42,5 +42,15 @@
     - name: Get alerts.json
       fetch:
         src: "{{ alerts_path }}"
+        dest: /tmp/
+        flat: true
+
+    # Get messages from Slack channel using the API of Slack
+    - name: Run the script using python3 (Get messages from Slack channel)
+      script: "{{ SLACK_API_SCRIPT }} -t {{ slack_token }} -c {{ slack_channel }} -m 1 -p {{ slack_messages_log }}"
+
+    - name: Get Slack messages log
+      fetch:
+        src: "{{ slack_messages_log }}"
         dest: /tmp/
         flat: true
