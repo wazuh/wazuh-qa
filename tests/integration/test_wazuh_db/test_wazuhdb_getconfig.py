@@ -96,6 +96,6 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     output = case_data["output"]
 
     response = query_wdb(case_data["input"])
-    print("RESPONSE --------" + str(response))
+    
     # Validate response
     assert str(response) == output
