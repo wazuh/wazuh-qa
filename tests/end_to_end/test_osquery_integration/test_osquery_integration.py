@@ -55,7 +55,7 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
         },
         {
             "term": {
-                "timestamp": f"{raised_alert_timestamp }"
+                "timestamp": f"{raised_alert_timestamp}"
             }
         }
     ])
