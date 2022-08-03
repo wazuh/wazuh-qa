@@ -65,10 +65,6 @@ wi_cluster:
     wi{{ loop.index }}:
       {{ expand_ansible_connection_attributes(indexer_value) | indent(6) }}
       private_ip: {{ indexer_value['ip'] }}
-      {%- if indexer|length == 1 %}
-
-      single_node: true
-      {% endif %}
 
   {%- endfor -%}
 
