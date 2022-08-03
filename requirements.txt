@@ -21,14 +21,14 @@ py~=1.10.0
 pycryptodome>=3.9.8
 pyOpenSSL==19.1.0
 pytest-html==3.1.1
-pytest==6.2.2
+pytest==6.2.5
 pyyaml==5.4
 requests==2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 seaborn>=0.11.1; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 setuptools~=56.0.0
 testinfra==5.0.0
-jq==1.1.2; platform_system == "Linux" or platform_system == "Darwin"
+jq>=1.1.2; platform_system == "Linux" or platform_system == "Darwin"
 cryptography==3.3.2; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 urllib3
 numpydoc>=1.1.0
