@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
-
 ### Added
 
 - Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984)) \- (Framework + Tests)
