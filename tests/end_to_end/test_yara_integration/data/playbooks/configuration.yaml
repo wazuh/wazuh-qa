@@ -1,0 +1,142 @@
+- name: Configure environment
+  hosts: wazuh-manager
+  become: true
+  tasks:
+
+    - name: Configure local rules for Yara
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: |
+          <group name="syscheck,">
+          <rule id="100300" level="7">
+          <if_sid>550</if_sid>
+          <field name="file">/tmp/yara/malware/</field>
+          <description>File modified in /tmp/yara/malware/ directory.</description>
+          </rule>
+          <rule id="100301" level="7">
+          <if_sid>554</if_sid>
+          <field name="file">/tmp/yara/malware/</field>
+          <description>File added to /tmp/yara/malware/ directory.</description>
+          </rule>
+          </group>
+          <group name="yara,">
+          <rule id="108000" level="0">
+          <decoded_as>yara_decoder</decoded_as>
+          <description>Yara grouping rule</description>
+          </rule>
+          <rule id="108001" level="12">
+          <if_sid>108000</if_sid>
+          <match>wazuh-yara: INFO - Scan result: </match>
+          <description>File "$(yara_scanned_file)" is a positive match. Yara rule: $(yara_rule)</description>
+          </rule>
+          </group>
+
+    - name: Configure local decoders for Yara
+      blockinfile:
+        path: /var/ossec/etc/decoders/local_decoder.xml
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        block: |
+          <decoder name="yara_decoder">
+          <prematch>wazuh-yara:</prematch>
+          </decoder>
+          <decoder name="yara_decoder1">
+          <parent>yara_decoder</parent>
+          <regex>wazuh-yara: (\S+) - Scan result: (\S+) (\S+)</regex>
+          <order>log_type, yara_rule, yara_scanned_file</order>
+          </decoder>
+
+    - name: Configure an active response for Yara
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        insertbefore: ^</ossec_config>
+        block: |
+          <command>
+          <name>yara</name>
+          <executable>yara.sh</executable>
+          <extra_args>-yara_path /usr/bin -yara_rules /tmp/yara/rules/yara_rules.yar</extra_args>
+          <timeout_allowed>no</timeout_allowed>
+          </command>
+          <active-response>
+          <command>yara</command>
+          <location>local</location>
+          <rules_id>100300,100301</rules_id>
+          </active-response>
+
+    - name: Configure syscheck
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertafter: <syscheck>
+        marker: <!-- {mark} ADDING SYSCHECK CONFIG -->
+        block: |
+          <directories whodata="yes">/tmp/yara/malware</directories>
+
+    - name: Restart wazuh-manager
+      systemd:
+        state: restarted
+        name: wazuh-manager
+
+    - name: Create a directory to store Yara rules
+      file:
+        path: /tmp/yara/rules
+        state: directory
+
+    - name: Download Yara rules
+      uri:
+        url: https://valhalla.nextron-systems.com/api/v1/get
+        method: POST
+        headers:
+          Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+          Accept-Language: en-US,en;q=0.5
+          Referer: https://valhalla.nextron-systems.com/
+          Content-Type: application/x-www-form-urlencoded
+          DNT: "1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1"
+        body: demo=demo&apikey=1111111111111111111111111111111111111111111111111111111111111111&format=text
+        dest: /tmp/yara/rules/yara_rules.yar
+
+    - name: Check if epel-release is installed
+      shell: rpm -qa epel-release
+      register: check_epel_release
+
+    - name: Install epel-release
+      package:
+        name:
+          - epel-release
+        state: present
+      when: '"epel" not in check_epel_release.stdout'
+
+    - name: Check if yara is installed
+      shell: rpm -qa yara
+      register: check_yara
+
+    - name: Install Yara on CentOS
+      package:
+        name:
+          - yara
+        state: present
+      when: '"yara" not in check_yara.stdout'
+
+    - name: Create a directory to store malware
+      file:
+        path: /tmp/yara/malware
+        state: directory
+
+    - name: Copy the Yara script
+      copy:
+        src: "{{ yara_script }}"
+        dest: /var/ossec/active-response/bin/
+        owner: root
+        group: wazuh
+        mode: '0750'
+
+    - name: Check if jq is installed
+      shell: rpm -qa jq
+      register: check_jq
+
+    - name: Install jq (JSON Processor) on CentOS
+      package:
+        name:
+          - jq
+        state: present
+      when: '"jq" not in check_jq.stdout'
