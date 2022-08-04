@@ -14,10 +14,11 @@ def check_if_daemons_are_running(daemons):
     for daemon in daemons:
         assert check_if_process_is_running(daemon), f"{daemon} is not running. It may have crashed"
 
+
 def execute_shell_command(command):
     try:
         output_shell = subprocess.run(command, shell=True, check=True, stderr=subprocess.PIPE)
         return output_shell
     except subprocess.CalledProcessError as exc:
         logger.error(f"Process failed because did not return a successful return code. "
-        f"Returned {exc.returncode}\n{exc}")
+                     f"Returned {exc.returncode}\n{exc}")

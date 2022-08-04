@@ -93,7 +93,8 @@ def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, f
                               set_wazuh_configuration_analysisd, copy_file, source_path, destination_path,
                               restart_wazuh_daemon_function):
     '''
-    description: Check if 'active response' works correctly when binding an active response for a rule that will be overwritten.
+    description: Check if 'active response' works correctly when binding an active response for a rule
+                 that will be overwritten.
 
     wazuh_min_version: 4.3.5
 

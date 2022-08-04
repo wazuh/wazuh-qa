@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
 
+
 @pytest.fixture(scope='function')
 def set_wazuh_configuration_analysisd(configuration, set_wazuh_configuration):
     """Set wazuh configuration
