@@ -2,40 +2,55 @@
   hosts: wazuh-windows
   tasks:
 
+    - name: Disable Windows Defender
+      win_shell: |
+        Set-MpPreference -DisableRealtimeMonitoring 1
+
     - name: Create temp folder
       win_file:
         path: C:\temp
         state: directory
 
+    - name: Download PSTools
+      win_shell: |
+        Set-Location C:\temp
+        Write-Host "Location set $path"
+        Write-Host "Retrieving PSTools..."
+        Invoke-WebRequest -Uri https://download.sysinternals.com/files/PSTools.zip -Outfile PSTools.zip
+
+    - name: Unzip PSTools
+      win_shell: |
+        Expand-Archive -Path C:\temp\PSTools.zip -DestinationPath C:\temp\PSTools
+
     - name: Copy ossec.conf
-      ansible.windows.win_copy:
+      win_copy:
         src: C:\Program Files (x86)\ossec-agent\ossec.conf
         dest: C:\temp
         remote_src: true
 
     - name: Download sysmon
-      ansible.windows.win_shell: |
+      win_shell: |
         Set-Location C:\temp
         Write-Host "Location set $path"
         Write-Host "Retrieving Sysmon..."
         Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -Outfile Sysmon.zip
 
     - name: Unzip sysmon
-      ansible.windows.win_shell: |
+      win_shell: |
         Expand-Archive -Path C:\temp\Sysmon.zip -DestinationPath C:\temp\Sysmon
 
     - name: Copy Sysmon configuration file
-      ansible.windows.win_copy:
+      win_copy:
         src: "{{ sysmon_config }}"
         dest: C:\temp\Sysmon
 
     - name: Install sysmon
-      ansible.windows.win_shell: |
+      win_shell: |
         cd C:\temp\Sysmon
         ./Sysmon64.exe -accepteula -i sysconfig.xml
 
     - name: Configure Wazuh to collect Sysmon events
-      ansible.windows.win_shell: |
+      win_shell: |
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
@@ -44,18 +59,13 @@
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
 
-    - name: Copy exec_emotet_script.vbs in the agent
-      ansible.windows.win_copy:
-        src: "{{ vbs_script }}"
-        dest: C:\temp
-
     - name: Copy trigger_emotet.exe in the agent
-      ansible.windows.win_copy:
+      win_copy:
         src: "{{ emotet_file }}"
         dest: C:\temp
 
     - name: Restart wazuh-agent (Windows)
-      ansible.windows.win_shell: |
+      win_shell: |
         net stop wazuh
         net start wazuh
 
