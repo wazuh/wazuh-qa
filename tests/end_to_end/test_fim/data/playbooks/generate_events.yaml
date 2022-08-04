@@ -1,0 +1,42 @@
+- name: Clean alerts file
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate file
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: True
+
+- name: Generate events
+  hosts: agents
+  vars:
+    os: "{{ os }}"
+  tasks:
+
+    - name: "{{ event_description }}"
+      become: True
+      file:
+        path: "{{ path }}"
+        state: "{{ state }}"
+        mode: "{{ mode }}"
+      when: os == "Linux"
+
+    - name: "{{ event_description }}"
+      win_file:
+        path: "{{ path }}"
+        state: "{{ state }}"
+      when: os == ansible_facts['os_family']
+
+- name: Get alerts
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Wait for alert to be generated
+      wait_for:
+        timeout: 5
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true

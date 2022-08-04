@@ -1,0 +1,53 @@
+- name: Test agent configuration
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Create temp folder
+      win_file:
+        path: C:\temp
+        state: directory
+
+    - name: Copy ossec.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Enable the agent to collect Windows Defender logs
+      ansible.windows.win_shell: |
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+        "`n<location>Microsoft-Windows-Windows Defender/Operational</location>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
+        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+
+    - name: Restart wazuh-agent (Windows)
+      ansible.windows.win_shell: |
+        net stop wazuh
+        net start wazuh
+
+- name: Test manager configuration
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Configure local rules
+      become: true
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        insertafter: </groups>
+        block: |
+          <group name="Defense Evasion,WindowsDefender">
+          <rule id="255303" level="12">
+          <if_sid>62100</if_sid>
+          <field name="win.system.eventID">^5001$</field>
+          <description>Windows Defender Real-time Protection was disabled.</description>
+          <group>defender,attack.t1089</group>
+          </rule>
+          </group>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart wazuh-manager
+      become: true
+      shell: systemctl restart wazuh-manager

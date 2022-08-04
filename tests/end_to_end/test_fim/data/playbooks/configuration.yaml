@@ -1,0 +1,61 @@
+---
+- name: Test case configuration
+  hosts: agents
+  tasks:
+
+    - name: Create directory to monitor (Linux)
+      become: True
+      file:
+        path: /tmp/test_demo_fim
+        state: directory
+      when: ansible_facts['system'] == "Linux"
+
+    - name: Add directory to syscheck configuration (Linux)
+      become: True
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertafter: </directories>
+        block: |
+          <directories check_all="yes" whodata="yes">/tmp/test_demo_fim</directories>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+      when: ansible_facts['system'] == "Linux"
+
+    - name: Restart Wazuh (Linux)
+      become: True
+      systemd:
+        name: wazuh-agent
+        state: restarted
+      when: ansible_facts['system'] == "Linux"
+
+    - name: Create directory to monitor (Windows)
+      win_file:
+        path: C:\Test\test_demo_fim
+        state: directory
+      when: ansible_facts['os_family'] == "Windows"
+
+    - name: Add directory to syscheck configuration (Windows)
+      win_lineinfile:
+        path: C:\Program Files (x86)\ossec-agent\ossec.conf
+        insertafter: </directories>
+        line: |
+          <directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>
+      when: ansible_facts['os_family'] == "Windows"
+
+    - name: Truncate ossec.log
+      win_file:
+        path: C:\Program Files (x86)\ossec-agent\ossec.log
+        state: absent
+      when: ansible_facts['os_family'] == "Windows"
+
+    - name: Restart Wazuh (Windows)
+      win_shell: |
+        net stop wazuh
+        net start wazuh
+      when: ansible_facts['os_family'] == "Windows"
+
+    - name: Wait for whodata start
+      win_wait_for:
+        path: C:\Program Files (x86)\ossec-agent\ossec.log
+        search_regex: File integrity monitoring real-time Whodata engine started.
+        timeout: 20
+      when: ansible_facts['os_family'] == "Windows"

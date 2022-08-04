@@ -4,38 +4,42 @@ import re
 import pytest
 from tempfile import gettempdir
 
+from wazuh_testing.tools import configuration as config
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
-from wazuh_testing.tools import configuration as config
 
-
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_osquery_integration.yaml')
-osquery_configuration_file_path = os.path.join(test_data_path, 'configuration', 'osquery_integration.json')
+# Test cases data
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_windows_defender.yaml')
+
+# Playbooks
 configuration_playbooks = ['configuration.yaml']
-configuration_extra_vars = {'configuration_file': osquery_configuration_file_path}
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
+# Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_osquery_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
-                             clean_alerts_index):
+def test_windows_defender(configure_environment, metadata, get_dashboard_credentials, generate_events,
+                          clean_alerts_index):
+    """
+    Test to detect a vulnerability
+    """
     rule_level = metadata['rule.level']
-    rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
-    osquery_name = metadata['extra']['data.osquery.name']
+    rule_description = metadata['rule.description']
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
-                          fr"\"id\":\"{rule_id}\".+osquery\":.+\"name\":\"{osquery_name}\""
+    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
+                          fr'"rule"\:{{"level"\:{rule_level},' \
+                          fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
-    expected_indexed_alert = fr".+osquery\":.+\"name\": \"{osquery_name}\".+level\": {rule_level}, " \
-                             fr"\"description\": \"{rule_description}\".+\"id\": \"{rule_id}\"" \
-                             r'.+timestamp\": \"(.+)\"},.+'
+    expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
+                             fr'.*"id": "{rule_id}".*' \
+                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
@@ -46,11 +50,6 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
         {
             "term": {
                 "rule.id": f"{rule_id}"
-            }
-        },
-        {
-            "term": {
-                "data.osquery.name": f"{osquery_name}"
             }
         },
         {

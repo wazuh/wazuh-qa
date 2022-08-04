@@ -83,6 +83,11 @@ def configure_environment(request):
 
             parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
 
+            # Check if the module has extra variables to pass to the playbook
+            configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
+            if configuration_extra_vars is not None:
+                parameters.update({'extravars': configuration_extra_vars})
+
             ansible_runner.run(**parameters)
 
 
