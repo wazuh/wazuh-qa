@@ -15,6 +15,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 test_cases_path = os.path.join(test_data_path, 'test_cases')
 test_cases_file_path = os.path.join(test_cases_path, 'cases_slack_integration.yaml')
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
+slack_messages_log = os.path.join(gettempdir(), 'slack_messages.log')
 
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
@@ -32,16 +33,10 @@ metadata = config.update_configuration_template(metadata, ['CUSTOM_SLACK_SCRIPT_
 
 
 @pytest.fixture(scope='function')
-def get_slack_log_path():
-    """Get the temporary path to the file containing the Slack messages. Then delete the temporary file.
-
-    Returns:
-        slack_messages_log(str): String with the file path.
+def remove_slack_log():
+    """Delete the temporary path to the file containing the Slack messages.
     """
-
-    slack_messages_log = os.path.join(gettempdir(), 'slack_messages.log')
-
-    yield slack_messages_log
+    yield
 
     remove_file(slack_messages_log)
 
@@ -49,7 +44,7 @@ def get_slack_log_path():
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_slack_integration(metadata, configure_environment, get_dashboard_credentials, generate_events,
-                           get_slack_log_path, clean_alerts_index):
+                           remove_slack_log, clean_alerts_index):
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
@@ -96,5 +91,5 @@ def test_slack_integration(metadata, configure_environment, get_dashboard_creden
     assert alert_data is not None, 'Alert triggered, but not indexed'
 
     # Check if the alert received in Slack is the same as the triggered one
-    evm.check_event(callback=expected_slack_log, file_to_monitor=get_slack_log_path,
+    evm.check_event(callback=expected_slack_log, file_to_monitor=slack_messages_log,
                     timeout=fw.T_5, error_message='The alert has not reached Slack').result()
