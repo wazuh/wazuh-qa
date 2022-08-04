@@ -57,6 +57,64 @@
 {%- endmacro -%}
 
 
+
+{% macro expand_custom_package(role, role_parameters) %}
+
+{% if role == 'agent' %}
+{% if role_parameters['wazuh_custom_packages_installation_agent_rpm_url'] is defined%}
+wazuh_custom_packages_installation_agent_rpm_url: {{role_parameters['wazuh_custom_packages_installation_agent_rpm_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_agent_deb_url'] is defined%}
+wazuh_custom_packages_installation_agent_deb_url: {{role_parameters['wazuh_custom_packages_installation_agent_deb_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_msi_url'] is defined %}
+wazuh_custom_packages_installation_agent_msi_url: {{role_parameters['wazuh_custom_packages_installation_agent_msi_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_macos_url'] is defined%}
+custom_package_macos_agent: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url:'] is defined%}
+custom_package_solaris_agent: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
+{% endif %}
+{% endif %}
+
+
+{% if role == 'manager' %}
+{% if role_parameters['wazuh_custom_packages_installation_manager_deb_url'] is defined %}
+wazuh_custom_packages_installation_manager_deb_url: {{role_parameters['wazuh_custom_packages_installation_manager_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_manager_rpm_url'] is defined%}
+wazuh_custom_packages_installation_manager_rpm_url: {{role_parameters['wazuh_custom_packages_installation_manager_rpm_url']}}
+{% endif %}
+{% endif %}
+
+
+
+{% if role == 'dashboard' %}
+{% if role_parameters['wazuh_custom_packages_installation_dashboard_deb_url'] is defined%}
+wazuh_custom_packages_installation_dashboard_deb_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url'] is defined %}
+wazuh_custom_packages_installation_dashboard_rpm_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url']}}
+{% endif %}
+{% endif %}
+
+{% if role == 'indexer' %}
+{% if role_parameters['wazuh_custom_packages_installation_indexer_deb_url'] is defined %}
+wazuh_custom_packages_installation_indexer_deb_url: {{role_parameters['wazuh_custom_packages_installation_indexer_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_indexer_rpm_url'] is defined %}
+wazuh_custom_packages_installation_indexer_rpm_url: {{role_parameters['wazuh_custom_packages_installation_indexer_rpm_url']}}
+{% endif %}
+{% endif %}
+
+{%- endmacro -%}
+
+
+
 {% if indexer is defined%}
 wi_cluster:
   hosts:
@@ -65,6 +123,7 @@ wi_cluster:
     wi{{ loop.index }}:
       {{ expand_ansible_connection_attributes(indexer_value) | indent(6) }}
       private_ip: {{ indexer_value['ip'] }}
+      {{ expand_custom_package('indexer', indexer_value) | indent(6)  }}
 
   {%- endfor -%}
 
@@ -76,6 +135,7 @@ wi_cluster:
       perform_installation: false
       indexer_node_name: "node-1"
       dashboard_node_name: "node-1"
+      {{ expand_custom_package('indexer', indexer_value) | indent(6)  }}
 
       {% else %}
 
@@ -156,6 +216,7 @@ manager:
       master:
         {{ expand_ansible_connection_attributes(manager['master']) | indent(8) }}
         private_ip:  {{ manager['master']['ip'] }}
+        {{ expand_custom_package('manager', manager['master']) | indent(8)  }}
         wazuh_manager_config:
           cluster:
             disable: 'no'
@@ -172,6 +233,7 @@ manager:
       worker{{loop.index}}:
         {{ expand_ansible_connection_attributes(worker_values) | indent(8) }}
         private_ip:  {{ worker_values['ip'] }}
+        {{ expand_custom_package('manager', worker_values) | indent(6)  }}
         wazuh_manager_config:
           cluster:
             disable: 'no'
@@ -206,6 +268,7 @@ agent:
   hosts:
     {% for agent_key, agent_value in agent.items() -%}
     agent{{loop.index}}:
+      {{ expand_custom_package('agent', agent_value) | indent(6)  }}
       {{ expand_ansible_connection_attributes(agent_value) | indent(6) }}
       wazuh_managers:
       - address: {{ agent_value['manager_ip'] }}
