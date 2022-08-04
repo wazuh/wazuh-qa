@@ -65,7 +65,8 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'analysis'))
 receiver_sockets_params = [(logtest_sock, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
-msg_get_config = "getconfig rule_test"
+msg_get_config = '{"version": 1, "origin": {"module": "api"}, "command": "getconfig", "module": "api",\
+                 "parameters": {"section": "rule_test"}}'
 
 
 # Fixture
