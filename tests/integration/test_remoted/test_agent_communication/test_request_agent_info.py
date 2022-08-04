@@ -50,6 +50,7 @@ import wazuh_testing.remote as rd
 import wazuh_testing.tools.agent_simulator as ag
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.sockets import send_request
+from wazuh_testing.tools import REMOTED_SOCKET_PATH
 
 
 # Marks
@@ -163,7 +164,7 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
 
         msg_request = f'{agent.id} {command_request}'
 
-        response = send_request(msg_request)
+        response = send_request(msg_request, wazuh_socket=REMOTED_SOCKET_PATH)
 
         assert expected_answer in response, "Remoted unexpected answer"
 
