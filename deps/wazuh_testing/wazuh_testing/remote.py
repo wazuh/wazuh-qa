@@ -631,12 +631,12 @@ def check_push_shared_config(agent, sender, injector=None):
         # Add agent to group and check if the configuration is pushed.
         add_agent_to_group(DEFAULT_TESTING_GROUP_NAME, agent.id)
 
-        for _ in range(5):
+        for _ in range(2):
             # send some keep alive messages until manager push the new group configuration
             sender.send_event(agent.keep_alive_event)
-            time.sleep(1)
+            time.sleep(10)
 
-        check_agent_received_message(agent, '#!-up file .* merged.mg', timeout=10,
+        check_agent_received_message(agent, r'#!-up file .* merged.mg', timeout=10,
                                      error_message="New group shared config not received")
 
     finally:
