@@ -1,0 +1,22 @@
+- name: Cleanup environment
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Restore ossec.conf without changes
+      ansible.windows.win_copy:
+        src: C:\temp\ossec.conf
+        dest: C:\Program Files (x86)\ossec-agent
+        remote_src: true
+
+    - name: Delete C:\temp folder
+      ansible.windows.win_file:
+        path: C:\temp
+        state: absent
+
+    - name: Enable Windows Defender
+      ansible.windows.win_shell: set-MpPreference -DisableRealtimeMonitoring $False
+
+    - name: Restart wazuh-agent (Windows)
+      ansible.windows.win_shell: |
+        net stop wazuh
+        net start wazuh
