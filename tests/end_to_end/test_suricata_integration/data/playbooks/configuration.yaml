@@ -26,25 +26,23 @@
       register: check_suricata
       ignore_errors: true
 
-    - name: Add and configure the repo to install Suricata
+    - name: Add the repo to install Suricata
       shell: |
-        add-apt-repository ppa:oisf/suricata-5.0 -y
-        apt-get update -y
+        add-apt-repository ppa:oisf/suricata-stable -y
       when: '"no packages found matching suricata" in check_suricata.stderr'
 
     - name: Install Suricata
       package:
-        name: suricata=5.0.9-0ubuntu4
+        name: suricata
         state: present
       when: '"no packages found matching suricata" in check_suricata.stderr'
 
-    - name: Download and extract Emerging rules
-      shell: |
-        cd /tmp/
-        curl -LO https://rules.emergingthreats.net/open/suricata-5.0.8/emerging.rules.tar.gz
-        tar -xvzf emerging.rules.tar.gz && mv rules/*.rules /etc/suricata/rules/
-        chmod 640 /etc/suricata/rules/*.rules
-      when: '"no packages found matching suricata" in check_suricata.stderr'
+    - name: Enable and stop Suricata
+      systemd:
+        daemon_reload: true
+        enabled: true
+        state: stopped
+        name: suricata
 
     - name: Change the default interface
       replace:
@@ -62,11 +60,18 @@
       replace:
         path: "{{ suricata_conf_path }}"
         regexp: 'default-rule-path: \S.*\n\nrule-files:\n.*- suricata.rules'
-        replace: 'default-rule-path: /etc/suricata/rules\n\nrule-files:\n  - "*.rules"'
+        replace: 'default-rule-path: /var/lib/suricata/rules\n\nrule-files:\n  - "*.rules"'
+
+    - name: Configure live rule reloading
+      replace:
+        path: "{{ suricata_conf_path }}"
+        regexp: '#include: include2.yaml'
+        replace: '#include: include2.yaml\ndetect-engine:\n  - rule-reload: true'
+
+    - name: Updating Suricata rules
+      shell: suricata-update
 
     - name: Start Suricata
       systemd:
-        daemon_reload: true
-        enabled: true
         state: started
         name: suricata

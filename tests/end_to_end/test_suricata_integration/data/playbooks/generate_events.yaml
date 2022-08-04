@@ -9,7 +9,7 @@
       shell: echo "" > {{ alerts_path }}
 
     - name: Run command to generate an alert
-      shell: curl -s http://testmynids.org/uid/index.html
+      shell: curl http://testmynids.org/uid/index.html
 
     - name: Wait for alerts to be generated
       wait_for:

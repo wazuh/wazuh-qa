@@ -6,6 +6,6 @@
   metadata:
     rule.id: 86601
     rule.level: 3
-    rule.description: "Suricata: Alert - ET POLICY curl User-Agent Outbound"
+    rule.description: "Suricata: Alert - GPL ATTACK_RESPONSE id check returned root"
     extra:
       data.hostname: testmynids.org
