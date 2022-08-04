@@ -54,7 +54,7 @@ import pytest
 import time
 
 from wazuh_testing import global_parameters
-from wazuh_testing.processes import check_if_daemons_are_running
+from wazuh_testing.processes import check_if_daemons_are_running, execute_shell_command
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import remove_file
 from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, AR_SCRIPTS_PATH
@@ -139,7 +139,7 @@ def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, f
     '''
     os.chmod(wazuh_ar_script, 0o777)
     cmd = "echo '{}' >> '{}'".format(metadata['log_sample'], file_to_monitor)
-    os.system(cmd)
+    execute_shell_command(cmd)
 
     # Checking if AR works properly
     time.sleep(global_parameters.default_timeout)
