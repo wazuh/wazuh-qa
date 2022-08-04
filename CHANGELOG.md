@@ -2,18 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.3.6] - Development (unreleased)
+## [4.3.7] - Development (unreleased)
 
 Wazuh commit: TBD \
 Release report: TBD
 
+
 ### Added
 
-- Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984))
+- Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984)) \- (Framework + Tests)
+
+### Changed
+
+- Increase framework version of jq and pytest in the requirements file to support python3.10 ([#3107](https://github.com/wazuh/wazuh-qa/pull/3108)) \- (Framework)
+
+## [4.3.6] - 20-07-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/be15851b8ead7512d9cd4ef1ee18b3b953173211 \
+Release report: https://github.com/wazuh/wazuh/issues/14188
+
+### Added
+
+- Add Remoted IT - test_multi_groups ([#3060](https://github.com/wazuh/wazuh-qa/pull/3060)) \- (Framework + Tests)
 
 ### Fixed
 
 - Fix GCloud IT - test_max_messages error ([#3006](https://github.com/wazuh/wazuh-qa/pull/3006)) \- (Framework + Tests)
+- Fix Remoted IT - test_agent_communication ([#3088](https://github.com/wazuh/wazuh-qa/pull/3088)) \- (Framework)
 
 
 ## [4.3.5] - 29-06-2022
@@ -84,6 +99,7 @@ Release report: https://github.com/wazuh/wazuh/issues/13321
 - Add FIM Windows 4659 events tests. ([#648](https://github.com/wazuh/wazuh-qa/pull/648))
 
 ### Changed
+
 - Migrate `test_rids` documentation to `qa-docs`. ([#2422](https://github.com/wazuh/wazuh-qa/pull/2422))
 - Google Cloud. IT Tests: Fixing and rework for 4.3.0-RC2. ([#2420](https://github.com/wazuh/wazuh-qa/pull/2420))
 - Refactor: FIM `test_report_changes` according to new standard.  Phase 1. ([#2417](https://github.com/wazuh/wazuh-qa/pull/2417))

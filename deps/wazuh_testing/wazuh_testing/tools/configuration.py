@@ -671,9 +671,12 @@ def load_configuration_template(data_file_path, configuration_parameters=[], con
 
 def get_test_cases_data(data_file_path):
     """Load a test case template file and get its data.
-    Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
+
+    Template example file: tests/integration/test_remoted/test_multi_groups/data/test_cases/case_file_actions.yaml
+
     Args:
         data_file_path (str): Test case template file path.
+
     Returns:
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
