@@ -27,3 +27,13 @@
     - name: Restart the manager
       become: true
       shell: systemctl restart wazuh-manager
+
+- name: Cleanup Windows agent environment
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Delete syscheck configuration
+      win_lineinfile:
+        path: C:\Windows\System32\drivers\etc\hosts
+        regex: wazuh-manager
+        state: absent
