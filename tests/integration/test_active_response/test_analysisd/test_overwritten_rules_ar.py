@@ -126,7 +126,7 @@ def test_overwritten_rules_ar(configuration, metadata, create_file_to_monitor, f
         - restart_wazuh_daemon_function:
             type: fixture
             brief: restart Wazuh.
-        
+
     assertions:
         - verify that the custom AR created a file.
 
