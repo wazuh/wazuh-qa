@@ -907,6 +907,7 @@ def copy_file(source_path, destination_path):
         copy(source_path[i], destination_path[i])
 
     yield
+
     for file in destination_path:
         remove_file(file)
 
@@ -921,4 +922,5 @@ def create_file_to_monitor(file_to_monitor):
     write_file(file_to_monitor)
 
     yield
+    
     remove_file(file_to_monitor)
