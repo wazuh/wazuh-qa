@@ -106,7 +106,7 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
                  If the agent is disconnected, it raises an error.
                  As the test has nothing to do with shared configuration files, we removed those rootcheck txt files
                  from default agent group to reduce the time required by the test to make the checks.
-    
+
     wazuh_min_version: 4.2.0
 
     tier: 0
@@ -130,20 +130,20 @@ def test_request(get_configuration, configure_environment, remove_shared_files,
         - expected_answer:
             type: dict_keys
             brief: Test cases keys. Used to verify the remoted response.
-    
+
     assertions:
         - Verify that the expected answer is in the response.
-    
+
     input_description: A configuration template (test_request_agent_info) is contained in an external YAML file,
                        (wazuh_request_agent_info.yaml). That template is combined with different test cases defined
                        in the module. Those include configuration settings for the 'wazuh-remoted' daemon and agents
                        info.
-    
+
     expected_output:
         - Could not find the remoted key loading log
         - "expected_answer: {agent.id} {command_request}"
         - Remoted unexpected answer
-    
+
     tags:
         - simulator
         - remoted
