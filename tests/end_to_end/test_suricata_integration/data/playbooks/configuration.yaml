@@ -67,9 +67,7 @@
       blockinfile:
         path: "{{ suricata_conf_path }}"
         insertafter: EOF
-        block: |
-          detect-engine:
-            - rule-reload: true
+        block: "detect-engine:\n  - rule-reload: true"
 
     - name: Updating Suricata rules
       shell: suricata-update
