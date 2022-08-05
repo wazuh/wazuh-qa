@@ -15,15 +15,15 @@
       become: true
       shell: yum install python39 -y
 
-    - name: Download Alienvault IP
+    - name: Download Alienvault IP set
       become: true
       shell: >
-        wget https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/alienvault_reputation.ipset
-        -O /var/ossec/etc/lists/alienvault_reputation.ipset
+        curl https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/alienvault_reputation.ipset
+        -o /var/ossec/etc/lists/alienvault_reputation.ipset
 
     - name: Download script to convert from ipset format to cdblist format
       become: true
-      shell: wget https://wazuh.com/resources/iplist-to-cdblist.py -O /tmp/iplist-to-cdblist.py
+      shell: curl https://wazuh.com/resources/iplist-to-cdblist.py -o /tmp/iplist-to-cdblist.py
 
     - name: Add the attacker IP to the list
       become: true
