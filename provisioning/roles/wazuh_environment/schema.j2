@@ -73,11 +73,11 @@ wazuh_custom_packages_installation_agent_msi_url: {{role_parameters['wazuh_custo
 {% endif %}
 
 {% if role_parameters['wazuh_custom_packages_installation_agent_macos_url'] is defined%}
-custom_package_macos_agent: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
+wazuh_custom_packages_installation_agent_macos_url: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
 {% endif %}
 
 {% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url:'] is defined%}
-custom_package_solaris_agent: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
+wazuh_custom_packages_installation_agent_solaris_url: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
 {% endif %}
 {% endif %}
 
@@ -296,43 +296,43 @@ all:
     wazuh_custom_packages_installation_indexer_enabled: true
 
 
-    {% if custom_package_deb_agent is defined-%}
-    wazuh_custom_packages_installation_agent_deb_url: {{ custom_package_deb_agent }}
+    {% if wazuh_custom_packages_installation_agent_deb_url is defined-%}
+    wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
     {% endif %}
 
-    {%- if custom_package_rpm_agent is defined-%}
-    wazuh_custom_packages_installation_agent_rpm_url: {{ custom_package_rpm_agent }}
+    {%- if wazuh_custom_packages_installation_agent_rpm_url is defined-%}
+    wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
     {% endif %}
-    {%- if custom_pakckage_msi_agent is defined-%}
-    wazuh_custom_packages_installation_agent_msi_url: {{ custom_pakckage_msi_agent}}
+    {%- if wazuh_custom_packages_installation_agent_msi_url is defined-%}
+    wazuh_custom_packages_installation_agent_msi_url: {{ wazuh_custom_packages_installation_agent_msi_url}}
     {% endif %}
-    {%- if custom_package_macos_agent is defined-%}
-    macos_agent_pkg: {{ custom_package_macos_agent}}
+    {%- if wazuh_custom_packages_installation_agent_macos_url is defined-%}
+    wazuh_custom_packages_installation_agent_macos_url: {{ wazuh_custom_packages_installation_agent_macos_url}}
     {% endif %}
-    {%- if custom_package_solaris_agent is defined-%}
-    solaris_agent_pkg: {{ custom_package_solaris_agent}}
+    {%- if wazuh_custom_packages_installation_agent_solaris_url is defined-%}
+    wazuh_custom_packages_installation_agent_solaris_url: {{ wazuh_custom_packages_installation_agent_solaris_url}}
     {% endif %}
-    {%- if custom_package_deb_manager is defined-%}
-    wazuh_custom_packages_installation_manager_deb_url: {{ custom_package_deb_manager}}
+    {%- if wazuh_custom_packages_installation_manager_deb_url is defined-%}
+    wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url}}
     {% endif %}
-    {%- if custom_package_rpm_manager is defined-%}
-    wazuh_custom_packages_installation_manager_rpm_url: {{ custom_package_rpm_manager}}
-    {% endif %}
-
-    {%- if custom_package_deb_dashboard is defined-%}
-    wazuh_custom_packages_installation_dashboard_deb_url: {{ custom_package_deb_dashboard}}
+    {%- if wazuh_custom_packages_installation_manager_rpm_url is defined-%}
+    wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url}}
     {% endif %}
 
-
-    {%- if custom_package_rpm_dashboard is defined-%}
-    wazuh_custom_packages_installation_dashboard_rpm_url: {{ custom_package_rpm_dashboard}}
+    {%- if wazuh_custom_packages_installation_dashboard_deb_url is defined-%}
+    wazuh_custom_packages_installation_dashboard_deb_url: {{ wazuh_custom_packages_installation_dashboard_deb_url}}
     {% endif %}
 
 
-    {%- if custom_package_deb_indexer is defined-%}
-    wazuh_custom_packages_installation_indexer_deb_url: {{ custom_package_deb_indexer}}
+    {%- if wazuh_custom_packages_installation_dashboard_rpm_url is defined-%}
+    wazuh_custom_packages_installation_dashboard_rpm_url: {{ wazuh_custom_packages_installation_dashboard_rpm_url}}
     {% endif %}
 
-    {%- if custom_package_rpm_indexer is defined-%}
-    wazuh_custom_packages_installation_indexer_rpm_url: {{ custom_package_rpm_indexer}}
+
+    {%- if wazuh_custom_packages_installation_indexer_deb_url is defined-%}
+    wazuh_custom_packages_installation_indexer_deb_url: {{ wazuh_custom_packages_installation_indexer_deb_url}}
+    {% endif %}
+
+    {%- if wazuh_custom_packages_installation_indexer_rpm_url is defined-%}
+    wazuh_custom_packages_installation_indexer_rpm_url: {{ wazuh_custom_packages_installation_indexer_rpm_url}}
     {% endif %}
