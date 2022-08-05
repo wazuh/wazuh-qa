@@ -1,6 +1,8 @@
 {% macro expand_ansible_connection_attributes(attributes_map) %}
 {% for attr_key, attr_value in attributes_map.items() %}
+{% if 'ansible' in attr_key %}
 {{- attr_key }}: {{ attr_value }}
+{% endif %}
 {% endfor %}
 {%- endmacro -%}
 
@@ -11,7 +13,7 @@ apache:
 
     apache{{ loop.index }}:
       ansible_host: {{ apache_value['ip'] }}
-      {{ expand_ansible_connection_attributes(apache_value['connection_attributes']) | indent(6) }}
+      {{ expand_ansible_connection_attributes(apache_value) | indent(6) }}
   {%- endfor %}
 {% endif %}
 

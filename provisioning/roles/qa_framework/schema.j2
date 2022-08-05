@@ -1,6 +1,8 @@
 {% macro expand_ansible_connection_attributes(attributes_map) %}
 {% for attr_key, attr_value in attributes_map.items() %}
+{% if 'ansible' in attr_key %}
 {{- attr_key }}: {{ attr_value }}
+{% endif %}
 {% endfor %}
 {%- endmacro -%}
 
@@ -11,7 +13,7 @@ qa_framework:
 
     qa_framework{{ loop.index }}:
       ansible_host: {{ qa_framework_value['ip'] }}
-      {{ expand_ansible_connection_attributes(qa_framework_value['connection_attributes']) | indent(6) }}
+      {{ expand_ansible_connection_attributes(qa_framework_value) | indent(6) }}
       qa_repository_reference: {{ qa_framework_value['qa_repository_reference'] }}
   {%- endfor %}
 {% endif %}
