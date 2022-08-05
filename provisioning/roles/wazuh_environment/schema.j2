@@ -135,11 +135,14 @@ wi_cluster:
       perform_installation: false
       indexer_node_name: "node-1"
       dashboard_node_name: "node-1"
-      {{ expand_custom_package('indexer', indexer_value) | indent(6)  }}
+
+      {{ expand_custom_package('indexer', vars['dashboard']) | indent(6)  }}
+      {{ expand_custom_package('dashboard', vars['dashboard']) | indent(6)  }}
 
       {% else %}
 
-
+      {{ expand_custom_package('indexer', vars['dashboard']) | indent(6)  }}
+      {{ expand_custom_package('dashboard', vars['dashboard']) | indent(6)  }}
       dashboard_node_name: "node-{{ dashboard_node }}"
 
       {% endif %}
@@ -233,7 +236,7 @@ manager:
       worker{{loop.index}}:
         {{ expand_ansible_connection_attributes(worker_values) | indent(8) }}
         private_ip:  {{ worker_values['ip'] }}
-        {{ expand_custom_package('manager', worker_values) | indent(6)  }}
+        {{ expand_custom_package('manager', worker_values) | indent(8)  }}
         wazuh_manager_config:
           cluster:
             disable: 'no'
