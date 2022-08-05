@@ -3,6 +3,7 @@
   become: true
   vars:
     suricata_conf_path: /etc/suricata/suricata.yaml
+    suricata_log_path: /var/log/suricata/suricata.log
   tasks:
 
     - name: Configure Wazuh to read Suricata logs file
@@ -63,10 +64,12 @@
         replace: 'default-rule-path: /var/lib/suricata/rules\n\nrule-files:\n  - "*.rules"'
 
     - name: Configure live rule reloading
-      replace:
+      blockinfile:
         path: "{{ suricata_conf_path }}"
-        regexp: '#include: include2.yaml'
-        replace: '#include: include2.yaml\ndetect-engine:\n  - rule-reload: true'
+        insertafter: EOF
+        block: |
+          detect-engine:
+            - rule-reload: true
 
     - name: Updating Suricata rules
       shell: suricata-update
@@ -75,3 +78,8 @@
       systemd:
         state: started
         name: suricata
+
+    - name: Wait for Suricata to start completely
+      wait_for:
+        path: "{{ suricata_log_path }}"
+        search_regex: <Info> - All AFP capture threads are running.
