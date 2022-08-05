@@ -21,37 +21,33 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, generate_events,
-                       clean_alerts_index):
+def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
     """
     Test to detect a IP Reputation
     """
 
-    first_alert = {"rule_id": metadata['malicious_ip']['rule.id'],
-                   "rule_level": metadata['malicious_ip']['rule.level'],
-                   "rule_description": metadata['malicious_ip']['rule.description']}
-    second_alert = {"rule_id": metadata['active_response']['rule.id'],
-                    "rule_level": metadata['active_response']['rule.level'],
-                    "rule_description": metadata['active_response']['rule.description']}
+    malicious_ip_alert = metadata['malicious_ip']
+    active_response_alert = metadata['active_response']
+    expected_alerts = [malicious_ip_alert, active_response_alert]
 
-    ip_alerts = [first_alert, second_alert]
+    for alert in expected_alerts:
+        rule_level = alert['rule.level']
+        rule_id = alert['rule.id']
+        rule_description = alert['rule.description']
 
-    for alert in ip_alerts:
         expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
-                              fr'"rule"\:{{"level"\:{alert["rule_level"]},' \
-                              fr'"description"\:"{alert["rule_description"]}","id"\:"{alert["rule_id"]}".*\}}'
+                              fr'"rule"\:{{"level"\:{rule_level},' \
+                              fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
-        expected_indexed_alert = fr'.*"rule":.*"level": {alert["rule_level"]},' \
-                                 fr'.*"description": "{alert["rule_description"]}"' \
-                                 fr'.*"id": "{alert["rule_id"]}".*'\
+        expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},' \
+                                 fr'.*"description": "{rule_description}"' \
+                                 fr'.*"id": "{rule_id}".*'\
                                  r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
 
         # Check that alert has been raised and save timestamp
         raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                       error_message='The alert has not occurred').result()
+                                       error_message=f"The alert '{rule_description}' has not occurred").result()
         raised_alert_timestamp = raised_alert.group(1)
-
-        rule_id = alert["rule_id"]
 
         query = e2e.make_query([
 
