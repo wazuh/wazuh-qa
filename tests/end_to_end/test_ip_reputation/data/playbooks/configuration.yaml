@@ -11,10 +11,6 @@
       become: true
       shell: systemctl start httpd
 
-    - name: Install pyhton
-      become: true
-      shell: yum install python39 -y
-
     - name: Download Alienvault IP set
       become: true
       shell: >
