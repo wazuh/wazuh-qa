@@ -1,0 +1,8 @@
+- name: 'EPS Limits enable'
+  description: 'EPS Limits enable'
+  configuration_parameters:
+    MAXIMUN: '10'
+    TIMEFRAME: '5'
+  metadata:
+    maximun: 10
+    timeframe: 5

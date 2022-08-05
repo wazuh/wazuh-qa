@@ -1,0 +1,17 @@
+- name: 'EPS Limits with maximun value 0'
+  description: 'EPS Limits with maximun value 0'
+  configuration_parameters:
+    MAXIMUN: '0'
+    TIMEFRAME: '5'
+  metadata:
+    maximun: 0
+    timeframe: 5
+
+- name: 'EPS Limits with maximun values null'
+  description: 'EPS Limits with maximun values null'
+  configuration_parameters:
+    MAXIMUN: ''
+    TIMEFRAME: '10'
+  metadata:
+    maximun:
+    timeframe: 10

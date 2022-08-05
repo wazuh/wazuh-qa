@@ -1,0 +1,8 @@
+- name: 'EPS Limits start queueing events'
+  description: 'EPS Limits start queueing events'
+  configuration_parameters:
+    MAXIMUN: '100'
+    TIMEFRAME: '5'
+  metadata:
+    maximun: 100
+    timeframe: 5

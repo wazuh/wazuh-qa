@@ -1,0 +1,6 @@
+- name: 'Simulate agent params configuration'
+  description: 'Simulate agent params configuration'
+  configuration_parameters:
+    num_agent: '1'
+    modules: 'logcollector'
+    time: '15'

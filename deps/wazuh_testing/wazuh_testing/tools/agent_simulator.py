@@ -1017,6 +1017,7 @@ class Logcollector:
     def __init__(self):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
+        self.message_counter = 0
 
     def generate_event(self):
         """Generate logcollector event
@@ -1026,8 +1027,10 @@ class Logcollector:
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
-        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}"
+        message_counter_info = f"Message number: {self.message_counter}"
+        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}:{message_counter_info}"
 
+        self.message_counter = self.message_counter + 1
         return message
 
 
