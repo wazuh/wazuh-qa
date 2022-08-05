@@ -30,11 +30,12 @@ slack_api_script = os.path.join(test_data_path, 'configuration', 'slack_api_scri
 
 # Update configuration with custom paths
 metadata = config.update_configuration_template(metadata, ['CUSTOM_SLACK_SCRIPT_PATH'], [slack_api_script])
+configuration_extra_vars = configuration[0]
 
 
 @pytest.fixture(scope='function')
 def remove_slack_log():
-    """Delete the temporary path to the file containing the Slack messages.
+    """Delete the temporary file containing the Slack messages.
     """
     yield
 
