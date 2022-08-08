@@ -59,11 +59,21 @@ def clone_wazuh_repository(pytestconfig):
             repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                                    repository_path, branch='master', no_single_branch=True)
 
+            # Get all branches that contains the commit
             git_local = Git(repository_path)
-            commit_branch = git_local.branch('-a', '--contains', commit).split('\n')[0].strip()
+            commit_branch = git_local.branch('-a', '--contains', commit).split('\n')
+            commit_branch_head = False
 
-            repo.git.checkout(commit_branch)
-            repo.git.checkout(commit)
+            for branch in commit_branch:
+                # Remove * in case of branch is the master
+                branch_name = branch.replace('*','').strip()
+                repo.git.checkout(branch_name)
+                # Check if the commit is the head of the branch
+                if(str(repo.head.commit) == commit):
+                    commit_branch_head = True
+                    break
+            if not commit_branch_head:
+                raise Exception("Commit should be the head of the branch")
 
         yield repository_path
 
