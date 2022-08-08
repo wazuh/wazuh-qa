@@ -17,6 +17,6 @@ from wazuh_testing.modules.integratord.event_monitor import check_integratord_ev
 def wait_for_start_module(request):
     # Wait for integratord thread to start
     file_monitor = FileMonitor(LOG_FILE_PATH)
-    check_integratord_event(file_monitor=file_monitor, timeout=20, 
+    check_integratord_event(file_monitor=file_monitor, timeout=20,
                             callback=callback_generator(integrator.CB_INTEGRATORD_THREAD_READY),
                             error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)

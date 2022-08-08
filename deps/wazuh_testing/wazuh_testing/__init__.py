@@ -22,7 +22,7 @@ def is_tcp(protocol):
 
 
 def is_tcp_udp(protocol):
-    _protocol = protocol.replace(' ','').upper().split(',')
+    _protocol = protocol.replace(' ', '').upper().split(',')
     _protocol.sort()
     return ','.join(_protocol) == TCP_UDP
 

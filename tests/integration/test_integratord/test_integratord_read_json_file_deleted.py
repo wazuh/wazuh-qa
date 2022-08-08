@@ -34,6 +34,7 @@ tags:
 import os
 import time
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import remove_file
@@ -114,8 +115,8 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
 
     remove_file(ALERT_FILE_PATH)
     check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
-                                 callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
-                                 error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
+                            callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
+                            error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
     # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
     run_local_command_returning_output(command)
     time.sleep(2)
@@ -123,5 +124,5 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
 
     # Read Response in ossec.log
     check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
-                                 callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT),
-                                 error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+                            callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT),
+                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)

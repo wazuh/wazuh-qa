@@ -1,12 +1,15 @@
-
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+'''
 
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
-
 def check_integratord_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                              timeout=30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+                            timeout=30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """Check if an event occurs
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.
@@ -22,4 +25,3 @@ def check_integratord_event(file_monitor=None, callback='', error_message=None, 
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=callback, error_message=error_message)
-

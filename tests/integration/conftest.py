@@ -96,7 +96,8 @@ def restart_wazuh_function(daemons=None):
     """
     control_service('restart', daemons)
     yield
-    control_service('stop',daemons)
+    control_service('stop', daemons)
+
 
 @pytest.fixture(scope='module')
 def restart_wazuh_module(daemons=None):
@@ -106,7 +107,8 @@ def restart_wazuh_module(daemons=None):
     """
     control_service('restart', daemons)
     yield
-    control_service('stop',daemons)
+    control_service('stop', daemons)
+
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
@@ -250,6 +252,7 @@ def pytest_addoption(parser):
         type=str,
         help="pass api key required for integratord tests."
     )
+
 
 def pytest_configure(config):
     # Register an additional marker
@@ -885,7 +888,6 @@ def configure_local_internal_options_module(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-
 @pytest.fixture(scope='function')
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
@@ -912,6 +914,7 @@ def truncate_monitored_files_module():
 
     for log_file in log_files:
         truncate_file(log_file)
+
 
 @pytest.fixture(scope='function')
 def set_wazuh_configuration(configuration):
