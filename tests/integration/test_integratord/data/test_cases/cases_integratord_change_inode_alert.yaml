@@ -8,7 +8,7 @@
                    "syscheck_entry_added","syscheck_file"],"pci_dss":["11.5"],"gpg13":["4.11"],"gdpr":["II_5.1.f"],
                    "hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8",
                    "CC7.2","CC7.3"]},"agent":{"id":"000","name":"padding_input"},"manager":{"name":"c3"},"id":
-                   "1657551196.2754","full_log":"File /test_folder/TEST_CHANGED_INODE_ALERT.txt added\nMode: 
+                   "1657551196.2754","full_log":"File /test_folder/TEST_CHANGED_INODE_ALERT.txt added\nMode:
                    scheduled\n","syscheck":{"path":"/test_folder/TEST_CHANGED_INODE_ALERT.txt","mode":"scheduled",
                    "size_after":"16","perm_after":"rw-r--r--","uid_after":"0","gid_after":"0","md5_after":
                    "2982666f29e2736e7ca0e12dd638d433","sha1_after":"49999430cc5652dedd26352b0342097e8fa3affe",

@@ -106,7 +106,7 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_file_deleted` file provides the test cases.
     expected_output:
-        - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts\.json.*No such file.*'
+        - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts.json.*No such file.*'
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
 
     '''
