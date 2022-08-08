@@ -69,6 +69,9 @@
         insertafter: EOF
         block: "detect-engine:\n  - rule-reload: true"
 
+    - name: Clean Suricata logs
+      shell: echo '' >  "{{ suricata_log_path }}"
+
     - name: Updating Suricata rules
       shell: suricata-update
 
