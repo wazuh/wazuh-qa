@@ -129,12 +129,12 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     time.sleep(3)
     run_local_command_returning_output(command)
 
-    # Monitor Inode Changed   
+    # Monitor Inode Changed
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout * 2,
                             callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
                             error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
 
-    # Read Response in ossec.log    
+    # Read Response in ossec.log
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                             callback=callback_generator(integrator.CB_PROCESSING_ALERT),
                             error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)

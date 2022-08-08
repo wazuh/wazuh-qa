@@ -114,7 +114,7 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     command = f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}"
 
     remove_file(ALERT_FILE_PATH)
-    check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
                             error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
     # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
@@ -123,6 +123,6 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor,timeout=global_parameters.default_timeout*2,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT),
                             error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)

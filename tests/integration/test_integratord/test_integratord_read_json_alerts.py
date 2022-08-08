@@ -77,8 +77,8 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                            configure_local_internal_options_module, restart_wazuh_function,
-                                            wait_for_start_module):
+                                       configure_local_internal_options_module, restart_wazuh_function,
+                                       wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a virustotal integration alert is expected in the alerts.json file.
@@ -114,7 +114,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
     '''
-    
+
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     time.sleep(5)
@@ -130,8 +130,8 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                              configure_local_internal_options_module, restart_wazuh_function,
-                                              wait_for_start_module):
+                                         configure_local_internal_options_module, restart_wazuh_function,
+                                         wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
