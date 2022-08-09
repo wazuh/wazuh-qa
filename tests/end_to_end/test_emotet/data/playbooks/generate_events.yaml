@@ -8,12 +8,12 @@
 
 - name: Generate events windows
   hosts: wazuh-windows
-
   tasks:
+
     - name: Execute trigger-emotet.exe
-      win_command: C:\temp\PSTools\psexec.exe -accepteula -nobanner -i 1 -d C:\temp\trigger-emotet.exe
+      win_shell: C:\temp\PSTools\psexec.exe -accepteula -nobanner -i 1 -d C:\temp\trigger-emotet.exe
       register: output
-      failed_when: '"with process ID {{ output.rc }}" not in output.stderr'
+      failed_when: '"with process ID" not in output.stderr'
 
 - name: Wait alert
   hosts: wazuh-manager
@@ -21,7 +21,7 @@
 
     - name: Wait for alert
       wait_for:
-        timeout: 5
+        timeout: 10
 
     - name: Get alerts.json
       fetch:

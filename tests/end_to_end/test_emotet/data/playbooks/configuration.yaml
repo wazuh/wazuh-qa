@@ -2,6 +2,14 @@
   hosts: wazuh-windows
   tasks:
 
+    - name: Auto logon
+      community.windows.win_auto_logon:
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+
+    - name: Reboot Windows agent
+      win_reboot:
+
     - name: Disable Windows Defender
       win_shell: |
         Set-MpPreference -DisableRealtimeMonitoring 1
