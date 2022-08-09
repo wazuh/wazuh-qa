@@ -12,7 +12,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":true}}}'
-  verbose_mode: True
+  verbose_mode: true
 -
   name: rules_debug_false
   rule_file: rules_verbose.xml
@@ -20,7 +20,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":false}}}'
-  verbose_mode: False
+  verbose_mode: false
 -
   name: rules_debug_bad_type_string
   rule_file: rules_verbose.xml
@@ -28,7 +28,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":"true"}}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: ".*WARNING: .*: ('rules_debug' field must be a boolean. The parameter will be ignored).*"
 -
   name: rules_debug_bad_type_number
@@ -37,7 +37,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":123}}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: ".*WARNING: .*: ('rules_debug' field must be a boolean. The parameter will be ignored).*"
 -
   name: rules_debug_bad_type_object
@@ -46,7 +46,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":{"test":"true"}}}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: ".*WARNING: .*: ('rules_debug' field must be a boolean. The parameter will be ignored).*"
 -
   name: rules_debug_bad_type_array
@@ -55,7 +55,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":{"rules_debug":["true", "false"]}}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: ".*WARNING: .*: ('rules_debug' field must be a boolean. The parameter will be ignored).*"
 -
   name: options_bad_type_boolean
@@ -64,7 +64,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":true}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: "WARNING: .*: ('options' field must be a JSON object. The parameter will be ignored)"
 -
   name: options_bad_type_array
@@ -73,7 +73,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":["true", "false"]}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: "WARNING: .*: ('options' field must be a JSON object. The parameter will be ignored)"
 -
   name: options_bad_type_number
@@ -82,7 +82,7 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":123456}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: "WARNING: .*: ('options' field must be a JSON object. The parameter will be ignored)"
 -
   name: options_bad_type_string
@@ -91,5 +91,5 @@
   input: '{"version":1,"origin":{"name":"Integration Test","module":"api"},"command":"log_processing","parameters":{
           "event": "{\"it_logtest\" : \"rules_verbose\", \"test\": \"last_match\"}","log_format": "syslog",
           "location": "master->/var/log/syslog","options":"true"}}'
-  verbose_mode: False
+  verbose_mode: false
   warning_message: "WARNING: .*: ('options' field must be a JSON object. The parameter will be ignored)"
