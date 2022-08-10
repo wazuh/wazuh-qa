@@ -77,7 +77,7 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                       configure_local_internal_options_module, restart_wazuh_function,
+                                       configure_local_internal_options_module, restart_wazuh_daemon_function,
                                        wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
@@ -100,9 +100,9 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - restart_wazuh_function:
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+            brief: Restart wazuh daemon before starting a test.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
