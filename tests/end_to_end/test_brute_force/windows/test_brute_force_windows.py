@@ -26,13 +26,13 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_brute_force(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
     """
-    Test to detect a SSH/RDP Brute Force attack
+    Test to detect a RDP Brute Force attack
     """
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
-    timestamp = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+    timestamp = fr'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
     expected_alert_json = fr'\{{"timestamp":"({timestamp})","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*'

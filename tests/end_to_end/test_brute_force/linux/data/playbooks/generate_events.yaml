@@ -32,23 +32,6 @@
         - "'Permission denied' not in result.stdout"
       when: agent_os == "Linux"
 
-    # Case: Windows agent
-    - name: Attempt a RDP brute force attack
-      shell: hydra -l {{ item }} -p invalid_password rdp://wazuh-windows
-      loop:
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-        - test_user
-      register: result
-      failed_when:
-        - "'0 valid password found' not in result.stdout"
-      when: agent_os == "Windows"
-
     - name: Wait for alert
       wait_for:
         timeout: 5
