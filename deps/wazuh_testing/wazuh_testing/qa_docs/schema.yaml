@@ -49,6 +49,7 @@ predefined_values:
     - performance
     - system
     - unit
+    - end_to_end
   components:
     - active_response
     - agentd
