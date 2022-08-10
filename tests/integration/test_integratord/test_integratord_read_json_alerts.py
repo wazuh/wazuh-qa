@@ -60,11 +60,11 @@ t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_js
 
 # Configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-t1_configuration_parameters[0]['API_KEY'] = global_parameters.integration-api-pey
+t1_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration-api-pey
+t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 

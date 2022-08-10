@@ -263,9 +263,9 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
-        "--integration-api-pey",
+        "--integration_api_key",
         action="store",
-        metavar="integration-api-pey",
+        metavar="integration_api_key",
         default=None,
         type=str,
         help="pass api key required for integratord tests."
@@ -327,10 +327,10 @@ def pytest_configure(config):
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
 
-    # Set integration-api-pey if it is passed through command line args
-    integration-api-pey = config.getoption("--integration-api-pey")
-    if integration-api-pey:
-        global_parameters.integration-api-pey = integration-api-pey
+    # Set integration_api_key if it is passed through command line args
+    integration_api_key = config.getoption("--integration_api_key")
+    if integration_api_key:
+        global_parameters.integration_api_key = integration_api_key
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
