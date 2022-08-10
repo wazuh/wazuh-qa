@@ -1,7 +1,7 @@
 - name: Cannot read alerts - Json File Deleted
   description: The alerts.json file is missing and it cannot read alerts from it.
   configuration_parameters:
-    API_KEY: Insert using --integration_api_key parameter
+    API_KEY: Insert using --integration-api-pey parameter
   metadata:
     alert_sample: '{"timestamp":"2022-07-20T14:53:16.482+0000","rule":{"level":5,"description":
                    "File added to the system.","id":"554","firedtimes":1,"mail":false,"groups":["ossec","syscheck",
