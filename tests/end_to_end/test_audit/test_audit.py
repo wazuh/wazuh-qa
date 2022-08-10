@@ -59,6 +59,44 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_audit(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+    '''
+    description: Check that an alert is generated and indexed when a command is executed.
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Generate an event.
+        - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
+        - Check that the obtained alert from alerts.json has been indexed.
+
+    wazuh_min_version: 4.4.0
+
+    tier: 0
+
+    parameters:
+        - configurate_environment:
+            type: fixture
+            brief: Set the wazuh configuration according to the configuration playbook.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata.
+        - get_dashboard_credentials:
+            type: fixture
+            brief: Get the wazuh dashboard credentials.
+        - generate_events:
+            type: fixture
+            brief: Generate events that will trigger the alert according to the generate_events playbook.
+        - clean_alerts_index:
+            type: fixture
+            brief: Delete obtained alerts.json and alerts index.
+
+    assertions:
+        - Verify that the alert has been triggered.
+        - Verify that the same alert has been indexed.
+
+    input_description:
+        - The `configuration.yaml` file provides the module configuration for this test.
+        - The `generate_events.yaml`file provides the function configuration for this test.
+    '''
     level = metadata['level']
     description = metadata['description']
     rule_id = metadata['rule.id']
