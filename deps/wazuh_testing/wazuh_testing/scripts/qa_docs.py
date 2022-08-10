@@ -258,6 +258,12 @@ def check_incompatible_parameters(parameters):
                                'as input',
                                qadocs_logger.error)
 
+    if parameters.check_doc:
+        if not parameters.test_modules:
+            raise QAValueError('The --check-documentation option needs the modules to be checked. You must specify it by'
+                               ' using -m.',
+                               qadocs_logger.error)
+
     qadocs_logger.debug('Parameters incompatibilities checked.')
 
 
