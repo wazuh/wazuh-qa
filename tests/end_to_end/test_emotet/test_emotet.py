@@ -15,8 +15,7 @@ test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_emotet.
 configuration_playbooks = ['configuration.yaml']
 emotet_file_path = os.path.join(test_data_path, 'configuration', 'trigger-emotet.exe')
 sysmon_config = os.path.join(test_data_path, 'configuration', 'sysconfig.xml')
-vbs_script = os.path.join(test_data_path, 'configuration', 'exec_emotet_script.vbs')
-configuration_extra_vars = {'emotet_file': emotet_file_path, 'sysmon_config': sysmon_config, 'vbs_script': vbs_script}
+configuration_extra_vars = {'emotet_file': emotet_file_path, 'sysmon_config': sysmon_config}
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
