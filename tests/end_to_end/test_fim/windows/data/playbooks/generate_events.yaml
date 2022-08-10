@@ -13,14 +13,6 @@
   tasks:
 
     - name: "{{ event_description }}"
-      become: True
-      file:
-        path: "{{ path }}"
-        state: "{{ state }}"
-        mode: "{{ mode }}"
-      when: os == "Linux"
-
-    - name: "{{ event_description }}"
       win_file:
         path: "{{ path }}"
         state: "{{ state }}"

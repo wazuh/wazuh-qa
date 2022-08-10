@@ -22,7 +22,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_fim(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
     """
-     Test to scanning a file using FIM
+     Test to scanning a file in Windows using FIM
     """
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
