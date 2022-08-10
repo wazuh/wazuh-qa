@@ -105,9 +105,11 @@ class Config():
 
     def __get_test_types(self):
         """Get all the test types within wazuh-qa framework."""
-        for name in os.listdir(self.project_path):
-            if os.path.isdir(os.path.join(self.project_path, name)):
-                self.test_types.append(name)
+        predefined_types = self.predefined_values['type']
+        for type in predefined_types:
+            for folder in self.project_path.split(os.sep):
+                if type == folder and type not in self.test_types:
+                    self.test_types.append(type)
 
     def __get_include_paths(self):
         """Get all the components and suites to include within all the specified types."""
@@ -115,7 +117,11 @@ class Config():
         self.include_paths = []
 
         for type in self.test_types:
-            subset_tests = os.path.join(self.project_path, type)
+            if type not in self.project_path:
+                subset_tests = os.path.join(self.project_path, type)
+            else:
+                subset_tests = self.project_path
+
             if self.test_components:
                 if self.test_suites:
                     if self.test_modules:
