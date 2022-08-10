@@ -1,7 +1,7 @@
 - name: Read invalid json alert
   description: Read a invalid alert from alerts.json - removed rule key name - Integration fails
   configuration_parameters:
-    API_KEY: Insert using --integration_api_key parameter
+    API_KEY: Insert using --integration-api-key parameter
   metadata:
     alert_sample: '{"timestamp":"2022-07-20T14:53:16.482+0000",:{"level":5,"description":"File added to the system.",
                    "id":"554","firedtimes":1,"mail":false,"groups":["ossec","syscheck","syscheck_entry_added",
@@ -20,7 +20,7 @@
 - name: Read Overlong json alert
   description: Read a an alert that is over 64kb alert from alerts.json - Integration fails
   configuration_parameters:
-    API_KEY: Insert using --integration_api_key parameter
+    API_KEY: Insert using --integration-api-key parameter
   metadata:
     alert_sample: '{"timestamp":"2022-07-20T14:53:16.482+0000","rule":{"level":5,"description":
                    "File added to the system.","id":"554","firedtimes":1,"mail":false,"groups":["ossec","syscheck",

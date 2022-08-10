@@ -245,7 +245,7 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
-        "--integration_api_key",
+        "--integration-api-key",
         action="store",
         metavar="integration_api_key",
         default=None,
@@ -307,7 +307,7 @@ def pytest_configure(config):
     global_parameters.fim_mode = mode
 
     # Set integration_api_key if it is passed through command line args
-    integration_api_key = config.getoption("--integration_api_key")
+    integration_api_key = config.getoption("--integration-api-key")
     if integration_api_key:
         global_parameters.integration_api_key = integration_api_key
 
