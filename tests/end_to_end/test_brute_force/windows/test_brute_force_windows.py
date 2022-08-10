@@ -32,7 +32,7 @@ def test_brute_force(configure_environment, metadata, get_dashboard_credentials,
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
-    timestamp = fr'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+    timestamp = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
     expected_alert_json = fr'\{{"timestamp":"({timestamp})","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*'
