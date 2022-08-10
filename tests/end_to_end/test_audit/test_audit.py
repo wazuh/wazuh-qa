@@ -1,3 +1,40 @@
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: end_to_end
+
+brief: This test will verify that the integration with audit is working correctly.
+       Audit logging is used to capture and log execve system calls.
+
+components:
+    - logcollector
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-logcollector
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - CentOS 8
+
+references:
+    - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#audit
+    - https://documentation.wazuh.com/current/proof-of-concept-guide/audit-commands-run-by-user.html
+
+tags:
+    - demo
+    - auditd
+    - audit_rules
+'''
 import os
 import json
 import re

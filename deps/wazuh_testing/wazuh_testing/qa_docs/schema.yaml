@@ -209,6 +209,7 @@ predefined_values:
     - debian
     - debian_feeds
     - decoder
+    - demo
     - diff
     - disk_quota
     - dos_attack
