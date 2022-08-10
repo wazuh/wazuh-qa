@@ -114,6 +114,7 @@ class Config():
     def __get_include_paths(self):
         """Get all the components and suites to include within all the specified types."""
         dir_regex = re.compile("test_.")
+        test_regex = re.compile("^test_.*.py$")
         self.include_paths = []
 
         for type in self.test_types:
@@ -149,6 +150,8 @@ class Config():
                 for name in os.listdir(subset_tests):
                     if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
                         self.include_paths.append(os.path.join(subset_tests, name))
+                    elif test_regex.match(name) and subset_tests not in self.include_paths:
+                        self.include_paths.append(subset_tests)
 
     def __read_schema_file(self, file):
         """Read schema file.
