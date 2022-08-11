@@ -1,3 +1,42 @@
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: end_to_end
+
+brief: This test will verify that the anomaly and malware detection works correctly. Anomaly detection refers to the
+       action of finding patterns in the system that do not match the expected behavior. Once malware (e.g., a rootkit)
+       is installed on a system, it modifies the system to hide itself from the user. Although malware uses a variety of
+       techniques to accomplish this, Wazuh uses a broad spectrum approach to finding anomalous patterns that indicate
+       possible intruders.
+
+components:
+    - rootcheck
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-syscheckd
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - CentOS 8
+
+references:
+    - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#trojan
+    - https://documentation.wazuh.com/current/proof-of-concept-guide/poc-detect-trojan.html
+
+tags:
+    - demo
+    - rootcheck
+'''
 import os
 import json
 import re
@@ -29,6 +68,44 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_detecting_suspicious_binaries(configure_environment, metadata, get_dashboard_credentials, generate_events,
                                        clean_alerts_index):
+    '''
+    description: Check that an alert is generated and indexed when there is a trojaned system binary.
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Replace the content of a system binary to generate event.
+        - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
+        - Check that the obtained alert from alerts.json has been indexed.
+
+    wazuh_min_version: 4.4.0
+
+    tier: 0
+
+    parameters:
+        - configurate_environment:
+            type: fixture
+            brief: Set the wazuh configuration according to the configuration playbook.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata.
+        - get_dashboard_credentials:
+            type: fixture
+            brief: Get the wazuh dashboard credentials.
+        - generate_events:
+            type: fixture
+            brief: Generate events that will trigger the alert according to the generate_events playbook.
+        - clean_alerts_index:
+            type: fixture
+            brief: Delete obtained alerts.json and alerts index.
+
+    assertions:
+        - Verify that the alert has been triggered.
+        - Verify that the same alert has been indexed.
+
+    input_description:
+        - The `configuration.yaml` file provides the module configuration for this test.
+        - The `generate_events.yaml`file provides the function configuration for this test.
+    '''
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
