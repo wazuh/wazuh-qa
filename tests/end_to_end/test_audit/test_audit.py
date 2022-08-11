@@ -65,7 +65,7 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
 
     test_phases:
         - Set a custom Wazuh configuration.
-        - Generate an event.
+        - Run ping command to generate event.
         - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
         - Check that the obtained alert from alerts.json has been indexed.
 
