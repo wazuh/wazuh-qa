@@ -58,6 +58,7 @@ predefined_values:
     - authd
     - aws_s3
     - cluster
+    - docker_listener
     - fim
     - gcloud
     - github
@@ -213,6 +214,7 @@ predefined_values:
     - demo
     - diff
     - disk_quota
+    - docker
     - dos_attack
     - download
     - enrollment

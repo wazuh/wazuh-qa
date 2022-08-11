@@ -7,8 +7,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: end_to_end
 
-brief: This test will verify that the AWS-S3 module is working correctly.The AWS S3 wodle allows you to gather and parse
-       logs from multiple AWS services, such as Guard Duty, Macie, VPC Flow, etc.
+brief: This test will verify that the AWS-S3 module is working correctly. The AWS S3 wodle allows you to gather and
+       parse logs from multiple AWS services, such as Guard Duty, Macie, VPC Flow, etc.
 
 components:
     - aws_s3
