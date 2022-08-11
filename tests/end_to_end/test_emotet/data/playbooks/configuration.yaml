@@ -22,7 +22,7 @@
     - name: Download PSTools
       win_shell: |
         Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}emotet/PSTools.zip -Outfile PSTools.zip
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/PSTools.zip -Outfile PSTools.zip
 
     - name: Unzip PSTools
       win_shell: |
@@ -37,7 +37,7 @@
     - name: Download sysmon
       win_shell: |
         Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}emotet/Sysmon.zip -Outfile Sysmon.zip
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/Sysmon.zip -Outfile Sysmon.zip
 
     - name: Unzip sysmon
       win_shell: |
@@ -46,7 +46,7 @@
     - name: Download Sysmon configuration file
       win_shell: |
         Set-Location C:\temp\Sysmon
-        Invoke-WebRequest -Uri {{ s3_url }}emotet/sysconfig.xml -Outfile sysconfig.xml
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/sysconfig.xml -Outfile sysconfig.xml
 
     - name: Install sysmon
       win_shell: |
@@ -66,7 +66,7 @@
     - name: Download trigger_emotet.exe
       win_shell: |
         Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
 
     - name: Restart wazuh-agent (Windows)
       win_shell: |
