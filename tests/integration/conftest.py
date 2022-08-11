@@ -88,6 +88,28 @@ def restart_wazuh(get_configuration, request):
     control_service('start')
 
 
+@pytest.fixture(scope='function')
+def restart_wazuh_function(daemons=None):
+    """Restarts before starting a test, and stop it after finishing.
+       Args:
+            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+    """
+    control_service('restart', daemons)
+    yield
+    control_service('stop', daemons)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_module(daemons=None):
+    """Restarts before starting a test, and stop it after finishing.
+       Args:
+            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+    """
+    control_service('restart', daemons)
+    yield
+    control_service('stop', daemons)
+
+
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
     # Reset ossec.log and start a new monitor
@@ -240,6 +262,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using a specific WPK package path"
     )
+    parser.addoption(
+        "--integration-api-key",
+        action="store",
+        metavar="integration_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for integratord tests."
+    )
 
 
 def pytest_configure(config):
@@ -293,6 +323,11 @@ def pytest_configure(config):
     if not mode:
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
+
+    # Set integration_api_key if it is passed through command line args
+    integration_api_key = config.getoption("--integration-api-key")
+    if integration_api_key:
+        global_parameters.integration_api_key = integration_api_key
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
@@ -869,6 +904,34 @@ def configure_local_internal_options_module(request):
 
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def truncate_monitored_files():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+
+@pytest.fixture(scope='module')
+def truncate_monitored_files_module():
+    """Truncate all the log files and json alerts files before and after the test execution"""
+    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
 
 
 @pytest.fixture(scope='function')

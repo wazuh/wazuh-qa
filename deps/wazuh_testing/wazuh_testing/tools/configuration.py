@@ -13,6 +13,7 @@ import pytest
 import yaml
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools.file import read_yaml
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import file
 
@@ -660,7 +661,7 @@ def load_configuration_template(data_file_path, configuration_parameters=[], con
         raise ValueError(f"configuration_parameters and configuration_metadata should have the same data length "
                          f"{len(configuration_parameters)} != {len(configuration_metadata)}")
 
-    configuration = file.read_yaml(data_file_path)
+    configuration = read_yaml(data_file_path)
 
     if sys.platform == 'darwin':
         configuration = set_correct_prefix([configuration], PREFIX)
@@ -671,16 +672,14 @@ def load_configuration_template(data_file_path, configuration_parameters=[], con
 
 def get_test_cases_data(data_file_path):
     """Load a test case template file and get its data.
-
-    Template example file: tests/integration/test_remoted/test_multi_groups/data/test_cases/case_file_actions.yaml
-
+    Template example file: tests/integration/vulnerability_detector/test_providers/data/test_cases/test_enabled.yaml
     Args:
         data_file_path (str): Test case template file path.
-
     Returns:
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
-    test_cases_data = file.read_yaml(data_file_path)
+    test_cases_data = read_yaml(data_file_path)
+
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
