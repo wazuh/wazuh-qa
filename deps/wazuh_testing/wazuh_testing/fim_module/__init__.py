@@ -1,3 +1,4 @@
+
 # Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
@@ -48,10 +49,13 @@ CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
 CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA = r".*Setting 'disk_quota' to (\d+), 'disk_quota' must be greater than 'file_size'"
 CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
 CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: (\d+), path count: (\d+)"
-CB_FIM_ENTRIES_COUNT =r".*Fim entries: (\d+)"
+CB_FIM_ENTRIES_COUNT = r".*Fim entries: (\d+)"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
+CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
+CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
 
-#Error Messages
+
+# Error Messages
 ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT = 'Did not receive expected "DEBUG: ...: Sending DB ...% full alert." event'
 ERR_MSG_FIM_INODE_ENTRIES = 'Did not receive expected "Fim inode entries: ..., path count: ..." event'
 ERR_MSG_DB_BACK_TO_NORMAL = 'Did not receive expected "DEBUG: ...: Sending DB back to normal alert." event'
@@ -67,6 +71,6 @@ ERR_MSG_NO_EVENTS_EXPECTED = 'No events should be detected.'
 ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
 ERR_MSG_WRONG_NUMBER_OF_ENTRIES = 'Wrong number of entries counted.'
 ERR_MSG_WRONG_INODE_PATH_COUNT = 'Wrong number of inodes and path count'
-ERR_MSG_WRONG_FILE_LIMIT_VALUE ='Wrong value for file_limit.'
-ERR_MSG_WRONG_DISK_QUOTA_VALUE ='Wrong value for disk_quota'
-ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT= 'Wrong capacity log for DB file_limit'
+ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
+ERR_MSG_WRONG_DISK_QUOTA_VALUE = 'Wrong value for disk_quota'
+ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT = 'Wrong capacity log for DB file_limit'
