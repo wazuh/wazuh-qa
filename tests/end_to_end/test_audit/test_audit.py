@@ -29,6 +29,7 @@ os_version:
 references:
     - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#audit
     - https://documentation.wazuh.com/current/proof-of-concept-guide/audit-commands-run-by-user.html
+    - https://documentation.wazuh.com/current/learning-wazuh/audit-commands.html#learning-wazuh-audit-commands
 
 tags:
     - demo
