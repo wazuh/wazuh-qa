@@ -22,9 +22,7 @@
     - name: Download PSTools
       win_shell: |
         Set-Location C:\temp
-        Write-Host "Location set $path"
-        Write-Host "Retrieving PSTools..."
-        Invoke-WebRequest -Uri https://s3.amazonaws.com/ci.wazuh.com/qa/testing_files/end_to_end/emotet/PSTools.zip -Outfile PSTools.zip
+        Invoke-WebRequest -Uri {{ s3_url }}emotet/PSTools.zip -Outfile PSTools.zip
 
     - name: Unzip PSTools
       win_shell: |
@@ -39,9 +37,7 @@
     - name: Download sysmon
       win_shell: |
         Set-Location C:\temp
-        Write-Host "Location set $path"
-        Write-Host "Retrieving Sysmon..."
-        Invoke-WebRequest -Uri https://s3.amazonaws.com/ci.wazuh.com/qa/testing_files/end_to_end/emotet/Sysmon.zip -Outfile Sysmon.zip
+        Invoke-WebRequest -Uri {{ s3_url }}emotet/Sysmon.zip -Outfile Sysmon.zip
 
     - name: Unzip sysmon
       win_shell: |
@@ -50,9 +46,7 @@
     - name: Download Sysmon configuration file
       win_shell: |
         Set-Location C:\temp\Sysmon
-        Write-Host "Location set $path"
-        Write-Host "Retrieving Sysmon configuration..."
-        Invoke-WebRequest -Uri https://s3.amazonaws.com/ci.wazuh.com/qa/testing_files/end_to_end/emotet/sysconfig.xml -Outfile sysconfig.xml
+        Invoke-WebRequest -Uri {{ s3_url }}emotet/sysconfig.xml -Outfile sysconfig.xml
 
     - name: Install sysmon
       win_shell: |
@@ -72,9 +66,7 @@
     - name: Download trigger_emotet.exe
       win_shell: |
         Set-Location C:\temp
-        Write-Host "Location set $path"
-        Write-Host "Retrieving trigger-emotet.exe..."
-        Invoke-WebRequest -Uri https://s3.amazonaws.com/ci.wazuh.com/qa/testing_files/end_to_end/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
+        Invoke-WebRequest -Uri {{ s3_url }}emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
 
     - name: Restart wazuh-agent (Windows)
       win_shell: |
