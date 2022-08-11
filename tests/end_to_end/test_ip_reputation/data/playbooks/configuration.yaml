@@ -14,11 +14,11 @@
     - name: Download Alienvault IP set
       become: true
       shell: |
-        curl {{ s3_url }}ip_reputation/alienvault_reputation.ipset -o /var/ossec/etc/lists/alienvault_reputation.ipset
+        curl {{ s3_url }}/ip_reputation/alienvault_reputation.ipset -o /var/ossec/etc/lists/alienvault_reputation.ipset
 
     - name: Download script to convert from ipset format to cdblist format
       become: true
-      shell: curl {{ s3_url }}ip_reputation/iplist-to-cdblist.py -o /tmp/iplist-to-cdblist.py
+      shell: curl {{ s3_url }}/ip_reputation/iplist-to-cdblist.py -o /tmp/iplist-to-cdblist.py
 
     - name: Add the attacker IP to the list
       become: true
