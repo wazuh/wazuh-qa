@@ -1,5 +1,5 @@
-- name: Netcat
-  description: Detecting unauthorized processes
+- name: netcat
+  description: Detect if Netcat is running
   configuration_parameters: null
   metadata:
     extra_vars:
