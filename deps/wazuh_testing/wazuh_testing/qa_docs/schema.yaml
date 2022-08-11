@@ -65,6 +65,7 @@ predefined_values:
     - logcollector
     - logtest
     - office365
+    - osquery
     - remoted
     - rids
     - rootcheck
@@ -321,6 +322,7 @@ predefined_values:
     - nvd
     - office365
     - on_start
+    - osquery
     - oval
     - prelink
     - providers
