@@ -1,3 +1,43 @@
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: end_to_end
+
+brief: This test will verify that a shellshock attack is detected correctly. Shellshock represents a family of
+       vulnerabilities disclosed in late 2014 involving the Linux Bash shell. These vulnerabilities made it possible to
+       inject shell commands via maliciously crafted web requests sent to Linux web servers. The pattern in such web
+       requests is quite distinctive, and any instance of your servers being probed with Shellshock requests are fairly
+       strong indicators of malicious probing worthy of automated countermeasures.
+
+components:
+    - logcollector
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-logcollector
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - CentOS 8
+
+references:
+    - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#shellshock
+    - https://documentation.wazuh.com/current/proof-of-concept-guide/detect-web-attack-shellshock.html
+    - https://documentation.wazuh.com/current/learning-wazuh/shellshock.html#learning-wazuh-shellshock
+
+tags:
+    - demo
+    - shellshock
+'''
 import os
 import json
 import re
@@ -23,6 +63,44 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_shellshock_attack_detection(configure_environment, metadata, get_dashboard_credentials, generate_events,
                                      clean_alerts_index):
+    '''
+    description: Check that an alert is generated when the host is stressed.
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Execute a request to the web server to generate the event.
+        - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
+        - Check that the obtained alert from alerts.json has been indexed.
+
+    wazuh_min_version: 4.4.0
+
+    tier: 0
+
+    parameters:
+        - configurate_environment:
+            type: fixture
+            brief: Set the wazuh configuration according to the configuration playbook.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata.
+        - get_dashboard_credentials:
+            type: fixture
+            brief: Get the wazuh dashboard credentials.
+        - generate_events:
+            type: fixture
+            brief: Generate events that will trigger the alert according to the generate_events playbook.
+        - clean_alerts_index:
+            type: fixture
+            brief: Delete obtained alerts.json and alerts index.
+
+    assertions:
+        - Verify that the alert has been triggered.
+        - Verify that the same alert has been indexed.
+
+    input_description:
+        - The `configuration.yaml` file provides the module configuration for this test.
+        - The `generate_events.yaml`file provides the function configuration for this test.
+    '''
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']

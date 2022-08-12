@@ -344,6 +344,7 @@ predefined_values:
     - session_error
     - session_limit
     - settings
+    - shellshock
     - simulator
     - ssl
     - stats_file
