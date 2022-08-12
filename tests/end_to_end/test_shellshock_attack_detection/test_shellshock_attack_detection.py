@@ -64,7 +64,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 def test_shellshock_attack_detection(configure_environment, metadata, get_dashboard_credentials, generate_events,
                                      clean_alerts_index):
     '''
-    description: Check that an alert is generated when the host is stressed.
+    description: Check that an alert is generated when a shellshock attack is performed.
 
     test_phases:
         - Set a custom Wazuh configuration.
