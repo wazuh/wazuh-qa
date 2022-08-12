@@ -346,6 +346,7 @@ predefined_values:
     - settings
     - shellshock
     - simulator
+    - sql_injection
     - ssl
     - stats_file
     - system_inventory
