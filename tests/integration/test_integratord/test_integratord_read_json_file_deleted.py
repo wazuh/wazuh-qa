@@ -10,7 +10,7 @@ given a specific alert, the expected response is recieved, depending if it is a 
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
 components:
     - integratord
-suite: integratord_read_json_alerts
+suite: integratord_read_json_file_deleted
 targets:
     - agent
 daemons:
