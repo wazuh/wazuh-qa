@@ -218,6 +218,7 @@ predefined_values:
     - docker
     - dos_attack
     - download
+    - emotet
     - enrollment
     - errors
     - events
@@ -349,6 +350,7 @@ predefined_values:
     - sql_injection
     - ssl
     - stats_file
+    - sysmon
     - system_inventory
     - time_travel
     - token
