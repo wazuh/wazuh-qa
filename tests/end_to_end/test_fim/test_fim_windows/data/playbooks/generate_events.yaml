@@ -7,18 +7,13 @@
       become: True
 
 - name: Generate events
-  hosts: agents
-  vars:
-    os: "{{ os }}"
+  hosts: wazuh-windows
   tasks:
 
     - name: "{{ event_description }}"
-      become: True
-      file:
+      win_file:
         path: "{{ path }}"
         state: "{{ state }}"
-        mode: "{{ mode }}"
-      when: os == "Linux"
 
 - name: Get alerts
   hosts: wazuh-manager

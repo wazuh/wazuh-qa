@@ -7,16 +7,15 @@
       become: True
 
 - name: Generate events
-  hosts: agents
-  vars:
-    os: "{{ os }}"
+  hosts: wazuh-agent
   tasks:
 
     - name: "{{ event_description }}"
-      win_file:
+      become: True
+      file:
         path: "{{ path }}"
         state: "{{ state }}"
-      when: os == ansible_facts['os_family']
+        mode: "{{ mode }}"
 
 - name: Get alerts
   hosts: wazuh-manager
