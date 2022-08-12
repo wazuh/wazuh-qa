@@ -1,0 +1,11 @@
+- name: ssh_brute_force
+  description: Execute brute force attacks using SSH and check generated alerts
+  configuration_parameters: null
+  metadata:
+    rule.id: 5712
+    rule.level: 10
+    rule.description: "sshd: brute force trying to get access to the system. Non existent user."
+    extra:
+      mitre_technique: Brute Force
+    extra_vars:
+      agent_os: Linux
