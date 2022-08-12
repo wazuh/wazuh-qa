@@ -286,9 +286,11 @@ predefined_values:
     - interval
     - invalid
     - invalid_settings
+    - ip_reputation
     - keys
     - key_polling
     - limits
+    - lists
     - logcollector
     - logcollector_location
     - logcollector_log_format
