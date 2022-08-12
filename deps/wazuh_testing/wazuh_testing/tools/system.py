@@ -92,6 +92,16 @@ class HostManager:
         """
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
 
+    def clear_file_without_recreate(self, host: str, file_path: str, check: bool = False):
+        """Truncate the specified file without overwriting/recreating it.
+
+        Args:
+            host (str): Hostname
+            file_path (str): File path to be truncated
+            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+        """
+        self.get_host(host).ansible('shell', f"truncate -s 0 {file_path}", check=check)
+
     def get_file_content(self, host: str, file_path: str):
         """Get the content of the specified file.
 
@@ -244,3 +254,17 @@ class HostManager:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+        """Search and return information of a file inside a path.
+        Args:
+            host (str): Hostname
+            path (str): Path in which to search for the file that matches the pattern.
+            pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+        Returns:
+            Files (list): List of found files.
+        """
+        return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
+                                                   f"use_regex={use_regex}")
