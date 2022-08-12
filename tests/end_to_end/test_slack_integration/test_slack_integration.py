@@ -1,3 +1,41 @@
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: end_to_end
+
+brief: This test will verify that the Slack integeration works correctly. This integration allows reporting alerts
+       through messages sent to Slack.
+
+components:
+    - logcollector
+    - integration
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-logcollector
+    - wazuh-integratord
+    - wazuh-analysisd
+
+os_platform:
+    - linux
+
+os_version:
+    - CentOS 8
+
+references:
+    - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#slack
+    - https://documentation.wazuh.com/current/proof-of-concept-guide/poc-integrate-slack.html
+tags:
+    - demo
+    - slack
+    - integration
+'''
 import os
 import json
 import re
@@ -46,6 +84,49 @@ def remove_slack_log():
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_slack_integration(metadata, configure_environment, get_dashboard_credentials, generate_events,
                            remove_slack_log, clean_alerts_index):
+    '''
+    description: Check that an alert is generated and sent to Slack.
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Execute a brute force attack to generate the event.
+        - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
+        - Check that the obtained alert from alerts.json has been indexed.
+        - Check that the alert was sent to Slack.
+
+    wazuh_min_version: 4.4.0
+
+    tier: 0
+
+    parameters:
+        - configurate_environment:
+            type: fixture
+            brief: Set the wazuh configuration according to the configuration playbook.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata.
+        - get_dashboard_credentials:
+            type: fixture
+            brief: Get the wazuh dashboard credentials.
+        - generate_events:
+            type: fixture
+            brief: Generate events that will trigger the alert according to the generate_events playbook.
+        - remove_slack_log:
+            type: fixture
+            brief: Deleted obtained Slack log.
+        - clean_alerts_index:
+            type: fixture
+            brief: Delete obtained alerts.json and alerts index.
+
+    assertions:
+        - Verify that the alert has been triggered.
+        - Verify that the same alert has been indexed.
+        - Verify that the same alert was sent to Slack.
+
+    input_description:
+        - The `configuration.yaml` file provides the module configuration for this test.
+        - The `generate_events.yaml`file provides the function configuration for this test.
+    '''
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']

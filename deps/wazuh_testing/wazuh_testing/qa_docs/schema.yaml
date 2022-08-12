@@ -62,6 +62,7 @@ predefined_values:
     - fim
     - gcloud
     - github
+    - integration
     - logcollector
     - logtest
     - office365
@@ -282,6 +283,7 @@ predefined_values:
     - github
     - github_configuration
     - inactivity
+    - integration
     - integrity
     - interval
     - invalid
@@ -349,6 +351,7 @@ predefined_values:
     - settings
     - shellshock
     - simulator
+    - slack
     - sql_injection
     - ssl
     - stats_file
