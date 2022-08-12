@@ -324,6 +324,7 @@ predefined_values:
     - mitre
     - msu
     - msu_feeds
+    - nids
     - nvd
     - office365
     - on_start
@@ -355,6 +356,7 @@ predefined_values:
     - sql_injection
     - ssl
     - stats_file
+    - suricata
     - sysmon
     - system_inventory
     - time_travel
