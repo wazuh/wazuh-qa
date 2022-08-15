@@ -19,9 +19,9 @@ suite_path = os.path.dirname(os.path.realpath(__file__))
 def validate_environments(request):
     """Fixture with session scope to validate the environments before run the E2E tests.
 
-    This phase is divided in 4 steps:
-        Step 1: Collect the data related with the selected tests that will be executed.
-        Step 2: Generate a playbook with general validations containing cross-checks for selected tests.
+    This phase is divided into 4 steps:
+        Step 1: Collect the data related to the selected tests that will be executed.
+        Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
         Step 4: Execute test-specific validations (if any). It will run one validation for each selected test set.
 
