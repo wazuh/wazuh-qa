@@ -18,13 +18,13 @@
         path: "{{ path }}"
         state: "{{ state }}"
         mode: "{{ mode }}"
-      when: os == "Linux"
+      when: ansible_system == os
 
     - name: "{{ event_description }}"
       win_file:
         path: "{{ path }}"
         state: "{{ state }}"
-      when: os == ansible_facts['os_family']
+      when: ansible_facts['os_family'] == os
 
 - name: Get alerts
   hosts: wazuh-manager
