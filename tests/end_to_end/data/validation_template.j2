@@ -1,0 +1,12 @@
+{% if num_of_agents == 0 %}
+- hosts: managers
+{% elif num_of_managers == 0 %}
+- hosts: agents
+{% else %}
+- hosts: managers:agents
+{% endif %}
+  any_errors_fatal: true
+  roles:
+    - role: host_checker
+      vars:
+        os: "{% raw %}{{ 'Windows' if ansible_os_family == 'Windows' else 'Linux' }}{% endraw %}"

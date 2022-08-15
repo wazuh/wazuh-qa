@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  vars:
+    num_of_managers: "{{ num_of_managers }}"
+    num_of_agents: "{{ num_of_agents }}"
+  tasks:
+    - name: Generate a general validation playbook
+      template:
+        src: "{{ template_path }}"
+        dest: "{{ dest_path }}"
