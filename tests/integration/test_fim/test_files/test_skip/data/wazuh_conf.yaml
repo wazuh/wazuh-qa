@@ -41,17 +41,3 @@
         value: "/dev"
     - skip_dev:
         value: SKIP
-# conf 4
-- tags:
-    - skip_nfs
-  apply_to_modules:
-    - test_skip
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/nfs-mount-point"
-    - skip_nfs:
-        value: SKIP
