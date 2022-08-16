@@ -22,8 +22,10 @@ def update_cluster_json(request):
     IMPORTANT: These variables must be defined in the module where this fixture is called:
       - test_hosts (list): Cluster host names.
       - host_manager (HostManager): Instance of HostManager.
-      - cluster_json_values (list of dicts): Each item of the list must follow the structure below.
-        {'key': ['<dict_key_A>', '<dict_key_A_nested>'], 'value': <value>}
+      - cluster_json_values (list of dicts): Each item of the list must follow the structure below. This example:
+        {'key': ['<dict_key_A>', '<dict_key_AA>'], 'value': <value>}
+        would replace this value:
+        {'dict_key_A': {'dict_key_AA': <REPLACED_VALUE>, 'dict_key_AB': 'unchanged_value', ...}, 'dict_key_B': ...}
     """
     backup_json = {}
     test_hosts = getattr(request.module, 'test_hosts')

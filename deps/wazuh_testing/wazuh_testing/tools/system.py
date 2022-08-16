@@ -103,7 +103,7 @@ class HostManager:
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
 
     def clear_file_without_recreate(self, host: str, file_path: str, check: bool = False):
-        """Truncate the specified file without overwriting/recreating it.
+        """Truncate the specified file without recreating it.
 
         Args:
             host (str): Hostname
