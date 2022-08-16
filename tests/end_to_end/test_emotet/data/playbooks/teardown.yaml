@@ -1,0 +1,34 @@
+- name: Cleanup environment
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Restore ossec.conf without changes
+      win_copy:
+        src: C:\temp\ossec.conf
+        dest: C:\Program Files (x86)\ossec-agent
+        remote_src: true
+
+    - name: Uninstall Sysmon
+      win_shell: |
+        cd C:\temp\Sysmon
+        ./Sysmon64.exe -u force
+
+    - name: Kill trigger-emotet.exe
+      win_shell: |
+        taskkill /im trigger-emotet.exe /f
+      become: yes
+      become_method: runas
+      become_user: Administrator
+
+    - name: Delete C:\temp folder
+      ansible.windows.win_file:
+        path: C:\temp
+        state: absent
+
+    - name: Restart wazuh-agent (Windows)
+      win_shell: |
+        net stop wazuh
+        net start wazuh
+
+    - name: Enable Windows Defender
+      win_shell: set-MpPreference -DisableRealtimeMonitoring $False
