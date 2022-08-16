@@ -372,3 +372,4 @@ predefined_values:
     - windows_defender
     - worker
     - wpk
+    - yara
