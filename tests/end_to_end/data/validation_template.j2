@@ -1,9 +1,10 @@
+- name: General validation phase
 {% if num_of_agents == 0 %}
-- hosts: managers
+  hosts: managers
 {% elif num_of_managers == 0 %}
-- hosts: agents
+  hosts: agents
 {% else %}
-- hosts: managers:agents
+  hosts: managers:agents
 {% endif %}
   any_errors_fatal: true
   roles:

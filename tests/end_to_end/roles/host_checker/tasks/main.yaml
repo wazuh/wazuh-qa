@@ -14,6 +14,12 @@
 
 - name: Check OS
   import_tasks: check_os.yaml
+
+- name: Check the connection between Filebeat and Wazuh Indexer
+  import_tasks: check_filebeat_indexer.yaml
+
+- name: Check the connection between Controller node and Wazuh Indexer
+  import_tasks: check_controller_indexer.yaml
 # ----------------------------------------------------------------------------
 
 # -------- Task to identify whether the validation step fails or not. --------

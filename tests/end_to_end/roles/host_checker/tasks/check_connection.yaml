@@ -1,6 +1,6 @@
 # REQUIRED VARIABLES
-#-------------------
-# (String)  os: Target operating system
+# -------------------
+# (String) os: Target operating system
 
 - name: Try connection (Linux)
   ping:

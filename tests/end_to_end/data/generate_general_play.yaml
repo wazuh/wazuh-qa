@@ -1,4 +1,3 @@
----
 - hosts: localhost
   vars:
     num_of_managers: "{{ num_of_managers }}"

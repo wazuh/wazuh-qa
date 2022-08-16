@@ -87,7 +87,7 @@ def validate_environments(request):
     remove_file(general_playbook)
     # If the general validations have failed, then abort the execution finishing with an error. Else, continue.
     if general_validation_runner.status == 'failed':
-        raise Exception(f"The general validations have failed. Please check that the environments meet the expected " \
+        raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
                         'requirements.')
     # -------------------------- End of Step 3 -------------------------------------
 
@@ -107,7 +107,7 @@ def validate_environments(request):
 
             # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
             if validation_runner.status == 'failed':
-                raise Exception(f"The validation phase of {{ path }} has failed. Please check that the environments " \
+                raise Exception(f"The validation phase of {{ path }} has failed. Please check that the environments "
                                 'meet the expected requirements.')
     # -------------------------- End of Step 4 -------------------------------------
 
