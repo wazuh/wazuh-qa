@@ -10,7 +10,7 @@ from wazuh_testing.tools import configuration as config
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_fim.yaml')
+test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_fim_linux.yaml')
 configuration_playbooks = ['configuration.yaml']
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
@@ -20,7 +20,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_fim(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
     """
      Test to scanning a file in Linux using FIM
     """

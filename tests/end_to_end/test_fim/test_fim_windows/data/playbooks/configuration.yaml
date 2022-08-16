@@ -1,13 +1,12 @@
 ---
 - name: Test case configuration
-  hosts: agents
+  hosts: wazuh-windows
   tasks:
 
     - name: Create directory to monitor (Windows)
       win_file:
         path: C:\Test\test_demo_fim
         state: directory
-      when: ansible_facts['os_family'] == "Windows"
 
     - name: Add directory to syscheck configuration (Windows)
       win_lineinfile:
@@ -15,23 +14,20 @@
         insertafter: </directories>
         line: |
           <directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>
-      when: ansible_facts['os_family'] == "Windows"
 
     - name: Truncate ossec.log
       win_file:
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         state: absent
-      when: ansible_facts['os_family'] == "Windows"
 
     - name: Restart Wazuh (Windows)
       win_shell: |
         net stop wazuh
         net start wazuh
-      when: ansible_facts['os_family'] == "Windows"
 
     - name: Wait for whodata start
       win_wait_for:
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         search_regex: File integrity monitoring real-time Whodata engine started.
         timeout: 20
-      when: ansible_facts['os_family'] == "Windows"
+
