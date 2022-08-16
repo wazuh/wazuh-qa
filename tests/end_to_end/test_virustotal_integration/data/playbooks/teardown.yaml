@@ -4,11 +4,17 @@
   become: True
   tasks:
 
-    - name: Delete Virustotal integration
+    - name: Delete Virustotal integration and active response configuration
       blockinfile:
         path: /var/ossec/etc/ossec.conf
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         block: ''
+
+    - name: Delete local rules virus total integration
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-manager
       systemd:
@@ -26,9 +32,14 @@
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
         block: ''
 
-    - name: Delete folder
+    - name: Delete active response script
       file:
-        path: /test
+        path: /var/ossec/active-response/remove-threat.sh
+        state: absent
+
+    - name: Delete created file
+      file:
+        path: /root/harmless_file.txt
         state: absent
 
     - name: Restart wazuh-agent
