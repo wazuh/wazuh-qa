@@ -16,10 +16,12 @@
         block: ''
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+    - name: Restart manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
 - name: Cleanup agent environment
   hosts: wazuh-agent
@@ -42,7 +44,9 @@
         path: /root/harmless_file.txt
         state: absent
 
-    - name: Restart wazuh-agent
-      systemd:
-        state: restarted
-        name: wazuh-agent
+    - name: Restart agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'

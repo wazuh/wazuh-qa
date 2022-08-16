@@ -5,26 +5,29 @@
   #
   # GENERIC:
   #  - (String) os: Target operating system
-  #
-  # LINUX
-  #  - (String) target: [manager,agent]
+
+  - name: Get installation type
+    become: true
+    shell: /var/ossec/bin/wazuh-control info
+    register: wazuh_info
+    when: os == 'linux'
 
   - name: Restart manager service on linux
     become: true
     service:
       name: wazuh-manager
       state: restarted
-    when: os == 'linux' and target == 'manager'
+    when: (os == 'linux' and 'server' in wazuh_info.stdout)
 
   - name: Restart agent service on linux
     become: true
     service:
       name: "wazuh-agent"
       state: restarted
-    when:  os == 'linux' and target == 'agent'
+    when: (os == 'linux' and 'agent' in wazuh_info.stdout)
 
   - name: Restart wazuh on Windows
     win_shell: "Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue | Restart-Service -ErrorAction SilentlyContinue"
     args:
       executable: powershell.exe
-    when: os == 'windows' and target == 'agent'
+    when: os == 'windows'

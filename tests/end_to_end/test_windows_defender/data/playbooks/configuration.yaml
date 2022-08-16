@@ -23,10 +23,12 @@
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
         Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
 
-    - name: Restart wazuh-agent (Windows)
-      ansible.windows.win_shell: |
-        net stop wazuh
-        net start wazuh
+    - name: Restart agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'windows'
 
 - name: Test manager configuration
   hosts: wazuh-manager
@@ -48,6 +50,9 @@
           </group>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Restart wazuh-manager
-      become: true
-      shell: systemctl restart wazuh-manager
+    - name: Restart manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'

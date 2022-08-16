@@ -66,8 +66,12 @@
     - name: Truncate alert.json
       shell: echo "" > /var/ossec/logs/alerts/alerts.json
 
-    - name: Restart the manager
-      shell: systemctl restart wazuh-manager
+    - name: Restart manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
 - name: Test agent configuration
   hosts: wazuh-agent
@@ -99,5 +103,9 @@
         chmod 750 /var/ossec/active-response/bin/remove-threat.sh
         chown root:wazuh /var/ossec/active-response/bin/remove-threat.sh
 
-    - name: Restart the agent
-      shell: systemctl restart wazuh-agent
+    - name: Restart agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'

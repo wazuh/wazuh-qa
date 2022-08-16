@@ -25,8 +25,7 @@
 
     - name: Restart agent
       include_role:
-        name: "/home/belen/Repositories/wazuh-qa/tests/end_to_end/ansible-roles/restart_wazuh"
-        tasks_from: "restart_wazuh.yaml"
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
       vars:
         os: 'linux'
-        target: 'agent'
