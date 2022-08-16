@@ -1,7 +1,6 @@
----
 - name: Cleanup Linux agent environment
   hosts: wazuh-agent
-  become: True
+  become: true
   tasks:
 
     - name: Delete syscheck configuration

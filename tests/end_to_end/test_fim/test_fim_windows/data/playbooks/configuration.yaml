@@ -1,4 +1,3 @@
----
 - name: Test case configuration
   hosts: wazuh-windows
   tasks:
@@ -30,4 +29,3 @@
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         search_regex: File integrity monitoring real-time Whodata engine started.
         timeout: 20
-

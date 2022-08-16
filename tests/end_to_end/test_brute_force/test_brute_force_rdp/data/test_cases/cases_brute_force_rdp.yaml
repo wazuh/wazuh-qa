@@ -7,4 +7,3 @@
     rule.description: Multiple Windows logon failures.
     extra:
       mitre_technique: Brute Force
-
