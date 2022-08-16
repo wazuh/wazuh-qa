@@ -1,0 +1,31 @@
+- name: Truncate files
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Truncate file alert.json
+      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      become: true
+
+- name: Generate events windows
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Execute trigger-emotet.exe
+      win_shell: C:\temp\PSTools\psexec.exe -accepteula -nobanner -i 1 -d C:\temp\trigger-emotet.exe
+      register: output
+      failed_when: '"with process ID" not in output.stderr'
+
+- name: Wait alert
+  hosts: wazuh-manager
+  tasks:
+
+    - name: Wait for alert
+      wait_for:
+        timeout: 10
+
+    - name: Get alerts.json
+      fetch:
+        src: /var/ossec/logs/alerts/alerts.json
+        dest: /tmp/
+        flat: true
+      become: true
