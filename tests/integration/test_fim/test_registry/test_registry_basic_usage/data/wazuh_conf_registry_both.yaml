@@ -5,7 +5,6 @@
   apply_to_modules:
   - test_basic_usage_delete_registry
   - test_basic_usage_registry_baseline_generation
-  - test_basic_usage_registry_changes
   sections:
   - section: syscheck
     elements:
