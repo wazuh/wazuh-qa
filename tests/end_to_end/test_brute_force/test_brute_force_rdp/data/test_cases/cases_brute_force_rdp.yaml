@@ -7,5 +7,4 @@
     rule.description: Multiple Windows logon failures.
     extra:
       mitre_technique: Brute Force
-    extra_vars:
-      agent_os: Windows
+
