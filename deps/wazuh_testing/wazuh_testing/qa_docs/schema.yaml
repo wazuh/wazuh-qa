@@ -369,5 +369,6 @@ predefined_values:
     - week_day
     - who_data
     - windows
+    - windows_defender
     - worker
     - wpk
