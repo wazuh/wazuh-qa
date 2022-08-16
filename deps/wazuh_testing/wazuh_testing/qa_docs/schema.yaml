@@ -361,6 +361,7 @@ predefined_values:
     - system_inventory
     - time_travel
     - token
+    - virustotal
     - vulnerability
     - vulnerability_detector
     - wazuh_db
