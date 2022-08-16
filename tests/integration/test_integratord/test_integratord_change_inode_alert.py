@@ -3,31 +3,42 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 type: integration
+
 brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+
 components:
     - integratord
+
 suite: integratord_change_inode_alert
+
 targets:
     - agent
+
 daemons:
     - wazuh-integratord
+
 os_platform:
     - Linux
+
 os_version:
     - Centos 8
     - Ubuntu Focal
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
 tags:
     - virustotal
 '''
@@ -76,9 +87,20 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
                                        wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected.
+
+    test_phases:
+        - Insert an alert alerts.json file.
+        - Replace the alerts.json file while it being read.
+        - Check integratord detects the file's inode has changed.
+        - Wait for integratord to start reading from the file again.
+        - Insert an alert
+        - Check virustotal response is added in ossec.log
+
     wazuh_min_version: 4.3.5
+
     tier: 1
-   parameters:
+
+    parameters:
         - configuration:
             type: dict
             brief: Configuration loaded from `configuration_template`.
@@ -100,13 +122,16 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_alerts` file provides the test cases.
+
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+        - r'.*(wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed).*'
 
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)

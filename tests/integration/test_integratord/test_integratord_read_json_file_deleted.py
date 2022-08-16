@@ -3,31 +3,42 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 type: integration
+
 brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+
 components:
     - integratord
+
 suite: integratord_read_json_file_deleted
+
 targets:
     - agent
+
 daemons:
     - wazuh-integratord
+
 os_platform:
     - Linux
+
 os_version:
     - Centos 8
     - Ubuntu Focal
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
 tags:
     - virustotal
 '''
@@ -75,9 +86,19 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     '''
     description: Check that if while integratord is reading from the alerts.json file, it is deleted, the expected
     error message is displayed, and if the file is created again and alerts are inserted, integratord continues
-    working and alerts are read
+    working and alerts are read.
     wazuh_min_version: 4.3.5
+
+    test_phases:
+        - Remove alerts.json file.
+        - Wait for integratord to detect the file was removed.
+        - Create new alerts.json file.
+        - Wait for the new file to be detected.
+        - Insert an alert
+        - Check virustotal response is added in ossec.log
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -100,15 +121,17 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_file_deleted` file provides the test cases.
+
     expected_output:
         - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts.json.*No such file.*'
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
-
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     command = f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}"
@@ -117,8 +140,11 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=generate_monitoring_callback(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
                             error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
-    # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
+    
+    # Create file new alerts.json file. 
     run_local_command_returning_output(command)
+    
+    #Wait for Integratord to detect the file before the inserting the alert
     time.sleep(2)
     run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 

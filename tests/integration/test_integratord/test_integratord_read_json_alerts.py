@@ -4,30 +4,40 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
+
 brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+
 components:
     - integratord
+
 suite: integratord_read_json_alerts
+
 targets:
     - agent
+
 daemons:
     - wazuh-integratord
+
 os_platform:
     - Linux
+
 os_version:
     - Centos 8
     - Ubuntu Focal
+
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
 tags:
     - virustotal
 '''
@@ -67,8 +77,6 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
-
-
 local_internal_options = {'integrator.debug': '2'}
 
 
@@ -83,7 +91,13 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a virustotal integration alert is expected in the alerts.json file.
     wazuh_min_version: 4.3.7
+
+    test_phases:
+        - Insert an alert alerts.json file.
+        - Check virustotal response is added in ossec.log
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -106,18 +120,20 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
+
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
     '''
 
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
-    time.sleep(5)
     run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
@@ -137,6 +153,11 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
     broken, or overly long a message will appear in the ossec.log file.
     wazuh_min_version: 4.3.7
+ 
+    test_phases:
+        - Insert an alert alerts.json file.
+        - Check that the expected response message is given for an invalid alert.
+
     tier: 1
     parameters:
         - configuration:
