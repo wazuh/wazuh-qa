@@ -3,8 +3,9 @@
   tasks:
 
     - name: Truncate alert.json
-      shell: echo "" > /var/ossec/logs/alerts/alerts.json
-      become: true
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
 
 - name: Generate events
   hosts: localhost
@@ -15,7 +16,7 @@
 
     - name: Wait for alert
       wait_for:
-        timeout: 5
+        timeout: 30
 
 - name: Get logs
   hosts: wazuh-manager
@@ -23,6 +24,6 @@
 
     - name: Get alert json
       include_role:
-        name: get_alerts
+        name: manage_alerts
         tasks_from: get_alert_json.yaml
 

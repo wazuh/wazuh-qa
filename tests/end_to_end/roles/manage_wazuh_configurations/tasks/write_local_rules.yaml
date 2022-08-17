@@ -1,0 +1,7 @@
+- name: Configure local rules
+  become: true
+  blockinfile:
+    path: /var/ossec/etc/rules/local_rules.xml
+    insertafter: </groups>
+    block: "{{ config_block }}"
+    marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
