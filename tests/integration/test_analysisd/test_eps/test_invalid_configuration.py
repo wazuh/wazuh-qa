@@ -16,16 +16,16 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_maximun.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_maximun.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_maximum.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_maximum.yaml')
 
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_timeframe.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_timeframe.yaml')
 
-t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_timeframe_maximun.yaml')
-t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_timeframe_maximun.yaml')
+t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_timeframe_maximum.yaml')
+t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_timeframe_maximum.yaml')
 
-# Test configurations without maximun value (t1)
+# Test configurations without maximum value (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
@@ -35,7 +35,7 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
-# Test configurations without timeframe and maximun values (t3)
+# Test configurations without timeframe and maximum values (t3)
 t3_configuration_parameters, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 t3_configurations = load_configuration_template(t3_configurations_path, t3_configuration_parameters,
                                                 t3_configuration_metadata)
@@ -43,7 +43,7 @@ t3_configurations = load_configuration_template(t3_configurations_path, t3_confi
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_maximun(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
                          truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when `maximum` value is not present in the
@@ -149,7 +149,7 @@ def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
 
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_timeframe_maximun(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_timeframe_maximum(configuration, metadata, set_wazuh_configuration_eps,
                                    truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when `maximum` and/or `timeframe` are not present in the

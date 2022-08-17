@@ -1545,7 +1545,7 @@ class Injector:
         thread_number (int): total number of threads created. This may change depending on the modules used in the
                              agent.
         threads (list): list containing all the threads created.
-        limit_msg (int): Maximun amount of message to be sent.
+        limit_msg (int): Maximum amount of message to be sent.
 
     Examples:
         To create an Injector, you need to create an agent, a sender and then, create the injector using both of them.
@@ -1601,7 +1601,7 @@ class InjectorThread(threading.Thread):
         agent (Agent): agent owner of the injector and the sender.
         module (str): module used to send events (fim, syscollector, etc).
         stop_thread (int): 0 if the thread is running, 1 if it is stopped.
-        limit_msg (int): Maximun amount of message to be sent.
+        limit_msg (int): Maximum amount of message to be sent.
     """
     def __init__(self, thread_id, name, sender, agent, module, limit_msg):
         super(InjectorThread, self).__init__()

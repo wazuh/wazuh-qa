@@ -63,13 +63,13 @@ def test_enabled(configuration, metadata, set_wazuh_configuration_eps,
         - Verify that when the `maximum` value is set to a values greater than 0 and lower than 100000 and, `timeframe`
           value is set to a value greater than 0 and lower than 3600, the module EPS limits is running.
         - Verify that the wazuh-analysisd daemon is running.
-        
+
     input_description:
         - The `cases_enabled.yaml` file provides the module configuration for this test.
 
     expected_output:
         - r'(.*)wazuh-analysisd: INFO: EPS limit enabled, EPS: (.*), timeframe: (.*)'
     '''
-    evm.check_eps_enabled(metadata['maximun'], metadata['timeframe'])
+    evm.check_eps_enabled(metadata['maximum'], metadata['timeframe'])
     # Check that wazuh-analysisd is running
     check_if_deamon_is_running('wazuh-analysisd')

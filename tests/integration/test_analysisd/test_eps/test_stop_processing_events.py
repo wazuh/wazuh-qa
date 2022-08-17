@@ -29,9 +29,9 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 
 # Get simulate agent configurations (t1)
 params_stop_processing_events = get_simulate_agent_configuration(configurations_simulate_agent_path)
-maximun_eps = [metadata['maximun'] for metadata in t1_configuration_metadata]
+maximum_eps = [metadata['maximum'] for metadata in t1_configuration_metadata]
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = maximun_eps[0] * timeframe_eps_t1[0] * 3
+total_msg = maximum_eps[0] * timeframe_eps_t1[0] * 3
 if total_msg > QUEUE_SIZE:
     total_msg = QUEUE_SIZE - 1
 params_stop_processing_events.update({'total_msg': total_msg})
@@ -44,7 +44,7 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
                                  restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
-                 be lower or equal than `maximun` * `timeframe`
+                 be lower or equal than `maximum` * `timeframe`
 
     test_phases:
         - Set a custom Wazuh configuration.
@@ -78,7 +78,7 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
 
     assertions:
         - The `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must be lower or equal
-          than `maximun` * `timeframe` and greater than a percentage of `maximun` * `timeframe` to confirm that
+          than `maximum` * `timeframe` and greater than a percentage of `maximum` * `timeframe` to confirm that
           `events_processed` is not null.
 
     input_description:
@@ -89,6 +89,6 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
     events_processed = evm.get_analysisd_state('events_processed')
 
     # Check that processed events reach the EPS limit
-    assert events_processed <= float(metadata['maximun'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximun'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximun * timeframe'
+    assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
+           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+           'events_processed must be lower or equal to maximum * timeframe'

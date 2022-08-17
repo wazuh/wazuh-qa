@@ -54,9 +54,9 @@ def check_eps_disabled():
     check_analysisd_event(callback=fr'.*INFO: EPS limit disabled.*', timeout=eps.T_10)
 
 
-def check_eps_enabled(maximun, timeframe):
+def check_eps_enabled(maximum, timeframe):
     """Check if the eps module is enable"""
-    check_analysisd_event(callback=fr".*INFO: EPS limit enabled, EPS: '{maximun}', timeframe: '{timeframe}'",
+    check_analysisd_event(callback=fr".*INFO: EPS limit enabled, EPS: '{maximum}', timeframe: '{timeframe}'",
                           timeout=eps.T_10)
 
 

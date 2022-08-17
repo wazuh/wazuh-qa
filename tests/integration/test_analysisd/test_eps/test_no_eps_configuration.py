@@ -35,7 +35,7 @@ params_disabled_eps.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
-                 truncate_monitored_files, restart_wazuh_daemon_function):
+                  truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is disabled when it is not configured.
 

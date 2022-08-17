@@ -6,7 +6,7 @@
             - eps:
                 elements:
                   - maximum:
-                      value: MAXIMUN
+                      value: MAXIMUM
 
     - section: remote
       elements:

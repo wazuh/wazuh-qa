@@ -29,11 +29,11 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 
 # Get simulate agent configurations (t1)
 params_start_queuing_events_when_limit_reached = get_simulate_agent_configuration(configurations_simulate_agent_path)
-maximun_eps = [metadata['maximun'] for metadata in t1_configuration_metadata]
+maximum_eps = [metadata['maximum'] for metadata in t1_configuration_metadata]
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
 # It is sent `width_frame` time frame width to reduce test time execution
 width_frame = 3
-total_msg = maximun_eps[0] * timeframe_eps_t1[0] * width_frame
+total_msg = maximum_eps[0] * timeframe_eps_t1[0] * width_frame
 if total_msg > QUEUE_SIZE:
     total_msg = QUEUE_SIZE - 1
 params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
@@ -43,11 +43,11 @@ params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_start_queuing_events_when_limit_reached], indirect=True)
 def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wazuh_configuration_eps,
-                                                  truncate_monitored_files, restart_wazuh_daemon_function,
-                                                  simulate_agent):
+                                                 truncate_monitored_files, restart_wazuh_daemon_function,
+                                                 simulate_agent):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
-                 be lower or equal than `maximun` * `timeframe` and, the `events_received` value must be greater than
+                 be lower or equal than `maximum` * `timeframe` and, the `events_received` value must be greater than
                  `events_processed` and, the `events_dropped` value equal to 0 and finaly, `event_queue_usage` is lower
                  than 1.0.
 
@@ -83,7 +83,7 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
 
     assertions:
         - The `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must be lower or equal
-          than `maximun` * `timeframe` and greater than a percentage of `maximun` * `timeframe` to confirm that
+          than `maximum` * `timeframe` and greater than a percentage of `maximum` * `timeframe` to confirm that
           `events_processed` is not null. The `events_received` value must be greater than `events_processed` and,
           the `events_dropped` value equal to 0 and finaly, `event_queue_usage` is lower than 1.0.
 
@@ -98,9 +98,9 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
     event_queue_usage = evm.get_analysisd_state('event_queue_usage')
 
     # Check that processed events reach the EPS limit
-    assert events_processed <= float(metadata['maximun'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximun'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximun * timeframe'
+    assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
+           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+           'events_processed must be lower or equal to maximum * timeframe'
 
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'

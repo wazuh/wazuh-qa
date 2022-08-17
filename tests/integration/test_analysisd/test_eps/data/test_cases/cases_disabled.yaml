@@ -1,8 +1,8 @@
 - name: 'EPS Limits disabled'
   description: 'EPS Limits disabled'
   configuration_parameters:
-    MAXIMUN: '0'
+    MAXIMUM: '0'
     TIMEFRAME: '5'
   metadata:
-    maximun: 0
+    maximum: 0
     timeframe: 5

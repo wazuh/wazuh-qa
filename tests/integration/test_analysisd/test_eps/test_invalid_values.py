@@ -29,7 +29,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_invalid_values(configuration, metadata, set_wazuh_configuration_eps,
-                       truncate_monitored_files, restart_wazuh_daemon_after_finishing):
+                        truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when an invalid value is set to `maximum` and/or `timeframe`.
 

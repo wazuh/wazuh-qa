@@ -79,7 +79,7 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, set_wazu
 
     assertions:
         - The `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must be lower or equal
-          than `maximun` * `timeframe` and greater than a percentage of `maximun` * `timeframe` to confirm that
+          than `maximum` * `timeframe` and greater than a percentage of `maximum` * `timeframe` to confirm that
           `events_processed` is not null. The `events_received` value must be greater than `events_processed` and,
           the `events_dropped` value greater than 0 and finaly, `event_queue_usage` is equal to 1.0.
 
@@ -94,9 +94,9 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, set_wazu
     event_queue_usage = evm.get_analysisd_state('event_queue_usage')
 
     # Check that processed events reach the EPS limit
-    assert events_processed <= float(metadata['maximun'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximun'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximun * timeframe'
+    assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
+           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+           'events_processed must be lower or equal to maximum * timeframe'
 
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'

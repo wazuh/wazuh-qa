@@ -1,6 +1,6 @@
 - name: 'EPS Limits without timeframe value'
   description: 'EPS Limits without timeframe value'
   configuration_parameters:
-    MAXIMUN: '500'
+    MAXIMUM: '500'
   metadata:
-    maximun: 500
+    maximum: 500

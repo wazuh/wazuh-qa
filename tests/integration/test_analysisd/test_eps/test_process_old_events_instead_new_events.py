@@ -40,12 +40,13 @@ params_process_old_events_one_thread.update({'total_msg': total_msg})
 
 # Get simulate agent configurations (t2)
 params_process_old_events_multithread = get_simulate_agent_configuration(configurations_simulate_agent_path)
-maximun_eps_t2 = [metadata['maximun'] for metadata in t2_configuration_metadata]
+maximum_eps_t2 = [metadata['maximum'] for metadata in t2_configuration_metadata]
 timeframe_eps_t2 = [metadata['timeframe'] for metadata in t2_configuration_metadata]
 # It is sent `width_frame` time frame width to reduce test time execution
 frame_width = 3
-total_msg = maximun_eps_t2[0] * timeframe_eps_t2[0] * frame_width
+total_msg = maximum_eps_t2[0] * timeframe_eps_t2[0] * frame_width
 params_process_old_events_multithread.update({'total_msg': total_msg})
+
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
@@ -138,12 +139,12 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_multithread], indirect=True)
 def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_configuration_eps,
-                                               truncate_monitored_files, delete_alerts_folder,
-                                               restart_wazuh_daemon_function, simulate_agent):
+                                         truncate_monitored_files, delete_alerts_folder,
+                                         restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
                  average frees up some space. To do this, read the alerts.log file and find the numerated alerts
-                 messages with the FileMonitor tool. To do so, it iterates the `n` frames of `maximun` * `timeframe` and
+                 messages with the FileMonitor tool. To do so, it iterates the `n` frames of `maximum` * `timeframe` and
                  checks if the message number belongs to the respective frame.
 
     test_phases:
@@ -195,7 +196,7 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
     sleep(metadata['timeframe'] / 2)
     events_received = evm.get_analysisd_state('events_received')
     index = 0
-    frame = metadata['timeframe'] * metadata['maximun']
+    frame = metadata['timeframe'] * metadata['maximum']
     # Iterate over each frame to find the respective numerated message belongs to the frame
     while (index + 1) * frame <= events_received:
         start_index = index * frame

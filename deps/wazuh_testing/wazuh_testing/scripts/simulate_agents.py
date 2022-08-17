@@ -41,13 +41,13 @@ def process_script_parameters(args):
         args (argparse.Namespace): Script args.
     """
     # Add keepalive and receive_message modules if they are not specified in script parameters
-    if None == args.disable_keepalive:
+    if args.disable_keepalive is None:
         if 'keepalive' not in args.modules:
             args.modules.append('keepalive')
             args.modules_eps.append('0')
 
 
-    if None == args.disable_receive:
+    if args.disable_receive is None:
         if 'receive_messages' not in args.modules:
             args.modules.append('receive_messages')
             args.modules_eps.append('0')
@@ -139,7 +139,7 @@ def create_injectors(agents, manager_address, protocol, limit_msg):
         agents (list): List of agents to create the injectors (1 injector/agent).
         manager_address (str): Manager IP address to connect the agents.
         protocol (str): TCP or UDP protocol to connect the agents to the manager.
-        limit_msg (int): Maximun amount of message to be sent.
+        limit_msg (int): Maximum amount of message to be sent.
 
     Returns:
         list: List of injector objects.
@@ -164,10 +164,10 @@ def start(injector, time_alive, flag_disable_keepalive):
     """
     try:
         injector.run()
-        if not flag_disable_keepalive:
-            sleep(time_alive)
-        else:
+        if flag_disable_keepalive:
             injector.wait()
+        else:
+            sleep(time_alive)
     finally:
         stop(injector)
 
