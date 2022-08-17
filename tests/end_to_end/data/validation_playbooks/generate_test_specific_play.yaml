@@ -1,0 +1,10 @@
+- hosts: localhost
+  vars:
+    validation_template: "{{ validation_template }}"
+    num_of_managers: "{{ num_of_managers }}"
+    num_of_agents: "{{ num_of_agents }}"
+  tasks:
+    - name: Generate a test specific validation playbook
+      template:
+        src: "{{ template_path }}"
+        dest: "{{ dest_path }}"

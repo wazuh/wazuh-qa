@@ -1,0 +1,24 @@
+# REQUIRED VARIABLES
+# -------------------
+# (String) os: Target operating system
+# (String) dist: Target distribution
+# (String) supported_dist: List of ditros supported by the current test
+
+- name: Get Wazuh installation
+  include_role:
+    name: service_controller
+    tasks_from: get_installation_type
+
+- debug: var=wazuh_info.stdout
+
+- debug: var=manager_distros
+
+- debug: var=agent_distros
+
+- fail:
+    msg: "{{ dist }} is not supported by this test: {{ manager_distros }}"
+  when: ('server' in wazuh_info.stdout and dist not in manager_distros)
+
+- fail:
+    msg: "{{ dist }} is not supported by this test: {{ manager_distros }}"
+  when: ('agent' in wazuh_info.stdout and dist not in manager_distros)

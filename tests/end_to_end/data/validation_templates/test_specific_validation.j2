@@ -1,0 +1,19 @@
+- name: Check supported distros
+  hosts: {{ target_hosts }}
+  any_errors_fatal: true
+  tasks:
+
+  - name: Check if the host distribution is compatible
+    include_role:
+      name: host_checker
+      tasks_from: check_supported_distro
+    vars:
+        os: "{% raw %}{{ 'Windows' if ansible_os_family == 'Windows' else 'Linux' }}{% endraw %}"
+        dist: "{% raw %}{{ ansible_distribution if ansible_os_family != 'Windows' else 'Windows' }}{% endraw %}"
+        manager_distros: {{ manager_distros }}
+        agent_distros: {{ agent_distros }}
+
+{# Include the test-specific validation tasks if exist #}
+{% if validation_template != '' %}
+{% include validation_template %}
+{% endif %}

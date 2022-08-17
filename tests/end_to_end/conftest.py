@@ -31,11 +31,11 @@ def validate_environments(request):
     collected_items = request.session.items
     roles_path = request.config.getoption('--roles-path')
     inventory_path = request.config.getoption('--inventory_path')
-    environment_file = os.path.join(suite_path, 'data', 'environment.json')
+    environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
     environment_metadata = json.load(open(environment_file))
-    playbook_generator = os.path.join(suite_path, 'data', 'generate_general_play.yaml')
-    playbook_template = os.path.join(suite_path, 'data', 'validation_template.j2')
-    general_playbook = os.path.join(suite_path, 'data', 'general_validation.yaml')
+    playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_general_play.yaml')
+    playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'general_validation.j2')
+    general_playbook = os.path.join(suite_path, 'data', 'validation_playbooks', 'general_validation.yaml')
 
     if not inventory_path:
         raise ValueError('Inventory not specified')
@@ -56,9 +56,9 @@ def validate_environments(request):
         test_suites_paths.append(path)
         # Get the test suite name
         test_suite_name = path.split('/')[-1:][0]
-        # Save the test environment metadata in lists
-        manager_instances.append(environment_metadata[test_suite_name]['managers'])
-        agent_instances.append(environment_metadata[test_suite_name]['agents'])
+        # Save the test environment metadata
+        manager_instances.append(environment_metadata[test_suite_name]['manager']['instances'])
+        agent_instances.append(environment_metadata[test_suite_name]['agent']['instances'])
 
     # Get the largest number of manager/agent instances
     num_of_managers = max(manager_instances)
@@ -66,14 +66,14 @@ def validate_environments(request):
     # -------------------------- End of Step 1 -------------------------------------
 
     # ---- Step 2: Run the playbook to generate the general validation playbook ----
-    parameters = {
+    gen_parameters = {
         'playbook': playbook_generator, 'inventory': inventory_path,
         'extravars': {
             'template_path': playbook_template, 'dest_path': general_playbook,
             'num_of_managers': num_of_managers, 'num_of_agents': num_of_agents
         }
     }
-    ansible_runner.run(**parameters)
+    ansible_runner.run(**gen_parameters)
     # -------------------------- End of Step 2 -------------------------------------
 
     # -------------------- Step 3: Run the general validation playbook -------------
@@ -91,24 +91,49 @@ def validate_environments(request):
                         'requirements.')
     # -------------------------- End of Step 3 -------------------------------------
 
-    # Step 4: Execute test-specific validations (if any)
+    # ---------------- Step 4: Execute test-specific validations (if any) ----------
+    playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_test_specific_play.yaml')
+    playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'test_specific_validation.j2')
+
     for path in test_suites_paths:
+        validation_template = os.path.join(path, 'data', 'playbooks', 'validation.j2')
+        validation_template = validation_template if os.path.exists(validation_template) else ''
+        # Define the path where the resulting playbook will be stored
         validation_playbook = os.path.join(path, 'data', 'playbooks', 'validation.yaml')
 
-        if os.path.exists(validation_playbook):
-            # Set Ansible parameters
-            parameters = {
-                'playbook': validation_playbook,
-                'inventory': inventory_path,
-                'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-            }
-            # Run the validations of the test suite.
-            validation_runner = ansible_runner.run(**parameters)
+        # Get distros by instances type
+        test_suite_name = path.split('/')[-1:][0]
+        target_hosts = []
+        distros = {"manager": [], "agent": []}
+        for key in environment_metadata[test_suite_name]:
+            if environment_metadata[test_suite_name][key]['instances'] > 0:
+                # Save manager/agent distros for the current test
+                distros[key] = environment_metadata[test_suite_name][key]['distros']
+                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+                target_hosts.extend([distro.lower() + f"-{key}*" for distro in distros[key]])
 
-            # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
-            if validation_runner.status == 'failed':
-                raise Exception(f"The validation phase of {{ path }} has failed. Please check that the environments "
-                                'meet the expected requirements.')
+        # Generate test_specific validation playbook
+        gen_parameters = {
+            'playbook': playbook_generator, 'inventory': inventory_path, 'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
+            'extravars': {
+                'template_path': playbook_template, 'dest_path': validation_playbook,
+                'num_of_managers': num_of_managers, 'num_of_agents': num_of_agents,
+                'validation_template': validation_template, 'target_hosts': ','.join(target_hosts),
+                'manager_distros': distros['manager'], 'agent_distros': distros['agent']
+            }
+        }
+        ansible_runner.run(**gen_parameters)
+
+        # Run test_specific validation playbook
+        parameters = {
+            'playbook': validation_playbook, 'inventory': inventory_path, 'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
+        }
+        validation_runner = ansible_runner.run(**parameters)
+
+        # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
+        if validation_runner.status == 'failed':
+            raise Exception(f"The validation phase of {{ path }} has failed. Please check that the environments "
+                            'meet the expected requirements.')
     # -------------------------- End of Step 4 -------------------------------------
 
 
