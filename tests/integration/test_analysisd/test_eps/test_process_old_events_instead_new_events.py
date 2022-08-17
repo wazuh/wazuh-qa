@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-get_simulate_agent_configuration
+                                              get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 
 
@@ -35,7 +35,7 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 # Get simulate agent configurations (t1)
 params_process_old_events_one_thread = get_simulate_agent_configuration(configurations_simulate_agent_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 10000 # of 1Kb message of 16384 Kb of queue size
+total_msg = 10000  # of 1Kb message of 16384 Kb of queue size
 params_process_old_events_one_thread.update({'total_msg': total_msg})
 
 # Get simulate agent configurations (t2)
@@ -131,8 +131,7 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
             # Store the timestamp to be compared with the next one
             timestamp_bkp = timestamp
     else:
-        raise Exception('Not enough messages were sent. Please increase the `total_msg` for ' \
-                        'this test.')
+        raise Exception('Not enough messages were sent. Please increase the `total_msg` for this test.')
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)

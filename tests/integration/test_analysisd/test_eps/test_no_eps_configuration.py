@@ -3,7 +3,7 @@ from time import sleep
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-get_simulate_agent_configuration
+                                              get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.eps import ANALYSISD_STATE_INTERNAL_DEFAULT, PERCENTAGE_PROCESS_MSGS
 
@@ -28,7 +28,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 # Get simulate agent configurations (t1)
 params_disabled_eps = get_simulate_agent_configuration(configurations_simulate_agent_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 1000 # of 1Kb message of 16384 Kb of queue size
+total_msg = 1000  # of 1Kb message of 16384 Kb of queue size
 params_disabled_eps.update({'total_msg': total_msg})
 
 
@@ -131,6 +131,7 @@ def test_without_eps_setting(configuration, metadata, set_wazuh_configuration_ep
     sleep(metadata['timeframe'] / 2)
     events_processed = evm.get_analysisd_state('events_processed')
     events_received = evm.get_analysisd_state('events_received')
-    # There are some internal event that are processed but not are reflected in events_received, That why it has been used PERCENTAGE_PROCESS_MSGS variable
-    assert events_processed >= events_received * PERCENTAGE_PROCESS_MSGS and \
-           events_processed > 0, 'The events_processed value is similar to events_received'
+    # There are some internal event that are processed but not are reflected in events_received, That why it
+    #  has been used PERCENTAGE_PROCESS_MSGS variable
+    assert events_processed >= events_received * PERCENTAGE_PROCESS_MSGS and events_processed > 0, 'The ' \
+        'events_processed value is similar to events_received'

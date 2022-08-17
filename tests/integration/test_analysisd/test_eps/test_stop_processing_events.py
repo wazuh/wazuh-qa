@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-get_simulate_agent_configuration
+                                              get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
@@ -90,5 +90,5 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
 
     # Check that processed events reach the EPS limit
     assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximum * timeframe'
+        events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+        'events_processed must be lower or equal to maximum * timeframe'

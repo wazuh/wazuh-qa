@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-get_simulate_agent_configuration
+                                              get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
@@ -99,8 +99,8 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
 
     # Check that processed events reach the EPS limit
     assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximum * timeframe'
+        events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+        'events_processed must be lower or equal to maximum * timeframe'
 
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'
@@ -108,4 +108,4 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
     # Check that there are not events dropped and the queue usage is less than 1.0 (100%).
     # This means the queue is not full
     assert events_dropped == 0 and event_queue_usage < 1.0 and event_queue_usage > 0.0, 'events_dropped must be 0 ' \
-           'and event_queue_usage less than 1.0'
+        'and event_queue_usage less than 1.0'

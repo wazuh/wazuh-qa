@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-get_simulate_agent_configuration
+                                              get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
@@ -31,7 +31,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 # Get simulate agent configurations (t1)
 params_start_dropping_events_when_queue_full = get_simulate_agent_configuration(configurations_simulate_agent_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 16500 # of 1Kb message of 16384 Kb of queue size. Total dropped aproximatelly 116
+total_msg = 16500  # of 1Kb message of 16384 Kb of queue size. Total dropped aproximatelly 116
 expected_msg_dropped = total_msg - QUEUE_SIZE
 params_start_dropping_events_when_queue_full.update({'total_msg': total_msg})
 
@@ -95,20 +95,20 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, set_wazu
 
     # Check that processed events reach the EPS limit
     assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \
-           events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
-           'events_processed must be lower or equal to maximum * timeframe'
+        events_processed >= float(metadata['maximum'] * metadata['timeframe']) * PERCENTAGE_PROCESS_MSGS, \
+        'events_processed must be lower or equal to maximum * timeframe'
 
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'
 
     # Check that there is no event dropped and the queue usage is less than 1.0 (100%). This means the queue is not full
     assert events_dropped >= int(expected_msg_dropped * PERCENTAGE_PROCESS_MSGS) \
-           and events_dropped <= int(expected_msg_dropped * (1 + (1 - PERCENTAGE_PROCESS_MSGS))), 'events_dropped must be '\
-           'in the range of (total_msg - QUEUE_SIZE)'
+        and events_dropped <= int(expected_msg_dropped * (1 + (1 - PERCENTAGE_PROCESS_MSGS))), 'events_dropped must '\
+        'be in the range of (total_msg - QUEUE_SIZE)'
 
     # Check that there is no event dropped and the queue usage is less than 1.0 (100%). This means the queue is not full
     assert event_queue_usage == 1.0, 'event_queue_usage must be 1.0'
 
     # Check that events_dropped are in the range of events_received - events_processed
     assert events_processed <= events_received - events_dropped, 'events_processed must be lower than' \
-           'events_received - events_dropped'
+        'events_received - events_dropped'

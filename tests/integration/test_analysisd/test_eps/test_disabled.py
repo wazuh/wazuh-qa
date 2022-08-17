@@ -28,7 +28,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
-                 truncate_monitored_files, restart_wazuh_daemon_function):
+                  truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is not started when `maximum` is set to a value equal to 0, or with an empty
                  value, and `timeframe` is set to a value greater than 0 and lower than 3600.
