@@ -1585,7 +1585,6 @@ class Injector:
             self.sender.socket.shutdown(socket.SHUT_RDWR)
         self.sender.socket.close()
 
-
     def wait(self):
         for thread in range(self.thread_number):
             self.threads[thread].join()

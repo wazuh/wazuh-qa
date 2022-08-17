@@ -1,5 +1,5 @@
-- name: 'EPS Limits enabled'
-  description: 'EPS Limits enabled'
+- name: EPS Limits enabled
+  description: EPS Limits enabled
   configuration_parameters:
     MAXIMUM: '10'
     TIMEFRAME: '5'

@@ -12,10 +12,10 @@
       elements:
         - connection:
             value: secure
-      - port:
-          value: '1514'
-      - protocol:
-          value: TCP
+        - port:
+            value: '1514'
+        - protocol:
+            value: TCP
 
     - section: sca
       elements:
