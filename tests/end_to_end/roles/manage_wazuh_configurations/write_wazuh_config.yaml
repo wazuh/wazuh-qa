@@ -1,8 +1,0 @@
-- name: Configure ossec.conf
-  become: true
-  blockinfile:
-    path: /var/ossec/etc/ossec.conf
-    insertbefore: </ossec_config>
-    block: |
-      '{{ block }}'
-    marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
