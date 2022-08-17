@@ -478,6 +478,8 @@ class Agent:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
+        elif '#!-force_reconnect' in msg_decoded_list[0]:
+            sender.reconnect(self.startup_msg)
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -675,7 +677,8 @@ class Agent:
     def init_rootcheck(self):
         """Initialize rootcheck module."""
         if self.rootcheck is None:
-            self.rootcheck = Rootcheck(os = self.os, agent_name = self.name, agent_id = self.id, rootcheck_sample = self.rootcheck_sample)
+            self.rootcheck = Rootcheck(os=self.os, agent_name=self.name, agent_id=self.id,
+                                       rootcheck_sample=self.rootcheck_sample)
 
     def init_fim(self):
         """Initialize fim module."""
@@ -1014,6 +1017,7 @@ class Logcollector:
     def __init__(self):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
+        self.message_counter = 0
 
     def generate_event(self):
         """Generate logcollector event
@@ -1023,8 +1027,10 @@ class Logcollector:
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
-        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}"
+        message_counter_info = f"Message number: {self.message_counter}"
+        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}:{message_counter_info}"
 
+        self.message_counter = self.message_counter + 1
         return message
 
 
@@ -1491,11 +1497,23 @@ class Sender:
         self.manager_address = manager_address
         self.manager_port = manager_port
         self.protocol = protocol.upper()
+        self.socket = None
+        self.connect()
+
+    def connect(self):
         if is_tcp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
         if is_udp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def reconnect(self, event):
+        if is_tcp(self.protocol):
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            self.connect()
+            if event:
+                self.send_event(event)
 
     def send_event(self, event):
         if is_tcp(self.protocol):
@@ -1677,17 +1695,18 @@ class InjectorThread(threading.Thread):
                     char_size = getsizeof(event_msg[0]) - getsizeof('')
                     event_msg += 'A' * (dummy_message_size//char_size)
 
-                # Add message limitiation
+                # # Add message limitiation
                 if self.totalMessages >= self.limit_msg:
                     self.stop_thread = 1
                     break
-                
+
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1
                 sent_messages += 1
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
+
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
 
