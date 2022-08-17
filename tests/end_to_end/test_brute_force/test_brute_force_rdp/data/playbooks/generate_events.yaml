@@ -23,7 +23,7 @@
         - test_user
       register: result
       failed_when:
-        - "'0 valid passwords found' not in result.stdout"
+        - "'0 valid password found' not in result.stdout"
 
     - name: Wait for alert
       wait_for:
