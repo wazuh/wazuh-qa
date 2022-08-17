@@ -1,0 +1,31 @@
+- name: Test case configuration
+  hosts: wazuh-windows
+  tasks:
+
+    - name: Create directory to monitor (Windows)
+      win_file:
+        path: C:\Test\test_demo_fim
+        state: directory
+
+    - name: Add directory to syscheck configuration (Windows)
+      win_lineinfile:
+        path: C:\Program Files (x86)\ossec-agent\ossec.conf
+        insertafter: </directories>
+        line: |
+          <directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>
+
+    - name: Truncate ossec.log
+      win_file:
+        path: C:\Program Files (x86)\ossec-agent\ossec.log
+        state: absent
+
+    - name: Restart Wazuh (Windows)
+      win_shell: |
+        net stop wazuh
+        net start wazuh
+
+    - name: Wait for whodata start
+      win_wait_for:
+        path: C:\Program Files (x86)\ossec-agent\ossec.log
+        search_regex: File integrity monitoring real-time Whodata engine started.
+        timeout: 20
