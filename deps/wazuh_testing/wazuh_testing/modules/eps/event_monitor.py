@@ -116,5 +116,5 @@ def get_msg_with_number(message):
         message (str): Message to find
     """
     check_analysisd_event(timeout=eps.T_20, callback=message,
-                          error_message="Could not find the event in alerts.log",  prefix="", \
+                          error_message=fr"Could not find the event: {message}",  prefix="", \
                           file_to_monitor=ALERT_LOGS_PATH)
