@@ -13,20 +13,6 @@
         value: DIRECTORY
     - skip_proc:
         value: SKIP
-# conf 2
-- tags:
-  - skip_sys
-  apply_to_modules:
-  - test_skip
-  sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - directories:
-        value: "/sys/module/isofs"
-    - skip_sys:
-        value: SKIP
 # conf 3
 - tags:
     - skip_dev
