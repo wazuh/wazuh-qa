@@ -1,0 +1,8 @@
+- name: 'EPS Limits process old events instead of new ones - One thread'
+  description: 'EPS Limits process old events instead of new ones - One thread'
+  configuration_parameters:
+    MAXIMUN: '100'
+    TIMEFRAME: '5'
+  metadata:
+    maximun: 100
+    timeframe: 5

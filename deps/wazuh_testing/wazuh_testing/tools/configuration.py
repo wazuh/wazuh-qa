@@ -742,3 +742,21 @@ def update_configuration_template(configurations, old_values, new_values):
         configurations_to_update = configurations_to_update.replace(old_value, new_value)
 
     return json.loads(configurations_to_update)
+
+
+def get_simulate_agent_configuration(data_file_path):
+    """Load simulate agent configuration file.
+
+    Args:
+        data_file_path (str): Test case template file path.
+
+    Returns:
+        dict: Configurations names.
+    """
+    configuration_file = file.read_yaml(data_file_path)
+    configuration_parameters = {}
+
+    for test_case in configuration_file:
+        configuration_parameters.update(test_case['configuration_parameters'])
+
+    return configuration_parameters

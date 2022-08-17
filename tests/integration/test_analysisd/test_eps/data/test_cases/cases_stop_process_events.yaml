@@ -1,0 +1,8 @@
+- name: 'EPS Limits stop processing events'
+  description: 'EPS Limits stop processing events'
+  configuration_parameters:
+    MAXIMUN: '100'
+    TIMEFRAME: '5'
+  metadata:
+    maximun: 100
+    timeframe: 5

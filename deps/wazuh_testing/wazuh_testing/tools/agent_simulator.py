@@ -1527,6 +1527,7 @@ class Injector:
         thread_number (int): total number of threads created. This may change depending on the modules used in the
                              agent.
         threads (list): list containing all the threads created.
+        limit_msg (int): Maximun amount of message to be sent.
 
     Examples:
         To create an Injector, you need to create an agent, a sender and then, create the injector using both of them.
@@ -1538,16 +1539,17 @@ class Injector:
         >>> injector.run()
     """
 
-    def __init__(self, sender, agent):
+    def __init__(self, sender, agent, limit):
         self.sender = sender
         self.agent = agent
+        self.limit_msg = limit
         self.thread_number = 0
         self.threads = []
         for module, config in self.agent.modules.items():
             if config["status"] == "enabled":
                 self.threads.append(
                     InjectorThread(self.thread_number, f"Thread-{self.agent.id}{module}", self.sender,
-                                   self.agent, module))
+                                   self.agent, module, self.limit_msg))
                 self.thread_number += 1
 
     def run(self):
@@ -1566,6 +1568,11 @@ class Injector:
         self.sender.socket.close()
 
 
+    def wait(self):
+        for thread in range(self.thread_number):
+            self.threads[thread].join()
+
+
 class InjectorThread(threading.Thread):
     """This class creates a thread who will create and send the events to the manager for each module.
 
@@ -1576,8 +1583,9 @@ class InjectorThread(threading.Thread):
         agent (Agent): agent owner of the injector and the sender.
         module (str): module used to send events (fim, syscollector, etc).
         stop_thread (int): 0 if the thread is running, 1 if it is stopped.
+        limit_msg (int): Maximun amount of message to be sent.
     """
-    def __init__(self, thread_id, name, sender, agent, module):
+    def __init__(self, thread_id, name, sender, agent, module, limit_msg):
         super(InjectorThread, self).__init__()
         self.thread_id = thread_id
         self.name = name
@@ -1586,6 +1594,7 @@ class InjectorThread(threading.Thread):
         self.totalMessages = 0
         self.module = module
         self.stop_thread = 0
+        self.limit_msg = limit_msg
 
     def keep_alive(self):
         """Send a keep alive message from the agent to the manager."""
@@ -1668,6 +1677,11 @@ class InjectorThread(threading.Thread):
                     char_size = getsizeof(event_msg[0]) - getsizeof('')
                     event_msg += 'A' * (dummy_message_size//char_size)
 
+                # Add message limitiation
+                if self.totalMessages >= self.limit_msg:
+                    self.stop_thread = 1
+                    break
+                
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)
                 self.totalMessages += 1

@@ -1,0 +1,47 @@
+- sections:
+    - section: global
+      elements:
+        - limits:
+            elements:
+            - eps:
+                elements:
+                  - maximum:
+                      value: MAXIMUN
+
+    - section: remote
+      elements:
+      - connection:
+          value: 'secure'
+      - port:
+          value: '1514'
+      - protocol:
+          value: 'TCP'
+
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: 'syscollector'
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: 'osquery'
+      elements:
+        - disabled:
+            value: 'yes'

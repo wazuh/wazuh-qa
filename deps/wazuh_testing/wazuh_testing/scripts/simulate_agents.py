@@ -41,13 +41,16 @@ def process_script_parameters(args):
         args (argparse.Namespace): Script args.
     """
     # Add keepalive and receive_message modules if they are not specified in script parameters
-    if 'keepalive' not in args.modules:
-        args.modules.append('keepalive')
-        args.modules_eps.append('0')
+    if None == args.disable_keepalive:
+        if 'keepalive' not in args.modules:
+            args.modules.append('keepalive')
+            args.modules_eps.append('0')
 
-    if 'receive_messages' not in args.modules:
-        args.modules.append('receive_messages')
-        args.modules_eps.append('0')
+
+    if None == args.disable_receive:
+        if 'receive_messages' not in args.modules:
+            args.modules.append('receive_messages')
+            args.modules_eps.append('0')
 
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
@@ -129,13 +132,14 @@ def create_agents(args):
     return agents
 
 
-def create_injectors(agents, manager_address, protocol):
+def create_injectors(agents, manager_address, protocol, limit_msg):
     """Create injectos objects from list of agents and connection parameters.
 
     Args:
         agents (list): List of agents to create the injectors (1 injector/agent).
         manager_address (str): Manager IP address to connect the agents.
         protocol (str): TCP or UDP protocol to connect the agents to the manager.
+        limit_msg (int): Maximun amount of message to be sent.
 
     Returns:
         list: List of injector objects.
@@ -146,12 +150,12 @@ def create_injectors(agents, manager_address, protocol):
 
     for agent in agents:
         sender = ag.Sender(manager_address, protocol=protocol)
-        injectors.append(ag.Injector(sender, agent))
+        injectors.append(ag.Injector(sender, agent, limit_msg))
 
     return injectors
 
 
-def start(injector, time_alive):
+def start(injector, time_alive, flag_disable_keepalive):
     """Start the injector process for a specified time.
 
     Args:
@@ -160,7 +164,10 @@ def start(injector, time_alive):
     """
     try:
         injector.run()
-        sleep(time_alive)
+        if not flag_disable_keepalive:
+            sleep(time_alive)
+        else:
+            injector.wait()
     finally:
         stop(injector)
 
@@ -174,7 +181,7 @@ def stop(injector):
     injector.stop_receive()
 
 
-def run(injectors, time_alive):
+def run(injectors, time_alive, flag_disable_keepalive):
     """Run each injector in a separated process.
 
     Args:
@@ -184,7 +191,7 @@ def run(injectors, time_alive):
     processes = []
 
     for injector in injectors:
-        processes.append(Process(target=start, args=(injector, time_alive)))
+        processes.append(Process(target=start, args=(injector, time_alive, flag_disable_keepalive)))
 
     for agent_process in processes:
         agent_process.start()
@@ -322,6 +329,18 @@ def main():
                             help='Waiting time in seconds between agent registration and the sending of events.',
                             required=False, default=0, dest='waiting_connection_time')
 
+    arg_parser.add_argument('-e', '--limit-msg', metavar='<limit_msg>', type=int,
+                            help='Amount of message to sent.',
+                            required=False, default=None, dest='limit_msg')
+
+    arg_parser.add_argument('-k', '--disable-keepalive', metavar='<disable_keepalive>', type=bool,
+                            help='Disable keepalive module',
+                            required=False, default=False, dest='disable_keepalive')
+
+    arg_parser.add_argument('-d', '--disable-receive', metavar='<disable_receive>', type=bool,
+                            help='Disable receive message module',
+                            required=False, default=False, dest='disable_receive')
+
     args = arg_parser.parse_args()
 
     process_script_parameters(args)
@@ -333,9 +352,9 @@ def main():
     # Waiting time to prevent CPU overload when registering many agents (registration + event generation).
     sleep(args.waiting_connection_time)
 
-    injectors = create_injectors(agents, args.manager_address, args.agent_protocol)
+    injectors = create_injectors(agents, args.manager_address, args.agent_protocol, args.limit_msg)
 
-    run(injectors, args.simulation_time)
+    run(injectors, args.simulation_time, args.disable_keepalive)
 
 
 if __name__ == "__main__":

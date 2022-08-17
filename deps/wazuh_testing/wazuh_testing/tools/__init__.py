@@ -77,6 +77,9 @@ else:
     else:
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
+    ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
+    SIMULATE_AGENT =  os.path.join('deps','wazuh_testing','wazuh_testing','scripts','simulate_agents.py')
+    WAZUH_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
     try:
         import grp
@@ -126,6 +129,7 @@ CLIENT_CUSTOM_KEYS_PATH = os.path.join(_data_path, 'sslmanager.key')
 CLIENT_CUSTOM_CERT_PATH = os.path.join(_data_path, 'sslmanager.cert')
 
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
+ALERT_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 ALERT_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.log')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')
