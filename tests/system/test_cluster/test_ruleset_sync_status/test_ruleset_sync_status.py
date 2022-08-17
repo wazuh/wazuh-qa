@@ -15,7 +15,6 @@ worker_hosts = test_hosts[1:]
 
 # Data paths
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-messages_path = os.path.join(test_data_path, 'master_messages.yml')
 tmp_path = os.path.join(test_data_path, 'tmp')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'agentless_cluster', 'inventory.yml')
@@ -67,9 +66,9 @@ def test_ruleset_sync_status(update_cluster_json):
     assert all(not item['synced'] for item in get_sync_status(api_token) if item['name'] != test_hosts[0])
 
     # Wait until a Local Integrity task is run in the master and then, Integrity sync tasks are run in the workers.
-    HostMonitor(inventory_path=inventory_path, messages_path=os.path.join(test_data_path, 'master_messages.yml'),
+    HostMonitor(inventory_path=inventory_path, messages_path=os.path.join(test_data_path, 'master_messages.yaml'),
                 tmp_path=tmp_path).run()
-    HostMonitor(inventory_path=inventory_path, messages_path=os.path.join(test_data_path, 'worker_messages.yml'),
+    HostMonitor(inventory_path=inventory_path, messages_path=os.path.join(test_data_path, 'worker_messages.yaml'),
                 tmp_path=tmp_path).run()
 
     # Verify that synced status is True for all cluster nodes again.
