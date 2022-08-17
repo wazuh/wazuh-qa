@@ -13,4 +13,4 @@ def check_if_deamon_is_running(daemon):
 
 def check_if_deamon_is_not_running(daemon):
     """Check if the specified daemon is running"""
-    assert check_if_process_is_running(daemon) == False, f"{daemon} is running. It may have crashed"
+    assert not check_if_process_is_running(daemon), f"{daemon} is running. It may have crashed"

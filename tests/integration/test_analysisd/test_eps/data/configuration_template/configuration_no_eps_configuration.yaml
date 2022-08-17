@@ -1,12 +1,12 @@
 - sections:
     - section: remote
       elements:
-      - connection:
-          value: 'secure'
-      - port:
-          value: '1514'
-      - protocol:
-          value: 'TCP'
+        - connection:
+            value: secure
+        - port:
+            value: '1514'
+        - protocol:
+            value: TCP
 
     - section: sca
       elements:
@@ -25,14 +25,14 @@
 
     - section: wodle
       attributes:
-        - name: 'syscollector'
+        - name: syscollector
       elements:
         - disabled:
             value: 'yes'
 
     - section: wodle
       attributes:
-        - name: 'osquery'
+        - name: osquery
       elements:
         - disabled:
             value: 'yes'

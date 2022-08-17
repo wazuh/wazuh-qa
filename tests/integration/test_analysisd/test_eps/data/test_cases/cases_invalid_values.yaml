@@ -1,5 +1,5 @@
-- name: 'EPS Limits with maximum values over the maximum allowed'
-  description: 'EPS Limits with maximum values over the maximum allowed'
+- name: EPS Limits with maximum values over the maximum allowed
+  description: EPS Limits with maximum values over the maximum allowed
   configuration_parameters:
     MAXIMUM: '100001'
     TIMEFRAME: '5'
@@ -7,8 +7,8 @@
     maximum: 100001
     timeframe: 5
 
-- name: 'EPS Limits with timeframe values over the timeframe allowed'
-  description: 'EPS Limits with timeframe values over the timeframe allowed'
+- name: EPS Limits with timeframe values over the timeframe allowed
+  description: EPS Limits with timeframe values over the timeframe allowed
   configuration_parameters:
     MAXIMUM: '10'
     TIMEFRAME: '3601'
@@ -16,8 +16,8 @@
     maximum: 10
     timeframe: 3601
 
-- name: 'EPS Limits with timeframe value 0'
-  description: 'EPS Limits with timeframe value 0'
+- name: EPS Limits with timeframe value 0
+  description: EPS Limits with timeframe value 0
   configuration_parameters:
     MAXIMUM: '10'
     TIMEFRAME: '0'
@@ -25,8 +25,8 @@
     maximum: 10
     timeframe: 0
 
-- name: 'EPS Limits with maximum and timeframe values 0'
-  description: 'EPS Limits with maximum and timeframe values 0'
+- name: EPS Limits with maximum and timeframe values 0
+  description: EPS Limits with maximum and timeframe values 0
   configuration_parameters:
     MAXIMUM: '0'
     TIMEFRAME: '0'

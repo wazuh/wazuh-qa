@@ -1,5 +1,5 @@
-- name: 'EPS Limits start dropping events'
-  description: 'EPS Limits start dropping events'
+- name: EPS Limits start dropping events
+  description: EPS Limits start dropping events
   configuration_parameters:
     MAXIMUM: '1'
     TIMEFRAME: '5'

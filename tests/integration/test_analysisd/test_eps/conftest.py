@@ -10,7 +10,8 @@ from typing import List
 import pytest
 
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import configuration, SIMULATE_AGENT, ARCHIVES_LOG_FILE_PATH, ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_PATH, WAZUH_INTERNAL_OPTIONS
+from wazuh_testing.tools import configuration, SIMULATE_AGENT, ARCHIVES_LOG_FILE_PATH, \
+                                ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_PATH, WAZUH_INTERNAL_OPTIONS
 
 
 @pytest.fixture(scope='function')
@@ -25,7 +26,7 @@ def restart_analysisd_function():
 def configure_local_internal_options_eps(request):
     """Fixture to configure the local internal options file."""
     # Define local internal options for vulnerability detector tests
-    local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',\
+    local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
                               'analysisd.state_interval': f"{request.param[0]}"}
 
     # Backup the old local internal options
@@ -55,7 +56,7 @@ def set_wazuh_configuration_eps(configuration, set_wazuh_configuration, configur
 @pytest.fixture(scope='function')
 def simulate_agent(request):
     """Fixture to execute the script simulate_agent.py"""
-    #Get IP address of the host
+    # Get IP address of the host
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
 
@@ -64,7 +65,6 @@ def simulate_agent(request):
                     -m {request.param['modules']} -s {request.param['eps']} -t {request.param['time']} \
                     -f {request.param['msg_size']} -e {request.param['total_msg']} \
                     -k {request.param['keepalive_disabled']} -d {request.param['receive_msg_disabled']}", shell=True)
-
 
     yield
 

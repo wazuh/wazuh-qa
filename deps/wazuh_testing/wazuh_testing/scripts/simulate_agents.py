@@ -46,7 +46,6 @@ def process_script_parameters(args):
             args.modules.append('keepalive')
             args.modules_eps.append('0')
 
-
     if args.disable_receive is False:
         if 'receive_messages' not in args.modules:
             args.modules.append('receive_messages')

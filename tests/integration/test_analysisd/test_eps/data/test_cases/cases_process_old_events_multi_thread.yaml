@@ -1,5 +1,5 @@
-- name: 'EPS Limits process old events instead of new ones - Multithread'
-  description: 'EPS Limits process old events instead of new ones - Multithread'
+- name: EPS Limits process old events instead of new ones - Multithread
+  description: EPS Limits process old events instead of new ones - Multithread
   configuration_parameters:
     MAXIMUM: '10'
     TIMEFRAME: '5'

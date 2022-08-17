@@ -3,17 +3,17 @@
       elements:
         - limits:
             elements:
-            - eps:
-                elements:
+              - eps:
+                  elements:
 
     - section: remote
       elements:
-      - connection:
-          value: 'secure'
+        - connection:
+            value: secure
       - port:
           value: '1514'
       - protocol:
-          value: 'TCP'
+          value: TCP
 
     - section: sca
       elements:
@@ -32,14 +32,14 @@
 
     - section: wodle
       attributes:
-        - name: 'syscollector'
+        - name: syscollector
       elements:
         - disabled:
             value: 'yes'
 
     - section: wodle
       attributes:
-        - name: 'osquery'
+        - name: osquery
       elements:
         - disabled:
             value: 'yes'

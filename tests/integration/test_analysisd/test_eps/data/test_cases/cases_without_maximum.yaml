@@ -1,5 +1,5 @@
-- name: 'EPS Limits without maximum value'
-  description: 'EPS Limits without maximum value'
+- name: EPS Limits without maximum value
+  description: EPS Limits without maximum value
   configuration_parameters:
     TIMEFRAME: '5'
   metadata:

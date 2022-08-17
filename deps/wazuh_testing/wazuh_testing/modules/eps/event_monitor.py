@@ -77,7 +77,6 @@ def get_words_from_file(words, filename):
     """
     with open(filename, 'r') as file:
         for _, line in enumerate(file):
-        # search string
             if words in line:
                 return line
 
@@ -116,5 +115,5 @@ def get_msg_with_number(message):
         message (str): Message to find
     """
     check_analysisd_event(timeout=eps.T_20, callback=message,
-                          error_message=fr"Could not find the event: {message}",  prefix="", \
+                          error_message=fr"Could not find the event: {message}",  prefix="",
                           file_to_monitor=ALERT_LOGS_PATH)
