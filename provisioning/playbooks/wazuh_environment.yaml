@@ -13,7 +13,6 @@
 
 # Wazuh indexer cluster
     - hosts: wi_cluster
-      strategy: free
       roles:
         - role: "{{ wazuh_ansible_roles }}/wazuh/wazuh-indexer"
           indexer_network_host: "{{ private_ip }}"
@@ -57,8 +56,17 @@
 
   # Agent
     - hosts: agent
-      strategy: free
-      become: yes
-      become_user: root
-      roles:
-        - "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
+      tasks:
+      - name: Agents
+        block:
+          - name: Install UNIX based agents
+            become: yes
+            become_user: root
+            import_role:
+              name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
+            when: ansible_os_family != "Windows"
+
+          - name: Install Windows based agents
+            import_role:
+              name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
+            when: ansible_os_family == "Windows"

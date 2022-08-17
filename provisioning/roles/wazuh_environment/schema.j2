@@ -1,0 +1,341 @@
+{% if vars['indexer'] is defined %}
+{%- set indexer = vars['indexer'] -%}
+{%- set indexer_nodes = indexer.keys() | list -%}
+{%- set first_indexer_node = indexer_nodes | first -%}
+{%- set last_indexer_node = indexer|length  - 1-%}
+{% else %}
+{%- set last_indexer_node = 0-%}
+{% endif %}
+
+
+{% if vars['dashboard'] is defined %}
+
+  {% if vars['dashboard']['ip'] ==  vars['indexer'][first_indexer_node]['ip'] %}
+    {%- set all_in_one = true-%}
+  {% else %}
+    {%- set all_in_one = false-%}
+{% endif %}
+
+  {% if all_in_one %}
+{%- set dashboard_node = last_indexer_node  + 1 -%}
+  {% else %}
+{%- set dashboard_node = last_indexer_node + 2 -%}
+  {% endif %}
+{%- set dashboard = vars['dashboard'] -%}
+
+{% else %}
+{%- set dashboard_node = last_indexer_node + 1-%}
+{% endif %}
+
+
+{% if vars['manager'] is defined %}
+{%- set manager = vars['manager'] -%}
+{%- set master_node = dashboard_node + 1 -%}
+
+    {% if manager['workers'] is not defined %}
+        {%- set workers = {} -%}
+    {% else %}
+            {%- set workers = vars['manager']['workers'] -%}
+
+    {% endif %}
+{% endif %}
+
+{% if vars['agent'] is defined %}
+{%- set agent = vars['agent'] -%}
+{% endif %}
+
+{% if vars['filebeat'] is defined %}
+{%- set filebeat = vars['filebeat'] -%}
+{% endif %}
+
+{% macro expand_ansible_connection_attributes(attributes_map) %}
+{% for attr_key, attr_value in attributes_map.items() %}
+{% if 'ansible' in attr_key %}
+{{- attr_key }}: {{ attr_value }}
+{% endif %}
+{% endfor %}
+{%- endmacro -%}
+
+
+
+{% macro expand_custom_package(role, role_parameters) %}
+
+{% if role == 'agent' %}
+{% if role_parameters['wazuh_custom_packages_installation_agent_rpm_url'] is defined%}
+wazuh_custom_packages_installation_agent_rpm_url: {{role_parameters['wazuh_custom_packages_installation_agent_rpm_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_agent_deb_url'] is defined%}
+wazuh_custom_packages_installation_agent_deb_url: {{role_parameters['wazuh_custom_packages_installation_agent_deb_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_msi_url'] is defined %}
+wazuh_custom_packages_installation_agent_msi_url: {{role_parameters['wazuh_custom_packages_installation_agent_msi_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_macos_url'] is defined%}
+wazuh_custom_packages_installation_agent_macos_url: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
+{% endif %}
+
+{% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url:'] is defined%}
+wazuh_custom_packages_installation_agent_solaris_url: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
+{% endif %}
+{% endif %}
+
+
+{% if role == 'manager' %}
+{% if role_parameters['wazuh_custom_packages_installation_manager_deb_url'] is defined %}
+wazuh_custom_packages_installation_manager_deb_url: {{role_parameters['wazuh_custom_packages_installation_manager_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_manager_rpm_url'] is defined%}
+wazuh_custom_packages_installation_manager_rpm_url: {{role_parameters['wazuh_custom_packages_installation_manager_rpm_url']}}
+{% endif %}
+{% endif %}
+
+
+
+{% if role == 'dashboard' %}
+{% if role_parameters['wazuh_custom_packages_installation_dashboard_deb_url'] is defined%}
+wazuh_custom_packages_installation_dashboard_deb_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url'] is defined %}
+wazuh_custom_packages_installation_dashboard_rpm_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url']}}
+{% endif %}
+{% endif %}
+
+{% if role == 'indexer' %}
+{% if role_parameters['wazuh_custom_packages_installation_indexer_deb_url'] is defined %}
+wazuh_custom_packages_installation_indexer_deb_url: {{role_parameters['wazuh_custom_packages_installation_indexer_deb_url']}}
+{% endif %}
+{% if role_parameters['wazuh_custom_packages_installation_indexer_rpm_url'] is defined %}
+wazuh_custom_packages_installation_indexer_rpm_url: {{role_parameters['wazuh_custom_packages_installation_indexer_rpm_url']}}
+{% endif %}
+{% endif %}
+
+{%- endmacro -%}
+
+
+
+{% if indexer is defined%}
+wi_cluster:
+  hosts:
+  {%- for indexer_key, indexer_value in indexer.items() %}
+
+    wi{{ loop.index }}:
+      {{ expand_ansible_connection_attributes(indexer_value) | indent(6) }}
+      private_ip: {{ indexer_value['ip'] }}
+      {{ expand_custom_package('indexer', indexer_value) | indent(6)  }}
+
+  {%- endfor -%}
+
+  {%- if dashboard is defined %}
+
+    dashboard:
+      {%- if all_in_one %}
+
+      perform_installation: false
+      indexer_node_name: "node-1"
+      dashboard_node_name: "node-1"
+
+      {{ expand_custom_package('indexer', vars['dashboard']) | indent(6)  }}
+      {{ expand_custom_package('dashboard', vars['dashboard']) | indent(6)  }}
+
+      {% else %}
+
+      {{ expand_custom_package('indexer', vars['dashboard']) | indent(6)  }}
+      {{ expand_custom_package('dashboard', vars['dashboard']) | indent(6)  }}
+      dashboard_node_name: "node-{{ dashboard_node }}"
+
+      {% endif %}
+
+      {{ expand_ansible_connection_attributes(dashboard) | indent(6) }}
+      private_ip:  {{ dashboard['ip'] }}
+
+  {% endif %}
+
+  vars:
+  {% raw %}
+    indexer_network_host: "{{ private_ip }}"
+  {% endraw %}
+
+    indexer_discovery_nodes:
+
+    {% for indexer_key, indexer_value in indexer.items() %}
+      - "{{ indexer_value['ip'] }}"
+    {% endfor %}
+
+    indexer_cluster_nodes:
+
+    {% for indexer_key, indexer_value in indexer.items() %}
+      - "{{ indexer_value['ip'] }}"
+    {% endfor %}
+
+    instances:
+
+      {%- for indexer_key, indexer_value in indexer.items() %}
+
+      node{{ loop.index }}:
+        name: node-{{loop.index}}
+        ip: "{{ indexer_value['ip'] }}"
+        role: indexer
+      {% endfor %}
+
+    {%- if dashboard is defined and not all_in_one %}
+
+      node{{dashboard_node}}:
+        name: node-{{dashboard_node}}
+        ip: "{{ dashboard['ip'] }}"
+        role: dashboard
+    {% endif %}
+
+    {%- if manager is defined %}
+
+      node{{master_node}}:
+        name: node-{{master_node}}
+        ip: "{{ manager['master']['ip'] }}"
+        role: wazuh
+    {%- if workers|length != 0 %}
+
+        node_type: master
+    {% endif %}
+
+        {%- for worker_key, worker_value in workers.items() %}
+        {% set real_node_index =  master_node + loop.index %}
+
+      node{{real_node_index}}:
+        name: node-{{real_node_index}}
+        ip: "{{ worker_value['ip'] }}"
+        role: wazuh
+        node_type: worker
+        {% endfor %}
+    {% endif %}
+{% endif %}
+
+
+{% if manager is defined -%}
+manager:
+  hosts:
+	  {%- if manager['master'] %}
+
+      master:
+        {{ expand_ansible_connection_attributes(manager['master']) | indent(8) }}
+        private_ip:  {{ manager['master']['ip'] }}
+        {{ expand_custom_package('manager', manager['master']) | indent(8)  }}
+        wazuh_manager_config:
+          cluster:
+            disable: 'no'
+            node_name: 'master'
+            node_type: 'master'
+            key: 'c98b62a9b6169ac5f67dae55ae4a9088'
+            nodes:
+                - "{{ manager['master']['ip'] }}"
+            hidden: 'no'
+        {%- endif -%}
+
+	    {%- for worker_key, worker_values in workers.items() %}
+
+      worker{{loop.index}}:
+        {{ expand_ansible_connection_attributes(worker_values) | indent(8) }}
+        private_ip:  {{ worker_values['ip'] }}
+        {{ expand_custom_package('manager', worker_values) | indent(8)  }}
+        wazuh_manager_config:
+          cluster:
+            disable: 'no'
+            node_name:  "{{worker_key}}"
+            node_type: 'worker'
+            key: 'c98b62a9b6169ac5f67dae55ae4a9088'
+            nodes:
+                - "{{manager['master']['ip']}}"
+            hidden: 'no'
+        {% endfor %}
+
+
+{% if filebeat is defined%}
+filebeat:
+  hosts:
+  {%- for filebeat_key, filebeat_value in filebeat.items() %}
+
+    filebeat{{ loop.index }}:
+      {{ expand_ansible_connection_attributes(filebeat_value) | indent(6) }}
+      filebeat_node_name: node-{{ loop.index + master_node - 1 }}
+ {%- endfor %}
+
+  vars:
+    filebeat_output_indexer_hosts:
+      - "{{ indexer[first_indexer_node]['ip'] }}"
+{%- endif -%}
+{% endif %}
+
+{% if agent is defined%}
+
+agent:
+  hosts:
+    {% for agent_key, agent_value in agent.items() -%}
+    agent{{loop.index}}:
+      {{ expand_custom_package('agent', agent_value) | indent(6)  }}
+      {{ expand_ansible_connection_attributes(agent_value) | indent(6) }}
+      wazuh_managers:
+      - address: {{ agent_value['manager_ip'] }}
+        port: 1514
+        protocol: tcp
+        api_port: 55000
+        api_proto: 'http'
+        api_user: ansible
+        max_retries: 5
+        retry_interval: 5
+    {% endfor %}
+{% endif %}
+
+all:
+  vars:
+    # General ansible connection parameters
+    ansible_ssh_common_args: -o StrictHostKeyChecking=no
+    ansible_winrm_server_cert_validation: ignore
+
+    # Custom Packages parameters
+    wazuh_custom_packages_installation_agent_enabled: true
+    wazuh_custom_packages_installation_manager_enabled: true
+
+    wazuh_custom_packages_installation_dashboard_enabled: true
+    wazuh_custom_packages_installation_indexer_enabled: true
+
+
+    {% if wazuh_custom_packages_installation_agent_deb_url is defined-%}
+    wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
+    {% endif %}
+
+    {%- if wazuh_custom_packages_installation_agent_rpm_url is defined-%}
+    wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_agent_msi_url is defined-%}
+    wazuh_custom_packages_installation_agent_msi_url: {{ wazuh_custom_packages_installation_agent_msi_url}}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_agent_macos_url is defined-%}
+    wazuh_custom_packages_installation_agent_macos_url: {{ wazuh_custom_packages_installation_agent_macos_url}}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_agent_solaris_url is defined-%}
+    wazuh_custom_packages_installation_agent_solaris_url: {{ wazuh_custom_packages_installation_agent_solaris_url}}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_manager_deb_url is defined-%}
+    wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url}}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_manager_rpm_url is defined-%}
+    wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url}}
+    {% endif %}
+
+    {%- if wazuh_custom_packages_installation_dashboard_deb_url is defined-%}
+    wazuh_custom_packages_installation_dashboard_deb_url: {{ wazuh_custom_packages_installation_dashboard_deb_url}}
+    {% endif %}
+
+
+    {%- if wazuh_custom_packages_installation_dashboard_rpm_url is defined-%}
+    wazuh_custom_packages_installation_dashboard_rpm_url: {{ wazuh_custom_packages_installation_dashboard_rpm_url}}
+    {% endif %}
+
+
+    {%- if wazuh_custom_packages_installation_indexer_deb_url is defined-%}
+    wazuh_custom_packages_installation_indexer_deb_url: {{ wazuh_custom_packages_installation_indexer_deb_url}}
+    {% endif %}
+
+    {%- if wazuh_custom_packages_installation_indexer_rpm_url is defined-%}
+    wazuh_custom_packages_installation_indexer_rpm_url: {{ wazuh_custom_packages_installation_indexer_rpm_url}}
+    {% endif %}

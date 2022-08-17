@@ -21,10 +21,9 @@ agent:
   service: ANY
   vars:
     mandatory:
-      package:
-        version: VERSION
-        revision: REVISION
-        repository: REPOSITORY
+      version: VERSION
+      revision: REVISION
+      repository: REPOSITORY
       manager: MANAGER_HOST
 
 #----------------------
@@ -39,10 +38,9 @@ manager:
       memory: 2048
   vars:
     mandatory:
-      package:
-        version: VERSION
-        revision: REVISION
-        repository: REPOSITORY
+      version: VERSION
+      revision: REVISION
+      repository: REPOSITORY
     default:
         type: master
 
@@ -56,15 +54,11 @@ indexer:
     minimal:
       cpu: 4
       memory: 4096
-    default:
-      cpu: 4
-      memory: 4096
   vars:
     mandatory:
-      package:
-        version: VERSION
-        revision: REVISION
-        repository: REPOSITORY
+      version: VERSION
+      revision: REVISION
+      repository: REPOSITORY
 
 #----------------------
 
@@ -76,15 +70,11 @@ dashboard:
     minimal:
       cpu: 4
       memory: 4096
-    default:
-      cpu: 4
-      memory: 4096
   vars:
     mandatory:
-      package:
-        version: VERSION
-        revision: REVISION
-        repository: REPOSITORY
+      version: VERSION
+      revision: REVISION
+      repository: REPOSITORY
 
 #----------------------
 
@@ -94,7 +84,7 @@ filebeat:
   service: ANY
   os: LINUX_BASED_OS
   resources:
-    default:
+    minimal:
       cpu: 2
       memory: 2048
 
