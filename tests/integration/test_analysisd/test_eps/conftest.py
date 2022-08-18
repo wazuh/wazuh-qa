@@ -91,7 +91,7 @@ def delete_alerts_folder():
     delete_folder_content(ALERT_DIRECTORY)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def configure_wazuh_one_thread():
     """Fixture to configure the local internal options file to work with one thread."""
     local_internal_options = {'analysisd.event_threads': '1', 'analysisd.syscheck_threads': '1',
