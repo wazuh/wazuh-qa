@@ -129,7 +129,7 @@ CLIENT_CUSTOM_KEYS_PATH = os.path.join(_data_path, 'sslmanager.key')
 CLIENT_CUSTOM_CERT_PATH = os.path.join(_data_path, 'sslmanager.cert')
 
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
-ALERT_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts')
+ALERT_DIRECTORY = os.path.join(WAZUH_LOGS_PATH, 'alerts')
 ALERT_FILE_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.json')
 ALERT_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts', 'alerts.log')
 CLUSTER_LOGS_PATH = os.path.join(WAZUH_LOGS_PATH, 'cluster.log')

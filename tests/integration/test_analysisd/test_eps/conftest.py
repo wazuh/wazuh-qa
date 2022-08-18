@@ -11,7 +11,7 @@ import pytest
 
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import configuration, SIMULATE_AGENT, ARCHIVES_LOG_FILE_PATH, \
-                                ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_PATH, WAZUH_INTERNAL_OPTIONS
+                                ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_DIRECTORY, WAZUH_INTERNAL_OPTIONS
 
 
 @pytest.fixture(scope='function')
@@ -25,7 +25,7 @@ def restart_analysisd_function():
 @pytest.fixture(scope='session')
 def configure_local_internal_options_eps(request):
     """Fixture to configure the local internal options file."""
-    # Define local internal options for vulnerability detector tests
+    # Define local internal options for EPS tests
     local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
                               'analysisd.state_interval': f"{request.param[0]}"}
 
@@ -55,16 +55,17 @@ def set_wazuh_configuration_eps(configuration, set_wazuh_configuration, configur
 
 @pytest.fixture(scope='function')
 def simulate_agent(request):
-    """Fixture to execute the script simulate_agent.py"""
+    """Fixture to run the script simulate_agent.py"""
     # Get IP address of the host
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
 
-    file_excecute = os.path.abspath(SIMULATE_AGENT)
-    subprocess.call(f"python3 {file_excecute} -a {IPAddr} -n {request.param['num_agent']} \
+    simulator_agent_script = os.path.abspath(SIMULATE_AGENT)
+    subprocess.call(f"python3 {simulator_agent_script} -a {IPAddr} -n {request.param['num_agent']} \
                     -m {request.param['modules']} -s {request.param['eps']} -t {request.param['time']} \
                     -f {request.param['msg_size']} -e {request.param['total_msg']} \
-                    -k {request.param['keepalive_disabled']} -d {request.param['receive_msg_disabled']}", shell=True)
+                    -k {request.param['disable_keepalive_msg']} -d {request.param['disable_receive_msg']} \
+                    -c {request.param['enable_logcollector_msg_number']}", shell=True)
 
     yield
 
@@ -83,77 +84,29 @@ def delete_folder_content(folder):
 def delete_alerts_folder():
     """Delete alerts folder content before and after execution"""
 
-    delete_folder_content(ALERT_PATH)
+    delete_folder_content(ALERT_DIRECTORY)
 
     yield
 
-    delete_folder_content(ALERT_PATH)
-
-
-def get_wazuh_internal_options() -> List[str]:
-    """Get current `internal_options.conf` file content.
-
-    Returns
-        List of str: A list containing all the lines of the `ossec.conf` file.
-    """
-    with open(WAZUH_INTERNAL_OPTIONS) as f:
-        lines = f.readlines()
-    return lines
-
-
-def set_wazuh_internal_options(wazuh_local_internal_options: List[str]):
-    """Set up Wazuh `local_internal_options.conf` file content.
-
-    Returns
-        List of str: A list containing all the lines of the `local_interal_options.conf` file.
-    """
-    with open(WAZUH_INTERNAL_OPTIONS, 'w') as f:
-        f.writelines(wazuh_local_internal_options)
-
-
-def change_internal_options(param, value, value_regex='[0-9]*'):
-    """Change the value of a given parameter in internal_options.
-
-    Args:
-        param (str): parameter to change.
-        value (obj): new value.
-        value_regex (str, optional): regex to match value in local_internal_options.conf. Default '[0-9]*'
-    """
-    add_pattern = True
-    with open(WAZUH_INTERNAL_OPTIONS, "r") as sources:
-        lines = sources.readlines()
-
-    with open(WAZUH_INTERNAL_OPTIONS, "w") as sources:
-        for line in lines:
-            sources.write(
-                re.sub(f'{param}={value_regex}', f'{param}={value}', line))
-            if param in line:
-                add_pattern = False
-
-    if add_pattern:
-        with open(WAZUH_INTERNAL_OPTIONS, "a") as sources:
-            sources.write(f'\n\n{param}={value}')
+    delete_folder_content(ALERT_DIRECTORY)
 
 
 @pytest.fixture(scope='session')
-def configure_internal_options_eps():
-    """Fixture to configure the internal options file."""
+def configure_wazuh_one_thread():
+    """Fixture to configure the local internal options file to work with one thread."""
+    local_internal_options = {'analysisd.event_threads': '1', 'analysisd.syscheck_threads': '1',
+                              'analysisd.syscollector_threads': '1', 'analysisd.rootcheck_threads': '1',
+                              'analysisd.sca_threads': '1', 'analysisd.hostinfo_threads': '1',
+                              'analysisd.winevt_threads': '1', 'analysisd.rule_matching_threads': '1',
+                              'analysisd.dbsync_threads': '1', 'remoted.worker_pool': '1'}
 
     # Backup the old local internal options
-    backup_internal_options = get_wazuh_internal_options()
+    backup_local_internal_options = configuration.get_wazuh_local_internal_options()
 
-    change_internal_options('analysisd.event_threads', '1')
-    change_internal_options('analysisd.syscheck_threads', '1')
-    change_internal_options('analysisd.syscollector_threads', '1')
-    change_internal_options('analysisd.rootcheck_threads', '1')
-    change_internal_options('analysisd.sca_threads', '1')
-    change_internal_options('analysisd.hostinfo_threads', '1')
-    change_internal_options('analysisd.winevt_threads', '1')
-    change_internal_options('analysisd.rule_matching_threads', '1')
-    change_internal_options('analysisd.dbsync_threads', '1')
-    change_internal_options('remoted.worker_pool', '1')
+    # Add the new configuration to local internal options
+    configuration.add_wazuh_local_internal_options(configuration.create_local_internal_options(local_internal_options))
 
     yield
 
     # Backup the old local internal options cofiguration
-    set_wazuh_internal_options(backup_internal_options)
+    configuration.set_wazuh_local_internal_options(backup_local_internal_options)

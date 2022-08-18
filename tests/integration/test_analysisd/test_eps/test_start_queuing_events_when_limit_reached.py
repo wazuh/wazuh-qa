@@ -34,11 +34,10 @@ timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metad
 # It is sent `width_frame` time frame width to reduce test time execution
 width_frame = 3
 total_msg = maximum_eps[0] * timeframe_eps_t1[0] * width_frame
-if total_msg > QUEUE_SIZE:
-    total_msg = QUEUE_SIZE - 1
 params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_start_queuing_events_when_limit_reached], indirect=True)

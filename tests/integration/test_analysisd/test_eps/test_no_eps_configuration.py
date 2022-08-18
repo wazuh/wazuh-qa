@@ -32,6 +32,7 @@ total_msg = 1000  # of 1Kb message of 16384 Kb of queue size
 params_disabled_eps.update({'total_msg': total_msg})
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
@@ -79,6 +80,7 @@ def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
     evm.check_eps_disabled()
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_disabled_eps], indirect=True)

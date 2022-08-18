@@ -41,12 +41,12 @@ def process_script_parameters(args):
         args (argparse.Namespace): Script args.
     """
     # Add keepalive and receive_message modules if they are not specified in script parameters
-    if args.disable_keepalive is False:
+    if not args.disable_keepalive:
         if 'keepalive' not in args.modules:
             args.modules.append('keepalive')
             args.modules_eps.append('0')
 
-    if args.disable_receive is False:
+    if not args.disable_receive:
         if 'receive_messages' not in args.modules:
             args.modules.append('receive_messages')
             args.modules_eps.append('0')
@@ -116,7 +116,8 @@ def create_agents(args):
         for item in distribution_list:  # item[0] = modules - item[1] = eps
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels)
+                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
+                             enable_msg_number=args.enable_logcollector_message_number)
             set_agent_modules_and_eps(agent, item[0].split(' ') + ['keepalive', 'receive_messages'],
                                       item[1].split(' ') + ['0', '0'])
             agents.append(agent)
@@ -124,14 +125,15 @@ def create_agents(args):
         for _ in range(args.agents_number):
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels)
+                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
+                             enable_msg_number=args.enable_logcollector_message_number)
             set_agent_modules_and_eps(agent, args.modules, args.modules_eps)
             agents.append(agent)
 
     return agents
 
 
-def create_injectors(agents, manager_address, protocol, limit_msg):
+def create_injectors(agents, manager_address, protocol, limit_msg=None):
     """Create injectos objects from list of agents and connection parameters.
 
     Args:
@@ -154,7 +156,7 @@ def create_injectors(agents, manager_address, protocol, limit_msg):
     return injectors
 
 
-def start(injector, time_alive, limit_msg_enable):
+def start(injector, time_alive, limit_msg_enable=None):
     """Start the injector process for a specified time.
 
     Args:
@@ -181,7 +183,7 @@ def stop(injector):
     injector.stop_receive()
 
 
-def run(injectors, time_alive, limit_msg_enable):
+def run(injectors, time_alive, limit_msg_enable=None):
     """Run each injector in a separated process.
 
     Args:
@@ -331,7 +333,7 @@ def main():
                             required=False, default=0, dest='waiting_connection_time')
 
     arg_parser.add_argument('-e', '--limit-msg', metavar='<limit_msg>', type=int,
-                            help='Amount of message to sent.',
+                            help='Limit the amount of message to send to the manager for each module.',
                             required=False, default=None, dest='limit_msg')
 
     arg_parser.add_argument('-k', '--disable-keepalive', metavar='<disable_keepalive>', type=bool,
@@ -341,6 +343,11 @@ def main():
     arg_parser.add_argument('-d', '--disable-receive', metavar='<disable_receive>', type=bool,
                             help='Disable receive message module',
                             required=False, default=False, dest='disable_receive')
+
+    arg_parser.add_argument('-c', '--enable-logcollector-message-number',
+                            metavar='<enable_logcollector_message_number>', type=bool,
+                            help='Enable logcollector message number',
+                            required=False, default=False, dest='enable_logcollector_message_number')
 
     args = arg_parser.parse_args()
 

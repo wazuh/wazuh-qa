@@ -26,6 +26,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
                                                 t1_configuration_metadata)
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_invalid_values(configuration, metadata, set_wazuh_configuration_eps,

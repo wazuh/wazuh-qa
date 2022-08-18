@@ -41,6 +41,7 @@ t3_configurations = load_configuration_template(t3_configurations_path, t3_confi
                                                 t3_configuration_metadata)
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
@@ -94,6 +95,7 @@ def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
         check_if_deamon_is_not_running('wazuh-analysisd')
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
@@ -147,6 +149,7 @@ def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
         check_if_deamon_is_not_running('wazuh-analysisd')
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 def test_without_timeframe_maximum(configuration, metadata, set_wazuh_configuration_eps,

@@ -68,6 +68,7 @@ class Agent:
         authd_password (str), optional: Password for registration if needed.
         registration_address (str, optional): Manager registration IP address.
         retry_enrollment (bool, optional): retry then enrollment in case of error.
+        logcollector_msg_number (bool, optional): insert in the logcollector message the message number.
 
     Attributes:
         id (str): ID of the agent.
@@ -119,7 +120,8 @@ class Agent:
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None, registration_address=None, retry_enrollment=False):
+                 fixed_message_size=None, registration_address=None, retry_enrollment=False,
+                 logcollector_msg_number=None):
         self.id = id
         self.name = name
         self.key = key
@@ -183,6 +185,7 @@ class Agent:
         self.retry_enrollment = retry_enrollment
         self.rcv_msg_queue = Queue(rcv_msg_limit)
         self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
+        self.logcollector_msg_number = logcollector_msg_number
         self.setup(disable_all_modules=disable_all_modules)
 
     def update_checksum(self, new_checksum):
@@ -478,8 +481,7 @@ class Agent:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
-        elif '#!-force_reconnect' in msg_decoded_list[0]:
-            sender.reconnect(self.startup_msg)
+
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -662,7 +664,7 @@ class Agent:
     def init_logcollector(self):
         """Initialize logcollector module."""
         if self.logcollector is None:
-            self.logcollector = Logcollector()
+            self.logcollector = Logcollector(self.logcollector_msg_number)
 
     def init_sca(self):
         """Initialize init_sca module."""
@@ -1014,10 +1016,12 @@ class Rootcheck:
 
 class Logcollector:
     """This class allows the generation of logcollector events."""
-    def __init__(self):
+    def __init__(self, enable_msg_number=None):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
+        # Those variables were added only in logcollector module to perform EPS test that need numbered messages.
         self.message_counter = 0
+        self.enable_msg_number = enable_msg_number
 
     def generate_event(self):
         """Generate logcollector event
@@ -1027,10 +1031,13 @@ class Logcollector:
         """
         log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
 
-        message_counter_info = f"Message number: {self.message_counter}"
-        message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}:{message_counter_info}"
+        if self.enable_msg_number:
+            message_counter_info = f"Message number: {self.message_counter}"
+            message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}:{message_counter_info}"
+            self.message_counter = self.message_counter + 1
+        else:
+            message = f"{self.logcollector_mq}:{self.logcollector_tag}:{log}"
 
-        self.message_counter = self.message_counter + 1
         return message
 
 
@@ -1497,23 +1504,11 @@ class Sender:
         self.manager_address = manager_address
         self.manager_port = manager_port
         self.protocol = protocol.upper()
-        self.socket = None
-        self.connect()
-
-    def connect(self):
         if is_tcp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
         if is_udp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    def reconnect(self, event):
-        if is_tcp(self.protocol):
-            self.socket.shutdown(socket.SHUT_RDWR)
-            self.socket.close()
-            self.connect()
-            if event:
-                self.send_event(event)
 
     def send_event(self, event):
         if is_tcp(self.protocol):
@@ -1557,7 +1552,7 @@ class Injector:
         >>> injector.run()
     """
 
-    def __init__(self, sender, agent, limit):
+    def __init__(self, sender, agent, limit=None):
         self.sender = sender
         self.agent = agent
         self.limit_msg = limit
@@ -1602,7 +1597,7 @@ class InjectorThread(threading.Thread):
         stop_thread (int): 0 if the thread is running, 1 if it is stopped.
         limit_msg (int): Maximum amount of message to be sent.
     """
-    def __init__(self, thread_id, name, sender, agent, module, limit_msg):
+    def __init__(self, thread_id, name, sender, agent, module, limit_msg=None):
         super(InjectorThread, self).__init__()
         self.thread_id = thread_id
         self.name = name
@@ -1694,10 +1689,11 @@ class InjectorThread(threading.Thread):
                     char_size = getsizeof(event_msg[0]) - getsizeof('')
                     event_msg += 'A' * (dummy_message_size//char_size)
 
-                # # Add message limitiation
-                if self.totalMessages >= self.limit_msg:
-                    self.stop_thread = 1
-                    break
+                # Add message limitiation
+                if self.limit_msg:
+                    if self.totalMessages >= self.limit_msg:
+                        self.stop_thread = 1
+                        break
 
                 event = self.agent.create_event(event_msg)
                 self.sender.send_event(event)

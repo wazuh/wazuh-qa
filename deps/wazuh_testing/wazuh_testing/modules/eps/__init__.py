@@ -1,15 +1,5 @@
-import os
-import json
-from datetime import datetime, timedelta
-from copy import deepcopy
-
-from wazuh_testing.tools.time import parse_date_time_format
-
-
 # Timeouts
-T_5 = 5
 T_10 = 10
-T_15 = 15
 T_20 = 20
 T_60 = 60
 
@@ -19,3 +9,5 @@ MAILD_PREFIX = r'.*wazuh-maild.*'
 ANALYSISD_STATE_INTERNAL_DEFAULT = '5'
 PERCENTAGE_PROCESS_MSGS = 0.95
 QUEUE_SIZE = 16384
+# Set logcollector message that the agent sents
+LOGCOLLECTOR_MESSAGE = 'Invalid user random_user from 172.17.1.1 port 56550:Message number:'

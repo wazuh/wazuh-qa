@@ -6,6 +6,7 @@ import pytest
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
+from wazuh_testing.modules.eps import LOGCOLLECTOR_MESSAGE
 
 
 pytestmark = [pytest.mark.server]
@@ -48,11 +49,12 @@ total_msg = maximum_eps_t2[0] * timeframe_eps_t2[0] * frame_width
 params_process_old_events_multithread.update({'total_msg': total_msg})
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_one_thread], indirect=True)
 def test_process_old_events_one_thread(configuration, metadata, set_wazuh_configuration_eps,
-                                       configure_internal_options_eps, truncate_monitored_files,
+                                       configure_wazuh_one_thread, truncate_monitored_files,
                                        delete_alerts_folder, restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
@@ -82,7 +84,7 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
-        - configure_internal_options_eps:
+        - configure_wazuh_one_thread:
             type: fixture
             brief: Set the wazuh internal option configuration according to the configuration data.
         - truncate_monitored_files:
@@ -104,8 +106,6 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
     input_description:
         - The `cases_process_old_events_one_thread.yaml` file provides the module configuration for this test.
     '''
-    # Set logcollector message that the agent sents
-    logcollector_message = 'Invalid user random_user from 172.17.1.1 port 56550:Message number:'
     # Set the alerts start message
     start_alert_msg = '** Alert '
     # Initial timestamp to compare
@@ -124,16 +124,17 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
     if(events_processed * time_events_processed <= events_received):
         for index in range((events_processed * time_events_processed) - 1):
             # Get the timestamp of the log
-            timestamp = evm.get_alert_timestamp(start_alert_msg, f"{logcollector_message} {index}")
+            timestamp = evm.get_alert_timestamp(start_alert_msg, f"{LOGCOLLECTOR_MESSAGE} {index}")
             # Check that the timestamp of the first message y lower than the previous one
-            assert timestamp >= timestamp_bkp, 'The timestamp of the previous message has to be lower than the '\
-                                               'next one'
+            assert timestamp >= timestamp_bkp, fr"The timestamp of the previous message {timestamp_bkp} has to be "\
+                                               fr"lower than the follow one {timestamp}"
             # Store the timestamp to be compared with the next one
             timestamp_bkp = timestamp
     else:
-        raise Exception('Not enough messages were sent. Please increase the `total_msg` for this test.')
+        raise Exception('Not enough messages were sent.')
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_multithread], indirect=True)
@@ -167,7 +168,7 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
-        - configure_internal_options_eps:
+        - configure_wazuh_one_thread:
             type: fixture
             brief: Set the wazuh internal option configuration according to the configuration data.
         - truncate_monitored_files:
@@ -189,8 +190,6 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
     input_description:
         - The `cases_process_old_events_multi_thread.yaml` file provides the module configuration for this test.
     '''
-    # Set logcollector message that the agent sents
-    logcollector_message = 'Invalid user random_user from 172.17.1.1 port 56550:Message number:'
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
     events_received = evm.get_analysisd_state('events_received')
@@ -202,5 +201,5 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
         end_index = (index + 1) * frame
         # Iterate over the frame to find the respective numerated message
         for msg_number in range(start_index, end_index):
-            evm.get_msg_with_number(fr".*{logcollector_message} {msg_number}")
+            evm.get_msg_with_number(fr".*{LOGCOLLECTOR_MESSAGE} {msg_number}")
         index += 1

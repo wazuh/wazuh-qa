@@ -36,6 +36,7 @@ expected_msg_dropped = total_msg - QUEUE_SIZE
 params_start_dropping_events_when_queue_full.update({'total_msg': total_msg})
 
 
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_start_dropping_events_when_queue_full], indirect=True)

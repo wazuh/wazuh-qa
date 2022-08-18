@@ -9,11 +9,11 @@ from wazuh_testing.tools.monitoring import FileMonitor
 def make_analysisd_callback(pattern, prefix=eps.ANALYSISD_PREFIX):
     """Create a callback function from a text pattern.
 
-    It already contains the vulnerability-detector prefix.
+    It already contains the analsisd prefix.
 
     Args:
         pattern (str): String to match on the log.
-        prefix (str): regular expression used as prefix before the pattern.
+        prefix (str): regular expression used as a prefix before the pattern.
 
     Returns:
         lambda: function that returns if there's a match in the file
@@ -67,27 +67,27 @@ def check_configuration_error():
                                         'in ossec.log', prefix=eps.MAILD_PREFIX)
 
 
-def get_words_from_file(words, filename):
-    """Get the words from file
+def find_in_file(string_to_search, filename):
+    """Find a specific string in a file
 
     Args:
-        wordss (str): Word to find in the file
+        string_to_search (str): Word to find in the file
     Returns:
         str: Line that match in file
     """
     with open(filename, 'r') as file:
         for _, line in enumerate(file):
-            if words in line:
+            if string_to_search in line:
                 return line
 
 
-def get_analysisd_state(word):
-    """Get the value of word in wazuh-analysisd.state
+def get_analysisd_state(value):
+    """Get the specified wazuh-analysisd.state value
 
     Args:
-        word (str): Word to find in the file
+        value (str): wazuh-analisysd value
     """
-    line = get_words_from_file(word, ANALYSISD_STATE)
+    line = find_in_file(value, ANALYSISD_STATE)
     return float(line.split("\'")[1::2][0])
 
 
