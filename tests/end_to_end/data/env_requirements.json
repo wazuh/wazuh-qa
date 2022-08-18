@@ -76,7 +76,7 @@
             ]
         }
     },
-    "test_fim": {
+    "test_fim_linux": {
         "manager": {
             "instances": 1,
             "distros": [
@@ -84,9 +84,22 @@
             ]
         },
         "agent": {
-            "instances": 2,
+            "instances": 1,
             "distros": [
-                "CentOS",
+                "CentOS"
+            ]
+        }
+    },
+    "test_fim_windows": {
+        "manager": {
+            "instances": 1,
+            "distros": [
+                "CentOS"
+            ]
+        },
+        "agent": {
+            "instances": 1,
+            "distros": [
                 "Windows"
             ]
         }

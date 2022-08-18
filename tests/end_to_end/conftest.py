@@ -129,10 +129,12 @@ def validate_environments(request):
             'playbook': validation_playbook, 'inventory': inventory_path, 'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
         }
         validation_runner = ansible_runner.run(**parameters)
+        # Remove the generated playbook
+        remove_file(validation_playbook)
 
         # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
         if validation_runner.status == 'failed':
-            raise Exception(f"The validation phase of {{ path }} has failed. Please check that the environments "
+            raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the environments "
                             'meet the expected requirements.')
     # -------------------------- End of Step 4 -------------------------------------
 
