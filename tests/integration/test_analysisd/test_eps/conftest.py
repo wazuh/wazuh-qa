@@ -104,7 +104,7 @@ def configure_wazuh_one_thread():
     backup_local_internal_options = configuration.get_wazuh_local_internal_options()
 
     # Add the new configuration to local internal options
-    configuration.add_wazuh_local_internal_options(configuration.create_local_internal_options(local_internal_options))
+    configuration.add_wazuh_local_internal_options(local_internal_options)
 
     yield
 
