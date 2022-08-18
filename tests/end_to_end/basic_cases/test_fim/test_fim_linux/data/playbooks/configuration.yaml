@@ -1,0 +1,24 @@
+- name: Test case configuration
+  hosts: wazuh-agent
+  tasks:
+
+    - name: Create directory to monitor (Linux)
+      become: true
+      file:
+        path: /tmp/test_demo_fim
+        state: directory
+
+    - name: Add directory to syscheck configuration (Linux)
+      become: true
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        insertafter: </directories>
+        block: |
+          <directories check_all="yes" whodata="yes">/tmp/test_demo_fim</directories>
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+
+    - name: Restart Wazuh (Linux)
+      become: true
+      systemd:
+        name: wazuh-agent
+        state: restarted
