@@ -334,6 +334,7 @@ predefined_values:
     - providers
     - pull
     - rbac
+    - rdp
     - realtime
     - redhat
     - redhat_feeds
@@ -354,6 +355,7 @@ predefined_values:
     - simulator
     - slack
     - sql_injection
+    - ssh
     - ssl
     - stats_file
     - suricata
