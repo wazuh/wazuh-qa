@@ -482,7 +482,6 @@ class Agent:
             if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
 
-
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
 

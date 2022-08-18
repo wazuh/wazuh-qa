@@ -11,3 +11,17 @@ PERCENTAGE_PROCESS_MSGS = 0.95
 QUEUE_SIZE = 16384
 # Set logcollector message that the agent sents
 LOGCOLLECTOR_MESSAGE = 'Invalid user random_user from 172.17.1.1 port 56550:Message number:'
+
+
+def find_in_file(string_to_search, filename):
+    """Find a specific string in a file
+
+    Args:
+        string_to_search (str): Word to find in the file
+    Returns:
+        str: Line that match in file
+    """
+    with open(filename, 'r') as file:
+        for _, line in enumerate(file):
+            if string_to_search in line:
+                return line

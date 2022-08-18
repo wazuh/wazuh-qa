@@ -4,6 +4,7 @@ from datetime import datetime
 from wazuh_testing.modules import eps as eps
 from wazuh_testing.tools import LOG_FILE_PATH, ANALYSISD_STATE, ALERT_LOGS_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.eps import find_in_file
 
 
 def make_analysisd_callback(pattern, prefix=eps.ANALYSISD_PREFIX):
@@ -65,20 +66,6 @@ def check_configuration_error():
     check_analysisd_event(timeout=eps.T_10, callback=r".* \(\d+\): Configuration error at.*",
                           error_message="Could not find the event 'Configuration error at 'etc/ossec.conf' "
                                         'in ossec.log', prefix=eps.MAILD_PREFIX)
-
-
-def find_in_file(string_to_search, filename):
-    """Find a specific string in a file
-
-    Args:
-        string_to_search (str): Word to find in the file
-    Returns:
-        str: Line that match in file
-    """
-    with open(filename, 'r') as file:
-        for _, line in enumerate(file):
-            if string_to_search in line:
-                return line
 
 
 def get_analysisd_state(value):
