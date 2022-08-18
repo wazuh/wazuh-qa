@@ -29,7 +29,7 @@ os_platform:
 
 os_version:
     - CentOS 8
-    - Windows Sever 2019
+    - Windows Server 2019
 
 references:
     - https://github.com/wazuh/wazuh-automation/wiki/Wazuh-demo:-Execution-guide#-fim
