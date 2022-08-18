@@ -16,6 +16,7 @@ components:
 
 targets:
     - manager
+    - agent
 
 daemons:
     - wazuh-logcollector
