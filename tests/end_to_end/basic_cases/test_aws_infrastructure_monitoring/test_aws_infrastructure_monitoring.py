@@ -5,6 +5,7 @@ import pytest
 from datetime import datetime
 from tempfile import gettempdir
 
+import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
@@ -50,7 +51,7 @@ def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dash
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                   error_message='The alert has not occurred').result()
+                                   timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 
     query = e2e.make_query([
