@@ -28,4 +28,3 @@
       win_wait_for:
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         search_regex: File integrity monitoring real-time Whodata engine started.
-        timeout: 20
