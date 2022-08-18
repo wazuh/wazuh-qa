@@ -1,0 +1,15 @@
+- name: Check supported distros
+  hosts: centos-manager*,centos-agent*,windows-agent*
+  any_errors_fatal: true
+  tasks:
+
+  - name: Check if the host distribution is compatible
+    include_role:
+      name: host_checker
+      tasks_from: check_supported_distro
+    vars:
+        os: "{{ 'Windows' if ansible_os_family == 'Windows' else 'Linux' }}"
+        dist: "{{ ansible_distribution if ansible_os_family != 'Windows' else 'Windows' }}"
+        manager_distros: ['CentOS']
+        agent_distros: ['CentOS', 'Windows']
+
