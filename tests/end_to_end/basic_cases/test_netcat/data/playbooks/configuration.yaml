@@ -3,22 +3,25 @@
   tasks:
 
     - name: Configure agent to get a list of running processes
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertbefore: </ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <localfile>
           <log_format>full_command</log_format>
           <alias>process list</alias>
           <command>ps -e -o pid,uname,command</command>
           <frequency>30</frequency>
           </localfile>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        os: 'linux'
 
     - name: Restart wazuh-agent
-      become: true
-      shell: systemctl restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
     - name: Install netcat (CentOS)
       become: true
@@ -35,11 +38,11 @@
   tasks:
 
     - name: Configure local rules
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/rules/local_rules.xml
-        insertafter: </groups>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_rules.yaml
+      vars:
+        config_block: |
           <group name="ossec,">
           <rule id="100050" level="0">
           <if_sid>530</if_sid>
@@ -54,8 +57,10 @@
           <group>process_monitor,</group>
           </rule>
           </group>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-manager
-      become: true
-      shell: systemctl restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
