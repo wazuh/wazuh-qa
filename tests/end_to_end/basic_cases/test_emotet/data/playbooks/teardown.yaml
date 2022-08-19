@@ -25,10 +25,12 @@
         path: C:\temp
         state: absent
 
-    - name: Restart wazuh-agent (Windows)
-      win_shell: |
-        net stop wazuh
-        net start wazuh
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'windows'
 
     - name: Enable Windows Defender
       win_shell: set-MpPreference -DisableRealtimeMonitoring $False
