@@ -44,7 +44,7 @@ def validate_environments(request):
     if not inventory_path:
         raise ValueError('Inventory not specified')
 
-    #--------------------------------------- Step 1: Prepare the necessary data ----------------------------------------
+    # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
     # Remove duplicates caused by the existence of 2 or more test cases
@@ -67,9 +67,9 @@ def validate_environments(request):
     # Get the largest number of manager/agent instances
     num_of_managers = max(manager_instances)
     num_of_agents = max(agent_instances)
-    #-------------------------------------------------- End of Step 1 --------------------------------------------------
+    # -------------------------------------------------- End of Step 1 -------------------------------------------------
 
-    #---------------------- Step 2: Run the playbook to generate the general validation playbook -----------------------
+    # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
     gen_parameters = {
         'playbook': playbook_generator, 'inventory': inventory_path,
         'extravars': {
@@ -78,9 +78,9 @@ def validate_environments(request):
         }
     }
     ansible_runner.run(**gen_parameters)
-    #-------------------------------------------------- End of Step 2 --------------------------------------------------
+    # -------------------------------------------------- End of Step 2 -------------------------------------------------
 
-    #----------------------------------- Step 3: Run the general validation playbook -----------------------------------
+    # ----------------------------------- Step 3: Run the general validation playbook ----------------------------------
     parameters = {
         'playbook': general_playbook,
         'inventory': inventory_path,
@@ -93,9 +93,9 @@ def validate_environments(request):
     if general_validation_runner.status == 'failed':
         raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
                         'requirements.')
-    #-------------------------------------------------- End of Step 3 --------------------------------------------------
+    # -------------------------------------------------- End of Step 3 -------------------------------------------------
 
-    #------------------------------------ Step 4: Execute test-specific validations ------------------------------------
+    # ------------------------------------ Step 4: Execute test-specific validations -----------------------------------
     playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_test_specific_play.yaml')
     playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'test_specific_validation.j2')
 
@@ -140,7 +140,7 @@ def validate_environments(request):
         if validation_runner.status == 'failed':
             raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the environments "
                             'meet the expected requirements.')
-    #-------------------------------------------------- End of Step 4 --------------------------------------------------
+    # -------------------------------------------------- End of Step 4 -------------------------------------------------
 
 
 @pytest.fixture(scope='function')
