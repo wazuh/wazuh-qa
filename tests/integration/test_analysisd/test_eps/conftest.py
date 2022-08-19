@@ -2,8 +2,8 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import re
 import subprocess
+import sys
 import socket
 import shutil
 from typing import List
@@ -58,10 +58,11 @@ def simulate_agent(request):
     """Fixture to run the script simulate_agent.py"""
     # Get IP address of the host
     hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
+    ip_addr = socket.gethostbyname(hostname)
 
     simulator_agent_script = os.path.abspath(SIMULATE_AGENT)
-    subprocess.call(f"python3 {simulator_agent_script} -a {IPAddr} -n {request.param['num_agent']} \
+    python_executable = sys.executable
+    subprocess.call(f"{python_executable} {simulator_agent_script} -a {ip_addr} -n {request.param['num_agent']} \
                     -m {request.param['modules']} -s {request.param['eps']} -t {request.param['time']} \
                     -f {request.param['msg_size']} -e {request.param['total_msg']} \
                     -k {request.param['disable_keepalive_msg']} -d {request.param['disable_receive_msg']} \
@@ -110,3 +111,22 @@ def configure_wazuh_one_thread():
 
     # Backup the old local internal options cofiguration
     configuration.set_wazuh_local_internal_options(backup_local_internal_options)
+
+
+@pytest.fixture(scope='session')
+def load_wazuh_basic_configuration():
+    """Load a new basic ocnfiguration to the manager"""
+    # Reference paths
+    DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+    CONFIGURATIONS_PATH = os.path.join(DATA_PATH, 'wazuh_basic_configuration')
+    configurations_path = os.path.join(CONFIGURATIONS_PATH, 'ossec.conf')
+
+    backup_ossec_configuration = configuration.get_wazuh_conf()
+
+    with open(configurations_path, 'r') as file:
+        lines = file.readlines()
+    configuration.write_wazuh_conf(lines)
+
+    yield
+
+    configuration.write_wazuh_conf(backup_ossec_configuration)

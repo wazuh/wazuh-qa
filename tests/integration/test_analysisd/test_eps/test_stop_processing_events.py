@@ -41,7 +41,7 @@ params_stop_processing_events.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_stop_processing_events], indirect=True)
-def test_stops_processing_events(configuration, metadata, set_wazuh_configuration_eps, truncate_monitored_files,
+def test_stops_processing_events(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps, truncate_monitored_files,
                                  restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
@@ -64,6 +64,9 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -87,7 +90,8 @@ def test_stops_processing_events(configuration, metadata, set_wazuh_configuratio
     '''
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
-    events_processed = evm.get_analysisd_state('events_processed')
+    analysisd_state = evm.get_analysisd_state()
+    events_processed = int(analysisd_state['events_processed'])
 
     # Check that processed events reach the EPS limit
     assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \

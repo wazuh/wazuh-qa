@@ -27,7 +27,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_enabled(configuration, metadata, set_wazuh_configuration_eps,
+def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                  truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is started when `maximum` is set to a value greater than 0 lower and than 100000,
@@ -50,6 +50,9 @@ def test_enabled(configuration, metadata, set_wazuh_configuration_eps,
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.

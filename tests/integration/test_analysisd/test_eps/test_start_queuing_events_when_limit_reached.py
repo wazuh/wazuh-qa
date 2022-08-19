@@ -41,7 +41,7 @@ params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_start_queuing_events_when_limit_reached], indirect=True)
-def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wazuh_configuration_eps,
+def test_start_queuing_events_when_limit_reached(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                                                  truncate_monitored_files, restart_wazuh_daemon_function,
                                                  simulate_agent):
     '''
@@ -67,6 +67,9 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -91,10 +94,11 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, set_wa
     '''
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
-    events_processed = evm.get_analysisd_state('events_processed')
-    events_received = evm.get_analysisd_state('events_received')
-    events_dropped = evm.get_analysisd_state('events_dropped')
-    event_queue_usage = evm.get_analysisd_state('event_queue_usage')
+    analysisd_state = evm.get_analysisd_state()
+    events_processed = int(analysisd_state['events_processed'])
+    events_received = int(analysisd_state['events_received'])
+    events_dropped = int(analysisd_state['events_dropped'])
+    event_queue_usage = float(analysisd_state['event_queue_usage'])
 
     # Check that processed events reach the EPS limit
     assert events_processed <= float(metadata['maximum'] * metadata['timeframe']) and \

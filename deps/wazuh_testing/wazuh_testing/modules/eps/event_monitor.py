@@ -68,14 +68,22 @@ def check_configuration_error():
                                         'in ossec.log', prefix=eps.MAILD_PREFIX)
 
 
-def get_analysisd_state(value):
-    """Get the specified wazuh-analysisd.state value
+def get_analysisd_state():
+    """Get the states values of wazuh-analysisd.state file
 
-    Args:
-        value (str): wazuh-analisysd value
+    Returns:
+        dict: Dictionary with all analysisd state
     """
-    line = find_in_file(value, ANALYSISD_STATE)
-    return float(line.split("\'")[1::2][0])
+    data = ""
+    with open(ANALYSISD_STATE, 'r') as file:
+        for line in file.readlines():
+            if not line.startswith("#") and not line.startswith('\n'):
+                data = data + line.replace('\'', '')
+    data = data[:-1]
+    analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=')
+                            for element in data.split('\n')))
+
+    return analysisd_state
 
 
 def get_alert_timestamp(start_log, end_log):

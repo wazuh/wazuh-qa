@@ -44,7 +44,7 @@ t3_configurations = load_configuration_template(t3_configurations_path, t3_confi
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_maximum(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                          truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when `maximum` value is not present in the
@@ -67,6 +67,9 @@ def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -98,7 +101,7 @@ def test_without_maximum(configuration, metadata, set_wazuh_configuration_eps,
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_timeframe(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                            truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when `timeframe` value is not present in the
@@ -121,6 +124,9 @@ def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -152,7 +158,7 @@ def test_without_timeframe(configuration, metadata, set_wazuh_configuration_eps,
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_timeframe_maximum(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_timeframe_maximum(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                                    truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when `maximum` and/or `timeframe` are not present in the
@@ -175,6 +181,9 @@ def test_without_timeframe_maximum(configuration, metadata, set_wazuh_configurat
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.

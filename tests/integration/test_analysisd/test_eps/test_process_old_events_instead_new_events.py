@@ -53,7 +53,7 @@ params_process_old_events_multithread.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_one_thread], indirect=True)
-def test_process_old_events_one_thread(configuration, metadata, set_wazuh_configuration_eps,
+def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                                        configure_wazuh_one_thread, truncate_monitored_files,
                                        delete_alerts_folder, restart_wazuh_daemon_function, simulate_agent):
     '''
@@ -81,6 +81,9 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -115,8 +118,9 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
 
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
-    events_processed = int(evm.get_analysisd_state('events_processed'))
-    events_received = int(evm.get_analysisd_state('events_received'))
+    analysisd_state = evm.get_analysisd_state()
+    events_processed = int(analysisd_state['events_processed'])
+    events_received = int(analysisd_state['events_received'])
 
     # Check that the timestamp of the message in the alerts.log is lower than the next one
     # In order to reduce the test time execution, It will check {time_events_processed} consecutive timeframe
@@ -138,7 +142,7 @@ def test_process_old_events_one_thread(configuration, metadata, set_wazuh_config
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_multithread], indirect=True)
-def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_configuration_eps,
+def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                                          truncate_monitored_files, delete_alerts_folder,
                                          restart_wazuh_daemon_function, simulate_agent):
     '''
@@ -165,6 +169,9 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -192,7 +199,8 @@ def test_process_old_events_multi_thread(configuration, metadata, set_wazuh_conf
     '''
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
-    events_received = evm.get_analysisd_state('events_received')
+    analysisd_state = evm.get_analysisd_state()
+    events_received = int(analysisd_state['events_received'])
     index = 0
     frame = metadata['timeframe'] * metadata['maximum']
     # Iterate over each frame to find the respective numerated message belongs to the frame

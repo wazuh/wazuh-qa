@@ -35,7 +35,7 @@ params_disabled_eps.update({'total_msg': total_msg})
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
+def test_disabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                   truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is disabled when it is not configured.
@@ -57,6 +57,9 @@ def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -84,7 +87,7 @@ def test_disabled(configuration, metadata, set_wazuh_configuration_eps,
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_disabled_eps], indirect=True)
-def test_without_eps_setting(configuration, metadata, set_wazuh_configuration_eps,
+def test_without_eps_setting(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
                              truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that limits EPS is disabled when it is not configured and the received events are similar or
@@ -107,6 +110,9 @@ def test_without_eps_setting(configuration, metadata, set_wazuh_configuration_ep
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
+        - load_wazuh_basic_configuration
+            type: fixture
+            brief: Load a basic configuration to the manager.
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
@@ -131,8 +137,9 @@ def test_without_eps_setting(configuration, metadata, set_wazuh_configuration_ep
     '''
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
-    events_processed = evm.get_analysisd_state('events_processed')
-    events_received = evm.get_analysisd_state('events_received')
+    analysisd_state = evm.get_analysisd_state()
+    events_processed = int(analysisd_state['events_processed'])
+    events_received = int(analysisd_state['events_received'])
     # There are some internal event that are processed but not are reflected in events_received, That why it
     #  has been used PERCENTAGE_PROCESS_MSGS variable
     assert events_processed >= events_received * PERCENTAGE_PROCESS_MSGS and events_processed > 0, 'The ' \
