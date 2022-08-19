@@ -8,16 +8,15 @@
         path: C:\Program Files (x86)\ossec-agent\ossec.conf
         regex: C\:\\\\Test\\\\test_demo_fim
         state: absent
-      when: ansible_facts['os_family'] == "Windows"
 
     - name: Delete directory to monitor (Windows)
       win_file:
         path: C:\Test
         state: absent
-      when: ansible_facts['os_family'] == "Windows"
 
-    - name: Restart Wazuh (Windows)
-      win_shell: |
-        net stop wazuh
-        net start wazuh
-      when: ansible_facts['os_family'] == "Windows"
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'windows'

@@ -9,16 +9,19 @@
         state: directory
 
     - name: Add directory to syscheck configuration (Linux)
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertafter: </directories>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          <syscheck>
           <directories check_all="yes" whodata="yes">/tmp/test_demo_fim</directories>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+          </syscheck>
+        os: 'linux'
 
-    - name: Restart Wazuh (Linux)
-      become: true
-      systemd:
-        name: wazuh-agent
-        state: restarted
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'

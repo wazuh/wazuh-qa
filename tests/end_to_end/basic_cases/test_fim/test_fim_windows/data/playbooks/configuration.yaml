@@ -8,21 +8,30 @@
         state: directory
 
     - name: Add directory to syscheck configuration (Windows)
-      win_lineinfile:
-        path: C:\Program Files (x86)\ossec-agent\ossec.conf
-        insertafter: </directories>
-        line: |
-          <directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<syscheck>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+          '`n<directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>'
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</syscheck>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: 'windows'
 
     - name: Truncate ossec.log
       win_file:
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         state: absent
 
-    - name: Restart Wazuh (Windows)
-      win_shell: |
-        net stop wazuh
-        net start wazuh
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'windows'
 
     - name: Wait for whodata start
       win_wait_for:
