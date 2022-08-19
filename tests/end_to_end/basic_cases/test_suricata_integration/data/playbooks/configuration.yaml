@@ -7,20 +7,23 @@
   tasks:
 
     - name: Configure Wazuh to read Suricata logs file
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        marker: <!-- {mark} READ SURICATA LOGS CONFIG -->
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <localfile>
           <log_format>syslog</log_format>
           <location>/var/log/suricata/eve.json</location>
           </localfile>
+        os: 'linux'
 
-    - name: Restart Wazuh to apply the change
-      systemd:
-        state: restarted
-        name: wazuh-manager
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
     - name: Check if Suricata is installed
       shell: dpkg -l suricata | grep suricata
