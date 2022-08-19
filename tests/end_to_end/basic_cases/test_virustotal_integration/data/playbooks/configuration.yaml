@@ -4,10 +4,11 @@
   tasks:
 
     - name: Configure Virustotal integration and active response
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertbefore: </ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <integration>
           <name>virustotal</name>
           <api_key>{{ virustotal_key }}</api_key>
@@ -27,14 +28,14 @@
           <location>local</location>
           <rules_id>87105</rules_id>
           </active-response>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        os: 'linux'
 
-    - name: Configure local rules virus total integration
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/rules/local_rules.xml
-        insertafter: </groups>
-        block: |
+    - name: Configure local rules virustotal integration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_rules.yaml
+      vars:
+        config_block: |
           <group name="syscheck,pci_dss_11.5,nist_800_53_SI.7,">
           <!-- Rules for Linux systems -->
           <rule id="100200" level="7">
@@ -61,10 +62,11 @@
           <description>Error removing threat located at $(parameters.alert.data.virustotal.source.file)</description>
           </rule>
           </group>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Truncate alert.json
-      shell: echo "" > /var/ossec/logs/alerts/alerts.json
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
 
     - name: Restart manager
       include_role:
@@ -79,12 +81,15 @@
   tasks:
 
     - name: Configure syscheck
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertafter: </directories>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          <syscheck>
           <directories whodata="yes">/root</directories>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+          </syscheck>
+        os: 'linux'
 
     - name: Add active response script
       become: true
