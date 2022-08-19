@@ -1,5 +1,5 @@
-- name: Test agent configuration
-  hosts: wazuh-windows
+- name: TConfigure Windows agent environment
+  hosts: windows-agent
   tasks:
 
     - name: Create temp folder
@@ -28,7 +28,7 @@
         net stop wazuh
         net start wazuh
 
-- name: Test manager configuration
+- name: Configure manager environment
   hosts: wazuh-manager
   tasks:
 

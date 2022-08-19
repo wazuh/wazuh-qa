@@ -7,7 +7,7 @@
       become: True
 
 - name: Generate events
-  hosts: wazuh-agent
+  hosts: agents:&linux
   tasks:
 
     - name: "{{ event_description }}"
@@ -17,7 +17,7 @@
         state: "{{ state }}"
         mode: "{{ mode }}"
 
-- name: Get alerts
+- name: Get alerts file
   hosts: wazuh-manager
   tasks:
 

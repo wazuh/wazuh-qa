@@ -1,5 +1,5 @@
-- name: Test agent configuration
-  hosts: wazuh-agent
+- name: Configure Linux agent environment
+  hosts: agents:&linux
   tasks:
 
     - name: Configure agent to get a list of running processes
@@ -30,7 +30,7 @@
       shell: apt install ncat nmap -y
       when: ansible_facts['distribution'] == "Ubuntu"
 
-- name: Test manager configuration
+- name: Configure manager environment
   hosts: wazuh-manager
   tasks:
 

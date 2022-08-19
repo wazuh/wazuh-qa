@@ -1,4 +1,4 @@
-- name: Cleanup environment
+- name: Cleanup manager environment
   hosts: wazuh-manager
   become: true
   vars:

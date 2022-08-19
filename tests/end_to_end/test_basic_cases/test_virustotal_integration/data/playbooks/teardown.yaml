@@ -22,7 +22,7 @@
         name: wazuh-manager
 
 - name: Cleanup agent environment
-  hosts: wazuh-agent
+  hosts: centos-agent
   become: True
   tasks:
 

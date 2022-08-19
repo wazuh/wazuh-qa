@@ -1,4 +1,4 @@
-- name: Configure environment
+- name: Configure local environment
   hosts: localhost
   become: true
   tasks:

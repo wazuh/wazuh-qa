@@ -1,4 +1,4 @@
-- name: Truncate file
+- name: Clean alerts file
   hosts: wazuh-manager
   tasks:
 
@@ -29,7 +29,7 @@
       wait_for:
         timeout: 5
 
-- name: Get logs
+- name: Get alerts file
   hosts: wazuh-manager
   tasks:
 

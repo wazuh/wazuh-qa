@@ -1,8 +1,8 @@
-- name: Test agent configuration
-  hosts: wazuh-windows
+- name: Configure Windows agent environment
+  hosts: windows-agent
   tasks:
 
-    - name: Auto logon
+    - name: Enable auto logon
       community.windows.win_auto_logon:
         username: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
@@ -68,12 +68,12 @@
         Set-Location C:\temp
         Invoke-WebRequest -Uri {{ s3_url }}/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
 
-    - name: Restart wazuh-agent (Windows)
+    - name: Restart wazuh-agent
       win_shell: |
         net stop wazuh
         net start wazuh
 
-- name: Test manager configuration
+- name: Configure manager environment
   hosts: wazuh-manager
   tasks:
 

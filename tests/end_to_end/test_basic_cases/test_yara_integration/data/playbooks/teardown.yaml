@@ -1,4 +1,4 @@
-- name: Configure environment
+- name: Cleanup manager environment
   hosts: wazuh-manager
   become: true
   tasks:

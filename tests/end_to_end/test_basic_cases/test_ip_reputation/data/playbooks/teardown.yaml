@@ -1,14 +1,10 @@
-- name: Cleanup environment
+- name: Cleanup manager environment
   hosts: wazuh-manager
   tasks:
 
     - name: Uninstall apache
       become: true
       command: yum remove httpd -y
-
-    - name: Uninstall python
-      become: true
-      command: yum remove python39 -y
 
     - name: Delete added rules
       become: true
@@ -29,7 +25,7 @@
       shell: systemctl restart wazuh-manager
 
 - name: Cleanup Windows agent environment
-  hosts: wazuh-windows
+  hosts: windows-agent
   tasks:
 
     - name: Delete syscheck configuration
