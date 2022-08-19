@@ -21,7 +21,7 @@
 - name: Check the connection between Controller node and Wazuh Indexer
   import_tasks: check_controller_indexer.yaml
 # ----------------------------------------------------------------------------
-- debug: var=errors
+
 # -------- Task to identify whether the validation step fails or not. --------
 - name: Verify if any check have failed
   fail:
