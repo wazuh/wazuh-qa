@@ -62,7 +62,8 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
+                       clean_alerts_index):
     '''
     description: Check that alerts are generated when accessing the web server with an ip with a bad reputation.
 
@@ -140,9 +141,10 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
         ])
 
         # Check if the alert has been indexed and get its data
-        response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+        response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials,
+                                             ip_address=get_manager_ip)
         indexed_alert = json.dumps(response.json())
 
         # Check that the alert data is the expected one
         alert_data = re.search(expected_indexed_alert, indexed_alert)
-        assert alert_data is not None, 'Alert triggered, but not indexed'
+        assert alert_data is not None, f"Alert '{rule_description}' triggered, but not indexed"

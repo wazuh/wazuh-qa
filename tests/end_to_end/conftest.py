@@ -38,7 +38,7 @@ def get_dashboard_credentials(request):
         raise ValueError('Inventory not specified')
 
     inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
-                                             host='wazuh-manager')
+                                             host='managers')
 
     # Inventory is a tuple, with the second value empty, so we must access inventory[0]
     dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
@@ -115,6 +115,26 @@ def generate_events(request, metadata):
             parameters.update({'extravars': metadata['extra_vars']})
 
         ansible_runner.run(**parameters)
+
+@pytest.fixture(scope='module')
+def get_manager_ip(request):
+    """Get manager IP.
+
+       Returns:
+            str: Manager IP.
+    """
+    inventory_playbook = [request.config.getoption('--inventory_path')]
+
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
+
+    inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
+                                             host='managers')
+
+    # Inventory is a tuple, with the second value empty, so we must access inventory[0]
+    manager_ip = inventory[0]['ansible_host']
+
+    yield manager_ip
 
 
 def pytest_addoption(parser):

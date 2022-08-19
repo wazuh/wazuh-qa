@@ -31,7 +31,7 @@
       when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Configure manager environment
-  hosts: wazuh-manager
+  hosts: managers
   tasks:
 
     - name: Configure local rules

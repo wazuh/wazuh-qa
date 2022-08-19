@@ -8,7 +8,7 @@ from wazuh_testing.tools.utils import retry
 
 
 @retry(Exception, attempts=3, delay=5)
-def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.x-*'):
     """Get an alert from the wazuh-indexer API
 
       Make a request to the wazuh-indexer API to get the last indexed alert that matches the values passed in

@@ -73,8 +73,8 @@ configuration_extra_vars.update({'AWS_API_SCRIPT': aws_api_script, 'bucket': buc
 
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dashboard_credentials, generate_events,
-                                       clean_alerts_index):
+def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dashboard_credentials, get_manager_ip,
+                                       generate_events, clean_alerts_index):
     '''
     description: Check that an alert is generated and indexed when an event obtained from AWS services matches a rule.
 
@@ -148,7 +148,7 @@ def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dash
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

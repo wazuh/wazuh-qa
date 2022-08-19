@@ -1,5 +1,5 @@
 - name: Cleanup manager environment
-  hosts: wazuh-manager
+  hosts: managers
   become: true
   vars:
     conf_path: /var/ossec/etc/ossec.conf

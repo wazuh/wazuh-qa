@@ -1,6 +1,6 @@
 ---
 - name: Configure manager environment
-  hosts: wazuh-manager
+  hosts: managers
   tasks:
 
     - name: Get euid

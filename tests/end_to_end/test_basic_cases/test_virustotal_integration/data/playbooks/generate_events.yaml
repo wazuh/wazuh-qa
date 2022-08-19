@@ -11,7 +11,7 @@
         timeout: 5
 
 - name: Get alerts file
-  hosts: wazuh-manager
+  hosts: managers
   tasks:
 
     - name: Get alerts.json

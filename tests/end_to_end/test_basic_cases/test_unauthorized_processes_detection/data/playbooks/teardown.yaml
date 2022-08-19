@@ -16,7 +16,7 @@
         name: wazuh-agent
 
 - name: Cleanup manager environment
-  hosts: wazuh-manager
+  hosts: managers
   become: True
   tasks:
 

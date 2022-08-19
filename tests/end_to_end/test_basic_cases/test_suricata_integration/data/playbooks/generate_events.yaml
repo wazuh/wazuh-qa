@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: wazuh-manager
+  hosts: managers
   become: true
   vars:
     alerts_path: /var/ossec/logs/alerts/alerts.json
@@ -17,7 +17,7 @@
       shell: curl http://testmynids.org/uid/index.html
 
 - name: Get alerts file
-  hosts: wazuh-manager
+  hosts: managers
   become: true
   vars:
     alerts_path: /var/ossec/logs/alerts/alerts.json

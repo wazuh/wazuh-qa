@@ -29,7 +29,7 @@
         net start wazuh
 
 - name: Configure manager environment
-  hosts: wazuh-manager
+  hosts: managers
   tasks:
 
     - name: Configure local rules
