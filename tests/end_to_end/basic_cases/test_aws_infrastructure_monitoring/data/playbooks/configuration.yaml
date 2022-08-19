@@ -4,11 +4,11 @@
   tasks:
 
     - name: Configure the aws-s3 wodle
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <wodle name="aws-s3">
           <disabled>no</disabled>
           <remove_from_bucket>no</remove_from_bucket>
@@ -23,11 +23,14 @@
           <regions>{{ aws_region }}</regions>
           </bucket>
           </wodle>
+        os: 'linux'
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
     - name: Install boto3 python package (script dependency)
       shell: python3 -m pip install boto3

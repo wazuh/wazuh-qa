@@ -13,6 +13,8 @@
       script: "{{ AWS_API_SCRIPT }} -i {{ aws_access_key_id }} -k {{ aws_secret_access_key }} -b {{ bucket }}"
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
