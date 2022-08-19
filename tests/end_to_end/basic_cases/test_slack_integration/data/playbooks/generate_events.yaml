@@ -1,7 +1,6 @@
 - name: Generate events
   hosts: wazuh-manager
   vars:
-    alerts_path: /var/ossec/logs/alerts/alerts.json
     integrations_log: /var/ossec/logs/integrations.log
     slack_messages_log: /tmp/slack_messages.log
   become: true
