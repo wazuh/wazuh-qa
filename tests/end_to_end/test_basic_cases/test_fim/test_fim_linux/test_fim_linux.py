@@ -104,13 +104,14 @@ def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, g
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     syscheck_path = metadata['extra']['syscheck.path']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule":{{"level":{rule_level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule":{{"level":{rule_level},' \
                           fr'"description":"{rule_description}","id":"{rule_id}".*"syscheck":{{"path":' \
                           fr'"{syscheck_path}".*\}}'
 
     expected_indexed_alert = fr'.*"path": "{syscheck_path}".*"rule":.*"level": {rule_level},.*"description": ' \
-                             fr'"{rule_description}".*"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                             fr'"{rule_description}".*"timestamp": "({timestamp_regex})".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

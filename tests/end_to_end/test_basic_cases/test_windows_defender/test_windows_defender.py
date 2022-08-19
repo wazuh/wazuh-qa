@@ -104,14 +104,15 @@ def test_windows_defender(configure_environment, metadata, get_dashboard_credent
     rule_level = metadata['rule.level']
     rule_id = metadata['rule.id']
     rule_description = metadata['rule.description']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})",' \
                           fr'"rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
                              fr'.*"id": "{rule_id}".*' \
-                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                             fr'"timestamp": "({timestamp_regex})".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

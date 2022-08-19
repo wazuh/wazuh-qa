@@ -103,13 +103,14 @@ def test_sql_injection(configure_environment, metadata, get_dashboard_credential
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{rule_level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
                              fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'\
-                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                             fr'"timestamp": "({timestamp_regex})".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

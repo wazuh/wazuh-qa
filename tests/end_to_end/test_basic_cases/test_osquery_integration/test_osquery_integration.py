@@ -106,13 +106,14 @@ def test_osquery_integration(configure_environment, metadata, get_dashboard_cred
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     osquery_name = metadata['extra']['data.osquery.name']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
-                          fr"\"id\":\"{rule_id}\".+osquery\":.+\"name\":\"{osquery_name}\""
+    expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level},\"description\":" \
+                          fr"\"{rule_description}\",\"id\":\"{rule_id}\".+osquery\":.+\"name\":\"{osquery_name}\""
 
     expected_indexed_alert = fr".+osquery\":.+\"name\": \"{osquery_name}\".+level\": {rule_level}, " \
                              fr"\"description\": \"{rule_description}\".+\"id\": \"{rule_id}\"" \
-                             r'.+timestamp\": \"(.+)\"},.+'
+                             fr'.+timestamp\": \"({timestamp_regex})\".+'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

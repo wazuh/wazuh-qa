@@ -105,12 +105,13 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, get_m
     rule_id = metadata['rule.id']
     a3 = metadata['extra']['a3']
     data_audit_command = metadata['extra']['data.audit.command']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule"\:{{"level"\:{level},' \
                           fr'"description"\:"{description}","id"\:"{rule_id}".*a3={a3}.*\}}'
     expected_indexed_alert = fr'.*"rule":.*"level": {level}, "description": "{description}".*"id": "{rule_id}".*' \
                              fr'comm=\\"{data_audit_command}\\".*a3={a3}.*' \
-                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                             fr'"timestamp": "({timestamp_regex})".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

@@ -108,10 +108,10 @@ def test_suricata_integration(configure_environment, metadata, get_dashboard_cre
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
     data_hostname = metadata['extra']['data.hostname']
-    timestamp = r'\d{4}-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+    timestamp_regex = r'\d{4}-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr".*timestamp.+({timestamp}).+level.+{rule_level}.+description.+{rule_description}.+id.+" \
-                          fr"{rule_id}.+hostname.+{data_hostname}"
+    expected_alert_json = fr".*timestamp.+({timestamp_regex}).+level.+{rule_level}.+description.+{rule_description}.+" \
+                          fr"id.+{rule_id}.+hostname.+{data_hostname}"
     expected_indexed_alert = fr".*hostname.*{data_hostname}.+level.+{rule_level}.+description.+" \
                              fr"{rule_description}.+id.+{rule_id}"
 

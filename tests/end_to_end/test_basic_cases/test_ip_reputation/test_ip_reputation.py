@@ -105,20 +105,21 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
     malicious_ip_alert = metadata['malicious_ip']
     active_response_alert = metadata['active_response']
     expected_alerts = [malicious_ip_alert, active_response_alert]
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
     for alert in expected_alerts:
         rule_level = alert['rule.level']
         rule_id = alert['rule.id']
         rule_description = alert['rule.description']
 
-        expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
+        expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})",' \
                               fr'"rule"\:{{"level"\:{rule_level},' \
                               fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
         expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},' \
                                  fr'.*"description": "{rule_description}"' \
                                  fr'.*"id": "{rule_id}".*'\
-                                 r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                                 fr'"timestamp": "({timestamp_regex})".*'
 
         # Check that alert has been raised and save timestamp
         raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

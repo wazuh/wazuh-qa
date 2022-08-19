@@ -107,13 +107,13 @@ def test_docker_monitoring(configure_environment, metadata, get_dashboard_creden
     rule_id = metadata['rule.id']
     rule_level = metadata['rule.level']
     docker_action = metadata['extra']['data.docker.Action']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level.+{rule_level}.+description.+{rule_description}.+" \
-                          fr"id.+{rule_id}.+Action.+{docker_action}.+"
+    expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level.+{rule_level}.+description.+" \
+                          fr"{rule_description}.+id.+{rule_id}.+Action.+{docker_action}.+"
 
     expected_indexed_alert = fr".+Action.+{docker_action}.+level.+{rule_level}.+description.+{rule_description}.+" \
-                             fr"id.+{rule_id}.+timestamp\": \"(.+)\"" \
-                             r'},.+'
+                             fr"id.+{rule_id}.+timestamp\": \"({timestamp_regex})\".+"
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,

@@ -104,13 +104,13 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
-                          fr"\"id\":\"{rule_id}\""
+    expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level},\"description\":" \
+                          fr"\"{rule_description}\",\"id\":\"{rule_id}\""
 
     expected_indexed_alert = fr".+level\": {rule_level}.+\"description\": \"{rule_description}\"" \
-                             fr".+\"id\": \"{rule_id}\".+timestamp\": \"(.+)\"" \
-                             r'},.+'
+                             fr".+\"id\": \"{rule_id}\".+timestamp\": \"({timestamp_regex})\".+"
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
