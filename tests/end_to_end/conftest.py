@@ -23,11 +23,7 @@ def validate_environments(request):
         Step 1: Collect the data related to the selected tests that will be executed.
         Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
-        Step 4: Generate a test-specific playbook to validate the environment required by that test, then execute that
-                playbook. This will run one validation for each selected test set. To add specific validation tasks to a
-                test,a new jinja2 template must be added inside the `playbooks` folder in the test suite. E.g:
-                test_basic_cases/test_fim/test_fim_linux/data/playbooks/validation.j2
-                (See end_to_end/data/validation_templates for a guide to create the file)
+        Step 4: Execute a test-specific playbook (if any). This will run one validation for each selected test set.
 
     Args:
         request (fixture):  Gives access to the requesting test context.
@@ -45,13 +41,26 @@ def validate_environments(request):
         raise ValueError('Inventory not specified')
 
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
+    test_suites_paths = []
+    manager_instances = []
+    agent_instances = []
+    target_hosts = []
+    target_distros = []
+    distros_by = {'manager': [], 'agent': []}
+
+    def set_target_and_distros(suite):
+        for key in environment_metadata[test_suite_name]:
+            if environment_metadata[test_suite_name][key]['instances'] > 0:
+                # Save manager/agent distros
+                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
+                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
     # Remove duplicates caused by the existence of 2 or more test cases
     collected_paths = list(dict.fromkeys(collected_paths))
-    test_suites_paths = []
-    manager_instances = []
-    agent_instances = []
 
     for path in collected_paths:
         # Remove the name of the file from the path
@@ -63,18 +72,22 @@ def validate_environments(request):
         # Save the test environment metadata
         manager_instances.append(environment_metadata[test_suite_name]['manager']['instances'])
         agent_instances.append(environment_metadata[test_suite_name]['agent']['instances'])
+        set_target_and_distros(test_suite_name)
 
-    # Get the largest number of manager/agent instances
-    num_of_managers = max(manager_instances)
-    num_of_agents = max(agent_instances)
+    # Remove duplicates
+    target_distros = list(dict.fromkeys(target_distros))
+    target_hosts = list(dict.fromkeys(target_hosts))
+
     # -------------------------------------------------- End of Step 1 -------------------------------------------------
 
     # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
     gen_parameters = {
         'playbook': playbook_generator, 'inventory': inventory_path,
         'extravars': {
-            'template_path': playbook_template, 'dest_path': general_playbook,
-            'num_of_managers': num_of_managers, 'num_of_agents': num_of_agents
+            'template_path': playbook_template,
+            'dest_path': general_playbook,
+            'target_hosts': ','.join(target_hosts),
+            'distros': target_distros
         }
     }
     ansible_runner.run(**gen_parameters)
@@ -102,51 +115,28 @@ def validate_environments(request):
                         f"requirements. Result:\n{errors}")
     # -------------------------------------------------- End of Step 3 -------------------------------------------------
 
-    # ------------------------------------ Step 4: Execute test-specific validations -----------------------------------
-    playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_test_specific_play.yaml')
-    playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'test_specific_validation.j2')
-
+    # -------------------------------- Step 4: Execute test-specific validations (if any) ------------------------------
     for path in test_suites_paths:
-        validation_template = os.path.join(path, 'data', 'playbooks', 'validation.j2')
-        validation_template = validation_template if os.path.exists(validation_template) else ''
-        # Define the path where the resulting playbook will be stored
         validation_playbook = os.path.join(path, 'data', 'playbooks', 'validation.yaml')
 
-        # Get distros by instances type
         test_suite_name = path.split('/')[-1:][0]
         target_hosts = []
-        distros = {"manager": [], "agent": []}
-        for key in environment_metadata[test_suite_name]:
-            if environment_metadata[test_suite_name][key]['instances'] > 0:
-                # Save manager/agent distros for the current test
-                distros[key] = environment_metadata[test_suite_name][key]['distros']
-                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-                target_hosts.extend([distro.lower() + f"-{key}*" for distro in distros[key]])
+        distros_by = {"manager": [], "agent": []}
+        set_target_and_distros(test_suite_name)
 
-        # Generate test_specific validation playbook
-        gen_parameters = {
-            'playbook': playbook_generator, 'inventory': inventory_path, 'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
-            'extravars': {
-                'template_path': playbook_template, 'dest_path': validation_playbook,
-                'num_of_managers': num_of_managers, 'num_of_agents': num_of_agents,
-                'validation_template': validation_template, 'target_hosts': ','.join(target_hosts),
-                'manager_distros': distros['manager'], 'agent_distros': distros['agent']
+        # Run test-specific validation playbook (if any)
+        if os.path.exists(validation_playbook):
+            parameters = {
+                'playbook': validation_playbook, 'inventory': inventory_path,
+                'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
+                'extravars': {'target_hosts': ','.join(target_hosts)}
             }
-        }
-        ansible_runner.run(**gen_parameters)
+            validation_runner = ansible_runner.run(**parameters)
 
-        # Run test_specific validation playbook
-        parameters = {
-            'playbook': validation_playbook, 'inventory': inventory_path, 'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-        }
-        validation_runner = ansible_runner.run(**parameters)
-        # Remove the generated playbook
-        remove_file(validation_playbook)
-
-        # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
-        if validation_runner.status == 'failed':
-            raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the environments "
-                            'meet the expected requirements.')
+            # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
+            if validation_runner.status == 'failed':
+                raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the "
+                                'environments meet the expected requirements.')
     # -------------------------------------------------- End of Step 4 -------------------------------------------------
 
 
