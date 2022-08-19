@@ -1,0 +1,6 @@
+- name: Configure local decoders
+  become: true
+  blockinfile:
+    path: /var/ossec/etc/decoders/local_decoder.xml
+    marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+    block: "{{ config_block }}"
