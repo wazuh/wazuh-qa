@@ -1,0 +1,34 @@
+- name: Truncate alerts file
+  hosts: wazuh-manager
+  become: true
+  vars:
+    alerts_path: /var/ossec/logs/alerts/alerts.json
+  tasks:
+
+    - name: Truncate alerts file
+      shell: echo "" > {{ alerts_path }}
+
+- name: Generate events
+  hosts: ubuntu-agent
+  become: true
+  tasks:
+
+    - name: Run command to generate an alert
+      shell: curl http://testmynids.org/uid/index.html
+
+- name: Get alerts
+  hosts: wazuh-manager
+  become: true
+  vars:
+    alerts_path: /var/ossec/logs/alerts/alerts.json
+  tasks:
+
+    - name: Wait for alerts to be generated
+      wait_for:
+        timeout: 10
+
+    - name: Get alerts.json
+      fetch:
+        src: "{{ alerts_path }}"
+        dest: /tmp/
+        flat: true
