@@ -16,7 +16,7 @@
 
     - name: Wait for alert
       wait_for:
-        timeout: 30
+        timeout: 5
 
 - name: Get logs
   hosts: wazuh-manager
