@@ -53,9 +53,10 @@ params_process_old_events_multithread.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_one_thread], indirect=True)
-def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
-                                       configure_wazuh_one_thread, truncate_monitored_files,
-                                       delete_alerts_folder, restart_wazuh_daemon_function, simulate_agent):
+def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration,
+                                       set_wazuh_configuration_eps, configure_wazuh_one_thread,
+                                       truncate_monitored_files, delete_alerts_folder, restart_wazuh_daemon_function,
+                                       simulate_agent):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
                  average frees up some space. To do this, read the alerts.log file and find the numerated alerts
@@ -142,8 +143,8 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_process_old_events_multithread], indirect=True)
-def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
-                                         truncate_monitored_files, delete_alerts_folder,
+def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration,
+                                         set_wazuh_configuration_eps, truncate_monitored_files, delete_alerts_folder,
                                          restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving

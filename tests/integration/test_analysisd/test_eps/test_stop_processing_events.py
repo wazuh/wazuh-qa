@@ -41,8 +41,8 @@ params_stop_processing_events.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_stop_processing_events], indirect=True)
-def test_stops_processing_events(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps, truncate_monitored_files,
-                                 restart_wazuh_daemon_function, simulate_agent):
+def test_stops_processing_events(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
+                                 truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be lower or equal than `maximum` * `timeframe`

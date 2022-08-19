@@ -40,9 +40,9 @@ params_start_dropping_events_when_queue_full.update({'total_msg': total_msg})
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
 @pytest.mark.parametrize('simulate_agent', [params_start_dropping_events_when_queue_full], indirect=True)
-def test_start_dropping_events_when_queue_full(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
-                                               truncate_monitored_files, restart_wazuh_daemon_function,
-                                               simulate_agent):
+def test_start_dropping_events_when_queue_full(configuration, metadata, load_wazuh_basic_configuration,
+                                               set_wazuh_configuration_eps, truncate_monitored_files,
+                                               restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that the `events_dropped` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be greater than 1 and, `event_queue_usage` is equal to 1

@@ -80,8 +80,7 @@ def get_analysisd_state():
             if not line.startswith("#") and not line.startswith('\n'):
                 data = data + line.replace('\'', '')
     data = data[:-1]
-    analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=')
-                            for element in data.split('\n')))
+    analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=') for element in data.split('\n')))
 
     return analysisd_state
 
