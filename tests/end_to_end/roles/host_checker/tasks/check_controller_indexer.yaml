@@ -15,11 +15,6 @@
   delegate_to: localhost
   when: (os == 'Linux' and 'server' in wazuh_info.stdout)
 
-- debug: var=test_result
-  when: test_result is failed
-
-- debug: var=test_result.stderr
-
 - name: Check the connection between Controller node and Wazuh Indexer
   set_fact:
     check_result: 'true'

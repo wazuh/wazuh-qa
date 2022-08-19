@@ -23,7 +23,21 @@
             "distros": []
         }
     },
-    "test_brute_force": {
+    "test_brute_force_ssh": {
+        "manager": {
+            "instances": 1,
+            "distros": [
+                "CentOS"
+            ]
+        },
+        "agent": {
+            "instances": 1,
+            "distros": [
+                "CentOS"
+            ]
+        }
+    },
+    "test_brute_force_rdp": {
         "manager": {
             "instances": 1,
             "distros": [
@@ -33,7 +47,6 @@
         "agent": {
             "instances": 2,
             "distros": [
-                "CentOS",
                 "Windows"
             ]
         }

@@ -91,8 +91,15 @@ def validate_environments(request):
     remove_file(general_playbook)
     # If the general validations have failed, then abort the execution finishing with an error. Else, continue.
     if general_validation_runner.status == 'failed':
+        # Collect inventory_hostnames with errors
+        hosts_with_errors = [key for key in general_validation_runner.stats['failures']]
+        # Collect list of errors
+        errors = []
+        errors.extend([general_validation_runner.get_fact_cache(host)['phase_results'] for host in hosts_with_errors])
+        errors = ''.join(errors)
+        # Raise the exception with errors details
         raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
-                        'requirements.')
+                        f"requirements. Result:\n{errors}")
     # -------------------------------------------------- End of Step 3 -------------------------------------------------
 
     # ------------------------------------ Step 4: Execute test-specific validations -----------------------------------

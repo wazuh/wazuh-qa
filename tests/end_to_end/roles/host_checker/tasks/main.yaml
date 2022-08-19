@@ -23,6 +23,10 @@
 # ----------------------------------------------------------------------------
 
 # -------- Task to identify whether the validation step fails or not. --------
+- set_fact:
+    phase_results: "{{ errors }}"
+    cacheable: yes
+
 - name: Verify if any check have failed
   fail:
     msg: "Some validations were fail:\n'{{ errors }}'"
