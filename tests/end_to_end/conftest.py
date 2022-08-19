@@ -24,9 +24,8 @@ def validate_environments(request):
         Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
         Step 4: Generate a test-specific playbook to validate the environment required by that test, then execute that
-                playbook. This will run one validation for each selected test set.
-                To add specific validation tasks to a test its only necessary to add a new jinja2 template inside the
-                `playbooks` folder in the test suite. E.g:
+                playbook. This will run one validation for each selected test set. To add specific validation tasks to a
+                test,a new jinja2 template must be added inside the `playbooks` folder in the test suite. E.g:
                 test_basic_cases/test_fim/test_fim_linux/data/playbooks/validation.j2
                 (See end_to_end/data/validation_templates for a guide to create the file)
 
