@@ -116,6 +116,7 @@ def generate_events(request, metadata):
 
         ansible_runner.run(**parameters)
 
+
 @pytest.fixture(scope='module')
 def get_manager_ip(request):
     """Get manager IP.
