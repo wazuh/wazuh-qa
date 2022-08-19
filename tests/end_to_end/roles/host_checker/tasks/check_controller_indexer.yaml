@@ -7,7 +7,7 @@
     name: service_controller
     tasks_from: get_installation_type
 
-- name: Test connection with host
+- name: Test connection with Wazuh Indexer
   shell: nc -v -4 {{ inventory_hostname }} 9200
   timeout: 3
   ignore_errors: true

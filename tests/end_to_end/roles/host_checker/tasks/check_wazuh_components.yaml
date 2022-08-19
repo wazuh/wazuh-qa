@@ -14,7 +14,7 @@
 - name: Check the status of Wazuh components (Manager)
   set_fact:
     check_result: 'true'
-    errors: "{{ errors }}{{ ansible_facts.services[item] }} is not running.\n"
+    errors: "{{ errors }}{{ ansible_facts.services[item].name }} is not running.\n"
   when: (os == 'Linux' and 'server' in wazuh_info.stdout and ansible_facts.services[item].state != 'running')
   with_items:
     - wazuh-manager.service
