@@ -39,11 +39,10 @@
         search_regex: hooks.slack.com
         timeout: 5
 
-    - name: Get alerts.json
-      fetch:
-        src: "{{ alerts_path }}"
-        dest: /tmp/
-        flat: true
+    - name: Get alert json
+      include_role:
+        name: manage_alerts
+        tasks_from: get_alert_json.yaml
 
     # Get messages from Slack channel using the API of Slack
     - name: Run the script using python3 (Get messages from Slack channel)
