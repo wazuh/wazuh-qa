@@ -13,7 +13,7 @@ Then, you will need to have an inventory with the needed hosts and variables. Fo
 ```
 managers:
   hosts:
-    wazuh-manager:
+    centos-manager:
       ansible_host: <IP_ADDRESS>
       ansible_connection: ssh
       ansible_user: <USER>
@@ -24,7 +24,7 @@ managers:
 
 agents:
   children:
-    linux-agents:
+    linux:
       hosts:
         ubuntu-agent:
           ansible_host: <IP_ADDRESS>
@@ -38,7 +38,7 @@ agents:
           ansible_user: <USER>
           ansible_ssh_private_key_file: <PRIVATE_KEY>
           ansible_python_interpreter: /usr/bin/python3
-    windows-agents:
+    windows:
       hosts:
         windows-agent:
           ansible_host: <IP_ADDRESS>
