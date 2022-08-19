@@ -4,12 +4,12 @@
 
 - name: Check OS (Linux)
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nThe {{ ansible_system }} OS was not expected, but the {{ os }} OS."
+    check_result: 'true'
+    errors: "{{ errors }}The {{ ansible_system }} OS was not expected, but the {{ os }} OS.\n"
   when: (os != ansible_system and os == "Linux")
 
 - name: Check OS (Windows)
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nThe {{ ansible_os_family }} OS was not expected, but the {{ os }} OS."
+    check_result: 'true'
+    errors: "{{ errors }}The {{ ansible_os_family }} OS was not expected, but the {{ os }} OS.\n"
   when: (os != ansible_os_family and os == "Windows")

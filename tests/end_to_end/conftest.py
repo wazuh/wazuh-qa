@@ -23,7 +23,12 @@ def validate_environments(request):
         Step 1: Collect the data related to the selected tests that will be executed.
         Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
-        Step 4: Execute test-specific validations (if any). It will run one validation for each selected test set.
+        Step 4: Generate a test-specific playbook to validate the environment required by that test, then execute that
+                playbook. This will run one validation for each selected test set.
+                To add specific validation tasks to a test its only necessary to add a new jinja2 template inside the
+                `playbooks` folder in the test suite. E.g:
+                test_basic_cases/test_fim/test_fim_linux/data/playbooks/validation.j2
+                (See end_to_end/data/validation_templates for a guide to create the file)
 
     Args:
         request (fixture):  Gives access to the requesting test context.
@@ -40,7 +45,7 @@ def validate_environments(request):
     if not inventory_path:
         raise ValueError('Inventory not specified')
 
-    # -------------------------- Step 1: Prepare the necessary data ----------------
+    #--------------------------------------- Step 1: Prepare the necessary data ----------------------------------------
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
     # Remove duplicates caused by the existence of 2 or more test cases
@@ -63,9 +68,9 @@ def validate_environments(request):
     # Get the largest number of manager/agent instances
     num_of_managers = max(manager_instances)
     num_of_agents = max(agent_instances)
-    # -------------------------- End of Step 1 -------------------------------------
+    #-------------------------------------------------- End of Step 1 --------------------------------------------------
 
-    # ---- Step 2: Run the playbook to generate the general validation playbook ----
+    #---------------------- Step 2: Run the playbook to generate the general validation playbook -----------------------
     gen_parameters = {
         'playbook': playbook_generator, 'inventory': inventory_path,
         'extravars': {
@@ -74,9 +79,9 @@ def validate_environments(request):
         }
     }
     ansible_runner.run(**gen_parameters)
-    # -------------------------- End of Step 2 -------------------------------------
+    #-------------------------------------------------- End of Step 2 --------------------------------------------------
 
-    # -------------------- Step 3: Run the general validation playbook -------------
+    #----------------------------------- Step 3: Run the general validation playbook -----------------------------------
     parameters = {
         'playbook': general_playbook,
         'inventory': inventory_path,
@@ -89,9 +94,9 @@ def validate_environments(request):
     if general_validation_runner.status == 'failed':
         raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
                         'requirements.')
-    # -------------------------- End of Step 3 -------------------------------------
+    #-------------------------------------------------- End of Step 3 --------------------------------------------------
 
-    # ---------------- Step 4: Execute test-specific validations (if any) ----------
+    #------------------------------------ Step 4: Execute test-specific validations ------------------------------------
     playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_test_specific_play.yaml')
     playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'test_specific_validation.j2')
 
@@ -136,7 +141,7 @@ def validate_environments(request):
         if validation_runner.status == 'failed':
             raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the environments "
                             'meet the expected requirements.')
-    # -------------------------- End of Step 4 -------------------------------------
+    #-------------------------------------------------- End of Step 4 --------------------------------------------------
 
 
 @pytest.fixture(scope='function')

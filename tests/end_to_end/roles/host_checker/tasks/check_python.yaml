@@ -4,8 +4,8 @@
 
 - name: Check default Python version (Linux)
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nPython version is less than 3. Current version: {{ ansible_python_version }}"
+    check_result: 'true'
+    errors: "{{ errors }}Python version is less than 3. Current version: {{ ansible_python_version }}\n"
   when: (os == "Linux" and ansible_python['version']['major'] < 3)
 
 - name: Get Python version (Windows)
@@ -15,6 +15,6 @@
 
 - name: Check default Python version (Linux)
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nPython version is less than 3. Current version: {{ version.stdout }}"
+    check_result: 'true'
+    errors: "{{ errors }}Python version is less than 3. Current version: {{ version.stdout }}\n"
   when: (os == "Windows" and version.stdout.split(" ")[1].split(".")[0] | int < 3)

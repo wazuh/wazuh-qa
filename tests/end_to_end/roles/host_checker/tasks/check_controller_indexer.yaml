@@ -15,8 +15,13 @@
   delegate_to: localhost
   when: (os == 'Linux' and 'server' in wazuh_info.stdout)
 
+- debug: var=test_result
+  when: test_result is failed
+
+- debug: var=test_result.stderr
+
 - name: Check the connection between Controller node and Wazuh Indexer
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nAnsible Controller node cannot connect correctly with Wazuh Indexer."
-  when: (test_result is failed and test_result.stdout is defined and 'refused' in test_result.stdout)
+    check_result: 'true'
+    errors: "{{ errors }}Ansible Controller node cannot connect correctly with Wazuh Indexer.\n"
+  when: (test_result is failed and test_result.stdout is defined and 'refused' in test_result.stderr)

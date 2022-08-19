@@ -1,19 +1,19 @@
 # -------- Task to identify whether the validation step fails or not. --------
 - name: Set flag and informative variable
   set_fact:
-    failed: false
-    errors: null
+    check_result: 'false'
+    errors: ''
 # ----------------------------------------------------------------------------
 
 # -------- Checks ------------------------------------------------------------
-- name: Check host connection
-  include_tasks: check_connection.yaml
-
 - name: Check Python
   import_tasks: check_python.yaml
 
 - name: Check OS
   import_tasks: check_os.yaml
+
+- name: Check the status of Wazuh components
+  import_tasks: check_wazuh_components.yaml
 
 - name: Check the connection between Filebeat and Wazuh Indexer
   import_tasks: check_filebeat_indexer.yaml
@@ -21,10 +21,10 @@
 - name: Check the connection between Controller node and Wazuh Indexer
   import_tasks: check_controller_indexer.yaml
 # ----------------------------------------------------------------------------
-
+- debug: var=errors
 # -------- Task to identify whether the validation step fails or not. --------
 - name: Verify if any check have failed
   fail:
     msg: "Some validations were fail:\n'{{ errors }}'"
-  when: failed == true
+  when: (check_result == 'true' or errors != '')
 # ----------------------------------------------------------------------------

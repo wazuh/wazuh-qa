@@ -16,6 +16,6 @@
 
 - name: Check the connection between Filebeat and Wazuh Indexer
   set_fact:
-    failed: true
-    errors: "{{ errors }}\nFilebeat cannot connect correctly with Wazuh Indexer."
+    check_result: 'true'
+    errors: "{{ errors }}Filebeat cannot connect correctly with Wazuh Indexer.\n"
   when: (os == 'Linux' and 'server' in wazuh_info.stdout and 'ERROR' in test_result.stdout)
