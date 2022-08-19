@@ -4,22 +4,25 @@
   tasks:
 
     - name: Configure the docker-listener module
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <wodle name="docker-listener">
           <interval>10m</interval>
           <attempts>5</attempts>
           <run_on_start>yes</run_on_start>
           <disabled>no</disabled>
           </wodle>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        os: 'linux'
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
     - name: Force systemd to reread configs
       systemd:
