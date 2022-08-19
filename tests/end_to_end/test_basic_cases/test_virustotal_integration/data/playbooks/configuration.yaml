@@ -84,9 +84,8 @@
 
     - name: Add active response script
       become: true
-      copy:
-        src: "{{ active_response_script }}"
-        dest: /var/ossec/active-response/bin
+      shell: |
+        curl {{ s3_url }}/virustotal_integration/remove-threat.sh -o /var/ossec/active-response/bin/remote-threat.sh
 
     - name: Install jq (CentOS)
       become: true
