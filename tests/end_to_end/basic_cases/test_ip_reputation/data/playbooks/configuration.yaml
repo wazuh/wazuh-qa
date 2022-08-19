@@ -43,10 +43,11 @@
         chmod 660 /var/ossec/etc/lists/blacklist-alienvault
 
     - name: Configure ossec.conf
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertbefore: </ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <localfile>
           <log_format>apache</log_format>
           <location>/var/log/httpd/access_log</location>
@@ -76,14 +77,14 @@
           <rules_id>100100</rules_id>
           <timeout>10s</timeout>
           </active-response>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        os: 'linux'
 
     - name: Configure local rules
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/rules/local_rules.xml
-        insertafter: </groups>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_rules.yaml
+      vars:
+        config_block: |
           <group name="attack,">
           <rule id="100100" level="10">
           <if_group>web|attack|attacks</if_group>
@@ -91,11 +92,13 @@
           <description>IP address found in AlienVault reputation database.</description>
           </rule>
           </group>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Restart the manager
-      become: true
-      shell: systemctl restart wazuh-manager
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: 'linux'
 
 - name: Windows agent configuration
   hosts: wazuh-windows
