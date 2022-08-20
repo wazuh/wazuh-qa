@@ -13,7 +13,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Wait for alerts to be generated
       wait_for:

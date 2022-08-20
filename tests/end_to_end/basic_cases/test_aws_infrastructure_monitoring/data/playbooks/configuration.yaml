@@ -23,14 +23,14 @@
           <regions>{{ aws_region }}</regions>
           </bucket>
           </wodle>
-        os: 'linux'
+        os: linux
 
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Install boto3 python package (script dependency)
       shell: python3 -m pip install boto3

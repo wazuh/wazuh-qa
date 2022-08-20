@@ -67,8 +67,7 @@ def configure_environment(request):
         configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
         parameters = {'playbook': configuration_playbook_path,
                       'inventory': inventory_playbook,
-                      'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-                     }
+                      'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
 
         # Check if the module has extra variables to pass to the playbook
         configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -89,7 +88,7 @@ def configure_environment(request):
             parameters = {'playbook': teardown_playbook_path,
                           'inventory': inventory_playbook,
                           'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-                         }
+            }
 
             # Check if the module has extra variables to pass to the playbook
             configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -119,9 +118,8 @@ def generate_events(request, metadata):
         events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
         parameters = {'playbook': events_playbook_path,
-                       'inventory': inventory_playbook,
-                       'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-                     }
+                      'inventory': inventory_playbook,
+                      'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
