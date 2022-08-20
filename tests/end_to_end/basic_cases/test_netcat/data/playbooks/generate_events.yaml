@@ -14,7 +14,7 @@
     - name: "{{ event_description_netcat }}"
       command: "{{ command_netcat }}"
       timeout: 30
-      ignore_errors: true # Added 'ignore errors' because the command nc -l 8000 continues running after the timeout
+      ignore_errors: true #Added 'ignore errors' because the command nc -l 8000 continues running after the timeout
 
     - name: Wait for alert
       wait_for:

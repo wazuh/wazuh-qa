@@ -14,14 +14,14 @@
           <command>ps -e -o pid,uname,command</command>
           <frequency>30</frequency>
           </localfile>
-        os: 'linux'
+        os: linux
 
     - name: Restart wazuh-agent
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Install netcat (CentOS)
       become: true
@@ -63,4 +63,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
