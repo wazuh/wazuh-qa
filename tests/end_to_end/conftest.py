@@ -87,8 +87,7 @@ def configure_environment(request):
 
             parameters = {'playbook': teardown_playbook_path,
                           'inventory': inventory_playbook,
-                          'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-            }
+                          'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
 
             # Check if the module has extra variables to pass to the playbook
             configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)

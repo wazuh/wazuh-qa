@@ -15,18 +15,18 @@
           <run_on_start>yes</run_on_start>
           <disabled>no</disabled>
           </wodle>
-        os: 'linux'
+        os: linux
 
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Force systemd to reread configs
       systemd:
-        daemon_reload: yes
+        daemon_reload: true
 
     - name: Check if Docker is installed or not on CentOS
       command: systemctl status docker --no-pager

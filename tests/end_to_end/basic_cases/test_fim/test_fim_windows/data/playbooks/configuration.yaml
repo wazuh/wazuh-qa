@@ -19,7 +19,7 @@
           '`n<directories check_all="yes" report_changes="yes" whodata="yes">C:\\Test\\test_demo_fim</directories>'
           Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</syscheck>"
           Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
-        os: 'windows'
+        os: windows
 
     - name: Truncate ossec.log
       win_file:
@@ -31,7 +31,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'windows'
+        os: windows
 
     - name: Wait for whodata start
       win_wait_for:

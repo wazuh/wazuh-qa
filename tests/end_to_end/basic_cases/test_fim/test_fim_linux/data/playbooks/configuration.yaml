@@ -17,11 +17,11 @@
           <syscheck>
           <directories check_all="yes" whodata="yes">/tmp/test_demo_fim</directories>
           </syscheck>
-        os: 'linux'
+        os: linux
 
     - name: Restart wazuh-agent
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

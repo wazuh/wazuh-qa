@@ -77,7 +77,7 @@
           <rules_id>100100</rules_id>
           <timeout>10s</timeout>
           </active-response>
-        os: 'linux'
+        os: linux
 
     - name: Configure local rules
       include_role:
@@ -98,7 +98,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
 - name: Windows agent configuration
   hosts: wazuh-windows

@@ -1,7 +1,6 @@
----
 - name: Cleanup environment
   hosts: wazuh-manager
-  become: True
+  become: true
   tasks:
 
     - name: Delete the docker-listener module configuration
@@ -15,4 +14,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

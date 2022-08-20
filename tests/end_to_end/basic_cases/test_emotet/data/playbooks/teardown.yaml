@@ -16,7 +16,7 @@
     - name: Kill trigger-emotet.exe
       win_shell: |
         taskkill /im trigger-emotet.exe /f
-      become: yes
+      become: true
       become_method: runas
       become_user: Administrator
 
@@ -30,7 +30,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'windows'
+        os: windows
 
     - name: Enable Windows Defender
       win_shell: set-MpPreference -DisableRealtimeMonitoring $False

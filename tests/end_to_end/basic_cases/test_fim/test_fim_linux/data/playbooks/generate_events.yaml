@@ -12,7 +12,7 @@
   tasks:
 
     - name: "{{ event_description }}"
-      become: True
+      become: true
       file:
         path: "{{ path }}"
         state: "{{ state }}"

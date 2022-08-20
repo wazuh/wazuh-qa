@@ -29,7 +29,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
 - name: Cleanup Windows agent environment
   hosts: wazuh-windows

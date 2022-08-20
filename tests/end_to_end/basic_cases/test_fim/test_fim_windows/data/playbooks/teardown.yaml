@@ -1,4 +1,3 @@
----
 - name: Cleanup Windows agent environment
   hosts: wazuh-windows
   tasks:
@@ -19,4 +18,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'windows'
+        os: windows
