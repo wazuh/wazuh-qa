@@ -21,11 +21,11 @@
           <log_format>apache</log_format>
           <location>/var/log/httpd/access_log</location>
           </localfile>
-        os: 'linux'
+        os: linux
 
     - name: Restart agent
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

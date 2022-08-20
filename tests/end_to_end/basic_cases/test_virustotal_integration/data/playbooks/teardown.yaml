@@ -1,7 +1,7 @@
 ---
 - name: Cleanup manager environment
   hosts: wazuh-manager
-  become: True
+  become: true
   tasks:
 
     - name: Delete Virustotal integration and active response configuration
@@ -21,11 +21,11 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
 - name: Cleanup agent environment
   hosts: wazuh-agent
-  become: True
+  become: true
   tasks:
 
     - name: Delete syscheck configuration
@@ -49,4 +49,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

@@ -16,7 +16,7 @@
           <rule_id>{{ RULE_ID }}</rule_id>
           <alert_format>json</alert_format>
           </integration>
-        os: 'linux'
+        os: linux
 
     - name: Truncate alert.json
       include_role:
@@ -28,4 +28,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

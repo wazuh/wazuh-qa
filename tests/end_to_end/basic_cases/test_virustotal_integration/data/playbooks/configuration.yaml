@@ -28,7 +28,7 @@
           <location>local</location>
           <rules_id>87105</rules_id>
           </active-response>
-        os: 'linux'
+        os: linux
 
     - name: Configure local rules virustotal integration
       include_role:
@@ -73,7 +73,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
 - name: Test agent configuration
   hosts: wazuh-agent
@@ -89,7 +89,7 @@
           <syscheck>
           <directories whodata="yes">/root</directories>
           </syscheck>
-        os: 'linux'
+        os: linux
 
     - name: Add active response script
       become: true
@@ -113,4 +113,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

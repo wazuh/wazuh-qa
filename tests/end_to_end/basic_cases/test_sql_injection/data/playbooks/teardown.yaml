@@ -1,7 +1,6 @@
----
 - name: Cleanup agent environment
   hosts: wazuh-agent
-  become: True
+  become: true
   tasks:
 
     - name: Delete localfile configuration
@@ -15,4 +14,4 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux

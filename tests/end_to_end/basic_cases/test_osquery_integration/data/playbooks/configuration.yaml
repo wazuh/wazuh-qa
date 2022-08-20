@@ -44,7 +44,7 @@
           <config_path>/etc/osquery/osquery.conf</config_path>
           <add_labels>no</add_labels>
           </wodle>
-        os: 'linux'
+        os: linux
 
     - name: Start Osquery
       shell: systemctl start osqueryd
@@ -55,7 +55,7 @@
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Check if stress is installed or not on CentOS
       command: rpm -q stress

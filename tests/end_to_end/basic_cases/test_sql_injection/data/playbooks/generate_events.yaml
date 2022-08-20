@@ -26,4 +26,3 @@
       include_role:
         name: manage_alerts
         tasks_from: get_alert_json.yaml
-
