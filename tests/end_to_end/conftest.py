@@ -13,6 +13,7 @@ from wazuh_testing import end_to_end as e2e
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
+
 @pytest.fixture(scope='function')
 def clean_alerts_index(get_dashboard_credentials):
     """Remove the temporary file that contains the alerts and delete indices using the API.
@@ -67,7 +68,7 @@ def configure_environment(request):
         parameters = {'playbook': configuration_playbook_path,
                       'inventory': inventory_playbook,
                       'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-        }
+                     }
 
         # Check if the module has extra variables to pass to the playbook
         configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -88,8 +89,7 @@ def configure_environment(request):
             parameters = {'playbook': teardown_playbook_path,
                           'inventory': inventory_playbook,
                           'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-        }
-
+                         }
 
             # Check if the module has extra variables to pass to the playbook
             configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -111,7 +111,6 @@ def generate_events(request, metadata):
     inventory_playbook = request.config.getoption('--inventory_path')
     roles_path = request.config.getoption('--roles_path')
 
-
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
 
@@ -122,7 +121,7 @@ def generate_events(request, metadata):
         parameters = {'playbook': events_playbook_path,
                        'inventory': inventory_playbook,
                        'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
-        }
+                     }
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
