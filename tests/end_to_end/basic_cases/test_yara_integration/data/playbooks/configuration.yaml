@@ -69,14 +69,14 @@
           <syscheck>
           <directories whodata="yes">/tmp/yara/malware</directories>
           </syscheck>
-        os: 'linux'
+        os: linux
 
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'linux'
+        os: linux
 
     - name: Create a directory to store Yara rules
       file:

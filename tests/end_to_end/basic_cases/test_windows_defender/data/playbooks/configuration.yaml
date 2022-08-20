@@ -26,14 +26,14 @@
           Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
           Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
           Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
-        os: 'windows'
+        os: windows
 
     - name: Restart agent
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
-        os: 'windows'
+        os: windows
 
 - name: Test manager configuration
   hosts: wazuh-manager

@@ -1,3 +1,9 @@
+ # REQUIRED VARIABLES
+  #-------------------
+  #
+  # GENERIC:
+  #  - (String) os: Target operating system
+
 - name: Configure ossec.conf linux
   become: true
   blockinfile:
