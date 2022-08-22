@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: wazuh-manager
+  hosts: managers
   vars:
     alerts_path: /var/ossec/logs/alerts/alerts.json
     integrations_log: /var/ossec/logs/integrations.log

@@ -42,6 +42,7 @@ import re
 import pytest
 from tempfile import gettempdir
 
+import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
@@ -59,7 +60,8 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_audit(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_audit(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
+               clean_alerts_index):
     '''
     description: Check that an alert is generated and indexed when a command is executed.
 
@@ -103,16 +105,17 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     rule_id = metadata['rule.id']
     a3 = metadata['extra']['a3']
     data_audit_command = metadata['extra']['data.audit.command']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[\+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)","rule"\:{{"level"\:{level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule"\:{{"level"\:{level},' \
                           fr'"description"\:"{description}","id"\:"{rule_id}".*a3={a3}.*\}}'
     expected_indexed_alert = fr'.*"rule":.*"level": {level}, "description": "{description}".*"id": "{rule_id}".*' \
                              fr'comm=\\"{data_audit_command}\\".*a3={a3}.*' \
-                             r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                             fr'"timestamp": "({timestamp_regex})".*'
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                   error_message='The alert has not occurred').result()
+                                   timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 
     query = e2e.make_query([
@@ -134,7 +137,7 @@ def test_audit(configure_environment, metadata, get_dashboard_credentials, gener
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

@@ -1,13 +1,13 @@
-- name: Test case configuration
-  hosts: wazuh-windows
+- name: Configure Windows agent environment
+  hosts: windows-agent
   tasks:
 
-    - name: Create directory to monitor (Windows)
+    - name: Create directory to monitor
       win_file:
         path: C:\Test\test_demo_fim
         state: directory
 
-    - name: Add directory to syscheck configuration (Windows)
+    - name: Add directory to syscheck configuration
       win_lineinfile:
         path: C:\Program Files (x86)\ossec-agent\ossec.conf
         insertafter: </directories>
@@ -19,7 +19,7 @@
         path: C:\Program Files (x86)\ossec-agent\ossec.log
         state: absent
 
-    - name: Restart Wazuh (Windows)
+    - name: Restart Wazuh
       win_shell: |
         net stop wazuh
         net start wazuh

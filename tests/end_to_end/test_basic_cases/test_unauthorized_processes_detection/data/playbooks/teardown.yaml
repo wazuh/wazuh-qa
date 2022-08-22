@@ -1,6 +1,6 @@
 ---
-- name: Cleanup agent environment
-  hosts: wazuh-agent
+- name: Cleanup Linux agent environment
+  hosts: agents:$linux
   become: True
   tasks:
 
@@ -16,7 +16,7 @@
         name: wazuh-agent
 
 - name: Cleanup manager environment
-  hosts: wazuh-manager
+  hosts: managers
   become: True
   tasks:
 

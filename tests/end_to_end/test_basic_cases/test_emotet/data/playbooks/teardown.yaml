@@ -1,5 +1,5 @@
-- name: Cleanup environment
-  hosts: wazuh-windows
+- name: Cleanup Windows agent environment
+  hosts: windows-agent
   tasks:
 
     - name: Restore ossec.conf without changes
@@ -25,7 +25,7 @@
         path: C:\temp
         state: absent
 
-    - name: Restart wazuh-agent (Windows)
+    - name: Restart wazuh-agent
       win_shell: |
         net stop wazuh
         net start wazuh
