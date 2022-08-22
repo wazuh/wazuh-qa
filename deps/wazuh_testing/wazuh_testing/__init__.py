@@ -32,6 +32,7 @@ WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security
 API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
+WAZUH_QA_REṔO_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'

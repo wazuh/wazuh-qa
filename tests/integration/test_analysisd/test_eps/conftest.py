@@ -60,9 +60,8 @@ def simulate_agent(request):
     hostname = socket.gethostname()
     ip_addr = socket.gethostbyname(hostname)
 
-    simulator_agent_script = os.path.abspath(SIMULATE_AGENT)
     python_executable = sys.executable
-    subprocess.call(f"{python_executable} {simulator_agent_script} -a {ip_addr} -n {request.param['num_agent']} \
+    subprocess.call(f"{python_executable} {SIMULATE_AGENT} -a {ip_addr} -n {request.param['num_agent']} \
                     -m {request.param['modules']} -s {request.param['eps']} -t {request.param['time']} \
                     -f {request.param['msg_size']} -e {request.param['total_msg']} \
                     -k {request.param['disable_keepalive_msg']} -d {request.param['disable_receive_msg']} \
