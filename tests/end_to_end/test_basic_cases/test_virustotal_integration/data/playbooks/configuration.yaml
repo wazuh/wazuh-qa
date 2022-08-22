@@ -85,7 +85,7 @@
     - name: Add active response script
       become: true
       shell: |
-        curl {{ s3_url }}/virustotal_integration/remove-threat.sh -o /var/ossec/active-response/bin/remote-threat.sh
+        curl {{ s3_url }}/virustotal_integration/remove-threat.sh -o /var/ossec/active-response/bin/remove-threat.sh
 
     - name: Install jq
       become: true
