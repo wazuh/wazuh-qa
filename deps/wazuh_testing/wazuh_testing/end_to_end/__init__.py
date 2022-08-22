@@ -36,7 +36,7 @@ def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.
     return response
 
 
-def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+def delete_index_api(credentials, ip_address, index='wazuh-alerts-4.x-*'):
     """Delete indices from wazuh-indexer using its API.
 
       Make a request to the wazuh-indexer API to delete indices that match a given name.

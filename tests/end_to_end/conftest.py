@@ -14,7 +14,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 
 @pytest.fixture(scope='function')
-def clean_alerts_index(get_dashboard_credentials):
+def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
@@ -22,7 +22,7 @@ def clean_alerts_index(get_dashboard_credentials):
     """
     yield
     remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials)
+    e2e.delete_index_api(credentials=get_dashboard_credentials, ip_address=get_manager_ip)
 
 
 @pytest.fixture(scope='module')
