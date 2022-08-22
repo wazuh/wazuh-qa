@@ -1,0 +1,15 @@
+- name: Configure environment
+  hosts: ubuntu-agent
+  become: true
+  tasks:
+
+    - name: Remove Wazuh logs configuration
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} READ SURICATA LOGS CONFIG -->
+        state: absent
+
+    - name: Restart Wazuh to apply the change
+      systemd:
+        state: restarted
+        name: wazuh-agent
