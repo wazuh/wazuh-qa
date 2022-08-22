@@ -22,12 +22,18 @@
 
     - name: Install netcat (CentOS)
       become: true
-      shell: yum install -y nmap-ncat
+      package:
+        name: nmap-ncat
+        state: present
       when: ansible_facts['distribution'] == "CentOS"
 
     - name: Install netcat (Ubuntu)
       become: true
-      shell: apt install ncat nmap -y
+      package:
+        name:
+          - ncat
+          - nmap
+        state: present
       when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Configure manager environment
