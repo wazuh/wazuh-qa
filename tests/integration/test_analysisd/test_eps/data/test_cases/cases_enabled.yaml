@@ -6,3 +6,21 @@
   metadata:
     maximum: 10
     timeframe: 5
+
+- name: EPS Limits enabled
+  description: EPS Limits enabled
+  configuration_parameters:
+    MAXIMUM: '500'
+    TIMEFRAME: '30'
+  metadata:
+    maximum: 500
+    timeframe: 30
+
+- name: EPS Limits enabled
+  description: EPS Limits enabled
+  configuration_parameters:
+    MAXIMUM: '1500'
+    TIMEFRAME: '120'
+  metadata:
+    maximum: 1500
+    timeframe: 120
