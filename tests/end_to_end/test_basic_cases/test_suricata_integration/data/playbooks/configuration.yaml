@@ -1,5 +1,5 @@
 - name: Prepare environment
-  hosts: wazuh-manager
+  hosts: ubuntu-agent
   become: true
   vars:
     suricata_conf_path: /etc/suricata/suricata.yaml
@@ -20,7 +20,7 @@
     - name: Restart Wazuh to apply the change
       systemd:
         state: restarted
-        name: wazuh-manager
+        name: wazuh-agent
 
     - name: Check if Suricata is installed
       shell: dpkg -l suricata | grep suricata

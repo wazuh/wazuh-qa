@@ -18,6 +18,7 @@ components:
 
 targets:
     - manager
+    - agent
 
 daemons:
     - wazuh-logcollector
@@ -27,6 +28,7 @@ os_platform:
     - linux
 
 os_version:
+    - CentOS 8
     - Ubuntu Focal
 
 references:
