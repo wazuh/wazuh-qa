@@ -131,7 +131,7 @@
             ]
         }
     },
-    "test_netcat": {
+    "test_unauthorized_processes_detection": {
         "manager": {
             "instances": 1,
             "distros": [
@@ -199,12 +199,14 @@
         "manager": {
             "instances": 1,
             "distros": [
-                "Ubuntu"
+                "CentOS"
             ]
         },
         "agent": {
-            "instances": 0,
-            "distros": []
+            "instances": 1,
+            "distros": [
+                "Ubuntu"
+            ]
         }
     },
     "test_virustotal_integration": {
