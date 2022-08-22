@@ -22,7 +22,7 @@
 
     - name: Add the attacker IP to the list
       become: true
-      shell: echo "{{ hostvars['wazuh-windows']['ansible_host'] }}" >> /var/ossec/etc/lists/alienvault_reputation.ipset
+      shell: echo "{{ hostvars['windows-agent']['ansible_host'] }}" >> /var/ossec/etc/lists/alienvault_reputation.ipset
 
     - name: Convert .ipset to .cdb using script
       become: true
@@ -105,4 +105,4 @@
       win_lineinfile:
         path: C:\Windows\System32\drivers\etc\hosts
         line: |
-          {{ hostvars['wazuh-manager']['ansible_host'] }} wazuh-manager
+          {{ hostvars['centos-manager']['ansible_host'] }} wazuh-manager
