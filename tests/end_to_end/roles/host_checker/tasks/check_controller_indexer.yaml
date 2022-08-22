@@ -19,4 +19,4 @@
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}Ansible Controller node cannot connect correctly with Wazuh Indexer.\n"
-  when: (test_result is failed and test_result.stdout is defined and 'refused' in test_result.stderr)
+  when: (test_result is failed and test_result.stderr is defined and 'refused' in test_result.stderr)
