@@ -20,7 +20,6 @@
   hosts: wazuh-manager
   become: true
   vars:
-    alerts_path: /var/ossec/logs/alerts/alerts.json
   tasks:
 
     - name: Wait for alerts to be generated
