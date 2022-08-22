@@ -61,7 +61,7 @@ Release report: TBD
 
 ### Removed
 
--  FIM IT: Remove all skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
+-  Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 
 ## [4.3.7] - Development (unreleased)
 
