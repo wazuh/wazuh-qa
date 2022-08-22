@@ -62,6 +62,7 @@ Release report: TBD
 ### Removed
 
 -  Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
+- VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
 
 ## [4.3.7] - Development (unreleased)
 
