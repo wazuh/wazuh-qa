@@ -42,20 +42,9 @@ def validate_environments(request):
 
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     test_suites_paths = []
-    manager_instances = []
-    agent_instances = []
     target_hosts = []
     target_distros = []
     distros_by = {'manager': [], 'agent': []}
-
-    def set_target_and_distros(suite):
-        for key in environment_metadata[test_suite_name]:
-            if environment_metadata[test_suite_name][key]['instances'] > 0:
-                # Save manager/agent distros
-                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
-                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
-                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
 
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
@@ -69,15 +58,17 @@ def validate_environments(request):
         test_suites_paths.append(path)
         # Get the test suite name
         test_suite_name = path.split('/')[-1:][0]
-        # Save the test environment metadata
-        manager_instances.append(environment_metadata[test_suite_name]['manager']['instances'])
-        agent_instances.append(environment_metadata[test_suite_name]['agent']['instances'])
-        set_target_and_distros(test_suite_name)
-
+        # Set target hosts and distros
+        for key in environment_metadata[test_suite_name]:
+            if environment_metadata[test_suite_name][key]['instances'] > 0:
+                # Save manager/agent distros
+                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
+                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
     # Remove duplicates
     target_distros = list(dict.fromkeys(target_distros))
     target_hosts = list(dict.fromkeys(target_hosts))
-
     # -------------------------------------------------- End of Step 1 -------------------------------------------------
 
     # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
@@ -119,17 +110,12 @@ def validate_environments(request):
     for path in test_suites_paths:
         validation_playbook = os.path.join(path, 'data', 'playbooks', 'validation.yaml')
 
-        test_suite_name = path.split('/')[-1:][0]
-        target_hosts = []
-        distros_by = {"manager": [], "agent": []}
-        set_target_and_distros(test_suite_name)
-
         # Run test-specific validation playbook (if any)
         if os.path.exists(validation_playbook):
             parameters = {
                 'playbook': validation_playbook, 'inventory': inventory_path,
                 'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
-                'extravars': {'target_hosts': ','.join(target_hosts)}
+                'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
             }
             validation_runner = ansible_runner.run(**parameters)
 
