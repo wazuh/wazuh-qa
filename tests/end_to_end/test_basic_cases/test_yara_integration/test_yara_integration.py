@@ -76,7 +76,7 @@ def test_yara_integration(configure_environment, metadata, get_dashboard_credent
 
     test_phases:
         - Set a custom Wazuh configuration.
-        - Download to generate the event.
+        - Download malware to generate the event.
         - Check in the alerts.json log that the expected alert has been triggered and get its timestamp.
         - Check that the obtained alert from alerts.json has been indexed.
 
