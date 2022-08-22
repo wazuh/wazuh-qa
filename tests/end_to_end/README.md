@@ -1,6 +1,17 @@
-# wazuh-qa
+# E2E tests
 
-Wazuh - Quality assurance automation templates
+End-to-end testing is a technique that tests the entire software product from beginning to end to ensure the application flow behaves as expected.
+
+The main purpose of End-to-end (E2E) testing is to test from the end user’s experience by simulating the real user scenario and validating the system under test and its components for integration and data integrity.
+
+The Wazuh architecture is based on agents, running on the monitored endpoints, that forward security data to a central server. The central server decodes and analyzes the incoming information and passes the results along to the Wazuh indexer for indexing and storage. The Wazuh indexer cluster is a collection of one or more nodes that communicate with each other to perform read and write operations on indices.
+
+The diagram below represents the Wazuh components and data flow.
+
+![wazuh-data-flow](https://documentation.wazuh.com/current/_images/data-flow1.png)
+
+
+Our E2E tests will verify that, after generating an event, an alert will be triggered and correctly indexed.
 
 ## Setting up a test environment
 
