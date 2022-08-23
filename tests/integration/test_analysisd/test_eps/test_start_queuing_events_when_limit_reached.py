@@ -6,7 +6,8 @@ import pytest
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
-from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
+from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE, UPPER_QUEUE_HALF_SIZE_LIMIT, \
+                                      LOWER_QUEUE_HALF_SIZE_LIMIT
 
 
 pytestmark = [pytest.mark.server]
@@ -31,9 +32,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 params_start_queuing_events_when_limit_reached = get_simulate_agent_configuration(configurations_simulate_agent_path)
 maximum_eps = [metadata['maximum'] for metadata in t1_configuration_metadata]
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-# It is sent `width_frame` time frame width to reduce test time execution
-width_frame = 3
-total_msg = maximum_eps[0] * timeframe_eps_t1[0] * width_frame
+total_msg = maximum_eps[0] * timeframe_eps_t1[0] + int(QUEUE_SIZE / 2)
 params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
 
 
@@ -47,8 +46,8 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, load_w
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be lower or equal than `maximum` * `timeframe` and, the `events_received` value must be greater than
-                 `events_processed` and, the `events_dropped` value equal to 0 and finaly, `event_queue_usage` is lower
-                 than 1.0.
+                 `events_processed` and, the `events_dropped` value equal to 0 and finaly, `event_queue_usage` is
+                 around 0,5 due to it is sent the maximum amount of message in a frame plus 50% of the queue total.
 
     test_phases:
         - Set a custom Wazuh configuration.
@@ -108,7 +107,10 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, load_w
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'
 
-    # Check that there are not events dropped and the queue usage is less than 1.0 (100%).
+    # Check that there are not events dropped and the queue usage is less than 1.0 (100%)
     # This means the queue is not full
-    assert events_dropped == 0 and event_queue_usage < 1.0 and event_queue_usage > 0.0, 'events_dropped must be 0 ' \
-        'and event_queue_usage less than 1.0'
+    assert events_dropped == 0, 'events_dropped must be 0'
+
+    # Check that event_queue_usage is around 50 %
+    assert  event_queue_usage < UPPER_QUEUE_HALF_SIZE_LIMIT and event_queue_usage > LOWER_QUEUE_HALF_SIZE_LIMIT, \
+        f"event_queue_usage have to be around 50 % (0.5), event_queue_usage = {event_queue_usage}"

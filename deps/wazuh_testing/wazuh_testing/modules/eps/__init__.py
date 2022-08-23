@@ -11,6 +11,9 @@ PERCENTAGE_PROCESS_MSGS = 0.95
 QUEUE_SIZE = 16384
 # Set logcollector message that the agent sents
 LOGCOLLECTOR_MESSAGE = 'Invalid user random_user from 172.17.1.1 port 56550:Message number:'
+TIMEFRAME_DEFAULT_VALUE = 10
+UPPER_QUEUE_HALF_SIZE_LIMIT = 0.51
+LOWER_QUEUE_HALF_SIZE_LIMIT = 0.49
 
 
 def find_in_file(string_to_search, filename):
