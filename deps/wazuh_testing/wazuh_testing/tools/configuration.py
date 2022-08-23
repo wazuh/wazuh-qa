@@ -13,7 +13,8 @@ from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, \
+                                LOCAL_RULES_PATH
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import file
 
@@ -760,3 +761,26 @@ def get_simulate_agent_configuration(data_file_path):
         configuration_parameters.update(test_case['configuration_parameters'])
 
     return configuration_parameters
+
+
+def get_wazuh_local_rules() -> List[str]:
+    """
+    Get current `local_rules.xml` file content.
+
+    Returns
+        List of str: A list containing all the lines of the `local_rules.xml` file.
+    """
+    with open(LOCAL_RULES_PATH) as f:
+        lines = f.readlines()
+    return lines
+
+
+def write_wazuh_local_rules(local_rules: List[str]):
+    """
+    Write new rules in 'local_rules.xml' file.
+
+    Args:
+        local_rules (list or str): Lines to be written in the local_rules.xml file.
+    """
+    with open(LOCAL_RULES_PATH, 'w') as f:
+        f.writelines(local_rules)

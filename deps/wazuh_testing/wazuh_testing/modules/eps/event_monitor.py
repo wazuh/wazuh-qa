@@ -3,8 +3,7 @@ from datetime import datetime
 
 from wazuh_testing.modules import eps as eps
 from wazuh_testing.tools import LOG_FILE_PATH, ANALYSISD_STATE, ALERT_LOGS_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.eps import find_in_file
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
 def make_analysisd_callback(pattern, prefix=eps.ANALYSISD_PREFIX):
@@ -111,3 +110,22 @@ def get_msg_with_number(message):
     check_analysisd_event(timeout=eps.T_20, callback=message,
                           error_message=fr"Could not find the event: {message}",  prefix="",
                           file_to_monitor=ALERT_LOGS_PATH)
+
+
+def get_msg_with_number(file_monitor, message, accum_results):
+    """Check if the alerts.log file contains the message
+
+    Args:
+        file_monitor (FileMonitor): Wazuh log monitor
+        message (str): Message to find
+        accum_results (int): Total message to accumulate
+
+    Returns:
+        list: List of messages number
+    """
+    error_message = f"Could not find this event in {message}"
+
+    result = file_monitor.start(timeout=eps.T_20, update_position=True, accum_results=accum_results,
+                                callback=generate_monitoring_callback(message), error_message=error_message).result()
+
+    return result

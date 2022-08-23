@@ -6,7 +6,9 @@ import pytest
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.eps import LOGCOLLECTOR_MESSAGE
+from wazuh_testing.tools import ALERT_FILE_PATH
 
 
 pytestmark = [pytest.mark.server]
@@ -148,7 +150,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
                                          restart_wazuh_daemon_function, simulate_agent):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
-                 average frees up some space. To do this, read the alerts.log file and find the numerated alerts
+                 average frees up some space. To do this, read the alerts.json file and find the numerated alerts
                  messages with the FileMonitor tool. To do so, it iterates the `n` frames of `maximum` * `timeframe` and
                  checks if the message number belongs to the respective frame.
 
@@ -176,15 +178,15 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
+        - load_local_rules:
+            type: fixture
+            brief: Set the local_rules.xml to override rules.
         - configure_wazuh_one_thread:
             type: fixture
             brief: Set the wazuh internal option configuration according to the configuration data.
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
-        - delete_alerts_folder:
-            type: fixture
-            brief: Delete all the content od the /var/log/alerts folder.
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
@@ -198,17 +200,20 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     input_description:
         - The `cases_process_old_events_multi_thread.yaml` file provides the module configuration for this test.
     '''
+    file_monitor = FileMonitor(ALERT_FILE_PATH)
     # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
     sleep(metadata['timeframe'] / 2)
     analysisd_state = evm.get_analysisd_state()
     events_received = int(analysisd_state['events_received'])
     index = 0
     frame = metadata['timeframe'] * metadata['maximum']
-    # Iterate over each frame to find the respective numerated message belongs to the frame
+    total_msg_number_list = evm.get_msg_with_number(file_monitor, fr".*{LOGCOLLECTOR_MESSAGE} (\d+).*", total_msg)
     while (index + 1) * frame <= events_received:
         start_index = index * frame
         end_index = (index + 1) * frame
-        # Iterate over the frame to find the respective numerated message
-        for msg_number in range(start_index, end_index):
-            evm.get_msg_with_number(fr".*{LOGCOLLECTOR_MESSAGE} {msg_number}")
+        number_list = total_msg_number_list[start_index: end_index]
+
+        assert all(int(number) >= start_index and int(number) < end_index for number in number_list), \
+            'Some messages are not in the correct frame'
+
         index += 1
