@@ -11,7 +11,7 @@
   tasks:
 
     - name: Attempt a RDP brute force attack
-      shell: hydra -l {{ item }} -p invalid_password rdp://wazuh-windows
+      shell: hydra -l {{ item }} -p invalid_password rdp://{{ hostvars['windows-agent']['ansible_host'] }}
       loop:
         - test_user
         - test_user
