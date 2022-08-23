@@ -26,7 +26,8 @@
 
 - name: Restart wazuh on Windows
   win_shell: |
-    "Get-Service -Name WazuhSvc -ErrorAction SilentlyContinue | Restart-Service -ErrorAction SilentlyContinue"
+    net stop Wazuh
+    net start Wazuh
   args:
     executable: powershell.exe
   when: os == 'windows'
