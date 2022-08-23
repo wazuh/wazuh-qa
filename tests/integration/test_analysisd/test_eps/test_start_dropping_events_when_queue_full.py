@@ -106,14 +106,14 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, load_waz
     # Check that events continue receiving although the EPS limit was reached
     assert events_received > events_processed, 'events_received must be bigger than events_processed'
 
-    # Check that there is no event dropped and the queue usage is less than 1.0 (100%). This means the queue is not full
+    # Check that there is event dropped. This means the queue is full
     assert events_dropped >= int(expected_msg_dropped * PERCENTAGE_PROCESS_MSGS) \
         and events_dropped <= int(expected_msg_dropped * (1 + (1 - PERCENTAGE_PROCESS_MSGS))), 'events_dropped must '\
         'be in the range of (total_msg - QUEUE_SIZE)'
 
-    # Check that there is no event dropped and the queue usage is less than 1.0 (100%). This means the queue is not full
+    # Check that the queue usage is 1.0 (100%). This means the queue is full
     assert event_queue_usage == 1.0, 'event_queue_usage must be 1.0'
 
-    # Check that events_dropped are in the range of events_received - events_processed
+    # Check that events_processed are in the range of events_received - events_dropped
     assert events_processed <= events_received - events_dropped, 'events_processed must be lower than' \
         'events_received - events_dropped'
