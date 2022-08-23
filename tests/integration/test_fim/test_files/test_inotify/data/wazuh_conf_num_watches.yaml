@@ -5,7 +5,6 @@
   - ossec_conf
   apply_to_modules:
   - test_num_watches
-  - test_remove_rename_folder
   sections:
   - section: syscheck
     elements:
