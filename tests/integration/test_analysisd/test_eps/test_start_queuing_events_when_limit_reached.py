@@ -112,5 +112,5 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, load_w
     assert events_dropped == 0, 'events_dropped must be 0'
 
     # Check that event_queue_usage is around 50 %
-    assert  event_queue_usage < UPPER_QUEUE_HALF_SIZE_LIMIT and event_queue_usage > LOWER_QUEUE_HALF_SIZE_LIMIT, \
+    assert event_queue_usage < UPPER_QUEUE_HALF_SIZE_LIMIT and event_queue_usage > LOWER_QUEUE_HALF_SIZE_LIMIT, \
         f"event_queue_usage have to be around 50 % (0.5), event_queue_usage = {event_queue_usage}"
