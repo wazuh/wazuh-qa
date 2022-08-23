@@ -22,7 +22,7 @@ def restart_analysisd_function():
     control_service('stop', daemon='wazuh-analysisd')
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def configure_local_internal_options_eps(request):
     """Fixture to configure the local internal options file."""
     # Define local internal options for EPS tests
@@ -129,3 +129,22 @@ def load_wazuh_basic_configuration():
     yield
 
     configuration.write_wazuh_conf(backup_ossec_configuration)
+
+
+@pytest.fixture(scope='module')
+def load_local_rules():
+    """Load local rules to override original rules"""
+    # Reference paths
+    DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+    CONFIGURATIONS_PATH = os.path.join(DATA_PATH, 'wazuh_rules')
+    configurations_path = os.path.join(CONFIGURATIONS_PATH, 'local_rules.xml')
+
+    backup_local_rules = configuration.get_wazuh_local_rules()
+
+    with open(configurations_path, 'r') as file:
+        lines = file.readlines()
+    configuration.write_wazuh_local_rules(lines)
+
+    yield
+
+    configuration.write_wazuh_local_rules(backup_local_rules)
