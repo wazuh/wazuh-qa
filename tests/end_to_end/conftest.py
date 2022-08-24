@@ -15,6 +15,25 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
+def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_hosts=[]):
+    environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
+    environment_metadata = json.load(open(environment_file))
+    distros_by = {'manager': [], 'agent': []}
+
+    for key in environment_metadata[test_suite_name]:
+            if environment_metadata[test_suite_name][key]['instances'] > 0:
+                # Save manager/agent distros
+                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
+                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+    # Remove duplicates
+    target_hosts = list(dict.fromkeys(target_hosts))
+    target_distros = list(dict.fromkeys(target_distros))
+
+    return target_hosts, target_distros
+
+
 @pytest.fixture(scope='session', autouse=True)
 def validate_environments(request):
     """Fixture with session scope to validate the environments before run the E2E tests.
@@ -23,7 +42,6 @@ def validate_environments(request):
         Step 1: Collect the data related to the selected tests that will be executed.
         Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
-        Step 4: Execute a test-specific playbook (if any). This will run one validation for each selected test set.
 
     Args:
         request (fixture):  Gives access to the requesting test context.
@@ -31,8 +49,6 @@ def validate_environments(request):
     collected_items = request.session.items
     roles_path = request.config.getoption('--roles-path')
     inventory_path = request.config.getoption('--inventory_path')
-    environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
-    environment_metadata = json.load(open(environment_file))
     playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_general_play.yaml')
     playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'general_validation.j2')
     general_playbook = os.path.join(suite_path, 'data', 'validation_playbooks', 'general_validation.yaml')
@@ -44,7 +60,6 @@ def validate_environments(request):
     test_suites_paths = []
     target_hosts = []
     target_distros = []
-    distros_by = {'manager': [], 'agent': []}
 
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
@@ -59,16 +74,7 @@ def validate_environments(request):
         # Get the test suite name
         test_suite_name = path.split('/')[-1:][0]
         # Set target hosts and distros
-        for key in environment_metadata[test_suite_name]:
-            if environment_metadata[test_suite_name][key]['instances'] > 0:
-                # Save manager/agent distros
-                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
-                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
-                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
-    # Remove duplicates
-    target_distros = list(dict.fromkeys(target_distros))
-    target_hosts = list(dict.fromkeys(target_hosts))
+        target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name, target_distros, target_hosts)
     # -------------------------------------------------- End of Step 1 -------------------------------------------------
 
     # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
@@ -106,24 +112,36 @@ def validate_environments(request):
                         f"requirements. Result:\n{errors}")
     # -------------------------------------------------- End of Step 3 -------------------------------------------------
 
-    # -------------------------------- Step 4: Execute test-specific validations (if any) ------------------------------
-    for path in test_suites_paths:
-        validation_playbook = os.path.join(path, 'data', 'playbooks', 'validation.yaml')
 
-        # Run test-specific validation playbook (if any)
-        if os.path.exists(validation_playbook):
-            parameters = {
-                'playbook': validation_playbook, 'inventory': inventory_path,
-                'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
-                'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
-            }
-            validation_runner = ansible_runner.run(**parameters)
+@pytest.fixture(scope='module', autouse=True)
+def run_specific_validations(request):
+    """Fixture with module scope to validate the environment of an specific tests with specific validation tasks.
 
-            # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
-            if validation_runner.status == 'failed':
-                raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the "
-                                'environments meet the expected requirements.')
-    # -------------------------------------------------- End of Step 4 -------------------------------------------------
+    Execute a test-specific playbook (if any). This will run one validation playbook for each test module.
+
+    Args:
+        request (fixture):  Gives access to the requesting test context.
+    """
+    roles_path = request.config.getoption('--roles-path')
+    inventory_path = request.config.getoption('--inventory_path')
+    test_suite_path = os.path.dirname(request.fspath)
+    test_suite_name = test_suite_path.split('/')[-1:][0]
+    target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name)
+    validation_playbook = os.path.join(test_suite_path, 'data', 'playbooks', 'validation.yaml')
+
+    # Run test-specific validation playbook (if any)
+    if os.path.exists(validation_playbook):
+        parameters = {
+            'playbook': validation_playbook, 'inventory': inventory_path,
+            'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
+            'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
+        }
+        validation_runner = ansible_runner.run(**parameters)
+
+        # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
+        if validation_runner.status == 'failed':
+            raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the "
+                            'environments meet the expected requirements.')
 
 
 @pytest.fixture(scope='function')
@@ -265,7 +283,7 @@ def pytest_addoption(parser):
         '--roles-path',
         action='store',
         metavar='ROLES_PATH',
-        default=os.path.join(suite_path, 'roles'),
+        default=os.path.join(suite_path, 'data', 'ansible_roles'),
         type=str,
         help='Ansible roles path.',
     )
