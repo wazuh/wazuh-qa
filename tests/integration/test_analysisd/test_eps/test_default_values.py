@@ -19,7 +19,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_timeframe.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_timeframe.yaml')
 
-# Test configurations without timeframe value (t2)
+# Test configurations without timeframe value (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
@@ -32,7 +32,7 @@ def test_without_timeframe(configuration, metadata, load_wazuh_basic_configurati
                            truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is started when `maximum` is set to a value greater than 0 lower and than 100000,
-                 and `timeframe` is not present.
+                 and `timeframe` is not present. In this case, 'timeframe' will be set with a default value.
 
     test_phases:
         - Set a custom Wazuh configuration.
@@ -65,12 +65,10 @@ def test_without_timeframe(configuration, metadata, load_wazuh_basic_configurati
             brief: Restart all the wazuh daemons.
 
     assertions:
-        - Verify that when the `maximum` value is set to a values greater than 0 and lower than 100000 and, `timeframe`
-          value is not set.
         - Verify that the wazuh-analysisd daemon is running.
 
     input_description:
-        - The `cases_enabled.yaml` file provides the module configuration for this test.
+        - The `cases_without_timeframe.yaml` file provides the module configuration for this test.
 
     expected_output:
         - r'(.*)wazuh-analysisd: INFO: EPS limit enabled, EPS: (.*), timeframe: (.*)'
