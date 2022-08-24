@@ -153,7 +153,7 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
     broken, or overly long a message will appear in the ossec.log file.
     wazuh_min_version: 4.3.7
- 
+
     test_phases:
         - Insert an alert alerts.json file.
         - Check that the expected response message is given for an invalid alert.

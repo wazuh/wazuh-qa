@@ -87,7 +87,7 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     description: Check that if while integratord is reading from the alerts.json file, it is deleted, the expected
     error message is displayed, and if the file is created again and alerts are inserted, integratord continues
     working and alerts are read.
-    wazuh_min_version: 4.3.5
+    wazuh_min_version: 4.3.7
 
     test_phases:
         - Remove alerts.json file.
@@ -140,11 +140,11 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=generate_monitoring_callback(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
                             error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
-    
-    # Create file new alerts.json file. 
+
+    # Create file new alerts.json file.
     run_local_command_returning_output(command)
-    
-    #Wait for Integratord to detect the file before the inserting the alert
+
+    # Wait for Integratord to detect the file before the inserting the alert
     time.sleep(2)
     run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 

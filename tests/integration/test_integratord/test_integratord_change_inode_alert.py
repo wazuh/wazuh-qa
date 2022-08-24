@@ -86,7 +86,8 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
                                        configure_local_internal_options_module, restart_wazuh_daemon_function,
                                        wait_for_start_module):
     '''
-    description: Check that when a given alert is inserted into alerts.json, integratord works as expected.
+    description: Check that if when reading the alerts.json file, the inode for the file changes, integratord will 
+                 reload the file and continue reading from it.
 
     test_phases:
         - Insert an alert alerts.json file.
@@ -96,7 +97,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
         - Insert an alert
         - Check virustotal response is added in ossec.log
 
-    wazuh_min_version: 4.3.5
+    wazuh_min_version: 4.3.7
 
     tier: 1
 
