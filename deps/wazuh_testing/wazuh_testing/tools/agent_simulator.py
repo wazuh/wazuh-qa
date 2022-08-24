@@ -69,6 +69,7 @@ class Agent:
         registration_address (str, optional): Manager registration IP address.
         retry_enrollment (bool, optional): retry then enrollment in case of error.
         logcollector_msg_number (bool, optional): insert in the logcollector message the message number.
+        custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
 
     Attributes:
         id (str): ID of the agent.
@@ -121,7 +122,7 @@ class Agent:
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
-                 logcollector_msg_number=None):
+                 logcollector_msg_number=None, custom_logcollector_message=''):
         self.id = id
         self.name = name
         self.key = key
@@ -186,6 +187,7 @@ class Agent:
         self.rcv_msg_queue = Queue(rcv_msg_limit)
         self.fixed_message_size = fixed_message_size * 1024 if fixed_message_size is not None else None
         self.logcollector_msg_number = logcollector_msg_number
+        self.custom_logcollector_message = custom_logcollector_message
         self.setup(disable_all_modules=disable_all_modules)
 
     def update_checksum(self, new_checksum):
@@ -663,7 +665,8 @@ class Agent:
     def init_logcollector(self):
         """Initialize logcollector module."""
         if self.logcollector is None:
-            self.logcollector = Logcollector(self.logcollector_msg_number)
+            self.logcollector = Logcollector(enable_msg_number=self.logcollector_msg_number, \
+                                             custom_logcollector_message=self.custom_logcollector_message)
 
     def init_sca(self):
         """Initialize init_sca module."""
@@ -1015,12 +1018,13 @@ class Rootcheck:
 
 class Logcollector:
     """This class allows the generation of logcollector events."""
-    def __init__(self, enable_msg_number=None):
+    def __init__(self, enable_msg_number=None, custom_logcollector_message=''):
         self.logcollector_tag = 'syslog'
         self.logcollector_mq = 'x'
         # Those variables were added only in logcollector module to perform EPS test that need numbered messages.
         self.message_counter = 0
         self.enable_msg_number = enable_msg_number
+        self.custom_logcollector_message = custom_logcollector_message
 
     def generate_event(self):
         """Generate logcollector event
@@ -1028,7 +1032,10 @@ class Logcollector:
         Returns:
             str: a Logcollector generated message
         """
-        log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+        if not self.custom_logcollector_message:
+            log = 'Mar 24 10:12:36 centos8 sshd[12249]: Invalid user random_user from 172.17.1.1 port 56550'
+        else:
+            log = self.custom_logcollector_message
 
         if self.enable_msg_number:
             message_counter_info = f"Message number: {self.message_counter}"

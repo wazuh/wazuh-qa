@@ -117,7 +117,8 @@ def create_agents(args):
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
                              version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
-                             logcollector_msg_number=args.enable_logcollector_message_number)
+                             logcollector_msg_number=args.enable_logcollector_message_number,
+                             custom_logcollector_message=args.custom_logcollector_message)
             set_agent_modules_and_eps(agent, item[0].split(' ') + ['keepalive', 'receive_messages'],
                                       item[1].split(' ') + ['0', '0'])
             agents.append(agent)
@@ -126,7 +127,8 @@ def create_agents(args):
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
                              version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
-                             logcollector_msg_number=args.enable_logcollector_message_number)
+                             logcollector_msg_number=args.enable_logcollector_message_number,
+                             custom_logcollector_message=args.custom_logcollector_message)
             set_agent_modules_and_eps(agent, args.modules, args.modules_eps)
             agents.append(agent)
 
@@ -348,6 +350,11 @@ def main():
                             metavar='<enable_logcollector_message_number>', type=bool,
                             help='Enable logcollector message number',
                             required=False, default=False, dest='enable_logcollector_message_number')
+
+    arg_parser.add_argument('-g', '--custom-logcollector-message',
+                            metavar='<custom_logcollector_message>', type=str,
+                            help='Custom logcollector message',
+                            required=False, default='', dest='custom_logcollector_message')
 
     args = arg_parser.parse_args()
 
