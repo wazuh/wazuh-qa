@@ -86,7 +86,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
                                        configure_local_internal_options_module, restart_wazuh_daemon_function,
                                        wait_for_start_module):
     '''
-    description: Check that if when reading the alerts.json file, the inode for the file changes, integratord will 
+    description: Check that if when reading the alerts.json file, the inode for the file changes, integratord will
                  reload the file and continue reading from it.
 
     test_phases:
