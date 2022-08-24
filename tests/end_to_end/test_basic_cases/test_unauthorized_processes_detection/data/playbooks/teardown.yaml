@@ -1,6 +1,6 @@
 ---
 - name: Cleanup Linux agent environment
-  hosts: agents:$linux
+  hosts: agents:&linux
   become: True
   tasks:
 

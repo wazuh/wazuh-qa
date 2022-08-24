@@ -107,7 +107,7 @@ def test_unauthorized_processes_detection(configure_environment, metadata, get_d
     rule_id = metadata['rule.id']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex}+)","rule"\:{{"level"\:{rule_level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
