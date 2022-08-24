@@ -21,12 +21,12 @@ def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_host
     distros_by = {'manager': [], 'agent': []}
 
     for key in environment_metadata[test_suite_name]:
-            if environment_metadata[test_suite_name][key]['instances'] > 0:
-                # Save manager/agent distros
-                distros_by[key] = environment_metadata[test_suite_name][key]['distros']
-                target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
-                # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-                target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+        if environment_metadata[test_suite_name][key]['instances'] > 0:
+            # Save manager/agent distros
+            distros_by[key] = environment_metadata[test_suite_name][key]['distros']
+            target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+            # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+            target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
     # Remove duplicates
     target_hosts = list(dict.fromkeys(target_hosts))
     target_distros = list(dict.fromkeys(target_distros))
