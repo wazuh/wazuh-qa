@@ -45,7 +45,7 @@ class HostManager:
         host (str): Hostname
         src_path (str): Source path
         dest_path (str): Destination path
-        check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+        check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
                                     check=check)
@@ -59,7 +59,8 @@ class HostManager:
             replace (str): Text to be inserted in the file
             before (str): Lower stop of the block to be replaced
             after (str): Upper stop of the block to be replaced
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`.
         """
         replace = f'{after}{replace}{before}'
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
@@ -86,7 +87,8 @@ class HostManager:
             host (str): Hostname
             service (str): Service to be controlled
             state (str): Final state in which service must end
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`.
         """
         if service == 'wazuh':
             service = 'wazuh-agent' if 'agent' in host else 'wazuh-manager'
@@ -98,7 +100,8 @@ class HostManager:
         Args:
             host (str): Hostname
             file_path (str): File path to be truncated
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
 
@@ -108,7 +111,8 @@ class HostManager:
         Args:
             host (str): Hostname
             file_path (str): File path to be truncated
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
         """
         self.get_host(host).ansible('shell', f"truncate -s 0 {file_path}", check=check)
 
@@ -158,10 +162,11 @@ class HostManager:
         """Apply the API configuration described in the yaml file or in the dictionary.
 
         Args:
-            api_config (str,dict): Configuration to be applied. If it is a string, it will try to load the YAML in that path. If it is a dictionary, it will apply that configuration to every host in `host_list`.
+            api_config (str,dict): Configuration to be applied. If it is a string, it will try to load the YAML in that
+                path. If it is a dictionary, it will apply that configuration to every host in `host_list`.
             host_list (list, optional): List of hosts to apply the configuration in. Default `None`
-            dest_path (str, optional): Path where the API configuration is. Default `/var/ossec/api/configuration/api.yaml`
-            clear_log (bool, optional): Boolean to decide if it must truncate the 'api.log' after restarting the API or not.
+            dest_path (str, optional): Path where the API configuration is.
+            clear_log (bool, optional): Boolean to decide if it must truncate the 'api.log' after restarting the API.
         """
         if isinstance(api_config, str):
             with open(api_config, 'r') as config_yml:
@@ -187,7 +192,7 @@ class HostManager:
             password (str, optional): API password. Default `wazuh`
             auth_context (dict, optional): Authorization context body. Default `None`
             port (int, optional): API port. Default `55000`
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            check (bool, optional): Ansible check mode("Dry Run"),
                 by default it is enabled so no changes will be applied. Default `False`
 
         Returns:
@@ -220,7 +225,8 @@ class HostManager:
             endpoint (str, optional): Request endpoint. It must start with '/'.. Default `/`
             request_body ( dict, optional) : Request body. Default `None`
             token (str, optional):  Request token. Default `None`
-            check ( bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check ( bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             API response (dict) : Return the response in JSON format.
@@ -242,7 +248,8 @@ class HostManager:
         Args:
             host (str) : Hostname
             cmd (str): Command to execute
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             stdout (str): The output of the command execution.
@@ -257,7 +264,8 @@ class HostManager:
         Args:
             host (str) : Hostname
             cmd (str): Shell command to execute
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             stdout (str): The output of the command execution.
