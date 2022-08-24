@@ -13,7 +13,7 @@
   register: version
   when: os == 'Windows'
 
-- name: Check default Python version (Linux)
+- name: Check default Python version (Windows)
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}Python version is less than 3. Current version: {{ version.stdout }}\n"
