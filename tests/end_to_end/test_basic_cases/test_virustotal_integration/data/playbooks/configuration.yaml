@@ -1,5 +1,5 @@
-- name: Test manager configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 
@@ -75,8 +75,8 @@
       vars:
         os: linux
 
-- name: Test agent configuration
-  hosts: wazuh-agent
+- name: Configure CentOS agent environment
+  hosts: centos-agent
   become: true
   tasks:
 
@@ -93,11 +93,10 @@
 
     - name: Add active response script
       become: true
-      copy:
-        src: "{{ active_response_script }}"
-        dest: /var/ossec/active-response/bin
+      shell: |
+        curl {{ s3_url }}/virustotal_integration/remove-threat.sh -o /var/ossec/active-response/bin/remove-threat.sh
 
-    - name: Install jq (CentOS)
+    - name: Install jq
       become: true
       shell: yum install -y jq
       when: ansible_facts['distribution'] == "CentOS"

@@ -8,7 +8,7 @@ from wazuh_testing.tools.utils import retry
 
 
 @retry(Exception, attempts=3, delay=5)
-def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.x-*'):
     """Get an alert from the wazuh-indexer API
 
       Make a request to the wazuh-indexer API to get the last indexed alert that matches the values passed in
@@ -36,7 +36,7 @@ def get_alert_indexer_api(query, credentials, ip_address='wazuh-manager', index=
     return response
 
 
-def delete_index_api(credentials, ip_address='wazuh-manager', index='wazuh-alerts-4.x-*'):
+def delete_index_api(credentials, ip_address, index='wazuh-alerts-4.x-*'):
     """Delete indices from wazuh-indexer using its API.
 
       Make a request to the wazuh-indexer API to delete indices that match a given name.

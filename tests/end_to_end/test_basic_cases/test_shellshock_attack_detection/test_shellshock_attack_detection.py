@@ -61,8 +61,8 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_shellshock_attack_detection(configure_environment, metadata, get_dashboard_credentials, generate_events,
-                                     clean_alerts_index):
+def test_shellshock_attack_detection(configure_environment, metadata, get_dashboard_credentials, get_manager_ip,
+                                     generate_events, clean_alerts_index):
     '''
     description: Check that an alert is generated when a shellshock attack is performed.
 
@@ -104,13 +104,13 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_id = metadata['rule.id']
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr".+timestamp\":\"(.+)\",.+level\":{rule_level},\"description\":\"{rule_description}\"," \
-                          fr"\"id\":\"{rule_id}\""
+    expected_alert_json = fr".+timestamp\":\"({timestamp_regex})\",.+level\":{rule_level},\"description\":" \
+                          fr"\"{rule_description}\",\"id\":\"{rule_id}\""
 
     expected_indexed_alert = fr".+level\": {rule_level}.+\"description\": \"{rule_description}\"" \
-                             fr".+\"id\": \"{rule_id}\".+timestamp\": \"(.+)\"" \
-                             r'},.+'
+                             fr".+\"id\": \"{rule_id}\".+timestamp\": \"({timestamp_regex})\".+"
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
@@ -136,7 +136,7 @@ def test_shellshock_attack_detection(configure_environment, metadata, get_dashbo
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

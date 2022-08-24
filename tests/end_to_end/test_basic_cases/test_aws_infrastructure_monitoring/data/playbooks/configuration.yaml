@@ -1,5 +1,5 @@
-- name: Configure environment
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 

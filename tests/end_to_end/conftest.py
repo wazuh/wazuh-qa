@@ -15,7 +15,7 @@ suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
 @pytest.fixture(scope='function')
-def clean_alerts_index(get_dashboard_credentials):
+def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
@@ -23,7 +23,7 @@ def clean_alerts_index(get_dashboard_credentials):
     """
     yield
     remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials)
+    e2e.delete_index_api(credentials=get_dashboard_credentials, ip_address=get_manager_ip)
 
 
 @pytest.fixture(scope='module')
@@ -33,16 +33,19 @@ def get_dashboard_credentials(request):
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    inventory_playbook = [request.config.getoption('--inventory_path')]
+    inventory_playbook = request.config.getoption('--inventory_path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
 
-    inventory = ansible_runner.get_inventory(action='host', inventories=inventory_playbook, response_format='json',
-                                             host='wazuh-manager')
+    inventories = [inventory_playbook]
 
-    # Inventory is a tuple, with the second value empty, so we must access inventory[0]
-    dashboard_credentials = {'user': inventory[0]['dashboard_user'], 'password': inventory[0]['dashboard_password']}
+    inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
+                                                  host='managers')
+
+    # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
+    dashboard_credentials = {'user': inventory_data[0]['dashboard_user'],
+                             'password': inventory_data[0]['dashboard_password']}
 
     yield dashboard_credentials
 
@@ -124,6 +127,29 @@ def generate_events(request, metadata):
             parameters.update({'extravars': metadata['extra_vars']})
 
         ansible_runner.run(**parameters)
+
+
+@pytest.fixture(scope='module')
+def get_manager_ip(request):
+    """Get manager IP.
+
+       Returns:
+            str: Manager IP.
+    """
+    inventory_playbook = request.config.getoption('--inventory_path')
+
+    if not inventory_playbook:
+        raise ValueError('Inventory not specified')
+
+    inventories = [inventory_playbook]
+
+    inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
+                                                  host='managers')
+
+    # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
+    manager_ip = inventory_data[0]['ansible_host']
+
+    yield manager_ip
 
 
 def pytest_addoption(parser):

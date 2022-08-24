@@ -1,5 +1,5 @@
-- name: Truncate file
-  hosts: wazuh-manager
+- name: Clean alerts file
+  hosts: managers
   tasks:
 
     - name: Truncate alert.json
@@ -18,8 +18,8 @@
       wait_for:
         timeout: 5
 
-- name: Get logs
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   tasks:
 
     - name: Get alert json

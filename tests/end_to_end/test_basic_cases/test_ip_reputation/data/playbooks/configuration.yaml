@@ -1,5 +1,5 @@
-- name: Test manager configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 
@@ -22,7 +22,7 @@
 
     - name: Add the attacker IP to the list
       become: true
-      shell: echo "{{ hostvars['wazuh-windows']['ip_address'] }}" >> /var/ossec/etc/lists/alienvault_reputation.ipset
+      shell: echo "{{ hostvars['windows-agent']['ansible_host'] }}" >> /var/ossec/etc/lists/alienvault_reputation.ipset
 
     - name: Convert .ipset to .cdb using script
       become: true
@@ -100,12 +100,12 @@
       vars:
         os: linux
 
-- name: Windows agent configuration
-  hosts: wazuh-windows
+- name: Configure Windows agent environment
+  hosts: windows-agent
   tasks:
 
     - name: Add hostname to hosts file
       win_lineinfile:
         path: C:\Windows\System32\drivers\etc\hosts
         line: |
-          {{ hostvars['wazuh-manager']['ip_address'] }} wazuh-manager
+          {{ hostvars['centos-manager']['ansible_host'] }} wazuh-manager

@@ -1,13 +1,13 @@
-- name: Test case configuration
-  hosts: wazuh-windows
+- name: Configure Windows agent environment
+  hosts: windows-agent
   tasks:
 
-    - name: Create directory to monitor (Windows)
+    - name: Create directory to monitor
       win_file:
         path: C:\Test\test_demo_fim
         state: directory
 
-    - name: Add directory to syscheck configuration (Windows)
+    - name: Add directory to syscheck configuration
       include_role:
         name: manage_wazuh_configurations
         tasks_from: write_wazuh_config.yaml

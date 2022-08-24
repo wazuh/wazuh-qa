@@ -1,5 +1,5 @@
-- name: Generate events in the manager
-  hosts: wazuh-manager
+- name: Generate events
+  hosts: managers
   become: true
   tasks:
 

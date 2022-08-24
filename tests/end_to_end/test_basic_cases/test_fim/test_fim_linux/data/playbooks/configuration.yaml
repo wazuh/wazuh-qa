@@ -1,14 +1,14 @@
-- name: Test case configuration
-  hosts: wazuh-agent
+- name: Configure Linux agent environment
+  hosts: agents:&linux
   tasks:
 
-    - name: Create directory to monitor (Linux)
+    - name: Create directory to monitor
       become: true
       file:
         path: /tmp/test_demo_fim
         state: directory
 
-    - name: Add directory to syscheck configuration (Linux)
+    - name: Add directory to syscheck configuration
       include_role:
         name: manage_wazuh_configurations
         tasks_from: write_wazuh_config.yaml
@@ -19,7 +19,7 @@
           </syscheck>
         os: linux
 
-    - name: Restart wazuh-agent
+    - name: Restart Wazuh
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml

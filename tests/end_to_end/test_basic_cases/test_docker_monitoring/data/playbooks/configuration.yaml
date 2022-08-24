@@ -1,5 +1,5 @@
-- name: Test case configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 

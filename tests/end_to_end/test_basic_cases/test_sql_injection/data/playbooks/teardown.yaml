@@ -1,5 +1,5 @@
-- name: Cleanup agent environment
-  hosts: wazuh-agent
+- name: Cleanup CentOS agent environment
+  hosts: centos-agent
   become: true
   tasks:
 

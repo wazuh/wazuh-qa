@@ -1,8 +1,8 @@
-- name: Test agent configuration
-  hosts: wazuh-agent
+- name: Configure CentOS agent environment
+  hosts: centos-agent
   tasks:
 
-    - name: Install apache (CentOS)
+    - name: Install apache
       become: true
       shell: dnf install httpd -y
       when: ansible_facts['distribution'] == "CentOS"

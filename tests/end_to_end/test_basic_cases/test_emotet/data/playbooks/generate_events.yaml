@@ -1,5 +1,5 @@
-- name: Truncate files
-  hosts: wazuh-manager
+- name: Clean alerts file
+  hosts: managers
   tasks:
 
     - name: Truncate alert.json
@@ -7,8 +7,8 @@
         name: manage_alerts
         tasks_from: truncate_alert_json.yaml
 
-- name: Generate events windows
-  hosts: wazuh-windows
+- name: Generate events
+  hosts: windows-agent
   tasks:
 
     - name: Execute trigger-emotet.exe
@@ -16,8 +16,8 @@
       register: output
       failed_when: '"with process ID" not in output.stderr'
 
-- name: Wait alert
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   tasks:
 
     - name: Wait for alert

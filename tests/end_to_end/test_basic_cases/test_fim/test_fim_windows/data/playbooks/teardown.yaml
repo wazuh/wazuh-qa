@@ -1,5 +1,5 @@
 - name: Cleanup Windows agent environment
-  hosts: wazuh-windows
+  hosts: windows-agent
   tasks:
 
     - name: Delete syscheck configuration

@@ -1,5 +1,5 @@
-- name: Test configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 
@@ -12,7 +12,7 @@
 
     - name: Install Osquery on CentOS
       shell: |
-        curl -LO https://pkg.osquery.io/rpm/osquery-4.5.1-1.linux.x86_64.rpm
+        curl -LO {{ s3_url }}/osquery_integration/osquery-4.5.1-1.linux.x86_64.rpm
         rpm -ivh ./osquery-4.5.1-1.linux.x86_64.rpm
       register: installation
       # If the return code is 0, it means that Osquery is already installed and running.
@@ -20,13 +20,10 @@
       when: (ansible_facts['distribution'] == "CentOS" and osquery_check.rc != 0 and osquery_check.rc != 3)
 
     - name: Configure Osquery
-      copy:
-        src: "{{ configuration_file }}"
-        dest: /etc/osquery/osquery.conf
-        owner: root
-        group: root
-        mode: '0644'
-        backup: true
+      shell: |
+        curl {{ s3_url }}/osquery_integration/osquery_integration.json -o /etc/osquery/osquery.conf
+        chown root:root /etc/osquery/osquery.conf
+        chmod 0644 /etc/osquery/osquery.conf
       # If the installation return code is 0, it means that the installation was successful.
       when: (osquery_check.rc == 3 or osquery_check.rc == 0 or installation.rc == 0)
 

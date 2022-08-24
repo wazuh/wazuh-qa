@@ -1,8 +1,8 @@
-- name: Test agent configuration
-  hosts: wazuh-windows
+- name: Configure Windows agent environment
+  hosts: windows-agent
   tasks:
 
-    - name: Auto logon
+    - name: Enable auto logon
       community.windows.win_auto_logon:
         username: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
@@ -80,8 +80,8 @@
       vars:
         os: windows
 
-- name: Test manager configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   tasks:
 
     - name: Configure local rules

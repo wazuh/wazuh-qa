@@ -1,5 +1,5 @@
-- name: Configure environment
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 
@@ -84,17 +84,8 @@
         state: directory
 
     - name: Download Yara rules
-      uri:
-        url: https://valhalla.nextron-systems.com/api/v1/get
-        method: POST
-        headers:
-          Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-          Accept-Language: en-US,en;q=0.5
-          Referer: https://valhalla.nextron-systems.com/
-          Content-Type: application/x-www-form-urlencoded
-          DNT: "1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1"
-        body: demo=demo&apikey=1111111111111111111111111111111111111111111111111111111111111111&format=text
-        dest: /tmp/yara/rules/yara_rules.yar
+      shell: |
+        curl {{ s3_url }}/yara_integration/yara_rules.yar -o /tmp/yara/rules/yara_rules.yar
 
     - name: Check if epel-release is installed
       shell: rpm -qa epel-release
@@ -124,12 +115,10 @@
         state: directory
 
     - name: Copy the Yara script
-      copy:
-        src: "{{ yara_script }}"
-        dest: /var/ossec/active-response/bin/
-        owner: root
-        group: wazuh
-        mode: '0750'
+      shell: |
+        curl {{ s3_url }}/yara_integration/yara.sh -o /var/ossec/active-response/bin/yara.sh
+        chown root:wazuh /var/ossec/active-response/bin/yara.sh
+        chmod 0750 /var/ossec/active-response/bin/yara.sh
 
     - name: Check if jq is installed
       shell: rpm -qa jq

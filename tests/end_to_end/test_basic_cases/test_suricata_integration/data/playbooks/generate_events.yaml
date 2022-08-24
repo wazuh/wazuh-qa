@@ -1,5 +1,5 @@
-- name: Truncate alerts file
-  hosts: wazuh-manager
+- name: Clean alerts file
+  hosts: managers
   become: true
   tasks:
 
@@ -16,8 +16,8 @@
     - name: Run command to generate an alert
       shell: curl http://testmynids.org/uid/index.html
 
-- name: Get alerts
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   become: true
   vars:
   tasks:

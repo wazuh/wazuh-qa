@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: wazuh-manager
+  hosts: managers
   tasks:
 
     - name: Truncate alert.json

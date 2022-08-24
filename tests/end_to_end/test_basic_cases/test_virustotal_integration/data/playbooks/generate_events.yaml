@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: wazuh-agent
+  hosts: centos-agent
   tasks:
 
     - name: "{{ event_description }}"
@@ -10,8 +10,8 @@
       wait_for:
         timeout: 5
 
-- name: Get logs
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   tasks:
 
     - name: Get alert json

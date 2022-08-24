@@ -1,5 +1,5 @@
-- name: Truncate files
-  hosts: wazuh-manager
+- name: Clean alerts file
+  hosts: managers
   tasks:
 
     - name: Truncate alert.json
@@ -8,7 +8,7 @@
         tasks_from: truncate_alert_json.yaml
 
 - name: Generate events
-  hosts: wazuh-windows
+  hosts: windows-agent
   tasks:
 
     - name: "{{ event_description }}"
@@ -16,8 +16,8 @@
       register: result
       failed_when: "'Forbidden' not in result.stderr"
 
-- name: Wait alert
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   tasks:
 
     - name: Waiting for alert

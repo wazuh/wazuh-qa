@@ -1,5 +1,5 @@
-- name: Truncate file
-  hosts: wazuh-manager
+- name: Clean alerts file
+  hosts: managers
   tasks:
 
     - name: Truncate alert.json
@@ -11,9 +11,11 @@
   hosts: localhost
   tasks:
 
-    - name: SSH connection
+    - name: Attempt a SSH brute force attack
       expect:
-        command: ssh {{item}}@wazuh-agent -i {{hostvars['wazuh-agent']['ansible_ssh_private_key_file']}}
+        command: >
+          ssh {{item}}@{{ hostvars['centos-agent']['ansible_host'] }}
+          -i {{ hostvars['centos-agent']['ansible_ssh_private_key_file'] }}
         responses:
           (.*)continue connecting(.*): 'yes'
           (?i)password: 1
@@ -35,8 +37,8 @@
       wait_for:
         timeout: 5
 
-- name: Get logs
-  hosts: wazuh-manager
+- name: Get alerts file
+  hosts: managers
   tasks:
 
     - name: Get alert json

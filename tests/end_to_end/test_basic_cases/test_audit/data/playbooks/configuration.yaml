@@ -1,13 +1,11 @@
 ---
-- name: Test case configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   tasks:
 
     - name: Get euid
       shell: echo $EUID
       register: euid
-    - debug:
-        var: euid.stdout
 
     - name: Create wazuh audit rules file
       become: True

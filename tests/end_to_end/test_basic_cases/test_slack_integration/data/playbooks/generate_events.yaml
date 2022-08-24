@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: wazuh-manager
+  hosts: managers
   vars:
     integrations_log: /var/ossec/logs/integrations.log
     slack_messages_log: /tmp/slack_messages.log

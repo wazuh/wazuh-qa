@@ -1,4 +1,4 @@
-- name: Prepare environment
+- name: Configure Ubuntu agent environment
   hosts: ubuntu-agent
   become: true
   vars:

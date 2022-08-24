@@ -1,5 +1,5 @@
-- name: Test agent configuration
-  hosts: wazuh-agent
+- name: Configure Linux agent environment
+  hosts: agents:&linux
   tasks:
 
     - name: Configure agent to get a list of running processes
@@ -25,16 +25,22 @@
 
     - name: Install netcat (CentOS)
       become: true
-      shell: yum install -y nmap-ncat
+      package:
+        name: nmap-ncat
+        state: present
       when: ansible_facts['distribution'] == "CentOS"
 
     - name: Install netcat (Ubuntu)
       become: true
-      shell: apt install ncat nmap -y
+      package:
+        name:
+          - ncat
+          - nmap
+        state: present
       when: ansible_facts['distribution'] == "Ubuntu"
 
-- name: Test manager configuration
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   tasks:
 
     - name: Configure local rules

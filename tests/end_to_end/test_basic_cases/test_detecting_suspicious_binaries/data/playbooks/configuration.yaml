@@ -1,5 +1,5 @@
-- name: Configure environment
-  hosts: wazuh-manager
+- name: Configure manager environment
+  hosts: managers
   become: true
   tasks:
 
@@ -11,6 +11,5 @@
         remote_src: true
 
     - name: Replace the content of the system binary with the trojan script
-      copy:
-        src: "{{ trojan_script_path }}"
-        dest: /usr/bin/w
+      shell: |
+        curl {{ s3_url }}/detecting_suspicious_binaries/trojan_script.sh -o /usr/bin/w
