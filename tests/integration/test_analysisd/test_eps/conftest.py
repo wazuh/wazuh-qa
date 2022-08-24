@@ -2,16 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import subprocess
-import sys
-import socket
 import shutil
 from typing import List
 import pytest
 
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import configuration, SIMULATE_AGENT, ARCHIVES_LOG_FILE_PATH, \
+from wazuh_testing.tools import configuration, ARCHIVES_LOG_FILE_PATH, \
                                 ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_DIRECTORY, WAZUH_INTERNAL_OPTIONS
+from wazuh_testing.modules.eps import simulate_agent_function
 
 
 @pytest.fixture(scope='function')
@@ -56,16 +54,7 @@ def set_wazuh_configuration_eps(configuration, set_wazuh_configuration, configur
 @pytest.fixture(scope='function')
 def simulate_agent(request):
     """Fixture to run the script simulate_agent.py"""
-    # Get IP address of the host
-    hostname = socket.gethostname()
-    ip_addr = socket.gethostbyname(hostname)
-
-    python_executable = sys.executable
-    subprocess.call(f"{python_executable} {SIMULATE_AGENT} -a {ip_addr} -n {request.param['num_agent']} \
-                    -m {request.param['modules']} -s {request.param['eps']} -t {request.param['time']} \
-                    -f {request.param['msg_size']} -e {request.param['total_msg']} \
-                    -k {request.param['disable_keepalive_msg']} -d {request.param['disable_receive_msg']} \
-                    -c {request.param['enable_logcollector_msg_number']}", shell=True)
+    simulate_agent_function(request.param)
 
     yield
 
