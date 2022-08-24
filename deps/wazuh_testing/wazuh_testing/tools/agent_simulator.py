@@ -665,7 +665,7 @@ class Agent:
     def init_logcollector(self):
         """Initialize logcollector module."""
         if self.logcollector is None:
-            self.logcollector = Logcollector(enable_msg_number=self.logcollector_msg_number, \
+            self.logcollector = Logcollector(enable_msg_number=self.logcollector_msg_number, 
                                              custom_logcollector_message=self.custom_logcollector_message)
 
     def init_sca(self):
