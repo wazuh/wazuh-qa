@@ -7,7 +7,7 @@ import platform
 import subprocess
 import sys
 
-from wazuh_testing import WAZUH_QA_REṔO_PATH
+from wazuh_testing import WAZUH_TESTING_PATH
 
 
 if sys.platform == 'win32':
@@ -81,7 +81,7 @@ else:
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'hosts')
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
     ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
-    SIMULATE_AGENT = os.path.join(WAZUH_QA_REṔO_PATH, 'scripts', 'simulate_agents.py')
+    SIMULATE_AGENT = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'simulate_agents.py')
     WAZUH_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
     try:
