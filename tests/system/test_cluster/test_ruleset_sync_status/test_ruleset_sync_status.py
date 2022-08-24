@@ -38,6 +38,14 @@ rule_content = f"""
 
 
 def get_sync_status(api_token):
+    """Get ruleset sync status of cluster nodes.
+
+    Args:
+        api_token (str): Usable API token.
+
+    Returns:
+        list: Dictionaries containing node-name (str) and synced status (bool).
+    """
     response = host_manager.make_api_call(host=test_hosts[0], method='GET', token=api_token,
                                           endpoint='/cluster/ruleset/synchronization')
     assert response['status'] == 200, f"Failed when trying to obtain cluster sync status: {response}"

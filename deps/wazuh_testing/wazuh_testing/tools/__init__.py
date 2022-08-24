@@ -60,7 +60,6 @@ else:
     PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
 
-
     try:
         import grp
         import pwd
