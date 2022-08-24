@@ -69,7 +69,7 @@ configuration_extra_vars = {'yara_script': yara_script}
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_yara_integration(configure_environment, metadata, get_dashboard_credentials, generate_events,
+def test_yara_integration(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
                           clean_alerts_index):
     '''
     description: Check that an alert is generated when malware is downloaded.
@@ -150,7 +150,7 @@ def test_yara_integration(configure_environment, metadata, get_dashboard_credent
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

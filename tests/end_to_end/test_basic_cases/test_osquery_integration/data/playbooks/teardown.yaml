@@ -1,6 +1,6 @@
 ---
 - name: Cleanup manager environment
-  hosts: wazuh-manager
+  hosts: managers
   become: True
   tasks:
 
@@ -27,4 +27,4 @@
 
     - name: Uninstall stress
       shell: yum remove -y stress
-      when: (ansible_facts['distribution'] == "CentOS"
+      when: ansible_facts['distribution'] == "CentOS"

@@ -44,6 +44,7 @@ import re
 import pytest
 from tempfile import gettempdir
 
+import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
@@ -61,7 +62,8 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_ip_reputation(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
+                       clean_alerts_index):
     '''
     description: Check that alerts are generated when accessing the web server with an ip with a bad reputation.
 
@@ -103,24 +105,26 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
     malicious_ip_alert = metadata['malicious_ip']
     active_response_alert = metadata['active_response']
     expected_alerts = [malicious_ip_alert, active_response_alert]
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
     for alert in expected_alerts:
         rule_level = alert['rule.level']
         rule_id = alert['rule.id']
         rule_description = alert['rule.description']
 
-        expected_alert_json = fr'\{{"timestamp":"(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)",' \
+        expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})",' \
                               fr'"rule"\:{{"level"\:{rule_level},' \
                               fr'"description"\:"{rule_description}","id"\:"{rule_id}".*\}}'
 
         expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},' \
                                  fr'.*"description": "{rule_description}"' \
                                  fr'.*"id": "{rule_id}".*'\
-                                 r'"timestamp": "(\d+\-\d+\-\w+\:\d+\:\d+\.\d+\+\d+)".*'
+                                 fr'"timestamp": "({timestamp_regex})".*'
 
         # Check that alert has been raised and save timestamp
         raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                       error_message=f"The alert '{rule_description}' has not occurred").result()
+                                       timeout=fw.T_5, error_message=f"The alert '{rule_description}'"
+                                                                     ' has not occurred').result()
         raised_alert_timestamp = raised_alert.group(1)
 
         query = e2e.make_query([
@@ -138,9 +142,10 @@ def test_ip_reputation(configure_environment, metadata, get_dashboard_credential
         ])
 
         # Check if the alert has been indexed and get its data
-        response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+        response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials,
+                                             ip_address=get_manager_ip)
         indexed_alert = json.dumps(response.json())
 
         # Check that the alert data is the expected one
         alert_data = re.search(expected_indexed_alert, indexed_alert)
-        assert alert_data is not None, 'Alert triggered, but not indexed'
+        assert alert_data is not None, f"Alert '{rule_description}' triggered, but not indexed"

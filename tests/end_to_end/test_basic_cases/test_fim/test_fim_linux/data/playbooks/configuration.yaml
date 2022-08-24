@@ -1,14 +1,14 @@
-- name: Test case configuration
-  hosts: wazuh-agent
+- name: Configure Linux agent environment
+  hosts: agents:&linux
   tasks:
 
-    - name: Create directory to monitor (Linux)
+    - name: Create directory to monitor
       become: true
       file:
         path: /tmp/test_demo_fim
         state: directory
 
-    - name: Add directory to syscheck configuration (Linux)
+    - name: Add directory to syscheck configuration
       become: true
       blockinfile:
         path: /var/ossec/etc/ossec.conf
@@ -17,7 +17,7 @@
           <directories check_all="yes" whodata="yes">/tmp/test_demo_fim</directories>
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Restart Wazuh (Linux)
+    - name: Restart Wazuh
       become: true
       systemd:
         name: wazuh-agent

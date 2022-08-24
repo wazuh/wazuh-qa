@@ -41,6 +41,7 @@ import re
 import pytest
 from tempfile import gettempdir
 
+import wazuh_testing as fw
 from wazuh_testing.tools import configuration as config
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
@@ -60,7 +61,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_brute_force_ssh(metadata, get_dashboard_credentials, generate_events, clean_alerts_index):
+def test_brute_force_ssh(metadata, get_dashboard_credentials, get_manager_ip, generate_events, clean_alerts_index):
     '''
     description: Check that an alert is generated and indexed when a brute force attack is perfomed.
 
@@ -99,9 +100,9 @@ def test_brute_force_ssh(metadata, get_dashboard_credentials, generate_events, c
     rule_level = metadata['rule.level']
     rule_description = metadata['rule.description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
-    timestamp = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
+    timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
-    expected_alert_json = fr'\{{"timestamp":"({timestamp})","rule"\:{{"level"\:{rule_level},' \
+    expected_alert_json = fr'\{{"timestamp":"({timestamp_regex})","rule"\:{{"level"\:{rule_level},' \
                           fr'"description"\:"{rule_description}","id"\:"{rule_id}".*'
 
     expected_indexed_alert = fr'.*"rule":.*"level": {rule_level},.*"description": "{rule_description}"' \
@@ -109,7 +110,7 @@ def test_brute_force_ssh(metadata, get_dashboard_credentials, generate_events, c
 
     # Check that alert has been raised and save timestamp
     raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
-                                   error_message='The alert has not occurred').result()
+                                   timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 
     query = e2e.make_query([
@@ -126,7 +127,7 @@ def test_brute_force_ssh(metadata, get_dashboard_credentials, generate_events, c
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one
