@@ -16,4 +16,4 @@ jobs:
 
     - name: Run commit names checker script
       run: |
-        python .github/workflows/scripts/commit_checker.py -t ${{ secrets.GITHUB_TOKEN }} -p ${{ github.event.number }}
+        python .github/workflows/scripts/commits_checker.py -t ${{ secrets.GITHUB_TOKEN }} -p ${{ github.event.number }}
