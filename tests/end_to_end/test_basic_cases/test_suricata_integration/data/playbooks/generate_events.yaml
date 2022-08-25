@@ -1,12 +1,12 @@
 - name: Clean alerts file
   hosts: managers
   become: true
-  vars:
-    alerts_path: /var/ossec/logs/alerts/alerts.json
   tasks:
 
-    - name: Truncate alerts file
-      shell: echo "" > {{ alerts_path }}
+    - name: Truncate alert.json
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
 
 - name: Generate events
   hosts: ubuntu-agent
@@ -20,15 +20,13 @@
   hosts: managers
   become: true
   vars:
-    alerts_path: /var/ossec/logs/alerts/alerts.json
   tasks:
 
     - name: Wait for alerts to be generated
       wait_for:
         timeout: 10
 
-    - name: Get alerts.json
-      fetch:
-        src: "{{ alerts_path }}"
-        dest: /tmp/
-        flat: true
+    - name: Get alert json
+      include_role:
+        name: manage_alerts
+        tasks_from: get_alert_json.yaml

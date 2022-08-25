@@ -28,11 +28,11 @@
       when: (osquery_check.rc == 3 or osquery_check.rc == 0 or installation.rc == 0)
 
     - name: Configure the Osquery module
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <wodle name="osquery">
           <disabled>no</disabled>
           <run_daemon>yes</run_daemon>
@@ -41,13 +41,18 @@
           <config_path>/etc/osquery/osquery.conf</config_path>
           <add_labels>no</add_labels>
           </wodle>
+        os: linux
 
     - name: Start Osquery
       shell: systemctl start osqueryd
       when: (osquery_check.rc == 3 or osquery_check.rc == 0)
 
-    - name: Restart the manager
-      shell: systemctl restart wazuh-manager
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
     - name: Check if stress is installed or not on CentOS
       command: rpm -q stress

@@ -190,6 +190,7 @@ def configure_environment(request):
         request (fixture): Provide information on the executing test function.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
+    roles_path = request.config.getoption('--roles_path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -197,7 +198,9 @@ def configure_environment(request):
     # For each configuration playbook previously declared in the test, get the complete path and run it
     for playbook in getattr(request.module, 'configuration_playbooks'):
         configuration_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
-        parameters = {'playbook': configuration_playbook_path, 'inventory': inventory_playbook}
+        parameters = {'playbook': configuration_playbook_path,
+                      'inventory': inventory_playbook,
+                      'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
 
         # Check if the module has extra variables to pass to the playbook
         configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -215,7 +218,9 @@ def configure_environment(request):
         for playbook in teardown_playbooks:
             teardown_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
-            parameters = {'playbook': teardown_playbook_path, 'inventory': inventory_playbook}
+            parameters = {'playbook': teardown_playbook_path,
+                          'inventory': inventory_playbook,
+                          'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
 
             # Check if the module has extra variables to pass to the playbook
             configuration_extra_vars = getattr(request.module, 'configuration_extra_vars', None)
@@ -235,6 +240,7 @@ def generate_events(request, metadata):
         metadata (dict): Dictionary with test case metadata.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
+    roles_path = request.config.getoption('--roles_path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -243,7 +249,9 @@ def generate_events(request, metadata):
     for playbook in getattr(request.module, 'events_playbooks'):
         events_playbook_path = os.path.join(getattr(request.module, 'test_data_path'), 'playbooks', playbook)
 
-        parameters = {'playbook': events_playbook_path, 'inventory': inventory_playbook}
+        parameters = {'playbook': events_playbook_path,
+                      'inventory': inventory_playbook,
+                      'envvars': {'ANSIBLE_ROLES_PATH': roles_path}}
         # Check if the test case has extra variables to pass to the playbook and add them to the parameters in that case
         if 'extra_vars' in metadata:
             parameters.update({'extravars': metadata['extra_vars']})
@@ -282,13 +290,4 @@ def pytest_addoption(parser):
         default=None,
         type=str,
         help='Inventory path',
-    )
-
-    parser.addoption(
-        '--roles-path',
-        action='store',
-        metavar='ROLES_PATH',
-        default=os.path.join(suite_path, 'data', 'ansible_roles'),
-        type=str,
-        help='Ansible roles path.',
     )

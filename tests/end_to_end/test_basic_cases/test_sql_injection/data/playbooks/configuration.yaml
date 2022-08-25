@@ -12,17 +12,20 @@
       shell: systemctl start httpd
 
     - name: Configure agent to monitor the Apache access logs
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertbefore: </ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <localfile>
           <log_format>apache</log_format>
           <location>/var/log/httpd/access_log</location>
           </localfile>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        os: linux
 
-    - name: Restart wazuh-agent
-      become: true
-      shell: systemctl restart wazuh-agent
+    - name: Restart agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux

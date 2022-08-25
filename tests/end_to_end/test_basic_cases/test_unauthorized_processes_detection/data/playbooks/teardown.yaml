@@ -1,7 +1,6 @@
----
 - name: Cleanup Linux agent environment
   hosts: agents:&linux
-  become: True
+  become: true
   tasks:
 
     - name: Delete agent configuration
@@ -11,13 +10,15 @@
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-agent
-      systemd:
-        state: restarted
-        name: wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
 - name: Cleanup manager environment
   hosts: managers
-  become: True
+  become: true
   tasks:
 
     - name: Delete added rules
@@ -27,6 +28,8 @@
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux

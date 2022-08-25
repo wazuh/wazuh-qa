@@ -1,17 +1,14 @@
 - name: Configure manager environment
   hosts: managers
   become: true
-  vars:
-    alerts_path: /var/ossec/logs/alerts/alerts.json
-    conf_path: /var/ossec/etc/ossec.conf
   tasks:
 
     - name: Set the Slack integration block
-      blockinfile:
-        path: "{{ conf_path }}"
-        marker: <!-- {mark} SLACK INTEGRATION BLOCK -->
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <integration>
           <name>slack</name>
           <hook_url>{{ web_hook_url }}</hook_url>
@@ -19,11 +16,16 @@
           <rule_id>{{ RULE_ID }}</rule_id>
           <alert_format>json</alert_format>
           </integration>
+        os: linux
 
-    - name: Truncate alerts log
-      shell: echo "" > {{ alerts_path }}
+    - name: Truncate alert.json
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
