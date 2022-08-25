@@ -1,0 +1,18 @@
+centos-manager:
+  os: amazonlinux
+  roles: [aio]
+
+ubuntu-agent:
+  os: ubuntu
+  roles: [agent]
+  manager: centos-manager
+
+centos-agent:
+  os: amazonlinux
+  roles: [agent]
+  manager: centos-manager
+
+windows-agent:
+  os: windows
+  roles: [agent]
+  manager: centos-manager
