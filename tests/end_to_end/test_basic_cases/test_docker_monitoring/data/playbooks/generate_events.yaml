@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
 

@@ -1,5 +1,5 @@
 - name: Cleanup manager environment
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Uninstall apache

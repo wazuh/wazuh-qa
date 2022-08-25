@@ -1,5 +1,5 @@
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   become: true
   vars:
     alerts_path: /var/ossec/logs/alerts/alerts.json

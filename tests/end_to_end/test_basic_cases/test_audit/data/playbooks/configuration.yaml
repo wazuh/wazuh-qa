@@ -1,6 +1,6 @@
 ---
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Get euid

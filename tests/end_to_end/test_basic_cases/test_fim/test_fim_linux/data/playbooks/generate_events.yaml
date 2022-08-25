@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate file
@@ -7,7 +7,7 @@
       become: True
 
 - name: Generate events
-  hosts: agents:&linux
+  hosts: agent:&linux
   tasks:
 
     - name: "{{ event_description }}"
@@ -18,7 +18,7 @@
         mode: "{{ mode }}"
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Wait for alert to be generated

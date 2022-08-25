@@ -40,7 +40,7 @@ def get_dashboard_credentials(request):
     inventories = [inventory_playbook]
 
     inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
-                                                  host='managers')
+                                                  host='dashboard')
 
     # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
     dashboard_credentials = {'user': inventory_data[0]['dashboard_user'],
@@ -135,7 +135,7 @@ def get_manager_ip(request):
     inventories = [inventory_playbook]
 
     inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
-                                                  host='managers')
+                                                  host='manager')
 
     # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
     manager_ip = inventory_data[0]['ansible_host']

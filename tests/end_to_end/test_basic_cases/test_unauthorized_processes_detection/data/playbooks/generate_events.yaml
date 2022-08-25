@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate file alert.json
@@ -7,7 +7,7 @@
       become: true
 
 - name: Generate events
-  hosts: agents:&linux
+  hosts: agent:&linux
   tasks:
 
     - name: "{{ event_description_netcat }}"
@@ -24,7 +24,7 @@
       command: pkill -fx 'nc -l 8000'
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Get alerts.json

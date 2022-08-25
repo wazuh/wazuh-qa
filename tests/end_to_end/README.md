@@ -4,7 +4,7 @@ End-to-end testing is a technique that tests the entire software product from be
 
 The main purpose of End-to-end (E2E) testing is to test from the end user’s experience by simulating the real user scenario and validating the system under test and its components for integration and data integrity.
 
-The Wazuh architecture is based on agents, running on the monitored endpoints, that forward security data to a central server. The central server decodes and analyzes the incoming information and passes the results along to the Wazuh indexer for indexing and storage. The Wazuh indexer cluster is a collection of one or more nodes that communicate with each other to perform read and write operations on indices.
+The Wazuh architecture is based on agent, running on the monitored endpoints, that forward security data to a central server. The central server decodes and analyzes the incoming information and passes the results along to the Wazuh indexer for indexing and storage. The Wazuh indexer cluster is a collection of one or more nodes that communicate with each other to perform read and write operations on indices.
 
 The diagram below represents the Wazuh components and data flow.
 
@@ -22,7 +22,7 @@ To run these tests we need to use a **Linux** machine and install the following 
 Then, you will need to have an inventory with the needed hosts and variables. For example:
 
 ```
-managers:
+manager:
   hosts:
     centos-manager:
       ansible_host: <IP_ADDRESS>
@@ -33,7 +33,7 @@ managers:
       dashboard_user: <DASHBOARD_USER>
       dashboard_password: <DASHBOARD_PASSWORD>
 
-agents:
+agent:
   children:
     linux:
       hosts:

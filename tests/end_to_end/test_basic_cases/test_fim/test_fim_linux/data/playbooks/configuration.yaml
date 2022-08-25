@@ -1,5 +1,5 @@
 - name: Configure Linux agent environment
-  hosts: agents:&linux
+  hosts: agent:&linux
   tasks:
 
     - name: Create directory to monitor

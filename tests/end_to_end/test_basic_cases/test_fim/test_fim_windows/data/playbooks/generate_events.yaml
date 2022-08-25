@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate file
@@ -16,7 +16,7 @@
         state: "{{ state }}"
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Wait for alert to be generated

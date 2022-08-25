@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate file alert.json
@@ -16,7 +16,7 @@
       failed_when: '"with process ID" not in output.stderr'
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Wait for alert

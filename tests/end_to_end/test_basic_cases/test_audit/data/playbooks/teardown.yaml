@@ -1,6 +1,6 @@
 ---
 - name: Cleanup manager environment
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Delete wazuh audit rules file

@@ -1,5 +1,5 @@
 - name: Configure Linux agent environment
-  hosts: agents:&linux
+  hosts: agent:&linux
   tasks:
 
     - name: Configure agent to get a list of running processes
@@ -37,7 +37,7 @@
       when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Configure local rules
