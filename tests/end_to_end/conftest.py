@@ -32,7 +32,7 @@ def get_dashboard_credentials(request):
        Returns:
             dict: wazuh-dashboard credentials.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -58,7 +58,7 @@ def configure_environment(request):
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -103,7 +103,7 @@ def generate_events(request, metadata):
         request (fixture): Provide information on the executing test function.
         metadata (dict): Dictionary with test case metadata.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -127,7 +127,7 @@ def get_manager_ip(request):
        Returns:
             str: Manager IP.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -145,7 +145,7 @@ def get_manager_ip(request):
 
 def pytest_addoption(parser):
     parser.addoption(
-        '--inventory_path',
+        '--inventory-path',
         action='store',
         metavar='INVENTORY_PATH',
         default=None,

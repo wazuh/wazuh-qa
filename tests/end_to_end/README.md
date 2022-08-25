@@ -152,13 +152,13 @@ test_basic_cases/
 To execute these tests, we need to run the following command:
 
 ```
-python -m pytest <TEST_PATH> --inventory_path=<INVENTORY_PATH>
+python -m pytest <TEST_PATH> --inventory-path=<INVENTORY_PATH>
 ```
 
 #### Audit tests examples
 
 ```shell script
-python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory_path=/home/juliamagan/Desktop/QA/2893/inventory.yml
+python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory-path=/home/juliamagan/Desktop/QA/2893/inventory.yml
 ======================================================================== test session starts ========================================================================
 platform linux -- Python 3.9.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
 rootdir: /home/juliamagan/Desktop/QA/wazuh-qa
