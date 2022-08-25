@@ -174,7 +174,7 @@ tests/end_to_end/test_basic_cases/test_audit/test_audit.py .                    
 
 ### Adding or modifying E2E tests
 
-When adding or modifying any test it is necesry to modify the file with the environment data, placed in `tests/end_to_end/data/env_requirements.json`
+When adding or modifying any test it is necessary to modify the file with the environment data, placed in `tests/end_to_end/data/env_requirements.json`
 
 This file is used to validate the environments where the selected tests will be executed and it follows this structure:
 ```
