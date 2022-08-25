@@ -91,7 +91,7 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
         - wazuh_db
         - wdb_socket
     '''
-     # Set each case
+    # Set each case
     case_data = test_case[0]
     output = case_data["output"]
 
