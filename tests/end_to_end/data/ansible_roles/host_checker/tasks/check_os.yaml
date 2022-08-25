@@ -13,4 +13,4 @@
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}The {{ os }} OS isn't supported for the selected tests currently.\n"
-  when: (os == "windows" and os not in supported_distros)
+  when: (os == "windows" and os|capitalize not in supported_distros)
