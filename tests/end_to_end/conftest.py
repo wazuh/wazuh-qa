@@ -4,6 +4,7 @@
 import os
 import ansible_runner
 import pytest
+import json
 from tempfile import gettempdir
 
 from wazuh_testing.tools.file import remove_file
@@ -12,6 +13,135 @@ from wazuh_testing import end_to_end as e2e
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
+
+
+def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_hosts=[]):
+    environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
+    environment_metadata = json.load(open(environment_file))
+    distros_by = {'manager': [], 'agent': []}
+
+    for key in environment_metadata[test_suite_name]:
+        if environment_metadata[test_suite_name][key]['instances'] > 0:
+            # Save manager/agent distros
+            distros_by[key] = environment_metadata[test_suite_name][key]['distros']
+            target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+            # Add the target host to the list (following the standard host name: "<distro>-<type>*")
+            target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+    # Remove duplicates
+    target_hosts = list(dict.fromkeys(target_hosts))
+    target_distros = list(dict.fromkeys(target_distros))
+
+    return target_hosts, target_distros
+
+
+@pytest.fixture(scope='session', autouse=True)
+def validate_environments(request):
+    """Fixture with session scope to validate the environments before run the E2E tests.
+
+    This phase is divided into 4 steps:
+        Step 1: Collect the data related to the selected tests that will be executed.
+        Step 2: Generate a playbook containing cross-checks for selected tests.
+        Step 3: Run the generated playbook.
+
+    Args:
+        request (fixture):  Gives access to the requesting test context.
+    """
+    collected_items = request.session.items
+    roles_path = request.config.getoption('--roles-path')
+    inventory_path = request.config.getoption('--inventory_path')
+    playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_general_play.yaml')
+    playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'general_validation.j2')
+    general_playbook = os.path.join(suite_path, 'data', 'validation_playbooks', 'general_validation.yaml')
+
+    if not inventory_path:
+        raise ValueError('Inventory not specified')
+
+    # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
+    test_suites_paths = []
+    target_hosts = []
+    target_distros = []
+
+    # Get the path of the tests from collected items.
+    collected_paths = [item.fspath for item in collected_items]
+    # Remove duplicates caused by the existence of 2 or more test cases
+    collected_paths = list(dict.fromkeys(collected_paths))
+
+    for path in collected_paths:
+        # Remove the name of the file from the path
+        path = str(path).rsplit('/', 1)[0]
+        # Add the test suite path
+        test_suites_paths.append(path)
+        # Get the test suite name
+        test_suite_name = path.split('/')[-1:][0]
+        # Set target hosts and distros
+        target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name, target_distros, target_hosts)
+    # -------------------------------------------------- End of Step 1 -------------------------------------------------
+
+    # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
+    gen_parameters = {
+        'playbook': playbook_generator, 'inventory': inventory_path,
+        'extravars': {
+            'template_path': playbook_template,
+            'dest_path': general_playbook,
+            'target_hosts': ','.join(target_hosts),
+            'distros': target_distros
+        }
+    }
+    ansible_runner.run(**gen_parameters)
+    # -------------------------------------------------- End of Step 2 -------------------------------------------------
+
+    # ----------------------------------- Step 3: Run the general validation playbook ----------------------------------
+    parameters = {
+        'playbook': general_playbook,
+        'inventory': inventory_path,
+        'envvars': {'ANSIBLE_ROLES_PATH': roles_path}
+    }
+    general_validation_runner = ansible_runner.run(**parameters)
+    # Remove the generated playbook
+    remove_file(general_playbook)
+    # If the general validations have failed, then abort the execution finishing with an error. Else, continue.
+    if general_validation_runner.status == 'failed':
+        # Collect inventory_hostnames with errors
+        hosts_with_errors = [key for key in general_validation_runner.stats['failures']]
+        # Collect list of errors
+        errors = []
+        errors.extend([general_validation_runner.get_fact_cache(host)['phase_results'] for host in hosts_with_errors])
+        errors = ''.join(errors)
+        # Raise the exception with errors details
+        raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
+                        f"requirements. Result:\n{errors}")
+    # -------------------------------------------------- End of Step 3 -------------------------------------------------
+
+
+@pytest.fixture(scope='module', autouse=True)
+def run_specific_validations(request):
+    """Fixture with module scope to validate the environment of an specific tests with specific validation tasks.
+
+    Execute a test-specific playbook (if any). This will run one validation playbook for each test module.
+
+    Args:
+        request (fixture):  Gives access to the requesting test context.
+    """
+    roles_path = request.config.getoption('--roles-path')
+    inventory_path = request.config.getoption('--inventory_path')
+    test_suite_path = os.path.dirname(request.fspath)
+    test_suite_name = test_suite_path.split('/')[-1:][0]
+    target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name)
+    validation_playbook = os.path.join(test_suite_path, 'data', 'playbooks', 'validation.yaml')
+
+    # Run test-specific validation playbook (if any)
+    if os.path.exists(validation_playbook):
+        parameters = {
+            'playbook': validation_playbook, 'inventory': inventory_path,
+            'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
+            'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
+        }
+        validation_runner = ansible_runner.run(**parameters)
+
+        # If the validation phase has failed, then abort the execution finishing with an error. Else, continue.
+        if validation_runner.status == 'failed':
+            raise Exception(f"The validation phase of {test_suite_name} has failed. Please check that the "
+                            'environments meet the expected requirements.')
 
 
 @pytest.fixture(scope='function')
@@ -60,7 +190,7 @@ def configure_environment(request):
         request (fixture): Provide information on the executing test function.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
-    roles_path = request.config.getoption('--roles_path')
+    roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -110,7 +240,7 @@ def generate_events(request, metadata):
         metadata (dict): Dictionary with test case metadata.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
-    roles_path = request.config.getoption('--roles_path')
+    roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -163,7 +293,7 @@ def pytest_addoption(parser):
     )
 
     parser.addoption(
-        '--roles_path',
+        '--roles-path',
         action='store',
         metavar='ROLES_PATH',
         default=os.path.join(suite_path, 'data', 'ansible_roles'),

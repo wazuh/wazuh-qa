@@ -18,6 +18,7 @@ Our E2E tests will verify that, after generating an event, an alert will be trig
 To run these tests we need to use a **Linux** machine and install the following tools:
 
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+- [Netcat](https://www.tecmint.com/netcat-nc-command-examples/)
 
 Then, you will need to have an inventory with the needed hosts and variables. For example:
 
@@ -170,3 +171,36 @@ tests/end_to_end/test_basic_cases/test_audit/test_audit.py .                    
 ======================================================================== 1 passed in 16.05s =========================================================================
 
 ```
+
+### Adding or modifying E2E tests
+
+When adding or modifying any test it is necessary to modify the file with the environment data, placed in `tests/end_to_end/data/env_requirements.json`
+
+This file is used to validate the environments where the selected tests will be executed and it follows this structure:
+```
+"<TEST_SUITE_NAME>": {
+    "manager": {
+        "instances": <QUANTITY_OF_INSTANCES (any positive number)>,
+        "distros": <SUPPORTED_DISTROS (list)>
+    },
+    "agent": {
+        "instances": <QUANTITY_OF_INSTANCES (any positive number)>,
+        "distros": <SUPPORTED_DISTROS (list)>
+    }
+}
+```
+
+### Add specific validation tasks (for a test module)
+
+To add specific validation tasks to a test, its necessary to add a new playbook inside the test module, in the playbook folder with the default Play structure:
+
+```
+- name: <ANY-NAME>
+  hosts: "{{ target_hosts }}"
+  tasks:
+    <ANY-TASK-YOU-WANT>
+```
+
+E.g: Add validation tasks for test_audit by creating a playbook called `validation.yaml` in `tests/end_to_end/test_basic_cases/test_audit/data/playbooks`
+
+> The file name must always be "validation.yaml"
