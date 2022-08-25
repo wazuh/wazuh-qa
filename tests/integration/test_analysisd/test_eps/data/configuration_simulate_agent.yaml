@@ -9,4 +9,4 @@
     disable_keepalive_msg: 'True'
     disable_receive_msg: 'True'
     enable_logcollector_msg_number: 'True'
-    message: '"Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 1.1.1.1 port 11111"'
+    message: ''
