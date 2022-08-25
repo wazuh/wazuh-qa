@@ -9,13 +9,13 @@
 
 - name: Populate services facts
   service_facts:
-  when: os == 'Linux'
+  when: os == 'linux'
 
 - name: Check the status of Wazuh components (Manager)
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}{{ ansible_facts.services[item].name }} is not running.\n"
-  when: (os == 'Linux' and 'server' in wazuh_info.stdout and ansible_facts.services[item].state != 'running')
+  when: (os == 'linux' and 'server' in wazuh_info.stdout and ansible_facts.services[item].state != 'running')
   with_items:
     - wazuh-manager.service
     - wazuh-indexer.service
@@ -23,10 +23,10 @@
 
 - set_fact:
     service: wazuh-agent.service
-  when: (os == 'Linux' and 'agent' in wazuh_info.stdout)
+  when: (os == 'linux' and 'agent' in wazuh_info.stdout)
 
 - name: Check the status of Wazuh Agent
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}{{ ansible_facts.services[service].name }} is not running.\n"
-  when: (os == 'Linux' and 'agent' in wazuh_info.stdout and ansible_facts.services[service].state != 'running')
+  when: (os == 'linux' and 'agent' in wazuh_info.stdout and ansible_facts.services[service].state != 'running')

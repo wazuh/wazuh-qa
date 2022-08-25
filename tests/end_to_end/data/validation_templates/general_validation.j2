@@ -4,5 +4,5 @@
   roles:
     - role: host_checker
       vars:
-        os: "{% raw %}{{ 'Windows' if ansible_os_family == 'Windows' else 'Linux' }}{% endraw %}"
+        os: "{% raw %}{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}{% endraw %}"
         supported_distros: {{ distros }}

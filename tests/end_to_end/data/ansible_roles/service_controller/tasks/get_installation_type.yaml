@@ -6,4 +6,4 @@
   become: true
   shell: /var/ossec/bin/wazuh-control info
   register: wazuh_info
-  when: os == 'Linux'
+  when: os == 'linux'

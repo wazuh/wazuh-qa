@@ -12,10 +12,10 @@
   shell: filebeat test output
   register: test_result
   ignore_errors: true
-  when: (os == 'Linux' and 'server' in wazuh_info.stdout)
+  when: (os == 'linux' and 'server' in wazuh_info.stdout)
 
 - name: Check the connection between Filebeat and Wazuh Indexer
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}Filebeat cannot connect correctly with Wazuh Indexer.\n"
-  when: (os == 'Linux' and 'server' in wazuh_info.stdout and 'ERROR' in test_result.stdout)
+  when: (os == 'linux' and 'server' in wazuh_info.stdout and 'ERROR' in test_result.stdout)
