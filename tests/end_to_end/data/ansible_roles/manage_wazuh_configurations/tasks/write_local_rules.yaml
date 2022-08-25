@@ -1,3 +1,9 @@
+# REQUIRED VARIABLES
+# -------------------
+#
+# GENERIC:
+#  - (String) config_block: Custom Wazuh rules
+
 - name: Configure local rules
   become: true
   blockinfile:

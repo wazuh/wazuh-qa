@@ -3,6 +3,7 @@
 #
 # GENERIC:
 #  - (String) os: Target operating system
+#  - (String) config_block: Wazuh configuration block
 
 - name: Configure ossec.conf linux
   become: true

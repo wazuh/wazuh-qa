@@ -1,3 +1,9 @@
+# REQUIRED VARIABLES
+# -------------------
+#
+# GENERIC:
+#  - (String) config_block: Custom Wazuh decoders
+
 - name: Configure local decoders
   become: true
   blockinfile:

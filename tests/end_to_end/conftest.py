@@ -166,7 +166,7 @@ def pytest_addoption(parser):
         '--roles_path',
         action='store',
         metavar='ROLES_PATH',
-        default=os.path.join(suite_path, 'roles'),
+        default=os.path.join(suite_path, 'data', 'ansible_roles'),
         type=str,
         help='Ansible roles path.',
     )
