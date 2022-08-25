@@ -18,7 +18,7 @@ Our E2E tests will verify that, after generating an event, an alert will be trig
 To run these tests we need to use a **Linux** machine and install the following tools:
 
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
-- [netcat](https://en.wikipedia.org/wiki/Netcat)
+- [Netcat](https://www.tecmint.com/netcat-nc-command-examples/)
 
 Then, you will need to have an inventory with the needed hosts and variables. For example:
 
@@ -156,6 +156,22 @@ To execute these tests, we need to run the following command:
 python -m pytest <TEST_PATH> --inventory_path=<INVENTORY_PATH>
 ```
 
+#### Audit tests examples
+
+```shell script
+python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory_path=/home/juliamagan/Desktop/QA/2893/inventory.yml
+======================================================================== test session starts ========================================================================
+platform linux -- Python 3.9.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /home/juliamagan/Desktop/QA/wazuh-qa
+plugins: metadata-2.0.1, html-3.1.1, testinfra-5.0.0
+collected 1 item
+
+tests/end_to_end/test_basic_cases/test_audit/test_audit.py .                                                                                                  [100%]
+
+======================================================================== 1 passed in 16.05s =========================================================================
+
+```
+
 ### Adding or modifying E2E tests
 
 When adding or modifying any test it is necesry to modify the file with the environment data, placed in `tests/end_to_end/data/env_requirements.json`
@@ -188,19 +204,3 @@ To add specific validation tasks to a test, its necessary to add a new playbook 
 E.g: Add validation tasks for test_audit by creating a playbook called `validation.yaml` in `tests/end_to_end/test_basic_cases/test_audit/data/playbooks`
 
 > The file name must always be "validation.yaml"
-
-#### Audit tests examples
-
-```shell script
-python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory_path=/home/juliamagan/Desktop/QA/2893/inventory.yml
-======================================================================== test session starts ========================================================================
-platform linux -- Python 3.9.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
-rootdir: /home/juliamagan/Desktop/QA/wazuh-qa
-plugins: metadata-2.0.1, html-3.1.1, testinfra-5.0.0
-collected 1 item
-
-tests/end_to_end/test_basic_cases/test_audit/test_audit.py .                                                                                                  [100%]
-
-======================================================================== 1 passed in 16.05s =========================================================================
-
-```
