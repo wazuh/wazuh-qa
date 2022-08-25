@@ -1,0 +1,51 @@
+# vars
+
+# Linux
+- name: Include Debian custom vars
+  include_vars: ../vars/Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Include RedHat custom vars
+  include_vars: ../vars/RedHat.yml
+  when: ansible_os_family == "RedHat"
+
+# Windows
+- name: Include Windows custom vars
+  include_vars: ../vars/Windows.yml
+  when: ansible_os_family == "Windows"
+
+# Solaris
+- name: Include Solaris custom vars
+  include_vars: ../vars/Solaris.yml
+  when: ansible_os_family == "Solaris"
+
+# MacOS
+- name: Include MacOS custom vars
+  include_vars: ../vars/MacOS.yml
+  when: ansible_os_family == "Darwin"
+
+# tasks
+
+# Linux
+- name: Include Linux custom tasks
+  include_tasks: "Linux.yml"
+  when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
+
+# Windows
+- name: Include Windows custom tasks
+  include_tasks: "Windows.yml"
+  when: ansible_os_family == "Windows"
+
+# Solaris
+- name: Include Solaris custom tasks
+  include_tasks: "Solaris.yml"
+  when: ansible_os_family == "Solaris"
+  args:
+    apply:
+      environment:
+        PATH: "{{ environment_paths }}"
+
+# macOS
+- name: Include MacOS custom tasks
+  include_tasks: "MacOS.yml"
+  when: ansible_os_family == "Darwin"

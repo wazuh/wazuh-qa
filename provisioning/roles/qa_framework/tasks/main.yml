@@ -1,0 +1,41 @@
+# vars
+
+# Unix
+- name: Include Unix custom vars
+  include_vars: Unix.yml
+  when: 
+    - customize == false
+    - ansible_os_family != "Windows"
+
+# Solaris
+- name: Include Solaris custom vars
+  include_vars: Solaris.yml
+  when: 
+    - customize == false
+    - ansible_os_family == "Solaris"
+
+# macOS
+- name: Include macOS custom vars
+  include_vars: macOS.yml
+  when: 
+    - customize == false
+    - ansible_os_family == "Darwin"
+
+# Windows
+- name: Include Windows custom vars
+  include_vars: Windows.yml
+  when: 
+    - customize == false
+    - ansible_os_family == "Windows"
+
+# tasks
+
+# Unix|Solaris|macOS
+- name: Include Unix custom tasks
+  include_tasks: Unix.yml
+  when: ansible_os_family != "Windows"
+
+# Windows
+- name: Include Windows custom tasks
+  include_tasks: Windows.yml
+  when: ansible_os_family == "Windows"

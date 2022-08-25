@@ -1,0 +1,20 @@
+- name: Create {{ build_dir }} if does not exist
+  ansible.windows.win_file:
+    path: "{{ build_dir }}"
+    state: directory
+
+- name: Clone Wazuh-QA repo | Windows
+  win_command: powershell.exe -
+  args:
+    chdir: "{{ build_dir }}"
+    stdin: "git clone {{ qa_repository_url }} -b {{ qa_repository_reference }} --depth=1 {{ build_dir }}/tmp; move tmp/* ./"
+
+- name: Install python requirements | Windows
+  win_command: "{{ python_executable }} -m pip install -r {{ qa_requirements_file }} --no-cache-dir --only-binary=:cryptography,grpcio:"
+  args:
+    chdir: "{{ build_dir }}"
+
+- name: Install setup.py | Windows
+  win_command: "{{ python_executable }} {{ setup_installer }} install"
+  args:
+    chdir: "{{ build_dir }}\\{{ test_setup_qa_path }}"

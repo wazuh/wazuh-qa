@@ -1,0 +1,3 @@
+program: "httpd"
+service: "httpd"
+home_dir: /Users/vagrant
