@@ -23,6 +23,9 @@ LOGCOLLECTOR_MESSAGE = 'Invalid user random_user from 1.1.1.1 port 11111:Message
 TIMEFRAME_DEFAULT_VALUE = 10
 UPPER_QUEUE_HALF_SIZE_LIMIT = 0.51
 LOWER_QUEUE_HALF_SIZE_LIMIT = 0.49
+LOGCOLLECTOR_CUSTOM_MESSAGE_1 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 1.1.1.1 port 11111'
+LOGCOLLECTOR_CUSTOM_MESSAGE_2 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 2.2.2.2 port 22222'
+LOGCOLLECTOR_CUSTOM_MESSAGE_3 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 3.3.3.3 port 33333'
 
 
 def find_in_file(string_to_search, filename):
