@@ -1,7 +1,6 @@
----
 - name: Cleanup manager environment
   hosts: managers
-  become: True
+  become: true
   tasks:
 
     - name: Delete Osquery configuration file
@@ -21,9 +20,11 @@
         name: osqueryd
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
     - name: Uninstall stress
       shell: yum remove -y stress

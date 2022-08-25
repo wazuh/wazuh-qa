@@ -9,7 +9,9 @@
         marker: <!-- {mark} READ SURICATA LOGS CONFIG -->
         state: absent
 
-    - name: Restart Wazuh to apply the change
-      systemd:
-        state: restarted
-        name: wazuh-agent
+    - name: Restart wazuh-agent to apply the change
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
