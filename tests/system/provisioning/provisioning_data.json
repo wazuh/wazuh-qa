@@ -1,46 +1,69 @@
 {
     "agentless_cluster": [
-        "test_jwt_invalidation/test_change_rbac_mode.py",
-        "test_jwt_invalidation/test_change_security_resources.py",
-        "test_jwt_invalidation/test_disconnected_nodes.py",
-        "test_jwt_invalidation/test_revoke_endpoint.py",
-        "test_jwt_invalidation/test_update_password.py",
-        "test_cluster/test_integrity_sync/test_integrity_sync.py"
+        "test_system/test_jwt_invalidation/test_change_rbac_mode.py",
+        "test_system/test_jwt_invalidation/test_change_security_resources.py",
+        "test_system/test_jwt_invalidation/test_disconnected_nodes.py",
+        "test_system/test_jwt_invalidation/test_revoke_endpoint.py",
+        "test_system/test_jwt_invalidation/test_update_password.py",
+        "test_system/test_cluster/test_integrity_sync/test_integrity_sync.py"
     ],
     "basic_cluster": [
-        "test_cluster/test_agent_groups/test_agent_groups.py",
-        "test_cluster/test_agent_files_deletion/test_agent_files_deletion.py",
-        "test_cluster/test_agent_info_sync/test_agent_info_sync.py",
-        "test_cluster/test_agent_key_polling/test_agent_key_polling.py",
-        "test_multigroups/test_multigroups.py",
-        "test_cluster/test_agent_groups/test_agent_groups_forced_change.py"
+        "test_system/test_cluster/test_agent_groups/test_agent_groups.py",
+        "test_system/test_cluster/test_agent_files_deletion/test_agent_files_deletion.py",
+        "test_system/test_cluster/test_agent_info_sync/test_agent_info_sync.py",
+        "test_system/test_cluster/test_agent_key_polling/test_agent_key_polling.py",
+        "test_system/multigroups/test_multigroups.py",
+        "test_system/cluster/test_agent_groups/test_agent_groups_forced_change.py"
     ],
     "basic_environment": [
-        "test_agent_auth/test_agent_auth.py",
-        "test_enrollment/test_enrollment.py"
+        "test_system/test_agent_auth/test_agent_auth.py",
+        "test_system/test_enrollment/test_enrollment.py"
     ],
     "enrollment_cluster": [
-        "test_cluster/test_agent_enrollment/test_agent_enrollment.py",
-        "test_cluster/test_agent_groups/test_agent_default_group_added.py",
-        "test_cluster/test_agent_groups/test_assign_agent_group_with_enrollment.py",
-        "test_cluster/test_agent_groups/test_assign_agent_never_connected_to_group.py",
-        "test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py",
-        "test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool.py",
-        "test_cluster/test_agent_groups/test_assign_agent_to_a_group.py",
-        "test_cluster/test_agent_groups/test_assign_groups_guess.py"
+        "test_system/test_cluster/test_agent_enrollment/test_agent_enrollment.py",
+        "test_system/test_cluster/test_agent_groups/test_agent_default_group_added.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_agent_group_with_enrollment.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_agent_never_connected_to_group.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_agent_to_a_group_api.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_agent_to_a_group.py",
+        "test_system/test_cluster/test_agent_groups/test_assign_groups_guess.py"
     ],
     "manager_agent": [
-        "test_active_response_log_format/test_active_response_log_format.py"
+        "test_system/test_active_response_log_format/test_active_response_log_format.py"
     ],
     "one_manager_agent": [
-        "test_fim/test_files/test_files_cud.py",
-        "test_fim/test_synchronization/test_synchronization.py"
+        "test_system/test_fim/test_files/test_files_cud.py",
+        "test_system/test_fim/test_synchronization/test_synchronization.py"
     ],
     "four_manager_disconnected_node": [
-        "test_cluster/test_agent_groups/test_agent_groups_new_cluster_node.py"
+        "test_system/test_cluster/test_agent_groups/test_agent_groups_new_cluster_node.py"
     ],
     "big_cluster_40_agents": [
-        "test_cluster/test_agent_groups/test_groups_sync_default.py",
-        "test_cluster/test_agent_groups/test_groups_sync_time.py"
+        "test_system/test_cluster/test_agent_groups/test_groups_sync_default.py",
+        "test_system/test_cluster/test_agent_groups/test_groups_sync_time.py"
+    ],
+    "end_to_end_environment": [
+        "end_to_end/test_basic_cases/test_audit/test_audit.py",
+        "end_to_end/test_basic_cases/test_aws_infrastructure_monitoring/test_aws_infrastructure_monitoring.py",
+        "end_to_end/test_basic_cases/test_brute_force/test_brute_force_rdp/test_brute_force_rdp.py",
+        "end_to_end/test_basic_cases/test_brute_force/test_brute_force_ssh/test_brute_force_ssh.py",
+        "end_to_end/test_basic_cases/test_detecting_suspicious_binaries/test_detecting_suspicious_binaries.py",
+        "end_to_end/test_basic_cases/test_docker_monitoring/test_docker_monitoring.py",
+        "end_to_end/test_basic_cases/test_emotet/test_emotet.py",
+        "end_to_end/test_basic_cases/test_fim/test_fim_linux/test_fim_linux.py",
+        "end_to_end/test_basic_cases/test_fim/test_fim_windows/test_fim_windows.py",
+        "end_to_end/test_basic_cases/test_ip_reputation/test_ip_reputation.py",
+        "end_to_end/test_basic_cases/test_osquery_integration/test_osquery_integration.py",
+        "end_to_end/test_basic_cases/test_shellshock_attack_detection/test_shellshock_attack_detection.py",
+        "end_to_end/test_basic_cases/test_slack_integration/test_slack_integration.py",
+        "end_to_end/test_basic_cases/test_sql_injection/test_sql_injection.py",
+        "end_to_end/test_basic_cases/test_suricata_integration/test_suricata_integration.py",
+        "end_to_end/test_basic_cases/test_unauthorized_processes_detection/test_unauthorized_processes_detection.py",
+        "end_to_end/test_basic_cases/test_virustotal_integration/test_virustotal_integration.py",
+        "end_to_end/test_basic_cases/test_vulnerability_detector/test_vulnerability_detector_linux/test_vulnerability_detector_linux.py",
+        "end_to_end/test_basic_cases/test_vulnerability_detector/test_vulnerability_detector_windows/test_vulnerability_detection_windows.py",
+        "end_to_end/test_basic_cases/test_windows_defender/test_windows_defender.py",
+        "end_to_end/test_basic_cases/test_yara_integration/test_yara_integration.py",
     ]
 }
