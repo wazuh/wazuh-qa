@@ -190,7 +190,7 @@ def configure_environment(request):
         request (fixture): Provide information on the executing test function.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
-    roles_path = request.config.getoption('--roles_path')
+    roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -240,7 +240,7 @@ def generate_events(request, metadata):
         metadata (dict): Dictionary with test case metadata.
     """
     inventory_playbook = request.config.getoption('--inventory_path')
-    roles_path = request.config.getoption('--roles_path')
+    roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -290,4 +290,13 @@ def pytest_addoption(parser):
         default=None,
         type=str,
         help='Inventory path',
+    )
+
+    parser.addoption(
+        '--roles-path',
+        action='store',
+        metavar='ROLES_PATH',
+        default=os.path.join(suite_path, 'data', 'ansible_roles'),
+        type=str,
+        help='Ansible roles path.',
     )
