@@ -1,4 +1,4 @@
- name: Syslog simulator params configuration
+- name: Syslog simulator params configuration
   description: Syslog simulator params configuration
   configuration_parameters:
     message: '""'
