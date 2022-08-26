@@ -8,7 +8,7 @@ ubuntu-agent:
   manager: centos-manager
 
 centos-agent:
-  os: centos
+  os: amazonlinux
   roles: [agent]
   manager: centos-manager
 
