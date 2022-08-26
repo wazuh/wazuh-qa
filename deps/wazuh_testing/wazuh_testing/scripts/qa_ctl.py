@@ -105,7 +105,7 @@ def check_test_module_exists(tests_path, type, component, suite_command, module)
         suite_command (str): Suite flag and name to be used in the qa-docs run.
         module (str): Test module.
     """
-    check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} {suite_command} -e {module} --no-logging"
+    check_test_exist = f"qa-docs -p {tests_path} -t {type} -c {component} -s {suite_command} -e {module} --no-logging"
     check_test_exist = local_actions.run_local_command_returning_output(check_test_exist)
     if f"{module} exists" not in check_test_exist:
         raise QAValueError(f"{module} does not exist in {tests_path}", qactl_logger.error, QACTL_LOGGER)
