@@ -101,7 +101,7 @@ def get_alert_timestamp(start_log, end_log):
         return datetime.fromtimestamp(float(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
 
 
-def get_msg_with_number(file_monitor, message, accum_results):
+def get_messages_info(file_monitor, message, accum_results):
     """Check if the alerts.log file contains the message
 
     Args:
@@ -110,11 +110,11 @@ def get_msg_with_number(file_monitor, message, accum_results):
         accum_results (int): Total message to accumulate
 
     Returns:
-        list: List of messages number
+        list: List with messages information
     """
     error_message = f"Could not find this event in {message}"
 
-    result = file_monitor.start(timeout=eps.T_80, update_position=True, accum_results=accum_results,
+    result = file_monitor.start(timeout=eps.T_20, update_position=True, accum_results=accum_results,
                                 callback=generate_monitoring_callback_groups(message),
                                 error_message=error_message).result()
 
