@@ -3,7 +3,7 @@ import socket
 import subprocess
 import sys
 
-from wazuh_testing.tools import SIMULATE_AGENT
+from wazuh_testing.tools import SIMULATE_AGENT, SYSLOG_SIMULATOR
 
 
 # Timeouts
@@ -58,3 +58,15 @@ def simulate_agent_function(param):
                     -f {param['msg_size']} -e {param['total_msg']} \
                     -k {param['disable_keepalive_msg']} -d {param['disable_receive_msg']} \
                     -c {param['enable_logcollector_msg_number']} -g {param['message']}", shell=True)
+
+
+def syslog_simulator_function(param):
+    """Function to run the script syslog_simulator.py
+
+    Args:
+        param (dict): Dictionary with script parameters
+    """
+    python_executable = sys.executable
+    subprocess.call(f"{python_executable} {SYSLOG_SIMULATOR} -m {param['message']} -e {param['total_msg']} \
+                    -f {param['msg_size']} -t {param['interval_burst_time']} -b {param['messages_per_burst']}",
+                    shell=True)

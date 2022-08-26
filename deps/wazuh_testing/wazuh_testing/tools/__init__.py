@@ -82,6 +82,7 @@ else:
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
     ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
     SIMULATE_AGENT = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'simulate_agents.py')
+    SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator.py')
     WAZUH_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
     try:
