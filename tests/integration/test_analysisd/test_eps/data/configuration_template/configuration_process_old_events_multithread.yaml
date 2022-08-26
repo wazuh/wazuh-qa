@@ -1,0 +1,18 @@
+- sections:
+    - section: global
+      elements:
+        - limits:
+            elements:
+              - eps:
+                  elements:
+                    - maximum:
+                        value: MAXIMUM
+                    - timeframe:
+                        value: TIMEFRAME
+
+    - section: localfile
+      elements:
+        - log_format:
+            value: 'syslog'
+        - location:
+            value: '/var/log/syslog'
