@@ -13,6 +13,22 @@
         value: LOG_FORMAT
     - alias:
         value: ALIAS
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
 
 - tags:
   - test_command_execution_freq
@@ -27,3 +43,19 @@
         value: LOG_FORMAT
     - frequency:
         value: FREQUENCY
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
