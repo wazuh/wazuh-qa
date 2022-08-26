@@ -55,17 +55,20 @@ tags:
 import os
 import pytest
 import sys
+import subprocess as sb
+
 import wazuh_testing.api as api
+import wazuh_testing.generic_callbacks as gc
+import wazuh_testing.logcollector as logcollector
+from wazuh_testing import global_parameters
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
-import wazuh_testing.generic_callbacks as gc
-import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-import subprocess as sb
+
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
@@ -141,7 +144,7 @@ def check_configuration_age_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     log_callback = logcollector.callback_analyzing_file(cfg['location'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=log_callback,
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
