@@ -1,8 +1,8 @@
 - name: EPS Limits process old events instead of new ones - Multithread
   description: EPS Limits process old events instead of new ones - Multithread
   configuration_parameters:
-    MAXIMUM: '2'
-    TIMEFRAME: '60'
+    MAXIMUM: '10'
+    TIMEFRAME: '5'
   metadata:
-    maximum: 2
-    timeframe: 60
+    maximum: 10
+    timeframe: 5
