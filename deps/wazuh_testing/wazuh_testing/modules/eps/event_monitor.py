@@ -1,8 +1,7 @@
 import re
-from datetime import datetime
 
 from wazuh_testing.modules import eps as eps
-from wazuh_testing.tools import LOG_FILE_PATH, ANALYSISD_STATE, ALERT_LOGS_PATH
+from wazuh_testing.tools import LOG_FILE_PATH, ANALYSISD_STATE
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback_groups
 
 
@@ -82,23 +81,6 @@ def get_analysisd_state():
     analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=') for element in data.split('\n')))
 
     return analysisd_state
-
-
-def get_alert_timestamp(start_log, end_log):
-    """Get the timestamp of the alert if exist in the alerts.log file between two string
-
-    Args:
-        start_log (str): Start message to find
-        end_log (str): End message to find
-    """
-    with open(ALERT_LOGS_PATH, 'r') as file:
-        str_file = file.read()
-        index1 = str_file.find(end_log)
-        index2 = str_file[0: index1].rfind(start_log)
-        str_alert = str_file[index2: index1]
-        timestamp = str_alert[str_alert.find(start_log) + len(start_log):str_alert.find(': ')]
-
-        return datetime.fromtimestamp(float(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def get_messages_info(file_monitor, message, accum_results):
