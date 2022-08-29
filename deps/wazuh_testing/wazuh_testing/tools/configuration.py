@@ -745,11 +745,11 @@ def update_configuration_template(configurations, old_values, new_values):
     return json.loads(configurations_to_update)
 
 
-def get_simulate_agent_configuration(data_file_path):
-    """Load simulate agent configuration file.
+def get_configuration(data_file_path):
+    """Load configuration from file.
 
     Args:
-        data_file_path (str): Test case template file path.
+        data_file_path (str): Configuration file path.
 
     Returns:
         dict: Configurations names.
@@ -761,6 +761,30 @@ def get_simulate_agent_configuration(data_file_path):
         configuration_parameters.update(test_case['configuration_parameters'])
 
     return configuration_parameters
+
+
+def get_simulate_agent_configuration(data_file_path):
+    """Load simulate agent configuration file.
+
+    Args:
+        data_file_path (str): Configuration file path.
+
+    Returns:
+        dict: Configurations names.
+    """
+    return get_configuration(data_file_path)
+
+
+def get_syslog_simulator_configuration(data_file_path):
+    """Load syslog simulator configuration file.
+
+    Args:
+        data_file_path (str): Configuration file path.
+
+    Returns:
+        dict: Configurations names.
+    """
+    return get_configuration(data_file_path)
 
 
 def get_wazuh_local_rules() -> List[str]:

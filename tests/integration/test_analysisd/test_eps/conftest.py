@@ -9,7 +9,7 @@ import pytest
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import configuration, ARCHIVES_LOG_FILE_PATH, \
                                 ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_DIRECTORY, WAZUH_INTERNAL_OPTIONS
-from wazuh_testing.modules.eps import simulate_agent_function
+from wazuh_testing.modules.eps import simulate_agent_function, syslog_simulator_function
 
 
 @pytest.fixture(scope='function')
@@ -137,3 +137,11 @@ def load_local_rules():
     yield
 
     configuration.write_wazuh_local_rules(backup_local_rules)
+
+
+@pytest.fixture(scope='function')
+def syslog_simulator(request):
+    """Fixture to run the script syslog_simulator.py"""
+    syslog_simulator_function(request.param)
+
+    yield
