@@ -70,5 +70,11 @@
     line: "<node>{{ master_hostname }}</node>"
     backrefs: yes
 
+- name: Enable clusterd debug mode
+  blockinfile:
+    path: /var/ossec/etc/local_internal_options.conf
+    block: |
+      wazuh_clusterd.debug=1
+
 - name: Restart Wazuh
   command: /var/ossec/bin/wazuh-control restart

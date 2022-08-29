@@ -4,9 +4,11 @@
 import json
 import tempfile
 import xml.dom.minidom as minidom
+from typing import Union
 
 import testinfra
 import yaml
+
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
@@ -63,9 +65,15 @@ class HostManager:
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
-    def modify_file_content(self, host: str, path: str = None, content: str = ''):
+    def modify_file_content(self, host: str, path: str = None, content: Union[str, bytes] = ''):
+        """Create a file with a specified content and copies it to a path.
+        Args:
+            host (str): Hostname
+            path (str): path for the file to create and modify
+            content (str, bytes): content to write into the file
+        """
         tmp_file = tempfile.NamedTemporaryFile()
-        tmp_file.write(content.encode())
+        tmp_file.write(content if isinstance(content, bytes) else content.encode())
         tmp_file.seek(0)
         self.move_file(host, src_path=tmp_file.name, dest_path=path)
         tmp_file.close()
@@ -277,3 +285,13 @@ class HostManager:
         """
         return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
                                                    f"use_regex={use_regex}")
+
+    def get_stats(self, host: str, path: str):
+        """Retrieve file or file system status.
+        Args:
+            host (str): Hostname.
+            path (str): The full path of the file/object to get the facts of.
+        Returns:
+            Dictionary containing all the stat data.
+        """
+        return self.get_host(host).ansible("stat", f"path={path}")
