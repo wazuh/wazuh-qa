@@ -1,5 +1,5 @@
 centos-manager:
-  os: amazonlinux
+  os: centos
   roles: [aio]
 
 ubuntu-agent:
@@ -8,7 +8,7 @@ ubuntu-agent:
   manager: centos-manager
 
 centos-agent:
-  os: amazonlinux
+  os: centos
   roles: [agent]
   manager: centos-manager
 
