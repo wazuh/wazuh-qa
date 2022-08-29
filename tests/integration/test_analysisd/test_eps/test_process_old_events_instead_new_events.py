@@ -4,10 +4,10 @@ from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-                                              get_simulate_agent_configuration
+                                              get_syslog_simulator_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.eps import LOGCOLLECTOR_MESSAGE
+from wazuh_testing.modules.eps import syslog_simulator_function, SYSLOG_CUSTOM_MESSAGE, PATTERN_A, PATTERN_B, PATTERN_C
 from wazuh_testing.tools import ALERT_FILE_PATH
 
 
@@ -19,9 +19,9 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_process_old_events_instead_new_events.yaml')
-configurations_simulate_agent_path = os.path.join(TEST_DATA_PATH,
-                                                  'configuration_simulate_agent.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_process_old_events.yaml')
+configurations_syslog_simulator_path = os.path.join(TEST_DATA_PATH,
+                                                  'configuration_syslog_simulator.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_process_old_events_one_thread.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_process_old_events_multi_thread.yaml')
 
@@ -36,42 +36,38 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
                                                 t2_configuration_metadata)
 
 # Get simulate agent configurations (t1)
-params_process_old_events_one_thread = get_simulate_agent_configuration(configurations_simulate_agent_path)
+params_process_old_events_one_thread = get_syslog_simulator_configuration(configurations_syslog_simulator_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 10000  # of 1Kb message of 16384 Kb of queue size
+total_msg = 150
 params_process_old_events_one_thread.update({'total_msg': total_msg})
+params_process_old_events_one_thread.update({'message': f"\"{SYSLOG_CUSTOM_MESSAGE}\""})
+params_process_old_events_one_thread.update({'interval_burst_time': 0})
+params_process_old_events_one_thread.update({'messages_per_burst': 0})
 
-# Get simulate agent configurations (t2)
-params_process_old_events_multithread = get_simulate_agent_configuration(configurations_simulate_agent_path)
-maximum_eps_t2 = [metadata['maximum'] for metadata in t2_configuration_metadata]
+# Get syslog simulator configurations (t2)
+params_process_old_events_multithread = get_syslog_simulator_configuration(configurations_syslog_simulator_path)
 timeframe_eps_t2 = [metadata['timeframe'] for metadata in t2_configuration_metadata]
-# It is sent `width_frame` time frame width to reduce test time execution
-frame_width = 3
-total_msg = maximum_eps_t2[0] * timeframe_eps_t2[0] * frame_width
-params_process_old_events_multithread.update({'total_msg': total_msg})
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
-@pytest.mark.parametrize('simulate_agent', [params_process_old_events_one_thread], indirect=True)
+@pytest.mark.parametrize('syslog_simulator', [params_process_old_events_one_thread], indirect=True)
 def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration,
                                        set_wazuh_configuration_eps, configure_wazuh_one_thread,
-                                       truncate_monitored_files, delete_alerts_folder, restart_wazuh_daemon_function,
-                                       simulate_agent):
+                                       truncate_monitored_files, restart_wazuh_daemon_function, syslog_simulator):
     '''
-    description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
-                 average frees up some space. To do this, read the alerts.log file and find the numerated alerts
-                 messages and gets the timestamp. The oldest message must have lower timestamp. To do so, first it must
-                 set the `internal_options.conf` file to work with one thread, otherwise the message are not in the
-                 increasing order.
+    description: Check that `wazuh-analysisd` processes queued events first instead of new events. To do this, it is
+                 read the alerts.json file and it is stored the messages timestamp. The oldest message must have the
+                 lowest timestamp. First it must set the `internal_options.conf` file to work with one thread,
+                 otherwise the message are not in the increasing order.
 
     test_phases:
         - Set a custom Wazuh configuration.
         - Truncate logs files.
         - Restart wazuh-daemons.
-        - Execute agent simulated script.
-        - Check alerts.log file.
+        - Execute syslog simulator script.
+        - Check alerts.json file.
 
     wazuh_min_version: 4.4.0
 
@@ -96,70 +92,60 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
-        - delete_alerts_folder:
-            type: fixture
-            brief: Delete all the content od the /var/log/alerts folder.
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - simulate_agent:
+        - syslog_simulator:
             type: fixture
-            brief: Execute a script that simulate agent and send `logcolector` logs to the manager.
+            brief: Execute a script that send syslog messages to the manager.
 
     assertions:
-        - The timestamp of the oldest numerated messages have to be lower than he new messages.
+        - The timestamp of the oldest numerated messages have to be lower than the previous messages.
+        - The message must be in increase order.
 
     input_description:
         - The `cases_process_old_events_one_thread.yaml` file provides the module configuration for this test.
     '''
-    # Set the alerts start message
-    start_alert_msg = '** Alert '
     # Initial timestamp to compare
-    timestamp_bkp = datetime.fromtimestamp(float(0.0)).strftime('%Y-%m-%d %H:%M:%S')
-    # Factor to iterate the alerts.log file to reduce the test execution time
-    time_events_processed = 5
-
-    # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
-    sleep(metadata['timeframe'] / 2)
-    analysisd_state = evm.get_analysisd_state()
-    events_processed = int(analysisd_state['events_processed'])
-    events_received = int(analysisd_state['events_received'])
-
-    # Check that the timestamp of the message in the alerts.log is lower than the next one
-    # In order to reduce the test time execution, It will check {time_events_processed} consecutive timeframe
-    # by checking events_processed * time_events_processed
-    if(events_processed * time_events_processed <= events_received):
-        for index in range((events_processed * time_events_processed) - 1):
-            # Get the timestamp of the log
-            timestamp = evm.get_alert_timestamp(start_alert_msg, f"{LOGCOLLECTOR_MESSAGE} {index}")
-            # Check that the timestamp of the first message y lower than the previous one
-            assert timestamp >= timestamp_bkp, fr"The timestamp of the previous message {timestamp_bkp} has to be "\
-                                               fr"lower than the follow one {timestamp}"
-            # Store the timestamp to be compared with the next one
-            timestamp_bkp = timestamp
-    else:
-        raise Exception('Not enough messages were sent.')
+    timestamp_bkp = datetime.strptime('0001-01-01T00:00:00.000+0000', '%Y-%m-%dT%H:%M:%S.%f+0000')
+    regex = fr".*\"timestamp\":\"([^\"]*)\".*Login failed: admin, test AAAA, Message number: (\d+).*"
+    file_monitor = FileMonitor(ALERT_FILE_PATH)
+    timestamp_list = evm.get_messages_info(file_monitor, regex, total_msg)
+    # Check that the timestamp of the message in the alerts.json is lower than the next one, and messages are stored
+    # secuentially
+    index = 0
+    for element in timestamp_list:
+        # Get the timestamp of the log
+        timestamp = datetime.strptime(element[0], '%Y-%m-%dT%H:%M:%S.%f+0000')
+        message_index = int(element[1])
+        # Check that the timestamp of the next message is lower than the previous one
+        assert timestamp >= timestamp_bkp, f"The timestamp of the previous message {timestamp_bkp} has to be "\
+                                           f"lower than the follow one {timestamp}"
+        assert message_index == index, "The messages were not stored in increasing orded. Message index" \
+                                       f"stored {message_index} shoud be in possition {index}"
+        # Store the timestamp to be compared with the next one
+        timestamp_bkp = timestamp
+        # Increase index to check the next message
+        index += 1
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
-@pytest.mark.parametrize('simulate_agent', [params_process_old_events_multithread], indirect=True)
 def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                         set_wazuh_configuration_eps, truncate_monitored_files, delete_alerts_folder,
-                                         restart_wazuh_daemon_function, simulate_agent):
+                                         set_wazuh_configuration_eps, truncate_monitored_files,
+                                         restart_wazuh_daemon_function):
     '''
-    description: Check that `wazuh-analysisd` processes queued events first instead of new events when the moving
-                 average frees up some space. To do this, read the alerts.json file and find the numerated alerts
-                 messages with the FileMonitor tool. To do so, it iterates the `n` frames of `maximum` * `timeframe` and
-                 checks if the message number belongs to the respective frame.
+    description: Check that `wazuh-analysisd` processes queued events first instead of new events. To do this, it is
+                 sent three groups of messages with different content per groups (A, B and C). Then, it checks that
+                 each group of messages received belong to the rescpective timeframe in the correct order, first group
+                 A, the B an last C group.
 
     test_phases:
         - Set a custom Wazuh configuration.
         - Truncate logs files.
         - Restart wazuh-daemons.
-        - Execute agent simulated script.
-        - Check alerts.log file.
+        - Check alerts.json file.
 
     wazuh_min_version: 4.4.0
 
@@ -178,42 +164,52 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
         - set_wazuh_configuration_eps:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
-        - load_local_rules:
-            type: fixture
-            brief: Set the local_rules.xml to override rules.
-        - configure_wazuh_one_thread:
-            type: fixture
-            brief: Set the wazuh internal option configuration according to the configuration data.
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - simulate_agent:
-            type: fixture
-            brief: Execute a script that simulate agent and send `logcolector` logs to the manager.
 
     assertions:
-        - The timestamp of the oldest numerated messages have to be lower than he new messages.
+        - The messages content type must have the same order that it has been sent.
 
     input_description:
         - The `cases_process_old_events_multi_thread.yaml` file provides the module configuration for this test.
     '''
+    patern_list = [PATTERN_A, PATTERN_B, PATTERN_C]
+    total_msg_list = []
+    regex = fr".*Login failed: admin, test (\w+), Message number: (\d+).*"
+    messages_sent = int(params_process_old_events_multithread['total_msg'])
+
+    # Send custom messages type PATTERN_A
+    custom_message = SYSLOG_CUSTOM_MESSAGE
+    params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
+    syslog_simulator_function(params_process_old_events_multithread)
+    sleep(timeframe_eps_t2[0] / 2)
+    # Create a filemonitor
     file_monitor = FileMonitor(ALERT_FILE_PATH)
-    # Wait 'timeframe' / 2 second to read the wazuh-analysisd.state to ensure that has corrects values
-    sleep(metadata['timeframe'] / 2)
-    analysisd_state = evm.get_analysisd_state()
-    events_received = int(analysisd_state['events_received'])
-    index = 0
-    frame = metadata['timeframe'] * metadata['maximum']
-    total_msg_number_list = evm.get_msg_with_number(file_monitor, fr".*{LOGCOLLECTOR_MESSAGE} (\d+).*", total_msg)
-    while (index + 1) * frame <= events_received:
-        start_index = index * frame
-        end_index = (index + 1) * frame
-        number_list = total_msg_number_list[start_index: end_index]
+    # Get total PATTERN_A messages
+    total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
 
-        assert all(int(number) >= start_index and int(number) < end_index for number in number_list), \
-            'Some messages are not in the correct frame'
+     # Send custom messages type PATTERN_B
+    custom_message = custom_message.replace(PATTERN_A, PATTERN_B)
+    params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
+    syslog_simulator_function(params_process_old_events_multithread)
+    sleep(timeframe_eps_t2[0] / 2)
+    # Get total PATTERN_B messages
+    total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
 
-        index += 1
+     # Send custom messages type PATTERN_C
+    custom_message = custom_message.replace(PATTERN_B, PATTERN_C)
+    params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
+    syslog_simulator_function(params_process_old_events_multithread)
+    sleep(timeframe_eps_t2[0] / 2)
+    # Get total PATTERN_C messages
+    total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
+    # Check messages order pattern
+    index_patern = 0
+    for element in total_msg_list:
+        for index in range(len(element)):
+            assert element[index][0] == patern_list[index_patern]
+        index_patern += 1
