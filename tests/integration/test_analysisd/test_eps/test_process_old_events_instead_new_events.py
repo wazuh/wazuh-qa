@@ -20,8 +20,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_process_old_events.yaml')
-configurations_syslog_simulator_path = os.path.join(TEST_DATA_PATH,
-                                                  'configuration_syslog_simulator.yaml')
+configurations_syslog_simulator_path = os.path.join(TEST_DATA_PATH, 'configuration_syslog_simulator.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_process_old_events_one_thread.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_process_old_events_multi_thread.yaml')
 
@@ -192,7 +191,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     # Get total PATTERN_A messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
 
-     # Send custom messages type PATTERN_B
+    # Send custom messages type PATTERN_B
     custom_message = custom_message.replace(PATTERN_A, PATTERN_B)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
     syslog_simulator_function(params_process_old_events_multithread)
@@ -200,7 +199,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     # Get total PATTERN_B messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
 
-     # Send custom messages type PATTERN_C
+    # Send custom messages type PATTERN_C
     custom_message = custom_message.replace(PATTERN_B, PATTERN_C)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
     syslog_simulator_function(params_process_old_events_multithread)

@@ -27,6 +27,7 @@ PATTERN_B = 'BBBB'
 PATTERN_C = 'CCCC'
 SYSLOG_CUSTOM_MESSAGE = f"Login failed: admin, test {PATTERN_A}, Message number:"
 
+
 def find_in_file(string_to_search, filename):
     """Find a specific string in a file
 

@@ -13,6 +13,6 @@
     - section: localfile
       elements:
         - log_format:
-            value: 'syslog'
+            value: syslog
         - location:
-            value: '/var/log/syslog'
+            value: /var/log/syslog
