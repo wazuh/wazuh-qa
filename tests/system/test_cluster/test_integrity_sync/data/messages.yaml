@@ -11,12 +11,12 @@ wazuh-master:
   - regex: .*Decreasing sync size limit to .* MB.*
     path: /var/ossec/logs/cluster.log
     timeout: 60
-  - regex: ".*wazuh-worker1.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| 
-      Files to delete in worker: 0.*"
+  - regex: ".*wazuh-worker1.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| \
+            Files to delete in worker: 0.*"
     path: /var/ossec/logs/cluster.log
     timeout: 100
-  - regex: ".*wazuh-worker2.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| 
-      Files to delete in worker: 0.*"
+  - regex: ".*wazuh-worker2.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| \
+            Files to delete in worker: 0.*"
     path: /var/ossec/logs/cluster.log
     timeout: 100
   - regex: .*Increasing sync size limit to .* MB.*
