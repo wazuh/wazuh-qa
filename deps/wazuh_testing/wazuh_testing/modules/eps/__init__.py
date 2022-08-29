@@ -10,7 +10,6 @@ from wazuh_testing.tools import SIMULATE_AGENT, SYSLOG_SIMULATOR
 T_10 = 10
 T_20 = 20
 T_60 = 60
-T_80 = 80
 
 ANALYSISD_PREFIX = r'.*wazuh-analysisd.*'
 MAILD_PREFIX = r'.*wazuh-maild.*'
@@ -23,10 +22,10 @@ LOGCOLLECTOR_MESSAGE = 'Invalid user random_user from 1.1.1.1 port 11111:Message
 TIMEFRAME_DEFAULT_VALUE = 10
 UPPER_QUEUE_HALF_SIZE_LIMIT = 0.51
 LOWER_QUEUE_HALF_SIZE_LIMIT = 0.49
-LOGCOLLECTOR_CUSTOM_MESSAGE_1 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 1.1.1.1 port 11111'
-LOGCOLLECTOR_CUSTOM_MESSAGE_2 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 2.2.2.2 port 22222'
-LOGCOLLECTOR_CUSTOM_MESSAGE_3 = 'Mar 24 10:12:36 centos7 sshd[12249]: Invalid user random_user from 3.3.3.3 port 33333'
-
+PATTERN_A = 'AAAA'
+PATTERN_B = 'BBBB'
+PATTERN_C = 'CCCC'
+SYSLOG_CUSTOM_MESSAGE = f"Login failed: admin, test {PATTERN_A}, Message number:"
 
 def find_in_file(string_to_search, filename):
     """Find a specific string in a file
