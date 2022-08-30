@@ -176,16 +176,16 @@ else:
 
     def registry_key_cud():
         pass
-    
+
     def registry_value_create():
         pass
 
     def registry_value_update():
         pass
-    
+
     def registry_value_delete():
         pass
-    
+
     def create_values_content():
         pass
 
@@ -1968,7 +1968,7 @@ if sys.platform == 'win32':
             value_default_content = ''
         else:
             value_default_content = 1
-    
+
         aux_dict = {}
         if isinstance(value_list, list):
             for elem in value_list:
@@ -1980,7 +1980,7 @@ if sys.platform == 'win32':
 
         else:
             raise ValueError('It can only be a list or dictionary')
-        
+
         return aux_dict
 
 
@@ -2033,7 +2033,7 @@ if sys.platform == 'win32':
             value_added_content = 'added'
         else:
             value_added_content = 0
- 
+
         options_set = set_check_options(options)
 
         custom_validator = CustomValidator(validators_after_create, None, None, None)
@@ -2051,7 +2051,7 @@ if sys.platform == 'win32':
             if name in registry_path:
                 continue
             modify_registry_value(key_handle, name, value_type, value_added_content)
-    
+
         wait_for_scheduled_scan(wait_for_scan=wait_for_scan, interval=scan_delay, monitor=log_monitor)
 
         registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event)
@@ -2102,9 +2102,9 @@ if sys.platform == 'win32':
                                                       registry_dict=value_list, options=options_set,
                                                       custom_validator=custom_validator, encoding=encoding,
                                                       callback=callback, is_value=True)
-        
+
         key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
-        
+
         # Modify previous registry values
         for name, content in value_list.items():
             if name in registry_path:
@@ -2160,9 +2160,9 @@ if sys.platform == 'win32':
                                                       registry_dict=value_list, options=options_set,
                                                       custom_validator=custom_validator, encoding=encoding,
                                                       callback=callback, is_value=True)
-        
+
         key_handle = create_registry(registry_parser[root_key], registry_sub_key, arch)
-             
+
         # Delete previous registry values
         for name, _ in value_list.items():
             if name in registry_path:
@@ -2710,3 +2710,24 @@ def check_fim_start(file_monitor):
         detect_whodata_start(file_monitor)
     else:
         detect_initial_scan(file_monitor)
+
+
+# Create folder and file inside
+def create_folder_file(host_manager, folder_path):
+    # Create folder
+    host_manager.run_command('wazuh-agent1', f'mkdir {folder_path}')
+
+    # Create file
+    host_manager.run_command('wazuh-agent1', f'touch {folder_path}/{folder_path}.txt')
+
+
+# Check that fim scan end
+def wait_for_fim_scan_end(HostMonitor, inventory_path, messages_path, tmp_path):
+    HostMonitor(inventory_path=inventory_path,
+                messages_path=messages_path,
+                tmp_path=tmp_path).run()
+
+
+# Function that use to run a script inside remote host to execute queries to DB
+def query_db(host_manager, script, db_path, query):
+    return host_manager.run_command('wazuh-manager', "python {} --db_path {} --query {}".format(script, db_path, query))
