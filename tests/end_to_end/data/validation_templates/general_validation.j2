@@ -4,5 +4,5 @@
   roles:
     - role: host_checker
       vars:
-        os: "{% raw %}{{ hostvars[inventory_hostname]['os'] }}{% endraw %}"
+        os: "{% raw %}{{ hostvars[inventory_hostname]['os_name'] }}{% endraw %}"
         supported_distros: {{ distros }}
