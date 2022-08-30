@@ -5,6 +5,7 @@ import os
 import ansible_runner
 import pytest
 import json
+import yaml
 from tempfile import gettempdir
 
 from wazuh_testing.tools.file import remove_file
@@ -33,12 +34,39 @@ def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_host
 
     return target_hosts, target_distros
 
+def validate_inventory(inventory_path):
+    """Check if the Ansible inventory follows our standard defined in the README.md file, inside the E2E suite.
+
+    This function validate if the groups/subgroups in the inventory are in our list of valid groups.
+
+    Args:
+        inventory_path (str):  Path to Ansible inventory.
+    """
+    valid_groups = ['managers', 'agents', 'linux', 'windows', 'all']
+    inventory_dict = yaml.safe_load(open(inventory_path))
+
+    for group in inventory_dict:
+        # Check if the current group is valid
+        if group not in valid_groups:
+            raise Exception(f"'{group}' is not a valid group for E2E tests. Read the README.md file "
+                            "to build a valid inventory.")
+        try:
+            # Check if the subgroups are valid (if any)
+            for subgroup in inventory_dict[group]['children']:
+                if subgroup not in valid_groups:
+                    raise Exception(f"'{subgroup}' is not a valid group for E2E tests. Read the README.md file "
+                                    "to build a valid inventory.")
+        except KeyError:
+            # Do not throw an exception if the group has no subgroups within it
+            pass
+
 
 @pytest.fixture(scope='session', autouse=True)
 def validate_environments(request):
     """Fixture with session scope to validate the environments before run the E2E tests.
 
     This phase is divided into 4 steps:
+        Step 0: Check the Ansible inventory.
         Step 1: Collect the data related to the selected tests that will be executed.
         Step 2: Generate a playbook containing cross-checks for selected tests.
         Step 3: Run the generated playbook.
@@ -55,6 +83,10 @@ def validate_environments(request):
 
     if not inventory_path:
         raise ValueError('Inventory not specified')
+
+    # -------------------------------------- Step 0: Check the Ansible inventory ---------------------------------------
+    validate_inventory(inventory_path)
+    # -------------------------------------------------- End of Step 0 -------------------------------------------------
 
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     test_suites_paths = []
