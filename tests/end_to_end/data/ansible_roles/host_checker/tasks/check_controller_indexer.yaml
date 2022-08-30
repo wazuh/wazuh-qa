@@ -23,7 +23,7 @@
 
 - name: Test Wazuh Indexer credentials
   uri:
-    url: "https://{{ hostvars[inventory_hostname]['ansible_host'] }}:9200"
+    url: https://{{ hostvars[inventory_hostname]['ansible_host'] }}:9200
     user: "{{ hostvars[inventory_hostname]['dashboard_user'] }}"
     password: "{{ hostvars[inventory_hostname]['dashboard_password'] }}"
     method: GET
