@@ -12,7 +12,7 @@
   set_fact:
     check_result: 'true'
     errors: "{{ inventory_hostname }} is unreachable.\n"
-  when: 'ping_result.unreachable is defined and os == "linux"'
+  when: (ping_result.unreachable is defined and os == "linux")
 
 - name: Try connection (Windows)
   win_ping:
@@ -24,7 +24,7 @@
   set_fact:
     check_result: 'true'
     errors: "{{ inventory_hostname }} is unreachable.\n"
-  when: 'ping_result.unreachable is defined and os == "windows"'
+  when: (ping_result.unreachable is defined and os == "windows")
 
 # Collect the current errors
 - set_fact:
