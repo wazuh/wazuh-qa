@@ -118,6 +118,7 @@ def get_configuration(request):
     return request.param
 
 
+pytest.skip(reason="This test needs refactor/fixes. Has flaky behaviour")
 def test_configuration_query_valid(get_configuration, configure_environment, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon starts properly when the 'query' tag is used.
