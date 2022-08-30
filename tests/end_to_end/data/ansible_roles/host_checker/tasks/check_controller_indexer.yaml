@@ -40,4 +40,4 @@
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}The Wazuh Indexer credentials are invalid, please check the inventory.\n"
-  when: (api_response is defined and 'Unauthorized' in api_response.content)
+  when: (os == 'linux' and api_response is defined and 'Unauthorized' in api_response.content)
