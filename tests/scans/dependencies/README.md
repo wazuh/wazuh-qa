@@ -10,6 +10,7 @@ Output file in which the report will be generated can be specified with `report-
 Parameters:
     --repo: repository name. Default: 'wazuh'.
     --branch: branch name of specified repository. Default: 'master'.
+    --commit: commit of specified repository. Default: None
     --requirements-path: requirements file path. Default: 'framework/requirements.txt'.
     --report-path: output file path. Default: 'dependencies/report_file.json'.
 ```
@@ -22,7 +23,7 @@ cachedir: .pytest_cache
 metadata: {'Python': '3.9.5', 'Platform': 'Linux-5.11.0-34-generic-x86_64-with-glibc2.31', 'Packages': {'pytest': '6.2.3', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'html': '3.1.1', 'metadata': '1.11.0', 'testinfra': '5.0.0'}}
 rootdir: /home/kondent/git/wazuh-qa/tests/scans
 plugins: html-3.1.1, metadata-1.11.0, testinfra-5.0.0
-collected 1 item                                                                                                                                                                             
+collected 1 item
 
 dependencies/test_dependencies.py::test_python_dependencies_vuln_scan FAILED                                                                                                               [100%]
 
@@ -53,7 +54,7 @@ dependencies/test_dependencies.py:23: AssertionError
 FAILED dependencies/test_dependencies.py::test_python_dependencies_vuln_scan - AssertionError: Vulnerables packages were found, full report at: /home/kondent/git/wazuh-qa/tests/scans/dependen...
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ===================================================================================== 1 failed in 1.87s ======================================================================================
-↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ cat dependencies/report_file.json 
+↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ cat dependencies/report_file.json
 {
     "report_date": "2021-09-10T09:49:43.471148",
     "vulnerabilities_found": 28,
@@ -81,12 +82,12 @@ cachedir: .pytest_cache
 metadata: {'Python': '3.9.5', 'Platform': 'Linux-5.11.0-34-generic-x86_64-with-glibc2.31', 'Packages': {'pytest': '6.2.3', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'html': '3.1.1', 'metadata': '1.11.0', 'testinfra': '5.0.0'}}
 rootdir: /home/kondent/git/wazuh-qa/tests/scans
 plugins: html-3.1.1, metadata-1.11.0, testinfra-5.0.0
-collected 1 item                                                                                                                                                                             
+collected 1 item
 
 dependencies/test_dependencies.py::test_python_dependencies_vuln_scan PASSED                                                                                                               [100%]
 
 ===================================================================================== 1 passed in 0.68s ======================================================================================
-↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ cat ~/Desktop/report_file.json 
+↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ cat ~/Desktop/report_file.json
 {
     "report_date": "2021-09-10T09:53:39.284082",
     "vulnerabilities_found": 0,

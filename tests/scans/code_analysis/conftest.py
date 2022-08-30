@@ -1,8 +1,7 @@
 import shutil
 import tempfile
-
 import pytest
-from git import Repo
+from git import Git, Repo
 
 DEFAULT_DIRECTORIES_TO_CHECK = 'framework/,api/,wodles/'
 DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests/,test/'
@@ -43,6 +42,7 @@ def clone_wazuh_repository(pytestconfig):
     # Get Wazuh repository and branch
     repository_name = pytestconfig.getoption('repo')
     branch = pytestconfig.getoption('branch')
+    commit = pytestconfig.getoption('commit')
 
     # Create temporary dir
     repository_path = tempfile.mkdtemp()
@@ -50,12 +50,25 @@ def clone_wazuh_repository(pytestconfig):
     try:
         # Clone into temporary dir
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
-        Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
-                        repository_path,
-                        depth=1,
-                        branch=branch)
+        if not commit:
+            Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
+                            repository_path,
+                            depth=1,
+                            branch=branch)
+        else:
+            repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
+                                   repository_path, branch='master', no_single_branch=True)
+
+            git_local = Git(repository_path)
+            commit_branch = git_local.branch('-a', '--contains', commit).split('\n')[0].strip()
+
+            repo.git.checkout(commit_branch)
+            repo.git.checkout(commit)
+
         yield repository_path
-    except:
+
+    except Exception as e:
+        print(f"Error cloning {repository_name}: {str(e)}")
         yield None
 
     # Remove the temporary directory when the test ends

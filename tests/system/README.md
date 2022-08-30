@@ -114,6 +114,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_key_polling                                       | basic_cluster                  |
 | test_cluster/test_agent_files_deletion                                    | basic_cluster                  |
 | test_cluster/test_integrity_sync                                          | agentless_cluster              |
+| test_cluster/test_ruleset_sync_status                                     | agentless_cluster              |
 | test_jwt_invalidation                                                     | agentless_cluster              |
 | test_active_response_log_format                                           | manager_agent                  |
 | test_fim/test_synchronization                                             | one_manager_agent              |
@@ -316,13 +317,13 @@ changed: [wazuh-master]
 ...
 
 PLAY RECAP **********************************************************************************************************************************************************************************************************************
-localhost                  : ok=13   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-agent1               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-agent2               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-agent3               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-master               : ok=11   changed=10   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-worker1              : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-wazuh-worker2              : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=13   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-agent1               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-agent2               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-agent3               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-master               : ok=11   changed=10   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-worker1              : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+wazuh-worker2              : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 
 
 ```
@@ -337,7 +338,7 @@ cachedir: .pytest_cache
 metadata: {'Python': '3.7.5', 'Platform': 'Linux-5.3.0-7642-generic-x86_64-with-Ubuntu-19.10-eoan', 'Packages': {'pytest': '4.5.0', 'py': '1.8.1', 'pluggy': '0.13.1'}, 'Plugins': {'html': '2.0.1', 'tavern': '0.34.0', 'testinfra': '5.0.0', 'metadata': '1.8.0'}}
 rootdir: /home/adriiiprodri/Desktop/git/wazuh-qa/tests/system/cluster
 plugins: html-2.0.1, tavern-0.34.0, testinfra-5.0.0, metadata-1.8.0
-collected 1 item                                                                                                                                                          
+collected 1 item
 
 test_agent_key_polling/test_agent_key_polling.py::test_agent_key_polling 2020-03-31 09:42:46,087 - wazuh_testing - DEBUG - Add new file composer process for wazuh-master and path: /var/ossec/logs/ossec.log
 2020-03-31 09:42:46,089 - wazuh_testing - DEBUG - Add new file monitor process for wazuh-master and path: /var/ossec/logs/ossec.log

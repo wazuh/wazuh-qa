@@ -64,6 +64,7 @@ data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_path = os.path.join(data_dir, 'syscollector.yaml')
 with open(messages_path) as f:
     test_cases = yaml.safe_load(f)
+local_internal_options = {'analysisd.debug': '2'}
 
 
 # Fixtures
@@ -77,8 +78,9 @@ def get_configuration(request):
 @pytest.mark.parametrize('test_case',
                          list(test_cases),
                          ids=[test_case['name'] for test_case in test_cases])
-def test_syscollector_events(test_case, get_configuration, mock_agent_module, configure_custom_rules, restart_analysisd,
-                             wait_for_analysisd_startup, connect_to_sockets_function, file_monitoring):
+def test_syscollector_events(test_case, configure_local_internal_options_module, get_configuration, mock_agent_module,
+                             configure_custom_rules, restart_analysisd, wait_for_analysisd_startup,
+                             connect_to_sockets_function, file_monitoring):
     '''
     description: Check if Analysisd handle Syscollector deltas properly by generating alerts.
 
