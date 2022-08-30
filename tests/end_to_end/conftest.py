@@ -16,7 +16,7 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_hosts=[]):
+def get_target_hosts_and_distros(test_suite_name, target_distros={}, target_hosts=[]):
     environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
     environment_metadata = json.load(open(environment_file))
     distros_by = {'manager': [], 'agent': []}
@@ -25,12 +25,13 @@ def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_host
         if environment_metadata[test_suite_name][key]['instances'] > 0:
             # Save manager/agent distros
             distros_by[key] = environment_metadata[test_suite_name][key]['distros']
-            target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+            target_distros[key].extend(environment_metadata[test_suite_name][key]['distros'])
             # Add the target host to the list (following the standard host name: "<distro>-<type>*")
             target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
     # Remove duplicates
     target_hosts = list(dict.fromkeys(target_hosts))
-    target_distros = list(dict.fromkeys(target_distros))
+    target_distros['manager'] = list(dict.fromkeys(target_distros['manager']))
+    target_distros['agent'] = list(dict.fromkeys(target_distros['agent']))
 
     return target_hosts, target_distros
 
@@ -108,7 +109,7 @@ def validate_environments(request):
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     test_suites_paths = []
     target_hosts = []
-    target_distros = []
+    target_distros = {'manager': [], 'agent': []}
 
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
@@ -137,7 +138,8 @@ def validate_environments(request):
             'template_path': playbook_template,
             'dest_path': general_playbook,
             'target_hosts': ','.join(target_hosts),
-            'distros': target_distros
+            'manager_distros': target_distros['manager'],
+            'agent_distros': target_distros['agent'],
         }
     }
     ansible_runner.run(**gen_parameters)
@@ -187,7 +189,11 @@ def run_specific_validations(request):
         parameters = {
             'playbook': validation_playbook, 'inventory': inventory_path,
             'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
-            'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
+            'extravars': {
+                'target_hosts': ','.join(target_hosts),
+                'manager_distros': target_distros['manager'],
+                'agent_distros': target_distros['agent'],
+            }
         }
         validation_runner = ansible_runner.run(**parameters)
 
