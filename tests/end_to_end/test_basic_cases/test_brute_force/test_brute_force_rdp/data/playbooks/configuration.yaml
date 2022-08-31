@@ -1,10 +1,9 @@
 - name: Configure local environment
-  hosts: localhost
+  hosts:  centos-manager
   become: true
   tasks:
-
     # Install hydra to attempt the RDP brute force attack
     - name: Install hydra
-      package:
+      ansible.builtin.yum:
         name: hydra
         state: present

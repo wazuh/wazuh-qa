@@ -7,7 +7,7 @@
       become: true
 
 - name: Generate events
-  hosts: localhost
+  hosts: centos-manager
   tasks:
 
     - name: Attempt a RDP brute force attack
