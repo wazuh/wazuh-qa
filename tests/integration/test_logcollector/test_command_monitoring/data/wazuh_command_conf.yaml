@@ -7,11 +7,11 @@
   sections:
     - section: localfile
       elements:
-      - command:
+        - command:
           value: COMMAND
-      - log_format:
+        - log_format:
           value: LOG_FORMAT
-      - alias:
+        - alias:
           value: ALIAS
     - section: syscheck
       elements:
@@ -19,15 +19,15 @@
           value: 'yes'
     - section: sca
       elements:
-      - enabled:
+        - enabled:
           value: 'no'
     - section: rootcheck
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
     - section: active-response
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
 
 - tags:
@@ -37,25 +37,25 @@
   sections:
     - section: localfile
       elements:
-      - command:
+        - command:
           value: COMMAND
-      - log_format:
+        - log_format:
           value: LOG_FORMAT
-      - frequency:
+        - frequency:
           value: FREQUENCY
     - section: syscheck
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
     - section: sca
       elements:
-      - enabled:
+        - enabled:
           value: 'no'
     - section: rootcheck
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
     - section: active-response
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
