@@ -49,6 +49,8 @@ import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules import TIER0, WINDOWS
+
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -58,6 +60,9 @@ events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
+
+# Marks
+pytestmark = [TIER0, WINDOWS]
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')

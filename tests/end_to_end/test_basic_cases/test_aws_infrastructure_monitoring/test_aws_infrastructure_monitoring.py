@@ -46,6 +46,7 @@ import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules import TIER0, LINUX
 
 # Test cases data
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -69,6 +70,9 @@ aws_api_script = os.path.join(test_data_path, 'configuration', 'aws_cloudtrail_e
 metadata = config.update_configuration_template(metadata, ['CUSTOM_AWS_SCRIPT_PATH'], [aws_api_script])
 bucket_name = metadata[0]['extra_vars']['bucket']
 configuration_extra_vars.update({'AWS_API_SCRIPT': aws_api_script, 'bucket': bucket_name})
+
+# Marks
+pytestmark = [TIER0, LINUX]
 
 
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
