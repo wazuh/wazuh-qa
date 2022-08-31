@@ -16,18 +16,16 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_target_hosts_and_distros(test_suite_name, target_distros={}, target_hosts=[]):
+def get_target_hosts_and_distros(test_suite_name, target_distros={'manager': [], 'agent': []}, target_hosts=[]):
     environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
     environment_metadata = json.load(open(environment_file))
-    distros_by = {'manager': [], 'agent': []}
 
     for key in environment_metadata[test_suite_name]:
         if environment_metadata[test_suite_name][key]['instances'] > 0:
             # Save manager/agent distros
-            distros_by[key] = environment_metadata[test_suite_name][key]['distros']
             target_distros[key].extend(environment_metadata[test_suite_name][key]['distros'])
             # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-            target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+            target_hosts.extend([distro.lower() + f"-{key}" for distro in target_distros[key]])
     # Remove duplicates
     target_hosts = list(dict.fromkeys(target_hosts))
     target_distros['manager'] = list(dict.fromkeys(target_distros['manager']))
@@ -108,9 +106,7 @@ def validate_environments(request):
 
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     test_suites_paths = []
-    target_hosts = []
-    target_distros = {'manager': [], 'agent': []}
-
+    target_hosts, target_distros = [], {'manager': [], 'agent': []}
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
     # Remove duplicates caused by the existence of 2 or more test cases
