@@ -106,7 +106,8 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-pytest.skip(reason="This test needs refactor/fixes. Has flaky behaviour")
+
+@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
 def test_command_execution_freq(configure_local_internal_options_module, get_configuration, file_monitoring,
                                 configure_environment, restart_monitord, restart_logcollector):
     '''

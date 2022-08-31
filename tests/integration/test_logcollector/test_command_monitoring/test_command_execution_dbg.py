@@ -181,7 +181,7 @@ def dbg_reading_command(command, alias, log_format):
                             error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-pytest.skip(reason="This test needs refactor/fixes. Has flaky behaviour")
+@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
 def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
                                configure_environment, restart_logcollector):
     '''
