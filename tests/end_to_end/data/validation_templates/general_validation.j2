@@ -1,0 +1,8 @@
+- name: General validation phase
+  hosts: {{ target_hosts }}
+  any_errors_fatal: true
+  roles:
+    - role: host_checker
+      vars:
+        os: "{% raw %}{{ 'windows' if ansible_os_family == 'Windows' else 'linux' }}{% endraw %}"
+        supported_distros: {{ distros }}

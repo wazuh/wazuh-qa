@@ -119,6 +119,7 @@ def restart_wazuh_daemon_function(daemon=None):
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
 
+
 @pytest.fixture(scope='module')
 def restart_wazuh_daemon_after_finishing(daemon=None):
     """
@@ -127,6 +128,7 @@ def restart_wazuh_daemon_after_finishing(daemon=None):
     yield
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
+
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
@@ -262,6 +264,14 @@ def pytest_addoption(parser):
         type=str,
         help="run tests using a specific WPK package path"
     )
+    parser.addoption(
+        "--integration-api-key",
+        action="store",
+        metavar="integration_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for integratord tests."
+    )
 
 
 def pytest_configure(config):
@@ -318,6 +328,11 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
+
+    # Set integration_api_key if it is passed through command line args
+    integration_api_key = config.getoption("--integration-api-key")
+    if integration_api_key:
+        global_parameters.integration_api_key = integration_api_key
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
@@ -937,6 +952,7 @@ def set_wazuh_configuration(configuration):
     # Restore previous configuration
     conf.write_wazuh_conf(backup_config)
 
+
 @pytest.fixture(scope='function')
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
@@ -961,6 +977,7 @@ def configure_local_internal_options_function(request):
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
+
 @pytest.fixture(scope='function')
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
@@ -973,7 +990,6 @@ def truncate_monitored_files():
 
     for log_file in log_files:
         truncate_file(log_file)
-
 
 
 @pytest.fixture(scope='function')
@@ -1086,14 +1102,14 @@ def remove_backups(backups_path):
     recursive_directory_creation(backups_path)
     os.chmod(backups_path, 0o777)
 
-    
-@pytest.fixture(scope='function')    
+
+@pytest.fixture(scope='function')
 def mock_agent_with_custom_system(agent_system):
     """Fixture to create a mocked agent with custom system specified as parameter"""
     if agent_system not in mocking.SYSTEM_DATA:
         raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
 
-    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system])
 
     yield agent_id
 

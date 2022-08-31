@@ -65,7 +65,8 @@ configurations = load_wazuh_configurations(configurations_path, __name__)
 logtest_sock = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'sockets', 'analysis'))
 receiver_sockets_params = [(logtest_sock, 'AF_UNIX', 'TCP')]
 receiver_sockets = None
-msg_get_config = "getconfig rule_test"
+msg_get_config = '{"version": 1, "origin": {"module": "api"}, "command": "getconfig", "module": "api",\
+                 "parameters": {"section": "rule_test"}}'
 
 
 # Fixture
@@ -81,8 +82,8 @@ def test_get_configuration_sock(get_configuration, configure_environment, restar
     description: Check analysis Unix socket returns the correct Logtest configuration under different sets of
                  configurations, `wazuh-analisysd` returns the right information from the `rule_test` configuration
                  block. To do this, it overwrites wrong field values and checks that the values within the received
-                 message after establishing a connection using the logtest AF_UNIX socket that uses TCP are the same that the
-                 loaded fields from the 'wazuh_conf.yaml' file.
+                 message after establishing a connection using the logtest AF_UNIX socket that uses TCP are the same
+                 that the loaded fields from the 'wazuh_conf.yaml' file.
 
     wazuh_min_version: 4.2.0
 

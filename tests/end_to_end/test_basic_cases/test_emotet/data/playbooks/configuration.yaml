@@ -54,14 +54,19 @@
         ./Sysmon64.exe -accepteula -i sysconfig.xml
 
     - name: Configure Wazuh to collect Sysmon events
-      win_shell: |
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
-        "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
-        Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+          "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
 
     - name: Download trigger_emotet.exe
       win_shell: |
@@ -69,20 +74,22 @@
         Invoke-WebRequest -Uri {{ s3_url }}/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
 
     - name: Restart wazuh-agent
-      win_shell: |
-        net stop wazuh
-        net start wazuh
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows
 
 - name: Configure manager environment
   hosts: manager
   tasks:
 
     - name: Configure local rules
-      become: true
-      blockinfile:
-        path: /var/ossec/etc/rules/local_rules.xml
-        insertafter: </groups>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_rules.yaml
+      vars:
+        config_block: |
           <group name="emotet,">
           <rule id="255559" level="5">
           <if_group>sysmon</if_group>
@@ -111,8 +118,10 @@
           </mitre>
           </rule>
           </group>
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
     - name: Restart wazuh-manager
-      become: true
-      shell: systemctl restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux

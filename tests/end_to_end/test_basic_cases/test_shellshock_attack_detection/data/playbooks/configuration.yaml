@@ -4,20 +4,23 @@
   tasks:
 
     - name: Configure a localfile instance to collect the logs from Apache
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        insertbefore: ^</ossec_config>
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <localfile>
           <log_format>apache</log_format>
           <location>/var/log/httpd/access_log</location>
           </localfile>
+        os: linux
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
     - name: Check if Firewalld is installed on CentOS
       shell: systemctl status firewalld --no-pager

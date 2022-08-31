@@ -57,7 +57,7 @@ def detect_gcp_start(file_monitor):
 
 
 def callback_received_messages_number(line):
-    received_messages_number = rf".*wm_gcp_pubsub_run\(\): INFO: - INFO - Received and acknowledged (\d+) messages"
+    received_messages_number = r'.*wm_gcp_parse_output\(\): INFO: Received and acknowledged (\d+) messages'
     match = re.findall(received_messages_number, line)
     if match:
         return match

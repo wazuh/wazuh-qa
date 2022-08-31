@@ -20,9 +20,12 @@
         block: ''
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
-    - name: Restart the manager
-      become: true
-      shell: systemctl restart wazuh-manager
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
 - name: Cleanup Windows agent environment
   hosts: windows-agent

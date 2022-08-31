@@ -1,0 +1,9 @@
+# REQUIRED VARIABLES
+# -------------------
+# (String) os: Target operating system
+
+- name: Get installation type
+  become: true
+  shell: /var/ossec/bin/wazuh-control info
+  register: wazuh_info
+  when: os == 'linux'

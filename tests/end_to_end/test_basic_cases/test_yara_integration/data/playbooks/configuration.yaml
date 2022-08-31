@@ -4,10 +4,11 @@
   tasks:
 
     - name: Configure local rules for Yara
-      blockinfile:
-        path: /var/ossec/etc/rules/local_rules.xml
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_rules.yaml
+      vars:
+        config_block: |
           <group name="syscheck,">
           <rule id="100300" level="7">
           <if_sid>550</if_sid>
@@ -33,10 +34,11 @@
           </group>
 
     - name: Configure local decoders for Yara
-      blockinfile:
-        path: /var/ossec/etc/decoders/local_decoder.xml
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        block: |
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_local_decoders.yaml
+      vars:
+        config_block: |
           <decoder name="yara_decoder">
           <prematch>wazuh-yara:</prematch>
           </decoder>
@@ -46,12 +48,12 @@
           <order>log_type, yara_rule, yara_scanned_file</order>
           </decoder>
 
-    - name: Configure an active response for Yara
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
-        insertbefore: ^</ossec_config>
-        block: |
+    - name: Configure an active response and syscheck
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
           <command>
           <name>yara</name>
           <executable>yara.sh</executable>
@@ -64,18 +66,17 @@
           <rules_id>100300,100301</rules_id>
           </active-response>
 
-    - name: Configure syscheck
-      blockinfile:
-        path: /var/ossec/etc/ossec.conf
-        insertafter: <syscheck>
-        marker: <!-- {mark} ADDING SYSCHECK CONFIG -->
-        block: |
+          <syscheck>
           <directories whodata="yes">/tmp/yara/malware</directories>
+          </syscheck>
+        os: linux
 
     - name: Restart wazuh-manager
-      systemd:
-        state: restarted
-        name: wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
 
     - name: Create a directory to store Yara rules
       file:

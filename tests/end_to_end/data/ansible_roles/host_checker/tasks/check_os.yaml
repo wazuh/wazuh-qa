@@ -1,0 +1,16 @@
+# REQUIRED VARIABLES
+# -------------------
+# (String) os: Target operating system
+# (String) supported_distros: List of ditros supported by the current test
+
+- name: Check OS (Linux)
+  set_fact:
+    check_result: 'true'
+    errors: "{{ errors }}The {{ ansible_distribution }} distro isn't supported for the selected tests currently.\n"
+  when: (ansible_distribution not in supported_distros and os == "linux")
+
+- name: Check OS (Windows)
+  set_fact:
+    check_result: 'true'
+    errors: "{{ errors }}The {{ os }} OS isn't supported for the selected tests currently.\n"
+  when: (os == "windows" and os|capitalize not in supported_distros)
