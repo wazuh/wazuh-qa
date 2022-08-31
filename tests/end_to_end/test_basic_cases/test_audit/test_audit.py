@@ -46,6 +46,7 @@ import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules import TIER0, LINUX
 
 
 alerts_json = os.path.join(gettempdir(), 'alerts.json')
@@ -56,6 +57,9 @@ events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
+
+# Marks
+pytestmark = [TIER0, LINUX]
 
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
