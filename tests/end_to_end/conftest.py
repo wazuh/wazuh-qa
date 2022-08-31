@@ -145,7 +145,7 @@ def run_specific_validations(request):
 
 
 @pytest.fixture(scope='function')
-def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
+def clean_alerts_index(get_indexer_credentials, get_manager_ip):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
@@ -153,15 +153,15 @@ def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
     """
     yield
     remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    e2e.delete_index_api(credentials=get_indexer_credentials, ip_address=get_manager_ip)
 
 
 @pytest.fixture(scope='module')
-def get_dashboard_credentials(request):
-    """Get wazuh-dashboard username and password.
+def get_indexer_credentials(request):
+    """Get wazuh-indexer username and password.
 
        Returns:
-            dict: wazuh-dashboard credentials.
+            dict: wazuh-indexer credentials.
     """
     inventory_playbook = request.config.getoption('--inventory-path')
 
@@ -171,13 +171,13 @@ def get_dashboard_credentials(request):
     inventories = [inventory_playbook]
 
     inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
-                                                  host='dashboard')
+                                                  host='indexer')
 
     # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
-    dashboard_credentials = {'user': inventory_data[0]['dashboard_user'],
-                             'password': inventory_data[0]['dashboard_password']}
+    indexer_credentials = {'user': inventory_data[0]['indexer_user'],
+                           'password': inventory_data[0]['indexer_password']}
 
-    yield dashboard_credentials
+    yield indexer_credentials
 
 
 @pytest.fixture(scope='module')

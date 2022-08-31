@@ -31,8 +31,12 @@ manager:
       ansible_user: <USER>
       ansible_ssh_private_key_file: <PRIVATE_KEY>
       ansible_python_interpreter: /usr/bin/python3
-      dashboard_user: <DASHBOARD_USER>
-      dashboard_password: <DASHBOARD_PASSWORD>
+
+indexer:
+  hosts:
+    indexer-node-1:
+      indexer_user: <DASHBOARD_USER>
+      indexer_password: <DASHBOARD_PASSWORD>
 
 agent:
   children:

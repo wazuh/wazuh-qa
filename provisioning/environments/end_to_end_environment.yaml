@@ -1,6 +1,6 @@
 centos-manager:
   os: centos
-  roles: [aio]
+  roles: [manager, indexer, filebeat]
 
 ubuntu-agent:
   os: ubuntu
