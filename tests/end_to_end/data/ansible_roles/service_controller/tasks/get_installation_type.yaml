@@ -11,5 +11,5 @@
 - name: Get installation type (Windows)
   set_fact:
     wazuh_info:
-      stdout: 'agent'
+      stdout: agent
   when: os == 'windows'
