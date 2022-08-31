@@ -14,7 +14,7 @@ Release report: TBD
 ### Changed
 
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
-
+- Skip flaky Logcollector tests ([#3217](https://github.com/wazuh/wazuh-qa/pull/3217)) \- (Tests)
 ### Fixed
 
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests) 
