@@ -22,7 +22,7 @@
 
     - name: Wait for alert to be generated
       wait_for:
-        timeout: 5
+        timeout: 30
 
     - name: Get alert json
       include_role:

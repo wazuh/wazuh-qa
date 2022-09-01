@@ -23,7 +23,7 @@
 
     - name: Wait for alerts to be indexed
       wait_for:
-        timeout: 10
+        timeout: 40
 
     - name: Get alert json
       include_role:

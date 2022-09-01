@@ -8,7 +8,7 @@
 
     - name: Wait for alert
       wait_for:
-        timeout: 5
+        timeout: 40
 
 - name: Get alerts file
   hosts: manager
