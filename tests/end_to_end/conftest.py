@@ -5,6 +5,7 @@ import os
 import ansible_runner
 import pytest
 import json
+import yaml
 from tempfile import gettempdir
 
 from wazuh_testing.tools.file import remove_file
@@ -15,23 +16,69 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_target_hosts_and_distros(test_suite_name, target_distros=[], target_hosts=[]):
+def get_target_hosts_and_distros(test_suite_name, target_distros={'manager': [], 'agent': []}, target_hosts=[]):
     environment_file = os.path.join(suite_path, 'data', 'env_requirements.json')
     environment_metadata = json.load(open(environment_file))
-    distros_by = {'manager': [], 'agent': []}
 
     for key in environment_metadata[test_suite_name]:
         if environment_metadata[test_suite_name][key]['instances'] > 0:
             # Save manager/agent distros
-            distros_by[key] = environment_metadata[test_suite_name][key]['distros']
-            target_distros.extend(environment_metadata[test_suite_name][key]['distros'])
+            target_distros[key].extend(environment_metadata[test_suite_name][key]['distros'])
             # Add the target host to the list (following the standard host name: "<distro>-<type>*")
-            target_hosts.extend([distro.lower() + f"-{key}" for distro in distros_by[key]])
+            target_hosts.extend([distro.lower() + f"-{key}" for distro in target_distros[key]])
     # Remove duplicates
     target_hosts = list(dict.fromkeys(target_hosts))
-    target_distros = list(dict.fromkeys(target_distros))
+    target_distros['manager'] = list(dict.fromkeys(target_distros['manager']))
+    target_distros['agent'] = list(dict.fromkeys(target_distros['agent']))
 
     return target_hosts, target_distros
+
+
+def validate_inventory(inventory_path, valid_hosts):
+    """Check if the Ansible inventory follows our standard defined in the README.md file, inside the E2E suite.
+
+    This function checks:
+        1. If the groups/subgroups in the inventory are in our list of valid groups.
+        2. If the hostnames follow our standard (<os>-<wazuh-installation-type>)
+
+    Args:
+        inventory_path (str): Path to Ansible inventory.
+        valid_hosts (list[str]): List of valid hosts for the selected tests.
+    """
+    valid_groups = ['managers', 'agents', 'linux', 'windows', 'all']
+    inventory_dict = yaml.safe_load(open(inventory_path))
+    errors = []
+    default_err_msg = 'Read the README.md file inside the E2E suite to build a valid inventory.'
+
+    for group in inventory_dict:
+        # Check if the current group is valid
+        if group not in valid_groups:
+            errors.append(f"'{group}' isn't a valid group for E2E tests.")
+        # Check if the hosts of the group have valid names
+        if 'hosts' in inventory_dict[group]:
+            for hostname in inventory_dict[group]['hosts']:
+                if hostname not in valid_hosts:
+                    errors.append(f"The hostname '{hostname}' doesn't follow our standard: <os>-<installation-type> or"
+                                  " isn't a necessary host for the execution of the selected tests.")
+        # Check if the subgroups are valid (if any)
+        try:
+            subgroups = inventory_dict[group]['children']
+            for subgroup in subgroups:
+                if subgroup not in valid_groups:
+                    errors.append(f"'{subgroup}' is not a valid subgroup for E2E tests.")
+                # Check if the hosts of the subgroup have valid names
+                for hostname in subgroups[subgroup]['hosts']:
+                    if hostname not in valid_hosts:
+                        errors.append(f"The hostname '{hostname}' doesn't follow our standard: <os>-<installation-type>"
+                                      " or isn't a necessary host for the execution of the selected tests.")
+        except KeyError:
+            # Do not throw an exception if the group has no subgroups within it
+            pass
+
+    if errors != []:
+        errors.append(default_err_msg)
+        error_msg = '\n'.join(errors)
+        raise Exception(error_msg)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -40,8 +87,9 @@ def validate_environments(request):
 
     This phase is divided into 4 steps:
         Step 1: Collect the data related to the selected tests that will be executed.
-        Step 2: Generate a playbook containing cross-checks for selected tests.
-        Step 3: Run the generated playbook.
+        Step 2: Check the Ansible inventory.
+        Step 3: Generate a playbook containing cross-checks for selected tests.
+        Step 4: Run the generated playbook.
 
     Args:
         request (fixture):  Gives access to the requesting test context.
@@ -58,9 +106,7 @@ def validate_environments(request):
 
     # --------------------------------------- Step 1: Prepare the necessary data ---------------------------------------
     test_suites_paths = []
-    target_hosts = []
-    target_distros = []
-
+    target_hosts, target_distros = [], {'manager': [], 'agent': []}
     # Get the path of the tests from collected items.
     collected_paths = [item.fspath for item in collected_items]
     # Remove duplicates caused by the existence of 2 or more test cases
@@ -77,20 +123,25 @@ def validate_environments(request):
         target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name, target_distros, target_hosts)
     # -------------------------------------------------- End of Step 1 -------------------------------------------------
 
-    # ---------------------- Step 2: Run the playbook to generate the general validation playbook ----------------------
+    # -------------------------------------- Step 2: Check the Ansible inventory ---------------------------------------
+    validate_inventory(inventory_path, target_hosts)
+    # -------------------------------------------------- End of Step 2 -------------------------------------------------
+
+    # ---------------------- Step 3: Run the playbook to generate the general validation playbook ----------------------
     gen_parameters = {
         'playbook': playbook_generator, 'inventory': inventory_path,
         'extravars': {
             'template_path': playbook_template,
             'dest_path': general_playbook,
             'target_hosts': ','.join(target_hosts),
-            'distros': target_distros
+            'manager_distros': target_distros['manager'],
+            'agent_distros': target_distros['agent'],
         }
     }
     ansible_runner.run(**gen_parameters)
-    # -------------------------------------------------- End of Step 2 -------------------------------------------------
+    # -------------------------------------------------- End of Step 3 -------------------------------------------------
 
-    # ----------------------------------- Step 3: Run the general validation playbook ----------------------------------
+    # ----------------------------------- Step 4: Run the general validation playbook ----------------------------------
     parameters = {
         'playbook': general_playbook,
         'inventory': inventory_path,
@@ -110,7 +161,7 @@ def validate_environments(request):
         # Raise the exception with errors details
         raise Exception(f"The general validations have failed. Please check that the environments meet the expected "
                         f"requirements. Result:\n{errors}")
-    # -------------------------------------------------- End of Step 3 -------------------------------------------------
+    # -------------------------------------------------- End of Step 4 -------------------------------------------------
 
 
 @pytest.fixture(scope='module', autouse=True)
@@ -134,7 +185,11 @@ def run_specific_validations(request):
         parameters = {
             'playbook': validation_playbook, 'inventory': inventory_path,
             'envvars': {'ANSIBLE_ROLES_PATH': roles_path},
-            'extravars': {'target_hosts': ','.join(target_hosts), 'distros': target_distros}
+            'extravars': {
+                'target_hosts': ','.join(target_hosts),
+                'manager_distros': target_distros['manager'],
+                'agent_distros': target_distros['agent'],
+            }
         }
         validation_runner = ansible_runner.run(**parameters)
 

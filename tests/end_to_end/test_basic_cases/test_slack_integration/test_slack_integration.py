@@ -47,6 +47,8 @@ from wazuh_testing.tools.file import remove_file
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules import TIER0, LINUX
+
 
 # Test cases data
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -69,6 +71,9 @@ slack_api_script = os.path.join(test_data_path, 'configuration', 'slack_api_scri
 # Update configuration with custom paths
 metadata = config.update_configuration_template(metadata, ['CUSTOM_SLACK_SCRIPT_PATH'], [slack_api_script])
 configuration_extra_vars = configuration[0]
+
+# Marks
+pytestmark = [TIER0, LINUX]
 
 
 @pytest.fixture(scope='function')

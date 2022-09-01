@@ -18,7 +18,6 @@ Our E2E tests will verify that, after generating an event, an alert will be trig
 To run these tests we need to use a **Linux** machine and install the following tools:
 
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
-- [Netcat](https://www.tecmint.com/netcat-nc-command-examples/)
 
 Then, you will need to have an inventory with the needed hosts and variables. For example:
 
@@ -31,6 +30,13 @@ manager:
       ansible_user: <USER>
       ansible_ssh_private_key_file: <PRIVATE_KEY>
       ansible_python_interpreter: /usr/bin/python3
+<<<<<<< HEAD
+=======
+      dashboard_user: <DASHBOARD_USER>
+      dashboard_password: <DASHBOARD_PASSWORD>
+  vars:
+    os_name: linux
+>>>>>>> 2872-tests-e2e
 
 indexer:
   hosts:
@@ -54,6 +60,8 @@ agent:
           ansible_user: <USER>
           ansible_ssh_private_key_file: <PRIVATE_KEY>
           ansible_python_interpreter: /usr/bin/python3
+      vars:
+        os_name: linux
     windows:
       hosts:
         windows-agent:
@@ -65,6 +73,8 @@ agent:
           ansible_winrm_transport: basic
           ansible_winrm_port: 5985 (Only in local executions)
           ansible_python_interpreter: C:\Users\vagrant\AppData\Local\Programs\Pyhton\Python39\python.exe
+      vars:
+        os_name: windows
 
 all:
   vars:

@@ -47,6 +47,8 @@ import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
 from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import configuration as config
+from wazuh_testing.modules import TIER0, LINUX
+
 
 # Test cases data
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -65,6 +67,9 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 # Custom paths
 yara_script = os.path.join(test_data_path, 'configuration', 'yara.sh')
 configuration_extra_vars = {'yara_script': yara_script}
+
+# Marks
+pytestmark = [TIER0, LINUX]
 
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
