@@ -47,7 +47,8 @@
         "agent": {
             "instances": 1,
             "distros": [
-                "Windows"
+                "Windows",
+                "Ubuntu"
             ]
         }
     },

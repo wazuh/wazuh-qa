@@ -7,3 +7,7 @@
     rule.description: "sshd: brute force trying to get access to the system. Non existent user."
     extra:
       mitre_technique: Brute Force
+    extra_vars:
+      rule_id: 5712
+      rule_level: 10
+      rule_description: "sshd: brute force trying to get access to the system. Non existent user."
