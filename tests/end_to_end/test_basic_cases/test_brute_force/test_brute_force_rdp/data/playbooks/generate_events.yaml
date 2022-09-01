@@ -8,7 +8,7 @@
         tasks_from: truncate_alert_json.yaml
 
 - name: Generate events
-  hosts: localhost
+  hosts: ubuntu-agent
   tasks:
 
     - name: Attempt a RDP brute force attack
@@ -22,17 +22,21 @@
         - test_user
         - test_user
         - test_user
-      register: result
-      failed_when:
-        - "'0 valid password found' not in result.stdout"
-
-    - name: Wait for alert
-      wait_for:
-        timeout: 5
 
 - name: Get alerts file
   hosts: managers
   tasks:
+
+    - name: Search alert in alerts log
+      include_role:
+        name: manage_alerts
+        tasks_from: search_alert.yaml
+      vars:
+        ts: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
+        custom_regex: "{\"timestamp\":\"{{ ts }}\",\"rule\":{\"level\":{{ rule_level }},\
+          \"description\":\"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".*"
+        attempts: 15
+        time_btw_attempts: 2
 
     - name: Get alert json
       include_role:

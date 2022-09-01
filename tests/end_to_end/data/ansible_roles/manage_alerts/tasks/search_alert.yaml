@@ -1,0 +1,12 @@
+- name: Search alert in alerts log
+  become: true
+  lineinfile:
+    path: /var/ossec/logs/alerts/alerts.json
+    regexp: "{{ custom_regex }}"
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: alert
+  until: alert.found != 0
+  retries: "{{ attempts }}"
+  delay: "{{ time_btw_attempts }}"
