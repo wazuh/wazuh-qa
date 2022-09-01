@@ -2,10 +2,9 @@ import os
 from time import sleep
 import pytest
 
-from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
-                                              get_simulate_agent_configuration
+from wazuh_testing.tools.configuration import get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
-from wazuh_testing.modules.eps import ANALYSISD_STATE_INTERNAL_DEFAULT, PERCENTAGE_PROCESS_MSGS
+from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT, PERCENTAGE_PROCESS_MSGS
 
 
 pytestmark = [pytest.mark.server]
@@ -18,8 +17,8 @@ configurations_simulate_agent_path = os.path.join(TEST_DATA_PATH,
 
 # Get simulate agent configurations (t1)
 params_disabled_eps = get_simulate_agent_configuration(configurations_simulate_agent_path)
-total_msg = 1000  # of 1Kb message of 16384 Kb of queue size
-params_disabled_eps.update({'total_msg': total_msg})
+num_messages = 1000  # of 1Kb message of 16384 Kb of queue size
+params_disabled_eps.update({'num_messages': num_messages})
 
 
 @pytest.mark.tier(level=0)
@@ -61,9 +60,9 @@ def test_disabled(load_wazuh_basic_configuration, configure_local_internal_optio
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-@pytest.mark.parametrize('simulate_agent', [params_disabled_eps], indirect=True)
+@pytest.mark.parametrize('simulate_agent_function', [params_disabled_eps], indirect=True)
 def test_without_eps_setting(load_wazuh_basic_configuration, configure_local_internal_options_eps,
-                             truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent):
+                             truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent_function):
     '''
     description: Check that limits EPS is disabled when it is not configured and the received events are similar or
                  equal to the processed events.
@@ -91,7 +90,7 @@ def test_without_eps_setting(load_wazuh_basic_configuration, configure_local_int
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - simulate_agent:
+        - simulate_agent_function:
             type: fixture
             brief: Execute a script that simulate agent and send `logcolector` logs to the manager.
 

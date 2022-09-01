@@ -7,11 +7,18 @@ from wazuh_testing.tools.configuration import load_configuration_template, get_t
                                               get_syslog_simulator_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.eps import syslog_simulator_function, SYSLOG_CUSTOM_MESSAGE, PATTERN_A, PATTERN_B, PATTERN_C
+from wazuh_testing.modules.analysisd import syslog_simulator
 from wazuh_testing.tools import ALERT_FILE_PATH
 
 
 pytestmark = [pytest.mark.server]
+
+# Global variables
+PATTERN_A = 'AAAA'
+PATTERN_B = 'BBBB'
+PATTERN_C = 'CCCC'
+SYSLOG_CUSTOM_MESSAGE = f"Login failed: admin, test {PATTERN_A}, Message number:"
+
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -37,8 +44,8 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 # Get simulate agent configurations (t1)
 params_process_old_events_one_thread = get_syslog_simulator_configuration(configurations_syslog_simulator_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 150
-params_process_old_events_one_thread.update({'total_msg': total_msg})
+num_messages = 150
+params_process_old_events_one_thread.update({'num_messages': num_messages})
 params_process_old_events_one_thread.update({'message': f"\"{SYSLOG_CUSTOM_MESSAGE}\""})
 params_process_old_events_one_thread.update({'interval_burst_time': 0})
 params_process_old_events_one_thread.update({'messages_per_burst': 0})
@@ -51,10 +58,11 @@ timeframe_eps_t2 = [metadata['timeframe'] for metadata in t2_configuration_metad
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
-@pytest.mark.parametrize('syslog_simulator', [params_process_old_events_one_thread], indirect=True)
+@pytest.mark.parametrize('syslog_simulator_function', [params_process_old_events_one_thread], indirect=True)
 def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                       set_wazuh_configuration_eps, configure_wazuh_one_thread,
-                                       truncate_monitored_files, restart_wazuh_daemon_function, syslog_simulator):
+                                       set_wazuh_configuration_analysisd, configure_wazuh_one_thread,
+                                       truncate_monitored_files, restart_wazuh_daemon_function,
+                                       syslog_simulator_function):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events. To do this, it is
                  read the alerts.json file and it is stored the messages timestamp. The oldest message must have the
@@ -82,7 +90,7 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - configure_wazuh_one_thread:
@@ -94,7 +102,7 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - syslog_simulator:
+        - syslog_simulator_function:
             type: fixture
             brief: Execute a script that send syslog messages to the manager.
 
@@ -109,7 +117,7 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
     timestamp_bkp = datetime.strptime('0001-01-01T00:00:00.000+0000', '%Y-%m-%dT%H:%M:%S.%f+0000')
     regex = fr".*\"timestamp\":\"([^\"]*)\".*Login failed: admin, test AAAA, Message number: (\d+).*"
     file_monitor = FileMonitor(ALERT_FILE_PATH)
-    timestamp_list = evm.get_messages_info(file_monitor, regex, total_msg)
+    timestamp_list = evm.get_messages_info(file_monitor, regex, num_messages)
     # Check that the timestamp of the message in the alerts.json is lower than the next one, and messages are stored
     # secuentially
     index = 0
@@ -132,7 +140,7 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
 def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                         set_wazuh_configuration_eps, truncate_monitored_files,
+                                         set_wazuh_configuration_analysisd, truncate_monitored_files,
                                          restart_wazuh_daemon_function):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events. To do this, it is
@@ -160,7 +168,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - truncate_monitored_files:
@@ -179,12 +187,12 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     patern_list = [PATTERN_A, PATTERN_B, PATTERN_C]
     total_msg_list = []
     regex = fr".*Login failed: admin, test (\w+), Message number: (\d+).*"
-    messages_sent = int(params_process_old_events_multithread['total_msg'])
+    messages_sent = int(params_process_old_events_multithread['num_messages'])
 
     # Send custom messages type PATTERN_A
     custom_message = SYSLOG_CUSTOM_MESSAGE
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
-    syslog_simulator_function(params_process_old_events_multithread)
+    syslog_simulator(params_process_old_events_multithread)
     sleep(timeframe_eps_t2[0] / 2)
     # Create a filemonitor
     file_monitor = FileMonitor(ALERT_FILE_PATH)
@@ -194,7 +202,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     # Send custom messages type PATTERN_B
     custom_message = custom_message.replace(PATTERN_A, PATTERN_B)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
-    syslog_simulator_function(params_process_old_events_multithread)
+    syslog_simulator(params_process_old_events_multithread)
     sleep(timeframe_eps_t2[0] / 2)
     # Get total PATTERN_B messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
@@ -202,7 +210,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     # Send custom messages type PATTERN_C
     custom_message = custom_message.replace(PATTERN_B, PATTERN_C)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
-    syslog_simulator_function(params_process_old_events_multithread)
+    syslog_simulator(params_process_old_events_multithread)
     sleep(timeframe_eps_t2[0] / 2)
     # Get total PATTERN_C messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))

@@ -3,7 +3,7 @@ import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.eps import event_monitor as evm
-from wazuh_testing.modules.eps import ANALYSISD_STATE_INTERNAL_DEFAULT
+from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT
 from wazuh_testing.processes import check_if_deamon_is_running
 
 
@@ -27,7 +27,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
+def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_analysisd,
                  truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is started when `maximum` is set to a value greater than 0 lower and than 100000,
@@ -53,7 +53,7 @@ def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wa
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - truncate_monitored_files:

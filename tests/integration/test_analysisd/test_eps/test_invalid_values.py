@@ -4,7 +4,7 @@ import pytest
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.modules.eps import ANALYSISD_STATE_INTERNAL_DEFAULT
+from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT
 from wazuh_testing.processes import check_if_deamon_is_not_running
 
 
@@ -29,7 +29,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_invalid_values(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_eps,
+def test_invalid_values(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_analysisd,
                         truncate_monitored_files, restart_wazuh_daemon_after_finishing):
     '''
     description: Check that wazuh manager is not started when an invalid value is set to `maximum` and/or `timeframe`.
@@ -54,7 +54,7 @@ def test_invalid_values(configuration, metadata, load_wazuh_basic_configuration,
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - truncate_monitored_files:

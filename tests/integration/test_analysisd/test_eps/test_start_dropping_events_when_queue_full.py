@@ -1,12 +1,11 @@
 import os
 from time import sleep
-from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
-from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
+from wazuh_testing.modules.analysisd import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
 
 pytestmark = [pytest.mark.server]
@@ -31,18 +30,18 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 # Get simulate agent configurations (t1)
 params_start_dropping_events_when_queue_full = get_simulate_agent_configuration(configurations_simulate_agent_path)
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = 16500  # of 1Kb message of 16384 Kb of queue size. Total dropped aproximatelly 116
-expected_msg_dropped = total_msg - QUEUE_SIZE
-params_start_dropping_events_when_queue_full.update({'total_msg': total_msg})
+num_messages = 16500  # of 1Kb message of 16384 Kb of queue size. Total dropped aproximatelly 116
+expected_msg_dropped = num_messages - QUEUE_SIZE
+params_start_dropping_events_when_queue_full.update({'num_messages': num_messages})
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
-@pytest.mark.parametrize('simulate_agent', [params_start_dropping_events_when_queue_full], indirect=True)
+@pytest.mark.parametrize('simulate_agent_function', [params_start_dropping_events_when_queue_full], indirect=True)
 def test_start_dropping_events_when_queue_full(configuration, metadata, load_wazuh_basic_configuration,
-                                               set_wazuh_configuration_eps, truncate_monitored_files,
-                                               restart_wazuh_daemon_function, simulate_agent):
+                                               set_wazuh_configuration_analysisd, truncate_monitored_files,
+                                               restart_wazuh_daemon_function, simulate_agent_function):
     '''
     description: Check that the `events_dropped` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be greater than 1 and, `event_queue_usage` is equal to 1
@@ -68,7 +67,7 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, load_waz
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - truncate_monitored_files:
@@ -77,7 +76,7 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, load_waz
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - simulate_agent:
+        - simulate_agent_function:
             type: fixture
             brief: Execute a script that simulate agent and send `logcolector` logs to the manager.
 
@@ -109,7 +108,7 @@ def test_start_dropping_events_when_queue_full(configuration, metadata, load_waz
     # Check that there is event dropped. This means the queue is full
     assert events_dropped >= int(expected_msg_dropped * PERCENTAGE_PROCESS_MSGS) \
         and events_dropped <= int(expected_msg_dropped * (1 + (1 - PERCENTAGE_PROCESS_MSGS))), 'events_dropped must '\
-        'be in the range of (total_msg - QUEUE_SIZE)'
+        f"be in the range of {num_messages - QUEUE_SIZE}"
 
     # Check that the queue usage is 1.0 (100%). This means the queue is full
     assert event_queue_usage == 1.0, 'event_queue_usage must be 1.0'

@@ -1,16 +1,18 @@
 import os
 from time import sleep
-from datetime import datetime
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
-from wazuh_testing.modules.eps import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE, UPPER_QUEUE_HALF_SIZE_LIMIT, \
-                                      LOWER_QUEUE_HALF_SIZE_LIMIT
+from wazuh_testing.modules.analysisd import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
 
 pytestmark = [pytest.mark.server]
+
+# Global variables
+UPPER_QUEUE_HALF_SIZE_LIMIT = 0.51
+LOWER_QUEUE_HALF_SIZE_LIMIT = 0.49
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -32,17 +34,17 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 params_start_queuing_events_when_limit_reached = get_simulate_agent_configuration(configurations_simulate_agent_path)
 maximum_eps = [metadata['maximum'] for metadata in t1_configuration_metadata]
 timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
-total_msg = maximum_eps[0] * timeframe_eps_t1[0] + int(QUEUE_SIZE / 2)
-params_start_queuing_events_when_limit_reached.update({'total_msg': total_msg})
+num_messages = maximum_eps[0] * timeframe_eps_t1[0] + int(QUEUE_SIZE / 2)
+params_start_queuing_events_when_limit_reached.update({'num_messages': num_messages})
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 @pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
-@pytest.mark.parametrize('simulate_agent', [params_start_queuing_events_when_limit_reached], indirect=True)
+@pytest.mark.parametrize('simulate_agent_function', [params_start_queuing_events_when_limit_reached], indirect=True)
 def test_start_queuing_events_when_limit_reached(configuration, metadata, load_wazuh_basic_configuration,
-                                                 set_wazuh_configuration_eps, truncate_monitored_files,
-                                                 restart_wazuh_daemon_function, simulate_agent):
+                                                 set_wazuh_configuration_analysisd, truncate_monitored_files,
+                                                 restart_wazuh_daemon_function, simulate_agent_function):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be lower or equal than `maximum` * `timeframe` and, the `events_received` value must be greater than
@@ -69,7 +71,7 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, load_w
         - load_wazuh_basic_configuration
             type: fixture
             brief: Load a basic configuration to the manager.
-        - set_wazuh_configuration_eps:
+        - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
         - truncate_monitored_files:
@@ -78,7 +80,7 @@ def test_start_queuing_events_when_limit_reached(configuration, metadata, load_w
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart all the wazuh daemons.
-        - simulate_agent:
+        - simulate_agent_function:
             type: fixture
             brief: Execute a script that simulate agent and send `logcolector` logs to the manager.
 
