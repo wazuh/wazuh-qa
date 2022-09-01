@@ -11,9 +11,16 @@
     - name: "{{ event_description }}"
       shell: "{{ command }}"
 
-    - name: Wait for alerts to be generated
-      wait_for:
-        timeout: 20
+    - name: Search alert in alerts log
+      include_role:
+        name: manage_alerts
+        tasks_from: search_alert.yaml
+      vars:
+        timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
+        custom_regex: ".+timestamp\":\"{{ timestamp }}\",.+level.+{{ rule_level }}.+description.+\
+                       {{ rule_description }}.+id.+{{ rule_id }}.+"
+        attempts: 15
+        time_btw_attempts: 2
 
     - name: Get alert json
       include_role:
