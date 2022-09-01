@@ -46,12 +46,10 @@ agent_count = 1
 
 class Agent:
     """Class that allows us to simulate an agent registered in a manager.
-
     This simulated agent allows sending-receiving messages and commands. In order to simulate
     syscollector, FIM, FIM Integrity, rootcheck, hostinfo, winevt and logcollector modules the following classes have
     been created: GeneratorSyscollector, GeneratorFIM, GeneratorIntegrityFIM, Rootcheck,
     GeneratorHostinfo, GeneratorWinevt, Logcollector.
-
     Args:
         manager_address (str): Manager IP address.
         cypher (str, optional): Cypher method. It can be [aes, blowfish]. Default aes.
@@ -70,7 +68,6 @@ class Agent:
         retry_enrollment (bool, optional): retry then enrollment in case of error.
         logcollector_msg_number (bool, optional): insert in the logcollector message the message number.
         custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
-
     Attributes:
         id (str): ID of the agent.
         name (str): Agent name.
@@ -218,7 +215,6 @@ class Agent:
     def set_wpk_variables(self, sha=None, upgrade_exec_result=None, upgrade_notification=False, upgrade_script_result=0,
                           stage_disconnect=None):
         """Set variables related to wpk simulated responses.
-
         Args:
             sha (str): Shared key between manager and agent for remote upgrading.
             upgrade_exec_result (int): Upgrade result status code.
@@ -267,7 +263,6 @@ class Agent:
 
     def register(self):
         """Request to register the agent in the manager.
-
         In addition, it sets the agent id and agent key with the response data.
         """
         if self.retry_enrollment:
@@ -288,13 +283,10 @@ class Agent:
     @staticmethod
     def wazuh_padding(compressed_event):
         """Add the Wazuh custom padding to each event sent.
-
         Args:
             compressed_event (bytes): Compressed event with zlib.
-
         Returns:
             bytes: Padded event.
-
         Examples:
             >>> wazuh_padding(b'x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda\\x7f
                                \\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}\\xb0
@@ -326,10 +318,8 @@ class Agent:
     @staticmethod
     def compose_event(message):
         """Compose event from raw message.
-
         Returns:
             bytes: Composed event.
-
         Examples:
             >>> compose_event('test')
             b'6ef859712d8b215d9daf071ff67aaa62555551234567891:5555:test'
@@ -346,13 +336,10 @@ class Agent:
 
     def encrypt(self, padded_event):
         """Encrypt event using AES or Blowfish encryption.
-
         Args:
             padded_event (bytes): Padded event.
-
         Returns:
             bytes: Encrypted event.
-
         Examples:
             >>> agent.encrypt(b'!!!!!!!!x\\x9c\\x15\\xc7\\xc9\\r\\x00 \\x08\\x04\\xc0\\x96\\\\\\x94\\xcbn0H\\x03\\xda
                                \\x7f\\x8c\\xf3\\x1b\\xd9e\\xec\\nJ[\\x04N\\xcf\\xa8\\xa6\\xa8\\x12\\x8d\\x08!\\xfe@}
@@ -371,11 +358,9 @@ class Agent:
     def headers(self, agent_id, encrypted_event):
         """
         Add event headers for AES or Blowfish Cyphers.
-
         Args:
             agent_id (str): Agent id.
             encrypted_event (str): Encrypted event.
-
         Returns:
             bytes: Encrypted event with headers.
         """
@@ -388,13 +373,10 @@ class Agent:
 
     def create_event(self, message):
         """Build an event from a raw string message.
-
         Args:
             message (str): Raw message.
-
         Returns:
             bytes: Built event (compressed, padded, enceypted and with headers).
-
         Examples:
             >>> create_event('test message')
             b'!005!#AES:\\xab\\xfa\\xcc2;\\x87\\xab\\x7fUH\\x03>_J\\xda=I\\x96\\xb5\\xa4\\x89\\xbe\\xbf`\\xd0\\xad
@@ -416,7 +398,6 @@ class Agent:
 
     def receive_message(self, sender):
         """Agent listener to receive messages and process the accepted commands.
-
         Args:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
         """
@@ -468,9 +449,7 @@ class Agent:
 
     def process_message(self, sender, message):
         """Process agent received messages.
-
         If the message contains reserved words, then it will be proceed as command.
-
         Args:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
             message (str): Decoder message in ISO-8859-1 format.
@@ -486,11 +465,9 @@ class Agent:
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
-
         Args:
             sender (Sender): Object to establish connection with the manager socket and receive/send information.
             message_list (list): Message split by white spaces.
-
         Raises:
             ValueError: if 'sha1' command and sha_key Agent value is not defined.
             ValueError: if execution result is not configured in the Agent.
@@ -637,7 +614,6 @@ class Agent:
 
     def initialize_modules(self, disable_all_modules):
         """Initialize and enable agent modules.
-
         Args:
             disable_all_modules (boolean): True to disable all modules, False to leave the default ones enabled.
         """
@@ -718,7 +694,6 @@ class Agent:
 
     def get_connection_status(self):
         """Get agent connection status of global.db.
-
         Returns:
             str: Agent connection status (connected, disconnected, never_connected)
         """
@@ -727,7 +702,6 @@ class Agent:
     @retry(AttributeError, attempts=10, delay=5, delay_multiplier=1)
     def wait_status_active(self):
         """Wait until agent status is active in global.db.
-
         Raises:
             AttributeError: If the agent is not active. Combined with the retry decorator makes a wait loop
                 until the agent is active.
@@ -740,7 +714,6 @@ class Agent:
 
     def set_module_status(self, module_name, status):
         """Set module status.
-
         Args:
             module_name (str): Module name.
             status (str): Module status.
@@ -759,19 +732,15 @@ class Agent:
 
 class GeneratorSyscollector:
     """This class allows the generation of syscollector events.
-
     Create events of different syscollector event types Network, Process, Port, Packages, OS, Hardware and Hotfix.
     In order to change messages events it randomized different fields of templates specified by <random_string>.
     In order to simulate syscollector module, it send a set of the same syscollector type messages,
     which size is specified by `batch_size` attribute. Example of syscollector message:
-
         d:syscollector:{"type":"network","ID":18,"timestamp":"2021/03/26 00:00:00","iface":{"name":"O977Q1F55O",
         "type":"ethernet","state":"up","MAC":"08:00:27:be:ce:3a","tx_packets":2135,"rx_packets":9091,"tx_bytes":210748,
         "rx_bytes":10134272,"tx_errors":0,"rx_errors":0,"tx_dropped":0,"rx_dropped":0,"MTU":1500,"IPv4":
         {"address":["10.0.2.15"],"netmask":["255.255.255.0"],"broadcast":["10.0.2.255"],
         "metric":100,"gateway":"10.0.2.2","DHCP":"enabled"}}}
-
-
     Args:
         agent_name (str): Name of the agent.
         batch_size (int): Number of messages of the same type
@@ -789,10 +758,8 @@ class GeneratorSyscollector:
 
     def format_event(self, message_type):
         """Format syscollector message of the specified type.
-
         Args:
             message_type (str): Syscollector event type.
-
         Returns:
             str: the generated syscollector event message.
         """
@@ -834,10 +801,8 @@ class GeneratorSyscollector:
 
     def generate_event(self):
         """Generate syscollector event.
-
          The event types are selected sequentially, creating a number of events of the same type specified
          in `bath_size`.
-
          Returns:
             str: generated event with the desired format for syscollector
         """
@@ -857,9 +822,7 @@ class GeneratorSyscollector:
 
 class SCA:
     """This class allows the generation of sca_label events.
-
     Create sca events, both summary and check.
-
     Args:
         os (str): Agent operative system.
     """
@@ -873,7 +836,6 @@ class SCA:
 
     def get_message(self):
         """Alternatively creates summary and check SCA messages.
-
         Returns:
             str: an sca_label message formatted with the required header codes.
         """
@@ -891,10 +853,8 @@ class SCA:
 
     def create_sca_event(self, event_type):
         """Create sca_label event of the desired type.
-
         Args:
             event_type (str): Event type summary or check.
-
         Returns:
             dict: SCA event.
         """
@@ -964,9 +924,7 @@ class SCA:
 
 class Rootcheck:
     """This class allows the generation of rootcheck events.
-
     Creates rootcheck events by sequentially repeating the events of a sample file file.
-
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): Id of the agent.
@@ -1001,7 +959,6 @@ class Rootcheck:
 
     def get_message(self):
         """Returns a rootcheck message, informing when rootcheck scan starts and ends.
-
         Returns:
             str: a Rootcheck generated message
         """
@@ -1028,7 +985,6 @@ class Logcollector:
 
     def generate_event(self):
         """Generate logcollector event
-
         Returns:
             str: a Logcollector generated message
         """
@@ -1049,7 +1005,6 @@ class Logcollector:
 
 class GeneratorIntegrityFIM:
     """This class allows the generation of fim_integrity events.
-
     Args:
         agent_id (str): The id of the agent.
         agent_name (str): The name of the agent.
@@ -1065,7 +1020,6 @@ class GeneratorIntegrityFIM:
 
     def format_message(self, message):
         """Format FIM integrity message.
-
         Args:
             message (str): Integrity fim event.
         """
@@ -1073,7 +1027,6 @@ class GeneratorIntegrityFIM:
 
     def generate_message(self):
         """Generate integrity FIM message according to `event_type` attribute.
-
         Returns:
             str: an IntegrityFIM formatted message
         """
@@ -1103,7 +1056,6 @@ class GeneratorIntegrityFIM:
 
     def get_message(self, event_type=None):
         """Generate a random kind of integrity FIM message according to `event_type` attribute.
-
         Returns:
             str: an IntegrityFIM formatted message
         """
@@ -1118,11 +1070,9 @@ class GeneratorIntegrityFIM:
 
 class GeneratorHostinfo:
     """This class allows the generation of hostinfo events.
-
     Creates hostinfo events, randomizing an open port detection template event on a host.
     It randomizes the host, as well as the ports and their protocol. The number of open ports of the event is a
     random number from 1 to 10. Example of hostinfo message:
-
         3:/var/log/nmap.log:Host: 95.211.24.108 (), open ports: 43270 (udp) 37146 (tcp) 19885 (tcp)
     """
     def __init__(self):
@@ -1133,7 +1083,6 @@ class GeneratorHostinfo:
 
     def generate_event(self):
         """"Generates an arbitrary hostinfo message
-
         Returns:
             str: an hostinfo formatted message
         """
@@ -1152,12 +1101,9 @@ class GeneratorHostinfo:
 
 class GeneratorWinevt:
     """This class allows the generation of winevt events.
-
     Create events of the different winevt channels: System, Security, Application, Windows-Defender and Sysmon.
     It uses template events (`data/winevt.py`) for which the `EventID` field is randomized. Message structure:
-
         f:EventChannel:{"Message":"<EVENTCHANNEL_MESSAGE>","Event":"<EVENT_CHANNEL_EVENT_XML>"}
-
     Args:
         agent_name (str): Name of the agent.
         agent_id (str): ID of the agent.
@@ -1180,13 +1126,10 @@ class GeneratorWinevt:
 
     def generate_event(self, winevt_type=None):
         """Generate Windows event.
-
         Generate the desired type of Windows event (winevt). If no type of winvt message is provided,
         all winvt message types will be generated sequentially.
-
         Args:
             winevt_type (str): Winevt type message `system, security, application, windows-defender, sysmon`.
-
         Returns:
             str: an windows event generated message.
         """
@@ -1202,7 +1145,6 @@ class GeneratorWinevt:
 
 class GeneratorFIM:
     """This class allows the generation of FIM events.
-
     Args:
         agent_id (str): The id of the agent.
         agent_name (str): The name of the agent.
@@ -1240,7 +1182,6 @@ class GeneratorFIM:
 
     def random_file(self):
         """Initialize file attribute.
-
         Returns:
             str: the new randomized file for the instance
         """
@@ -1249,7 +1190,6 @@ class GeneratorFIM:
 
     def random_size(self):
         """Initialize file size with random value
-
         Returns:
             str: the new randomized file size for the instance
         """
@@ -1258,7 +1198,6 @@ class GeneratorFIM:
 
     def random_mode(self):
         """Initialize module attribute with `S_IFREG` or `S_IFLNK`
-
         Returns:
             self._mode: the new randomized file mode for the instance
         """
@@ -1276,7 +1215,6 @@ class GeneratorFIM:
 
     def random_uid(self):
         """Initialize uid attribute with random value.
-
         Returns:
             str: the new randomized file uid for the instance
         """
@@ -1286,7 +1224,6 @@ class GeneratorFIM:
 
     def random_gid(self):
         """Initialize gid attribute with random value.
-
         Returns:
             str: the new randomized gid for the instance,
             str: the new randomized gname for the instance.
@@ -1385,7 +1322,6 @@ class GeneratorFIM:
 
     def get_attributes(self):
         """Return GeneratorFIM attributes.
-
         Returns:
             dict: instance attributes.
         """
@@ -1404,7 +1340,6 @@ class GeneratorFIM:
         """Format FIM message.
         Args:
             message (str): FIM message.
-
         Returns:
             str: generated message with the required FIM header.
         """
@@ -1423,7 +1358,6 @@ class GeneratorFIM:
 
     def generate_message(self):
         """Generate FIM event based on `event_type` and `agent_version` attribute.
-
         Returns:
             str: generated message with the required FIM header.
         """
@@ -1470,7 +1404,6 @@ class GeneratorFIM:
         Args:
             event_mode (str): Event mode `real-time, whodata, scheduled`.
             event_type (str): Event type `added, modified, deleted`.
-
         Returns:
             str: generated message.
         """
@@ -1491,13 +1424,11 @@ class GeneratorFIM:
 
 class Sender:
     """This class sends events to the manager through a socket.
-
     Attributes:
         manager_address (str): IP of the manager.
         manager_port (str, optional): port used by remoted in the manager.
         protocol (str, optional): protocol used by remoted. TCP or UDP.
         socket (socket): sock_stream used to connect with remoted.
-
     Examples:
         To create a Sender, you need to create an agent first, and then, create the sender. Finally, to send messages
         you will need to use both agent and sender to create an injector.
@@ -1535,11 +1466,9 @@ class Sender:
 
 class Injector:
     """This class simulates a daemon used to send and receive messages with the manager.
-
     Each `Agent` needs an injector and a sender to be able to communicate with the manager. This class will create
     a thread using `InjectorThread` which will behave similarly to an UNIX daemon. The `InjectorThread` will
     send and receive the messages using the `Sender`
-
     Attributes:
         sender (Sender): sender used to connect to the sockets and send messages.
         agent (agent): agent owner of the injector and the sender.
@@ -1547,7 +1476,6 @@ class Injector:
                              agent.
         threads (list): list containing all the threads created.
         limit_msg (int): Maximum amount of message to be sent.
-
     Examples:
         To create an Injector, you need to create an agent, a sender and then, create the injector using both of them.
         >>> import wazuh_testing.tools.agent_simulator as ag
@@ -1593,7 +1521,6 @@ class Injector:
 
 class InjectorThread(threading.Thread):
     """This class creates a thread who will create and send the events to the manager for each module.
-
     Attributes:
         thread_id (int): ID of the thread.
         name (str): name of the thread. It is composed as Thread-{agent.id}{module}.
@@ -1642,7 +1569,6 @@ class InjectorThread(threading.Thread):
 
     def run_module(self, module):
         """Send a module message from the agent to the manager.
-
          Args:
                 module (str): Module name
         """
@@ -1735,9 +1661,7 @@ class InjectorThread(threading.Thread):
 def create_agents(agents_number, manager_address, cypher='aes', fim_eps=100, authd_password=None, agents_os=None,
                   agents_version=None, disable_all_modules=False):
     """Create a list of generic agents
-
     This will create a list with `agents_number` amount of agents. All of them will be registered in the same manager.
-
     Args:
         agents_number (int): total number of agents.
         manager_address (str): IP address of the manager.
@@ -1747,7 +1671,6 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=100, aut
         agents_os (list, optional): list containing different operative systems for the agents.
         agents_version (list, optional): list containing different version of the agent.
         disable_all_modules (boolean): Disable all simulated modules for this agent.
-
     Returns:
         list: list of the new virtual agents.
     """
@@ -1768,7 +1691,6 @@ def create_agents(agents_number, manager_address, cypher='aes', fim_eps=100, aut
 
 def connect(agent,  manager_address='localhost', protocol=TCP, manager_port='1514'):
     """Connects an agent to the manager
-
     Args:
         agent (Agent): agent to connect.
         manager_address (str): address of the manager. It can be an IP or a DNS.

@@ -14,10 +14,8 @@ logger = logging.getLogger(f"P{os.getpid()}")
 
 def parse_custom_labels(labels):
     """Parse the wazuh labels from string list to dict.
-
     Args:
         labels (list): Labels in format ["key1:value1", "key2:value2"]
-
     Returns:
         dict: Labels dictionary. {key1:value1, key2:value2}
     """
@@ -36,7 +34,6 @@ def parse_custom_labels(labels):
 
 def process_script_parameters(args):
     """Process script parameters and edit them if necessary.
-
     Args:
         args (argparse.Namespace): Script args.
     """
@@ -54,12 +51,10 @@ def process_script_parameters(args):
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
-
     Args:
         agent (Agent): agent object.
         active_modules (list): List of active modules.
         modules_eps (list): List of EPS for each active module.
-
     Raises:
         ValueError: If number of active_modules items is not the same than the modules_eps.
         ValueError: If a module does not exist on the agent simulator.
@@ -90,10 +85,8 @@ def set_agent_modules_and_eps(agent, active_modules, modules_eps):
 
 def create_agents(args):
     """Create a list of agents according to script parameters like the mode, EPS...
-
     Args:
         args (list): List of script parameters.
-
     Returns:
         list: List of agents to run.
     """
@@ -137,13 +130,11 @@ def create_agents(args):
 
 def create_injectors(agents, manager_address, protocol, limit_msg=None):
     """Create injectos objects from list of agents and connection parameters.
-
     Args:
         agents (list): List of agents to create the injectors (1 injector/agent).
         manager_address (str): Manager IP address to connect the agents.
         protocol (str): TCP or UDP protocol to connect the agents to the manager.
         limit_msg (int): Maximum amount of message to be sent.
-
     Returns:
         list: List of injector objects.
     """
@@ -160,7 +151,6 @@ def create_injectors(agents, manager_address, protocol, limit_msg=None):
 
 def start(injector, time_alive, limit_msg_enable=None):
     """Start the injector process for a specified time.
-
     Args:
         injector (Injector): Injector object.
         time_alive (int): Period of time in seconds during the injector will be running.
@@ -178,7 +168,6 @@ def start(injector, time_alive, limit_msg_enable=None):
 
 def stop(injector):
     """Stop the injector process.
-
     Args:
         injector (Injector): Injector object.
     """
@@ -187,7 +176,6 @@ def stop(injector):
 
 def run(injectors, time_alive, limit_msg_enable=None):
     """Run each injector in a separated process.
-
     Args:
         injectors (list): List of injector objects.
         time_alive (int): Period of time in seconds during the injector will be running.
@@ -207,16 +195,13 @@ def run(injectors, time_alive, limit_msg_enable=None):
 
 def calculate_eps_distribution(data, max_eps_per_agent):
     """Calculate the distribution of agents and EPS according to the input ratio.
-
     Args:
         data (list): List of dictionaries containing information about the module and the remaining EPS to be
                      distributed.
         max_eps_per_agent (int): Maximum EPS load to be distributed to an agent.
-
     Returns:
         list: List of tuples, containing in the first position the modules to be launched by that agent, and in the
               second position the EPS distribution for each module of that agent.
-
     Example:
         Input:
             data =[
