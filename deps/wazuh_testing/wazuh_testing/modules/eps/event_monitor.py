@@ -1,11 +1,12 @@
 import re
 
-from wazuh_testing.modules import eps as eps
-from wazuh_testing.tools import LOG_FILE_PATH, ANALYSISD_STATE
+import wazuh_testing as eps
+from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX, MAILD_PREFIX
+from wazuh_testing import LOG_FILE_PATH, ANALYSISD_STATE
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback_groups
 
 
-def make_analysisd_callback(pattern, prefix=eps.ANALYSISD_PREFIX):
+def make_analysisd_callback(pattern, prefix=ANALYSISD_PREFIX):
     """Create a callback function from a text pattern.
 
     It already contains the analsisd prefix.
@@ -27,7 +28,7 @@ def make_analysisd_callback(pattern, prefix=eps.ANALYSISD_PREFIX):
 
 
 def check_analysisd_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                          timeout=eps.T_60, prefix=eps.ANALYSISD_PREFIX, accum_results=1,
+                          timeout=eps.T_60, prefix=ANALYSISD_PREFIX, accum_results=1,
                           file_to_monitor=LOG_FILE_PATH):
     """Check if a analysisd event occurs
 
@@ -63,7 +64,7 @@ def check_configuration_error():
     """Check the configuration error event in ossec.log"""
     check_analysisd_event(timeout=eps.T_10, callback=r".* \(\d+\): Configuration error at.*",
                           error_message="Could not find the event 'Configuration error at 'etc/ossec.conf' "
-                                        'in ossec.log', prefix=eps.MAILD_PREFIX)
+                                        'in ossec.log', prefix=MAILD_PREFIX)
 
 
 def get_analysisd_state():
