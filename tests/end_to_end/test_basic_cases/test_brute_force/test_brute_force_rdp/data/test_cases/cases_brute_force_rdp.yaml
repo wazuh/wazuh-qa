@@ -2,9 +2,6 @@
   description: Check if the alert is generated when executing a brute force attack via RDP.
   configuration_parameters: null
   metadata:
-    rule.id: 60204
-    rule.level: 10
-    rule.description: Multiple Windows logon failures.
     extra:
       mitre_technique: Brute Force
     extra_vars:

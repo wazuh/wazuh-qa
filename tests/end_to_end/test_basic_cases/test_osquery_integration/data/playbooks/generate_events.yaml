@@ -20,8 +20,8 @@
         tasks_from: search_alert.yaml
       vars:
         timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
-        custom_regex: ".+timestamp\":\"{{ timestamp }}\",.+level\":{{ rule_level }},\"description\":\
-          \"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".+osquery\":.+\"name\":\"{{ osquery_name }}\""
+        custom_regex: "{\"timestamp\":\"{{ timestamp }}\",.+level\":{{ rule_level }},\"description\":\
+                       \"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".+osquery\":.+\"name\":\"{{ osquery_name }}\""
         attempts: 15
         time_btw_attempts: 2
 
