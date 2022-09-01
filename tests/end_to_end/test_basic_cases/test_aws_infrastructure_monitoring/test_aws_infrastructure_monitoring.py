@@ -75,6 +75,7 @@ configuration_extra_vars.update({'AWS_API_SCRIPT': aws_api_script, 'bucket': buc
 pytestmark = [TIER0, LINUX]
 
 
+@pytest.mark.skip(reason='It will be blocked by #3211, when it is resolved, we can enable the test')
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_aws_infrastructure_monitoring(metadata, configure_environment, get_dashboard_credentials, get_manager_ip,
