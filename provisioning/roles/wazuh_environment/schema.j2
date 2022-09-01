@@ -339,3 +339,11 @@ all:
     {%- if wazuh_custom_packages_installation_indexer_rpm_url is defined-%}
     wazuh_custom_packages_installation_indexer_rpm_url: {{ wazuh_custom_packages_installation_indexer_rpm_url}}
     {% endif %}
+
+    {% if filebeat_repo is defined-%}
+    filebeat_module_package_url: {{ filebeat_repo }}
+    {% endif %}
+
+    {% if wazuh_app_repo is defined-%}
+    wazuh_app_url: {{ wazuh_app_repo }}
+    {% endif %}
