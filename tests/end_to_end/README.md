@@ -30,13 +30,6 @@ manager:
       ansible_user: <USER>
       ansible_ssh_private_key_file: <PRIVATE_KEY>
       ansible_python_interpreter: /usr/bin/python3
-<<<<<<< HEAD
-=======
-      dashboard_user: <DASHBOARD_USER>
-      dashboard_password: <DASHBOARD_PASSWORD>
-  vars:
-    os_name: linux
->>>>>>> 2872-tests-e2e
 
 indexer:
   hosts:

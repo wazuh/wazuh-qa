@@ -45,7 +45,7 @@ def validate_inventory(inventory_path, valid_hosts):
         inventory_path (str): Path to Ansible inventory.
         valid_hosts (list[str]): List of valid hosts for the selected tests.
     """
-    valid_groups = ['managers', 'agents', 'linux', 'windows', 'all']
+    valid_groups = ['manager', 'agent', 'dashboard', 'indexer', 'filebeat', 'linux', 'windows', 'all', 'solaris', 'macos']
     inventory_dict = yaml.safe_load(open(inventory_path))
     errors = []
     default_err_msg = 'Read the README.md file inside the E2E suite to build a valid inventory.'
@@ -81,7 +81,7 @@ def validate_inventory(inventory_path, valid_hosts):
         raise Exception(error_msg)
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def validate_environments(request):
     """Fixture with session scope to validate the environments before run the E2E tests.
 

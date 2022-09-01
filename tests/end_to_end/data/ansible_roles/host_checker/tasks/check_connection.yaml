@@ -4,7 +4,7 @@
 
 - name: Try connection (Linux)
   ping:
-  when: os == 'linux'
+  when: os_name == 'linux'
   register: ping_result
   ignore_unreachable: true
 
@@ -16,7 +16,7 @@
 
 - name: Try connection (Windows)
   win_ping:
-  when: os == 'windows'
+  when: os_name == 'windows'
   register: ping_result
   ignore_unreachable: true
 
