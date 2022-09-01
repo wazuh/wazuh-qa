@@ -11,7 +11,7 @@
   service_facts:
   when: os == 'linux'
 
-- name: Check the status of Wazuh components (Manager)
+- name: Check the status of Wazuh components (Manager - Linux)
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}{{ ansible_facts.services[item].name }} is not running.\n"
@@ -25,8 +25,20 @@
     service: wazuh-agent.service
   when: (os == 'linux' and 'agent' in wazuh_info.stdout)
 
-- name: Check the status of Wazuh Agent
+- name: Check the status of Wazuh Agent (Linux)
   set_fact:
     check_result: 'true'
     errors: "{{ errors }}{{ ansible_facts.services[service].name }} is not running.\n"
   when: (os == 'linux' and 'agent' in wazuh_info.stdout and ansible_facts.services[service].state != 'running')
+
+- name: Get the status of Wazuh Agent (Windows)
+  ansible.windows.win_powershell:
+    script: Get-Service "WazuhSvc" | select Status
+  register: script_result
+  when: os == 'windows'
+
+- name: Check the status of Wazuh Agent (Windows)
+  set_fact:
+    check_result: 'true'
+    errors: "{{ errors }}WazuhSvc is not running (Windows).\n"
+  when: (os == 'windows' and 'agent' in wazuh_info.stdout and 'Running' != script_result.output[0].Status.String)

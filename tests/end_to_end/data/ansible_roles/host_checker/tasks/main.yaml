@@ -6,6 +6,13 @@
 # ----------------------------------------------------------------------------
 
 # -------- Checks ------------------------------------------------------------
+- name: Check connection
+  import_tasks: check_connection.yaml
+
+# Once the connection was checked, it's possible to gather all facts from the reachable hosts
+- name: Gather facts
+  setup:
+
 - name: Check Python
   import_tasks: check_python.yaml
 
@@ -29,6 +36,6 @@
 
 - name: Verify if any check have failed
   fail:
-    msg: "Some validations were fail:\n'{{ errors }}'"
+    msg: "Some validations failed:\n'{{ errors }}'"
   when: (check_result == 'true' or errors != '')
 # ----------------------------------------------------------------------------
