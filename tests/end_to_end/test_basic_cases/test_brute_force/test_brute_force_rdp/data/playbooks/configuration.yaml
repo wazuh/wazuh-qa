@@ -1,10 +1,10 @@
 - name: Configure local environment
-  hosts: localhost
+  hosts: ubuntu-agent
   become: true
   tasks:
 
     # Install hydra to attempt the RDP brute force attack
     - name: Install hydra
       package:
-        name: hydra
+        name: hydra=9.2-1ubuntu1
         state: present

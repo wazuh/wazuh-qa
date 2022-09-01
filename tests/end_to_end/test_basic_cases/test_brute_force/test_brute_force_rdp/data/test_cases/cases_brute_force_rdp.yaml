@@ -7,3 +7,7 @@
     rule.description: Multiple Windows logon failures.
     extra:
       mitre_technique: Brute Force
+    extra_vars:
+      rule_id: 60204
+      rule_level: 10
+      rule_description: Multiple Windows logon failures.
