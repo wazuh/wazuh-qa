@@ -787,15 +787,16 @@ def get_syslog_simulator_configuration(data_file_path):
     return get_configuration(data_file_path)
 
 
-def get_wazuh_local_rules() -> List[str]:
+def get_wazuh_local_rules():
     """
     Get current `local_rules.xml` file content.
 
     Returns
-        List of str: A list containing all the lines of the `local_rules.xml` file.
+        List(str): A list containing all the lines of the `local_rules.xml` file.
     """
-    with open(LOCAL_RULES_PATH) as f:
-        lines = f.readlines()
+    with open(LOCAL_RULES_PATH) as file:
+        lines = file.readlines()
+
     return lines
 
 

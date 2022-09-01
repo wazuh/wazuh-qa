@@ -2,14 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import os
-import shutil
-from typing import List
 import pytest
 
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.tools import configuration, ARCHIVES_LOG_FILE_PATH, \
-                                ALERT_LOGS_PATH, ALERT_FILE_PATH, ALERT_DIRECTORY, WAZUH_INTERNAL_OPTIONS
-from wazuh_testing.modules.eps import simulate_agent_function, syslog_simulator_function
+from wazuh_testing.tools import configuration
+from wazuh_testing.modules.analysisd import simulate_agent, syslog_simulator
 
 
 @pytest.fixture(scope='function')
@@ -40,7 +37,7 @@ def configure_local_internal_options_eps(request):
 
 
 @pytest.fixture(scope='function')
-def set_wazuh_configuration_eps(configuration, set_wazuh_configuration, configure_local_internal_options_eps):
+def set_wazuh_configuration_analysisd(configuration, set_wazuh_configuration, configure_local_internal_options_eps):
     """Set wazuh configuration
 
     Args:
@@ -52,32 +49,11 @@ def set_wazuh_configuration_eps(configuration, set_wazuh_configuration, configur
 
 
 @pytest.fixture(scope='function')
-def simulate_agent(request):
+def simulate_agent_function(request):
     """Fixture to run the script simulate_agent.py"""
-    simulate_agent_function(request.param)
+    simulate_agent(request.param)
 
     yield
-
-
-def delete_folder_content(folder):
-    """Delete alerts folder content execution"""
-    for filename in os.listdir(folder):
-        filepath = os.path.join(folder, filename)
-        try:
-            shutil.rmtree(filepath)
-        except OSError:
-            os.remove(filepath)
-
-
-@pytest.fixture(scope='function')
-def delete_alerts_folder():
-    """Delete alerts folder content before and after execution"""
-
-    delete_folder_content(ALERT_DIRECTORY)
-
-    yield
-
-    delete_folder_content(ALERT_DIRECTORY)
 
 
 @pytest.fixture(scope='function')
@@ -103,7 +79,7 @@ def configure_wazuh_one_thread():
 
 @pytest.fixture(scope='session')
 def load_wazuh_basic_configuration():
-    """Load a new basic ocnfiguration to the manager"""
+    """Load a new basic configuration to the manager"""
     # Reference paths
     DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
     CONFIGURATIONS_PATH = os.path.join(DATA_PATH, 'wazuh_basic_configuration')
@@ -120,28 +96,9 @@ def load_wazuh_basic_configuration():
     configuration.write_wazuh_conf(backup_ossec_configuration)
 
 
-@pytest.fixture(scope='module')
-def load_local_rules():
-    """Load local rules to override original rules"""
-    # Reference paths
-    DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-    CONFIGURATIONS_PATH = os.path.join(DATA_PATH, 'wazuh_rules')
-    configurations_path = os.path.join(CONFIGURATIONS_PATH, 'local_rules.xml')
-
-    backup_local_rules = configuration.get_wazuh_local_rules()
-
-    with open(configurations_path, 'r') as file:
-        lines = file.readlines()
-    configuration.write_wazuh_local_rules(lines)
-
-    yield
-
-    configuration.write_wazuh_local_rules(backup_local_rules)
-
-
 @pytest.fixture(scope='function')
-def syslog_simulator(request):
+def syslog_simulator_function(request):
     """Fixture to run the script syslog_simulator.py"""
-    syslog_simulator_function(request.param)
+    syslog_simulator(request.param)
 
     yield
