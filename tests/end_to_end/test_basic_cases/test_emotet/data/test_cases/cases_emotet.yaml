@@ -14,3 +14,9 @@
       rule.description: Word Executing WScript C:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\wscript.exe
       extra:
         groups: emotet
+    extra_vars:
+      alerts:
+        regsvr32:
+          rule_id: 255561
+        word_executing_script:
+          rule_id: 255926
