@@ -76,7 +76,7 @@ wazuh_custom_packages_installation_agent_msi_url: {{role_parameters['wazuh_custo
 wazuh_custom_packages_installation_agent_macos_url: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
 {% endif %}
 
-{% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url:'] is defined%}
+{% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url'] is defined%}
 wazuh_custom_packages_installation_agent_solaris_url: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
 {% endif %}
 {% endif %}
@@ -111,6 +111,15 @@ wazuh_custom_packages_installation_indexer_rpm_url: {{role_parameters['wazuh_cus
 {% endif %}
 {% endif %}
 
+
+
+
+{% if role == 'filebeat' %}
+{% if role_parameters['filebeat_repo'] is defined%}
+filebeat_module_package_url: {{role_parameters['filebeat_repo']}}
+{% endif %}
+{% endif %}
+
 {%- endmacro -%}
 
 
@@ -135,6 +144,10 @@ wi_cluster:
       perform_installation: false
       indexer_node_name: "node-1"
       dashboard_node_name: "node-1"
+
+      {% if wazuh_app_repo is defined-%}
+      wazuh_app_url: {{ wazuh_app_repo }}
+      {% endif %}
 
       {{ expand_custom_package('indexer', vars['dashboard']) | indent(6)  }}
       {{ expand_custom_package('dashboard', vars['dashboard']) | indent(6)  }}
@@ -257,6 +270,7 @@ filebeat:
     filebeat{{ loop.index }}:
       {{ expand_ansible_connection_attributes(filebeat_value) | indent(6) }}
       filebeat_node_name: node-{{ loop.index + master_node - 1 }}
+      {{ expand_custom_package('filebeat', filebeat_value) | indent(6)  }}
  {%- endfor %}
 
   vars:
