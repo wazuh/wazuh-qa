@@ -66,11 +66,12 @@ def validate_inventory(inventory_path, target_hosts):
         if host not in inventory_hosts:
             missing_hosts.extend([host])
     if missing_hosts != []:
+        readme_file = '[README.md](https://github.com/wazuh/wazuh-qa/blob/master/tests/end_to_end/README.md)'
         raise Exception(f"Not all the hosts required to run the tests are present in the inventory.\n"
                         f"Hosts in the inventory: {inventory_hosts}\n"
                         f"Expected hosts: {target_hosts}\n"
                         f"Missing hosts: {missing_hosts}\n"
-                        "Read the README.md file inside the E2E suite to build a valid inventory.")
+                        f"Read the {readme_file} file inside the E2E suite to build a valid inventory.")
 
 
 @pytest.fixture(scope='session', autouse=True)
