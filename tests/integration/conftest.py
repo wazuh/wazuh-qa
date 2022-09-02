@@ -19,7 +19,7 @@ from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -118,6 +118,14 @@ def restart_wazuh_daemon_function(daemon=None):
     """
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='function')
+def restart_wazuh_function(daemon=None):
+    """Restart all Wazuh daemons"""
+    control_service("restart", daemon=daemon)
+    yield
+    control_service('stop', daemon=daemon)
 
 
 @pytest.fixture(scope='module')
@@ -1130,3 +1138,34 @@ def setup_alert_monitor():
     log_monitor = FileMonitor(ALERTS_JSON_PATH)
 
     yield log_monitor
+
+
+@pytest.fixture(scope='function')
+def copy_file(source_path, destination_path):
+    """Copy file from source to destination.
+
+    Args:
+        source_path (list): List that contains sources path of files.
+        destination_path (list): List that contains destination path of files.
+    """
+    for index in range(len(source_path)):
+        copy(source_path[index], destination_path[index])
+
+    yield
+
+    for file in destination_path:
+        remove_file(file)
+
+
+@pytest.fixture(scope='function')
+def create_file(new_file_path):
+    """Create an empty file.
+
+    Args:
+        new_file_path (str): File path to create.
+    """
+    write_file(new_file_path)
+
+    yield
+
+    remove_file(new_file_path)
