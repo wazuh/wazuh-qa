@@ -10,6 +10,7 @@ Release report: https://github.com/wazuh/wazuh/issues/14562
 ## Added
 - Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add system test to check synchronization status in the cluster ([#3180](https://github.com/wazuh/wazuh-qa/pull/3180)) \- (Framework + Tests)
+- Add system test to check big files synchronization in the cluster ([#3202](https://github.com/wazuh/wazuh-qa/pull/3202)) \- (Framework + Tests)
 
 ### Changed
 
