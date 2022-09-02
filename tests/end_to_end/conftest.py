@@ -34,7 +34,7 @@ def get_target_hosts_and_distros(test_suite_name, target_distros={'manager': [],
     return target_hosts, target_distros
 
 
-def validate_inventory(inventory_path, valid_hosts):
+def validate_inventory(inventory_path, target_hosts):
     """Check if the Ansible inventory follows our standard defined in the README.md file, inside the E2E suite.
 
     This function checks:
@@ -43,42 +43,34 @@ def validate_inventory(inventory_path, valid_hosts):
 
     Args:
         inventory_path (str): Path to Ansible inventory.
-        valid_hosts (list[str]): List of valid hosts for the selected tests.
+        target_hosts (list[str]): List of valid hosts for the selected tests.
     """
-    valid_groups = ['managers', 'agents', 'linux', 'windows', 'all']
     inventory_dict = yaml.safe_load(open(inventory_path))
-    errors = []
-    default_err_msg = 'Read the README.md file inside the E2E suite to build a valid inventory.'
+    inventory_hosts = []
+    missing_hosts = []
 
     for group in inventory_dict:
-        # Check if the current group is valid
-        if group not in valid_groups:
-            errors.append(f"'{group}' isn't a valid group for E2E tests.")
-        # Check if the hosts of the group have valid names
+        # Collect hosts from inventory
         if 'hosts' in inventory_dict[group]:
-            for hostname in inventory_dict[group]['hosts']:
-                if hostname not in valid_hosts:
-                    errors.append(f"The hostname '{hostname}' doesn't follow our standard: <os>-<installation-type> or"
-                                  " isn't a necessary host for the execution of the selected tests.")
-        # Check if the subgroups are valid (if any)
+            inventory_hosts.extend([hostname for hostname in inventory_dict[group]['hosts']])
         try:
+            # Collect hosts from inventory subgroups (if any)
             subgroups = inventory_dict[group]['children']
             for subgroup in subgroups:
-                if subgroup not in valid_groups:
-                    errors.append(f"'{subgroup}' is not a valid subgroup for E2E tests.")
-                # Check if the hosts of the subgroup have valid names
-                for hostname in subgroups[subgroup]['hosts']:
-                    if hostname not in valid_hosts:
-                        errors.append(f"The hostname '{hostname}' doesn't follow our standard: <os>-<installation-type>"
-                                      " or isn't a necessary host for the execution of the selected tests.")
+                inventory_hosts.extend([hostname for hostname in subgroups[subgroup]['hosts']])
         except KeyError:
             # Do not throw an exception if the group has no subgroups within it
             pass
 
-    if errors != []:
-        errors.append(default_err_msg)
-        error_msg = '\n'.join(errors)
-        raise Exception(error_msg)
+    for host in target_hosts:
+        if host not in inventory_hosts:
+            missing_hosts.extend([host])
+    if missing_hosts != []:
+        raise Exception(f"Not all the hosts required to run the tests are present in the inventory.\n"
+                        f"Hosts in the inventory: {inventory_hosts}\n"
+                        f"Expected hosts: {target_hosts}\n"
+                        f"Missing hosts: {missing_hosts}\n"
+                        "Read the README.md file inside the E2E suite to build a valid inventory.")
 
 
 @pytest.fixture(scope='session', autouse=True)
