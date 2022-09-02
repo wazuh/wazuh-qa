@@ -99,15 +99,15 @@ def restart_wazuh_function(daemons=None):
     control_service('stop', daemons)
 
 
-@pytest.fixture(scope='module')
-def restart_wazuh_module(daemons=None):
-    """Restarts before starting a test, and stop it after finishing.
-       Args:
-            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
-    """
-    control_service('restart', daemons)
-    yield
-    control_service('stop', daemons)
+    @pytest.fixture(scope='module')
+    def restart_wazuh_module(daemons=None):
+        """Restarts before starting a test, and stop it after finishing.
+        Args:
+                daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+        """
+        control_service('restart', daemons)
+        yield
+        control_service('stop', daemons)
 
 
 @pytest.fixture(scope='module')
@@ -130,24 +130,6 @@ def restart_wazuh_alerts(get_configuration, request):
 
     # Start Wazuh
     control_service('start')
-
-
-@pytest.fixture(scope='module')
-def restart_wazuh_daemon(daemon=None):
-    """
-    Restart a Wazuh daemon
-    """
-    truncate_file(LOG_FILE_PATH)
-    control_service("restart", daemon=daemon)
-
-
-@pytest.fixture(scope='function')
-def restart_wazuh_daemon_function(daemon=None):
-    """
-    Restart a Wazuh daemon
-    """
-    truncate_file(LOG_FILE_PATH)
-    control_service("restart", daemon=daemon)
 
 
 def pytest_addoption(parser):
@@ -977,14 +959,14 @@ def copy_file(source_path, destination_path):
 
 
 @pytest.fixture(scope='function')
-def create_file_to_monitor(file_to_monitor):
-    """Create a file to monitor
+def create_file(new_file_path):
+    """Create an empty file.
 
     Args:
-        file_to_monitor (str): Path of file that will monitored by Wazuh
+        new_file_path (str): File path to create.
     """
-    write_file(file_to_monitor)
+    write_file(new_file_path)
 
     yield
 
-    remove_file(file_to_monitor)
+    remove_file(new_file_path)
