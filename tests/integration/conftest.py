@@ -20,7 +20,7 @@ from wazuh_testing import global_parameters, logger
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -99,15 +99,15 @@ def restart_wazuh_function(daemons=None):
     control_service('stop', daemons)
 
 
-@pytest.fixture(scope='module')
-def restart_wazuh_module(daemons=None):
-    """Restarts before starting a test, and stop it after finishing.
-       Args:
-            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
-    """
-    control_service('restart', daemons)
-    yield
-    control_service('stop', daemons)
+    @pytest.fixture(scope='module')
+    def restart_wazuh_module(daemons=None):
+        """Restarts before starting a test, and stop it after finishing.
+        Args:
+                daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+        """
+        control_service('restart', daemons)
+        yield
+        control_service('stop', daemons)
 
 
 @pytest.fixture(scope='module')
@@ -939,3 +939,34 @@ def set_wazuh_configuration(configuration):
 
     # Restore previous configuration
     conf.write_wazuh_conf(backup_config)
+
+
+@pytest.fixture(scope='function')
+def copy_file(source_path, destination_path):
+    """Copy file from source to destination
+
+    Args:
+        source_path (list): list that contains sources path of files
+        destination_path (list): list that contains destination path of files
+    """
+    for i in range(len(source_path)):
+        copy(source_path[i], destination_path[i])
+
+    yield
+
+    for file in destination_path:
+        remove_file(file)
+
+
+@pytest.fixture(scope='function')
+def create_file(new_file_path):
+    """Create an empty file.
+
+    Args:
+        new_file_path (str): File path to create.
+    """
+    write_file(new_file_path)
+
+    yield
+
+    remove_file(new_file_path)
