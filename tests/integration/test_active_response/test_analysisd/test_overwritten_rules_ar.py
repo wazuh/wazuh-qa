@@ -56,7 +56,8 @@ import time
 from wazuh_testing.processes import check_if_daemons_are_running, run_local_command_printing_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import remove_file
-from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, AR_SCRIPTS_PATH
+from wazuh_testing import T_5
+from wazuh_testing.tools import CUSTOM_RULES_PATH, LOCAL_RULES_PATH, ACTIVE_RESPONSE_BINARY_PATH
 
 pytestmark = [pytest.mark.tier(level=1), pytest.mark.server]
 
@@ -73,7 +74,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_overwritten_rules.yaml')
 custom_rule = os.path.join(RULES_PATH, '0270-web_appsec_rules_edit.xml')
 local_rules = os.path.join(RULES_PATH, 'local_rules.xml')
 custom_ar_script = os.path.join(CUSTOM_AR_SCRIPT_PATH, 'custom-ar.sh')
-wazuh_ar_script = os.path.join(AR_SCRIPTS_PATH, 'custom-ar.sh')
+wazuh_ar_script = os.path.join(ACTIVE_RESPONSE_BINARY_PATH, 'custom-ar.sh')
 output_custom_ar_script = '/tmp/file-ar.txt'
 source_path = [custom_rule, local_rules, custom_ar_script]
 destination_path = [f"{CUSTOM_RULES_PATH}/0270-web_appsec_rules_edit.xml", LOCAL_RULES_PATH, wazuh_ar_script]
@@ -173,7 +174,7 @@ def test_overwritten_rules_ar(configuration, metadata, source_path, destination_
     run_local_command_printing_output(cmd)
 
     # Waiting time for triggering the rule and AR.
-    time.sleep(5)
+    time.sleep(T_5)
 
     # Checking if AR works properly
     assert os.path.exists(output_custom_ar_script), "The active response has not been triggered"
