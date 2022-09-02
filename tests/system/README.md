@@ -114,6 +114,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_key_polling    | basic_cluster        |
 | test_cluster/test_agent_files_deletion | basic_cluster        |
 | test_cluster/test_integrity_sync       | agentless_cluster    |
+| test_cluster/test_ruleset_sync_status  | agentless_cluster    |
 | test_jwt_invalidation                  | agentless_cluster    |
 
 ### Test structure

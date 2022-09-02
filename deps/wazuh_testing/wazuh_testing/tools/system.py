@@ -4,9 +4,11 @@
 import json
 import tempfile
 import xml.dom.minidom as minidom
+from typing import Union
 
 import testinfra
 import yaml
+
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
@@ -42,7 +44,7 @@ class HostManager:
         host (str): Hostname
         src_path (str): Source path
         dest_path (str): Destination path
-        check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+        check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
                                     check=check)
@@ -56,15 +58,22 @@ class HostManager:
             replace (str): Text to be inserted in the file
             before (str): Lower stop of the block to be replaced
             after (str): Upper stop of the block to be replaced
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`.
         """
         replace = f'{after}{replace}{before}'
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
-    def modify_file_content(self, host: str, path: str = None, content: str = ''):
+    def modify_file_content(self, host: str, path: str = None, content: Union[str, bytes] = ''):
+        """Create a file with a specified content and copies it to a path.
+        Args:
+            host (str): Hostname
+            path (str): path for the file to create and modify
+            content (str, bytes): content to write into the file
+        """
         tmp_file = tempfile.NamedTemporaryFile()
-        tmp_file.write(content.encode())
+        tmp_file.write(content if isinstance(content, bytes) else content.encode())
         tmp_file.seek(0)
         self.move_file(host, src_path=tmp_file.name, dest_path=path)
         tmp_file.close()
@@ -76,7 +85,8 @@ class HostManager:
             host (str): Hostname
             service (str): Service to be controlled
             state (str): Final state in which service must end
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`.
         """
         if service == 'wazuh':
             service = 'wazuh-agent' if 'agent' in host else 'wazuh-manager'
@@ -88,9 +98,21 @@ class HostManager:
         Args:
             host (str): Hostname
             file_path (str): File path to be truncated
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
         """
         self.get_host(host).ansible("copy", f"dest={file_path} content='' force=yes", check=check)
+
+    def clear_file_without_recreate(self, host: str, file_path: str, check: bool = False):
+        """Truncate the specified file without recreating it.
+
+        Args:
+            host (str): Hostname
+            file_path (str): File path to be truncated
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
+        """
+        self.get_host(host).ansible('shell', f"truncate -s 0 {file_path}", check=check)
 
     def get_file_content(self, host: str, file_path: str):
         """Get the content of the specified file.
@@ -138,10 +160,11 @@ class HostManager:
         """Apply the API configuration described in the yaml file or in the dictionary.
 
         Args:
-            api_config (str,dict): Configuration to be applied. If it is a string, it will try to load the YAML in that path. If it is a dictionary, it will apply that configuration to every host in `host_list`.
+            api_config (str,dict): Configuration to be applied. If it is a string, it will try to load the YAML in that
+                path. If it is a dictionary, it will apply that configuration to every host in `host_list`.
             host_list (list, optional): List of hosts to apply the configuration in. Default `None`
-            dest_path (str, optional): Path where the API configuration is. Default `/var/ossec/api/configuration/api.yaml`
-            clear_log (bool, optional): Boolean to decide if it must truncate the 'api.log' after restarting the API or not.
+            dest_path (str, optional): Path where the API configuration is.
+            clear_log (bool, optional): Boolean to decide if it must truncate the 'api.log' after restarting the API.
         """
         if isinstance(api_config, str):
             with open(api_config, 'r') as config_yml:
@@ -167,7 +190,7 @@ class HostManager:
             password (str, optional): API password. Default `wazuh`
             auth_context (dict, optional): Authorization context body. Default `None`
             port (int, optional): API port. Default `55000`
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html),
+            check (bool, optional): Ansible check mode("Dry Run"),
                 by default it is enabled so no changes will be applied. Default `False`
 
         Returns:
@@ -183,10 +206,11 @@ class HostManager:
             login_body = ''
 
         try:
-            token_response = self.get_host(host).ansible('uri', f'url=https://localhost:{port}{login_endpoint} '
-                                                                f'user={user} password={password} method={login_method} '
-                                                                f'{login_body} validate_certs=no force_basic_auth=yes',
-                                                         check=check)
+            token_response = self.get_host(host).ansible(
+                'uri',
+                f'url=https://localhost:{port}{login_endpoint} user={user} password={password} method={login_method} '
+                f'{login_body} validate_certs=no force_basic_auth=yes',
+                check=check)
             return token_response['json']['data']['token']
         except KeyError:
             raise KeyError(f'Failed to get token: {token_response}')
@@ -201,7 +225,8 @@ class HostManager:
             endpoint (str, optional): Request endpoint. It must start with '/'.. Default `/`
             request_body ( dict, optional) : Request body. Default `None`
             token (str, optional):  Request token. Default `None`
-            check ( bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check ( bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             API response (dict) : Return the response in JSON format.
@@ -223,7 +248,8 @@ class HostManager:
         Args:
             host (str) : Hostname
             cmd (str): Command to execute
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             stdout (str): The output of the command execution.
@@ -238,9 +264,34 @@ class HostManager:
         Args:
             host (str) : Hostname
             cmd (str): Shell command to execute
-            check (bool, optional): Ansible check mode("Dry Run")(https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html), by default it is enabled so no changes will be applied. Default `False`
+            check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
+                applied. Default `False`
 
         Returns:
             stdout (str): The output of the command execution.
         """
         return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+
+    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+        """Search and return information of a file inside a path.
+        Args:
+            host (str): Hostname
+            path (str): Path in which to search for the file that matches the pattern.
+            pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+        Returns:
+            Files (list): List of found files.
+        """
+        return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
+                                                   f"use_regex={use_regex}")
+
+    def get_stats(self, host: str, path: str):
+        """Retrieve file or file system status.
+        Args:
+            host (str): Hostname.
+            path (str): The full path of the file/object to get the facts of.
+        Returns:
+            Dictionary containing all the stat data.
+        """
+        return self.get_host(host).ansible("stat", f"path={path}")
