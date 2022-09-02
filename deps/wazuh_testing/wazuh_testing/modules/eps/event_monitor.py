@@ -85,7 +85,7 @@ def get_analysisd_state():
 
 
 def get_messages_info(file_monitor, message, accum_results):
-    """Check if the alerts.log file contains the message
+    """Check if the alerts.json file contains the message
 
     Args:
         file_monitor (FileMonitor): Wazuh log monitor

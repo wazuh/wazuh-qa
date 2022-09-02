@@ -27,7 +27,6 @@ QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 CVE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
-ALERTS_DIRECTORY_PATH = os.path.join(WAZUH_LOGS_PATH, 'alerts')
 ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 CPE_HELPER_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'dictionaries', 'cpe_helper.json')
 WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
@@ -60,7 +59,6 @@ API_DAEMONS_REQUIREMENTS = [API_DAEMON, DB_DAEMON, EXEC_DAEMON, ANALYSISD_DAEMON
 SIMULATE_AGENT = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'simulate_agents.py')
 SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator.py')
 ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
-WAZUH_INTERNAL_OPTIONS = os.path.join(WAZUH_PATH, 'etc', 'internal_options.conf')
 
 # Timeouts
 T_5 = 5
