@@ -30,4 +30,10 @@
     <match>TEST 6</match>
     <description>Rule to force the fail</description>
   </rule>
+
+  <rule id="100005" level="10">
+    <if_sid>100002</if_sid>
+    <match>TEST 7</match>
+    <description>Rule to force the fail with overwrite</description>
+  </rule>
 </group>
