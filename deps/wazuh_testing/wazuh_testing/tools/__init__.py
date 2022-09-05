@@ -75,6 +75,8 @@ else:
     PYTHON_PATH = os.path.join(WAZUH_PATH, 'framework', 'python')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
+    ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+
     if sys.platform == 'sunos5':
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
     else:
@@ -145,7 +147,7 @@ EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
 LOGTEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logtest')
 MONITORD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'monitor')
-REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'request')
+REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'remote')
 SYSCHECKD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'syscheck')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 MODULESD_WMODULES_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'wmodules')
