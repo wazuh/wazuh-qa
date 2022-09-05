@@ -7,7 +7,7 @@ from wazuh_testing.tools.configuration import load_configuration_template, get_t
                                               get_syslog_simulator_configuration
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.analysisd import syslog_simulator
+from wazuh_testing.tools.run_simulator import syslog_simulator
 from wazuh_testing.tools import ALERT_FILE_PATH
 
 

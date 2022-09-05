@@ -6,7 +6,7 @@ import pytest
 
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import configuration
-from wazuh_testing.modules.analysisd import simulate_agent, syslog_simulator
+from wazuh_testing.tools.run_simulator import simulate_agent,syslog_simulator
 
 
 @pytest.fixture(scope='function')
