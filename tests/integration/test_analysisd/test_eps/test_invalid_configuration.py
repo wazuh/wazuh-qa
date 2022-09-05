@@ -2,7 +2,7 @@ import os
 import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.modules.eps import event_monitor as evm
+from wazuh_testing.modules.analysisd import event_monitor as evm
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT
 from wazuh_testing.processes import check_if_daemons_are_running

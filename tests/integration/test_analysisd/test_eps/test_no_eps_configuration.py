@@ -3,7 +3,7 @@ from time import sleep
 import pytest
 
 from wazuh_testing.tools.configuration import get_simulate_agent_configuration
-from wazuh_testing.modules.eps import event_monitor as evm
+from wazuh_testing.modules.analysisd import event_monitor as evm
 from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT, PERCENTAGE_PROCESS_MSGS
 
 

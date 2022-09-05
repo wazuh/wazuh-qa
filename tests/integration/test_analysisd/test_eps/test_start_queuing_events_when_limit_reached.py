@@ -4,7 +4,7 @@ import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
-from wazuh_testing.modules.eps import event_monitor as evm
+from wazuh_testing.modules.analysisd import event_monitor as evm
 from wazuh_testing.modules.analysisd import PERCENTAGE_PROCESS_MSGS, QUEUE_SIZE
 
 

@@ -1,6 +1,6 @@
 import re
 
-import wazuh_testing as eps
+from wazuh_testing import T_10, T_20, T_60
 from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX, MAILD_PREFIX
 from wazuh_testing import LOG_FILE_PATH, ANALYSISD_STATE
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback_groups
@@ -28,8 +28,7 @@ def make_analysisd_callback(pattern, prefix=ANALYSISD_PREFIX):
 
 
 def check_analysisd_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                          timeout=eps.T_60, prefix=ANALYSISD_PREFIX, accum_results=1,
-                          file_to_monitor=LOG_FILE_PATH):
+                          timeout=T_60, prefix=ANALYSISD_PREFIX, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """Check if a analysisd event occurs
 
     Args:
@@ -51,18 +50,18 @@ def check_analysisd_event(file_monitor=None, callback='', error_message=None, up
 
 def check_eps_disabled():
     """Check if the eps module is disabled"""
-    check_analysisd_event(callback=fr'.*INFO: EPS limit disabled.*', timeout=eps.T_10)
+    check_analysisd_event(callback=fr'.*INFO: EPS limit disabled.*', timeout=T_10)
 
 
 def check_eps_enabled(maximum, timeframe):
     """Check if the eps module is enable"""
     check_analysisd_event(callback=fr".*INFO: EPS limit enabled, EPS: '{maximum}', timeframe: '{timeframe}'",
-                          timeout=eps.T_10)
+                          timeout=T_10)
 
 
 def check_configuration_error():
     """Check the configuration error event in ossec.log"""
-    check_analysisd_event(timeout=eps.T_10, callback=r".* \(\d+\): Configuration error at.*",
+    check_analysisd_event(timeout=T_10, callback=r".* \(\d+\): Configuration error at.*",
                           error_message="Could not find the event 'Configuration error at 'etc/ossec.conf' "
                                         'in ossec.log', prefix=MAILD_PREFIX)
 
@@ -97,7 +96,7 @@ def get_messages_info(file_monitor, message, accum_results):
     """
     error_message = f"Could not find this event in {message}"
 
-    result = file_monitor.start(timeout=eps.T_20, update_position=True, accum_results=accum_results,
+    result = file_monitor.start(timeout=T_20, update_position=True, accum_results=accum_results,
                                 callback=generate_monitoring_callback_groups(message),
                                 error_message=error_message).result()
 
