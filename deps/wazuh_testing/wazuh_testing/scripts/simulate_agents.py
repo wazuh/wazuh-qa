@@ -49,6 +49,9 @@ def process_script_parameters(args):
         args.modules.append('receive_messages')
         args.modules_eps.append('0')
 
+    if not args.version.startswith('v'):
+        args.version = 'v' + args.version
+
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
