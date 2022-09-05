@@ -5,7 +5,7 @@ from wazuh_testing.tools.configuration import load_configuration_template, get_t
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT
-from wazuh_testing.processes import check_if_deamon_is_not_running
+from wazuh_testing.processes import check_if_daemons_are_running
 
 
 pytestmark = [pytest.mark.server]
@@ -79,4 +79,5 @@ def test_invalid_values(configuration, metadata, load_wazuh_basic_configuration,
     except ValueError:
         evm.check_configuration_error()
         # Check that wazuh-analysisd is not running
-        check_if_deamon_is_not_running('wazuh-analysisd')
+        assert not check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is running and was not ' \
+                                                                         'expected to'

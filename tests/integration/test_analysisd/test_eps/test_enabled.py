@@ -4,7 +4,7 @@ import pytest
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.analysisd import ANALYSISD_STATE_INTERNAL_DEFAULT
-from wazuh_testing.processes import check_if_deamon_is_running
+from wazuh_testing.processes import check_if_daemons_are_running
 
 
 pytestmark = [pytest.mark.server]
@@ -75,5 +75,6 @@ def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wa
         - r'(.*)wazuh-analysisd: INFO: EPS limit enabled, EPS: (.*), timeframe: (.*)'
     '''
     evm.check_eps_enabled(metadata['maximum'], metadata['timeframe'])
+
     # Check that wazuh-analysisd is running
-    check_if_deamon_is_running('wazuh-analysisd')
+    assert check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is not running. Maybe it has crashed'
