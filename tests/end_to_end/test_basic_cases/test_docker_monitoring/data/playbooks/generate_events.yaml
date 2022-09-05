@@ -11,6 +11,14 @@
     - name: "{{ event_description }}"
       shell: "{{ command }}"
 
+    - name: Wait asynchronously for Filebeat to send data to Wazuh Indexer
+      wait_for:
+        path: /var/log/filebeat/filebeat
+        search_regex: "{{ rule_id }}"
+      async: 30
+      poll: 0
+      register: async_waiter
+
     - name: Search alert in alerts log
       include_role:
         name: manage_alerts
@@ -21,6 +29,21 @@
                        {{ rule_description }}.+id.+{{ rule_id }}.+"
         attempts: 15
         time_btw_attempts: 2
+
+    - name: Check if Filebeat has sent the alert data to Wazuh Indexer
+      async_status:
+        jid: "{{ async_waiter.ansible_job_id }}"
+      register: wait_result
+      until: wait_result.finished
+      retries: 15
+      delay: 2
+      # Ignore error to display a custom failure message after the current task
+      ignore_errors: true
+
+    - name: Fail when the alert data does not appear in Filebeat log
+      fail:
+        msg: "{{ rule_id }} was not found in '/var/log/filebeat/filebeat' after 30s"
+      when: wait_result.failed
 
     - name: Get alert json
       include_role:
