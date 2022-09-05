@@ -19,7 +19,7 @@
         responses:
           (.*)continue connecting(.*): 'yes'
           (?i)password: 1
-        timeout: 5
+        timeout: 15
       loop:
         - test_user
         - test_user
@@ -33,13 +33,20 @@
       failed_when:
         - "'Permission denied' not in result.stdout"
 
-    - name: Wait for alert
-      wait_for:
-        timeout: 30
-
 - name: Get alerts file
   hosts: manager
   tasks:
+
+    - name: Search alert in alerts log
+      include_role:
+        name: manage_alerts
+        tasks_from: search_alert.yaml
+      vars:
+        timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
+        custom_regex: "{\"timestamp\":\"{{ timestamp }}\",\"rule\":{\"level\":{{ rule_level }},\
+                       \"description\":\"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".*"
+        attempts: 15
+        time_btw_attempts: 2
 
     - name: Get alert json
       include_role:

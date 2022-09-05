@@ -100,9 +100,9 @@ def test_brute_force_ssh(metadata, get_indexer_credentials, get_manager_ip, gene
     input_description:
         - The `generate_events.yaml`file provides the function configuration for this test.
     '''
-    rule_id = metadata['rule.id']
-    rule_level = metadata['rule.level']
-    rule_description = metadata['rule.description']
+    rule_id = metadata['extra_vars']['rule_id']
+    rule_level = metadata['extra_vars']['rule_level']
+    rule_description = metadata['extra_vars']['rule_description']
     rule_mitre_technique = metadata['extra']['mitre_technique']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 

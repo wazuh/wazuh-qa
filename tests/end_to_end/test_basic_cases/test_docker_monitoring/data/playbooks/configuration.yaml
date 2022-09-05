@@ -48,3 +48,22 @@
         systemctl stop docker
         systemctl stop docker.socket
         systemctl start docker
+
+    - name: Remove info mode in Filebeat
+      lineinfile:
+        path: /etc/filebeat/filebeat.yml
+        state: absent
+        regexp: 'logging.level: info'
+
+    - name: Configure debug mode in Filebeat
+      blockinfile:
+        insertbefore: 'logging.to_files: true'
+        block: |
+          logging.level: debug
+          logging.selectors: ["processors"]
+        path: /etc/filebeat/filebeat.yml
+
+    - name: Restart Filebeat to apply configurations
+      systemd:
+        state: restarted
+        name: filebeat

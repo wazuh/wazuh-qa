@@ -9,6 +9,18 @@
         block: ''
         marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
 
+    - name: Restore Filebeat configuration
+      blockinfile:
+        insertbefore: 'logging.to_files: true'
+        block: 'logging.level: info'
+        path: /etc/filebeat/filebeat.yml
+        marker: '# {mark} ANSIBLE MANAGED BLOCK'
+
+    - name: Restart Filebeat to apply configurations
+      systemd:
+        state: restarted
+        name: filebeat
+
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh

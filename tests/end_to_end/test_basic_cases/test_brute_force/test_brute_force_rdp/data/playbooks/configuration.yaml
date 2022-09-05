@@ -8,6 +8,6 @@
 
     # Install hydra to attempt the RDP brute force attack
     - name: Install hydra
-      ansible.builtin.apt:
-        name: hydra
+      package:
+        name: hydra=9.2-1ubuntu1
         state: present

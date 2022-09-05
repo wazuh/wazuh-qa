@@ -4,8 +4,9 @@
     known to trip NIDS rules.
   configuration_parameters: null
   metadata:
-    rule.id: 86601
-    rule.level: 3
-    rule.description: "Suricata: Alert - GPL ATTACK_RESPONSE id check returned root"
+    extra_vars:
+      rule_id: 86601
+      rule_level: 3
+      rule_description: "Suricata: Alert - GPL ATTACK_RESPONSE id check returned root"
     extra:
       data.hostname: testmynids.org

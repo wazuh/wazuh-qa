@@ -7,9 +7,9 @@
       shell: |
         cd /root
         curl -LO http://www.eicar.org/download/eicar.com
-    rule.id: 100092
-    rule.level: 12
-    rule.description: "active-response\/bin\/remove-threat.sh removed threat located at \/root\/eicar.com "
+      rule_id: 100092
+      rule_level: 12
+      rule_description: "active-response\/bin\/remove-threat.sh removed threat located at \/root\/eicar.com "
 
 - name: harmless_file
   description: Scanning a file and check generated alerts
@@ -18,6 +18,6 @@
     extra_vars:
       event_description: Create harmless file
       shell: echo "Just a simple text file" > /root/harmless_file.txt
-    rule.id: 87103
-    rule.level: 3
-    rule.description: "VirusTotal: Alert - No records in VirusTotal database"
+      rule_id: 87103
+      rule_level: 3
+      rule_description: "VirusTotal: Alert - No records in VirusTotal database"
