@@ -40,7 +40,7 @@ def get_PR_data(pr_number, github_token):
         dict: PR data.
     """
     github_api_url = 'https://api.github.com'
-    query = f"/repos/jmv74211/wazuh-qa/pulls/{pr_number}/commits"
+    query = f"/repos/wazuh/wazuh-qa/pulls/{pr_number}/commits"
     headers = {'Accept': 'application/vnd.github.v3+json', 'Authorization': f"token {github_token}"}
 
     response = requests.get(f"{github_api_url}{query}", headers=headers)

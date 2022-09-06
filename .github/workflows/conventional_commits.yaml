@@ -5,7 +5,7 @@ on:
 jobs:
   commits_check_job:
     runs-on: ubuntu-latest
-    name: Conventional commits check
+    name: Check PR commits
     steps:
 
     - name: Download files
