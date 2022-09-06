@@ -30,8 +30,7 @@
         timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
         custom_regex: "{\"timestamp\":\"{{ timestamp }}\",\"rule\":{\"level\":{{ rule_level }},\"description\":\
                        \"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".*"
-        attempts: 15
-        time_btw_attempts: 2
+        timeout: 30
 
     - name: Check if Filebeat has sent the alert data to Wazuh Indexer
       become: true

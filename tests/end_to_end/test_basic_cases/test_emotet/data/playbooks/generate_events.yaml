@@ -28,8 +28,7 @@
       vars:
         timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
         custom_regex: "{\"timestamp\":\"{{ timestamp }}\".*\"id\":\"{{ item.value.rule_id }}\".*"
-        attempts: 15
-        time_btw_attempts: 2
+        timeout: 30
 
     - name: Get alert json
       include_role:
