@@ -78,12 +78,22 @@
     - name: Updating Suricata rules
       shell: suricata-update
 
-    - name: Start Suricata
-      systemd:
-        state: started
-        name: suricata
+    - name: Set flag to control the next loop
+      set_fact:
+        loop_finished: false
 
-    - name: Wait for Suricata to start completely
-      wait_for:
-        path: "{{ suricata_log_path }}"
-        search_regex: <Info> - All AFP capture threads are running.
+    - name: Ensuring Suricata's start-up
+      vars:
+        sleep_durations:
+          - 30
+          - 40
+          - 60
+        durations: "{{ item }}"
+        loop_status: "{{ loop_finished }}"
+      include_tasks: start_suricata.yaml
+      loop: "{{ sleep_durations | batch(1) | list }}"
+      register: result
+
+    - name: Fail if Suricata refuses to start
+      fail: msg="Suricata refuses to start after 3 attempts."
+      when: not (loop_finished | bool)

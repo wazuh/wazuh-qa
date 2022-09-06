@@ -3,6 +3,11 @@
   become: true
   tasks:
 
+    - name: Stop Suricata
+      systemd:
+        state: stopped
+        name: suricata
+
     - name: Remove Wazuh logs configuration
       blockinfile:
         path: /var/ossec/etc/ossec.conf
