@@ -7,6 +7,7 @@ import platform
 import subprocess
 import sys
 
+
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     WAZUH_CONF = os.path.join(WAZUH_PATH, 'ossec.conf')
@@ -34,9 +35,8 @@ if sys.platform == 'win32':
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
-
+    ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
 else:
-
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
     WAZUH_UNIX_USER = 'wazuh'
