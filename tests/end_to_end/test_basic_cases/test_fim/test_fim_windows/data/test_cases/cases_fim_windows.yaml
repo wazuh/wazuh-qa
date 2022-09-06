@@ -6,9 +6,9 @@
       event_description: Create a file into the monitored folder
       path: C:\Test\test_demo_fim\monitored_file.txt
       state: touch
-    rule.id: 554
-    rule.level: 5
-    rule.description: File added to the system\.
+      rule_id: 554
+      rule_level: 5
+      rule_description: File added to the system\.
     extra:
       syscheck.path: c:\\\\test\\\\test_demo_fim\\\\monitored_file.txt
 
@@ -20,9 +20,9 @@
       event_description: Modify a file from the monitored folder
       path: C:\Test\test_demo_fim\monitored_file.txt
       state: touch
-    rule.id: 550
-    rule.level: 7
-    rule.description: Integrity checksum changed\.
+      rule_id: 550
+      rule_level: 7
+      rule_description: Integrity checksum changed\.
     extra:
       syscheck.path: c:\\\\test\\\\test_demo_fim\\\\monitored_file.txt
 
@@ -34,8 +34,8 @@
       event_description: Delete a file from the monitored folder
       path: C:\Test\test_demo_fim\monitored_file.txt
       state: absent
-    rule.id: 553
-    rule.level: 7
-    rule.description: File deleted\.
+      rule_id: 553
+      rule_level: 7
+      rule_description: File deleted\.
     extra:
       syscheck.path: c:\\\\test\\\\test_demo_fim\\\\monitored_file.txt

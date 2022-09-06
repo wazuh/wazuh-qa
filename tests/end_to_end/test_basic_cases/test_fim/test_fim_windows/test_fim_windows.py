@@ -107,9 +107,9 @@ def test_fim_windows(configure_environment, metadata, get_dashboard_credentials,
         - The `configuration.yaml` file provides the module configuration for this test.
         - The `generate_events.yaml`file provides the function configuration for this test.
     '''
-    rule_id = metadata['rule.id']
-    rule_level = metadata['rule.level']
-    rule_description = metadata['rule.description']
+    rule_id = metadata['extra_vars']['rule_id']
+    rule_level = metadata['extra_vars']['rule_level']
+    rule_description = metadata['extra_vars']['rule_description']
     syscheck_path = metadata['extra']['syscheck.path']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
