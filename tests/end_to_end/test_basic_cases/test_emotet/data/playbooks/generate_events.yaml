@@ -20,17 +20,22 @@
   hosts: manager
   tasks:
 
-    - name: Search alert in alerts log
-      with_items: "{{ lookup('ansible.builtin.dict', alerts) }}"
-      include_role:
-        name: manage_alerts
-        tasks_from: search_alert.yaml
-      vars:
-        timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
-        custom_regex: "{\"timestamp\":\"{{ timestamp }}\".*\"id\":\"{{ item.value.rule_id }}\".*"
-        timeout: 30
+    - name: Wait for expected alert
+      block:
 
-    - name: Get alert json
-      include_role:
-        name: manage_alerts
-        tasks_from: get_alert_json.yaml
+        - name: Search alert in alerts log
+          with_items: "{{ lookup('ansible.builtin.dict', alerts) }}"
+          include_role:
+            name: manage_alerts
+            tasks_from: search_alert.yaml
+          vars:
+            timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
+            custom_regex: "{\"timestamp\":\"{{ timestamp }}\".*\"id\":\"{{ item.value.rule_id }}\".*"
+            timeout: 30
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml

@@ -14,15 +14,20 @@
     - name: "{{ event_description }}"
       command: "{{ command }}"
 
-    - name: Wait for alert
-      wait_for:
-        timeout: 30
-
 - name: Get alerts file
   hosts: manager
   tasks:
 
-    - name: Get alert json
-      include_role:
-        name: manage_alerts
-        tasks_from: get_alert_json.yaml
+    - name: Wait for expected alert
+      block:
+
+        - name: Wait for alert
+          wait_for:
+            timeout: 30
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml
