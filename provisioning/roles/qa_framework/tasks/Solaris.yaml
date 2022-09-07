@@ -1,0 +1,4 @@
+- name: Install python requirements on Solaris
+  command: "{{ python_executable }} -m pip install -r {{ qa_requirements_file }}"
+  args:
+    chdir: "{{ build_dir }}"
