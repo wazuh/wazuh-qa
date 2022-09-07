@@ -1,0 +1,25 @@
+{% macro expand_ansible_connection_attributes(attributes_map) %}
+{% for attr_key, attr_value in attributes_map.items() %}
+{% if 'ansible' in attr_key %}
+{{- attr_key }}: {{ attr_value }}
+{% endif %}
+{% endfor %}
+{%- endmacro -%}
+
+{% if apache is defined%}
+apache:
+  hosts:
+  {%- for apache_key, apache_value in apache.items() %}
+
+    apache{{ loop.index }}:
+      ansible_host: {{ apache_value['ip'] }}
+      {{ expand_ansible_connection_attributes(apache_value) | indent(6) }}
+  {%- endfor %}
+{% endif %}
+
+
+all:
+  vars:
+    # General ansible connection parameters
+    ansible_ssh_common_args: -o StrictHostKeyChecking=no
+    ansible_winrm_server_cert_validation: ignore
