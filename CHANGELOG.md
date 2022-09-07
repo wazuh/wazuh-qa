@@ -29,6 +29,7 @@ Release report: TBD
 
 ### Changed
 
+- Skip flaky Logcollector tests ([#3218](https://github.com/wazuh/wazuh-qa/pull/3217)) \- (Tests)
 - Update wazuhdb_getconfig integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)
 - Change how 'service_control' collects clusterd and apid pids ([#3140](https://github.com/wazuh/wazuh-qa/pull/3140)) \- (Framework)
 - Change scan test module fixtures to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
