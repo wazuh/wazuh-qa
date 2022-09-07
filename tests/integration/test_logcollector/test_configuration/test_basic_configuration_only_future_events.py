@@ -241,6 +241,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
 def test_only_future_events(get_configuration, configure_environment, generate_macos_logs, restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
