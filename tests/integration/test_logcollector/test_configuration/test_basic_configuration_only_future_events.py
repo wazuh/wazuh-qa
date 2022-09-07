@@ -168,6 +168,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__,
 configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size']}" + f"" if 'max-size' in x
                      else f"{x['log_format']}_{x['only-future-events']}" for x in metadata]
 
+
 @pytest.fixture(scope="module")
 def generate_macos_logs(get_configuration):
     """Get configurations from the module."""
