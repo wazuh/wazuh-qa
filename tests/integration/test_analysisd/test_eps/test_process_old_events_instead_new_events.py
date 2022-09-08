@@ -5,7 +5,7 @@ import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_syslog_simulator_configuration
-from wazuh_testing.modules.analysisd import event_monitor as evm
+from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.run_simulator import syslog_simulator
 from wazuh_testing.tools import ALERT_FILE_PATH
@@ -18,7 +18,6 @@ PATTERN_A = 'AAAA'
 PATTERN_B = 'BBBB'
 PATTERN_C = 'CCCC'
 SYSLOG_CUSTOM_MESSAGE = f"Login failed: admin, test {PATTERN_A}, Message number:"
-
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -43,7 +42,11 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 
 # Get simulate agent configurations (t1)
 params_process_old_events_one_thread = get_syslog_simulator_configuration(configurations_syslog_simulator_path)
-timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
+local_internal_configuration_t1 = [
+    {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0', 'analysisd.state_interval': metadata['timeframe']}
+    for metadata in t1_configuration_metadata
+]
+
 num_messages = 150
 params_process_old_events_one_thread.update({'num_messages': num_messages})
 params_process_old_events_one_thread.update({'message': f"\"{SYSLOG_CUSTOM_MESSAGE}\""})
@@ -52,15 +55,18 @@ params_process_old_events_one_thread.update({'messages_per_burst': 0})
 
 # Get syslog simulator configurations (t2)
 params_process_old_events_multithread = get_syslog_simulator_configuration(configurations_syslog_simulator_path)
-timeframe_eps_t2 = [metadata['timeframe'] for metadata in t2_configuration_metadata]
+local_internal_configuration_t2 = [
+    {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0', 'analysisd.state_interval': metadata['timeframe']}
+    for metadata in t2_configuration_metadata
+]
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
+@pytest.mark.parametrize('configure_local_internal_options_module', local_internal_configuration_t1, indirect=True)
 @pytest.mark.parametrize('syslog_simulator_function', [params_process_old_events_one_thread], indirect=True)
 def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                       set_wazuh_configuration_analysisd, configure_wazuh_one_thread,
+                                       configure_local_internal_options_module, configure_wazuh_one_thread,
                                        truncate_monitored_files, restart_wazuh_daemon_function,
                                        syslog_simulator_function):
     '''
@@ -138,10 +144,10 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t2], indirect=True)
+@pytest.mark.parametrize('configure_local_internal_options_module', local_internal_configuration_t2, indirect=True)
 def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                         set_wazuh_configuration_analysisd, truncate_monitored_files,
-                                         restart_wazuh_daemon_function):
+                                         set_wazuh_configuration, configure_local_internal_options_module,
+                                         truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that `wazuh-analysisd` processes queued events first instead of new events. To do this, it is
                  sent three groups of messages with different content per groups (A, B and C). Then, it checks that
@@ -193,7 +199,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     custom_message = SYSLOG_CUSTOM_MESSAGE
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
     syslog_simulator(params_process_old_events_multithread)
-    sleep(timeframe_eps_t2[0] / 2)
+    sleep(metadata['timeframe'] / 2)
     # Create a filemonitor
     file_monitor = FileMonitor(ALERT_FILE_PATH)
     # Get total PATTERN_A messages
@@ -203,7 +209,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     custom_message = custom_message.replace(PATTERN_A, PATTERN_B)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
     syslog_simulator(params_process_old_events_multithread)
-    sleep(timeframe_eps_t2[0] / 2)
+    sleep(metadata['timeframe'] / 2)
     # Get total PATTERN_B messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
 
@@ -211,7 +217,7 @@ def test_process_old_events_multi_thread(configuration, metadata, load_wazuh_bas
     custom_message = custom_message.replace(PATTERN_B, PATTERN_C)
     params_process_old_events_multithread.update({'message': f"\"{custom_message}\""})
     syslog_simulator(params_process_old_events_multithread)
-    sleep(timeframe_eps_t2[0] / 2)
+    sleep(metadata['timeframe'] / 2)
     # Get total PATTERN_C messages
     total_msg_list.append(evm.get_messages_info(file_monitor, regex, messages_sent))
     # Check messages order pattern

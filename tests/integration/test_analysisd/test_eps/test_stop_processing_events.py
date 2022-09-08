@@ -4,7 +4,7 @@ import pytest
 
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data, \
                                               get_simulate_agent_configuration
-from wazuh_testing.modules.analysisd import event_monitor as evm
+from wazuh_testing.modules.eps import event_monitor as evm
 from wazuh_testing.modules.analysisd import PERCENTAGE_PROCESS_MSGS
 
 
@@ -29,20 +29,23 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 # Get simulate agent configurations (t1)
 params_stop_processing_events = get_simulate_agent_configuration(configurations_simulate_agent_path)
 maximum_eps = [metadata['maximum'] for metadata in t1_configuration_metadata]
-timeframe_eps_t1 = [metadata['timeframe'] for metadata in t1_configuration_metadata]
 # It is sent `width_frame` time frame width to reduce test time execution
 width_frame = 3
-num_messages = maximum_eps[0] * timeframe_eps_t1[0] * width_frame
+local_internal_configuration_t1 = [
+    {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0', 'analysisd.state_interval': metadata['timeframe']}
+    for metadata in t1_configuration_metadata
+]
+num_messages = maximum_eps[0] * t1_configuration_metadata[0]['timeframe'] * width_frame
 params_stop_processing_events.update({'num_messages': num_messages})
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [timeframe_eps_t1], indirect=True)
+@pytest.mark.parametrize('configure_local_internal_options_module', local_internal_configuration_t1, indirect=True)
 @pytest.mark.parametrize('simulate_agent_function', [params_stop_processing_events], indirect=True)
 def test_stops_processing_events(configuration, metadata, load_wazuh_basic_configuration,
-                                 set_wazuh_configuration_analysisd, truncate_monitored_files,
-                                 restart_wazuh_daemon_function, simulate_agent_function):
+                                 set_wazuh_configuration, configure_local_internal_options_module,
+                                 truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent_function):
     '''
     description: Check that the `events_processed` value in the `/var/ossec/var/run/wazuh-analysisd.state` file must
                  be lower or equal than `maximum` * `timeframe`

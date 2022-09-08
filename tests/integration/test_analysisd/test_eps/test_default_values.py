@@ -11,6 +11,8 @@ pytestmark = [pytest.mark.server]
 
 # Global variables
 TIMEFRAME_DEFAULT_VALUE = 10
+local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
+                          'analysisd.state_interval': f"{ANALYSISD_STATE_INTERNAL_DEFAULT}"}
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -29,9 +31,9 @@ t1_configurations = load_configuration_template(t1_configurations_path, t1_confi
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_without_timeframe(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_analysisd,
-                           truncate_monitored_files, restart_wazuh_daemon_function):
+def test_without_timeframe(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+                           configure_local_internal_options_module, truncate_monitored_files,
+                           restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is started when `maximum` is set to a value greater than 0 lower and than 100000,
                  and `timeframe` is not present. In this case, 'timeframe' will be set with a default value.

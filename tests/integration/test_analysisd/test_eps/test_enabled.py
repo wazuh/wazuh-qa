@@ -13,6 +13,8 @@ pytestmark = [pytest.mark.server]
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
+                          'analysisd.state_interval': f"{ANALYSISD_STATE_INTERNAL_DEFAULT}"}
 
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_enabled.yaml')
@@ -26,9 +28,8 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration_analysisd,
-                 truncate_monitored_files, restart_wazuh_daemon_function):
+def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+                 configure_local_internal_options_module, truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is started when `maximum` is set to a value greater than 0 lower and than 100000,
                  and `timeframe` is set to a value greater than 0 and lower than 3600.

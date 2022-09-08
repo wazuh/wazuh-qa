@@ -138,6 +138,14 @@ def restart_wazuh_daemon_after_finishing(daemon=None):
     control_service("restart", daemon=daemon)
 
 
+@pytest.fixture(scope='function')
+def restart_analysisd_function():
+    """Restart wazuh-analysisd daemon before starting a test, and stop it after finishing"""
+    control_service('restart', daemon='wazuh-analysisd')
+    yield
+    control_service('stop', daemon='wazuh-analysisd')
+
+
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
     # Reset ossec.log and start a new monitor
@@ -546,6 +554,67 @@ def connect_to_sockets_configuration(request, get_configuration):
 
 
 @pytest.fixture(scope='module')
+def configure_local_internal_options_module(request):
+    """Fixture to configure the local internal options file.
+
+    It uses the test variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
+    """
+    try:
+        local_internal_options = request.param
+    except AttributeError:
+        try:
+            local_internal_options = getattr(request.module, 'local_internal_options')
+        except AttributeError:
+            logger.debug('local_internal_options is not set')
+            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no ' \
+                                 'parameter has been passed explicitly, nor is the variable local_internal_options ' \
+                                 'found in the module.') from AttributeError
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
+    conf.set_local_internal_options_dict(local_internal_options)
+
+    yield local_internal_options
+
+    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+@pytest.fixture(scope='function')
+def configure_local_internal_options_function(request):
+    """Fixture to configure the local internal options file.
+
+    It uses the test variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration, For example:
+    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
+    """
+    try:
+        local_internal_options = request.param
+    except AttributeError:
+        try:
+            local_internal_options = getattr(request.module, 'local_internal_options')
+        except AttributeError:
+            logger.debug('local_internal_options is not set')
+            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no ' \
+                                 'parameter has been passed explicitly, nor is the variable local_internal_options ' \
+                                 'found in the module.') from AttributeError
+
+    backup_local_internal_options = conf.get_local_internal_options_dict()
+
+    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
+    conf.set_local_internal_options_dict(local_internal_options)
+
+    yield
+
+    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
+    conf.set_local_internal_options_dict(backup_local_internal_options)
+
+
+# DEPRECATED
+@pytest.fixture(scope='module')
 def configure_local_internal_options(get_local_internal_options):
     """Configure Wazuh local internal options.
 
@@ -911,31 +980,6 @@ def file_monitoring(request):
     logger.debug(f"Trucanted {file_to_monitor}")
 
 
-@pytest.fixture(scope='module')
-def configure_local_internal_options_module(request):
-    """Fixture to configure the local internal options file.
-
-    It uses the test variable local_internal_options. This should be
-    a dictionary wich keys and values corresponds to the internal option configuration, For example:
-    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
-    """
-    try:
-        local_internal_options = getattr(request.module, 'local_internal_options')
-    except AttributeError as local_internal_configuration_not_set:
-        logger.debug('local_internal_options is not set')
-        raise local_internal_configuration_not_set
-
-    backup_local_internal_options = conf.get_local_internal_options_dict()
-
-    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
-    conf.set_local_internal_options_dict(local_internal_options)
-
-    yield
-
-    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
-    conf.set_local_internal_options_dict(backup_local_internal_options)
-
-
 @pytest.fixture(scope='function')
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
@@ -959,31 +1003,6 @@ def set_wazuh_configuration(configuration):
 
     # Restore previous configuration
     conf.write_wazuh_conf(backup_config)
-
-
-@pytest.fixture(scope='function')
-def configure_local_internal_options_function(request):
-    """Fixture to configure the local internal options file.
-
-    It uses the test variable local_internal_options. This should be
-    a dictionary wich keys and values corresponds to the internal option configuration, For example:
-    local_internal_options = {'monitord.rotate_log': '0', 'syscheck.debug': '0' }
-    """
-    try:
-        local_internal_options = getattr(request.module, 'local_internal_options')
-    except AttributeError as local_internal_configuration_not_set:
-        logger.debug('local_internal_options is not set')
-        raise local_internal_configuration_not_set
-
-    backup_local_internal_options = conf.get_local_internal_options_dict()
-
-    logger.debug(f"Set local_internal_option to {str(local_internal_options)}")
-    conf.set_local_internal_options_dict(local_internal_options)
-
-    yield
-
-    logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
-    conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
 @pytest.fixture(scope='function')

@@ -14,6 +14,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 # Simulate agent configuration
 configurations_simulate_agent_path = os.path.join(TEST_DATA_PATH,
                                                   'configuration_simulate_agent.yaml')
+local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
+                          'analysisd.state_interval': f"{ANALYSISD_STATE_INTERNAL_DEFAULT}"}
 
 # Get simulate agent configurations (t1)
 params_disabled_eps = get_simulate_agent_configuration(configurations_simulate_agent_path)
@@ -22,8 +24,7 @@ params_disabled_eps.update({'num_messages': num_messages})
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
-def test_disabled(load_wazuh_basic_configuration, configure_local_internal_options_eps,
+def test_disabled(load_wazuh_basic_configuration, configure_local_internal_options_module,
                   truncate_monitored_files, restart_wazuh_daemon_function):
     '''
     description: Check that limits EPS is disabled when it is not configured.
@@ -59,9 +60,8 @@ def test_disabled(load_wazuh_basic_configuration, configure_local_internal_optio
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configure_local_internal_options_eps', [ANALYSISD_STATE_INTERNAL_DEFAULT], indirect=True)
 @pytest.mark.parametrize('simulate_agent_function', [params_disabled_eps], indirect=True)
-def test_without_eps_setting(load_wazuh_basic_configuration, configure_local_internal_options_eps,
+def test_without_eps_setting(load_wazuh_basic_configuration, configure_local_internal_options_module,
                              truncate_monitored_files, restart_wazuh_daemon_function, simulate_agent_function):
     '''
     description: Check that limits EPS is disabled when it is not configured and the received events are similar or

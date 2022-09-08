@@ -10,33 +10,6 @@ from wazuh_testing.tools.run_simulator import simulate_agent,syslog_simulator
 
 
 @pytest.fixture(scope='function')
-def restart_analysisd_function():
-    """Restart wazuh-analysisd daemon before starting a test, and stop it after finishing"""
-    control_service('restart', daemon='wazuh-analysisd')
-    yield
-    control_service('stop', daemon='wazuh-analysisd')
-
-
-@pytest.fixture(scope='module')
-def configure_local_internal_options_eps(request):
-    """Fixture to configure the local internal options file."""
-    # Define local internal options for EPS tests
-    local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0',
-                              'analysisd.state_interval': f"{request.param[0]}"}
-
-    # Backup the old local internal options
-    backup_local_internal_options = configuration.get_wazuh_local_internal_options()
-
-    # Set the new local internal options configuration
-    configuration.set_wazuh_local_internal_options(configuration.create_local_internal_options(local_internal_options))
-
-    yield
-
-    # Backup the old local internal options cofiguration
-    configuration.set_wazuh_local_internal_options(backup_local_internal_options)
-
-
-@pytest.fixture(scope='function')
 def set_wazuh_configuration_analysisd(configuration, set_wazuh_configuration, configure_local_internal_options_eps):
     """Set wazuh configuration
 
