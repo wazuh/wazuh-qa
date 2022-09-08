@@ -1,41 +1,37 @@
 |Related issue|
-|---|
-||
-
-<!--
-This template reflects sections that must be included in new Pull requests.
-Contributions from the community are really appreciated. If this is the case, please add the
-"contribution" to properly track the Pull Request.
-
-Please fill the table above. Feel free to extend it at your convenience.
--->
+|-------------|
+|             |
 
 ## Description
 
-<!--
-Add a clear description of how the problem has been solved.
--->
+<!-- Add a description of the context and content of all changes made in the pull request -->
 
-## Configuration options
+<!-- Added functionalities or files. Remove if not applicable -->
+### Added
 
-<!--
-When proceed, this section should include new configuration parameters.
--->
+- Item 1
+- Item n
 
-## Logs example
+<!-- Changes made to existing functionality or files. Remove if not applicable -->
+### Updated
 
-<!--
-Paste here related logs and alerts
--->
+- Item 1
+- Item n
 
-## Tests
+<!-- Functionalities or files that have been deleted. Remove if not applicable -->
+### Deleted
 
-- [ ] Proven that tests **pass** when they have to pass.
-- [ ] Proven that tests **fail** when they have to fail.
-<!--
-Important: Don't remove these checks if your PR modifies Python code.
--->
-- [ ] Python codebase satisfies PEP-8 style style guide. `pycodestyle --max-line-length=120 --show-source --show-pep8 file.py`.
-- [ ] Python codebase is documented following the Google Style for Python docstrings.
-- [ ] The test is documented in wazuh-qa/docs.
-- [ ] `provision_documentation.sh` generate the docs without errors.
+- Item 1
+- Item n
+
+---
+
+## Testing performed
+
+<!-- At most there can only be this table. It must be updated if a new test has been performed. It is important to update the commit that has been tested! -->
+<!-- The developer only has to update his row. The same for the reviewer -->
+<!-- Reviewer has only to test in Jenkins -->
+| Tester             | Test path | Jenkins | Local  | OS | Commit | Notes                |
+|--------------------|-----------|---------|--------|-----|--------|----------------------|
+| @user (Developer)  |           | ⚫⚫⚫ | ⚫⚫⚫ |         |         | Nothing to highlight |
+| @user (Reviewer)   |           | ⚫⚫⚫ | :no_entry_sign: :no_entry_sign: :no_entry_sign:  |        |         | Nothing to highlight |

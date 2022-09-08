@@ -127,7 +127,7 @@ class ClusterCSVParser:
             for phase in [self.SETUP_PHASE, self.STABLE_PHASE]:
                 for file_name, file_df in files.items():
                     trimmed_df = self._trim_dataframe(file_df, phase, setup_datetime)
-                    if len(trimmed_df):
+                    if len(trimmed_df) and not (phase == self.STABLE_PHASE and file_name == 'integrity_sync'):
                         result[phase][file_name][node] = self._calculate_stats(trimmed_df)
 
         return result

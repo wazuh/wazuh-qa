@@ -98,6 +98,6 @@ resources:
           mean: 197162          # (197 MB)
           reg_cof: 209.6
         workers:
-          max: 201480           # (201 MB)
+          max: 256000           # (250 MB)
           mean: 145000          # (145 MB)
           reg_cof: 260
