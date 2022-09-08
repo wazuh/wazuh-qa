@@ -7,9 +7,9 @@
       path: /tmp/test_demo_fim/monitored_file.txt
       state: touch
       mode: 0755
-    rule.id: 554
-    rule.level: 5
-    rule.description: File added to the system\.
+      rule_id: 554
+      rule_level: 5
+      rule_description: File added to the system\.
     extra:
       syscheck.path: \/tmp\/test_demo_fim\/monitored_file\.txt
 
@@ -22,9 +22,9 @@
       path: /tmp/test_demo_fim/monitored_file.txt
       state: file
       mode: 0750
-    rule.id: 550
-    rule.level: 7
-    rule.description: Integrity checksum changed\.
+      rule_id: 550
+      rule_level: 7
+      rule_description: Integrity checksum changed\.
     extra:
       syscheck.path: \/tmp\/test_demo_fim\/monitored_file\.txt
 
@@ -37,8 +37,8 @@
       path: /tmp/test_demo_fim/monitored_file.txt
       state: absent
       mode: 0755
-    rule.id: 553
-    rule.level: 7
-    rule.description: File deleted\.
+      rule_id: 553
+      rule_level: 7
+      rule_description: File deleted\.
     extra:
       syscheck.path: \/tmp\/test_demo_fim\/monitored_file\.txt

@@ -25,3 +25,20 @@
         tasks_from: restart_wazuh.yaml
       vars:
         os: linux
+
+    - name: Configure debug mode in Filebeat
+      become: true
+      blockinfile:
+        insertbefore: 'logging.to_files: true'
+        block: |
+          logging.level: debug
+          logging.selectors: ["processors"]
+        path: /etc/filebeat/filebeat.yml
+      delegate_to: centos-manager
+
+    - name: Restart Filebeat to apply configurations
+      become: true
+      systemd:
+        state: restarted
+        name: filebeat
+      delegate_to: centos-manager
