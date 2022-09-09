@@ -13,13 +13,11 @@
         value: TEST_DIRECTORIES
         attributes:
         - FIM_MODE
-    - db_entry_limit:
+    - file_limit:
         elements:
           - enabled:
               value: 'yes'
-          - files:
-              value: LIMIT
-          - registries:
+          - entries:
               value: LIMIT
   - section: sca
     elements:
