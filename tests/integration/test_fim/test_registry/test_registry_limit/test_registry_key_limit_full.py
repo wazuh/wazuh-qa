@@ -63,7 +63,7 @@ from wazuh_testing.fim import generate_params, registry_parser, KEY_WOW64_64KEY,
     KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                        CB_REGISTRY_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT,
-                                       ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+                                       ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_KEY,
                                        CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
                                        ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.modules import WINDOWS, TIER1
@@ -165,7 +165,7 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
     RegCloseKey(reg_handle)
 
     wazuh_log_monitor.start(timeout=monitor_timeout, error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
-                            callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE))
+                            callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_KEY))
 
     key_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),
