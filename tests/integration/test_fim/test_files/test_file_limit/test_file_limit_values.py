@@ -71,6 +71,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE,
                                        ERR_MSG_FIM_INODE_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
                                        ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
@@ -122,7 +123,8 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_values(configure_local_internal_options_module, get_configuration, configure_environment,
+                           restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the value of the 'entries' tag, which corresponds
                  to the maximum number of files to monitor from the 'file_limit' feature of FIM. For this purpose,

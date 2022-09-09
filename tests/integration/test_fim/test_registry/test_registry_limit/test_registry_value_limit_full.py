@@ -58,6 +58,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,\
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
                                        ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
                                        CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE, CB_COUNT_REGISTRY_VALUE_ENTRIES,
@@ -112,7 +113,8 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_registry_value_limit_full(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_value_limit_full(configure_local_internal_options_module, get_configuration, configure_environment,
+                                   restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option

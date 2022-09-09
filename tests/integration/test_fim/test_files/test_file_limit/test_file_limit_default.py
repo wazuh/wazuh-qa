@@ -69,6 +69,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
 # Marks
@@ -102,7 +103,8 @@ def get_configuration(request):
 
 
 # Tests
-def test_file_limit_default(get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_default(configure_local_internal_options_module, get_configuration, configure_environment,
+                            restart_syscheckd):
     '''
     description: Check if the maximum number of files monitored by the 'wazuh-syscheckd' daemon is set to default
                  when the 'file_limit' tag is missing in the configuration. For this purpose, the test will monitor

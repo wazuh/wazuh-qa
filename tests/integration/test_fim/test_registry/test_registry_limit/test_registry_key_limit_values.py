@@ -59,6 +59,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, MONITORED_KEY_3,
                                        CB_REGISTRY_LIMIT_VALUE, ERR_MSG_REGISTRY_LIMIT_VALUES,
                                        CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
@@ -112,7 +113,8 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_registry_limit_values(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_limit_values(configure_local_internal_options_module, get_configuration, configure_environment,
+                               restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'registries' tag, which corresponds to
                  the maximum number of entries to monitor from the 'db_entries_limit' option of FIM. For this purpose,

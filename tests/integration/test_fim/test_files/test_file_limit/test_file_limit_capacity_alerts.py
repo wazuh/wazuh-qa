@@ -72,6 +72,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGU
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT,
                                        ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
                                        ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_CAPACITY, SCHEDULED_MODE)
@@ -118,8 +119,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('percentage', [(0), (80), (90)])
-def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_fim_start):
+def test_file_limit_capacity_alert(percentage, configure_local_internal_options_module, get_configuration,
+                                   configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a directory in which

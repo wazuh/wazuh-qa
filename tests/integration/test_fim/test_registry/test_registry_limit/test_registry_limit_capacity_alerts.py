@@ -61,6 +61,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
                                        ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES,
                                        CB_REGISTRY_DB_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL,
@@ -103,8 +104,8 @@ def get_configuration(request):
 
 # Tests
 @pytest.mark.parametrize('percentage', [(80), (90), (0)])
-def test_registry_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
-                                       wait_for_fim_start):
+def test_registry_limit_capacity_alert(percentage, get_configuration, configure_local_internal_options_module,
+                                       configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a key in which

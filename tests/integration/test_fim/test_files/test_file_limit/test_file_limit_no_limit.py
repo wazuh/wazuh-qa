@@ -82,6 +82,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (ERR_MSG_FILE_LIMIT_DISABLED, CB_FILE_LIMIT_DISABLED)
 from wazuh_testing.modules import TIER1
 
@@ -116,7 +117,8 @@ def get_configuration(request):
 
 
 # Tests
-def test_file_limit_no_limit(get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_no_limit(configure_local_internal_options_module, get_configuration, configure_environment,
+                             restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the 'file_limit' feature of FIM is disabled.
                  For this purpose, the test will monitor a testing directory, and finally, it will verify
