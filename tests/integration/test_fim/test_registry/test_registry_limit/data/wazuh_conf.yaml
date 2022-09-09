@@ -17,11 +17,11 @@
         value: WINDOWS_REGISTRY
         attributes:
         - arch: '64bit'
-    - db_entry_limit:
+    - registry_limit:
         elements:
           - enabled:
               value: 'yes'
-          - registries:
+          - entries:
               value: REGISTRIES
   - section: sca
     elements:
@@ -62,11 +62,11 @@
         value: WINDOWS_REGISTRY_2
         attributes:
         - arch: '64bit'
-    - db_entry_limit:
+    - registry_limit:
         elements:
           - enabled:
               value: 'yes'
-          - registries:
+          - entries:
               value: REGISTRIES
   - section: sca
     elements:
@@ -111,11 +111,11 @@
         value: WINDOWS_REGISTRY_3
         attributes:
         - arch: '64bit'
-    - db_entry_limit:
+    - registry_limit:
         elements:
           - enabled:
               value: 'yes'
-          - registries:
+          - entries:
               value: REGISTRIES
   - section: sca
     elements:
