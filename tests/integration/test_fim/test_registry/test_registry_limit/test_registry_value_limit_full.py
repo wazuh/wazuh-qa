@@ -10,7 +10,7 @@ type: integration
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
        generated while the database is in 'full database alert' mode for reaching the limit
-       of entries to monitor set in the 'db_entry_limit'-'registries' tag.
+       of entries to monitor set in the 'registry_limit'-'entries' tag.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
@@ -115,14 +115,14 @@ def extra_configuration_before_yield():
 def test_registry_value_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
-                 'full database alert' mode for reaching the limit of entries to monitor set in the 'registres' option
-                 of the 'db_entry_limit' tag.
+                 'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
+                 of the 'registry_limit' tag.
                  For this purpose, the test will monitor a key in which several testing values will be created
                  until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
                  when a new testing value is added to the monitored key. Finally, the test will verify that,
                  in the FIM 'entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

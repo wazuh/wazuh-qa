@@ -9,7 +9,7 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check that after having a
-       limit configured for the 'registries' option for 'db_entry_limit' of syscheck, it will
+       limit configured for the 'entries' option for 'registry_limit' of syscheck, it will
        only monitor values up to the specified limit and any excess will not be monitored.
 
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
@@ -115,12 +115,12 @@ def extra_configuration_before_yield():
 def test_registry_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'registries' tag, which corresponds to
-                 the maximum number of entries to monitor from the 'db_entry_limit' option of FIM. For this purpose,
+                 the maximum number of entries to monitor from the 'registry_limit' option of FIM. For this purpose,
                  the test will monitor a key in which multiple testing values will be added. Then, it will check if
                  the FIM event 'maximum number of entries' is generated and has the correct value. Finally, the test
                  will verify that, in the FIM 'values entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
