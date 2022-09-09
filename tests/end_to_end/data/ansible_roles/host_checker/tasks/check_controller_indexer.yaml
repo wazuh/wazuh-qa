@@ -12,8 +12,8 @@
     - name: Test Wazuh Indexer connection
       uri:
         url: https://{{ hostvars[inventory_hostname]['ansible_host'] }}:9200
-        user: "{{ hostvars[inventory_hostname]['dashboard_user'] }}"
-        password: "{{ hostvars[inventory_hostname]['dashboard_password'] }}"
+        user: "{{ hostvars[inventory_hostname]['indexer_user'] }}"
+        password: "{{ hostvars[inventory_hostname]['indexer_password'] }}"
         method: GET
         status_code: 200
         force_basic_auth: true
