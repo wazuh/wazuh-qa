@@ -47,12 +47,13 @@ CB_DATABASE_FULL_COULD_NOT_INSERT = r".*Couldn't insert ('.*')? entry into DB\. 
 CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE = r".*Couldn't insert ('.*')? value entry into DB\. The DB is full.*"
 CB_FILE_LIMIT_VALUE = r".*Maximum number of entries to be monitored: '(\d+)'"
 CB_FILE_SIZE_LIMIT_BIGGER_THAN_DISK_QUOTA = r".*Setting 'disk_quota' to (\d+), 'disk_quota' must be greater than 'file_size'"
-CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be monitored"
+CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of file entries to be monitored"
 CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: '(\d+)', path count: '(\d+)'"
 CB_FIM_ENTRIES_COUNT = r".*Fim entries: (\d+)"
 CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
 CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
+
 
 
 # Error Messages

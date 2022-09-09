@@ -116,15 +116,13 @@ def get_configuration(request):
 
 
 # Tests
-
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh #11162")
 def test_file_limit_no_limit(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the 'file_limit' feature of FIM is disabled.
                  For this purpose, the test will monitor a testing directory, and finally, it will verify
                  that the FIM event 'no limit' is generated.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

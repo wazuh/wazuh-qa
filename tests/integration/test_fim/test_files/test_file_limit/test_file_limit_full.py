@@ -120,7 +120,6 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
 def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
@@ -130,7 +129,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
                  when a new testing file is added to the monitored directory. Finally, the test will verify that
                  on the FIM event, inodes and monitored files number match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

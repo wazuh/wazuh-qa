@@ -102,8 +102,6 @@ def get_configuration(request):
 
 
 # Tests
-
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh#11819")
 def test_file_limit_default(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the maximum number of files monitored by the 'wazuh-syscheckd' daemon is set to default
@@ -111,7 +109,7 @@ def test_file_limit_default(get_configuration, configure_environment, restart_sy
                  a directory and wait for FIM to start and generate an event indicating the maximum number of files
                  to monitor. Finally, the test will verify that this number matches the default value (100000).
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

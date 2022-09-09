@@ -128,7 +128,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
                  the total and when the number is less than that percentage. Finally, the test will verify that
                  on the FIM event, inodes and monitored files number match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

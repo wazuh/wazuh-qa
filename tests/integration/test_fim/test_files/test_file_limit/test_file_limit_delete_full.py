@@ -135,7 +135,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                  no FIM events to be generated (file limit reached). Finally, it will delete 'test_file10'
                  and verify that the 'deleted' FIM event matches that file.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

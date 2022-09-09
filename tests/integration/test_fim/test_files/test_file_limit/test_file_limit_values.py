@@ -122,8 +122,6 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by wazuh/wazuh #11819")
 def test_file_limit_values(get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the value of the 'entries' tag, which corresponds
@@ -132,7 +130,7 @@ def test_file_limit_values(get_configuration, configure_environment, restart_sys
                  is generated and has the correct value. Finally, the test will verify that on the FIM event,
                  inodes and monitored files number match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
