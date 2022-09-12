@@ -6,14 +6,10 @@ qa_framework:
     mandatory:
       qa_repository_reference: QA_REFERENCE
 
-# ----------------------
-
 apache:
   playbook: ./playbooks/apache.yml
   os: LINUX_BASED_OS
   service: ANY
-
-# ----------------------
 
 agent:
   playbook: ./playbooks/wazuh_environment.yaml
@@ -25,8 +21,6 @@ agent:
       revision: REVISION
       repository: REPOSITORY
       manager: MANAGER_HOST
-
-# ----------------------
 
 manager:
   playbook: ./playbooks/wazuh_environment.yaml
@@ -44,8 +38,6 @@ manager:
     default:
       type: master
 
-# ----------------------
-
 indexer:
   playbook: ./playbooks/wazuh_environment.yaml
   os: LINUX_BASED_OS
@@ -59,8 +51,6 @@ indexer:
       version: VERSION
       revision: REVISION
       repository: REPOSITORY
-
-# ----------------------
 
 dashboard:
   playbook: ./playbooks/wazuh_environment.yaml
@@ -76,8 +66,6 @@ dashboard:
       revision: REVISION
       repository: REPOSITORY
 
-# ----------------------
-
 filebeat:
   depends: manager
   playbook: ./playbooks/wazuh_environment.yaml
@@ -87,5 +75,3 @@ filebeat:
     minimal:
       cpu: 2
       memory: 2048
-
-# ----------------------

@@ -1,15 +1,18 @@
 wazuh-manager:
-  roles: [manager]
+  roles:
+    - manager
 
 wazuh-agent1:
-  roles: [agent]
-  manager: [wazuh-manager]
+  roles:
+    - agent
+  manager: wazuh-manager
   version: 4.1.5
   revision: 1
   repository: live
 
 wazuh-agent2:
-  roles: [agent]
+  roles:
+    - agent
   manager: wazuh-manager
   version: 4.2.2
   revision: 1
@@ -17,7 +20,8 @@ wazuh-agent2:
 
 wazuh-agent3:
   manager: wazuh-manager
-  roles: [agent]
+  roles:
+    - agent
   version: 4.2.5
   revision: 1
   repository: live
