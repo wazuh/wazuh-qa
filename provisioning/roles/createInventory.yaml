@@ -2,7 +2,7 @@
   hosts: localhost
 
   tasks:
-  - name: "Template a file"
-    ansible.builtin.template:
-      src: "{{ source_template }}"
-      dest: "{{ dest_inventory}}"
+    - name: Template a file
+      ansible.builtin.template:
+        src: "{{ source_template }}"
+        dest: "{{ dest_inventory}}"
