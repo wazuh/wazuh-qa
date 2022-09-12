@@ -26,6 +26,7 @@ from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
+from wazuh_testing.tools.run_simulator import simulate_agent,syslog_simulator
 
 
 if sys.platform == 'win32':
@@ -1188,3 +1189,39 @@ def create_file(new_file_path):
     yield
 
     remove_file(new_file_path)
+
+
+@pytest.fixture(scope='function')
+def simulate_agent_function(request):
+    """Fixture to run the script simulate_agent.py"""
+    simulate_agent(request.param)
+
+    yield
+
+
+@pytest.fixture(scope='session')
+def load_wazuh_basic_configuration():
+    """Load a new basic configuration to the manager"""
+    # Load ossec.conf with all disabled settings
+    minimal_configuration = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'all_disabled_ossec.conf')
+
+    # Make a backup from current configuration
+    backup_ossec_configuration = get_wazuh_conf()
+
+    # Write new configuration
+    with open(minimal_configuration, 'r') as file:
+        lines = file.readlines()
+    write_wazuh_conf(lines)
+
+    yield
+
+    # Restore the ossec.conf backup
+    write_wazuh_conf(backup_ossec_configuration)
+
+
+@pytest.fixture(scope='function')
+def syslog_simulator_function(request):
+    """Fixture to run the script syslog_simulator.py"""
+    syslog_simulator(request.param)
+
+    yield

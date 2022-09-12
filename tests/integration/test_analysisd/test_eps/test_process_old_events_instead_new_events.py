@@ -66,7 +66,7 @@ local_internal_configuration_t2 = [
 @pytest.mark.parametrize('configure_local_internal_options_module', local_internal_configuration_t1, indirect=True)
 @pytest.mark.parametrize('syslog_simulator_function', [params_process_old_events_one_thread], indirect=True)
 def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic_configuration,
-                                       configure_local_internal_options_module, configure_wazuh_one_thread,
+                                       configure_local_internal_options_module, configure_analysisd_one_thread,
                                        truncate_monitored_files, restart_wazuh_daemon_function,
                                        syslog_simulator_function):
     '''
@@ -99,7 +99,7 @@ def test_process_old_events_one_thread(configuration, metadata, load_wazuh_basic
         - set_wazuh_configuration_analysisd:
             type: fixture
             brief: Set the wazuh configuration according to the configuration data.
-        - configure_wazuh_one_thread:
+        - configure_analysisd_one_thread:
             type: fixture
             brief: Set the wazuh internal option configuration according to the configuration data.
         - truncate_monitored_files:
