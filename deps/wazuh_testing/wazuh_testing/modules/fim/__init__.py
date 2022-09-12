@@ -73,7 +73,7 @@ CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: '(\d+)', path count: '(\d+)
 CB_DETECT_FIM_EVENT = r".*Sending FIM event: (.+)$"
 
 CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE = r".*registry_value.*Couldn't insert ('.*') entry into DB. The DB is full.*"
-CB_DATABASE_FULL_COULD_NOT_INSERT_KEY = r".*registry_key.*Couldn't insert '('.*')?' entry into DB\. The DB is full.*"
+CB_DATABASE_FULL_COULD_NOT_INSERT_KEY = r".*registry_key.*Couldn't insert ('.*')? entry into DB\. The DB is full.*"
 
 CB_COUNT_REGISTRY_ENTRIES = r".*Fim registry entries count: '(\d+)'"
 CB_COUNT_REGISTRY_VALUE_ENTRIES = r".*Fim registry values entries count: '(\d+)'"
