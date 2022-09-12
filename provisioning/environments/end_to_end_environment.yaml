@@ -1,13 +1,17 @@
 centos-manager:
   os: centos
-  roles: [manager, indexer, filebeat]
+  roles:
+  - manager
+    indexer
+    filebeat
   resources:
     cpu: 4
     memory: 8192
 
 ubuntu-agent:
   os: ubuntu
-  roles: [agent]
+  roles:
+    - agent
   manager: centos-manager
   resources:
     cpu: 2
@@ -15,12 +19,14 @@ ubuntu-agent:
 
 centos-agent:
   os: centos
-  roles: [agent]
+  roles:
+    - agent
   manager: centos-manager
 
 windows-agent:
   os: windows
-  roles: [agent]
+  roles:
+    - agent
   manager: centos-manager
   resources:
     cpu: 2
