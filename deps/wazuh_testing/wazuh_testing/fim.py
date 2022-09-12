@@ -169,10 +169,8 @@ else:
     REG_QWORD = 0
     KEY_ALL_ACCESS = 0
 
-
     def registry_value_cud():
         pass
-
 
     def registry_key_cud():
         pass
@@ -191,7 +189,6 @@ else:
 
     def validate_registry_event():
         pass
-
 
     RegOpenKeyEx = 0
     RegCloseKey = 0
@@ -1612,8 +1609,8 @@ class EventChecker:
         return result_list
 
 
-def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20), monitor: FileMonitor = None,
-                            timeout=global_parameters.default_timeout):
+def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20),
+                            monitor: FileMonitor = None, timeout=global_parameters.default_timeout):
     """Checks if the conditions for waiting for a new scheduled scan.
 
     Optionally, a monitor may be used to check if a scheduled scan has been performed.
@@ -1622,7 +1619,8 @@ def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta
 
     Args:
         wait_scan (boolean): True if we need to update time. False otherwise.
-        interval (timedelta, optional): time interval that will be waited for the scheduled scan to start. Default: 20 seconds.
+        interval (timedelta, optional): time interval that will be waited for the scheduled scan to start.
+            Default: 20 seconds.
         monitor (FileMonitor, optional): if passed, after changing system clock it will check for the end of the
             scheduled scan. The `monitor` will not consume any log line. Default `None`.
         timeout (int, optional): If a monitor is provided, this parameter sets how long to wait for the end of scan.
@@ -1641,8 +1639,8 @@ def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta
         time.sleep(interval)
         if monitor:
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
-                        update_position=False,
-                        error_message=f"End of scheduled scan not detected after {timeout} seconds")
+                          update_position=False,
+                          error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
 
 if sys.platform == 'win32':
@@ -1961,7 +1959,6 @@ if sys.platform == 'win32':
                               error_message=f'End of scheduled scan not detected after '
                               f"{global_parameters.default_timeout} seconds")
 
-
     def transform_registry_list(value_list=['test_value'], value_type=win32con.REG_SZ, callback=callback_value_event):
 
         if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
@@ -1983,7 +1980,6 @@ if sys.platform == 'win32':
 
         return aux_dict
 
-
     def set_check_options(options):
         """ Return set of check options. If options given is none, it will return check_all"""
         options_set = REQUIRED_REG_VALUE_ATTRIBUTES[CHECK_ALL]
@@ -1991,14 +1987,14 @@ if sys.platform == 'win32':
             options_set = options_set.intersection(options)
         return options_set
 
-
     def create_values_content(value_name, size):
         """ Create a string of data content of a given size for a specific key value"""
         return {value_name: generate_string(size, '0')}
 
     def registry_value_create(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
-                           min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True, encoding=None,
-                           callback=callback_value_event, validators_after_create=None, value_type=win32con.REG_SZ):
+                              min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True,
+                              encoding=None, callback=callback_value_event, validators_after_create=None,
+                              value_type=win32con.REG_SZ):
         """Check if creation of registry value events are detected by syscheck.
 
         This function provides multiple tools to validate events with custom validators.
@@ -2012,7 +2008,8 @@ if sys.platform == 'win32':
                 strings in each value. Default `['test_value']`
             min_timeout (int, optional): Minimum timeout. Default `1`
             options (set, optional): Set with all the checkers. Default `None`
-            wait_for_scan (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
+            wait_for_scan (boolean, optional): Boolean to determine if there will be time travels or not.
+                Default `False`
             scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
             triggers_event (boolean, optional): Boolean to determine if the
                 event should be raised or not. Default `True`
@@ -2059,10 +2056,10 @@ if sys.platform == 'win32':
         if triggers_event:
             logger.info("'added' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
-
     def registry_value_update(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
-                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
-                           callback=callback_value_event, validators_after_update=None, value_type=win32con.REG_SZ):
+                              wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True,
+                              encoding=None, callback=callback_value_event, validators_after_update=None,
+                              value_type=win32con.REG_SZ):
         """Check if update registry value events are detected by syscheck.
 
         This function provides multiple tools to validate events with custom validators.
@@ -2074,7 +2071,8 @@ if sys.platform == 'win32':
             arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
             value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
                 strings in each value. Default `['test_value']`
-            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans.
+                Default `False`
             scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
             min_timeout (int, optional): Minimum timeout. Default `1`
             options (set, optional): Set with all the checkers. Default `None`
@@ -2119,8 +2117,9 @@ if sys.platform == 'win32':
             logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
     def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, value_list=['test_value'],
-                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True, encoding=None,
-                           callback=callback_value_event, validators_after_delete=None, value_type=win32con.REG_SZ):
+                              wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True,
+                              encoding=None, callback=callback_value_event, validators_after_delete=None,
+                              value_type=win32con.REG_SZ):
         """Check if delete registry value events are detected by syscheck.
 
         This function provides multiple tools to validate events with custom validators.
@@ -2132,7 +2131,8 @@ if sys.platform == 'win32':
             arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
             value_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with empty
                 strings in each value. Default `['test_value']`
-            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans. Default `False`
+            wait_for_scan (boolean, optional): Boolean to determine if there will waits for scheduled scans.
+                Default `False`
             scan_delay (int, optional): time the test sleeps waiting for scan to be triggered.
             min_timeout (int, optional): Minimum timeout. Default `1`
             options (set, optional): Set with all the checkers. Default `None`
@@ -2174,7 +2174,6 @@ if sys.platform == 'win32':
 
         if triggers_event:
             logger.info("'deleted' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
-
 
     def registry_key_cud(root_key, registry_sub_key, log_monitor, arch=KEY_WOW64_64KEY, key_list=['test_key'],
                          time_travel=False, min_timeout=1, options=None, triggers_event=True, triggers_event_add=True,
@@ -2535,7 +2534,8 @@ def get_scan_timestamp(file_monitor):
         file_monitor (FileMonitor): file log monitor to detect events
     """
     timestamp = file_monitor.start(timeout=60, callback=callback_get_scan_timestap,
-                       error_message='Did not receive expected "File integrity monitoring scan ended" event').result()
+                                   error_message='Did not receive expected '
+                                   '"File integrity monitoring scan ended" event').result()
     return timestamp
 
 
