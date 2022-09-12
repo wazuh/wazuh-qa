@@ -1,6 +1,6 @@
 - name: Cleanup Linux agent environment
   hosts: agent:&linux
-  become: True
+  become: true
   tasks:
 
     - name: Delete agent configuration
@@ -18,7 +18,7 @@
 
 - name: Cleanup manager environment
   hosts: manager
-  become: True
+  become: true
   tasks:
 
     - name: Delete added rules

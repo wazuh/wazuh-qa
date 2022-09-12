@@ -1,4 +1,3 @@
----
 - name: Configure manager environment
   hosts: manager
   tasks:
@@ -8,7 +7,7 @@
       register: euid
 
     - name: Create wazuh audit rules file
-      become: True
+      become: true
       copy:
         dest: /etc/audit/rules.d/wazuh.rules
         content: |
@@ -16,9 +15,9 @@
           -a exit,always -F euid={{euid.stdout}} -F arch=b64 -S execve -k audit-wazuh-c
 
     - name: Delete previous audit rules
-      become: True
+      become: true
       shell: auditctl -D
 
     - name: Load audit rules
-      become: True
+      become: true
       shell: auditctl -R /etc/audit/rules.d/wazuh.rules

@@ -1,6 +1,6 @@
 - name: Cleanup manager environment
   hosts: manager
-  become: True
+  become: true
   tasks:
 
     - name: Delete Virustotal integration and active response configuration

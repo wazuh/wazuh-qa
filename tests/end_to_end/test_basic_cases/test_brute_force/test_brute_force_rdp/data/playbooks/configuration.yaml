@@ -1,10 +1,10 @@
 - name: Configure local environment
-  hosts:  ubuntu-agent
+  hosts: ubuntu-agent
   become: true
   tasks:
     - name: Update packages list
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
 
     # Install hydra to attempt the RDP brute force attack
     - name: Install hydra
