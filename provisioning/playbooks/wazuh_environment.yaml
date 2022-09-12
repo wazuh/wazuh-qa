@@ -56,16 +56,16 @@
 # Agent
 - hosts: agent
   tasks:
-  - name: Agents
-    block:
-      - name: Install UNIX based agents
-        become: yes
-        become_user: root
-        import_role:
-          name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
-        when: ansible_os_family != "Windows"
+    - name: Agents
+      block:
+        - name: Install UNIX based agents
+          become: true
+          become_user: root
+          import_role:
+            name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
+          when: ansible_os_family != "Windows"
 
-      - name: Install Windows based agents
-        import_role:
-          name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
-        when: ansible_os_family == "Windows"
+        - name: Install Windows based agents
+          import_role:
+            name: "{{ wazuh_ansible_roles }}/wazuh/ansible-wazuh-agent"
+          when: ansible_os_family == "Windows"
