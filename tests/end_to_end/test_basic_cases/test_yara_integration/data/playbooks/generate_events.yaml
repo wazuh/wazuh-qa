@@ -5,6 +5,10 @@
   become: true
   tasks:
 
+    - name: Truncate server log
+      shell: echo "" > /var/ossec/logs/ossec.log
+      become: true
+
     - name: Truncate alert.json
       include_role:
         name: manage_alerts
@@ -12,7 +16,9 @@
 
     - name: Wait until the server is ready
       wait_for:
-        timeout: 10
+        path: /var/ossec/logs/ossec.log
+        search_regex: "INFO: Ending rootcheck scan."
+        timeout: 30
 
     - name: Download malware
       shell: curl -s -XGET {{ url }} -o "/tmp/yara/malware/mirai"

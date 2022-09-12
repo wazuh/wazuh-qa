@@ -34,3 +34,25 @@
 
     - name: Enable Windows Defender
       win_shell: set-MpPreference -DisableRealtimeMonitoring $False
+
+    - name: Disable events logging
+      lineinfile:
+        path: /var/ossec/etc/ossec.conf
+        regexp: <logall_json>yes</logall_json>
+        line: <logall_json>no</logall_json>
+      delegate_to: centos-manager
+
+    - name: Delete created rules
+      become: true
+      blockinfile:
+        path: /var/ossec/etc/rules/local_rules.xml
+        block: ''
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+      delegate_to: centos-manager
+
+    - name: Restart manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux

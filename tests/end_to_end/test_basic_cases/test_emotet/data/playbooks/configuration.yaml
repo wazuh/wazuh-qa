@@ -1,88 +1,21 @@
-- name: Configure Windows agent environment
-  hosts: windows-agent
+- name: Configure manager environment
+  hosts: manager
   tasks:
 
     - name: Enable auto logon
       community.windows.win_auto_logon:
         username: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
+      delegate_to: windows-agent
 
     - name: Reboot Windows
       win_reboot:
+      delegate_to: windows-agent
 
     - name: Disable Windows Defender
       win_shell: |
         Set-MpPreference -DisableRealtimeMonitoring 1
-
-    - name: Create temp folder
-      win_file:
-        path: C:\temp
-        state: directory
-
-    - name: Download PSTools
-      win_shell: |
-        Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}/emotet/PSTools.zip -Outfile PSTools.zip
-
-    - name: Unzip PSTools
-      win_shell: |
-        Expand-Archive -Path C:\temp\PSTools.zip -DestinationPath C:\temp\PSTools
-
-    - name: Copy ossec.conf
-      win_copy:
-        src: C:\Program Files (x86)\ossec-agent\ossec.conf
-        dest: C:\temp
-        remote_src: true
-
-    - name: Download sysmon
-      win_shell: |
-        Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}/emotet/Sysmon.zip -Outfile Sysmon.zip
-
-    - name: Unzip sysmon
-      win_shell: |
-        Expand-Archive -Path C:\temp\Sysmon.zip -DestinationPath C:\temp\Sysmon
-
-    - name: Download Sysmon configuration file
-      win_shell: |
-        Set-Location C:\temp\Sysmon
-        Invoke-WebRequest -Uri {{ s3_url }}/emotet/sysconfig.xml -Outfile sysconfig.xml
-
-    - name: Install sysmon
-      win_shell: |
-        cd C:\temp\Sysmon
-        ./Sysmon64.exe -accepteula -i sysconfig.xml
-
-    - name: Configure Wazuh to collect Sysmon events
-      include_role:
-        name: manage_wazuh_configurations
-        tasks_from: write_wazuh_config.yaml
-      vars:
-        config_block: |
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
-          "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
-          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
-        os: windows
-
-    - name: Download trigger_emotet.exe
-      win_shell: |
-        Set-Location C:\temp
-        Invoke-WebRequest -Uri {{ s3_url }}/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe
-
-    - name: Restart wazuh-agent
-      include_role:
-        name: manage_wazuh
-        tasks_from: restart_wazuh.yaml
-      vars:
-        os: windows
-
-- name: Configure manager environment
-  hosts: manager
-  tasks:
+      delegate_to: windows-agent
 
     - name: Configure local rules
       include_role:
@@ -119,9 +52,87 @@
           </rule>
           </group>
 
+    - name: Enable events logging
+      become: true
+      lineinfile:
+        path: /var/ossec/etc/ossec.conf
+        regexp: <logall_json>no</logall_json>
+        line: <logall_json>yes</logall_json>
+        backrefs: true
+
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
         os: linux
+
+- name: Configure Windows agent environment
+  hosts: windows-agent
+  tasks:
+
+    - name: Create temp folder
+      win_file:
+        path: C:\temp
+        state: directory
+
+    - name: Download PSTools
+      win_shell: |
+        Set-Location C:\temp
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/PSTools.zip -Outfile PSTools.zip
+
+    - name: Unzip PSTools
+      win_shell: |
+        Expand-Archive -Path C:\temp\PSTools.zip -DestinationPath C:\temp\PSTools
+
+    - name: Download sysmon
+      win_shell: |
+        Set-Location C:\temp
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/Sysmon.zip -Outfile Sysmon.zip
+
+    - name: Unzip sysmon
+      win_shell: |
+        Expand-Archive -Path C:\temp\Sysmon.zip -DestinationPath C:\temp\Sysmon
+
+    - name: Download Sysmon configuration file
+      win_shell: |
+        Set-Location C:\temp\Sysmon
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/sysconfig.xml -Outfile sysconfig.xml
+
+    - name: Install sysmon
+      win_shell: |
+        cd C:\temp\Sysmon
+        ./Sysmon64.exe -accepteula -i sysconfig.xml
+
+    - name: Copy ossec.conf
+      win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Configure Wazuh to collect Sysmon events
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+          "`n<location>Microsoft-Windows-Sysmon/Operational</location>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>eventchannel</log_format>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
+
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows
+
+    - name: Download trigger_emotet.exe
+      win_shell: |
+        Set-Location C:\temp
+        Invoke-WebRequest -Uri {{ s3_url }}/emotet/trigger-emotet.exe -Outfile trigger-emotet.exe

@@ -63,6 +63,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 pytestmark = [TIER0, LINUX]
 
 
+@pytest.mark.skip(reason="The tests are not stable enough to be added to the automated execution (#3275).")
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_fim_linux(configure_environment, metadata, get_indexer_credentials, get_manager_ip, generate_events,
@@ -105,9 +106,9 @@ def test_fim_linux(configure_environment, metadata, get_indexer_credentials, get
         - The `configuration.yaml` file provides the module configuration for this test.
         - The `generate_events.yaml`file provides the function configuration for this test.
     '''
-    rule_id = metadata['rule.id']
-    rule_level = metadata['rule.level']
-    rule_description = metadata['rule.description']
+    rule_id = metadata['extra_vars']['rule_id']
+    rule_level = metadata['extra_vars']['rule_level']
+    rule_description = metadata['extra_vars']['rule_description']
     syscheck_path = metadata['extra']['syscheck.path']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 

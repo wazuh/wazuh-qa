@@ -2,6 +2,10 @@
   hosts: manager
   tasks:
 
+    - name: Truncate archives log
+      shell: echo "" > /var/ossec/logs/archives/archives.json
+      become: true
+
     - name: Truncate alert.json
       include_role:
         name: manage_alerts
@@ -20,8 +24,16 @@
   hosts: manager
   tasks:
 
-    - name: Wait for expected alert
+    - name: Wait for expected event and alert
       block:
+
+        - name: Search event in archives
+          become: true
+          with_items: "{{ lookup('ansible.builtin.dict', alerts) }}"
+          wait_for:
+            path: /var/ossec/logs/archives/archives.json
+            search_regex: "{{ item.value.rule_id }}"
+            timeout: 10
 
         - name: Search alert in alerts log
           with_items: "{{ lookup('ansible.builtin.dict', alerts) }}"
