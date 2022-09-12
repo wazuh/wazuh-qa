@@ -28,17 +28,17 @@
 
 # Linux
 - name: Include Linux custom tasks
-  include_tasks: "Linux.yml"
+  include_tasks: Linux.yml
   when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
 
 # Windows
 - name: Include Windows custom tasks
-  include_tasks: "Windows.yml"
+  include_tasks: Windows.yml
   when: ansible_os_family == "Windows"
 
 # Solaris
 - name: Include Solaris custom tasks
-  include_tasks: "Solaris.yml"
+  include_tasks: Solaris.yml
   when: ansible_os_family == "Solaris"
   args:
     apply:
@@ -47,5 +47,5 @@
 
 # macOS
 - name: Include MacOS custom tasks
-  include_tasks: "MacOS.yml"
+  include_tasks: MacOS.yml
   when: ansible_os_family == "Darwin"

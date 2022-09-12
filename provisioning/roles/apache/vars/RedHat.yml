@@ -1,2 +1,2 @@
-program: "httpd"
-service: "httpd"
+program: httpd
+service: httpd

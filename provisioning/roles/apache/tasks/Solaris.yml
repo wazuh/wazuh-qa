@@ -4,7 +4,7 @@
 
 - name: Fetch new catalog and descriptions
   become: true
-  shell: /opt/csw/bin/pkgutil -U 
+  shell: /opt/csw/bin/pkgutil -U
 
 - name: Install apache2
   become: true

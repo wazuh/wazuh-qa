@@ -13,7 +13,7 @@
 - name: Replace Apache's ServerRoot location
   community.windows.win_lineinfile:
     path: "{{ apache_folder_path }}/conf/httpd.conf"
-    backrefs: yes
+    backrefs: true
     regex: Define SRVROOT "c:/Apache24"
     line: Define SRVROOT "c:/Users/qa/Apache24"
 
