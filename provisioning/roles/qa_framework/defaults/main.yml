@@ -1,8 +1,0 @@
-qa_repository_url: https://github.com/wazuh/wazuh-qa.git
-qa_repository_reference: master
-qa_requirements_file: requirements.txt
-test_setup_qa_path: deps/wazuh_testing
-setup_installer: setup.py
-build_dir: /tmp/wazuh-qa
-# This flag allows modifying any var
-customize: false

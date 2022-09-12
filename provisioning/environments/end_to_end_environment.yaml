@@ -1,9 +1,9 @@
 centos-manager:
   os: centos
   roles:
-  - manager
-    indexer
-    filebeat
+    - manager
+      indexer
+      filebeat
   resources:
     cpu: 4
     memory: 8192
