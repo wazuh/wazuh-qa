@@ -29,7 +29,7 @@ Release report: TBD
 
 ### Changed
 
-- Update wazuhdb_getconfig integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)
+- Skip flaky Logcollector tests ([#3218](https://github.com/wazuh/wazuh-qa/pull/3217)) \- (Tests)
 - Change how 'service_control' collects clusterd and apid pids ([#3140](https://github.com/wazuh/wazuh-qa/pull/3140)) \- (Framework)
 - Change scan test module fixtures to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
 - Update syscollector deltas integration tests ([#2921](https://github.com/wazuh/wazuh-qa/pull/2921)) \- (Tests)
@@ -62,7 +62,7 @@ Release report: TBD
 
 ### Removed
 
--  Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
+- Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
 
 ## [4.3.7] - 24-08-2022
@@ -71,8 +71,10 @@ Wazuh commit: https://github.com/wazuh/wazuh/commit/e2b514bef3d148acd4bcae1a1c7f
 Release report: https://github.com/wazuh/wazuh/issues/14562
 
 ## Added
+- Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984)) \- (Framework + Tests)
 - Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add system test to check synchronization status in the cluster ([#3180](https://github.com/wazuh/wazuh-qa/pull/3180)) \- (Framework + Tests)
+- Add system test to check big files synchronization in the cluster ([#3202](https://github.com/wazuh/wazuh-qa/pull/3202)) \- (Framework + Tests)
 
 ### Changed
 

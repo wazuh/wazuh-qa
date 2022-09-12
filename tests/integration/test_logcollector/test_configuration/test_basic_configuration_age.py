@@ -182,6 +182,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_configuration_age(get_configuration, configure_environment):
     '''
