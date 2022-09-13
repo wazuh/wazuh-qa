@@ -85,7 +85,7 @@ def remove_slack_log():
     remove_file(slack_messages_log)
 
 
-@pytest.mark.skip(reason="The tests are not stable enough to be added to the automated execution (#3274).")
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3286')
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_slack_integration(metadata, configure_environment, get_indexer_credentials, get_manager_ip, generate_events,

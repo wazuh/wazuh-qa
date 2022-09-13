@@ -65,7 +65,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 pytestmark = [TIER0, WINDOWS]
 
 
-@pytest.mark.skip(reason="The tests are not stable enough to be added to the automated execution (#3274).")
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3207')
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 def test_fim_windows(configure_environment, metadata, get_indexer_credentials, get_manager_ip, generate_events,

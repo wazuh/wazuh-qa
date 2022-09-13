@@ -65,7 +65,7 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 pytestmark = [TIER0, LINUX]
 
 
-@pytest.mark.skip(reason="The tests are not stable enough to be added to the automated execution (#3274).")
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3210')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_docker_monitoring(configure_environment, metadata, get_indexer_credentials, get_manager_ip, generate_events,
