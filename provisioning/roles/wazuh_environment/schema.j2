@@ -7,7 +7,6 @@
 {%- set last_indexer_node = 0-%}
 {% endif %}
 
-
 {% if vars['dashboard'] is defined %}
 
   {% if vars['dashboard']['ip'] ==  vars['indexer'][first_indexer_node]['ip'] %}
@@ -26,7 +25,6 @@
 {% else %}
 {%- set dashboard_node = last_indexer_node + 1-%}
 {% endif %}
-
 
 {% if vars['manager'] is defined %}
 {%- set manager = vars['manager'] -%}
@@ -55,8 +53,6 @@
 {% endif %}
 {% endfor %}
 {%- endmacro -%}
-
-
 
 {% macro expand_custom_package(role, role_parameters) %}
 
@@ -303,11 +299,9 @@ all:
     wazuh_custom_packages_installation_dashboard_enabled: true
     wazuh_custom_packages_installation_indexer_enabled: true
 
-
     {% if wazuh_custom_packages_installation_agent_deb_url is defined-%}
     wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_agent_rpm_url is defined-%}
     wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
     {% endif %}
@@ -326,29 +320,21 @@ all:
     {%- if wazuh_custom_packages_installation_manager_rpm_url is defined-%}
     wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url}}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_dashboard_deb_url is defined-%}
     wazuh_custom_packages_installation_dashboard_deb_url: {{ wazuh_custom_packages_installation_dashboard_deb_url}}
     {% endif %}
-
-
     {%- if wazuh_custom_packages_installation_dashboard_rpm_url is defined-%}
     wazuh_custom_packages_installation_dashboard_rpm_url: {{ wazuh_custom_packages_installation_dashboard_rpm_url}}
     {% endif %}
-
-
     {%- if wazuh_custom_packages_installation_indexer_deb_url is defined-%}
     wazuh_custom_packages_installation_indexer_deb_url: {{ wazuh_custom_packages_installation_indexer_deb_url}}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_indexer_rpm_url is defined-%}
     wazuh_custom_packages_installation_indexer_rpm_url: {{ wazuh_custom_packages_installation_indexer_rpm_url}}
     {% endif %}
-
     {% if filebeat_repo is defined-%}
     filebeat_module_package_url: {{ filebeat_repo }}
     {% endif %}
-
     {% if wazuh_app_repo is defined-%}
     wazuh_app_url: {{ wazuh_app_repo }}
     {% endif %}

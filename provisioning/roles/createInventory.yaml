@@ -1,6 +1,5 @@
 - name: Creating inventory using templates
   hosts: localhost
-
   tasks:
     - name: Template a file
       ansible.builtin.template:
