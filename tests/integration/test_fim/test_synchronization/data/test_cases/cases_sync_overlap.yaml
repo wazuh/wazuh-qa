@@ -1,0 +1,13 @@
+- name: Doubled sync_interval smaller than max_interval
+  description: 'Detect that sync_interval is doubled when response_timeout is exceeded'
+  configuration_parameters:
+    INTERVAL: 10
+    RESPONSE_TIMEOUT: 5
+    MAX_INTERVAL: 30
+    fim_mode: scheduled
+  metadata:
+    interval: 10
+    response_timeout: 5
+    max_interval: 30
+    files: 10
+    fim_mode: scheduled

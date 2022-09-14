@@ -1,0 +1,26 @@
+- tags:
+  - test_sync_overlap
+  apply_to_modules:
+  - test_sync_overlap
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: 5
+    - directories:
+        value: /testdir
+        attributes:
+        - check_all: 'yes'
+    - synchronization:
+        elements:
+          - interval:
+              value: INTERVAL
+          - response_timeout:
+              value: RESPONSE_TIMEOUT
+          - max_interval:
+              value: MAX_INTERVAL
+          - max_eps:
+              value: 1
+    
