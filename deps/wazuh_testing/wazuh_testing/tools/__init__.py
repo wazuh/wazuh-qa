@@ -26,6 +26,7 @@ if sys.platform == 'win32':
     UPGRADE_PATH = os.path.join(WAZUH_PATH, 'upgrade')
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'agent-auth.exe')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
 
 else:
 
