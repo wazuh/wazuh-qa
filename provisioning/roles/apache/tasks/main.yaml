@@ -1,42 +1,40 @@
-# vars
-
 # Linux
 - name: Include Debian custom vars
-  include_vars: ../vars/Debian.yml
+  include_vars: ../vars/debian.yaml
   when: ansible_os_family == "Debian"
 
 - name: Include RedHat custom vars
-  include_vars: ../vars/RedHat.yml
+  include_vars: ../vars/redhat.yaml
   when: ansible_os_family == "RedHat"
 
 # Windows
 - name: Include Windows custom vars
-  include_vars: ../vars/Windows.yml
+  include_vars: ../vars/windows.yaml
   when: ansible_os_family == "Windows"
 
 # Solaris
 - name: Include Solaris custom vars
-  include_vars: ../vars/Solaris.yml
+  include_vars: ../vars/solaris.yaml
   when: ansible_os_family == "Solaris"
 
 # MacOS
 - name: Include MacOS custom vars
-  include_vars: ../vars/MacOS.yml
+  include_vars: ../vars/macos.yaml
   when: ansible_os_family == "Darwin"
 
 # Linux
 - name: Include Linux custom tasks
-  include_tasks: Linux.yml
+  include_tasks: linux.yaml
   when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
 
 # Windows
 - name: Include Windows custom tasks
-  include_tasks: Windows.yml
+  include_tasks: windows.yaml
   when: ansible_os_family == "Windows"
 
 # Solaris
 - name: Include Solaris custom tasks
-  include_tasks: Solaris.yml
+  include_tasks: solaris.yaml
   when: ansible_os_family == "Solaris"
   args:
     apply:
@@ -45,5 +43,5 @@
 
 # macOS
 - name: Include MacOS custom tasks
-  include_tasks: MacOS.yml
+  include_tasks: macos.yaml
   when: ansible_os_family == "Darwin"
