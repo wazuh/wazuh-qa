@@ -14,7 +14,7 @@
 
 # macOS
 - name: Include macOS custom vars
-  include_vars: macOS.yml
+  include_vars: macos.yaml
   when:
     - customize == false
     - ansible_os_family == "Darwin"
