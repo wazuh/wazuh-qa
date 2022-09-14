@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.8] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Changed
+
+- Update wazuh-logtest messages for integration tests \- (Tests)
+
 ## [4.3.7] - 24-08-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/e2b514bef3d148acd4bcae1a1c7fa8783b82ca3a \
