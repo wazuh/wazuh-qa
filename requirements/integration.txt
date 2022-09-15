@@ -1,0 +1,6 @@
+# test_windows_audit_interval.py
+wmi>=1.5.1; platform_system=='Windows'
+#test_basic_configuration_local_ip_valid.py
+netifaces==0.10.9; platform_system == "Linux" or platform_system == "Darwin"
+# API testing
+urllib3>=1.26.5

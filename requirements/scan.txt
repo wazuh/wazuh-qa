@@ -1,0 +1,2 @@
+safety==1.10.3 # Code analysis tests
+bandit==1.7.0 # Dependency analysis tests
