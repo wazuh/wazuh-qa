@@ -1,6 +1,6 @@
 # Unix
 - name: Include Unix custom vars
-  include_vars: unix.yaml
+  include_vars: linux.yaml
   when:
     - customize == false
     - ansible_os_family != "Windows"
@@ -28,7 +28,7 @@
 
 # Unix|Solaris|macOS
 - name: Include Unix custom tasks
-  include_tasks: unix.yaml
+  include_tasks: linux.yaml
   when: ansible_os_family != "Windows"
 
 # Windows
