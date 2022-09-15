@@ -1,5 +1,5 @@
 qa_framework:
-  playbook: ./playbooks/qa_framework.yml
+  playbook: ./playbooks/qa_framework.yaml
   os: ANY
   service: ANY
   vars:
@@ -7,7 +7,7 @@ qa_framework:
       qa_repository_reference: QA_REFERENCE
 
 apache:
-  playbook: ./playbooks/apache.yml
+  playbook: ./playbooks/apache.yaml
   os: LINUX_BASED_OS
   service: ANY
 

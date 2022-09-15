@@ -7,7 +7,6 @@
 {%- set last_indexer_node = 0-%}
 {% endif %}
 
-
 {% if vars['dashboard'] is defined %}
 
   {% if vars['dashboard']['ip'] ==  vars['indexer'][first_indexer_node]['ip'] %}
@@ -26,7 +25,6 @@
 {% else %}
 {%- set dashboard_node = last_indexer_node + 1-%}
 {% endif %}
-
 
 {% if vars['manager'] is defined %}
 {%- set manager = vars['manager'] -%}
@@ -56,73 +54,64 @@
 {% endfor %}
 {%- endmacro -%}
 
-
-
 {% macro expand_custom_package(role, role_parameters) %}
 
 {% if role == 'agent' %}
 {% if role_parameters['wazuh_custom_packages_installation_agent_rpm_url'] is defined%}
-wazuh_custom_packages_installation_agent_rpm_url: {{role_parameters['wazuh_custom_packages_installation_agent_rpm_url']}}
+wazuh_custom_packages_installation_agent_rpm_url: {{ role_parameters['wazuh_custom_packages_installation_agent_rpm_url'] }}
 {% endif %}
 {% if role_parameters['wazuh_custom_packages_installation_agent_deb_url'] is defined%}
-wazuh_custom_packages_installation_agent_deb_url: {{role_parameters['wazuh_custom_packages_installation_agent_deb_url']}}
+wazuh_custom_packages_installation_agent_deb_url: {{ role_parameters['wazuh_custom_packages_installation_agent_deb_url'] }}
 {% endif %}
 
 {% if role_parameters['wazuh_custom_packages_installation_agent_msi_url'] is defined %}
-wazuh_custom_packages_installation_agent_msi_url: {{role_parameters['wazuh_custom_packages_installation_agent_msi_url']}}
+wazuh_custom_packages_installation_agent_msi_url: {{ role_parameters['wazuh_custom_packages_installation_agent_msi_url'] }}
 {% endif %}
 
 {% if role_parameters['wazuh_custom_packages_installation_agent_macos_url'] is defined%}
-wazuh_custom_packages_installation_agent_macos_url: {{role_parameters['wazuh_custom_packages_installation_agent_macos_url']}}
+wazuh_custom_packages_installation_agent_macos_url: {{ role_parameters['wazuh_custom_packages_installation_agent_macos_url'] }}
 {% endif %}
 
 {% if role_parameters['wazuh_custom_packages_installation_agent_solaris_url'] is defined%}
-wazuh_custom_packages_installation_agent_solaris_url: {{role_parameters['wazuh_custom_packages_installation_agent_solaris_url']}}
+wazuh_custom_packages_installation_agent_solaris_url: {{ role_parameters['wazuh_custom_packages_installation_agent_solaris_url'] }}
 {% endif %}
 {% endif %}
 
 
 {% if role == 'manager' %}
 {% if role_parameters['wazuh_custom_packages_installation_manager_deb_url'] is defined %}
-wazuh_custom_packages_installation_manager_deb_url: {{role_parameters['wazuh_custom_packages_installation_manager_deb_url']}}
+wazuh_custom_packages_installation_manager_deb_url: {{ role_parameters['wazuh_custom_packages_installation_manager_deb_url'] }}
 {% endif %}
 {% if role_parameters['wazuh_custom_packages_installation_manager_rpm_url'] is defined%}
-wazuh_custom_packages_installation_manager_rpm_url: {{role_parameters['wazuh_custom_packages_installation_manager_rpm_url']}}
+wazuh_custom_packages_installation_manager_rpm_url: {{ role_parameters['wazuh_custom_packages_installation_manager_rpm_url'] }}
 {% endif %}
 {% endif %}
-
-
 
 {% if role == 'dashboard' %}
 {% if role_parameters['wazuh_custom_packages_installation_dashboard_deb_url'] is defined%}
-wazuh_custom_packages_installation_dashboard_deb_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_deb_url']}}
+wazuh_custom_packages_installation_dashboard_deb_url: {{ role_parameters['wazuh_custom_packages_installation_dashboard_deb_url'] }}
 {% endif %}
 {% if role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url'] is defined %}
-wazuh_custom_packages_installation_dashboard_rpm_url: {{role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url']}}
+wazuh_custom_packages_installation_dashboard_rpm_url: {{ role_parameters['wazuh_custom_packages_installation_dashboard_rpm_url'] }}
 {% endif %}
 {% endif %}
 
 {% if role == 'indexer' %}
 {% if role_parameters['wazuh_custom_packages_installation_indexer_deb_url'] is defined %}
-wazuh_custom_packages_installation_indexer_deb_url: {{role_parameters['wazuh_custom_packages_installation_indexer_deb_url']}}
+wazuh_custom_packages_installation_indexer_deb_url: {{ role_parameters['wazuh_custom_packages_installation_indexer_deb_url'] }}
 {% endif %}
 {% if role_parameters['wazuh_custom_packages_installation_indexer_rpm_url'] is defined %}
-wazuh_custom_packages_installation_indexer_rpm_url: {{role_parameters['wazuh_custom_packages_installation_indexer_rpm_url']}}
+wazuh_custom_packages_installation_indexer_rpm_url: {{ role_parameters['wazuh_custom_packages_installation_indexer_rpm_url'] }}
 {% endif %}
 {% endif %}
-
-
-
 
 {% if role == 'filebeat' %}
 {% if role_parameters['filebeat_repo'] is defined%}
-filebeat_module_package_url: {{role_parameters['filebeat_repo']}}
+filebeat_module_package_url: {{ role_parameters['filebeat_repo'] }}
 {% endif %}
 {% endif %}
 
 {%- endmacro -%}
-
-
 
 {% if indexer is defined%}
 wi_cluster:
@@ -187,23 +176,23 @@ wi_cluster:
       {%- for indexer_key, indexer_value in indexer.items() %}
 
       node{{ loop.index }}:
-        name: node-{{loop.index}}
+        name: node-{{ loop.index }}
         ip: "{{ indexer_value['ip'] }}"
         role: indexer
       {% endfor %}
 
     {%- if dashboard is defined and not all_in_one %}
 
-      node{{dashboard_node}}:
-        name: node-{{dashboard_node}}
+      node{{ dashboard_node }}:
+        name: node-{{ dashboard_node }}
         ip: "{{ dashboard['ip'] }}"
         role: dashboard
     {% endif %}
 
     {%- if manager is defined %}
 
-      node{{master_node}}:
-        name: node-{{master_node}}
+      node{{ master_node }}:
+        name: node-{{ master_node }}
         ip: "{{ manager['master']['ip'] }}"
         role: wazuh
     {%- if workers|length != 0 %}
@@ -214,15 +203,14 @@ wi_cluster:
         {%- for worker_key, worker_value in workers.items() %}
         {% set real_node_index =  master_node + loop.index %}
 
-      node{{real_node_index}}:
-        name: node-{{real_node_index}}
+      node{{ real_node_index }}:
+        name: node-{{ real_node_index }}
         ip: "{{ worker_value['ip'] }}"
         role: wazuh
         node_type: worker
         {% endfor %}
     {% endif %}
 {% endif %}
-
 
 {% if manager is defined -%}
 manager:
@@ -246,21 +234,20 @@ manager:
 
 	    {%- for worker_key, worker_values in workers.items() %}
 
-      worker{{loop.index}}:
+      worker{{ loop.index }}:
         {{ expand_ansible_connection_attributes(worker_values) | indent(8) }}
         private_ip:  {{ worker_values['ip'] }}
         {{ expand_custom_package('manager', worker_values) | indent(8)  }}
         wazuh_manager_config:
           cluster:
             disable: 'no'
-            node_name:  "{{worker_key}}"
+            node_name:  "{{ worker_key }}"
             node_type: 'worker'
             key: 'c98b62a9b6169ac5f67dae55ae4a9088'
             nodes:
-                - "{{manager['master']['ip']}}"
+                - "{{ manager['master']['ip'] }}"
             hidden: 'no'
         {% endfor %}
-
 
 {% if filebeat is defined%}
 filebeat:
@@ -284,7 +271,7 @@ filebeat:
 agent:
   hosts:
     {% for agent_key, agent_value in agent.items() -%}
-    agent{{loop.index}}:
+    agent{{ loop.index }}:
       {{ expand_custom_package('agent', agent_value) | indent(6)  }}
       {{ expand_ansible_connection_attributes(agent_value) | indent(6) }}
       wazuh_managers:
@@ -312,11 +299,9 @@ all:
     wazuh_custom_packages_installation_dashboard_enabled: true
     wazuh_custom_packages_installation_indexer_enabled: true
 
-
     {% if wazuh_custom_packages_installation_agent_deb_url is defined-%}
     wazuh_custom_packages_installation_agent_deb_url: {{ wazuh_custom_packages_installation_agent_deb_url }}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_agent_rpm_url is defined-%}
     wazuh_custom_packages_installation_agent_rpm_url: {{ wazuh_custom_packages_installation_agent_rpm_url }}
     {% endif %}
@@ -335,29 +320,21 @@ all:
     {%- if wazuh_custom_packages_installation_manager_rpm_url is defined-%}
     wazuh_custom_packages_installation_manager_rpm_url: {{ wazuh_custom_packages_installation_manager_rpm_url}}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_dashboard_deb_url is defined-%}
     wazuh_custom_packages_installation_dashboard_deb_url: {{ wazuh_custom_packages_installation_dashboard_deb_url}}
     {% endif %}
-
-
     {%- if wazuh_custom_packages_installation_dashboard_rpm_url is defined-%}
     wazuh_custom_packages_installation_dashboard_rpm_url: {{ wazuh_custom_packages_installation_dashboard_rpm_url}}
     {% endif %}
-
-
     {%- if wazuh_custom_packages_installation_indexer_deb_url is defined-%}
     wazuh_custom_packages_installation_indexer_deb_url: {{ wazuh_custom_packages_installation_indexer_deb_url}}
     {% endif %}
-
     {%- if wazuh_custom_packages_installation_indexer_rpm_url is defined-%}
     wazuh_custom_packages_installation_indexer_rpm_url: {{ wazuh_custom_packages_installation_indexer_rpm_url}}
     {% endif %}
-
     {% if filebeat_repo is defined-%}
     filebeat_module_package_url: {{ filebeat_repo }}
     {% endif %}
-
     {% if wazuh_app_repo is defined-%}
     wazuh_app_url: {{ wazuh_app_repo }}
     {% endif %}

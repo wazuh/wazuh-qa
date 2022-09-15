@@ -8,6 +8,7 @@
           import_role:
             name: ../roles/apache
           when: ansible_os_family == "Debian" or ansible_os_family == "RedHat" or ansible_os_family == "Solaris"
+
         - name: Install apache server in Windows and macOS hosts
           import_role:
             name: ../roles/apache

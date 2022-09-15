@@ -2,7 +2,7 @@
   win_get_url:
     url: "{{ apache_zip_url }}"
     dest: "{{ home_dir }}"
-    checksum: "{{apache_algorithm}}:{{apache_checksum}}"
+    checksum: "{{ apache_algorithm }}:{{ apache_checksum }}"
 
 - name: Unzip Apache binaries zip
   community.windows.win_unzip:
