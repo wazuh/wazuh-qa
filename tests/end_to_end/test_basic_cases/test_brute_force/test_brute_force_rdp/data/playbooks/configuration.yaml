@@ -2,6 +2,9 @@
   hosts: ubuntu-agent
   become: true
   tasks:
+    - name: Update packages list
+      ansible.builtin.apt:
+        update_cache: true
 
     # Install hydra to attempt the RDP brute force attack
     - name: Install hydra

@@ -1,5 +1,5 @@
 - name: Cleanup Linux agent environment
-  hosts: agents:&linux
+  hosts: agent:&linux
   become: true
   tasks:
 
@@ -17,7 +17,7 @@
         os: linux
 
 - name: Cleanup manager environment
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
 

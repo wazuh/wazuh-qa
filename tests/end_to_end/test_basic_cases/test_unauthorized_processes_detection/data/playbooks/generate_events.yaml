@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate alert.json
@@ -8,7 +8,7 @@
         tasks_from: truncate_alert_json.yaml
 
 - name: Generate events
-  hosts: agents:&linux
+  hosts: agent:&linux
   tasks:
 
     - name: "{{ event_description_netcat }}"
@@ -19,14 +19,14 @@
 
     - name: Wait for alert
       wait_for:
-        timeout: 5
+        timeout: 40
 
     - name: Kill netcat
       become: true
       command: pkill -fx 'nc -l 8000'
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Get alert json

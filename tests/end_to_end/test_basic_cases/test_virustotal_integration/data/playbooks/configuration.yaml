@@ -1,5 +1,5 @@
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
 
@@ -107,9 +107,20 @@
         chmod 750 /var/ossec/active-response/bin/remove-threat.sh
         chown root:wazuh /var/ossec/active-response/bin/remove-threat.sh
 
+    - name: Truncate ossec.log
+      shell: echo "" > /var/ossec/logs/ossec.log
+      become: true
+
     - name: Restart agent
       include_role:
         name: manage_wazuh
         tasks_from: restart_wazuh.yaml
       vars:
         os: linux
+
+    - name: Wait for Syscheck to end the scan
+      wait_for:
+        path: /var/ossec/logs/ossec.log
+        search_regex: File integrity monitoring scan ended.
+        timeout: 40
+      ignore_errors: true

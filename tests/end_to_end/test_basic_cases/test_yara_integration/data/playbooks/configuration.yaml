@@ -1,7 +1,60 @@
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
+
+    - name: Create a directory to store Yara rules
+      file:
+        path: /tmp/yara/rules
+        state: directory
+
+    - name: Download Yara rules
+      shell: |
+        curl {{ s3_url }}/yara_integration/yara_rules.yar -o /tmp/yara/rules/yara_rules.yar
+
+    - name: Create a directory to store malware
+      file:
+        path: /tmp/yara/malware
+        state: directory
+
+    - name: Copy the Yara script
+      shell: |
+        curl {{ s3_url }}/yara_integration/yara.sh -o /var/ossec/active-response/bin/yara.sh
+        chown root:wazuh /var/ossec/active-response/bin/yara.sh
+        chmod 0750 /var/ossec/active-response/bin/yara.sh
+
+    - name: Check if epel-release is installed
+      shell: rpm -qa epel-release
+      register: check_epel_release
+
+    - name: Install epel-release
+      package:
+        name:
+          - epel-release
+        state: present
+      when: '"epel" not in check_epel_release.stdout'
+
+    - name: Check if yara is installed
+      shell: rpm -qa yara
+      register: check_yara
+
+    - name: Install Yara on CentOS
+      package:
+        name:
+          - yara
+        state: present
+      when: '"yara" not in check_yara.stdout'
+
+    - name: Check if jq is installed
+      shell: rpm -qa jq
+      register: check_jq
+
+    - name: Install jq (JSON Processor) on CentOS
+      package:
+        name:
+          - jq
+        state: present
+      when: '"jq" not in check_jq.stdout'
 
     - name: Configure local rules for Yara
       include_role:
@@ -77,56 +130,3 @@
         tasks_from: restart_wazuh.yaml
       vars:
         os: linux
-
-    - name: Create a directory to store Yara rules
-      file:
-        path: /tmp/yara/rules
-        state: directory
-
-    - name: Download Yara rules
-      shell: |
-        curl {{ s3_url }}/yara_integration/yara_rules.yar -o /tmp/yara/rules/yara_rules.yar
-
-    - name: Check if epel-release is installed
-      shell: rpm -qa epel-release
-      register: check_epel_release
-
-    - name: Install epel-release
-      package:
-        name:
-          - epel-release
-        state: present
-      when: '"epel" not in check_epel_release.stdout'
-
-    - name: Check if yara is installed
-      shell: rpm -qa yara
-      register: check_yara
-
-    - name: Install Yara on CentOS
-      package:
-        name:
-          - yara
-        state: present
-      when: '"yara" not in check_yara.stdout'
-
-    - name: Create a directory to store malware
-      file:
-        path: /tmp/yara/malware
-        state: directory
-
-    - name: Copy the Yara script
-      shell: |
-        curl {{ s3_url }}/yara_integration/yara.sh -o /var/ossec/active-response/bin/yara.sh
-        chown root:wazuh /var/ossec/active-response/bin/yara.sh
-        chmod 0750 /var/ossec/active-response/bin/yara.sh
-
-    - name: Check if jq is installed
-      shell: rpm -qa jq
-      register: check_jq
-
-    - name: Install jq (JSON Processor) on CentOS
-      package:
-        name:
-          - jq
-        state: present
-      when: '"jq" not in check_jq.stdout'

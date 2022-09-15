@@ -71,7 +71,7 @@ pytestmark = [TIER0, LINUX]
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_detecting_suspicious_binaries(configure_environment, metadata, get_dashboard_credentials, get_manager_ip,
+def test_detecting_suspicious_binaries(configure_environment, metadata, get_indexer_credentials, get_manager_ip,
                                        generate_events, clean_alerts_index):
     '''
     description: Check that an alert is generated and indexed when there is a trojaned system binary.
@@ -93,9 +93,9 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
-        - get_dashboard_credentials:
+        - get_indexer_credentials:
             type: fixture
-            brief: Get the wazuh dashboard credentials.
+            brief: Get the wazuh indexer credentials.
         - generate_events:
             type: fixture
             brief: Generate events that will trigger the alert according to the generate_events playbook.
@@ -153,7 +153,7 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_dash
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_indexer_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

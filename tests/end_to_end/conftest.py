@@ -89,7 +89,7 @@ def validate_environments(request):
     """
     collected_items = request.session.items
     roles_path = request.config.getoption('--roles-path')
-    inventory_path = request.config.getoption('--inventory_path')
+    inventory_path = request.config.getoption('--inventory-path')
     playbook_generator = os.path.join(suite_path, 'data', 'validation_playbooks', 'generate_general_play.yaml')
     playbook_template = os.path.join(suite_path, 'data', 'validation_templates', 'general_validation.j2')
     general_playbook = os.path.join(suite_path, 'data', 'validation_playbooks', 'general_validation.yaml')
@@ -167,7 +167,7 @@ def run_specific_validations(request):
         request (fixture):  Gives access to the requesting test context.
     """
     roles_path = request.config.getoption('--roles-path')
-    inventory_path = request.config.getoption('--inventory_path')
+    inventory_path = request.config.getoption('--inventory-path')
     test_suite_path = os.path.dirname(request.fspath)
     test_suite_name = test_suite_path.split('/')[-1:][0]
     target_hosts, target_distros = get_target_hosts_and_distros(test_suite_name)
@@ -193,7 +193,7 @@ def run_specific_validations(request):
 
 
 @pytest.fixture(scope='function')
-def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
+def clean_alerts_index(get_indexer_credentials, get_manager_ip):
     """Remove the temporary file that contains the alerts and delete indices using the API.
 
       Args:
@@ -201,17 +201,17 @@ def clean_alerts_index(get_dashboard_credentials, get_manager_ip):
     """
     yield
     remove_file(alerts_json)
-    e2e.delete_index_api(credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    e2e.delete_index_api(credentials=get_indexer_credentials, ip_address=get_manager_ip)
 
 
 @pytest.fixture(scope='module')
-def get_dashboard_credentials(request):
-    """Get wazuh-dashboard username and password.
+def get_indexer_credentials(request):
+    """Get wazuh-indexer username and password.
 
        Returns:
-            dict: wazuh-dashboard credentials.
+            dict: wazuh-indexer credentials.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -219,13 +219,13 @@ def get_dashboard_credentials(request):
     inventories = [inventory_playbook]
 
     inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
-                                                  host='managers')
+                                                  host='indexer')
 
     # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
-    dashboard_credentials = {'user': inventory_data[0]['dashboard_user'],
-                             'password': inventory_data[0]['dashboard_password']}
+    indexer_credentials = {'user': inventory_data[0]['indexer_user'],
+                           'password': inventory_data[0]['indexer_password']}
 
-    yield dashboard_credentials
+    yield indexer_credentials
 
 
 @pytest.fixture(scope='module')
@@ -237,7 +237,7 @@ def configure_environment(request):
     Args:
         request (fixture): Provide information on the executing test function.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
     roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
@@ -287,7 +287,7 @@ def generate_events(request, metadata):
         request (fixture): Provide information on the executing test function.
         metadata (dict): Dictionary with test case metadata.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
     roles_path = request.config.getoption('--roles-path')
 
     if not inventory_playbook:
@@ -314,7 +314,7 @@ def get_manager_ip(request):
        Returns:
             str: Manager IP.
     """
-    inventory_playbook = request.config.getoption('--inventory_path')
+    inventory_playbook = request.config.getoption('--inventory-path')
 
     if not inventory_playbook:
         raise ValueError('Inventory not specified')
@@ -322,7 +322,7 @@ def get_manager_ip(request):
     inventories = [inventory_playbook]
 
     inventory_data = ansible_runner.get_inventory(action='host', inventories=inventories, response_format='json',
-                                                  host='managers')
+                                                  host='manager')
 
     # inventory_data is a tuple, with the second value empty, so we must access inventory[0]
     manager_ip = inventory_data[0]['ansible_host']
@@ -332,7 +332,7 @@ def get_manager_ip(request):
 
 def pytest_addoption(parser):
     parser.addoption(
-        '--inventory_path',
+        '--inventory-path',
         action='store',
         metavar='INVENTORY_PATH',
         default=None,

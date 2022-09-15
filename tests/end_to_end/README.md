@@ -4,7 +4,7 @@ End-to-end testing is a technique that tests the entire software product from be
 
 The main purpose of End-to-end (E2E) testing is to test from the end user’s experience by simulating the real user scenario and validating the system under test and its components for integration and data integrity.
 
-The Wazuh architecture is based on agents, running on the monitored endpoints, that forward security data to a central server. The central server decodes and analyzes the incoming information and passes the results along to the Wazuh indexer for indexing and storage. The Wazuh indexer cluster is a collection of one or more nodes that communicate with each other to perform read and write operations on indices.
+The Wazuh architecture is based on agent, running on the monitored endpoints, that forward security data to a central server. The central server decodes and analyzes the incoming information and passes the results along to the Wazuh indexer for indexing and storage. The Wazuh indexer cluster is a collection of one or more nodes that communicate with each other to perform read and write operations on indices.
 
 The diagram below represents the Wazuh components and data flow.
 
@@ -22,7 +22,7 @@ To run these tests we need to use a **Linux** machine and install the following 
 Then, you will need to have an inventory with the needed hosts and variables. For example:
 
 ```
-managers:
+manager:
   hosts:
     centos-manager:
       ansible_host: <IP_ADDRESS>
@@ -30,12 +30,14 @@ managers:
       ansible_user: <USER>
       ansible_ssh_private_key_file: <PRIVATE_KEY>
       ansible_python_interpreter: /usr/bin/python3
-      dashboard_user: <DASHBOARD_USER>
-      dashboard_password: <DASHBOARD_PASSWORD>
-  vars:
-    os_name: linux
 
-agents:
+indexer:
+  hosts:
+    indexer-node-1:
+      indexer_user: <DASHBOARD_USER>
+      indexer_password: <DASHBOARD_PASSWORD>
+
+agent:
   children:
     linux:
       hosts:
@@ -158,13 +160,13 @@ test_basic_cases/
 To execute these tests, we need to run the following command:
 
 ```
-python -m pytest <TEST_PATH> --inventory_path=<INVENTORY_PATH>
+python -m pytest <TEST_PATH> --inventory-path=<INVENTORY_PATH>
 ```
 
 #### Audit tests examples
 
 ```shell script
-python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory_path=/home/juliamagan/Desktop/QA/2893/inventory.yml
+python3 -m pytest tests/end_to_end/test_basic_cases/test_audit/ --inventory-path=/home/juliamagan/Desktop/QA/2893/inventory.yml
 ======================================================================== test session starts ========================================================================
 platform linux -- Python 3.9.7, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
 rootdir: /home/juliamagan/Desktop/QA/wazuh-qa

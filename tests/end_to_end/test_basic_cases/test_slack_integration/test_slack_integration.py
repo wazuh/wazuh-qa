@@ -85,9 +85,10 @@ def remove_slack_log():
     remove_file(slack_messages_log)
 
 
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3286')
 @pytest.mark.parametrize('metadata', metadata, ids=cases_ids)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_slack_integration(metadata, configure_environment, get_dashboard_credentials, get_manager_ip, generate_events,
+def test_slack_integration(metadata, configure_environment, get_indexer_credentials, get_manager_ip, generate_events,
                            remove_slack_log, clean_alerts_index):
     '''
     description: Check that an alert is generated and sent to Slack.
@@ -110,9 +111,9 @@ def test_slack_integration(metadata, configure_environment, get_dashboard_creden
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
-        - get_dashboard_credentials:
+        - get_indexer_credentials:
             type: fixture
-            brief: Get the wazuh dashboard credentials.
+            brief: Get the wazuh indexer credentials.
         - generate_events:
             type: fixture
             brief: Generate events that will trigger the alert according to the generate_events playbook.
@@ -170,7 +171,7 @@ def test_slack_integration(metadata, configure_environment, get_dashboard_creden
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_indexer_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

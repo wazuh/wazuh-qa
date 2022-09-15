@@ -65,7 +65,7 @@ pytestmark = [TIER0, WINDOWS]
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_windows_defender(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
+def test_windows_defender(configure_environment, metadata, get_indexer_credentials, get_manager_ip, generate_events,
                           clean_alerts_index):
     '''
     description: Check that an alert is generated for Windows Defender logs.
@@ -87,9 +87,9 @@ def test_windows_defender(configure_environment, metadata, get_dashboard_credent
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
-        - get_dashboard_credentials:
+        - get_indexer_credentials:
             type: fixture
-            brief: Get the wazuh dashboard credentials.
+            brief: Get the wazuh indexer credentials.
         - generate_events:
             type: fixture
             brief: Generate events that will trigger the alert according to the generate_events playbook.
@@ -137,7 +137,7 @@ def test_windows_defender(configure_environment, metadata, get_dashboard_credent
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_indexer_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one

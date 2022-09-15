@@ -1,5 +1,5 @@
 - name: Cleanup manager environment
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
 
@@ -36,3 +36,10 @@
       file:
         path: /var/ossec/active-response/bin/yara.sh
         state: absent
+
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux

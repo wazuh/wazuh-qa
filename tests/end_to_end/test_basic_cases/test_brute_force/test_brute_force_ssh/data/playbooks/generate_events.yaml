@@ -1,5 +1,5 @@
 - name: Clean alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate alert.json
@@ -34,21 +34,25 @@
         - "'Permission denied' not in result.stdout"
 
 - name: Get alerts file
-  hosts: managers
+  hosts: manager
   tasks:
 
-    - name: Search alert in alerts log
-      include_role:
-        name: manage_alerts
-        tasks_from: search_alert.yaml
-      vars:
-        timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
-        custom_regex: "{\"timestamp\":\"{{ timestamp }}\",\"rule\":{\"level\":{{ rule_level }},\
-                       \"description\":\"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".*"
-        attempts: 15
-        time_btw_attempts: 2
+    - name: Wait for expected alert
+      block:
 
-    - name: Get alert json
-      include_role:
-        name: manage_alerts
-        tasks_from: get_alert_json.yaml
+        - name: Search alert in alerts log
+          include_role:
+            name: manage_alerts
+            tasks_from: search_alert.yaml
+          vars:
+            timestamp: \d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+
+            custom_regex: "{\"timestamp\":\"{{ timestamp }}\",\"rule\":{\"level\":{{ rule_level }},\
+                           \"description\":\"{{ rule_description }}\",\"id\":\"{{ rule_id }}\".*"
+            timeout: 30
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml

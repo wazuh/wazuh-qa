@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: managers
+  hosts: manager
   become: true
   tasks:
 
@@ -15,11 +15,16 @@
       vars:
         os: linux
 
-    - name: Wait for alerts to be generated
-      wait_for:
-        timeout: 10
+    - name: Wait for expected alert
+      block:
 
-    - name: Get alert json
-      include_role:
-        name: manage_alerts
-        tasks_from: get_alert_json.yaml
+        - name: Wait for alerts to be generated
+          wait_for:
+            timeout: 40
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml

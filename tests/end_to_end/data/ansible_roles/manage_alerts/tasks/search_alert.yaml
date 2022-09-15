@@ -1,12 +1,6 @@
 - name: Search alert in alerts log
   become: true
-  lineinfile:
+  wait_for:
     path: /var/ossec/logs/alerts/alerts.json
-    regexp: "{{ custom_regex }}"
-    state: absent
-  check_mode: true
-  changed_when: false
-  register: alert
-  until: alert.found != 0
-  retries: "{{ attempts }}"
-  delay: "{{ time_btw_attempts }}"
+    search_regex: "{{ custom_regex }}"
+    timeout: "{{ timeout }}"

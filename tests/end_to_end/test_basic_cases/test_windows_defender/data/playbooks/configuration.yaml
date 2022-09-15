@@ -36,7 +36,7 @@
         os: windows
 
 - name: Configure manager environment
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Configure local rules

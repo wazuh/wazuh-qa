@@ -1,5 +1,5 @@
 - name: Generate events
-  hosts: managers
+  hosts: manager
   tasks:
 
     - name: Truncate alert.json
@@ -10,11 +10,16 @@
     - name: "{{ event_description }}"
       shell: "{{ command }}"
 
-    - name: Wait for alert to be generated
-      wait_for:
-        timeout: 5
+    - name: Wait for expected alert
+      block:
 
-    - name: Get alert json
-      include_role:
-        name: manage_alerts
-        tasks_from: get_alert_json.yaml
+        - name: Wait for alert to be generated
+          wait_for:
+            timeout: 30
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml

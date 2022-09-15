@@ -63,9 +63,10 @@ configurations, configuration_metadata, cases_ids = config.get_test_cases_data(t
 pytestmark = [TIER0, LINUX]
 
 
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3207')
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
-def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, get_manager_ip, generate_events,
+def test_fim_linux(configure_environment, metadata, get_indexer_credentials, get_manager_ip, generate_events,
                    clean_alerts_index):
     '''
     description: Check that an alert is generated and indexed for FIM events.
@@ -87,9 +88,9 @@ def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, g
         - metadata:
             type: dict
             brief: Wazuh configuration metadata.
-        - get_dashboard_credentials:
+        - get_indexer_credentials:
             type: fixture
-            brief: Get the wazuh dashboard credentials.
+            brief: Get the wazuh indexer credentials.
         - generate_events:
             type: fixture
             brief: Generate events that will trigger the alert according to the generate_events playbook.
@@ -105,9 +106,9 @@ def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, g
         - The `configuration.yaml` file provides the module configuration for this test.
         - The `generate_events.yaml`file provides the function configuration for this test.
     '''
-    rule_id = metadata['rule.id']
-    rule_level = metadata['rule.level']
-    rule_description = metadata['rule.description']
+    rule_id = metadata['extra_vars']['rule_id']
+    rule_level = metadata['extra_vars']['rule_level']
+    rule_description = metadata['extra_vars']['rule_description']
     syscheck_path = metadata['extra']['syscheck.path']
     timestamp_regex = r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+[+|-]\d+'
 
@@ -137,7 +138,7 @@ def test_fim_linux(configure_environment, metadata, get_dashboard_credentials, g
     ])
 
     # Check if the alert has been indexed and get its data
-    response = e2e.get_alert_indexer_api(query=query, credentials=get_dashboard_credentials, ip_address=get_manager_ip)
+    response = e2e.get_alert_indexer_api(query=query, credentials=get_indexer_credentials, ip_address=get_manager_ip)
     indexed_alert = json.dumps(response.json())
 
     # Check that the alert data is the expected one
