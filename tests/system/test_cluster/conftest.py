@@ -6,11 +6,10 @@ import copy
 import json
 from functools import reduce
 from operator import getitem
-import os
 
 import pytest
 
-from wazuh_testing.tools import PYTHON_PATH, WAZUH_LOGS_PATH
+from wazuh_testing.tools import PYTHON_PATH
 
 
 @pytest.fixture(scope='module')
@@ -55,11 +54,3 @@ def update_cluster_json(request):
         host_manager.modify_file_content(host=host, path=backup_json[host]['path'],
                                          content=json.dumps(backup_json[host]['content'], indent=4))
         host_manager.control_service(host=host, service='wazuh-manager', state='restarted')
-
-
-@pytest.fixture(scope='module')
-def clear_cluster_logs(request):
-    test_hosts = getattr(request.module, 'test_hosts')
-    host_manager = getattr(request.module, 'host_manager')
-    for host in test_hosts:
-        host_manager.clear_file_without_recreate(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
