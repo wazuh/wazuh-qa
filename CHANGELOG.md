@@ -8,7 +8,7 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
-
+- Add configuration files for Jenkins automation of system/E2E tests ([#3221](https://github.com/wazuh/wazuh-qa/pull/3221)) \- (Framework)
 - New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
 - New vulnerability Detector integration tests for Amazon Linux 2022 ([#2955](https://github.com/wazuh/wazuh-qa/pull/2955)) \- (Framework + Tests)
 - New vulnerability detector tests for SUSE Linux Enterpise Support ([#2945](https://github.com/wazuh/wazuh-qa/pull/2945)) \- (Framework + Tests)
