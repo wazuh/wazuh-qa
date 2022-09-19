@@ -28,7 +28,7 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
-
+- Add configuration files for Jenkins automation of system/E2E tests ([#3221](https://github.com/wazuh/wazuh-qa/pull/3221)) \- (Framework)
 - New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
 - New vulnerability Detector integration tests for Amazon Linux 2022 ([#2955](https://github.com/wazuh/wazuh-qa/pull/2955)) \- (Framework + Tests)
 - New vulnerability detector tests for SUSE Linux Enterpise Support ([#2945](https://github.com/wazuh/wazuh-qa/pull/2945)) \- (Framework + Tests)
@@ -49,6 +49,7 @@ Release report: TBD
 
 ### Changed
 
+- Skip flaky Logcollector tests ([#3218](https://github.com/wazuh/wazuh-qa/pull/3217)) \- (Tests)
 - Change how 'service_control' collects clusterd and apid pids ([#3140](https://github.com/wazuh/wazuh-qa/pull/3140)) \- (Framework)
 - Change scan test module fixtures to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
 - Update syscollector deltas integration tests ([#2921](https://github.com/wazuh/wazuh-qa/pull/2921)) \- (Tests)
@@ -81,8 +82,17 @@ Release report: TBD
 
 ### Removed
 
--  Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
+- Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
+
+## [4.3.8] - 19-09-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/88bf15d2cbb2040e197e34a94dda0f71f607afad \
+Release report: https://github.com/wazuh/wazuh/issues/14827
+
+### Changed
+
+- Update wazuh-logtest messages for integration tests \- (Tests)
 
 ## [4.3.7] - 24-08-2022
 
@@ -90,8 +100,10 @@ Wazuh commit: https://github.com/wazuh/wazuh/commit/e2b514bef3d148acd4bcae1a1c7f
 Release report: https://github.com/wazuh/wazuh/issues/14562
 
 ## Added
+- Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984)) \- (Framework + Tests)
 - Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add system test to check synchronization status in the cluster ([#3180](https://github.com/wazuh/wazuh-qa/pull/3180)) \- (Framework + Tests)
+- Add system test to check big files synchronization in the cluster ([#3202](https://github.com/wazuh/wazuh-qa/pull/3202)) \- (Framework + Tests)
 
 ### Changed
 
