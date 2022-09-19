@@ -55,7 +55,7 @@ def get_files_from_directory(directory):
 package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(name='wazuh_testing',
-      version='4.3.0',
+      version='4.3.8',
       description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
@@ -67,4 +67,3 @@ setup(name='wazuh_testing',
       include_package_data=True,
       zip_safe=False
       )
-
