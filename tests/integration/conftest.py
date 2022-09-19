@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 import json
 import os
 import re
@@ -17,7 +18,8 @@ from py.xml import html
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -967,12 +969,14 @@ def truncate_monitored_files():
     log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
     yield
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
 
 
