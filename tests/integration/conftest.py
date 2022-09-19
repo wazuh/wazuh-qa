@@ -963,6 +963,7 @@ def configure_local_internal_options_function(request):
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
+
 @pytest.fixture(scope='function')
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
@@ -977,7 +978,6 @@ def truncate_monitored_files():
     for log_file in log_files:
         if os.path.isfile(os.path.join(PREFIX, log_file)):
             truncate_file(log_file)
-
 
 
 @pytest.fixture(scope='function')
