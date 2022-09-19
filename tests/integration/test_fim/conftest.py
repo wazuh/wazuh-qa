@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import re
 import subprocess
+import time
 import pytest
 
 from distro import id
@@ -10,12 +11,12 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools.configuration import (get_wazuh_local_internal_options, set_wazuh_local_internal_options,
                                                create_local_internal_options)
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim import (create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry,
-                               LOG_FILE_PATH, callback_detect_registry_integrity_clear_event)
+from wazuh_testing.fim import (create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry, create_file,
+                               LOG_FILE_PATH, callback_detect_registry_integrity_clear_event, REGULAR)
 
-from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.file import truncate_file, delete_path_recursively
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE,
-                                       FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS)
+                                       FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, MONITORED_DIR_1)
 from wazuh_testing.modules.fim.event_monitor import detect_whodata_start, detect_realtime_start, detect_initial_scan
 from wazuh_testing.wazuh_variables import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP, WAZUH_LOG_MONITOR
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -42,6 +43,18 @@ def create_key(request):
     file_monitor.start(timeout=SYNC_INTERVAL_VALUE + global_parameters.default_timeout,
                        callback=callback_detect_registry_integrity_clear_event,
                        error_message='Did not receive expected "integrity clear" event')
+
+
+@pytest.fixture(scope='function')
+def create_files_in_folder(files_number):
+    """Create files in monitored folder and files"""
+
+    for file in range(0,files_number):
+            create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
+
+    yield
+
+    delete_path_recursively(MONITORED_DIR_1)
 
 
 @pytest.fixture(scope='module')

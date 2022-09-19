@@ -8,6 +8,8 @@ maintain if one of them changes in the future.
 '''
 
 import sys
+import os
+from wazuh_testing.tools import PREFIX
 
 # Variables
 
@@ -31,6 +33,7 @@ TEST_DIR_1 = 'testdir1'
 TEST_DIRECTORIES = 'TEST_DIRECTORIES'
 TEST_REGISTRIES = 'TEST_REGISTRIES'
 
+MONITORED_DIR_1 = os.path.join(PREFIX, TEST_DIR_1)
 
 # Syscheck attributes
 REPORT_CHANGES = 'report_changes'
