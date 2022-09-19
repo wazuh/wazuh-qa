@@ -1,13 +1,28 @@
 - name: Doubled sync_interval smaller than max_interval
-  description: 'Detect that sync_interval is doubled when response_timeout is exceeded'
+  description: 'Detect that sync_interval is doubled when a new sync tries to start before sync has ended'
   configuration_parameters:
-    INTERVAL: 10
-    RESPONSE_TIMEOUT: 5
-    MAX_INTERVAL: 30
-    fim_mode: scheduled
+    SCAN_INTERVAL: 20
+    INTERVAL: 3
+    RESPONSE_TIMEOUT: 3
+    MAX_INTERVAL: 20
   metadata:
-    interval: 10
+    interval: 3
+    response_timeout: 3
+    max_interval: 20
+    files: 5
+    sleep_time: 10
+
+- name: Doubled sync_interval smaller than max_interval
+  description: 'Detect that sync_interval is doubled when a new sync tries to start before sync has ended'
+  configuration_parameters:
+    SCAN_INTERVAL: 20
+    INTERVAL: 5
+    RESPONSE_TIMEOUT: 5
+    MAX_INTERVAL: 8
+  metadata:
+    interval: 5
     response_timeout: 5
-    max_interval: 30
+    max_interval: 8
     files: 10
-    fim_mode: scheduled
+    sleep_time: 15
+    

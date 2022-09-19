@@ -52,14 +52,13 @@ tags:
     - fim_synchronization
 '''
 import os
-
+import time
 import pytest
+
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, configuration
-from wazuh_testing.tools.file import delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim import REGULAR, callback_detect_synchronization, create_file
-
+from wazuh_testing.fim import callback_detect_synchronization
 
 # Marks
 # pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
@@ -81,11 +80,13 @@ configurations = configuration.load_configuration_template(configurations_path, 
 # Variables 
 test_directories = os.path.join(PREFIX, 'testdir')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+print(str(configuration_metadata))
 
 # Tests
-@pytest.mark.parametrize('daemon', ["wazuh-syscheckd"])
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids) 
-def test_sync_overlap(configuration, metadata, daemon, set_wazuh_configuration_fim, truncate_monitored_files, restart_syscheck_function, wait_for_fim_start_function):
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+@pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
+def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, create_files_in_folder,
+                      restart_syscheck_function, wait_for_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon performs the file synchronization at the intervals
                  specified in the configuration, using the 'interval' tag. For this purpose, the test
@@ -126,18 +127,33 @@ def test_sync_overlap(configuration, metadata, daemon, set_wazuh_configuration_f
         - scheduled
 
     '''
-    # Create files
-    for file in range(0,metadata['files']):
-        create_file(REGULAR, test_directories, f"test_file_{file}")
-    
-    # Wait for sync to start
+        
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    # Wait for new scan and check files have been created
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
-                            error_message='Did not receive expected '
-                                          '"Initializing FIM Integrity Synchronization check" event', update_position=True).result()
-    # Check if timeout, sync_interval doubled
-    
-    # Check if new fim scan was launched no new sync started.
-    # Check when sync ends sync_interval is returned to normal.
+                                error_message='Did not receive expected '
+                                              '"Initializing FIM Integrity Synchronization check" event',
+                                update_position=True).result()
+ 
+    callback = r".*Sync still in progress. Skipped next sync and increased interval.*'(\d+)s'"
+    err_message = 'Did not recieve the expected "Sync still in progress. Skipped next sync" event'
 
-    # Delete files and folder
-    delete_path_recursively(test_directories)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    # Check if timeout, sync_interval doubled
+    new_interval = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10, 
+                                               callback=generate_monitoring_callback(callback),
+                                               error_message=err_message,
+                                               update_position=True).result()
+    
+    # Check that doubled interval is equal or less than max interval
+    assert int(new_interval) <= int(metadata['max_interval']), f"Invalid value for new interval: {new_interval}, cannot be more than MAX_INTERVAL: {metadata['max_interval']}"
+    
+    time.sleep(metadata['sleep_time'])
+ 
+    # Check when sync ends sync_interval is returned to normal after response_timeout since last message.
+    callback = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
+    err_message = 'Did not recieve the expected "Sync interval is reset..." event'
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10, 
+                            callback=generate_monitoring_callback(callback),
+                            error_message=err_message,
+                            update_position=True).result()
