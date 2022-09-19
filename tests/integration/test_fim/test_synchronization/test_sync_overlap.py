@@ -7,7 +7,12 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: 
+brief: Check if the 'wazuh-syscheckd' daemon is performing a synchronization at the intervals specified in the
+       configuration, using the 'interval' tag, if a new synchronization is fired, and the last sync message has been
+       recieved in less time than 'response_timeout, the sync interval is doubled.
+       The new value for interval cannot be higher than max_interval option. After a new sync interval is tried and the
+       last message was recieved in a time that is higher than response_timeout, the sync interval value is returned to
+       the configured value.
 
 components:
     - fim
@@ -34,15 +39,14 @@ os_version:
     - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
+    - Windows Server 2019
+
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
 
 pytest_args:
-    - fim_mode:
-        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
-        whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
@@ -58,10 +62,11 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules import TIER2, AGENT, SERVER
 from wazuh_testing.fim import callback_detect_synchronization
 
 # Marks
-# pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
+pytestmark = [AGENT, SERVER, TIER2]
 
 # Reference paths
 TEST_DATA_PATH  = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -88,47 +93,62 @@ print(str(configuration_metadata))
 def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, create_files_in_folder,
                       restart_syscheck_function, wait_for_fim_start_function):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon performs the file synchronization at the intervals
-                 specified in the configuration, using the 'interval' tag. For this purpose, the test
-                 will monitor a testing directory. Then, it will travel in time to the next synchronization
-                 time and verify that the FIM 'integrity' event is trigered. Finally, the test will travel
-                 in time to half of the interval and verify that no FIM 'integrity' event is generated.
+    description: Check if the 'wazuh-syscheckd' daemon is performing a synchronization at the interval specified in the
+                 configuration, using the 'interval' tag, if a new synchronization is fired, and the last sync message
+                 has been recieved in less time than 'response_timeout, the sync interval is doubled.
+                 The new value for interval cannot be higher than max_interval option. After a new sync interval is 
+                 tried and the last message was recieved in a time that is higher than response_timeout, the sync 
+                 interval value is returned to the configured value.
 
+    test_phases:
+        - Create a folder with a number of files inside.
+        - Restart syscheckd.
+        - Check that a sync interval started.
+        - Check that next sync is skipped and interval value is doubled
+        - Check that interval value is returned to configured value after successful sync
+   
     wazuh_min_version: 4.5.0
 
-    tier: 1
+    tier: 2
 
     parameters:
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - set_wazuh_configuration_fim:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set ossec.conf and local_internal_options configuration.
+        - create_files_in_folder:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: create files in monitored folder, and delete them after the test.
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_for_fim_start_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: check that the starting fim scan is detected.
 
     assertions:
-        - Verify that FIM 'integrity' event is generated when the interval specified has elapsed.
-        - Verify that no FIM 'integrity' event is generated at half of the interval specified.
+        - Verify that the new value for interval when doubled is equal or lower to max_interval.
 
-    input_description: A test case (sync_interval) is contained in external YAML file (wazuh_conf.yaml) which
+    input_description: A test case (sync_interval) is contained in external YAML file (cases_sync_overlap.yaml) which
                        includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined with
                        the interval periods and the testing directory to be monitored defined in this module.
 
     expected_output:
         - r'Initializing FIM Integrity Synchronization check'
+        - r"*Sync still in progress. Skipped next sync and increased interval.*'(\d+)s'"
+        - r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
 
     tags:
         - scheduled
-
     '''
         
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     # Wait for new scan and check files have been created
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
                                 error_message='Did not receive expected '
@@ -139,6 +159,7 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
     err_message = 'Did not recieve the expected "Sync still in progress. Skipped next sync" event'
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+   
     # Check if timeout, sync_interval doubled
     new_interval = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10, 
                                                callback=generate_monitoring_callback(callback),
@@ -146,7 +167,8 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
                                                update_position=True).result()
     
     # Check that doubled interval is equal or less than max interval
-    assert int(new_interval) <= int(metadata['max_interval']), f"Invalid value for new interval: {new_interval}, cannot be more than MAX_INTERVAL: {metadata['max_interval']}"
+    assert int(new_interval) <= int(metadata['max_interval']), f"Invalid value for interval: {new_interval}, cannot be\
+                                                                 more than MAX_INTERVAL: {metadata['max_interval']}"
     
     time.sleep(metadata['sleep_time'])
  

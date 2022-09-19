@@ -12,8 +12,8 @@
     files: 5
     sleep_time: 10
 
-- name: Doubled sync_interval smaller than max_interval
-  description: 'Detect that sync_interval is doubled when a new sync tries to start before sync has ended'
+- name: Doubled sync_interval capped at max_interval
+  description: 'Detect that when doubled sync_interval will not exceed max_interval'
   configuration_parameters:
     SCAN_INTERVAL: 20
     INTERVAL: 5
