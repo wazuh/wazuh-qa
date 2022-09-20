@@ -6,6 +6,7 @@
     RESPONSE_TIMEOUT: 3
     MAX_INTERVAL: 20
   metadata:
+    scan_interval: 20
     interval: 3
     response_timeout: 3
     max_interval: 20
@@ -20,6 +21,7 @@
     RESPONSE_TIMEOUT: 5
     MAX_INTERVAL: 8
   metadata:
+    scan_interval: 20
     interval: 5
     response_timeout: 5
     max_interval: 8
