@@ -74,6 +74,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix Vulnerability Detector IT: test_validate_feed_content yaml cases had wrong extension. ([#3299](https://github.com/wazuh/wazuh-qa/pull/3299)) \- (Tests)
 - Fix Analysisd IT: test_syscollector_events failure on wait_for_analysisd_startup. ([#3110](https://github.com/wazuh/wazuh-qa/pull/3110)) \- (Tests)
 - Fix GCloud IT: test_max_messages error not received expected messages - ([#3083](https://github.com/wazuh/wazuh-qa/pull/3083)) \- (Tests)
 - Fix Solaris and Macos FIM integration tests failures ([#2976](https://github.com/wazuh/wazuh-qa/pull/2976)) \- (Framework + Tests)
