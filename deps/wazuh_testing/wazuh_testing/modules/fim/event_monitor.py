@@ -8,17 +8,17 @@ import json
 from sys import platform
 from datetime import datetime
 from json import JSONDecodeError
-from wazuh_testing import  LOG_FILE_PATH, logger
+from wazuh_testing import LOG_FILE_PATH, logger
 from wazuh_testing.modules.fim import (CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_MESSAGE, CB_INODE_ENTRIES_PATH_COUNT,
                                        CB_FIM_ENTRIES_COUNT, CB_DETECT_FIM_EVENT)
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
-## Variables
+# Variables
 file_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-##Callback functions
+# Callback functions
 def callback_connection_message(line):
     match = re.match(CB_AGENT_CONNECT, line)
     if match:

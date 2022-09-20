@@ -49,8 +49,8 @@ def create_key(request):
 def create_files_in_folder(files_number):
     """Create files in monitored folder and files"""
 
-    for file in range(0,files_number):
-            create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
+    for file in range(0, files_number):
+        create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
 
     yield
 
@@ -72,10 +72,10 @@ def install_audit(get_configuration):
         package_management = "apt-get"
         audit = "auditd"
         option = "--yes"
-    else:s
+    else:
     # Install audit and start the service
-    process = subprocess.run([package_management, "install", audit, option], check=True)
-    process = subprocess.run(["service", "auditd", "start"], check=True)
+        process = subprocess.run([package_management, "install", audit, option], check=True)
+        process = subprocess.run(["service", "auditd", "start"], check=True)
 
 
 @pytest.fixture(scope='session')
