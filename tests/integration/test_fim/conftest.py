@@ -73,7 +73,7 @@ def install_audit(get_configuration):
         audit = "auditd"
         option = "--yes"
     else:
-    # Install audit and start the service
+        # Install audit and start the service
         process = subprocess.run([package_management, "install", audit, option], check=True)
         process = subprocess.run(["service", "auditd", "start"], check=True)
 
@@ -81,7 +81,7 @@ def install_audit(get_configuration):
 @pytest.fixture(scope='session')
 def configure_local_internal_options_fim():
     """Fixture to configure the local internal options file."""
-    
+
     # Backup the old local internal options
     backup_local_internal_options = get_wazuh_local_internal_options()
 
