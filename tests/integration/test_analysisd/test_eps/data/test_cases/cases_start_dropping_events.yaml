@@ -1,8 +1,0 @@
-- name: EPS Limits start dropping events
-  description: EPS Limits start dropping events
-  configuration_parameters:
-    MAXIMUM: '1'
-    TIMEFRAME: '5'
-  metadata:
-    maximum: 1
-    timeframe: 5

@@ -1,8 +1,0 @@
-- name: EPS Limits process old events instead of new ones - One thread
-  description: EPS Limits process old events instead of new ones - One thread
-  configuration_parameters:
-    MAXIMUM: '10'
-    TIMEFRAME: '5'
-  metadata:
-    maximum: 10
-    timeframe: 5

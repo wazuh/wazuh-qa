@@ -1,8 +1,0 @@
-- name: EPS Limits stop processing events
-  description: EPS Limits stop processing events
-  configuration_parameters:
-    MAXIMUM: '100'
-    TIMEFRAME: '5'
-  metadata:
-    maximum: 100
-    timeframe: 5

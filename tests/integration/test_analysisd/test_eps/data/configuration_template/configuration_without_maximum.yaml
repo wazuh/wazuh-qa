@@ -1,9 +1,0 @@
-- sections:
-    - section: global
-      elements:
-        - limits:
-            elements:
-              - eps:
-                  elements:
-                    - timeframe:
-                        value: TIMEFRAME
