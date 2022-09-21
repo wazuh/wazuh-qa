@@ -1,26 +1,8 @@
-- name: EPS Limits enabled
+- name: maximum 20 - timeframe 5
   description: EPS Limits enabled
   configuration_parameters:
-    MAXIMUM: '10'
+    MAXIMUM: '20'
     TIMEFRAME: '5'
   metadata:
-    maximum: 10
+    maximum: 20
     timeframe: 5
-
-- name: EPS Limits enabled
-  description: EPS Limits enabled
-  configuration_parameters:
-    MAXIMUM: '500'
-    TIMEFRAME: '30'
-  metadata:
-    maximum: 500
-    timeframe: 30
-
-- name: EPS Limits enabled
-  description: EPS Limits enabled
-  configuration_parameters:
-    MAXIMUM: '1500'
-    TIMEFRAME: '120'
-  metadata:
-    maximum: 1500
-    timeframe: 120
