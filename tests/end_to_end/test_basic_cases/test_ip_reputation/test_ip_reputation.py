@@ -42,7 +42,6 @@ import os
 import json
 import re
 import pytest
-from tempfile import gettempdir
 
 import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
@@ -51,7 +50,6 @@ from wazuh_testing.tools import configuration as config
 from wazuh_testing.modules import TIER0, LINUX, WINDOWS
 
 
-alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_ip_reputation.yaml')
 configuration_playbooks = ['configuration.yaml']
@@ -126,7 +124,7 @@ def test_ip_reputation(configure_environment, metadata, get_indexer_credentials,
                                  fr'"timestamp": "({timestamp_regex})".*'
 
         # Check that alert has been raised and save timestamp
-        raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+        raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=e2e.fetched_alerts_json_path,
                                        timeout=fw.T_5, error_message=f"The alert '{rule_description}'"
                                                                      ' has not occurred').result()
         raised_alert_timestamp = raised_alert.group(1)

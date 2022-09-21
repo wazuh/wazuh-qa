@@ -54,7 +54,6 @@ from wazuh_testing.modules import TIER0, LINUX
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_path = os.path.join(test_data_path, 'test_cases')
 test_cases_file_path = os.path.join(test_cases_path, 'cases_slack_integration.yaml')
-alerts_json = os.path.join(gettempdir(), 'alerts.json')
 slack_messages_log = os.path.join(gettempdir(), 'slack_messages.log')
 
 # Playbooks
@@ -148,7 +147,7 @@ def test_slack_integration(metadata, configure_environment, get_indexer_credenti
     expected_slack_log = fr".*{rule_description}.+{rule_id} _\(Level {rule_level}\)"
 
     # Check that alert has been raised and save timestamp
-    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=e2e.fetched_alerts_json_path,
                                    timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 

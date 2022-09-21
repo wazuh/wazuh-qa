@@ -41,7 +41,6 @@ import os
 import json
 import re
 import pytest
-from tempfile import gettempdir
 
 import wazuh_testing as fw
 from wazuh_testing import end_to_end as e2e
@@ -54,7 +53,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 test_cases_path = os.path.join(test_data_path, 'test_cases')
 test_cases_file_path = os.path.join(test_cases_path, 'cases_detecting_suspicious_binaries.yaml')
 trojan_script_path = os.path.join(test_data_path, 'configuration', 'trojan_script.sh')
-alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
@@ -125,7 +123,7 @@ def test_detecting_suspicious_binaries(configure_environment, metadata, get_inde
                              fr"description.+{rule_description}.+id.+{rule_id}.+timestamp\": \"({timestamp_regex})\""
 
     # Check that alert has been raised and save timestamp
-    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=e2e.fetched_alerts_json_path,
                                    timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 

@@ -39,7 +39,6 @@ import os
 import json
 import re
 import pytest
-from tempfile import gettempdir
 
 import wazuh_testing as fw
 from wazuh_testing.tools import configuration as config
@@ -48,7 +47,6 @@ from wazuh_testing import event_monitor as evm
 from wazuh_testing.modules import TIER0, LINUX
 
 # Test cases data
-alerts_json = os.path.join(gettempdir(), 'alerts.json')
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 test_cases_file_path = os.path.join(test_data_path, 'test_cases', 'cases_brute_force_ssh.yaml')
 
@@ -113,7 +111,7 @@ def test_brute_force_ssh(metadata, get_indexer_credentials, get_manager_ip, gene
                              fr'.*"mitre":.*"{rule_mitre_technique}".*"id": "{rule_id}".*'
 
     # Check that alert has been raised and save timestamp
-    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=alerts_json,
+    raised_alert = evm.check_event(callback=expected_alert_json, file_to_monitor=e2e.fetched_alerts_json_path,
                                    timeout=fw.T_5, error_message='The alert has not occurred').result()
     raised_alert_timestamp = raised_alert.group(1)
 

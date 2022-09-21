@@ -6,13 +6,11 @@ import ansible_runner
 import pytest
 import json
 import yaml
-from tempfile import gettempdir
 
 from wazuh_testing.tools.file import remove_file
 from wazuh_testing import end_to_end as e2e
 
 
-alerts_json = os.path.join(gettempdir(), 'alerts.json')
 suite_path = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -200,7 +198,7 @@ def clean_alerts_index(get_indexer_credentials, get_manager_ip):
           credentials (dict): wazuh-indexer credentials.
     """
     yield
-    remove_file(alerts_json)
+    remove_file(e2e.fetched_alerts_json_path)
     e2e.delete_index_api(credentials=get_indexer_credentials, ip_address=get_manager_ip)
 
 
