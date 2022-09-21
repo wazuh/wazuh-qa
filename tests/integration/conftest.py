@@ -140,6 +140,16 @@ def restart_wazuh_daemon_after_finishing(daemon=None):
 
 
 @pytest.fixture(scope='function')
+def restart_wazuh_daemon_after_finishing_function(daemon=None):
+    """
+    Restart a Wazuh daemon
+    """
+    yield
+    truncate_file(LOG_FILE_PATH)
+    control_service("restart", daemon=daemon)
+
+
+@pytest.fixture(scope='function')
 def restart_analysisd_function():
     """Restart wazuh-analysisd daemon before starting a test, and stop it after finishing"""
     control_service('restart', daemon='wazuh-analysisd')
