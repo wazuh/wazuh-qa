@@ -49,19 +49,24 @@ predefined_values:
     - performance
     - system
     - unit
+    - end_to_end
   components:
     - active_response
     - agentd
     - analysisd
     - api
     - authd
+    - aws_s3
     - cluster
+    - docker_listener
     - fim
     - gcloud
     - github
+    - integration
     - logcollector
     - logtest
     - office365
+    - osquery
     - remoted
     - rids
     - rootcheck
@@ -208,10 +213,13 @@ predefined_values:
     - debian
     - debian_feeds
     - decoder
+    - demo
     - diff
     - disk_quota
+    - docker
     - dos_attack
     - download
+    - emotet
     - enrollment
     - errors
     - events
@@ -275,13 +283,16 @@ predefined_values:
     - github
     - github_configuration
     - inactivity
+    - integration
     - integrity
     - interval
     - invalid
     - invalid_settings
+    - ip_reputation
     - keys
     - key_polling
     - limits
+    - lists
     - logcollector
     - logcollector_location
     - logcollector_log_format
@@ -313,14 +324,17 @@ predefined_values:
     - mitre
     - msu
     - msu_feeds
+    - nids
     - nvd
     - office365
     - on_start
+    - osquery
     - oval
     - prelink
     - providers
     - pull
     - rbac
+    - rdp
     - realtime
     - redhat
     - redhat_feeds
@@ -337,12 +351,19 @@ predefined_values:
     - session_error
     - session_limit
     - settings
+    - shellshock
     - simulator
+    - slack
+    - sql_injection
+    - ssh
     - ssl
     - stats_file
+    - suricata
+    - sysmon
     - system_inventory
     - time_travel
     - token
+    - virustotal
     - vulnerability
     - vulnerability_detector
     - wazuh_db
@@ -350,5 +371,7 @@ predefined_values:
     - week_day
     - who_data
     - windows
+    - windows_defender
     - worker
     - wpk
+    - yara

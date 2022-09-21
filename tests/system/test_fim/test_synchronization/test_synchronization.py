@@ -49,7 +49,7 @@ from time import sleep
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 from wazuh_testing.tools import WAZUH_LOGS_PATH
-from test_fim import create_folder_file, query_db
+from wazuh_testing.fim import create_folder_file, query_db
 
 
 # Hosts
@@ -95,12 +95,12 @@ def test_synchronization(folder_path, case, host):
 
     assertions:
         - Verify that FIM sync events are generated correctly on the manager and agent sides.
-    
+
     input_description: Different test cases are included with Pytest parametrize.
                        The test cases are: add, modify and delete files.
-   
+
     expected_output:
-        - Different test cases are contained in external YAML file 
+        - Different test cases are contained in external YAML file
           (agent_initializing_synchronization.yml and manager_initializing_synchronization.yml)
     tags:
         - fim_basic_usage

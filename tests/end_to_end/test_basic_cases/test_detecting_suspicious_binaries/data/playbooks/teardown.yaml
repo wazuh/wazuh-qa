@@ -1,0 +1,16 @@
+- name: Cleanup manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Restore the system binary
+      copy:
+        src: /usr/bin/w.copy
+        dest: /usr/bin/w
+        mode: preserve
+        remote_src: true
+
+    - name: Delete the system binary copy
+      file:
+        path: /usr/bin/w.copy
+        state: absent
