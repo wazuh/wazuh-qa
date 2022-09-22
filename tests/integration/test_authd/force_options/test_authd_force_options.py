@@ -151,8 +151,6 @@ def test_authd_force_options(get_current_test_case, configure_local_internal_opt
 
     for stage in get_current_test_case['test_case']:
         # Reopen socket (socket is closed by manager after sending message with client key)
-        if 'input_delay' in stage:
-            time.sleep(stage['input_delay'])
         authd_sock.open()
         authd_sock.send(create_authd_request(stage['input']), size=False)
         timeout = time.time() + AUTHD_KEY_REQUEST_TIMEOUT

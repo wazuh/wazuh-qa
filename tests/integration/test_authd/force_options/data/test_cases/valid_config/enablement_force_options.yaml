@@ -137,11 +137,12 @@
         delta: -3
   log:
     - The <force_insert> tag is deprecated. Use <force> instead.
+    - The <force_time> tag is deprecated. Use <force> instead.
     - Setting <force><enabled> tag to 'yes' to comply with the legacy <force_insert> option found.
+    - Setting <force><disconnected_time> tag to '5' to comply with the legacy <force_time> option found.
   test_case:
   -
     description: Replace an agent if force_insert enabled force options
-    input_delay: 5
     input:
       name: 'agent_1'
     output:
