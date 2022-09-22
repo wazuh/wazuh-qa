@@ -1,0 +1,9 @@
+- hosts: localhost
+  vars:
+    target_hosts: "{{ target_hosts }}"
+    distros: "{{ distros }}"
+  tasks:
+    - name: Generate a general validation playbook
+      template:
+        src: "{{ template_path }}"
+        dest: "{{ dest_path }}"

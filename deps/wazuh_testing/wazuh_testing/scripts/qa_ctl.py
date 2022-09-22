@@ -190,6 +190,7 @@ def set_parameters(parameters):
                            '--version <value> parameter in the qa-ctl parameters.', qactl_logger.error, QACTL_LOGGER)
 
     parameters.version = (parameters.version).replace('v', '')
+    parameters.test_modules = [module.replace('.py', '') for module in parameters.test_modules]
 
     short_version = f"{(parameters.version).split('.')[0]}.{(parameters.version).split('.')[1]}"
     parameters.qa_branch = parameters.qa_branch if parameters.qa_branch else short_version

