@@ -17,10 +17,8 @@
         elements:
           - enabled:
               value: 'no'
-          - files:
-              value: '10'
-          - registries:
-              value: '10'
+          - entries:
+              value: 10
   - section: sca
     elements:
     - enabled:
