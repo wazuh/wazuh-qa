@@ -125,6 +125,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.

@@ -126,6 +126,9 @@ def test_registry_key_limit_full(configure_local_internal_options_module, get_co
     wazuh_min_version: 4.5.0
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.

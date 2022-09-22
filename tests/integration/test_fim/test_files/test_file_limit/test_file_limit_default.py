@@ -116,6 +116,9 @@ def test_file_limit_default(configure_local_internal_options_module, get_configu
     tier: 1
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.

@@ -148,6 +148,9 @@ def test_file_limit_delete_full(folder, file_name, configure_local_internal_opti
         - file_name:
             type: str
             brief: Name of the testing file to be created.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.

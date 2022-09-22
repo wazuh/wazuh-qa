@@ -51,6 +51,7 @@ references:
 
 pytest_args:
     - fim_mode:
+        scheduled: Monitoring is done after a configured interval
         realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
@@ -137,6 +138,9 @@ def test_file_limit_capacity_alert(percentage, configure_local_internal_options_
         - percentage:
             type: int
             brief: Percentage of testing files to be created.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.

@@ -127,6 +127,9 @@ def test_registry_limit_values(configure_local_internal_options_module, get_conf
     tier: 1
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
