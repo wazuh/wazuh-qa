@@ -23,13 +23,20 @@ def simulate_agent(param):
                     -c {param['enable_logcollector_msg_number']} -g {param['message']}", shell=True)
 
 
-def syslog_simulator(param):
-    """Function to run the script syslog_simulator.py
+def syslog_simulator(parameters):
+    """Run the syslog simulator tool.
 
     Args:
-        param (dict): Dictionary with script parameters
+        parameters (dict): Script parameters.
     """
     python_executable = sys.executable
-    subprocess.call(f"{python_executable} {SYSLOG_SIMULATOR} -m {param['message']} -e {param['num_messages']} \
-                    -f {param['msg_size']} -t {param['interval_burst_time']} -b {param['messages_per_burst']}",
-                    shell=True)
+    run_parameters = f"{python_executable} {SYSLOG_SIMULATOR} "
+    run_parameters += f"-a {parameters['address']} " if 'address' in parameters else ''
+    run_parameters += f"-e {parameters['eps']} " if 'eps' in parameters else ''
+    run_parameters += f"--protocol {parameters['protocol']} " if 'protocol' in parameters else ''
+    run_parameters += f"-n {parameters['messages_number']} " if 'messages_number' in parameters else ''
+    run_parameters += f"-m {parameters['message']} " if 'message' in parameters else ''
+    run_parameters = run_parameters.strip()
+
+    # Run the syslog simulator tool with custom parameters
+    subprocess.call(run_parameters, shell=True)

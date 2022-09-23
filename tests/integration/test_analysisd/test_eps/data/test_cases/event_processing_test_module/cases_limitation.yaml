@@ -1,0 +1,16 @@
+- name: maximum 500 - timeframe 5
+  description: EPS limitation
+  configuration_parameters:
+    PORT: 514
+    PROTOCOL: tcp
+    MAXIMUM: '250'
+    TIMEFRAME: '10'
+  metadata:
+    maximum: 250
+    timeframe: 10
+    # syslog simulator parameters
+    address: 'localhost'
+    port: 514
+    protocol: 'tcp'
+    messages_number: 10000
+    eps: 1000
