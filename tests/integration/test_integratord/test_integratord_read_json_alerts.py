@@ -102,7 +102,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
             brief: Configure the local internal options file.
         - restart_wazuh_function:
             type: fixture
-            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+            brief: Restart all daemons because Integratord depends on multiple daemons. Stop them after finishing.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log

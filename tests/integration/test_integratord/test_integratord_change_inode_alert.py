@@ -96,7 +96,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
             brief: Configure the local internal options file.
         - restart_wazuh_function:
             type: fixture
-            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+            brief: Restart all daemons because Integratord depends on multiple daemons. Stop them after finishing.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
@@ -125,16 +125,20 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     remove_file(ALERT_FILE_PATH)
     copy(TEMP_FILE_PATH, ALERT_FILE_PATH)
 
-    # Wait for Inode change to be detected and insert new alert
-    time.sleep(3)
-    run_local_command_returning_output(command)
+    # Wait for Inode change to be detected
+    # The `integratord` library tries to read alerts from the file every 1 second. So, the test waits 1 second + 1
+    # until the file is reloaded.
+    time.sleep(2)
 
     # Monitor Inode Changed
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout * 2,
                             callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
                             error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
 
+    # Insert a new alert
+    run_local_command_returning_output(command)
+
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout + 2,
                             callback=callback_generator(integrator.CB_PROCESSING_ALERT),
                             error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)

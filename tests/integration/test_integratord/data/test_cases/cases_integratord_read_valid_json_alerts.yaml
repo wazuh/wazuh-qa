@@ -1,4 +1,4 @@
-- name: Read valid json alert
+- name: read_valid_json_alert
   description: Read a valid alert from alerts.json
   configuration_parameters:
     API_KEY: Insert using --integration-api-key parameter

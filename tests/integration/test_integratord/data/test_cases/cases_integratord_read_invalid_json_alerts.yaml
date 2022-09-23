@@ -1,4 +1,4 @@
-- name: Read invalid json alert
+- name: read_invalid_json_alert
   description: Read a invalid alert from alerts.json - removed rule key name - Integration fails
   configuration_parameters:
     API_KEY: Insert using --integration-api-key parameter
@@ -17,7 +17,7 @@
                    "decoder":{"name":"syscheck_new_entry"},"location":"syscheck"}'
     alert_type: invalid
 
-- name: Read Overlong json alert
+- name: read_overlong_json_alert
   description: Read a an alert that is over 64kb alert from alerts.json - Integration fails
   configuration_parameters:
     API_KEY: Insert using --integration-api-key parameter

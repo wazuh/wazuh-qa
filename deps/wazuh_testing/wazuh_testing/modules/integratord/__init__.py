@@ -17,7 +17,7 @@ CB_VIRUSTOTAL_ALERT_JSON = r'.*VirusTotal: Alert.*\"integration\":\"virustotal\"
 CB_INVALID_JSON_ALERT_READ = r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
 CB_OVERLONG_JSON_ALERT_READ = r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
 CB_ALERTS_FILE_INODE_CHANGED = r'.*wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed.*'
-CB_CANNOT_RETRIEVE_JSON_FILE = r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*'\
+CB_CANNOT_RETRIEVE_JSON_FILE = r'.*wazuh-integratord.*WARNING.*Could not retrieve information of file.*'\
                                r'alerts\.json.*No such file.*'
 
 # Error messages

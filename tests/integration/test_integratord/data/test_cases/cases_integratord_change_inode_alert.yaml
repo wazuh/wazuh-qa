@@ -1,4 +1,4 @@
-- name: Cannot read alerts - Inode changed
+- name: alerts_file_inode_changed
   description: The alerts.json file inode has changed and it cannot read alerts from it until it reloads.
   configuration_parameters:
     API_KEY: Insert using --integration-api-key parameter
