@@ -60,10 +60,10 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
                                calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, registry_parser, create_values_content)
+                               registry_value_delete, create_values_content)
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+                                       SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
+                                       ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -73,7 +73,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), 
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
