@@ -10,14 +10,14 @@
             value: 'no'
         - directories:
             value: TEST_DIRECTORIES
-          attributes:
+            attributes:
             - FIM_MODE
         - file_limit:
-          elements:
-            - enabled:
-              value: 'yes'
-            - entries:
-              value: LIMIT
+            elements:
+              - enabled:
+                  value: 'yes'
+              - entries:
+                  value: LIMIT
     - section: sca
       elements:
         - enabled:
@@ -29,4 +29,4 @@
     - section: active-response
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
