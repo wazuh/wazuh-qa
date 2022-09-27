@@ -1,0 +1,11 @@
+- name: Copy log file to a tmp folder
+  hosts: windows-agent
+  tasks:
+
+    - name: Get ossec log
+      include_role:
+        name: manage_logs
+        tasks_from: get_log_file.yaml
+      vars:
+        dest_path: test_enabled/
+        source_path: C:\Program Files (x86)\ossec-agent\ossec.log
