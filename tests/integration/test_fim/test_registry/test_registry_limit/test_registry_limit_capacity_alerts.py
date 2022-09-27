@@ -148,9 +148,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                        with the percentages and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Registry database is (\d+)% full."
+        - r".*Registry database is (\\d+)% full."
         - r".*(The registry database status returns to normal)."
-        - r".*Fim registry value entries count: '(\d+)'"
+        - r".*Fim registry value entries count: '(\\d+)'"
 
     tags:
         - scheduled

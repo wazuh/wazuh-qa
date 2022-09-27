@@ -63,7 +63,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_va
                                KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
                                create_values_content)
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY)
+                                       ERR_MSG_CONTENT_CHANGES_EMPTY)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -83,11 +83,11 @@ value_content_size = 204800
 # Configurations
 
 params, metadata = generate_params(modes=['scheduled'], extra_params={'WINDOWS_REGISTRY_1': test_regs[0],
-                                                          'WINDOWS_REGISTRY_2': test_regs[1],
-                                                          'FILE_SIZE_ENABLED': 'no',
-                                                          'FILE_SIZE_LIMIT': '10KB',
-                                                          'DISK_QUOTA_ENABLED': 'no',
-                                                          'DISK_QUOTA_LIMIT': '4KB'})
+                                                                      'WINDOWS_REGISTRY_2': test_regs[1],
+                                                                      'FILE_SIZE_ENABLED': 'no',
+                                                                      'FILE_SIZE_LIMIT': '10KB',
+                                                                      'DISK_QUOTA_ENABLED': 'no',
+                                                                      'DISK_QUOTA_LIMIT': '4KB'})
 
 configurations_path = os.path.join(test_data_path, 'wazuh_registry_report_changes_limits_quota.yaml')
 

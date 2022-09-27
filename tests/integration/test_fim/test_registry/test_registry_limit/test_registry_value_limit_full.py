@@ -153,9 +153,9 @@ def test_registry_value_limit_full(configure_local_internal_options_module, get_
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Registry database is (\d+)% full."
+        - r".*Registry database is (\\d+)% full."
         - r".*Couldn't insert ('.*') entry into DB. The DB is full.*"
-        - r".*Fim registry values entries count: '(\d+)'"
+        - r".*Fim registry values entries count: '(\\d+)'"
 
     tags:
         - scheduled

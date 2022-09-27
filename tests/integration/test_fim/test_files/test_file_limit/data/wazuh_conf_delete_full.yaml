@@ -1,4 +1,3 @@
-# conf 1
 - tags:
     - tags_delete_full
   apply_to_modules:
@@ -11,7 +10,7 @@
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-            - FIM_MODE
+              - FIM_MODE
         - file_limit:
             elements:
               - enabled:

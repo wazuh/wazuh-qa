@@ -174,7 +174,7 @@ def test_file_limit_delete_full(folder, file_name, configure_local_internal_opti
                        the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*File database is (\d+)% full'
+        - r'.*File database is (\\d+)% full'
         - r'.*Sending FIM event: (.+)$' ('deleted' event)
 
     tags:

@@ -148,8 +148,8 @@ def test_registry_limit_values(configure_local_internal_options_module, get_conf
                        with the limits and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".Maximum number of registry values to be monitored: '(\d+)'"
-        - r".*Fim registry entries count: '(\d+)'"
+        - r".Maximum number of registry values to be monitored: '(\\d+)'"
+        - r".*Fim registry entries count: '(\\d+)'"
 
     tags:
         - scheduled
@@ -166,7 +166,7 @@ def test_registry_limit_values(configure_local_internal_options_module, get_conf
     registry_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                    callback=generate_monitoring_callback(CB_REGISTRY_LIMIT_VALUE),
                                                    error_message=ERR_MSG_REGISTRY_LIMIT_VALUES).result()
-    
+
     # Compare that the value configured is correct
     assert registry_limit_value == registry_limit, ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE
 

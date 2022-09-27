@@ -105,12 +105,11 @@ def get_configuration(request):
 
 @pytest.mark.parametrize("size", [(4096), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
-    [
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
-    ],
-)
+                         [
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
+                         ])
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """
@@ -120,7 +119,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  limit, and increase its size on each test case. Finally, the test will verify that the
                  compressed file has been created, and the related FIM event includes the 'content_changes'
                  field if the value size does not exceed the specified limit and viceversa.
-                 - Case 1, small file - when compressed it will be less than the disk_quota. The file is generated 
+                 - Case 1, small file - when compressed it will be less than the disk_quota. The file is generated
                  and the logs have content_changes data.
                  - Case 2, big size - when compressed the file would be bigger than the disk_quota. The file is not
                  generated and the logs should not have content_changes data.

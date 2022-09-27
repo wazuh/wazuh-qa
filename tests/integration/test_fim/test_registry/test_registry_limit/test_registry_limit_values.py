@@ -149,8 +149,8 @@ def test_registry_limit_values(configure_local_internal_options_module, get_conf
                        with the limits and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Maximum number of registry values to be monitored: '(\d+)'"
-        - r".*Fim registry values entries count: '(\d+)'"
+        - r".*Maximum number of registry values to be monitored: '(\\d+)'"
+        - r".*Fim registry values entries count: '(\\d+)'"
 
     tags:
         - scheduled

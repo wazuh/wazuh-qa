@@ -150,7 +150,7 @@ def test_registry_key_limit_full(configure_local_internal_options_module, get_co
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Registry database is (\d+)% full.'
+        - r'.*Registry database is (\\d+)% full.'
         - r'.*Couldn't insert ('.*') entry into DB. The DB is full.*'
         - r'.*Fim registry entries count:.*'
 
@@ -163,7 +163,8 @@ def test_registry_key_limit_full(configure_local_internal_options_module, get_co
 
     assert database_state == EXPECTED_DB_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
-    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'\\DB_FULL', KEY_WOW64_64KEY)
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'\\DB_FULL',
+                                 KEY_WOW64_64KEY)
     reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'\\DB_FULL', 0,
                               KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 

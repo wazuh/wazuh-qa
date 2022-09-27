@@ -11,7 +11,7 @@
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-            - FIM_MODE
+              - FIM_MODE
         - file_limit:
             elements:
               - enabled:
@@ -44,7 +44,7 @@
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-            - FIM_MODE
+              - FIM_MODE
     - section: sca
       elements:
         - enabled:
@@ -75,7 +75,7 @@
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-            - FIM_MODE
+              - FIM_MODE
         - file_limit:
             elements:
               - enabled:

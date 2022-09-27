@@ -159,7 +159,7 @@ def test_file_limit_full(configure_local_internal_options_module, get_configurat
                        combined with the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*File database is (\d+)% full'
+        - r'.*File database is (\\d+)% full'
         - r'.*The DB is full.*'
         - r'.*Fim inode entries*, path count'
         - r'.*Fim entries' (on Windows systems)
