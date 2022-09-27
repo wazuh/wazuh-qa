@@ -1,0 +1,15 @@
+- name: repeated_offenders_exceed_limits_timeout
+  description: Check that active-response repeated offenders does not exceed timeout limits.
+  configuration_parameters: null
+  metadata:
+    timeout_vars: 4
+    repeated_offenders_timeout: ['1', '2', '3', '4', '5', '6']
+    extra_vars:
+      repeated_offenders_logs: [
+        ".*INFO: Adding offenders timeout: 1.*",
+        ".*INFO: Adding offenders timeout: 2.*",
+        ".*INFO: Adding offenders timeout: 3.*",
+        ".*INFO: Adding offenders timeout: 4.*",
+        ".*INFO: Adding offenders timeout: 5.*"
+      ]
+      repeated_offenders_no_expected_logs:  ".*INFO: Adding offenders timeout: 6.*"
