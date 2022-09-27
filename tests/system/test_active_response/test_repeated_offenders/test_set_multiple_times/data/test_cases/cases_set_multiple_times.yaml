@@ -1,0 +1,17 @@
+- name: repeated_offenders_set_multiple_times
+  description: Check that active-response repeated offenders take one configuration when is set multiple times.
+  configuration_parameters: null
+  metadata:
+    timeout_vars: 4
+    repeated_offenders_timeout_1: ['4', '5', '6']
+    repeated_offenders_timeout_2: ['7', '8']
+    extra_vars:
+      repeated_offenders_logs_1: [
+        ".*INFO: Adding offenders timeout: 4.*",
+        ".*INFO: Adding offenders timeout: 5.*",
+        ".*INFO: Adding offenders timeout: 6.*"
+      ]
+      repeated_offenders_logs_2: [
+        ".*INFO: Adding offenders timeout: 7.*",
+        ".*INFO: Adding offenders timeout: 8.*"
+      ]

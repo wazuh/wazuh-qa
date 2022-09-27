@@ -1,0 +1,86 @@
+- name: Configure manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Configure the active-response module
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          <active-response>
+          <disabled>no</disabled>
+          <command>win_route-null</command>
+          <location>defined-agent</location>
+          <agent_id>001</agent_id>
+          <rules_id>60122</rules_id>
+          <timeout>{{ timeout_vars }}</timeout>
+          </active-response>
+        os: linux
+
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
+
+- name: Configure Windows agent environment
+  hosts: windows-agent
+  tasks:
+
+    - name: Create temp folder
+      win_file:
+        path: C:\temp\
+        state: directory
+
+    - name: Copy ossec.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Copy local_internal_options.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\local_internal_options.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Add active-response repeated_offender configuration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<disabled>no</disabled>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+          "`n<repeated_offenders>{{ repeated_offenders_timeout_1 }}</repeated_offenders>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' `
+          "`n<repeated_offenders>{{ repeated_offenders_timeout_2 }}</repeated_offenders>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
+
+    - name: Add local_internal_options configuration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_internal_options.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\local_internal_options.conf' "`nwindows.debug=1"
+        os: windows
+
+    - name: Truncate ossec.log
+      win_file:
+        path: C:\Program Files (x86)\ossec-agent\ossec.log
+        state: absent
+
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows
