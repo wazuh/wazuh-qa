@@ -1,0 +1,14 @@
+- name: repeated_offenders_recurrent_attacks_after_timeout_expired
+  description: Check that active-response repeated offenders resets timeout after the timeout expires.
+  configuration_parameters: null
+  metadata:
+    timeout_vars: 5
+    repeated_offenders_timeout: ['1', '2', '3']
+    extra_vars:
+      repeated_offenders_logs: [
+        ".*to the timeout list, with a timeout of '5s'.*",
+        ".*after a timeout of '5s'.*",
+        ".*DEBUG: Repeated offender. Setting timeout to '60s'.*",
+        ".*to the timeout list, with a timeout of '5s'.*",
+        ".*after a timeout of '5s'.*"
+      ]
