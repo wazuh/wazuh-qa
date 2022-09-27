@@ -89,25 +89,44 @@ def restart_wazuh(get_configuration, request):
 
 
 @pytest.fixture(scope='function')
-def restart_wazuh_function(daemons=None):
+def restart_wazuh_function(request, daemons=None):
     """Restarts before starting a test, and stop it after finishing.
        Args:
-            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+            request (fixture): Provide information on the executing test function.
+            daemons(List): List of wazuh daemons that need to be restarted. Default restarts all daemons.
+    """
+    # Check if the test module has the list of required daemons as attribute.
+    try:
+        # If there is a list of required daemons, then assign it to the list of daemons to be restarted.
+        daemons = request.module.REQUIRED_DAEMONS
+        for daemon in daemons:
+            control_service('restart', daemon)
+    except:
+        # Restart all daemons by default (daemons = None)
+        control_service('restart', daemons)
+        pass
+
+    yield
+
+    # Stop all daemons by default (daemons = None)
+    if daemons is None:
+        control_service('stop', daemons)
+    else:
+        # Stop a list daemons in order (as Wazuh does)
+        daemons.reverse()
+        for daemon in daemons:
+            control_service('stop', daemon)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_module(daemons=None):
+    """Restarts before starting a test, and stop it after finishing.
+    Args:
+            daemons(List): List of wazuh daemons that need to be restarted. Default restarts all daemons.
     """
     control_service('restart', daemons)
     yield
     control_service('stop', daemons)
-
-
-    @pytest.fixture(scope='module')
-    def restart_wazuh_module(daemons=None):
-        """Restarts before starting a test, and stop it after finishing.
-        Args:
-                daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
-        """
-        control_service('restart', daemons)
-        yield
-        control_service('stop', daemons)
 
 
 @pytest.fixture(scope='module')

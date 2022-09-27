@@ -4,20 +4,24 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 '''
 
+from wazuh_testing.tools import ANALYSISD_DAEMON, DB_DAEMON, INTEGRATOR_DAEMON
+
 # Variables
-INTEGRATORD_PREFIX = 'wazuh-integratord'
+INTEGRATORD_PREFIX = INTEGRATOR_DAEMON
+# The order of the demons in this list is the same as that used by Wazuh.
+REQUIRED_DAEMONS = [INTEGRATOR_DAEMON, DB_DAEMON, ANALYSISD_DAEMON]
 
 # Callback Messages
-CB_VIRUSTOTAL_ENABLED = r".*wazuh-integratord.*Enabling integration for: 'virustotal'.*"
-CB_INTEGRATORD_SENDING_ALERT = r'.*wazuh-integratord.*DEBUG: sending new alert'
-CB_PROCESSING_ALERT = r'.*wazuh-integratord.*Processing alert.*'
-CB_INTEGRATORD_THREAD_READY = r'.*wazuh-integratord.*DEBUG: Local requests thread ready'
-CB_VIRUSTOTAL_ALERT = r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
-CB_VIRUSTOTAL_ALERT_JSON = r'.*VirusTotal: Alert.*\"integration\":\"virustotal\".*'
-CB_INVALID_JSON_ALERT_READ = r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
-CB_OVERLONG_JSON_ALERT_READ = r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
-CB_ALERTS_FILE_INODE_CHANGED = r'.*wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed.*'
-CB_CANNOT_RETRIEVE_JSON_FILE = r'.*wazuh-integratord.*WARNING.*Could not retrieve information of file.*'\
+CB_VIRUSTOTAL_ENABLED = fr".*{INTEGRATORD_PREFIX}.*Enabling integration for: 'virustotal'.*"
+CB_INTEGRATORD_SENDING_ALERT = fr".*{INTEGRATORD_PREFIX}.*DEBUG: sending new alert"
+CB_PROCESSING_ALERT = fr".*{INTEGRATORD_PREFIX}.*Processing alert.*"
+CB_INTEGRATORD_THREAD_READY = fr".*{INTEGRATORD_PREFIX}.*DEBUG: Local requests thread ready"
+CB_VIRUSTOTAL_ALERT = fr".*{INTEGRATORD_PREFIX}.*alert_id.*\"integration\": \"virustotal\".*"
+CB_VIRUSTOTAL_ALERT_JSON = fr".*VirusTotal: Alert.*\"integration\":\"virustotal\".*"
+CB_INVALID_JSON_ALERT_READ = fr".*{INTEGRATORD_PREFIX}.*WARNING: Invalid JSON alert read.*"
+CB_OVERLONG_JSON_ALERT_READ = fr".*{INTEGRATORD_PREFIX}.*WARNING: Overlong JSON alert read.*"
+CB_ALERTS_FILE_INODE_CHANGED = fr".*{INTEGRATORD_PREFIX}.*DEBUG: jqueue_next.*Alert file inode changed.*"
+CB_CANNOT_RETRIEVE_JSON_FILE = fr".*{INTEGRATORD_PREFIX}.*WARNING.*Could not retrieve information of file.*"\
                                r'alerts\.json.*No such file.*'
 
 # Error messages

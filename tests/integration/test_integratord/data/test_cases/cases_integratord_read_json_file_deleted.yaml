@@ -1,4 +1,4 @@
-- name: alerts_json_file_deleted
+- name: cannot_read_alerts_file_deleted
   description: The alerts.json file is missing and it cannot read alerts from it.
   configuration_parameters:
     API_KEY: Insert using --integration-api-key parameter

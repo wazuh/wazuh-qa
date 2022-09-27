@@ -61,10 +61,11 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
-local_internal_options = {'integrator.debug': '2'}
+local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1'}
 
 # Variables
 TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
+REQUIRED_DAEMONS = integrator.REQUIRED_DAEMONS
 
 
 # Tests

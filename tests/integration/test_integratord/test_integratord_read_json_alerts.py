@@ -67,9 +67,10 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
+local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1'}
 
-
-local_internal_options = {'integrator.debug': '2'}
+# Variables
+REQUIRED_DAEMONS = integrator.REQUIRED_DAEMONS
 
 
 # Tests
