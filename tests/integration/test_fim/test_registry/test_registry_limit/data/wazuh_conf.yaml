@@ -14,14 +14,14 @@
             value: 5
         - windows_registry:
             value: WINDOWS_REGISTRY
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - registry_limit:
-          elements:
-            - enabled:
-                value: 'yes'
-            - entries:
-                value: REGISTRIES
+            elements:
+              - enabled:
+                  value: 'yes'
+              - entries:
+                  value: REGISTRIES
     - section: sca
       elements:
         - enabled:
@@ -55,18 +55,18 @@
             value: 5
         - windows_registry:
             value: WINDOWS_REGISTRY_1
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - windows_registry:
             value: WINDOWS_REGISTRY_2
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - registry_limit:
-          elements:
-            - enabled:
-                value: 'yes'
-            - entries:
-                value: REGISTRIES
+            elements:
+              - enabled:
+                  value: 'yes'
+              - entries:
+                  value: REGISTRIES
     - section: sca
       elements:
         - enabled:
@@ -100,34 +100,34 @@
             value: 5
         - windows_registry:
             value: WINDOWS_REGISTRY_1
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - windows_registry:
             value: WINDOWS_REGISTRY_2
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - windows_registry:
             value: WINDOWS_REGISTRY_3
-          attributes:
-            - arch: 64bit
+            attributes:
+              - arch: 64bit
         - registry_limit:
-          elements:
-            - enabled:
-                value: 'yes'
-            - entries:
-                value: REGISTRIES
+            elements:
+              - enabled:
+                  value: 'yes'
+              - entries:
+                  value: REGISTRIES
     - section: sca
       elements:
         - enabled:
-          value: 'no'
+            value: 'no'
     - section: rootcheck
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: active-response
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: wodle
       attributes:
         - name: syscollector
