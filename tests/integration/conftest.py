@@ -15,7 +15,7 @@ from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 
 import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
+from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH, ARCHIVES_LOG_PATH, ARCHIVES_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
@@ -27,6 +27,7 @@ from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
 from wazuh_testing.tools.run_simulator import simulate_agent,syslog_simulator
+from wazuh_testing.tools.configuration import get_minimal_configuration
 
 
 if sys.platform == 'win32':
@@ -1213,15 +1214,13 @@ def simulate_agent_function(request):
 def load_wazuh_basic_configuration():
     """Load a new basic configuration to the manager"""
     # Load ossec.conf with all disabled settings
-    minimal_configuration = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'all_disabled_ossec.conf')
+    minimal_configuration = get_minimal_configuration()
 
     # Make a backup from current configuration
     backup_ossec_configuration = get_wazuh_conf()
 
     # Write new configuration
-    with open(minimal_configuration, 'r') as file:
-        lines = file.readlines()
-    write_wazuh_conf(lines)
+    write_wazuh_conf(minimal_configuration)
 
     yield
 
@@ -1235,3 +1234,17 @@ def syslog_simulator_function(request):
     syslog_simulator(request.param)
 
     yield
+
+
+@pytest.fixture(scope='function')
+def truncate_event_logs():
+    """Truncate all the event log files"""
+    log_files = [ARCHIVES_LOG_PATH, ARCHIVES_JSON_PATH]
+
+    for log_file in log_files:
+        truncate_file(log_file)
+
+    yield
+
+    for log_file in log_files:
+        truncate_file(log_file)
