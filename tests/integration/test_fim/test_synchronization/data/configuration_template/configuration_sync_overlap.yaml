@@ -4,11 +4,11 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: SCAN_INTERVAL
+            value: 20
         - directories:
-            value: /testdir1
+            value: MONITORED_DIR
             attributes:
-            - check_all: 'yes'
+              - check_all: 'yes'
         - synchronization:
             elements:
               - interval:

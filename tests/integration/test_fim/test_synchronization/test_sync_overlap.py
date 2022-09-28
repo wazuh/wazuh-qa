@@ -63,6 +63,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import TIER2, AGENT, SERVER
+from wazuh_testing.modules import fim
 from wazuh_testing.fim import callback_detect_synchronization
 
 # Marks
@@ -81,9 +82,9 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_over
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
+configurations = configuration.update_configuration_template(configurations, ['MONITORED_DIR'], [fim.MONITORED_DIR_1])
 
 # Variables
-test_directories = os.path.join(PREFIX, 'testdir')
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
@@ -149,32 +150,44 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Wait for new scan and check files have been created
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
-                            error_message='Did not receive expected '
-                                          '"Initializing FIM Integrity Synchronization check" event',
-                            update_position=True).result()
+    # If config is invalid, check that invalid config value message appers
+    if metadata['response_timeout'] == 'invalid' or metadata['max_interval'] == 'invalid':
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                callback=generate_monitoring_callback(fim.CB_INVALID_CONFIG_VALUE),
+                                error_message=fim.ERR_MSG_INVALID_CONFIG_VALUE,
+                                update_position=True).result()
 
-    callback = r".*Sync still in progress. Skipped next sync and increased interval.*'(\d+)s'"
-    err_message = 'Did not recieve the expected "Sync still in progress. Skipped next sync" event'
+    # Wait for new sync
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
+                            error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Check if timeout, sync_interval doubled
-    new_interval = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
-                                           callback=generate_monitoring_callback(callback),
-                                           error_message=err_message, update_position=True).result()
+    # Check if response_timeout has elapsed, and sync is still running, the sync interval is doubled
+    interval = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5,
+                                       callback=generate_monitoring_callback(fim.CB_SYNC_SKIPPED),
+                                       accum_results=metadata['doubled_times'],
+                                       error_message=fim.ERR_MSG_SYNC_SKIPPED_EVENT, update_position=True).result()
 
-    # Check that doubled interval is equal or less than max interval
-    assert int(new_interval) <= int(metadata['max_interval']), f"Invalid value for interval: {new_interval}, cannot be\
-                                                                 more than MAX_INTERVAL: {metadata['max_interval']}"
+    if metadata['doubled_times'] > 1:
+        new_interval = interval[-1]
+    else:
+        new_interval = interval
 
-    time.sleep(metadata['sleep_time'])
+    # Check interval when doubled is not higher than max interval, if max_interval is higher than configured interval
+    # Check interval when doubled is equal than configured interval, if max_interval is lower than configured interval
+    if metadata['max_interval'] != 'invalid':
+        if not metadata['lower']:
+            assert int(new_interval) <= int(metadata['max_interval']), f"Invalid value for interval: {new_interval},\
+                                                                         cannot be more than MAX_INTERVAL:\
+                                                                         {metadata['max_interval']}"
+        else:
+            assert int(new_interval) <= int(metadata['interval']), f"Invalid value for interval: {new_interval}, cannot\
+                                                                     be more than interval: {metadata['interval']}"
 
     # Check when sync ends sync_interval is returned to normal after response_timeout since last message.
-    callback = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
-    err_message = 'Did not recieve the expected "Sync interval is reset..." event'
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
-                            callback=generate_monitoring_callback(callback),
-                            error_message=err_message,
-                            update_position=True).result()
+    if not metadata['lower']:
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
+                                callback=generate_monitoring_callback(fim.CB_SYNC_INTERVAL_RESET),
+                                error_message=fim.ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
+                                update_position=True).result()
