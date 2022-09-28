@@ -10,7 +10,7 @@ from datetime import datetime
 from json import JSONDecodeError
 from wazuh_testing import LOG_FILE_PATH, logger
 from wazuh_testing.modules.fim import (CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_MESSAGE, CB_INODE_ENTRIES_PATH_COUNT,
-                                       CB_FIM_ENTRIES_COUNT, CB_DETECT_FIM_EVENT,CB_REALTIME_MONITORED_FOLDERS,
+                                       CB_FIM_ENTRIES_COUNT, CB_DETECT_FIM_EVENT, CB_REALTIME_MONITORED_FOLDERS,
                                        CB_REALTIME_WHODATA_ENGINE_STARTED, ERR_MSG_SCHEDULED_SCAN_ENDED,
                                        ERR_MSG_REALTIME_FOLDERS_EVENT, ERR_MSG_WHODATA_ENGINE_EVENT, CB_FIM_EVENT)
 from wazuh_testing.tools.monitoring import FileMonitor
