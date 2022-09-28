@@ -35,7 +35,9 @@ def syslog_simulator(parameters):
     run_parameters += f"-e {parameters['eps']} " if 'eps' in parameters else ''
     run_parameters += f"--protocol {parameters['protocol']} " if 'protocol' in parameters else ''
     run_parameters += f"-n {parameters['messages_number']} " if 'messages_number' in parameters else ''
-    run_parameters += f"-m {parameters['message']} " if 'message' in parameters else ''
+    run_parameters += f"-m '{parameters['message']}' " if 'message' in parameters else ''
+    run_parameters += f"--numbered-messages {parameters['numbered_messages']} " if 'numbered_messages' in parameters \
+        else ''
     run_parameters = run_parameters.strip()
 
     # Run the syslog simulator tool with custom parameters
