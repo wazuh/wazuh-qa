@@ -809,3 +809,14 @@ def write_wazuh_local_rules(local_rules: List[str]):
     """
     with open(LOCAL_RULES_PATH, 'w') as f:
         f.writelines(local_rules)
+
+
+def get_minimal_configuration():
+    """Get the wazuh minimal configuration data.
+
+    Returns:
+        str: Wazuh minimal configuration data.
+    """
+    configuration = file.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../', 'data',
+                                                'all_disabled_ossec.conf'))
+    return configuration
