@@ -56,11 +56,10 @@ tags:
     - fim_synchronization
 '''
 import os
-import time
 import pytest
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import PREFIX, LOG_FILE_PATH, configuration
+from wazuh_testing.tools import LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import TIER2, AGENT, SERVER
 from wazuh_testing.modules import fim
@@ -80,9 +79,10 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_over
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['MONITORED_DIR'] = fim.MONITORED_DIR_1
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
-configurations = configuration.update_configuration_template(configurations, ['MONITORED_DIR'], [fim.MONITORED_DIR_1])
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
