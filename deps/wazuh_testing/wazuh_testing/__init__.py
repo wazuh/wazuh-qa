@@ -19,6 +19,7 @@ else:
         WAZUH_PATH = os.path.join("/var", "ossec")
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
+CONF_FILE_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')

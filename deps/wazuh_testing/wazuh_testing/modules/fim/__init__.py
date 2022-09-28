@@ -69,6 +69,11 @@ SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
 # Callbacks message
+CB_FIM_EVENT = r'.*Sending FIM event: (.+)$'
+CB_REALTIME_MONITORED_FOLDERS = r'.*Folders monitored with real-time engine: (\d+)'
+CB_REALTIME_WHODATA_ENGINE_STARTED = 'File integrity monitoring real-time Whodata engine started'
+CB_INVALID_CONFIG_VALUE = r".*Invalid value for element '(.*)': (.*)."
+
 CB_INTEGRITY_CONTROL_MESSAGE = r".*Sending integrity control message: (.+)$"
 CB_MAXIMUM_FILE_SIZE = r".*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*"
 CB_AGENT_CONNECT = r".* Connected to the server .*"
@@ -93,9 +98,14 @@ CB_FILE_LIMIT_DISABLED = r".*(No limit set) to maximum number of entries to be m
 CB_PATH_MONITORED_REALTIME = r".*Directory added for real time monitoring: (.*)"
 CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
 CB_PATH_MONITORED_WHODATA_WINDOWS = r".*Setting up SACL for (.*)"
+CB_SYNC_SKIPPED = r".*Sync still in progress. Skipped next sync and increased interval.*'(\d+)s'"
+CB_SYNC_INTERVAL_RESET = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
+
 
 # Error message
-
+ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
+ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive expected "real-time Whodata engine started" event'
+ERR_MSG_INVALID_CONFIG_VALUE = 'Did not receive expected "Invalid value for element" event'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
 
@@ -131,11 +141,14 @@ ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
 ERR_MSG_FIM_EVENT_NOT_RECIEVED = 'Did not receive expected "Sending FIM event: ..." event'
 ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
-ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event '
+ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event'
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED = 'Did not receive expected "File integrity monitoring real-time Whodata \
                                             engine started" or "Initializing FIM Integrity Synchronization check"'
 ERR_MSG_INTEGRITY_CHECK_EVENT = 'Did not receive expected "Initializing FIM Integrity Synchronization check" event'
+ERR_MSG_SYNC_SKIPPED_EVENT = 'Did not recieve the expected "Sync still in progress. Skipped next sync" event'
+ERR_MSG_FIM_SYNC_NOT_DETECTED = 'Did not receive expected "Initializing FIM Integrity Synchronization check" event'
+ERR_MSG_SYNC_INTERVAL_RESET_EVENT = 'Did not recieve the expected "Sync interval is reset" event'
 
 # Setting Local_internal_option file
 if sys.platform == 'win32':
