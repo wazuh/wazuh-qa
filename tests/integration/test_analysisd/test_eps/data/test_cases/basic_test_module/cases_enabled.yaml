@@ -1,4 +1,4 @@
-- name: maximum 20 - timeframe 5
+- name: enabled
   description: EPS Limits enabled
   configuration_parameters:
     MAXIMUM: '20'

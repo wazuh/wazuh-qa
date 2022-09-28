@@ -1,12 +1,12 @@
-- name: not process events after exceeding the limit
-  description: EPS limitation
+- name: queue non-processed events
+  description: Queueing events after processing limitation
   configuration_parameters:
     PORT: 514
     PROTOCOL: tcp
-    MAXIMUM: '500'
+    MAXIMUM: '100'
     TIMEFRAME: '10'
   metadata:
-    maximum: 500
+    maximum: 100
     timeframe: 10
     # syslog simulator parameters
     address: 'localhost'

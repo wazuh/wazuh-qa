@@ -1,5 +1,5 @@
 - name: maximum 5000 - timeframe 10
-  description: acepted value
+  description: accepted value
   configuration_parameters:
     MAXIMUM: '5000'
     TIMEFRAME: '10'
