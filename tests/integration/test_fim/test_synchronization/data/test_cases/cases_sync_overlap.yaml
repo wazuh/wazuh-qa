@@ -77,7 +77,7 @@
   metadata:
     interval: 3
     response_timeout: 5
-    doubled_times: 2
+    doubled_times: 1
     max_interval: invalid
     files: 5
     lower: false
