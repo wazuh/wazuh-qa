@@ -763,30 +763,6 @@ def get_configuration(data_file_path):
     return configuration_parameters
 
 
-def get_simulate_agent_configuration(data_file_path):
-    """Load simulate agent configuration file.
-
-    Args:
-        data_file_path (str): Configuration file path.
-
-    Returns:
-        dict: Configurations names.
-    """
-    return get_configuration(data_file_path)
-
-
-def get_syslog_simulator_configuration(data_file_path):
-    """Load syslog simulator configuration file.
-
-    Args:
-        data_file_path (str): Configuration file path.
-
-    Returns:
-        dict: Configurations names.
-    """
-    return get_configuration(data_file_path)
-
-
 def get_wazuh_local_rules():
     """
     Get current `local_rules.xml` file content.

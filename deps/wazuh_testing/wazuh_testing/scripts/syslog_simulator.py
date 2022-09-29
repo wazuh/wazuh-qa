@@ -112,7 +112,6 @@ def main():
     parameters = get_parameters()
     set_logging(parameters.debug)
     validate_parameters(parameters)
-
     send_messages(parameters.message, parameters.messages_number, parameters.eps,  parameters.numbered_messages,
                   parameters.address, parameters.port, parameters.protocol)
 

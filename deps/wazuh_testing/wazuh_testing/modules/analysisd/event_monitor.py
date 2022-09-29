@@ -81,23 +81,3 @@ def get_analysisd_state():
     analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=') for element in data.split('\n')))
 
     return analysisd_state
-
-
-def get_messages_info(file_monitor, message, accum_results):
-    """Check if the alerts.json file contains the message
-
-    Args:
-        file_monitor (FileMonitor): Wazuh log monitor
-        message (str): Message to find
-        accum_results (int): Total message to accumulate
-
-    Returns:
-        list: List with messages information
-    """
-    error_message = f"Could not find this event in {message}"
-
-    result = file_monitor.start(timeout=T_20, update_position=True, accum_results=accum_results,
-                                callback=generate_monitoring_callback_groups(message),
-                                error_message=error_message).result()
-
-    return result

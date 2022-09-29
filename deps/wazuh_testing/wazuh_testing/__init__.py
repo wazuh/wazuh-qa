@@ -59,7 +59,6 @@ AGENT_DAEMON = 'wazuh-agentd'
 API_DAEMONS_REQUIREMENTS = [API_DAEMON, DB_DAEMON, EXEC_DAEMON, ANALYSISD_DAEMON, REMOTE_DAEMON, MODULES_DAEMON]
 
 # Paths
-SIMULATE_AGENT = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'simulate_agents.py')
 SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator.py')
 ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 

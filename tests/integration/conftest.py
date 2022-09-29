@@ -1202,14 +1202,6 @@ def create_file(new_file_path):
     remove_file(new_file_path)
 
 
-@pytest.fixture(scope='function')
-def simulate_agent_function(request):
-    """Fixture to run the script simulate_agent.py"""
-    simulate_agent(request.param)
-
-    yield
-
-
 @pytest.fixture(scope='session')
 def load_wazuh_basic_configuration():
     """Load a new basic configuration to the manager"""
@@ -1226,14 +1218,6 @@ def load_wazuh_basic_configuration():
 
     # Restore the ossec.conf backup
     write_wazuh_conf(backup_ossec_configuration)
-
-
-@pytest.fixture(scope='function')
-def syslog_simulator_function(request):
-    """Fixture to run the script syslog_simulator.py"""
-    syslog_simulator(request.param)
-
-    yield
 
 
 @pytest.fixture(scope='function')
