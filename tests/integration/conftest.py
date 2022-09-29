@@ -26,7 +26,7 @@ from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
-from wazuh_testing.tools.run_simulator import simulate_agent, syslog_simulator
+from wazuh_testing.tools.run_simulator import syslog_simulator
 from wazuh_testing.tools.configuration import get_minimal_configuration
 
 
