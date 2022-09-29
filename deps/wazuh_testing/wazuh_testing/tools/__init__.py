@@ -1,13 +1,10 @@
 # Copyright (C) 2015-2022, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 import platform
 import subprocess
 import sys
-
-from wazuh_testing import WAZUH_TESTING_PATH
 
 
 if sys.platform == 'win32':
@@ -37,9 +34,8 @@ if sys.platform == 'win32':
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
-
+    ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
 else:
-
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
 
     WAZUH_UNIX_USER = 'wazuh'
@@ -147,7 +143,7 @@ EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
 LOGTEST_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logtest')
 MONITORD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'monitor')
-REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'remote')
+REMOTED_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'request')
 SYSCHECKD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'syscheck')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 MODULESD_WMODULES_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'wmodules')
