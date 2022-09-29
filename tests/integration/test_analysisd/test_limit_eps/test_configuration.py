@@ -262,4 +262,4 @@ def test_missing_configuration(configuration, metadata, restart_wazuh_daemon_aft
             evm.check_configuration_error()
             # Check that wazuh-analysisd is not running
             assert not check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is running and was not ' \
-                                                                                'expected to'
+                                                                             'expected to'

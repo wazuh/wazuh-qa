@@ -174,7 +174,7 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
     assert events_processed == 0, f"Events are being processed when the limit has been reached. {events_processed} != 0"
 
     # Wait until the limited timeframe has elapsed
-    time.sleep(metadata['timeframe'] + 1 - waited_simulator_time) ## Offset 1s
+    time.sleep(metadata['timeframe'] + 1 - waited_simulator_time)  # Offset 1s
 
     # Get analysisd stats in limitation stage
     analysisd_state = evm.get_analysisd_state()
@@ -473,8 +473,8 @@ def test_event_processing_in_order_single_thread(configuration, metadata, load_w
     syslog_simulator_thread_2.start()
 
     # Wait until all events have been processed
-    waiting_time = ((metadata['messages_number_1'] + metadata['messages_number_2']) / \
-        (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1  # Offset 1s
+    waiting_time = ((metadata['messages_number_1'] + metadata['messages_number_2']) /
+                    (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1  # Offset 1s
     time.sleep(waiting_time)
 
     # Read the events log data
@@ -487,8 +487,8 @@ def test_event_processing_in_order_single_thread(configuration, metadata, load_w
         f"expected>={expected_num_events}"
 
     # Get the IDs of event messages
-    event_ids = [int(re.search(fr"{metadata['message']} - (\d+)", event).group(1)) for event in events_data \
-        if bool(re.match(fr".*{metadata['message']} - (\d+)", event))]
+    event_ids = [int(re.search(fr"{metadata['message']} - (\d+)", event).group(1)) for event in events_data
+                 if bool(re.match(fr".*{metadata['message']} - (\d+)", event))]
 
     # Check that the event message IDs are in order
     assert all(event_ids[i] <= event_ids[i+1] for i in range(len(event_ids) - 1)), 'Events have not been processed ' \
@@ -566,7 +566,7 @@ def test_event_processing_in_order_multi_thread(configuration, metadata, load_wa
                                    'protocol': metadata['protocol'], 'eps': metadata['eps'],
                                    'messages_number': metadata['messages_number'], 'message': metadata['message_1']}
     # Create syslog simulator threads
-    for index, parameter in enumerate(range(metadata['num_batches'])):
+    for index in range(metadata['num_batches']):
         parameters.append(deepcopy(syslog_simulator_parameters))
         parameters[index].update({'message': metadata[f"message_{index + 1}"]})
         syslog_simulator_threads.append(ThreadExecutor(syslog_simulator, {'parameters': parameters[index]}))
@@ -577,14 +577,14 @@ def test_event_processing_in_order_multi_thread(configuration, metadata, load_wa
         time.sleep(metadata['batch_sending_time'])
 
     # Wait until all events have been processed
-    waiting_time_to_process_all_events= ((metadata['messages_number'] * metadata['num_batches']) / \
-        (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1  # Offset 1s
+    waiting_time_to_process_all_events = ((metadata['messages_number'] * metadata['num_batches']) /  # offset 1s
+                                          (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1
     waited_time_to_create_threads = metadata['batch_sending_time'] * metadata['num_batches']
     time.sleep(waiting_time_to_process_all_events - waited_time_to_create_threads)
 
     # Read the events log data
     events_data = file.read_file(ARCHIVES_LOG_PATH).split('\n')
-    expected_num_events =  metadata['batch_sending_time'] * metadata['num_batches']
+    expected_num_events = metadata['batch_sending_time'] * metadata['num_batches']
 
     # Check that all events have been recorded in the log file
     assert len(events_data) >= expected_num_events, \
@@ -592,8 +592,8 @@ def test_event_processing_in_order_multi_thread(configuration, metadata, load_wa
         f"expected>={expected_num_events}"
 
     # Get the IDs of event messages
-    event_ids = [int(re.search(fr"{metadata['message_1']} - Group (\d+)", event).group(1)) for event in events_data \
-        if bool(re.match(fr".*{metadata['message_1']} - Group (\d+)", event))]
+    event_ids = [int(re.search(fr"{metadata['message_1']} - Group (\d+)", event).group(1)) for event in events_data
+                 if bool(re.match(fr".*{metadata['message_1']} - Group (\d+)", event))]
 
     # Check that the event message IDs are in order
     assert all(event_ids[i] <= event_ids[i+1] for i in range(len(event_ids) - 1)), 'Events have not been processed ' \

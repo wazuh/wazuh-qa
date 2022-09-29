@@ -90,7 +90,7 @@ def send_messages(message, num_messages, eps, numbered_messages=-1, address='loc
         while sent_messages < num_messages:
             # Update the message according to the parameters
             final_message = f"{custom_message[:-1]} - {sent_messages + numbered_messages}\n" \
-                if numbered_messages != -1  else custom_message
+                if numbered_messages != -1 else custom_message
 
             if protocol == TCP:
                 sock.send(final_message.encode())

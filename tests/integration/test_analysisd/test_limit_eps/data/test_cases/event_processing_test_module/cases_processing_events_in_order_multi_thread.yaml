@@ -9,7 +9,7 @@
     maximum: 20
     timeframe: 5
     # syslog simulator parameters
-    address: 'localhost'
+    address: localhost
     num_batches: 5
     batch_sending_time: 3
     message_1: 'Login failed: admin, test - Group 1'
@@ -18,6 +18,6 @@
     message_4: 'Login failed: admin, test - Group 4'
     message_5: 'Login failed: admin, test - Group 5'
     port: 514
-    protocol: 'tcp'
+    protocol: tcp
     eps: 100
     messages_number: 100

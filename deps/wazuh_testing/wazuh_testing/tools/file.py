@@ -22,7 +22,6 @@ import yaml
 from wazuh_testing import logger
 
 
-
 def read_json(file_path):
     """
     Read a JSON file from a given path, return a dictionary with the json data.
@@ -130,6 +129,7 @@ def random_string(length, encode=None):
 
     return st
 
+
 def generate_string(stringLength=10, character='0'):
     """Generate a string with line breaks.
 
@@ -154,6 +154,7 @@ def generate_string(stringLength=10, character='0'):
             generated_string += '\n'
 
     return generated_string
+
 
 def read_file(file_path):
     with open(file_path) as f:

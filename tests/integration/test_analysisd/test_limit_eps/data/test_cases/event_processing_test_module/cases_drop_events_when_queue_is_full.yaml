@@ -9,9 +9,8 @@
     maximum: 1
     timeframe: 100
     # syslog simulator parameters
-    address: 'localhost'
+    address: localhost
     port: 514
-    protocol: 'tcp'
+    protocol: tcp
     messages_number: 50000
     eps: 5000
-

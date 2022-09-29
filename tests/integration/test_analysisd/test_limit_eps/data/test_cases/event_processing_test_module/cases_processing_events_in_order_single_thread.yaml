@@ -9,10 +9,10 @@
     maximum: 20
     timeframe: 5
     # syslog simulator parameters
-    address: 'localhost'
+    address: localhost
     message: 'Login failed: admin, test'
     port: 514
-    protocol: 'tcp'
+    protocol: tcp
     numbered_messages: 1
     messages_number_1: 300
     eps: 300

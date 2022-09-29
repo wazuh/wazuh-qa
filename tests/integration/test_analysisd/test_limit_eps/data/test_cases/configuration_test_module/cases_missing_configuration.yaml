@@ -6,7 +6,7 @@
   metadata:
     maximum: 1000
     timeframe: 5
-    behavior: 'works'
+    behavior: works
     remove_tags:
       - <timeframe>5</timeframe>
 
@@ -18,7 +18,7 @@
   metadata:
     maximum: 1000
     timeframe: 5
-    behavior: 'disabled'
+    behavior: disabled
     remove_tags:
       - <maximum>1000</maximum>
 
@@ -30,7 +30,7 @@
   metadata:
     maximum: 1000
     timeframe: 5
-    behavior: 'error'
+    behavior: error
     remove_tags:
       - <maximum>1000</maximum>
       - <timeframe>5</timeframe>

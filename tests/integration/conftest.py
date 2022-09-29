@@ -26,7 +26,7 @@ from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing import mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
-from wazuh_testing.tools.run_simulator import simulate_agent,syslog_simulator
+from wazuh_testing.tools.run_simulator import simulate_agent, syslog_simulator
 from wazuh_testing.tools.configuration import get_minimal_configuration
 
 
@@ -580,8 +580,8 @@ def configure_local_internal_options_module(request):
             local_internal_options = getattr(request.module, 'local_internal_options')
         except AttributeError:
             logger.debug('local_internal_options is not set')
-            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no ' \
-                                 'parameter has been passed explicitly, nor is the variable local_internal_options ' \
+            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no '
+                                 'parameter has been passed explicitly, nor is the variable local_internal_options '
                                  'found in the module.') from AttributeError
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
@@ -610,8 +610,8 @@ def configure_local_internal_options_function(request):
             local_internal_options = getattr(request.module, 'local_internal_options')
         except AttributeError:
             logger.debug('local_internal_options is not set')
-            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no ' \
-                                 'parameter has been passed explicitly, nor is the variable local_internal_options ' \
+            raise AttributeError('Error when using the fixture "configure_local_internal_options_module", no '
+                                 'parameter has been passed explicitly, nor is the variable local_internal_options '
                                  'found in the module.') from AttributeError
 
     backup_local_internal_options = conf.get_local_internal_options_dict()
