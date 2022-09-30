@@ -4,7 +4,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
-brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
+brief: Integratord manages wazuh integrations with other applications such as Yara or Slack, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
@@ -21,15 +21,15 @@ os_version:
     - Centos 8
     - Ubuntu Focal
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
-    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+    - https://documentation.wazuh.com/current/user-manual/manager/manual-integration.html#slack
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.html
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 tags:
-    - virustotal
+    - slack
 '''
 import os
 import pytest
@@ -60,13 +60,16 @@ t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_js
 
 # Configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-t1_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
+t1_configuration_parameters[0]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
+# Replace the Webhook URL in each test case
+for i, test_case in enumerate(t2_case_ids):
+    t2_configuration_parameters[i]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
+
 local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1'}
 
 # Variables
@@ -82,7 +85,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
                                        wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file.
+    of a valid alert, a slack integration alert is expected in the alerts.json file.
     wazuh_min_version: 4.3.7
     tier: 1
     parameters:
@@ -103,7 +106,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
             brief: Configure the local internal options file.
         - restart_wazuh_function:
             type: fixture
-            brief: Restart all daemons because Integratord depends on multiple daemons. Stop them after finishing.
+            brief: Restart a list of daemons (defined in REQUIRED_DAEMONS variable) and stop them after finishing.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
@@ -113,7 +116,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
     expected_output:
-        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
+        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"slack\".*'
     '''
 
     sample = metadata['alert_sample']
@@ -123,8 +126,8 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
 
     # Read Response in ossec.log
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-                            callback=callback_generator(integrator.CB_VIRUSTOTAL_ALERT),
-                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+                            callback=callback_generator(integrator.CB_SLACK_ALERT),
+                            error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)
 
 
 @pytest.mark.tier(level=1)
@@ -135,7 +138,7 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
                                          wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
+    of a valid alert, a slack integration alert is expected in the alerts.json file. If the alert is invalid or
     broken, or overly long a message will appear in the ossec.log file.
     wazuh_min_version: 4.3.7
     tier: 1
@@ -157,7 +160,7 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
             brief: Configure the local internal options file.
         - restart_wazuh_function:
             type: fixture
-            brief: Restart wazuh-modulesd daemon before starting a test, and stop it after finishing.
+            brief: Restart a list of daemons (defined in REQUIRED_DAEMONS variable) and stop them after finishing.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log

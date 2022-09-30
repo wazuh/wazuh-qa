@@ -101,7 +101,7 @@ def restart_wazuh_function(request, daemons=None):
         daemons = request.module.REQUIRED_DAEMONS
         for daemon in daemons:
             control_service('restart', daemon)
-    except:
+    except AttributeError:
         # Restart all daemons by default (daemons = None)
         control_service('restart', daemons)
         pass
@@ -264,12 +264,12 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
-        "--integration-api-key",
+        "--slack-webhook-url",
         action="store",
-        metavar="integration_api_key",
+        metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass api key required for integratord tests."
+        help="pass webhook url required for integratord tests."
     )
 
 
@@ -325,10 +325,10 @@ def pytest_configure(config):
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
 
-    # Set integration_api_key if it is passed through command line args
-    integration_api_key = config.getoption("--integration-api-key")
-    if integration_api_key:
-        global_parameters.integration_api_key = integration_api_key
+    # Set slack_webhook_url if it is passed through command line args
+    slack_webhook_url = config.getoption("--slack-webhook-url")
+    if slack_webhook_url:
+        global_parameters.slack_webhook_url = slack_webhook_url
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")

@@ -4,7 +4,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
-brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
+brief: Integratord manages wazuh integrations with other applications such as Yara or Slack, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
@@ -21,15 +21,15 @@ os_version:
     - Centos 8
     - Ubuntu Focal
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
-    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+    - https://documentation.wazuh.com/current/user-manual/manager/manual-integration.html#slack
+    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.html
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 tags:
-    - virustotal
+    - slack
 '''
 import os
 import time
@@ -58,7 +58,7 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_change_inode_alert
 
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
+configuration_parameters[0]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
 local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1'}
@@ -79,7 +79,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected.
     wazuh_min_version: 4.3.5
     tier: 1
-   parameters:
+    parameters:
         - configuration:
             type: dict
             brief: Configuration loaded from `configuration_template`.
@@ -97,7 +97,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
             brief: Configure the local internal options file.
         - restart_wazuh_function:
             type: fixture
-            brief: Restart all daemons because Integratord depends on multiple daemons. Stop them after finishing.
+            brief: Restart a list of daemons (defined in REQUIRED_DAEMONS variable) and stop them after finishing.
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
@@ -107,7 +107,9 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_alerts` file provides the test cases.
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
+        - r'.*wazuh-integratord.*DEBUG: sending new alert'
+        - r'.*wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed.*'
+        - r'.*wazuh-integratord.*Processing alert.*'
 
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
@@ -115,7 +117,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     # Insert Alerts
     run_local_command_returning_output(command)
 
-    # Get that alert is read
+    # Check that the alert was read
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                             callback=callback_generator(integrator.CB_INTEGRATORD_SENDING_ALERT),
                             error_message=integrator.ERR_MSG_SENDING_ALERT_NOT_FOUND,
@@ -132,7 +134,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     time.sleep(2)
 
     # Monitor Inode Changed
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout * 2,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                             callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
                             error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
 
@@ -140,6 +142,6 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     run_local_command_returning_output(command)
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout + 2,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                             callback=callback_generator(integrator.CB_PROCESSING_ALERT),
-                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+                            error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)

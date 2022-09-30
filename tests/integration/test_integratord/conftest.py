@@ -21,7 +21,7 @@ def wait_for_start_module(request):
     file_monitor = FileMonitor(LOG_FILE_PATH)
     check_integratord_event(file_monitor=file_monitor, timeout=20,
                             callback=callback_generator(integrator.CB_INTEGRATORD_THREAD_READY),
-                            error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
+                            error_message=integrator.ERR_MSG_SLACK_ENABLED_NOT_FOUND)
     # Wait for analysisd to start successfully (to detect changes in the alerts.json file)
     check_analysisd_event(file_monitor=file_monitor, timeout=5,
                           callback=callback_generator(analysisd.CB_ANALYSISD_STARTUP_COMPLETED),

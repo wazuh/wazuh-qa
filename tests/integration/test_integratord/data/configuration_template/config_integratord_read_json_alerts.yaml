@@ -8,32 +8,16 @@
     - section: integration
       elements:
         - name:
-            value: virustotal
-        - api_key:
-            value: API_KEY
+            value: slack
+        - hook_url:
+            value: WEBHOOK_URL
         - rule_id:
-            value: '554'
+            value: 5712
+        - level:
+            value: 10
         - alert_format:
             value: json
     - section: sca
       elements:
         - enabled:
             value: 'no'
-    - section: rootcheck
-      elements:
-        - disabled:
-            value: 'yes'
-    - section: syscheck
-      elements:
-        - disabled:
-            value: 'yes'
-    - section: wodle
-      attributes:
-        - name: syscollector
-      elements:
-        - disabled:
-            value: 'yes'
-    - section: auth
-      elements:
-        - disabled:
-            value: 'yes'
