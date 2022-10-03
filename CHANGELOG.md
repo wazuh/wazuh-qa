@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: https://github.com/wazuh/wazuh/commit/88bf15d2cbb2040e197e34a94dda0f71f607afad \
 Release report: https://github.com/wazuh/wazuh/issues/14827
 
+### Added
+
+- Analysisd - add new test to check analysisd socket properties ([#2405](https://github.com/wazuh/wazuh-qa/pull/2405))
+
 ### Changed
 
 - Change required version of urllib3 and requests dependencies \- (Framework)
