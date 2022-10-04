@@ -1,7 +1,6 @@
 ---
 name: QA enhancement request
 about: 'Request to enhance a repository resource: framework, test, documentation ...'
-title: Enhancement - <title>
 labels: status/not-tracked, team/qa, type/enhancement
 assignees: ''
 

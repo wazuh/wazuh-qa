@@ -1,7 +1,6 @@
 ---
 name: QA testing request
 about: Request the QA team to perform some type of testing, either manually or automatically.
-title: QA testing - <title>
 labels: status/not-tracked, team/qa, type/qa-testing
 assignees: ''
 
@@ -24,15 +23,15 @@ assignees: ''
 ...
 
 ## Steps to reproduce
-<!-- 
-(DELETE SECTION IF NOT APPLICABLE) If the changes correspond to the fix of a bug or behavior, indicate the steps necessary to reproduce it before the fix 
+<!--
+(DELETE SECTION IF NOT APPLICABLE) If the changes correspond to the fix of a bug or behavior, indicate the steps necessary to reproduce it before the fix
 -->
 
 ## Expected results
 <!-- Indicate expected results such as behaviors, logs... -->
 
 ## Configuration and considerations
-<!-- 
+<!--
 Indicate considerations to take into account when performing the testing that may not be very intuitive.
 
 If any configuration has to be applied, it should be indicated as far as possible.
