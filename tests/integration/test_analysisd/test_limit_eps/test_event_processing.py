@@ -148,7 +148,7 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
     waited_simulator_time = 0
 
     # Wait until syslog simulator is started
-    time.sleep(1)
+    time.sleep(1.5)
 
     # Get analysisd stats
     analysisd_state = evm.get_analysisd_state()
