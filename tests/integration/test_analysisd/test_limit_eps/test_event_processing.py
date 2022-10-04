@@ -1,6 +1,5 @@
 import os
 import pytest
-import threading
 import time
 import re
 from math import ceil
@@ -9,11 +8,9 @@ from copy import deepcopy
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing import ARCHIVES_LOG_PATH
 from wazuh_testing.modules.analysisd import event_monitor as evm
-from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools import file
 from wazuh_testing.modules.analysisd import QUEUE_EVENTS_SIZE, ANALYSISD_ONE_THREAD_CONFIG
 from wazuh_testing.scripts.syslog_simulator import DEFAULT_MESSAGE_SIZE
-from wazuh_testing.processes import check_if_daemons_are_running
 from wazuh_testing.tools.run_simulator import syslog_simulator
 from wazuh_testing.tools.thread_executor import ThreadExecutor
 
@@ -21,6 +18,7 @@ from wazuh_testing.tools.thread_executor import ThreadExecutor
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template', 'event_processing_test_module')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases', 'event_processing_test_module')
+SYSLOG_SIMULATOR_START_TIME = 2
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0', 'analysisd.state_interval': '1'}
 
 # --------------------------------------------------- TEST_LIMITATION --------------------------------------------------
@@ -148,7 +146,7 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
     waited_simulator_time = 0
 
     # Wait until syslog simulator is started
-    time.sleep(1.5)
+    time.sleep(SYSLOG_SIMULATOR_START_TIME)
 
     # Get analysisd stats
     analysisd_state = evm.get_analysisd_state()
@@ -252,7 +250,7 @@ def test_queueing_events_after_limitation(configuration, metadata, load_wazuh_ba
     event_queue_usage = float(analysisd_state['event_queue_usage'])
 
     # Check that there are no events in the queue
-    assert event_queue_usage == 0.0, f"The initial events queue is not at 0%"
+    assert event_queue_usage == 0.0, 'The initial events queue is not at 0%'
 
     # Set syslog simulator parameters according to the use case data
     syslog_simulator_parameters = {'address': metadata['address'], 'port': metadata['port'],
@@ -264,7 +262,8 @@ def test_queueing_events_after_limitation(configuration, metadata, load_wazuh_ba
     syslog_simulator_thread.start()
 
     # Wait for the event non-processing stage (limit reached)
-    waiting_limit_time = ceil((metadata['maximum'] * metadata['timeframe']) / metadata['eps']) + 1  # Offset 1s
+    waiting_limit_time = ceil((metadata['maximum'] * metadata['timeframe']) / metadata['eps']) + \
+        SYSLOG_SIMULATOR_START_TIME
     time.sleep(waiting_limit_time)
 
     # Get queue usage in limitation stage
@@ -353,7 +352,7 @@ def test_dropping_events_when_queue_is_full(configuration, metadata, load_wazuh_
     event_queue_usage = float(analysisd_state['event_queue_usage'])
 
     # Check that there are no events in the queue
-    assert event_queue_usage == 0.0, f"The initial events queue is not at 0%"
+    assert event_queue_usage == 0.0, 'The initial events queue is not at 0%'
 
     # Set syslog simulator parameters according to the use case data
     syslog_simulator_parameters = {'address': metadata['address'], 'port': metadata['port'],
@@ -365,7 +364,8 @@ def test_dropping_events_when_queue_is_full(configuration, metadata, load_wazuh_
     syslog_simulator_thread.start()
 
     # Calculate the non-processing stage (limit reached)
-    waiting_limit_time = ceil((metadata['maximum'] * metadata['timeframe']) / metadata['eps']) + 1  # Offset 1s
+    waiting_limit_time = ceil((metadata['maximum'] * metadata['timeframe']) / metadata['eps']) + \
+        SYSLOG_SIMULATOR_START_TIME
 
     # Calculate the stage when the events queue is full (offset 4 sec to check all received-dropped events)
     waiting_time_queue_is_full = waiting_limit_time + ((QUEUE_EVENTS_SIZE / DEFAULT_MESSAGE_SIZE) / metadata['eps']) + 4
@@ -474,7 +474,7 @@ def test_event_processing_in_order_single_thread(configuration, metadata, load_w
 
     # Wait until all events have been processed
     waiting_time = ((metadata['messages_number_1'] + metadata['messages_number_2']) /
-                    (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1  # Offset 1s
+                    (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + SYSLOG_SIMULATOR_START_TIME
     time.sleep(waiting_time)
 
     # Read the events log data
@@ -577,8 +577,10 @@ def test_event_processing_in_order_multi_thread(configuration, metadata, load_wa
         time.sleep(metadata['batch_sending_time'])
 
     # Wait until all events have been processed
-    waiting_time_to_process_all_events = ((metadata['messages_number'] * metadata['num_batches']) /  # offset 1s
-                                          (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + 1
+    waiting_time_to_process_all_events = \
+        ((metadata['messages_number'] * metadata['num_batches']) /
+         (metadata['maximum'] * metadata['timeframe'])) * metadata['timeframe'] + SYSLOG_SIMULATOR_START_TIME
+
     waited_time_to_create_threads = metadata['batch_sending_time'] * metadata['num_batches']
     time.sleep(waiting_time_to_process_all_events - waited_time_to_create_threads)
 
