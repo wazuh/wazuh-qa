@@ -13,8 +13,7 @@ from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
 from wazuh_testing import global_parameters, logger
-from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, \
-                                LOCAL_RULES_PATH
+from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF
 from wazuh_testing import global_parameters, logger
 from wazuh_testing.tools import file
 
@@ -743,56 +742,3 @@ def update_configuration_template(configurations, old_values, new_values):
         configurations_to_update = configurations_to_update.replace(old_value, new_value)
 
     return json.loads(configurations_to_update)
-
-
-def get_configuration(data_file_path):
-    """Load configuration from file.
-
-    Args:
-        data_file_path (str): Configuration file path.
-
-    Returns:
-        dict: Configurations names.
-    """
-    configuration_file = file.read_yaml(data_file_path)
-    configuration_parameters = {}
-
-    for test_case in configuration_file:
-        configuration_parameters.update(test_case['configuration_parameters'])
-
-    return configuration_parameters
-
-
-def get_wazuh_local_rules():
-    """
-    Get current `local_rules.xml` file content.
-
-    Returns
-        List(str): A list containing all the lines of the `local_rules.xml` file.
-    """
-    with open(LOCAL_RULES_PATH) as file:
-        lines = file.readlines()
-
-    return lines
-
-
-def write_wazuh_local_rules(local_rules: List[str]):
-    """
-    Write new rules in 'local_rules.xml' file.
-
-    Args:
-        local_rules (list or str): Lines to be written in the local_rules.xml file.
-    """
-    with open(LOCAL_RULES_PATH, 'w') as f:
-        f.writelines(local_rules)
-
-
-def get_minimal_configuration():
-    """Get the wazuh minimal configuration data.
-
-    Returns:
-        str: Wazuh minimal configuration data.
-    """
-    configuration = file.read_file(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../', 'data',
-                                                'all_disabled_ossec.conf'))
-    return configuration
