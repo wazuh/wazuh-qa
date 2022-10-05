@@ -1081,20 +1081,3 @@ def callback_authd_startup(line):
     if 'Accepting connections on port 1515' in line:
         return line
     return None
-
-
-def generate_monitoring_callback_groups(regex):
-    """
-    Generates a new callback that look for a specific pattern on a line passed.
-    If it finds a match, it returns the matched groups.
-    Args:
-        regex (str): regex to use to look for a match.
-    """
-    def new_callback(line):
-        match = re.match(regex, line)
-        if match:
-            if match.groups() is not None:
-                return match.groups()
-            return True
-
-    return new_callback
