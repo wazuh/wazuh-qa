@@ -8,6 +8,8 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+
+- New testing suite for checking analysisd EPS limitation([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
 - Add E2E tests for demo cases ([#3293](https://github.com/wazuh/wazuh-qa/pull/3293)) \- (Framework + Tests)
 - Add configuration files for Jenkins automation of system/E2E tests ([#3221](https://github.com/wazuh/wazuh-qa/pull/3221)) \- (Framework)
 - New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
