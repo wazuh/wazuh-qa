@@ -28,6 +28,8 @@ if sys.platform == 'win32':
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
     AR_SCRIPTS_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
     ANALYSISD_BINARY_PATH = None
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
 
 else:
 
@@ -42,6 +44,8 @@ else:
         GEN_OSSEC = os.path.join(WAZUH_SOURCES, 'gen_ossec.sh')
         PREFIX = os.sep
 
+    WAZUH_UNIX_USER = 'wazuh'
+    WAZUH_UNIX_GROUP = 'wazuh'
     WAZUH_CONF_RELATIVE = os.path.join('etc', 'ossec.conf')
     WAZUH_LOCAL_INTERNAL_OPTIONS = os.path.join(f'{WAZUH_PATH}/etc', 'local_internal_options.conf')
     WAZUH_CONF = os.path.join(WAZUH_PATH, WAZUH_CONF_RELATIVE)
@@ -99,8 +103,6 @@ def get_service():
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
 
-WAZUH_UNIX_USER = 'wazuh'
-WAZUH_UNIX_GROUP = 'wazuh'
 CUSTOM_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules')
 LOCAL_RULES_PATH = os.path.join(WAZUH_PATH, 'etc', 'rules', 'local_rules.xml')
 LOCAL_DECODERS_PATH = os.path.join(WAZUH_PATH, 'etc', 'decoders', 'local_decoder.xml')
