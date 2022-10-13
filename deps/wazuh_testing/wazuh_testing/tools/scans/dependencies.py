@@ -1,11 +1,12 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+import json
 import re
 import subprocess
 from collections import namedtuple
 from datetime import datetime
-from json import dumps, loads
 from os import environ
 
 from safety.formatter import report
@@ -20,13 +21,13 @@ def run_report():
     """Perform vulnerability scan using Safety to check all packages listed.
 
     Returns:
-        str: information about packages and vulnerabilities.
+        dict: information about packages and vulnerabilities.
     """
     json_report = []
     vulns = check(packages=package_list, key='', db_mirror='', cached=False, ignore_ids=(), proxy={})
     output_report = report(vulns=vulns, full=True, json_report=True, bare_report=False,
                            checked_packages=len(package_list), db='', key='')
-    for package_information in loads(output_report):
+    for package_information in json.loads(output_report):
         json_report.append({
             'package_name': package_information[0],
             'package_version': package_information[2],
@@ -39,7 +40,7 @@ def run_report():
         'vulnerabilities_found': len(json_report),
         'packages': json_report
     }
-    return dumps(json_data, indent=4)
+    return json_data
 
 
 def prepare_input(pip_mode, input_file_path):
@@ -87,14 +88,38 @@ def export_report(output, output_file_path):
         print(output)
 
 
-def report_for_pytest(requirements_file):
+def read_known_flaws(known_flaws_path):
+    """Read flaws detected by Safety in previous scans.
+
+    Args:
+        known_flaws_path (str): string containing the path to the Safety known flaws file.
+
+    Returns:
+        dict: dictionary containing the Safety known flaws properly classified.
+    """
+    try:
+        with open(known_flaws_path, mode="r") as f:
+            known_flaws = json.load(f)
+    except json.decoder.JSONDecodeError or FileNotFoundError:
+        known_flaws = {'false_positives': [], 'to_fix': []}
+
+    return known_flaws
+
+
+def report_for_pytest(requirements_file, known_flaws_path):
     """Method used by pytest to generate a report.
 
     Args:
-        requirements_file (str): path to the input file.
+        requirements_file (str): path to the requirements input file.
+        known_flaws_path (str): path to the Safety known flaws file.
 
     Returns:
         str: information about packages and vulnerabilities.
     """
     prepare_input(False, requirements_file)
-    return run_report()
+    result = run_report()
+    known_flaws = read_known_flaws(known_flaws_path=known_flaws_path)
+    result['packages'] = [flaw for flaw in result['packages'] if
+                          flaw not in known_flaws['false_positives'] + known_flaws['to_fix']]
+    result['vulnerabilities_found'] = len(result['packages'])
+    return json.dumps(result, indent=4)
