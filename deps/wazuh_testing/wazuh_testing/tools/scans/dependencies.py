@@ -65,7 +65,7 @@ def prepare_input(pip_mode, input_file_path):
             for line in lines:
                 line = re.sub('[<>~]', '=', line)
                 if ',' in line:
-                    package_version = max(re.findall('\d+\.+\d*\.*\d', line))
+                    package_version = max(re.findall(r'\d+\.+\d*\.*\d', line))
                     package_name = re.findall('([a-z]+)', line)[0]
                     line = f'{package_name}=={package_version}\n'
                 if ';' in line:
