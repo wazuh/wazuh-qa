@@ -42,7 +42,8 @@ scripts_list = [
     'qa-ctl=wazuh_testing.scripts.qa_ctl:main',
     'check-files=wazuh_testing.scripts.check_files:main'
     'add-agents-client-keys=wazuh_testing.scripts.add_agents_client_keys:main',
-    'unsync-agents=wazuh_testing.scripts.unsync_agents:main'
+    'unsync-agents=wazuh_testing.scripts.unsync_agents:main',
+    'stress_results_comparator=wazuh_testing.scripts.stress_results_comparator:main'
 ]
 
 
@@ -68,4 +69,4 @@ setup(name='wazuh_testing',
       entry_points={'console_scripts': scripts_list},
       include_package_data=True,
       zip_safe=False
-      )
+    )
