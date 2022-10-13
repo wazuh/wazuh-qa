@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.9] - 13-10-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh-qa/commit/8af0a5083bd69765f4d7878df9d3b785bb239723 \
+Release report: https://github.com/wazuh/wazuh/issues/15090
+
+### Added
+
+- Add a test to check the analysisd socket properties ([#3365](https://github.com/wazuh/wazuh-qa/pull/3365))
+
 ## [4.3.8] - 19-09-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/88bf15d2cbb2040e197e34a94dda0f71f607afad \
