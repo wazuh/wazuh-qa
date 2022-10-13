@@ -1,5 +1,5 @@
 {
-    "false_positives": [
+    "known_issues": [
         {
             "package_name": "python",
             "package_version": "3.9.9",

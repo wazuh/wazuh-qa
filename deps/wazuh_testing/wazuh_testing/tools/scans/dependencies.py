@@ -101,7 +101,7 @@ def read_known_flaws(known_flaws_path):
         with open(known_flaws_path, mode="r") as f:
             known_flaws = json.load(f)
     except json.decoder.JSONDecodeError or FileNotFoundError:
-        known_flaws = {'false_positives': [], 'to_fix': []}
+        known_flaws = {'known_issues': [], 'to_fix': []}
 
     return known_flaws
 
@@ -120,6 +120,6 @@ def report_for_pytest(requirements_file, known_flaws_path):
     result = run_report()
     known_flaws = read_known_flaws(known_flaws_path=known_flaws_path)
     result['packages'] = [flaw for flaw in result['packages'] if
-                          flaw not in known_flaws['false_positives'] + known_flaws['to_fix']]
+                          flaw not in known_flaws['known_issues'] + known_flaws['to_fix']]
     result['vulnerabilities_found'] = len(result['packages'])
     return json.dumps(result, indent=4)
