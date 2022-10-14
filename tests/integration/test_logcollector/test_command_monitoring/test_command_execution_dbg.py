@@ -59,99 +59,61 @@ tags:
 import os
 import pytest
 import sys
-
 from subprocess import check_output
-from wazuh_testing.tools import monitoring
+
 from wazuh_testing import global_parameters
-import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
-import tempfile
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, GENERIC_CALLBACK_ERROR_COMMAND_MONITORING
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
+from wazuh_testing.modules.logcollector import event_monitor as evm
+
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
-# Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_command_conf.yaml')
+prefix = LOG_COLLECTOR_PREFIX
+
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+# ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
+# Configuration and cases data
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_execution_dbg.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg.yaml')
 
 local_internal_options = {
     'logcollector.remote_commands': '1',
     'logcollector.max_lines': '100',
-    'logcollector.debug': '2'
+    'logcollector.debug': '2',
+    'monitord.rotate_log': '0'
 }
 
 
-parameters = [
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'テ``ñスト, ИСПЫТА´НИЕ",\'测`试", "اختبا', 'ALIAS': ''},
-    {'LOG_FORMAT': 'command', 'COMMAND': 'echo ***', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo hello world', 'ALIAS': 'goodbye'},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'not_found_command -o option -v', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'ls -R /tmp', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat doesntexists.txt', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'テ``ñスト, ИСПЫТА´НИЕ",\'测`试", "اختبا', 'ALIAS': ''},
-    {'LOG_FORMAT': 'full_command', 'COMMAND': 'echo ***', 'ALIAS': ''},
-]
-metadata = [
-    {'log_format': 'command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
-    {'log_format': 'command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
-    {'log_format': 'command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'command', 'command': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'alias': '',
-     'info': 'does_not_end'},
-    {'log_format': 'command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
-    {'log_format': 'command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
-    {'log_format': 'command', 'command': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'alias': '',
-     'info': 'special_chars_filename'},
-    {'log_format': 'command', 'command': 'テ``ñスト, ИСПЫТА´НИЕ",\'测`试", "اختبا', 'alias': '',
-     'info': 'special_chars_command'},
-    {'log_format': 'command', 'command': 'echo ***', 'alias': '', 'info': 'special_chars_echo'},
-    {'log_format': 'full_command', 'command': 'echo', 'alias': '', 'info': 'empty_output'},
-    {'log_format': 'full_command', 'command': 'echo hello world', 'alias': 'goodbye', 'info': 'check_output_and_alias'},
-    {'log_format': 'full_command', 'command': 'not_found_command -o option -v', 'alias': '', 'info': 'not_found'},
-    {'log_format': 'full_command', 'command': 'for ((i=0;;i++)); do echo "Line ${i}"; done', 'alias': '',
-     'info': 'does not end'},
-    {'log_format': 'full_command', 'command': 'ls -R /tmp', 'alias': '', 'info': 'long_output'},
-    {'log_format': 'full_command', 'command': 'cat doesntexists.txt', 'alias': '', 'info': 'that_fails'},
-    {'log_format': 'full_command', 'command': 'cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt', 'alias': '',
-     'info': 'special_chars_filename'},
-    {'log_format': 'full_command', 'command': 'テ``ñスト, ИСПЫТА´НИЕ",\'测`试", "اختبا', 'alias': '',
-     'info': 'special_chars_command'},
-    {'log_format': 'full_command', 'command': 'echo ***', 'alias': '', 'info': 'special_chars_echo'},
-]
+def remove_item_from_list(item):
+    """Remove item from configuration, metadata and case_ids list.
 
-if sys.platform == 'linux':
-    parameters.append({'LOG_FORMAT': 'command', 'COMMAND': 'timeout 2 tail -f /dev/random', 'ALIAS': 'killed_by_test'})
-    parameters.append({'LOG_FORMAT': 'full_command', 'COMMAND': 'timeout 2 tail -f /dev/random', 'ALIAS': ''})
-    parameters.append({'LOG_FORMAT': 'command', 'COMMAND': 'ss -l -p -u -t -4 -6 -n', 'ALIAS': ''})
-    parameters.append({'LOG_FORMAT': 'full_command', 'COMMAND': 'ss -l -p -u -t -4 -6 -n', 'ALIAS': ''})
-    metadata.append({'log_format': 'command', 'command': 'timeout 2 tail -f /dev/random', 'alias': '',
-                     'info': 'killed_by_test'})
-    metadata.append({'log_format': 'full_command', 'command': 'timeout 2 tail -f /dev/random', 'alias': '',
-                     'info': 'killed_by_test'})
-    metadata.append({'log_format': 'command', 'command': 'ss -l -p -u -t -4 -6 -n', 'alias': '',
-                     'info': 'many_arguments'})
-    metadata.append({'log_format': 'full_command', 'command': 'ss -l -p -u -t -4 -6 -n', 'alias': '',
-                     'info': 'many_arguments'})
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"{x['log_format']}_{x['info']}" for x in metadata]
+    Returns:
+        Index of the next element to be checked.
+    """
+    del t1_configuration_metadata[item]
+    del t1_configuration_parameters[item]
+    del t1_case_ids[item]
+    return item - 1
 
 
-# fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+# Accepted values test configurations (t1)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+
+if sys.platform != 'linux':
+    index = 0
+    for _ in range(len(t1_configuration_metadata)):
+        if t1_configuration_metadata[index]['os'] == 'linux' and index > 0:
+            index = remove_item_from_list(index)
+        index += 1
+
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
 
 def dbg_reading_command(command, alias, log_format):
@@ -167,23 +129,23 @@ def dbg_reading_command(command, alias, log_format):
     Raises:
         TimeoutError: If the command monitoring callback is not generated.
     """
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    internal_prefix = LOG_COLLECTOR_PREFIX
     output = check_output(command, universal_newlines=True, shell=True).strip()
 
     if log_format == 'full_command':
         msg = fr"^{output}'"
-        prefix = ''
+        internal_prefix = ''
     else:
         msg = fr"DEBUG: Reading command message: 'ossec: output: '{alias}': {output}'"
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                            callback=monitoring.make_callback(pattern=msg, prefix=prefix),
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
+    evm.check_logcollector_event(timeout=global_parameters.default_timeout, callback=msg, prefix=internal_prefix,
+                                 error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
-def test_command_execution_dbg(configure_local_internal_options_module, get_configuration, file_monitoring,
-                               configure_environment, restart_logcollector):
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_command_execution_dbg(configuration, metadata, set_wazuh_configuration,
+                               configure_local_internal_options_module, setup_log_monitor,
+                               restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
                  special characteristics. For this purpose, the test will configure the logcollector to run
@@ -201,24 +163,24 @@ def test_command_execution_dbg(configure_local_internal_options_module, get_conf
     tier: 0
 
     parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
         - configure_local_internal_options_module:
             type: fixture
-            brief: Configure the Wazuh local internal options.
-        - configure_local_internal_options:
+            brief: Configure the Wazuh local internal options file.
+        - setup_log_monitor:
             type: fixture
-            brief: Configure the Wazuh local internal options.
-        - get_configuration:
+            brief: Create the log monitor.
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: Get configurations from the module.
-        - file_monitoring:
-            type: fixture
-            brief: Handle the monitoring of a specified file.
-        - configure_environment:
-            type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_logcollector:
-            type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Restart the wazuh service.
 
     assertions:
         - Verify that the debug 'running' event is generated when running the command set in the 'command' tag.
@@ -226,9 +188,9 @@ def test_command_execution_dbg(configure_local_internal_options_module, get_conf
         - Verify that the debug 'lines' event is generated when running the related command.
 
     input_description: A configuration template (test_command_execution) is contained in an external
-                       YAML file (wazuh_command_conf.yaml), which includes configuration settings for
+                       YAML file (configuration_execution_dbg.yaml), which includes configuration settings for
                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
-                       (log formats and commands to run) defined in the module.
+                       (log formats and commands to run) defined in the cases_execution_dbg.yaml file.
 
     expected_output:
         - r'DEBUG: Running .*'
@@ -238,22 +200,19 @@ def test_command_execution_dbg(configure_local_internal_options_module, get_conf
     tags:
         - logs
     '''
-    config = get_configuration['metadata']
+    log_monitor = setup_log_monitor
 
     # Check log line "DEBUG: Running command '<command>'"
-    log_monitor.start(timeout=global_parameters.default_timeout,
-                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                      callback=logcollector.callback_running_command(log_format=config['log_format'],
-                                                                     command=config['command'],
-                                                                     escape=True))
+    evm.check_running_command(file_monitor=log_monitor, log_format=metadata['log_format'], command=metadata['command'],
+                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                              timeout=global_parameters.default_timeout, escape=True)
 
     # Command with known output to test "Reading command message: ..."
-    if config['command'].startswith('echo') and config['alias'] != '':
-        dbg_reading_command(config['command'], config['alias'], config['log_format'])
+    if metadata['command'].startswith('echo') and metadata['alias'] != '':
+        dbg_reading_command(metadata['command'], metadata['alias'], metadata['log_format'])
 
     # "Read ... lines from command ..." only appears with log_format=command
-    if config['log_format'] == 'command':
-        log_monitor.start(timeout=global_parameters.default_timeout,
-                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                          callback=logcollector.callback_read_lines(command=config['command'],
-                                                                    escape=True))
+    if metadata['log_format'] == 'command':
+        evm.check_read_lines(file_monitor=log_monitor, command=metadata['command'],
+                             error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                             timeout=global_parameters.default_timeout, escape=True)
