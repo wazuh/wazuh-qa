@@ -47,7 +47,7 @@ def read_yaml(file_path):
     Returns:
        dict: Yaml structure.
     """
-    with open(file_path) as f:
+    with open(file_path, encoding='utf-8') as f:
         return yaml.safe_load(f)
 
 
