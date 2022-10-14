@@ -1,0 +1,230 @@
+- name: Security_eventchannel_
+  description: Security_eventchannel_
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY:
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query:
+
+- name: System_eventchannel_
+  description: System_eventchannel_
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY:
+  metadata:
+    location: System
+    log_format: eventchannel
+    query:
+
+- name: Application_eventchannel_
+  description: Application_eventchannel_
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY:
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query:
+
+- name: Security_eventchannel_Event[System/EventID = 4624]
+  description: Security_eventchannel_Event[System/EventID = 4624]
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 4624]
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[System/EventID = 4624]
+
+- name: System_eventchannel_Event[System/EventID = 4624]
+  description: System_eventchannel_Event[System/EventID = 4624]
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 4624]
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[System/EventID = 4624]
+
+- name: Application_eventchannel_Event[System/EventID = 4624]
+  description: Application_eventchannel_Event[System/EventID = 4624]
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 4624]
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[System/EventID = 4624]
+
+- name: Security_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  description: Security_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+
+- name: System_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  description: System_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+
+- name: Application_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  description: Application_eventchannel_Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[System/EventID = 1343 and (EventData/Data[@Name='LogonType'] = 2
+
+- name: Security_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  description: Security_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+
+- name: System_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  description: System_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+
+- name: Application_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  description: Application_eventchannel_Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[System/EventID = 6632 and (EventData/Data[@Name='LogonType'] = 93 or EventData/Data[@Name='LogonType'] = 111)]
+
+- name: Security_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  description: Security_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data[@Name="property"]="value"]]
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[EventData[Data[@Name="property"]="value"]]
+
+- name: System_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  description: System_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data[@Name="property"]="value"]]
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[EventData[Data[@Name="property"]="value"]]
+
+- name: Application_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  description: Application_eventchannel_Event[EventData[Data[@Name="property"]="value"]]
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data[@Name="property"]="value"]]
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[EventData[Data[@Name="property"]="value"]]
+
+- name: Security_eventchannel_Event[EventData[Data="value"]]
+  description: Security_eventchannel_Event[EventData[Data="value"]]
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data="value"]]
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[EventData[Data="value"]]
+
+- name: System_eventchannel_Event[EventData[Data="value"]]
+  description: System_eventchannel_Event[EventData[Data="value"]]
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data="value"]]
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[EventData[Data="value"]]
+
+- name: Application_eventchannel_Event[EventData[Data="value"]]
+  description: Application_eventchannel_Event[EventData[Data="value"]]
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[EventData[Data="value"]]
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[EventData[Data="value"]]
+
+- name: Security_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  description: Security_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  configuration_parameters:
+    LOCATION: Security
+    LOG_FORMAT: eventchannel
+    QUERY: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  metadata:
+    location: Security
+    log_format: eventchannel
+    query: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+
+- name: System_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  description: System_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  configuration_parameters:
+    LOCATION: System
+    LOG_FORMAT: eventchannel
+    QUERY: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  metadata:
+    location: System
+    log_format: eventchannel
+    query: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+
+- name: Application_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  description: Application_eventchannel_Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  configuration_parameters:
+    LOCATION: Application
+    LOG_FORMAT: eventchannel
+    QUERY: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]
+  metadata:
+    location: Application
+    log_format: eventchannel
+    query: Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]

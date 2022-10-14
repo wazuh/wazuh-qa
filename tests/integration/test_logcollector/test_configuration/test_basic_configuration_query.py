@@ -45,81 +45,49 @@ tags:
     - logcollector_configuration
 '''
 import os
-import pytest
-import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.configuration import load_wazuh_configurations
 import sys
-from wazuh_testing.tools.utils import lower_case_key_dictionary_array
+import pytest
 
-# Marks
-query_list = ['']
-parameters = []
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
+from wazuh_testing.modules.logcollector import WINDOWS_AGENT_PREFIX, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_MACOS, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL
+from wazuh_testing.modules.logcollector import event_monitor as evm
 
-level_list = ['default', 'info', 'debug']
-type_list = ['log', 'trace', 'activity', 'log,trace', 'activity,log', 'activity,trace']
-wazuh_configuration = 'wazuh_basic_configuration_query_macos.yaml'
+
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+configurations_file = 'configuration_query_windows.yaml'
+cases_file = 'cases_query_windows.yaml'
 
 if sys.platform != 'win32' and sys.platform != 'darwin':
     pytestmark = [pytest.mark.skip, pytest.mark.tier(level=0)]
 else:
     pytestmark = [pytest.mark.tier(level=0)]
     if sys.platform == 'darwin':
-        clauses = ['eventMessage', 'processImagePath', 'senderImagePath', 'subsystem', 'category']
-        location = log_format = 'macos'
-        for clause in clauses:
-            query_list += [f'{clause} CONTAINS[c] "com.apple.geod"',
-                           f'{clause} == "testing"',
-                           f'{clause} <> "testing"',
-                           f'{clause} = "testing"',
-                           f'NOT {clause} CONTAINS[c] "testing" AND  {clause} LIKE "example"',
-                           f'{clause} ENDSWITH[c] "testing" &&  {clause} MATCHES[c] "example"',
-                           f'{clause} BEGINSWITH[c] "testing" OR  {clause} IN "example"'
-                           ]
+        configurations_file = 'configuration_query_macos.yaml'
+        cases_file = 'cases_query_macos.yaml'
+
     else:
-        wazuh_configuration = 'wazuh_basic_configuration_query_windows.yaml'
-        location = ['Security', 'System', 'Application']
-        log_format = 'eventchannel'
-        query_list += ['Event[System/EventID = 4624]',
-                       'Event[System/EventID = 1343 and (EventData/Data[@Name=\'LogonType\'] = 2',
-                       'Event[System/EventID = 6632 and (EventData/Data[@Name=\'LogonType\'] = 93 or '
-                       'EventData/Data[@Name=\'LogonType\'] = 111)]',
-                       'Event[EventData[Data[@Name="property"]="value"]]',
-                       'Event[EventData[Data="value"]]',
-                       'Event[ EventData[Data[@Name="PropA"]="ValueA" and  Data[@Name="PropB"]="ValueB" ]]'
-                       ]
+        configurations_file = 'configuration_query_windows.yaml'
+        cases_file = 'cases_query_windows.yaml'
 
-    for query in query_list:
-        if isinstance(location, list):
-            for channel in location:
-                parameters += [{'LOCATION': channel, 'LOG_FORMAT': log_format, 'QUERY': query}]
-        else:
-            for level in level_list:
-                for type in type_list:
-                    parameters += [{'LOCATION': location, 'LOG_FORMAT': log_format,
-                                    'QUERY': query, 'TYPE': type, 'LEVEL': level}]
+# ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
+# Configuration and cases data
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, configurations_file)
+t1_cases_path = os.path.join(TEST_CASES_PATH, cases_file)
 
-metadata = lower_case_key_dictionary_array(parameters)
-
-# Configuration
-no_restart_windows_after_configuration_set = True
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, wazuh_configuration)
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
-
-configuration_ids = [f"{x['location']}_{x['log_format']}_{x['query']}_{x['level']}_{x['type']}" + f"" if 'level' in x
-                     else f"{x['location']}_{x['log_format']}_{x['query']}" for x in metadata]
+# Accepted values test configurations (t1)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
 
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
-def test_configuration_query_valid(get_configuration, configure_environment, restart_logcollector):
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_configuration_query_valid(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon starts properly when the 'query' tag is used.
                  For this purpose, the test will configure the logcollector to monitor a testing log using
@@ -132,24 +100,26 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
     tier: 0
 
     parameters:
-        - get_configuration:
-            type: fixture
+        - configuration:
+            type: dict
             brief: Get configurations from the module.
-        - configure_environment:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_logcollector:
+            brief: Apply changes to the ossec.conf configuration.
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Restart the wazuh service.
 
     assertions:
         - Verify that the logcollector can start to monitor log files when the 'query' tag is used.
 
-    input_description: A configuration template (test_basic_configuration_query_macos and
-                       test_basic_configuration_query_windows) are contained in external YAML files
-                       (wazuh_basic_configuration_query_macos.yaml and wazuh_basic_configuration_query_windows.yaml).
-                       Those templates are combined with different test cases defined in the module. Those include
-                       configuration settings for the 'wazuh-logcollector' daemon.
+    input_description: A configuration template are contained in external YAML files
+                       (configuration_query_macos.yaml and configuration_query_windows.yaml).
+                       Those templates are combined with different test cases defined in the cases_query_macos.yaml and
+                       cases_query_windows.yaml files.
 
     expected_output:
         - r'Monitoring macOS logs with'
@@ -159,14 +129,10 @@ def test_configuration_query_valid(get_configuration, configure_environment, res
         - invalid_settings
         - logs
     '''
-    configuration = get_configuration['metadata']
-    log_format = configuration['log_format']
-
-    if log_format == 'macos':
-        log_callback = logcollector.callback_monitoring_macos_logs()
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
+    if metadata['log_format'] == 'macos':
+        error_message = GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
+        evm.check_monitoring_macos_logs(error_message=error_message)
     else:
-        log_callback = logcollector.callback_eventchannel_analyzing(configuration['location'])
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL)
+        prefix = WINDOWS_AGENT_PREFIX
+        error_message = GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL
+        evm.check_eventchannel_analyzing(metadata['location'], error_message=error_message, prefix=prefix)
