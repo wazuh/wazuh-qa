@@ -57,16 +57,17 @@ def get_files_from_directory(directory):
 
 package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
-setup(name='wazuh_testing',
-      version='4.4.0',
-      description='Wazuh testing utilities to help programmers automate tests',
-      url='https://github.com/wazuh',
-      author='Wazuh',
-      author_email='hello@wazuh.com',
-      license='GPLv2',
-      packages=find_packages(),
-      package_data={'wazuh_testing': package_data_list},
-      entry_points={'console_scripts': scripts_list},
-      include_package_data=True,
-      zip_safe=False
-    )
+setup(
+    name='wazuh_testing',
+    version='4.4.0',
+    description='Wazuh testing utilities to help programmers automate tests',
+    url='https://github.com/wazuh',
+    author='Wazuh',
+    author_email='hello@wazuh.com',
+    license='GPLv2',
+    packages=find_packages(),
+    package_data={'wazuh_testing': package_data_list},
+    entry_points={'console_scripts': scripts_list},
+    include_package_data=True,
+    zip_safe=False
+)
