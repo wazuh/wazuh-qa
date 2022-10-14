@@ -1,0 +1,131 @@
+- name: syslog_3s
+  description: syslog_3s
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 3s
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 3s
+    valid_value: True
+
+- name: syslog_4000s
+  description: syslog_4000s
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 4000s
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 4000s
+    valid_value: True
+
+- name: syslog_5m
+  description: syslog_5m
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 5m
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 5m
+    valid_value: True
+
+- name: syslog_99h
+  description: syslog_99h
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 99h
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 99h
+    valid_value: True
+
+- name: syslog_94201d
+  description: syslog_94201d
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 94201d
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 94201d
+    valid_value: True
+
+- name: syslog_44sTesting
+  description: syslog_44sTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 44sTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 44sTesting
+    valid_value: False
+
+- name: syslog_Testing44s
+  description: syslog_Testing44s
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: Testing44s
+  metadata:
+    location: ''
+    log_format: syslog
+    age: Testing44s
+    valid_value: False
+
+- name: syslog_9hTesting
+  description: syslog_9hTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 9hTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 9hTesting
+    valid_value: False
+
+- name: syslog_400mTesting
+  description: syslog_400mTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: 400mTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    age: 400mTesting
+    valid_value: False
+
+- name: syslog_3992
+  description: syslog_3992
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: '3992'
+  metadata:
+    location: ''
+    log_format: syslog
+    age: '3992'
+    valid_value: False
+
+- name: syslog_Testing
+  description: syslog_Testing
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    AGE: Testing
+  metadata:
+    location: ''
+    log_format: syslog
+    age: Testing
+    valid_value: False
