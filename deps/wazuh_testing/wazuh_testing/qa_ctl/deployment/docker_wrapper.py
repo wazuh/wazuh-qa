@@ -176,3 +176,24 @@ class DockerWrapper(Instance):
         except docker.errors.NotFound:
             status = 'not_created'
         return status
+        
+    def execute(self, command: str) -> tuple[bool, str]:
+        """Executes a command inside the container.
+        
+        Args:
+            command(str): The command to be executed inside the container.
+
+        Returns:
+            tuple(bool, str): A bool to indicate if the execution was successful
+                              and a str that is the actual output of the command.  
+        """
+        try:
+            exit_code, output = self.get_container().exec_run(command)
+            DockerWrapper.LOGGER.debug(f'Command {command} executed with exit_code {exit_code}')
+            return True if not exit_code else False, output.decode('UTF-8') 
+        except docker.errors.APIError:
+            DockerWrapper.LOGGER.error(f'An internal error in cointainer {self.name}.')
+            return False, 'Error from the docker server.'
+        except docker.errors.NotFound:
+            DockerWrapper.LOGGER.error(f'The container {self.name} is not created.')
+            return False, 'Container not created.'
