@@ -1,0 +1,3873 @@
+- name: syslog_no_9999999999999999999999999999999B
+  description: syslog_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: syslog_no_20B
+  description: syslog_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: syslog_no_5000B
+  description: syslog_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: syslog_no_500KB
+  description: syslog_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: syslog_no_50MB
+  description: syslog_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: syslog_no_5GB
+  description: syslog_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: syslog_no_43423423423
+  description: syslog_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: syslog_no_-12345
+  description: syslog_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: syslog_no_test
+  description: syslog_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: syslog_no_{/}
+  description: syslog_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: syslog_no_!32817--
+  description: syslog_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: syslog_yes
+  description: syslog_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: yes
+    invalid_value: ''
+
+- name: syslog_no
+  description: syslog_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    invalid_value: ''
+
+- name: syslog_yesTesting
+  description: syslog_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: syslog_noTesting
+  description: syslog_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: syslog_testingvalue
+  description: syslog_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: syslog_1234
+  description: syslog_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: syslog_yes
+  description: syslog_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: yes
+    invalid_value: ''
+
+- name: syslog_no
+  description: syslog_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: no
+    invalid_value: ''
+
+- name: syslog_yesTesting
+  description: syslog_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: syslog_noTesting
+  description: syslog_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: syslog_testingvalue
+  description: syslog_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: syslog_1234
+  description: syslog_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: syslog
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: syslog
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: json_no_9999999999999999999999999999999B
+  description: json_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: json_no_20B
+  description: json_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: json_no_5000B
+  description: json_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: json_no_500KB
+  description: json_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: json_no_50MB
+  description: json_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: json_no_5GB
+  description: json_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: json_no_43423423423
+  description: json_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: json_no_-12345
+  description: json_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: json_no_test
+  description: json_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: json_no_{/}
+  description: json_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: json_no_!32817--
+  description: json_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: json_yes
+  description: json_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: yes
+    invalid_value: ''
+
+- name: json_no
+  description: json_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    invalid_value: ''
+
+- name: json_yesTesting
+  description: json_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: json_noTesting
+  description: json_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: json_testingvalue
+  description: json_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: json_1234
+  description: json_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: json_yes
+  description: json_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: yes
+    invalid_value: ''
+
+- name: json_no
+  description: json_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: no
+    invalid_value: ''
+
+- name: json_yesTesting
+  description: json_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: json_noTesting
+  description: json_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: json_testingvalue
+  description: json_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: json_1234
+  description: json_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: json
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: json
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: snort-full_no_9999999999999999999999999999999B
+  description: snort-full_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: snort-full_no_20B
+  description: snort-full_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: snort-full_no_5000B
+  description: snort-full_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: snort-full_no_500KB
+  description: snort-full_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: snort-full_no_50MB
+  description: snort-full_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: snort-full_no_5GB
+  description: snort-full_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: snort-full_no_43423423423
+  description: snort-full_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: snort-full_no_-12345
+  description: snort-full_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: snort-full_no_test
+  description: snort-full_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: snort-full_no_{/}
+  description: snort-full_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: snort-full_no_!32817--
+  description: snort-full_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: snort-full_yes
+  description: snort-full_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: yes
+    invalid_value: ''
+
+- name: snort-full_no
+  description: snort-full_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    invalid_value: ''
+
+- name: snort-full_yesTesting
+  description: snort-full_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: snort-full_noTesting
+  description: snort-full_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: snort-full_testingvalue
+  description: snort-full_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: snort-full_1234
+  description: snort-full_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: snort-full_yes
+  description: snort-full_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: yes
+    invalid_value: ''
+
+- name: snort-full_no
+  description: snort-full_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: no
+    invalid_value: ''
+
+- name: snort-full_yesTesting
+  description: snort-full_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: snort-full_noTesting
+  description: snort-full_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: snort-full_testingvalue
+  description: snort-full_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: snort-full_1234
+  description: snort-full_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: snort-full
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: snort-full
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_no_9999999999999999999999999999999B
+  description: mysql_log_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: mysql_log_no_20B
+  description: mysql_log_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: mysql_log_no_5000B
+  description: mysql_log_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: mysql_log_no_500KB
+  description: mysql_log_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: mysql_log_no_50MB
+  description: mysql_log_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: mysql_log_no_5GB
+  description: mysql_log_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: mysql_log_no_43423423423
+  description: mysql_log_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: mysql_log_no_-12345
+  description: mysql_log_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: mysql_log_no_test
+  description: mysql_log_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: mysql_log_no_{/}
+  description: mysql_log_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: mysql_log_no_!32817--
+  description: mysql_log_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: mysql_log_yes
+  description: mysql_log_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: yes
+    invalid_value: ''
+
+- name: mysql_log_no
+  description: mysql_log_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    invalid_value: ''
+
+- name: mysql_log_yesTesting
+  description: mysql_log_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_noTesting
+  description: mysql_log_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_testingvalue
+  description: mysql_log_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_1234
+  description: mysql_log_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_yes
+  description: mysql_log_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: yes
+    invalid_value: ''
+
+- name: mysql_log_no
+  description: mysql_log_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: no
+    invalid_value: ''
+
+- name: mysql_log_yesTesting
+  description: mysql_log_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_noTesting
+  description: mysql_log_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_testingvalue
+  description: mysql_log_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: mysql_log_1234
+  description: mysql_log_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: mysql_log
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: mysql_log
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_no_9999999999999999999999999999999B
+  description: postgresql_log_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_no_20B
+  description: postgresql_log_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: postgresql_log_no_5000B
+  description: postgresql_log_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: postgresql_log_no_500KB
+  description: postgresql_log_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: postgresql_log_no_50MB
+  description: postgresql_log_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: postgresql_log_no_5GB
+  description: postgresql_log_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: postgresql_log_no_43423423423
+  description: postgresql_log_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_no_-12345
+  description: postgresql_log_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_no_test
+  description: postgresql_log_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_no_{/}
+  description: postgresql_log_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_no_!32817--
+  description: postgresql_log_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: postgresql_log_yes
+  description: postgresql_log_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: yes
+    invalid_value: ''
+
+- name: postgresql_log_no
+  description: postgresql_log_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    invalid_value: ''
+
+- name: postgresql_log_yesTesting
+  description: postgresql_log_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_noTesting
+  description: postgresql_log_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_testingvalue
+  description: postgresql_log_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_1234
+  description: postgresql_log_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_yes
+  description: postgresql_log_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: yes
+    invalid_value: ''
+
+- name: postgresql_log_no
+  description: postgresql_log_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: no
+    invalid_value: ''
+
+- name: postgresql_log_yesTesting
+  description: postgresql_log_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_noTesting
+  description: postgresql_log_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_testingvalue
+  description: postgresql_log_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: postgresql_log_1234
+  description: postgresql_log_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: postgresql_log
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: postgresql_log
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: nmapg_no_9999999999999999999999999999999B
+  description: nmapg_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: nmapg_no_20B
+  description: nmapg_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: nmapg_no_5000B
+  description: nmapg_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: nmapg_no_500KB
+  description: nmapg_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: nmapg_no_50MB
+  description: nmapg_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: nmapg_no_5GB
+  description: nmapg_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: nmapg_no_43423423423
+  description: nmapg_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: nmapg_no_-12345
+  description: nmapg_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: nmapg_no_test
+  description: nmapg_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: nmapg_no_{/}
+  description: nmapg_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: nmapg_no_!32817--
+  description: nmapg_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: nmapg_yes
+  description: nmapg_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: yes
+    invalid_value: ''
+
+- name: nmapg_no
+  description: nmapg_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    invalid_value: ''
+
+- name: nmapg_yesTesting
+  description: nmapg_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: nmapg_noTesting
+  description: nmapg_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: nmapg_testingvalue
+  description: nmapg_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: nmapg_1234
+  description: nmapg_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: nmapg_yes
+  description: nmapg_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: yes
+    invalid_value: ''
+
+- name: nmapg_no
+  description: nmapg_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: no
+    invalid_value: ''
+
+- name: nmapg_yesTesting
+  description: nmapg_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: nmapg_noTesting
+  description: nmapg_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: nmapg_testingvalue
+  description: nmapg_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: nmapg_1234
+  description: nmapg_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: nmapg
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: nmapg
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: iis_no_9999999999999999999999999999999B
+  description: iis_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: iis_no_20B
+  description: iis_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: iis_no_5000B
+  description: iis_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: iis_no_500KB
+  description: iis_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: iis_no_50MB
+  description: iis_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: iis_no_5GB
+  description: iis_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: iis_no_43423423423
+  description: iis_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: iis_no_-12345
+  description: iis_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: iis_no_test
+  description: iis_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: iis_no_{/}
+  description: iis_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: iis_no_!32817--
+  description: iis_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: iis_yes
+  description: iis_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: yes
+    invalid_value: ''
+
+- name: iis_no
+  description: iis_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    invalid_value: ''
+
+- name: iis_yesTesting
+  description: iis_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: iis_noTesting
+  description: iis_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: iis_testingvalue
+  description: iis_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: iis_1234
+  description: iis_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: iis_yes
+  description: iis_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: yes
+    invalid_value: ''
+
+- name: iis_no
+  description: iis_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: no
+    invalid_value: ''
+
+- name: iis_yesTesting
+  description: iis_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: iis_noTesting
+  description: iis_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: iis_testingvalue
+  description: iis_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: iis_1234
+  description: iis_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: iis
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: iis
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_no_9999999999999999999999999999999B
+  description: djb-multilog_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_no_20B
+  description: djb-multilog_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: djb-multilog_no_5000B
+  description: djb-multilog_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: djb-multilog_no_500KB
+  description: djb-multilog_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: djb-multilog_no_50MB
+  description: djb-multilog_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: djb-multilog_no_5GB
+  description: djb-multilog_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: djb-multilog_no_43423423423
+  description: djb-multilog_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_no_-12345
+  description: djb-multilog_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_no_test
+  description: djb-multilog_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_no_{/}
+  description: djb-multilog_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_no_!32817--
+  description: djb-multilog_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: djb-multilog_yes
+  description: djb-multilog_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: yes
+    invalid_value: ''
+
+- name: djb-multilog_no
+  description: djb-multilog_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    invalid_value: ''
+
+- name: djb-multilog_yesTesting
+  description: djb-multilog_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_noTesting
+  description: djb-multilog_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_testingvalue
+  description: djb-multilog_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_1234
+  description: djb-multilog_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_yes
+  description: djb-multilog_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: yes
+    invalid_value: ''
+
+- name: djb-multilog_no
+  description: djb-multilog_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: no
+    invalid_value: ''
+
+- name: djb-multilog_yesTesting
+  description: djb-multilog_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_noTesting
+  description: djb-multilog_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_testingvalue
+  description: djb-multilog_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: djb-multilog_1234
+  description: djb-multilog_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: djb-multilog
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: djb-multilog
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_no_9999999999999999999999999999999B
+  description: multi-line:3_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_no_20B
+  description: multi-line:3_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: multi-line:3_no_5000B
+  description: multi-line:3_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: multi-line:3_no_500KB
+  description: multi-line:3_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: multi-line:3_no_50MB
+  description: multi-line:3_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: multi-line:3_no_5GB
+  description: multi-line:3_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: multi-line:3_no_43423423423
+  description: multi-line:3_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_no_-12345
+  description: multi-line:3_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_no_test
+  description: multi-line:3_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_no_{/}
+  description: multi-line:3_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_no_!32817--
+  description: multi-line:3_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: multi-line:3_yes
+  description: multi-line:3_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: yes
+    invalid_value: ''
+
+- name: multi-line:3_no
+  description: multi-line:3_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    invalid_value: ''
+
+- name: multi-line:3_yesTesting
+  description: multi-line:3_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_noTesting
+  description: multi-line:3_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_testingvalue
+  description: multi-line:3_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_1234
+  description: multi-line:3_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_yes
+  description: multi-line:3_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: yes
+    invalid_value: ''
+
+- name: multi-line:3_no
+  description: multi-line:3_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: no
+    invalid_value: ''
+
+- name: multi-line:3_yesTesting
+  description: multi-line:3_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_noTesting
+  description: multi-line:3_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_testingvalue
+  description: multi-line:3_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: multi-line:3_1234
+  description: multi-line:3_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: multi-line:3
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: multi-line:3
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: squid_no_9999999999999999999999999999999B
+  description: squid_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: squid_no_20B
+  description: squid_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: squid_no_5000B
+  description: squid_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: squid_no_500KB
+  description: squid_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: squid_no_50MB
+  description: squid_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: squid_no_5GB
+  description: squid_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: squid_no_43423423423
+  description: squid_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: squid_no_-12345
+  description: squid_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: squid_no_test
+  description: squid_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: squid_no_{/}
+  description: squid_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: squid_no_!32817--
+  description: squid_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: squid_yes
+  description: squid_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: yes
+    invalid_value: ''
+
+- name: squid_no
+  description: squid_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    invalid_value: ''
+
+- name: squid_yesTesting
+  description: squid_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: squid_noTesting
+  description: squid_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: squid_testingvalue
+  description: squid_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: squid_1234
+  description: squid_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: squid_yes
+  description: squid_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: yes
+    invalid_value: ''
+
+- name: squid_no
+  description: squid_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: no
+    invalid_value: ''
+
+- name: squid_yesTesting
+  description: squid_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: squid_noTesting
+  description: squid_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: squid_testingvalue
+  description: squid_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: squid_1234
+  description: squid_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: squid
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: squid
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: audit_no_9999999999999999999999999999999B
+  description: audit_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: audit_no_20B
+  description: audit_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: audit_no_5000B
+  description: audit_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: audit_no_500KB
+  description: audit_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: audit_no_50MB
+  description: audit_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: audit_no_5GB
+  description: audit_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: audit_no_43423423423
+  description: audit_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: audit_no_-12345
+  description: audit_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: audit_no_test
+  description: audit_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: audit_no_{/}
+  description: audit_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: audit_no_!32817--
+  description: audit_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: audit_yes
+  description: audit_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: yes
+    invalid_value: ''
+
+- name: audit_no
+  description: audit_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    invalid_value: ''
+
+- name: audit_yesTesting
+  description: audit_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: audit_noTesting
+  description: audit_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: audit_testingvalue
+  description: audit_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: audit_1234
+  description: audit_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: audit_yes
+  description: audit_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: yes
+    invalid_value: ''
+
+- name: audit_no
+  description: audit_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: no
+    invalid_value: ''
+
+- name: audit_yesTesting
+  description: audit_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: audit_noTesting
+  description: audit_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: audit_testingvalue
+  description: audit_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: audit_1234
+  description: audit_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: audit
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: audit
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_no_9999999999999999999999999999999B
+  description: eventchannel_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: eventchannel_no_20B
+  description: eventchannel_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: eventchannel_no_5000B
+  description: eventchannel_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: eventchannel_no_500KB
+  description: eventchannel_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: eventchannel_no_50MB
+  description: eventchannel_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: eventchannel_no_5GB
+  description: eventchannel_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: eventchannel_no_43423423423
+  description: eventchannel_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: eventchannel_no_-12345
+  description: eventchannel_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: eventchannel_no_test
+  description: eventchannel_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: eventchannel_no_{/}
+  description: eventchannel_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: eventchannel_no_!32817--
+  description: eventchannel_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: eventchannel_yes
+  description: eventchannel_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: yes
+    invalid_value: ''
+
+- name: eventchannel_no
+  description: eventchannel_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    invalid_value: ''
+
+- name: eventchannel_yesTesting
+  description: eventchannel_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_noTesting
+  description: eventchannel_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_testingvalue
+  description: eventchannel_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_1234
+  description: eventchannel_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_yes
+  description: eventchannel_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: yes
+    invalid_value: ''
+
+- name: eventchannel_no
+  description: eventchannel_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: no
+    invalid_value: ''
+
+- name: eventchannel_yesTesting
+  description: eventchannel_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_noTesting
+  description: eventchannel_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_testingvalue
+  description: eventchannel_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: eventchannel_1234
+  description: eventchannel_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: eventchannel
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: eventchannel
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: macos_no_9999999999999999999999999999999B
+  description: macos_no_9999999999999999999999999999999B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '9999999999999999999999999999999B'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '9999999999999999999999999999999B'
+    invalid_value: 'max-size'
+
+- name: macos_no_20B
+  description: macos_no_20B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '20B'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '20B'
+    invalid_value: ''
+
+- name: macos_no_5000B
+  description: macos_no_5000B
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5000B'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '5000B'
+    invalid_value: ''
+
+- name: macos_no_500KB
+  description: macos_no_500KB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '500KB'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '500KB'
+    invalid_value: ''
+
+- name: macos_no_50MB
+  description: macos_no_50MB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '50MB'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '50MB'
+    invalid_value: ''
+
+- name: macos_no_5GB
+  description: macos_no_5GB
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '5GB'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '5GB'
+    invalid_value: ''
+
+- name: macos_no_43423423423
+  description: macos_no_43423423423
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '43423423423'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '43423423423'
+    invalid_value: 'max-size'
+
+- name: macos_no_-12345
+  description: macos_no_-12345
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '-12345'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '-12345'
+    invalid_value: 'max-size'
+
+- name: macos_no_test
+  description: macos_no_test
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: 'test'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: 'test'
+    invalid_value: 'max-size'
+
+- name: macos_no_{/}
+  description: macos_no_{/}
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '{/}'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '{/}'
+    invalid_value: 'max-size'
+
+- name: macos_no_!32817--
+  description: macos_no_!32817--
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+    MAX-SIZE: '!32817--'
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    max-size: '!32817--'
+    invalid_value: 'max-size'
+
+- name: macos_yes
+  description: macos_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: yes
+    invalid_value: ''
+
+- name: macos_no
+  description: macos_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    invalid_value: ''
+
+- name: macos_yesTesting
+  description: macos_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: macos_noTesting
+  description: macos_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: macos_testingvalue
+  description: macos_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: macos_1234
+  description: macos_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
+
+- name: macos_yes
+  description: macos_yes
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: yes
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: yes
+    invalid_value: ''
+
+- name: macos_no
+  description: macos_no
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: no
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: no
+    invalid_value: ''
+
+- name: macos_yesTesting
+  description: macos_yesTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: yesTesting
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: yesTesting
+    invalid_value: 'only-future-events'
+
+- name: macos_noTesting
+  description: macos_noTesting
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: noTesting
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: noTesting
+    invalid_value: 'only-future-events'
+
+- name: macos_testingvalue
+  description: macos_testingvalue
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: testingvalue
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: testingvalue
+    invalid_value: 'only-future-events'
+
+- name: macos_1234
+  description: macos_1234
+  configuration_parameters:
+    LOCATION: ''
+    LOG_FORMAT: macos
+    ONLY-FUTURE-EVENTS: 1234
+  metadata:
+    location: ''
+    log_format: macos
+    only-future-events: 1234
+    invalid_value: 'only-future-events'
