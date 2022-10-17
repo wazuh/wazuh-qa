@@ -962,6 +962,38 @@ def set_wazuh_configuration(configuration):
 
 
 @pytest.fixture(scope='function')
+def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh_configuration, set_local_internal_options):
+    """Set wazuh configuration
+
+    Args:
+        configuration (dict): Configuration template data to write in the ossec.conf.
+        set_wazuh_configuration (fixture): Set the wazuh configuration according to the configuration data.
+        configure_local_internal_options (fixture): Set the local_internal_options.conf file.
+    """
+    yield
+
+
+@pytest.fixture(scope='session')
+def set_local_internal_options(request):
+    """Fixture to configure the local internal options file."""
+
+    # Configure local internal options
+    try:
+        local_internal_options = getattr(request.module, 'local_internal_options')
+    except AttributeError as local_internal_configuration_not_set:
+        local_internal_options = {}
+    # Backup the old local internal options
+    backup_local_internal_options = conf.get_wazuh_local_internal_options()
+
+    # Set the new local internal options configuration
+    conf.set_wazuh_local_internal_options(conf.create_local_internal_options(local_internal_options))
+
+    yield
+
+    # Backup the old local internal options cofiguration
+    conf.set_wazuh_local_internal_options(backup_local_internal_options)
+
+@pytest.fixture(scope='function')
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 
