@@ -8,5 +8,5 @@
         - query:
             value: QUERY
             attributes:
-                - type: TYPE
-                - level: LEVEL
+              - type: TYPE
+              - level: LEVEL

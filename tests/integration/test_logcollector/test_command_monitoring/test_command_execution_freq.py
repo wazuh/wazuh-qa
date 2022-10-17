@@ -104,13 +104,13 @@ def change_date_format():
         command = subprocess.run(["powershell.exe", "(Get-culture).DateTimeFormat.ShortDatePattern"],
                                  stdout=subprocess.PIPE)
 
-        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path "HKCU:\\Control Panel\\International" ' \
+        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path "HKCU:\\Control Panel\\International" '
                          '-Name sShortDate -Value dd/MM/yy'])
 
         yield
 
         date_format = str(command.stdout).split('\'')[1].split('\\')[0]
-        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path \"HKCU:\\Control Panel\\International\" ' \
+        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path \"HKCU:\\Control Panel\\International\" '
                          f"-Name sShortDate -Value {date_format}"])
     else:
         yield

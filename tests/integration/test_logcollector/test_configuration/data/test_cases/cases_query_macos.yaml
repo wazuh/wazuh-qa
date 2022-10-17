@@ -3269,7 +3269,7 @@
     level: default
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_default_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3284,7 +3284,7 @@
     level: default
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_log,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_log,trace
+  description: macos_macos_NOT processImagePath  "testing" AND  processImagePath LIKE "example"_default_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3299,7 +3299,7 @@
     level: default
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity,log
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity,log
+  description: macos_macos_NOT processImagePath  "testing" AND  processImagePath LIKE "example"_default_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3313,8 +3313,8 @@
     type: activity,log
     level: default
 
-- name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_default_activity,trace
+- name: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_default_activity,trace
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3374,7 +3374,7 @@
     level: info
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_log,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_log,trace
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_info_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3389,7 +3389,7 @@
     level: info
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_activity,log
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_activity,log
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_info_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3404,7 +3404,7 @@
     level: info
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_activity,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_info_activity,trace
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_info_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3449,7 +3449,7 @@
     level: debug
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_debug_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3464,7 +3464,7 @@
     level: debug
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_log,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_log,trace
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_debug_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3479,7 +3479,7 @@
     level: debug
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity,log
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity,log
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_debug_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3494,7 +3494,7 @@
     level: debug
 
 - name: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity,trace
-  description: macos_macos_NOT processImagePath CONTAINS[c] "testing" AND  processImagePath LIKE "example"_debug_activity,trace
+  description: macos_macos_NOT processImagePath "testing" AND  processImagePath LIKE "example"_debug_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3524,7 +3524,7 @@
     level: default
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3539,7 +3539,7 @@
     level: default
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3554,7 +3554,7 @@
     level: default
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_log,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_log,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3568,8 +3568,8 @@
     type: log,trace
     level: default
 
-- name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity,log
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity,log
+- name: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_activity,log
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3583,8 +3583,8 @@
     type: activity,log
     level: default
 
-- name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_default_activity,trace
+- name: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_activity,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3629,7 +3629,7 @@
     level: info
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_info_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3644,7 +3644,7 @@
     level: info
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_log,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_log,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_info_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3659,7 +3659,7 @@
     level: info
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity,log
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity,log
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_info_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3674,7 +3674,7 @@
     level: info
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_info_activity,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_info_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3719,7 +3719,7 @@
     level: debug
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_debug_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3734,7 +3734,7 @@
     level: debug
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_log,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_log,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_debug_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3749,7 +3749,7 @@
     level: debug
 
 - name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,log
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,log
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3763,8 +3763,8 @@
     type: activity,log
     level: debug
 
-- name: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,trace
-  description: macos_macos_processImagePath ENDSWITH[c] "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,trace
+- name: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,trace
+  description: macos_macos_processImagePath "testing" &&  processImagePath MATCHES[c] "example"_debug_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3839,7 +3839,7 @@
     level: default
 
 - name: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_default_activity,log
-  description: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_default_activity,log
+  description: macos_macos_processImagePath "testing" OR  processImagePath IN "example"_default_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3854,7 +3854,7 @@
     level: default
 
 - name: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_default_activity,trace
-  description: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_default_activity,trace
+  description: macos_macos_processImagePath "testing" OR  processImagePath IN "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -3944,7 +3944,7 @@
     level: info
 
 - name: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_info_activity,trace
-  description: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_info_activity,trace
+  description: macos_macos_processImagePath "testing" OR  processImagePath IN "example"_info_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -4034,7 +4034,7 @@
     level: debug
 
 - name: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_debug_activity,trace
-  description: macos_macos_processImagePath BEGINSWITH[c] "testing" OR  processImagePath IN "example"_debug_activity,trace
+  description: macos_macos_processImagePath "testing" OR  processImagePath IN "example"_debug_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5159,7 +5159,7 @@
     level: default
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_default_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5174,7 +5174,7 @@
     level: default
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_log,trace
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_log,trace
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_default_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5189,7 +5189,7 @@
     level: default
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity,log
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity,log
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_default_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5204,7 +5204,7 @@
     level: default
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity,trace
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_default_activity,trace
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5279,7 +5279,7 @@
     level: info
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_info_activity,log
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_info_activity,log
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_info_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5294,7 +5294,7 @@
     level: info
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_info_activity,trace
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_info_activity,trace
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_info_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5369,7 +5369,7 @@
     level: debug
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_debug_activity,log
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_debug_activity,log
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_debug_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5384,7 +5384,7 @@
     level: debug
 
 - name: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_debug_activity,trace
-  description: macos_macos_NOT senderImagePath CONTAINS[c] "testing" AND  senderImagePath LIKE "example"_debug_activity,trace
+  description: macos_macos_NOT senderImagePath "testing" AND  senderImagePath LIKE "example"_debug_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5429,7 +5429,7 @@
     level: default
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_default_activity
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5444,7 +5444,7 @@
     level: default
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_log,trace
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_log,trace
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_default_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5459,7 +5459,7 @@
     level: default
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,log
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,log
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5473,8 +5473,8 @@
     type: activity,log
     level: default
 
-- name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,trace
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,trace
+- name: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,trace
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5549,7 +5549,7 @@
     level: info
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,log
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,log
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5564,7 +5564,7 @@
     level: info
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,trace
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,trace
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_info_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5624,7 +5624,7 @@
     level: debug
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_log,trace
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_log,trace
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_debug_log,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5639,7 +5639,7 @@
     level: debug
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,log
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,log
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,log
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5654,7 +5654,7 @@
     level: debug
 
 - name: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,trace
-  description: macos_macos_senderImagePath ENDSWITH[c] "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,trace
+  description: macos_macos_senderImagePath "testing" &&  senderImagePath MATCHES[c] "example"_debug_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -5744,7 +5744,7 @@
     level: default
 
 - name: macos_macos_senderImagePath BEGINSWITH[c] "testing" OR  senderImagePath IN "example"_default_activity,trace
-  description: macos_macos_senderImagePath BEGINSWITH[c] "testing" OR  senderImagePath IN "example"_default_activity,trace
+  description: macos_macos_senderImagePath "testing" OR  senderImagePath IN "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos

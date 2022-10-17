@@ -8,7 +8,7 @@
     location: ''
     log_format: syslog
     age: 3s
-    valid_value: True
+    valid_value: true
 
 - name: syslog_4000s
   description: syslog_4000s
@@ -20,7 +20,7 @@
     location: ''
     log_format: syslog
     age: 4000s
-    valid_value: True
+    valid_value: true
 
 - name: syslog_5m
   description: syslog_5m
@@ -32,7 +32,7 @@
     location: ''
     log_format: syslog
     age: 5m
-    valid_value: True
+    valid_value: true
 
 - name: syslog_99h
   description: syslog_99h
@@ -44,7 +44,7 @@
     location: ''
     log_format: syslog
     age: 99h
-    valid_value: True
+    valid_value: true
 
 - name: syslog_94201d
   description: syslog_94201d
@@ -56,7 +56,7 @@
     location: ''
     log_format: syslog
     age: 94201d
-    valid_value: True
+    valid_value: true
 
 - name: syslog_44sTesting
   description: syslog_44sTesting
@@ -68,7 +68,7 @@
     location: ''
     log_format: syslog
     age: 44sTesting
-    valid_value: False
+    valid_value: false
 
 - name: syslog_Testing44s
   description: syslog_Testing44s
@@ -80,7 +80,7 @@
     location: ''
     log_format: syslog
     age: Testing44s
-    valid_value: False
+    valid_value: false
 
 - name: syslog_9hTesting
   description: syslog_9hTesting
@@ -92,7 +92,7 @@
     location: ''
     log_format: syslog
     age: 9hTesting
-    valid_value: False
+    valid_value: false
 
 - name: syslog_400mTesting
   description: syslog_400mTesting
@@ -104,7 +104,7 @@
     location: ''
     log_format: syslog
     age: 400mTesting
-    valid_value: False
+    valid_value: false
 
 - name: syslog_3992
   description: syslog_3992
@@ -116,7 +116,7 @@
     location: ''
     log_format: syslog
     age: '3992'
-    valid_value: False
+    valid_value: false
 
 - name: syslog_Testing
   description: syslog_Testing
@@ -128,4 +128,4 @@
     location: ''
     log_format: syslog
     age: Testing
-    valid_value: False
+    valid_value: false

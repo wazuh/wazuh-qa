@@ -4,6 +4,6 @@
         - location:
             value: LOCATION
         - log_format:
-              value: LOG_FORMAT
+            value: LOG_FORMAT
         - age:
-              value: AGE
+            value: AGE
