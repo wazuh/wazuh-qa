@@ -1424,7 +1424,7 @@
     level: default
 
 - name: macos_macos_NOT eventMessage CONTAINS[c] "testing" AND  eventMessage LIKE "example"_default_activity,trace
-  description: macos_macos_NOT eventMessage CONTAINS[c] "testing" AND  eventMessage LIKE "example"_default_activity,trace
+  description: macos_macos_NOT eventMessage "testing" AND  eventMessage LIKE "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
@@ -1694,7 +1694,7 @@
     level: default
 
 - name: macos_macos_eventMessage ENDSWITH[c] "testing" &&  eventMessage MATCHES[c] "example"_default_activity,trace
-  description: macos_macos_eventMessage ENDSWITH[c] "testing" &&  eventMessage MATCHES[c] "example"_default_activity,trace
+  description: macos_macos_eventMessage "testing" &&  eventMessage MATCHES[c] "example"_default_activity,trace
   configuration_parameters:
     LOCATION: macos
     LOG_FORMAT: macos
