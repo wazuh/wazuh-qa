@@ -1,0 +1,26 @@
+- sections:
+    - section: sca
+      elements:
+        - enabled:
+            value: ENABLED
+        - scan_on_start:
+            value: 'yes'
+        - interval:
+            value: INTERVAL
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: 'syscollector'
+      elements:
+        - disabled:
+            value: 'no'
+

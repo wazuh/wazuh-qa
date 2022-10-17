@@ -1,0 +1,17 @@
+- name: 'enabled'
+  description: 'Set enabled to yes value'
+  configuration_parameters:
+    ENABLED: yes
+    INTERVAL: 5
+  metadata:
+    enabled: yes
+    interval: 5
+
+- name: 'disabled'
+  description: 'Set enabled to no value'
+  configuration_parameters:
+    ENABLED: no
+    INTERVAL: 5
+  metadata:
+    enabled: no
+    interval: 5
