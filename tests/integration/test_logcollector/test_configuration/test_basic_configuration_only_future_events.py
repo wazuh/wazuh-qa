@@ -114,7 +114,7 @@ def load_location(configuration_parameters, configuration_metadata):
         dict, dict: New configuraion parameters and metadata.
     """
     for index in range(len(configuration_metadata)):
-        if configuration_metadata[index]['log_format'] == '':
+        if configuration_metadata[index]['location'] == '':
             configuration_metadata[index]['location'] = temp_file_path
             configuration_parameters[index]['LOCATION'] = temp_file_path
 
@@ -178,11 +178,126 @@ def check_only_future_events_invalid(metadata):
         evm.check_invalid_value(invalid_value, option_value, prefix, severity="WARNING")
 
 
-@pytest.mark.parametrize('configuration, metadata', [zip(t1_configurations, t1_configuration_metadata),
-                         zip(t2_configurations, t2_configuration_metadata),
-                         zip(t3_configurations, t3_configuration_metadata)],
-                         ids=[t1_case_ids, t2_case_ids, t3_case_ids])
-def test_only_future_events(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
+@pytest.mark.skipif(sys.platform == 'win32' or sys.platform == 'darwin',
+                    reason="Test for Linux OS.")
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_only_future_events_linux(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
+    '''
+    description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
+                 and 'max-size' tags. For this purpose, the test will set a 'localfile' section using both
+                 valid and invalid values for those tags. Finally, it will verify that the 'analyzing' or
+                 'monitoring' event (depending on the OS) is triggered when using a valid value, or if an
+                 error event is generated when using an invalid one.
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - restart_wazuh_daemon_function:
+            type: fixture
+            brief: Restart the wazuh service.
+
+    assertions:
+        - Verify that the logcollector generates error events when using invalid values
+          for the 'only-future-events' tag.
+        - Verify that the logcollector generates 'analyzing' or 'monitoring' events when using valid values
+          for the 'only-future-events' tag.
+        - Verify that wazuh-logcollector or wazuh-agent daemon does not crash.
+
+    input_description: A configuration template (test_basic_configuration_only_future_events) is contained in an
+                       external YAML file (configuration_only_future_events.yaml). That template is combined with
+                       different test cases defined in the cases_only_future_events_linux.yam file.
+
+    expected_output:
+        - r'Analyzing file.*'
+        - r'INFO.* Analyzing event log.*' (on Windows systems)
+         - r'Invalid value .* for attribute .* in .* option'
+        - r'Invalid value for element .*'
+
+    tags:
+        - invalid_settings
+        - logs
+    '''
+    if metadata['invalid_value'] == '':
+        check_only_future_events_valid(metadata)
+    else:
+        check_only_future_events_invalid(metadata)
+
+    assert check_if_daemons_are_running([daemon])[0], f"{daemon} is not running. Maybe it has crashed"
+
+
+@pytest.mark.skipif(sys.platform == 'linux' or sys.platform == 'darwin',
+                    reason="Test for Windows OS.")
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+def test_only_future_events_windows(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
+    '''
+    description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
+                 and 'max-size' tags. For this purpose, the test will set a 'localfile' section using both
+                 valid and invalid values for those tags. Finally, it will verify that the 'analyzing' or
+                 'monitoring' event (depending on the OS) is triggered when using a valid value, or if an
+                 error event is generated when using an invalid one.
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - restart_wazuh_daemon_function:
+            type: fixture
+            brief: Restart the wazuh service.
+
+    assertions:
+        - Verify that the logcollector generates error events when using invalid values
+          for the 'only-future-events' tag.
+        - Verify that the logcollector generates 'analyzing' or 'monitoring' events when using valid values
+          for the 'only-future-events' tag.
+        - Verify that wazuh-logcollector or wazuh-agent daemon does not crash.
+
+    input_description: A configuration template (test_basic_configuration_only_future_events) is contained in an
+                       external YAML file (configuration_only_future_events.yaml). That template is combined with
+                       different test cases defined in the cases_only_future_events_windows.yam file.
+
+    expected_output:
+        - r'Analyzing file.*'
+        - r'INFO.* Analyzing event log.*' (on Windows systems)
+        - r'Invalid value .* for attribute .* in .* option'
+        - r'Invalid value for element .*'
+
+    tags:
+        - invalid_settings
+        - logs
+    '''
+    if metadata['invalid_value'] == '':
+        check_only_future_events_valid(metadata)
+    else:
+        check_only_future_events_invalid(metadata)
+
+    assert check_if_daemons_are_running([daemon])[0], f"{daemon} is not running. Maybe it has crashed"
+
+
+@pytest.mark.skipif(sys.platform == 'win32' or sys.platform == 'linux',
+                    reason="Test for Macos OS.")
+@pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
+def test_only_future_events_darwin(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
                  and 'max-size' tags. For this purpose, the test will set a 'localfile' section using both
@@ -233,7 +348,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration, re
     if sys.platform == 'darwin' and metadata['log_format'] == 'macos':
         control_service('restart', 'wazuh-logcollector')
         time.sleep(macos_process_timeout_init)
-        
+
     if metadata['invalid_value'] == '':
         check_only_future_events_valid(metadata)
     else:

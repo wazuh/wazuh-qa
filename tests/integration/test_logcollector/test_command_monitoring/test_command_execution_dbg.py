@@ -81,7 +81,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # Configuration and cases data
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_execution_dbg.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg_linux_os.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg_non_linux_.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg_non_linux_os.yaml')
 
 local_internal_options = {
     'logcollector.remote_commands': '1',
@@ -155,8 +155,7 @@ def check_test_logs(log_monitor, metadata):
                              timeout=global_parameters.default_timeout, escape=True)
 
 
-@pytest.mark.parametrize('configuration, metadata', [zip(t1_configurations, t1_configuration_metadata),
-                         zip(t2_configurations, t2_configuration_metadata)], ids=[t1_case_ids, t2_case_ids])
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_command_execution_dbg_linux_os(configuration, metadata, set_wazuh_configuration,
                                         configure_local_internal_options_module, setup_log_monitor,
                                         restart_wazuh_daemon_function):
@@ -204,7 +203,71 @@ def test_command_execution_dbg_linux_os(configuration, metadata, set_wazuh_confi
     input_description: A configuration template (test_command_execution) is contained in an external
                        YAML file (configuration_execution_dbg.yaml), which includes configuration settings for
                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
-                       (log formats and commands to run) defined in the cases_execution_dbg_xxx.yaml file.
+                       (log formats and commands to run) defined in the cases_execution_dbg_linux_os.yaml file.
+
+    expected_output:
+        - r'DEBUG: Running .*'
+        - r'DEBUG: Reading command message.*'
+        - r'lines from command .*'
+
+    tags:
+        - logs
+    '''
+    log_monitor = setup_log_monitor
+
+    # Check logs in ossec.log
+    check_test_logs(log_monitor, metadata)
+
+
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+def test_command_execution_dbg_non_linux_os(configuration, metadata, set_wazuh_configuration,
+                                            configure_local_internal_options_module, setup_log_monitor,
+                                            restart_wazuh_daemon_function):
+    '''
+    description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
+                 special characteristics. For this purpose, the test will configure the logcollector to run
+                 a command, setting it in the 'command' tag and using the 'command' and 'full_command' log
+                 formats. The properties of that command can be, for example, a non-existent command or one
+                 that includes special characters. Once the logcollector has started, it will wait for the
+                 'running' event that indicates that the command has been executed. Finally, the test
+                 will verify that the debug 'read N lines' event is generated, this event indicates the number
+                 of lines read from the command run. Depending on test case, the test also will verify that
+                 the debug event 'reading command' is generated, this event includes the output of the command
+                 run, and its alias if it is set in the 'alias' tag.
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the Wazuh local internal options file.
+        - setup_log_monitor:
+            type: fixture
+            brief: Create the log monitor.
+        - restart_wazuh_daemon_function:
+            type: fixture
+            brief: Restart the wazuh service.
+
+    assertions:
+        - Verify that the debug 'running' event is generated when running the command set in the 'command' tag.
+        - Verify that the debug 'reading command' event is generated when running the related command.
+        - Verify that the debug 'lines' event is generated when running the related command.
+
+    input_description: A configuration template (test_command_execution) is contained in an external
+                       YAML file (configuration_execution_dbg.yaml), which includes configuration settings for
+                       the 'wazuh-logcollector' daemon and, it is combined with the test cases
+                       (log formats and commands to run) defined in the cases_execution_dbg_non_linux_os.yaml file.
 
     expected_output:
         - r'DEBUG: Running .*'
