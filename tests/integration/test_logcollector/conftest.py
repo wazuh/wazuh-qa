@@ -4,6 +4,7 @@
 import pytest
 from shutil import copyfile
 import sys
+import subprocess
 
 if sys.platform != 'win32':
     from wazuh_testing.tools import LOGCOLLECTOR_FILE_STATUS_PATH
@@ -99,3 +100,22 @@ def restart_monitord():
         control_service('restart', daemon='wazuh-monitord')
     else:
         control_service('restart', daemon='wazuh-agentd')
+
+
+@pytest.fixture(scope='module')
+def change_date_format():
+    """"Function to change format date to dd/mm/yy"""
+    if sys.platform == 'win32':
+        command = subprocess.run(["powershell.exe", "(Get-culture).DateTimeFormat.ShortDatePattern"],
+                                 stdout=subprocess.PIPE)
+
+        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path "HKCU:\\Control Panel\\International" '
+                         '-Name sShortDate -Value dd/MM/yy'])
+
+        yield
+
+        date_format = str(command.stdout).split('\'')[1].split('\\')[0]
+        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path \"HKCU:\\Control Panel\\International\" '
+                         f"-Name sShortDate -Value {date_format}"])
+    else:
+        yield
