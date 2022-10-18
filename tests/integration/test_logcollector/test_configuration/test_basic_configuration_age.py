@@ -53,78 +53,58 @@ tags:
     - logcollector_configuration
 '''
 import os
-import pytest
 import sys
+import pytest
+
 import wazuh_testing.api as api
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools import get_service
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
-import wazuh_testing.generic_callbacks as gc
-import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_FILE
+from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.services import control_service
-import subprocess as sb
+from wazuh_testing.processes import check_if_daemons_are_running
+
 
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
-# Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
+prefix = LOG_COLLECTOR_PREFIX
+location = '/tmp/testing.txt'
+
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+# ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
+# Configuration and cases data
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_age.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_age.yaml')
 wazuh_component = get_service()
 
+# Accepted values test configurations (t1)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
-    wazuh_configuration = 'ossec.conf'
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
-    no_restart_windows_after_configuration_set = True
-    force_restart_after_restoring = True
+    prefix = WINDOWS_AGENT_PREFIX
 
-else:
-    location = '/tmp/testing.txt'
-    wazuh_configuration = 'etc/ossec.conf'
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+for index in range(len(t1_configuration_metadata)):
+    t1_configuration_metadata[index]['location'] = location
+    t1_configuration_parameters[index]['LOCATION'] = location
 
-parameters = [
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '3s'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '4000s'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '5m'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '99h'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '94201d'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '44sTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': 'Testing44s'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '9hTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '400mTesting'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': '3992'},
-    {'LOCATION': f'{location}', 'LOG_FORMAT': 'syslog', 'AGE': 'Testing'},
-]
-metadata = [
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '3s', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '4000s', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '5m', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '99h', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '94201d', 'valid_value': True},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '44sTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': 'Testing44s', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '9hTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '400mTesting', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': '3992', 'valid_value': False},
-    {'location': f'{location}', 'log_format': 'syslog', 'age': 'Testing', 'valid_value': False},
-]
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
 problematic_values = ['44sTesting', '9hTesting', '400mTesting', '3992']
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
-configuration_ids = [f"{x['location']}_{x['log_format']}_{x['age']}" for x in metadata]
 
 
-def check_configuration_age_valid(cfg):
+def check_configuration_age_valid(metadata):
     """Check if the Wazuh module runs correctly and analyze the desired file.
 
     Ensure logcollector is running with the specified configuration, analyzing the designated file and,
@@ -132,59 +112,29 @@ def check_configuration_age_valid(cfg):
     the selected configuration.
 
     Args:
-        cfg (dict): Dictionary with the localfile configuration.
+        metadata (dict): Dictionary with the localfile configuration.
 
     Raises:
         TimeoutError: If the "Analyzing file" callback is not generated.
         AssertError: In the case of a server instance, the API response is different from real configuration.
     """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    error_message = GENERIC_CALLBACK_ERROR_ANALYZING_FILE
 
-    log_callback = logcollector.callback_analyzing_file(cfg['location'])
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE)
+    evm.check_analyzing_file(file=metadata['location'], error_message=error_message, prefix=prefix)
+
     if wazuh_component == 'wazuh-manager':
-        real_configuration = cfg.copy()
+        real_configuration = metadata.copy()
+        real_configuration.pop('name')
+        real_configuration.pop('description')
         real_configuration.pop('valid_value')
         api.wait_until_api_ready()
         api.compare_config_api_response([real_configuration], 'localfile')
 
 
-def check_configuration_age_invalid(cfg):
-    """Check if the Wazuh fails because the invalid age configuration value.
-
-    Args:
-        cfg (dict): Dictionary with the localfile configuration.
-
-    Raises:
-        TimeoutError: If error callback are not generated.
-    """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-    log_callback = gc.callback_invalid_conf_for_localfile('age', prefix, severity='ERROR')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
-                                                      conf_path=f'{wazuh_configuration}')
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-
-    if sys.platform != 'win32':
-        log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
-                                                          conf_path=f'{wazuh_configuration}')
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
-
-
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
-def test_configuration_age(get_configuration, configure_environment):
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_configuration_age(configuration, metadata, restart_wazuh_daemon_after_finishing_function,
+                           set_wazuh_configuration):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid configurations for the 'age' tag.
                  For this purpose, the test will set a 'localfile' section using valid/invalid values for that
@@ -197,21 +147,28 @@ def test_configuration_age(get_configuration, configure_environment):
     tier: 0
 
     parameters:
-        - get_configuration:
-            type: fixture
+        - configuration:
+            type: dict
             brief: Get configurations from the module.
-        - configure_environment:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - restart_wazuh_daemon_after_finishing_function:
             type: fixture
-            brief: Configure a custom environment for testing.
+            brief: Restart the wazuh service in tierdown stage.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
 
     assertions:
         - Verify that the logcollector generates error events when using invalid values for the 'age' tag.
         - Verify that the logcollector generates 'analyzing' events when using valid values for the 'age' tag.
         - Verify that the Wazuh API returns the same values for the 'localfile' section as the configured one.
+        - Verify that the wazuh-logcollector daemon is not running when using invalid values for the 'age' tag.
 
     input_description: A configuration template (test_basic_configuration_age) is contained in an external YAML file
-                       (wazuh_basic_configuration.yaml). That template is combined with different test cases defined
-                       in the module. Those include configuration settings for the 'wazuh-logcollector' daemon.
+                       (configuration_age.yaml). That template is combined with different test cases defined
+                       in the cases_age.yaml file.
 
     expected_output:
         - r'Analyzing file.*'
@@ -221,25 +178,24 @@ def test_configuration_age(get_configuration, configure_environment):
     tags:
         - invalid_settings
     '''
-    cfg = get_configuration['metadata']
-
-    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
+    control_service('stop')
     truncate_file(LOG_FILE_PATH)
 
-    if cfg['valid_value']:
-        control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-        check_configuration_age_valid(cfg)
+    if metadata['valid_value']:
+        control_service('start')
+        check_configuration_age_valid(metadata)
     else:
-        if cfg['age'] in problematic_values:
+        if metadata['age'] in problematic_values:
             pytest.xfail("Logcollector accepts invalid values: https://github.com/wazuh/wazuh/issues/8158")
         else:
             if sys.platform == 'win32':
                 pytest.xfail("Windows agent allows invalid localfile configuration:\
                               https://github.com/wazuh/wazuh/issues/10890")
-                expected_exception = ValueError
             else:
-                expected_exception = sb.CalledProcessError
-
-            with pytest.raises(expected_exception):
-                control_service('start', daemon=LOGCOLLECTOR_DAEMON)
-                check_configuration_age_invalid(cfg)
+                try:
+                    control_service('start')
+                except ValueError:
+                    evm.check_configuration_error()
+                    # Check that wazuh-logcollector is not running
+                    assert not check_if_daemons_are_running(['wazuh-logcollector'])[0], 'wazuh-logcollector is ' \
+                        'running and was not expected to'
