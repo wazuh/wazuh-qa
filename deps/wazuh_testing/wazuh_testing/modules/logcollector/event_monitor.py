@@ -9,7 +9,7 @@ from wazuh_testing.tools import LOG_FILE_PATH
 def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=False):
     """Create a callback function from a text pattern.
 
-    It already contains the analsisd prefix.
+    It already contains the logcollector prefix.
 
     Args:
         pattern (str): String to match on the log.
@@ -20,7 +20,7 @@ def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=Fals
         lambda: function that returns if there's a match in the file
 
     Examples:
-        >>> callback_bionic_update_started = make_vuln_callback("Starting Ubuntu Bionic database update")
+        >>> callback_message = make_vuln_callback("DEBUG: Reading syslog message")
     """
     if escape:
         pattern = re.escape(pattern)
