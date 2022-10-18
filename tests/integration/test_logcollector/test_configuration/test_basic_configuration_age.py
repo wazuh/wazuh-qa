@@ -192,9 +192,8 @@ def test_configuration_age(configuration, metadata, restart_wazuh_daemon_after_f
                 pytest.xfail("Windows agent allows invalid localfile configuration:\
                               https://github.com/wazuh/wazuh/issues/10890")
             else:
-                try:
+                with pytest.raises(ValueError):
                     control_service('start')
-                except ValueError:
                     evm.check_configuration_error()
                     # Check that wazuh-logcollector is not running
                     assert not check_if_daemons_are_running(['wazuh-logcollector'])[0], 'wazuh-logcollector is ' \
