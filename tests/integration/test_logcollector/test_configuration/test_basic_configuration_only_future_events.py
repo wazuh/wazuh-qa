@@ -56,194 +56,144 @@ tags:
     - logcollector_configuration
 '''
 import os
-import pytest
 import sys
 import time
+import pytest
 
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-import wazuh_testing.generic_callbacks as gc
-import wazuh_testing.logcollector as logcollector
-from wazuh_testing.tools.monitoring import WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor, LOG_COLLECTOR_DETECTOR_PREFIX
-from wazuh_testing.tools import get_service, LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from tempfile import gettempdir
-from wazuh_testing.tools.utils import lower_case_key_dictionary_array
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_FILE, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL, \
+                                               GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
+from wazuh_testing.modules.logcollector import event_monitor as evm
+from wazuh_testing.processes import check_if_daemons_are_running
 
-LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
-prefix = LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Marks
 pytestmark = pytest.mark.tier(level=0)
 
-# Configuration
-no_restart_windows_after_configuration_set = True
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_basic_configuration.yaml')
-
-wazuh_component = get_service()
-first_macos_log_process = False
+prefix = LOG_COLLECTOR_PREFIX
 macos_process_timeout_init = 10
+daemon = 'wazuh-logcollector'
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
+# ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
+# Configuration and cases data
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_only_future_events.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
 temp_file_path = os.path.join(gettempdir(), 'testing.log')
 
-
-log_format_list = ['syslog', 'json', 'snort-full', 'mysql_log', 'postgresql_log', 'nmapg', 'iis', 'djb-multilog',
-                   'multi-line:3', 'squid', 'audit']
-tcases = []
-
+# Accepted values test configurations (t1)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
 if sys.platform == 'win32':
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
-    log_format_list += ['eventchannel']
-elif sys.platform == 'darwin':
-    log_format_list += ['macos']
+    prefix = WINDOWS_AGENT_PREFIX
+    daemon = 'wazuh-agent.exe'
 
-for log_format in log_format_list:
-    if log_format == 'djb-multilog':
+
+def remove_item_from_list(item):
+    """Remove item from configuration, metadata and case_ids list.
+
+    Returns:
+        Index of the next element to be checked.
+    """
+    del t1_configuration_metadata[item]
+    del t1_configuration_parameters[item]
+    del t1_case_ids[item]
+    return item - 1
+
+
+index = 0
+for _ in range(len(t1_configuration_metadata)):
+    if t1_configuration_metadata[index]['log_format'] == 'djb-multilog':
         location = '/var/log/testing/current'
-    elif log_format == 'eventchannel':
+    elif t1_configuration_metadata[index]['log_format'] == 'eventchannel':
         location = 'Security'
-    elif log_format == 'macos':
-        location = log_format
+    elif t1_configuration_metadata[index]['log_format'] == 'macos':
+        location = t1_configuration_metadata[index]['log_format']
     else:
         location = temp_file_path
 
-    tcases += [
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
-            'MAX-SIZE': '9999999999999999999999999999999B', 'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '20B',
-         'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5000B',
-         'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '500KB',
-         'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '50MB',
-         'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '5GB',
-         'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no',
-         'MAX-SIZE': '43423423423', 'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '-12345',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': 'test',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '{/}',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'MAX-SIZE': '!32817--',
-         'INVALID_VALUE': 'max-size'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yes', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yesTesting',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'noTesting',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'testingvalue',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': '1234',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yes', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'no', 'INVALID_VALUE': ''},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'yesTesting',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'noTesting',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': 'testingvalue',
-         'INVALID_VALUE': 'only-future-events'},
-        {'LOCATION': f"{location}", 'LOG_FORMAT': f'{log_format}', 'ONLY-FUTURE-EVENTS': '1234',
-         'INVALID_VALUE': 'only-future-events'}
-    ]
+    t1_configuration_metadata[index]['location'] = location
+    t1_configuration_parameters[index]['LOCATION'] = location
 
-metadata = lower_case_key_dictionary_array(tcases)
+    if sys.platform == 'win32':
+        if t1_configuration_metadata[index]['log_format'] == 'macos' and index > 0:
+            # remove macos cases
+            index = remove_item_from_list(index)
+    elif sys.platform == 'darwin' and index > 0:
+        if t1_configuration_metadata[index]['log_format'] == 'eventchannel':
+            # remove windows cases
+            index = remove_item_from_list(index)
+    elif t1_configuration_metadata[index]['log_format'] == 'macos' or \
+            t1_configuration_metadata[index]['log_format'] == 'eventchannel' and index > 0:
+        # remove windows and macos cases
+        index = remove_item_from_list(index)
+    index += 1
 
-for element in tcases:
-    element.pop('INVALID_VALUE')
-
-parameters = tcases
-
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=parameters,
-                                           metadata=metadata)
-configuration_ids = [f"{x['log_format']}_{x['only-future-events']}_{x['max-size']}" + f"" if 'max-size' in x
-                     else f"{x['log_format']}_{x['only-future-events']}" for x in metadata]
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
 
-@pytest.fixture(scope="module")
-def generate_macos_logs(get_configuration):
+@pytest.fixture(scope="function")
+def generate_macos_logs(metadata):
     """Get configurations from the module."""
-    global first_macos_log_process
-    if not first_macos_log_process and sys.platform == 'darwin' and \
-       get_configuration['metadata']['log_format'] == 'macos':
+    if sys.platform == 'darwin' and metadata['log_format'] == 'macos':
         control_service('restart', 'wazuh-logcollector')
         time.sleep(macos_process_timeout_init)
 
-        first_macos_log_process = True
 
-
-def check_only_future_events_valid(cfg):
+def check_only_future_events_valid(metadata):
     """Check if Wazuh runs correctly with the specified only future events field.
 
     Ensure logcollector allows the specified future events attribute.
 
-    Raises:
-        TimeoutError: If the "Analyzing file" callback is not generated.
+    Args:
+        metadata (dict): Dictionary with the localfile configuration.
     """
-    error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_FILE
+    error_message = GENERIC_CALLBACK_ERROR_ANALYZING_FILE
 
-    if sys.platform == 'win32' and cfg['log_format'] == 'eventchannel':
-        error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL
-        log_callback = logcollector.callback_eventchannel_analyzing(cfg['location'])
+    if sys.platform == 'win32' and metadata['log_format'] == 'eventchannel':
+        error_message = GENERIC_CALLBACK_ERROR_ANALYZING_EVENTCHANNEL
+        evm.check_eventchannel_analyzing(metadata['location'], error_message=error_message, prefix=prefix)
 
-    elif sys.platform == 'darwin' and cfg['log_format'] == 'macos':
-        error_message = logcollector.GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
-        if cfg['only-future-events'] == 'no':
-            log_callback = logcollector.callback_monitoring_macos_logs(True)
-            wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                    error_message=error_message)
+    elif sys.platform == 'darwin' and metadata['log_format'] == 'macos':
+        error_message = GENERIC_CALLBACK_ERROR_ANALYZING_MACOS
+        if metadata['only-future-events'] == 'no':
+            evm.check_monitoring_macos_logs(error_message=error_message, old_logs=True)
 
-        log_callback = logcollector.callback_monitoring_macos_logs()
+        evm.check_monitoring_macos_logs(error_message=error_message)
 
     else:
-        log_callback = logcollector.callback_analyzing_file(cfg['location'])
-
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=error_message)
+        evm.check_analyzing_file(file=metadata['location'], error_message=error_message, prefix=prefix)
 
 
-def check_only_future_events_invalid(cfg):
+def check_only_future_events_invalid(metadata):
     """Check if Wazuh fails due to a invalid only future events configuration value.
 
     Args:
-        cfg (dict): Dictionary with the localfile configuration.
-
-    Raises:
-        TimeoutError: If error callbacks are not generated.
+        metadata (dict): Dictionary with the localfile configuration.
     """
 
-    invalid_value = cfg['invalid_value']
+    invalid_value = metadata['invalid_value']
 
     if invalid_value == 'max-size':
-        option_value = cfg['max-size']
-        log_callback = gc.callback_invalid_attribute('only-future-events', 'max-size', option_value,
-                                                     prefix, severity="WARNING")
+        option_value = metadata['max-size']
+        evm.check_invalid_attribute('only-future-events', 'max-size', option_value, prefix, severity="WARNING")
     else:
-        option_value = cfg['only-future-events']
-        log_callback = gc.callback_invalid_value(invalid_value, option_value, prefix, severity="WARNING")
-
-    wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                            error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
+        option_value = metadata['only-future-events']
+        evm.check_invalid_value(invalid_value, option_value, prefix, severity="WARNING")
 
 
-# fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.mark.skip("This test needs refactor/fixes. Has flaky behaviour. Skipped by Issue #3218")
-def test_only_future_events(get_configuration, configure_environment, generate_macos_logs, restart_logcollector):
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_only_future_events(configuration, metadata, set_wazuh_configuration, generate_macos_logs,
+                            restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
                  and 'max-size' tags. For this purpose, the test will set a 'localfile' section using both
@@ -256,29 +206,32 @@ def test_only_future_events(get_configuration, configure_environment, generate_m
     tier: 0
 
     parameters:
-        - get_configuration:
-            type: fixture
+        - configuration:
+            type: dict
             brief: Get configurations from the module.
-        - configure_environment:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
+            brief: Apply changes to the ossec.conf configuration.
         - generate_macos_logs:
             type: fixture
-            brief: Restart the logcollector daemon to get the first macos log process.
-        - restart_logcollector:
+            brief: Restart wazuh-logcollector and wait for log to be generated.
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Restart the wazuh service.
 
     assertions:
         - Verify that the logcollector generates error events when using invalid values
           for the 'only-future-events' tag.
         - Verify that the logcollector generates 'analyzing' or 'monitoring' events when using valid values
           for the 'only-future-events' tag.
+        - Verify that wazuh-logcollector or wazuh-agent daemon does not crash.
 
     input_description: A configuration template (test_basic_configuration_only_future_events) is contained in an
-                       external YAML file (wazuh_basic_configuration.yaml). That template is combined with
-                       different test cases defined in the module. Those include configuration settings
-                       for the 'wazuh-logcollector' daemon.
+                       external YAML file (configuration_only_future_events.yaml). That template is combined with
+                       different test cases defined in the cases_only_future_events.yam file.
 
     expected_output:
         - r'Analyzing file.*'
@@ -291,9 +244,9 @@ def test_only_future_events(get_configuration, configure_environment, generate_m
         - invalid_settings
         - logs
     '''
-    cfg = get_configuration['metadata']
-
-    if cfg['invalid_value'] == '':
-        check_only_future_events_valid(cfg)
+    if metadata['invalid_value'] == '':
+        check_only_future_events_valid(metadata)
     else:
-        check_only_future_events_invalid(cfg)
+        check_only_future_events_invalid(metadata)
+
+    assert check_if_daemons_are_running([daemon])[0], f"{daemon} is not running. Maybe it has crashed"
