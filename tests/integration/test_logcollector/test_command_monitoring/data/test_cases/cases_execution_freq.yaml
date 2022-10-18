@@ -1,0 +1,95 @@
+- name: command_5_minutes
+  description: command_5_minutes
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo command_5m
+    FREQUENCY: 300
+  metadata:
+    log_format: command
+    command: echo command_5m
+    frequency: 300
+    freq_str: 5_minutes
+
+- name: command_30_minutes
+  description: command_30_minutes
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo command_30m
+    FREQUENCY: 1800
+  metadata:
+    log_format: command
+    command: echo command_30m
+    frequency: 1800
+    freq_str: 30_minutes
+
+- name: command_1_hour
+  description: command_1_hour
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo command_1h
+    FREQUENCY: 3600
+  metadata:
+    log_format: command
+    command: echo command_1h
+    frequency: 3600
+    freq_str: 1_hour
+
+- name: command_24_hours
+  description: command_24_hours
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo command_24h
+    FREQUENCY: 86400
+  metadata:
+    log_format: command
+    command: echo command_24h
+    frequency: 86400
+    freq_str: 24_hours
+
+- name: full_command_5_minutes
+  description: full_command_5_minutes
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo full_command_5m
+    FREQUENCY: 300
+  metadata:
+    log_format: full_command
+    command: echo full_command_5m
+    frequency: 300
+    freq_str: 5_minutes
+
+- name: full_command_30_minutes
+  description: full_command_30_minutes
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo full_command_30m
+    FREQUENCY: 1800
+  metadata:
+    log_format: full_command
+    command: echo full_command_30m
+    frequency: 1800
+    freq_str: 30_minutes
+
+- name: full_command_1_hour
+  description: full_command_1_hour
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo full_command_1h
+    FREQUENCY: 3600
+  metadata:
+    log_format: full_command
+    command: echo full_command_1h
+    frequency: 3600
+    freq_str: 1_hour
+
+- name: full_command_24_hours
+  description: full_command_24_hours
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo full_command_24h
+    FREQUENCY: 86400
+  metadata:
+    log_format: full_command
+    command: echo full_command_24h
+    frequency: 86400
+    freq_str: 24_hours
