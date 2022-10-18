@@ -57,7 +57,6 @@ tags:
 '''
 import os
 import sys
-import subprocess
 import pytest
 from datetime import timedelta, datetime
 
@@ -95,25 +94,6 @@ local_internal_options = {'logcollector.remote_commands': '1', 'logcollector.deb
 if sys.platform == 'win32':
     location = r'C:\testing\file.txt'
     prefix = WINDOWS_AGENT_PREFIX
-
-
-@pytest.fixture(scope='module')
-def change_date_format():
-    """"Function to change format date to dd/mm/yy"""
-    if sys.platform == 'win32':
-        command = subprocess.run(["powershell.exe", "(Get-culture).DateTimeFormat.ShortDatePattern"],
-                                 stdout=subprocess.PIPE)
-
-        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path "HKCU:\\Control Panel\\International" '
-                         '-Name sShortDate -Value dd/MM/yy'])
-
-        yield
-
-        date_format = str(command.stdout).split('\'')[1].split('\\')[0]
-        subprocess.call(['powershell.exe', 'Set-ItemProperty -Path \"HKCU:\\Control Panel\\International\" '
-                         f"-Name sShortDate -Value {date_format}"])
-    else:
-        yield
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
