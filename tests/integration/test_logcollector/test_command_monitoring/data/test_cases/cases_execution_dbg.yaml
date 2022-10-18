@@ -1,0 +1,285 @@
+- name: command_empty_output
+  description: command_empty_output
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: echo
+    alias: ''
+    info: empty_output
+    os: no_linux
+
+- name: command_check_output_and_alias
+  description: command_check_output_and_alias
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo hello world
+    ALIAS: goodbye
+  metadata:
+    log_format: command
+    command: echo hello world
+    alias: goodbye
+    info: check_output_and_alias
+    os: no_linux
+
+- name: command_not_found
+  description: command_not_found
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: not_found_command -o option -v
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: not_found_command -o option -v
+    alias: ''
+    info: not_found
+    os: no_linux
+
+- name: command_does_not_end
+  description: command_does_not_end
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: for ((i=0;;i++)); do echo "Line ${i}"; done
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: for ((i=0;;i++)); do echo "Line ${i}"; done
+    alias: ''
+    info: does_not_end
+    os: no_linux
+
+- name: command_long_output
+  description: command_long_output
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: ls -R /tmp
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: ls -R /tmp
+    alias: ''
+    info: long_output
+    os: no_linux
+
+- name: command_that_fails
+  description: command_that_fails
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: cat doesntexists.txt
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: cat doesntexists.txt
+    alias: ''
+    info: that_fails
+    os: no_linux
+
+- name: command_special_chars_filename
+  description: command_special_chars_filename
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt
+    alias: ''
+    info: special_chars_filename
+    os: no_linux
+
+- name: command_special_chars_command
+  description: command_special_chars_command
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: テ``ñスト, ИСПЫТА´НИЕ",'测`试", "اختبا
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: テ``ñスト, ИСПЫТА´НИЕ",'测`试", "اختبا
+    alias: ''
+    info: special_chars_command
+    os: no_linux
+
+- name: command_special_chars_echo
+  description: command_special_chars_echo
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: echo ***
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: echo ***
+    alias: ''
+    info: special_chars_echo
+    os: no_linux
+
+- name: full_command_empty_output
+  description: full_command_empty_output
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: echo
+    alias: ''
+    info: empty_output
+    os: no_linux
+
+- name: full_command_check_output_and_alias
+  description: full_command_check_output_and_alias
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo hello world
+    ALIAS: goodbye
+  metadata:
+    log_format: full_command
+    command: echo hello world
+    alias: goodbye
+    info: check_output_and_alias
+    os: no_linux
+
+- name: full_command_not_found
+  description: full_command_not_found
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: not_found_command -o option -v
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: not_found_command -o option -v
+    alias: ''
+    info: not_found
+    os: no_linux
+
+- name: full_command_does not end
+  description: full_command_does not end
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: for ((i=0;;i++)); do echo "Line ${i}"; done
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: for ((i=0;;i++)); do echo "Line ${i}"; done
+    alias: ''
+    info: does not end
+    os: no_linux
+
+- name: full_command_long_output
+  description: full_command_long_output
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: ls -R /tmp
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: ls -R /tmp
+    alias: ''
+    info: long_output
+    os: no_linux
+
+- name: full_command_that_fails
+  description: full_command_that_fails
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: cat doesntexists.txt
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: cat doesntexists.txt
+    alias: ''
+    info: that_fails
+    os: no_linux
+
+- name: full_command_special_chars_filename
+  description: full_command_special_chars_filename
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: cat "ñ", "テスト", "ИСПЫТАНИЕ", "测试", "اختبار".txt
+    alias: ''
+    info: special_chars_filename
+    os: no_linux
+
+- name: full_command_special_chars_command
+  description: full_command_special_chars_command
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: テ``ñスト, ИСПЫТА´НИЕ",'测`试", "اختبا
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: テ``ñスト, ИСПЫТА´НИЕ",'测`试", "اختبا
+    alias: ''
+    info: special_chars_command
+    os: no_linux
+
+- name: full_command_special_chars_echo
+  description: full_command_special_chars_echo
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: echo ***
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: echo ***
+    alias: ''
+    info: special_chars_echo
+    os: no_linux
+
+- name: command_killed_by_test
+  description: command_killed_by_test
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: timeout 2 tail -f /dev/random
+    ALIAS: killed_by_test
+  metadata:
+    log_format: command
+    command: timeout 2 tail -f /dev/random
+    alias: killed_by_test
+    info: killed_by_test
+    os: linux
+
+- name: full_command_killed_by_test
+  description: full_command_killed_by_test
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: timeout 2 tail -f /dev/random
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: timeout 2 tail -f /dev/random
+    alias: ''
+    info: killed_by_test
+    os: linux
+
+- name: command_many_arguments
+  description: command_many_arguments
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: ss -l -p -u -t -4 -6 -n
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: ss -l -p -u -t -4 -6 -n
+    alias: ''
+    info: many_arguments
+    os: linux
+
+- name: full_command_many_arguments
+  description: full_command_many_arguments
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: ss -l -p -u -t -4 -6 -n
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: ss -l -p -u -t -4 -6 -n
+    alias: ''
+    info: many_arguments
+    os: linux
