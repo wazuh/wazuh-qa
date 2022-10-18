@@ -80,7 +80,8 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
 # Configuration and cases data
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_execution_dbg.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg_linux_os.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_execution_dbg_non_linux_.yaml')
 
 local_internal_options = {
     'logcollector.remote_commands': '1',
@@ -89,31 +90,15 @@ local_internal_options = {
     'monitord.rotate_log': '0'
 }
 
-
-def remove_item_from_list(item):
-    """Remove item from configuration, metadata and case_ids list.
-
-    Returns:
-        Index of the next element to be checked.
-    """
-    del t1_configuration_metadata[item]
-    del t1_configuration_parameters[item]
-    del t1_case_ids[item]
-    return item - 1
-
-
 # Accepted values test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-
-if sys.platform != 'linux':
-    index = 0
-    for _ in range(len(t1_configuration_metadata)):
-        if t1_configuration_metadata[index]['os'] == 'linux' and index > 0:
-            index = remove_item_from_list(index)
-        index += 1
-
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
+
+# Accepted values test configurations (t2)
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+t2_configurations = load_configuration_template(t1_configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
 
 
 def dbg_reading_command(command, alias, log_format):
@@ -142,10 +127,39 @@ def dbg_reading_command(command, alias, log_format):
                                  error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
 
-@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_command_execution_dbg(configuration, metadata, set_wazuh_configuration,
-                               configure_local_internal_options_module, setup_log_monitor,
-                               restart_wazuh_daemon_function):
+def check_test_logs(log_monitor, metadata):
+    """Check if the (previously known) output of a command ("echo") is displayed correctly.
+
+    It also checks if the "alias" option is working correctly.
+
+    Args:
+        log_monitor (FileMonitor): File monitoring.
+        metadata (dict): Get metadata from the module.
+
+    Raises:
+        TimeoutError: If the command monitoring callback is not generated.
+    """
+    # Check log line "DEBUG: Running command '<command>'"
+    evm.check_running_command(file_monitor=log_monitor, log_format=metadata['log_format'], command=metadata['command'],
+                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                              timeout=global_parameters.default_timeout, escape=True)
+
+    # Command with known output to test "Reading command message: ..."
+    if metadata['command'].startswith('echo') and metadata['alias'] != '':
+        dbg_reading_command(metadata['command'], metadata['alias'], metadata['log_format'])
+
+    # "Read ... lines from command ..." only appears with log_format=command
+    if metadata['log_format'] == 'command':
+        evm.check_read_lines(file_monitor=log_monitor, command=metadata['command'],
+                             error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                             timeout=global_parameters.default_timeout, escape=True)
+
+
+@pytest.mark.parametrize('configuration, metadata', [zip(t1_configurations, t1_configuration_metadata),
+                         zip(t2_configurations, t2_configuration_metadata)], ids=[t1_case_ids, t2_case_ids])
+def test_command_execution_dbg_linux_os(configuration, metadata, set_wazuh_configuration,
+                                        configure_local_internal_options_module, setup_log_monitor,
+                                        restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon generates debug logs when running commands with
                  special characteristics. For this purpose, the test will configure the logcollector to run
@@ -190,7 +204,7 @@ def test_command_execution_dbg(configuration, metadata, set_wazuh_configuration,
     input_description: A configuration template (test_command_execution) is contained in an external
                        YAML file (configuration_execution_dbg.yaml), which includes configuration settings for
                        the 'wazuh-logcollector' daemon and, it is combined with the test cases
-                       (log formats and commands to run) defined in the cases_execution_dbg.yaml file.
+                       (log formats and commands to run) defined in the cases_execution_dbg_xxx.yaml file.
 
     expected_output:
         - r'DEBUG: Running .*'
@@ -202,17 +216,5 @@ def test_command_execution_dbg(configuration, metadata, set_wazuh_configuration,
     '''
     log_monitor = setup_log_monitor
 
-    # Check log line "DEBUG: Running command '<command>'"
-    evm.check_running_command(file_monitor=log_monitor, log_format=metadata['log_format'], command=metadata['command'],
-                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                              timeout=global_parameters.default_timeout, escape=True)
-
-    # Command with known output to test "Reading command message: ..."
-    if metadata['command'].startswith('echo') and metadata['alias'] != '':
-        dbg_reading_command(metadata['command'], metadata['alias'], metadata['log_format'])
-
-    # "Read ... lines from command ..." only appears with log_format=command
-    if metadata['log_format'] == 'command':
-        evm.check_read_lines(file_monitor=log_monitor, command=metadata['command'],
-                             error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                             timeout=global_parameters.default_timeout, escape=True)
+    # Check logs in ossec.log
+    check_test_logs(log_monitor, metadata)

@@ -1,0 +1,52 @@
+
+- name: command_killed_by_test
+  description: command_killed_by_test
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: timeout 2 tail -f /dev/random
+    ALIAS: killed_by_test
+  metadata:
+    log_format: command
+    command: timeout 2 tail -f /dev/random
+    alias: killed_by_test
+    info: killed_by_test
+    os: linux
+
+- name: full_command_killed_by_test
+  description: full_command_killed_by_test
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: timeout 2 tail -f /dev/random
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: timeout 2 tail -f /dev/random
+    alias: ''
+    info: killed_by_test
+    os: linux
+
+- name: command_many_arguments
+  description: command_many_arguments
+  configuration_parameters:
+    LOG_FORMAT: command
+    COMMAND: ss -l -p -u -t -4 -6 -n
+    ALIAS: ''
+  metadata:
+    log_format: command
+    command: ss -l -p -u -t -4 -6 -n
+    alias: ''
+    info: many_arguments
+    os: linux
+
+- name: full_command_many_arguments
+  description: full_command_many_arguments
+  configuration_parameters:
+    LOG_FORMAT: full_command
+    COMMAND: ss -l -p -u -t -4 -6 -n
+    ALIAS: ''
+  metadata:
+    log_format: full_command
+    command: ss -l -p -u -t -4 -6 -n
+    alias: ''
+    info: many_arguments
+    os: linux
