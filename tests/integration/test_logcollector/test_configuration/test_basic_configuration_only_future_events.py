@@ -86,67 +86,54 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
 # Configuration and cases data
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_only_future_events.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events_linux.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events_windows.yaml')
+t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events_darwin.yaml')
 temp_file_path = os.path.join(gettempdir(), 'testing.log')
 
 # Accepted values test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+# Accepted values test configurations (t2)
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+# Accepted values test configurations (t3)
+t3_configuration_parameters, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 
 if sys.platform == 'win32':
     prefix = WINDOWS_AGENT_PREFIX
     daemon = 'wazuh-agent.exe'
 
 
-def remove_item_from_list(item):
-    """Remove item from configuration, metadata and case_ids list.
+def load_location(configuration_parameters, configuration_metadata):
+    """Load location to the localfile configuration.
+
+    Args:
+        configuration_parameters (dict): Dictionary with the localfile configuration.
+        configuration_metadata (dict): Dictionary with the localfile metadata configuration.
 
     Returns:
-        Index of the next element to be checked.
+        dict, dict: New configuraion parameters and metadata.
     """
-    del t1_configuration_metadata[item]
-    del t1_configuration_parameters[item]
-    del t1_case_ids[item]
-    return item - 1
+    for index in range(len(configuration_metadata)):
+        if configuration_metadata[index]['log_format'] == '':
+            configuration_metadata[index]['location'] = temp_file_path
+            configuration_parameters[index]['LOCATION'] = temp_file_path
+
+    return configuration_parameters, configuration_metadata
 
 
-index = 0
-for _ in range(len(t1_configuration_metadata)):
-    if t1_configuration_metadata[index]['log_format'] == 'djb-multilog':
-        location = '/var/log/testing/current'
-    elif t1_configuration_metadata[index]['log_format'] == 'eventchannel':
-        location = 'Security'
-    elif t1_configuration_metadata[index]['log_format'] == 'macos':
-        location = t1_configuration_metadata[index]['log_format']
-    else:
-        location = temp_file_path
-
-    t1_configuration_metadata[index]['location'] = location
-    t1_configuration_parameters[index]['LOCATION'] = location
-
-    if sys.platform == 'win32':
-        if t1_configuration_metadata[index]['log_format'] == 'macos' and index > 0:
-            # remove macos cases
-            index = remove_item_from_list(index)
-    elif sys.platform == 'darwin' and index > 0:
-        if t1_configuration_metadata[index]['log_format'] == 'eventchannel':
-            # remove windows cases
-            index = remove_item_from_list(index)
-    elif t1_configuration_metadata[index]['log_format'] == 'macos' or \
-            t1_configuration_metadata[index]['log_format'] == 'eventchannel' and index > 0:
-        # remove windows and macos cases
-        index = remove_item_from_list(index)
-    index += 1
+t1_configuration_parameters, t1_configuration_metadata = load_location(t1_configuration_parameters,
+                                                                       t1_configuration_metadata)
+t2_configuration_parameters, t2_configuration_metadata = load_location(t2_configuration_parameters,
+                                                                       t2_configuration_metadata)
+t3_configuration_parameters, t3_configuration_metadata = load_location(t3_configuration_parameters,
+                                                                       t3_configuration_metadata)
 
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
-
-
-@pytest.fixture(scope="function")
-def generate_macos_logs(metadata):
-    """Get configurations from the module."""
-    if sys.platform == 'darwin' and metadata['log_format'] == 'macos':
-        control_service('restart', 'wazuh-logcollector')
-        time.sleep(macos_process_timeout_init)
+t2_configurations = load_configuration_template(t1_configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
+t3_configurations = load_configuration_template(t1_configurations_path, t3_configuration_parameters,
+                                                t3_configuration_metadata)
 
 
 def check_only_future_events_valid(metadata):
@@ -191,9 +178,11 @@ def check_only_future_events_invalid(metadata):
         evm.check_invalid_value(invalid_value, option_value, prefix, severity="WARNING")
 
 
-@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_only_future_events(configuration, metadata, set_wazuh_configuration, generate_macos_logs,
-                            restart_wazuh_daemon_function):
+@pytest.mark.parametrize('configuration, metadata', [zip(t1_configurations, t1_configuration_metadata),
+                         zip(t2_configurations, t2_configuration_metadata),
+                         zip(t3_configurations, t3_configuration_metadata)],
+                         ids=[t1_case_ids, t2_case_ids, t3_case_ids])
+def test_only_future_events(configuration, metadata, set_wazuh_configuration, restart_wazuh_daemon_function):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid settings for the 'only-future-events',
                  and 'max-size' tags. For this purpose, the test will set a 'localfile' section using both
@@ -215,9 +204,6 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration, ge
         - set_wazuh_configuration:
             type: fixture
             brief: Apply changes to the ossec.conf configuration.
-        - generate_macos_logs:
-            type: fixture
-            brief: Restart wazuh-logcollector and wait for log to be generated.
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
@@ -244,6 +230,10 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration, ge
         - invalid_settings
         - logs
     '''
+    if sys.platform == 'darwin' and metadata['log_format'] == 'macos':
+        control_service('restart', 'wazuh-logcollector')
+        time.sleep(macos_process_timeout_init)
+        
     if metadata['invalid_value'] == '':
         check_only_future_events_valid(metadata)
     else:

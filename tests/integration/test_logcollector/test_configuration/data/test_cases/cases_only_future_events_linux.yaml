@@ -2087,12 +2087,12 @@
 - name: djb-multilog_no_9999999999999999999999999999999B
   description: djb-multilog_no_9999999999999999999999999999999B
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 9999999999999999999999999999999B
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 9999999999999999999999999999999B
@@ -2101,12 +2101,12 @@
 - name: djb-multilog_no_20B
   description: djb-multilog_no_20B
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 20B
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 20B
@@ -2115,12 +2115,12 @@
 - name: djb-multilog_no_5000B
   description: djb-multilog_no_5000B
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 5000B
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 5000B
@@ -2129,12 +2129,12 @@
 - name: djb-multilog_no_500KB
   description: djb-multilog_no_500KB
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 500KB
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 500KB
@@ -2143,12 +2143,12 @@
 - name: djb-multilog_no_50MB
   description: djb-multilog_no_50MB
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 50MB
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 50MB
@@ -2157,12 +2157,12 @@
 - name: djb-multilog_no_5GB
   description: djb-multilog_no_5GB
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: 5GB
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: 5GB
@@ -2171,12 +2171,12 @@
 - name: djb-multilog_no_43423423423
   description: djb-multilog_no_43423423423
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: '43423423423'
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: '43423423423'
@@ -2185,12 +2185,12 @@
 - name: djb-multilog_no_-12345
   description: djb-multilog_no_-12345
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: '-12345'
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: '-12345'
@@ -2199,12 +2199,12 @@
 - name: djb-multilog_no_test
   description: djb-multilog_no_test
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: test
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: test
@@ -2213,12 +2213,12 @@
 - name: djb-multilog_no_{/}
   description: djb-multilog_no_{/}
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: '{/}'
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: '{/}'
@@ -2227,12 +2227,12 @@
 - name: djb-multilog_no_!32817--
   description: djb-multilog_no_!32817--
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
     MAX-SIZE: '!32817--'
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     max-size: '!32817--'
@@ -2241,11 +2241,11 @@
 - name: djb-multilog_yes
   description: djb-multilog_yes
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: yes
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: yes
     invalid_value: ''
@@ -2253,11 +2253,11 @@
 - name: djb-multilog_no
   description: djb-multilog_no
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     invalid_value: ''
@@ -2265,11 +2265,11 @@
 - name: djb-multilog_yesTesting
   description: djb-multilog_yesTesting
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: yesTesting
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: yesTesting
     invalid_value: only-future-events
@@ -2277,11 +2277,11 @@
 - name: djb-multilog_noTesting
   description: djb-multilog_noTesting
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: noTesting
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: noTesting
     invalid_value: only-future-events
@@ -2289,11 +2289,11 @@
 - name: djb-multilog_testingvalue
   description: djb-multilog_testingvalue
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: testingvalue
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: testingvalue
     invalid_value: only-future-events
@@ -2301,11 +2301,11 @@
 - name: djb-multilog_1234
   description: djb-multilog_1234
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: 1234
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: 1234
     invalid_value: only-future-events
@@ -2313,11 +2313,11 @@
 - name: djb-multilog_yes
   description: djb-multilog_yes
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: yes
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: yes
     invalid_value: ''
@@ -2325,11 +2325,11 @@
 - name: djb-multilog_no
   description: djb-multilog_no
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: no
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: no
     invalid_value: ''
@@ -2337,11 +2337,11 @@
 - name: djb-multilog_yesTesting
   description: djb-multilog_yesTesting
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: yesTesting
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: yesTesting
     invalid_value: only-future-events
@@ -2349,11 +2349,11 @@
 - name: djb-multilog_noTesting
   description: djb-multilog_noTesting
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: noTesting
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: noTesting
     invalid_value: only-future-events
@@ -2361,11 +2361,11 @@
 - name: djb-multilog_testingvalue
   description: djb-multilog_testingvalue
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: testingvalue
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: testingvalue
     invalid_value: only-future-events
@@ -2373,11 +2373,11 @@
 - name: djb-multilog_1234
   description: djb-multilog_1234
   configuration_parameters:
-    LOCATION: ''
+    LOCATION: '/var/log/testing/current'
     LOG_FORMAT: djb-multilog
     ONLY-FUTURE-EVENTS: 1234
   metadata:
-    location: ''
+    location: '/var/log/testing/current'
     log_format: djb-multilog
     only-future-events: 1234
     invalid_value: only-future-events
@@ -3273,601 +3273,5 @@
   metadata:
     location: ''
     log_format: audit
-    only-future-events: 1234
-    invalid_value: only-future-events
-
-- name: eventchannel_no_9999999999999999999999999999999B
-  description: eventchannel_no_9999999999999999999999999999999B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 9999999999999999999999999999999B
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 9999999999999999999999999999999B
-    invalid_value: max-size
-
-- name: eventchannel_no_20B
-  description: eventchannel_no_20B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 20B
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 20B
-    invalid_value: ''
-
-- name: eventchannel_no_5000B
-  description: eventchannel_no_5000B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 5000B
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 5000B
-    invalid_value: ''
-
-- name: eventchannel_no_500KB
-  description: eventchannel_no_500KB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 500KB
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 500KB
-    invalid_value: ''
-
-- name: eventchannel_no_50MB
-  description: eventchannel_no_50MB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 50MB
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 50MB
-    invalid_value: ''
-
-- name: eventchannel_no_5GB
-  description: eventchannel_no_5GB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 5GB
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: 5GB
-    invalid_value: ''
-
-- name: eventchannel_no_43423423423
-  description: eventchannel_no_43423423423
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '43423423423'
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: '43423423423'
-    invalid_value: max-size
-
-- name: eventchannel_no_-12345
-  description: eventchannel_no_-12345
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '-12345'
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: '-12345'
-    invalid_value: max-size
-
-- name: eventchannel_no_test
-  description: eventchannel_no_test
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: test
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: test
-    invalid_value: max-size
-
-- name: eventchannel_no_{/}
-  description: eventchannel_no_{/}
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '{/}'
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: '{/}'
-    invalid_value: max-size
-
-- name: eventchannel_no_!32817--
-  description: eventchannel_no_!32817--
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '!32817--'
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    max-size: '!32817--'
-    invalid_value: max-size
-
-- name: eventchannel_yes
-  description: eventchannel_yes
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: yes
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: yes
-    invalid_value: ''
-
-- name: eventchannel_no
-  description: eventchannel_no
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    invalid_value: ''
-
-- name: eventchannel_yesTesting
-  description: eventchannel_yesTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: yesTesting
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: yesTesting
-    invalid_value: only-future-events
-
-- name: eventchannel_noTesting
-  description: eventchannel_noTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: noTesting
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: noTesting
-    invalid_value: only-future-events
-
-- name: eventchannel_testingvalue
-  description: eventchannel_testingvalue
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: testingvalue
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: testingvalue
-    invalid_value: only-future-events
-
-- name: eventchannel_1234
-  description: eventchannel_1234
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: 1234
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: 1234
-    invalid_value: only-future-events
-
-- name: eventchannel_yes
-  description: eventchannel_yes
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: yes
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: yes
-    invalid_value: ''
-
-- name: eventchannel_no
-  description: eventchannel_no
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: no
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: no
-    invalid_value: ''
-
-- name: eventchannel_yesTesting
-  description: eventchannel_yesTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: yesTesting
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: yesTesting
-    invalid_value: only-future-events
-
-- name: eventchannel_noTesting
-  description: eventchannel_noTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: noTesting
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: noTesting
-    invalid_value: only-future-events
-
-- name: eventchannel_testingvalue
-  description: eventchannel_testingvalue
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: testingvalue
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: testingvalue
-    invalid_value: only-future-events
-
-- name: eventchannel_1234
-  description: eventchannel_1234
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: eventchannel
-    ONLY-FUTURE-EVENTS: 1234
-  metadata:
-    location: ''
-    log_format: eventchannel
-    only-future-events: 1234
-    invalid_value: only-future-events
-
-- name: macos_no_9999999999999999999999999999999B
-  description: macos_no_9999999999999999999999999999999B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 9999999999999999999999999999999B
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 9999999999999999999999999999999B
-    invalid_value: max-size
-
-- name: macos_no_20B
-  description: macos_no_20B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 20B
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 20B
-    invalid_value: ''
-
-- name: macos_no_5000B
-  description: macos_no_5000B
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 5000B
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 5000B
-    invalid_value: ''
-
-- name: macos_no_500KB
-  description: macos_no_500KB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 500KB
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 500KB
-    invalid_value: ''
-
-- name: macos_no_50MB
-  description: macos_no_50MB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 50MB
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 50MB
-    invalid_value: ''
-
-- name: macos_no_5GB
-  description: macos_no_5GB
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: 5GB
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: 5GB
-    invalid_value: ''
-
-- name: macos_no_43423423423
-  description: macos_no_43423423423
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '43423423423'
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: '43423423423'
-    invalid_value: max-size
-
-- name: macos_no_-12345
-  description: macos_no_-12345
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '-12345'
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: '-12345'
-    invalid_value: max-size
-
-- name: macos_no_test
-  description: macos_no_test
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: test
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: test
-    invalid_value: max-size
-
-- name: macos_no_{/}
-  description: macos_no_{/}
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '{/}'
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: '{/}'
-    invalid_value: max-size
-
-- name: macos_no_!32817--
-  description: macos_no_!32817--
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-    MAX-SIZE: '!32817--'
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    max-size: '!32817--'
-    invalid_value: max-size
-
-- name: macos_yes
-  description: macos_yes
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: yes
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: yes
-    invalid_value: ''
-
-- name: macos_no
-  description: macos_no
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    invalid_value: ''
-
-- name: macos_yesTesting
-  description: macos_yesTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: yesTesting
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: yesTesting
-    invalid_value: only-future-events
-
-- name: macos_noTesting
-  description: macos_noTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: noTesting
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: noTesting
-    invalid_value: only-future-events
-
-- name: macos_testingvalue
-  description: macos_testingvalue
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: testingvalue
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: testingvalue
-    invalid_value: only-future-events
-
-- name: macos_1234
-  description: macos_1234
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: 1234
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: 1234
-    invalid_value: only-future-events
-
-- name: macos_yes
-  description: macos_yes
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: yes
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: yes
-    invalid_value: ''
-
-- name: macos_no
-  description: macos_no
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: no
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: no
-    invalid_value: ''
-
-- name: macos_yesTesting
-  description: macos_yesTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: yesTesting
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: yesTesting
-    invalid_value: only-future-events
-
-- name: macos_noTesting
-  description: macos_noTesting
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: noTesting
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: noTesting
-    invalid_value: only-future-events
-
-- name: macos_testingvalue
-  description: macos_testingvalue
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: testingvalue
-  metadata:
-    location: ''
-    log_format: macos
-    only-future-events: testingvalue
-    invalid_value: only-future-events
-
-- name: macos_1234
-  description: macos_1234
-  configuration_parameters:
-    LOCATION: ''
-    LOG_FORMAT: macos
-    ONLY-FUTURE-EVENTS: 1234
-  metadata:
-    location: ''
-    log_format: macos
     only-future-events: 1234
     invalid_value: only-future-events
