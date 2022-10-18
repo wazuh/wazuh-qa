@@ -690,7 +690,7 @@ def load_configuration_template(data_file_path, configuration_parameters=[], con
     configuration = file.read_yaml(data_file_path)
 
     if sys.platform == 'darwin':
-        configuration = set_correct_prefix([configuration], PREFIX)
+        configuration = set_correct_prefix(configuration, PREFIX)
 
     return [process_configuration(configuration[0], placeholders=replacement, metadata=meta)
             for replacement, meta in zip(configuration_parameters, configuration_metadata)]
