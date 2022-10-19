@@ -14,10 +14,8 @@ logger = logging.getLogger(f"P{os.getpid()}")
 
 def parse_custom_labels(labels):
     """Parse the wazuh labels from string list to dict.
-
     Args:
         labels (list): Labels in format ["key1:value1", "key2:value2"]
-
     Returns:
         dict: Labels dictionary. {key1:value1, key2:value2}
     """
@@ -36,18 +34,19 @@ def parse_custom_labels(labels):
 
 def process_script_parameters(args):
     """Process script parameters and edit them if necessary.
-
     Args:
         args (argparse.Namespace): Script args.
     """
     # Add keepalive and receive_message modules if they are not specified in script parameters
-    if 'keepalive' not in args.modules:
-        args.modules.append('keepalive')
-        args.modules_eps.append('0')
+    if not args.disable_keepalive:
+        if 'keepalive' not in args.modules:
+            args.modules.append('keepalive')
+            args.modules_eps.append('0')
 
-    if 'receive_messages' not in args.modules:
-        args.modules.append('receive_messages')
-        args.modules_eps.append('0')
+    if not args.disable_receive:
+        if 'receive_messages' not in args.modules:
+            args.modules.append('receive_messages')
+            args.modules_eps.append('0')
 
     if not args.version.startswith('v'):
         args.version = 'v' + args.version
@@ -55,12 +54,10 @@ def process_script_parameters(args):
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
-
     Args:
         agent (Agent): agent object.
         active_modules (list): List of active modules.
         modules_eps (list): List of EPS for each active module.
-
     Raises:
         ValueError: If number of active_modules items is not the same than the modules_eps.
         ValueError: If a module does not exist on the agent simulator.
@@ -91,10 +88,8 @@ def set_agent_modules_and_eps(agent, active_modules, modules_eps):
 
 def create_agents(args):
     """Create a list of agents according to script parameters like the mode, EPS...
-
     Args:
         args (list): List of script parameters.
-
     Returns:
         list: List of agents to run.
     """
@@ -117,7 +112,9 @@ def create_agents(args):
         for item in distribution_list:  # item[0] = modules - item[1] = eps
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels)
+                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
+                             logcollector_msg_number=args.enable_logcollector_message_number,
+                             custom_logcollector_message=args.custom_logcollector_message)
             set_agent_modules_and_eps(agent, item[0].split(' ') + ['keepalive', 'receive_messages'],
                                       item[1].split(' ') + ['0', '0'])
             agents.append(agent)
@@ -125,21 +122,22 @@ def create_agents(args):
         for _ in range(args.agents_number):
             agent = ag.Agent(manager_address=args.manager_address, os=args.os,
                              registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels)
+                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
+                             logcollector_msg_number=args.enable_logcollector_message_number,
+                             custom_logcollector_message=args.custom_logcollector_message)
             set_agent_modules_and_eps(agent, args.modules, args.modules_eps)
             agents.append(agent)
 
     return agents
 
 
-def create_injectors(agents, manager_address, protocol):
+def create_injectors(agents, manager_address, protocol, limit_msg=None):
     """Create injectos objects from list of agents and connection parameters.
-
     Args:
         agents (list): List of agents to create the injectors (1 injector/agent).
         manager_address (str): Manager IP address to connect the agents.
         protocol (str): TCP or UDP protocol to connect the agents to the manager.
-
+        limit_msg (int): Maximum amount of message to be sent.
     Returns:
         list: List of injector objects.
     """
@@ -149,45 +147,47 @@ def create_injectors(agents, manager_address, protocol):
 
     for agent in agents:
         sender = ag.Sender(manager_address, protocol=protocol)
-        injectors.append(ag.Injector(sender, agent))
+        injectors.append(ag.Injector(sender, agent, limit_msg))
 
     return injectors
 
 
-def start(injector, time_alive):
+def start(injector, time_alive, limit_msg_enable=None):
     """Start the injector process for a specified time.
-
     Args:
         injector (Injector): Injector object.
         time_alive (int): Period of time in seconds during the injector will be running.
+        limit_msg_enable (int): Amount of message to be sent.
     """
     try:
         injector.run()
-        sleep(time_alive)
+        if limit_msg_enable is None:
+            sleep(time_alive)
+        else:
+            injector.wait()
     finally:
         stop(injector)
 
 
 def stop(injector):
     """Stop the injector process.
-
     Args:
         injector (Injector): Injector object.
     """
     injector.stop_receive()
 
 
-def run(injectors, time_alive):
+def run(injectors, time_alive, limit_msg_enable=None):
     """Run each injector in a separated process.
-
     Args:
         injectors (list): List of injector objects.
         time_alive (int): Period of time in seconds during the injector will be running.
+        limit_msg_enable (int): Amount of message to be sent.
     """
     processes = []
 
     for injector in injectors:
-        processes.append(Process(target=start, args=(injector, time_alive)))
+        processes.append(Process(target=start, args=(injector, time_alive, limit_msg_enable)))
 
     for agent_process in processes:
         agent_process.start()
@@ -198,16 +198,13 @@ def run(injectors, time_alive):
 
 def calculate_eps_distribution(data, max_eps_per_agent):
     """Calculate the distribution of agents and EPS according to the input ratio.
-
     Args:
         data (list): List of dictionaries containing information about the module and the remaining EPS to be
                      distributed.
         max_eps_per_agent (int): Maximum EPS load to be distributed to an agent.
-
     Returns:
         list: List of tuples, containing in the first position the modules to be launched by that agent, and in the
               second position the EPS distribution for each module of that agent.
-
     Example:
         Input:
             data =[
@@ -325,6 +322,28 @@ def main():
                             help='Waiting time in seconds between agent registration and the sending of events.',
                             required=False, default=0, dest='waiting_connection_time')
 
+    arg_parser.add_argument('-e', '--limit-msg', metavar='<limit_msg>', type=int,
+                            help='Limit the amount of message to send to the manager for each module.',
+                            required=False, default=None, dest='limit_msg')
+
+    arg_parser.add_argument('-k', '--disable-keepalive', metavar='<disable_keepalive>', type=bool,
+                            help='Disable keepalive module',
+                            required=False, default=False, dest='disable_keepalive')
+
+    arg_parser.add_argument('-d', '--disable-receive', metavar='<disable_receive>', type=bool,
+                            help='Disable receive message module',
+                            required=False, default=False, dest='disable_receive')
+
+    arg_parser.add_argument('-c', '--enable-logcollector-message-number',
+                            metavar='<enable_logcollector_message_number>', type=bool,
+                            help='Enable logcollector message number',
+                            required=False, default=False, dest='enable_logcollector_message_number')
+
+    arg_parser.add_argument('-g', '--custom-logcollector-message',
+                            metavar='<custom_logcollector_message>', type=str,
+                            help='Custom logcollector message',
+                            required=False, default='', dest='custom_logcollector_message')
+
     args = arg_parser.parse_args()
 
     process_script_parameters(args)
@@ -336,9 +355,9 @@ def main():
     # Waiting time to prevent CPU overload when registering many agents (registration + event generation).
     sleep(args.waiting_connection_time)
 
-    injectors = create_injectors(agents, args.manager_address, args.agent_protocol)
+    injectors = create_injectors(agents, args.manager_address, args.agent_protocol, args.limit_msg)
 
-    run(injectors, args.simulation_time)
+    run(injectors, args.simulation_time, args.limit_msg)
 
 
 if __name__ == "__main__":

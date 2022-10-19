@@ -24,9 +24,16 @@ mg_folder_path = os.path.join(WAZUH_PATH, 'var', 'multigroups')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'provisioning',
                               'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
-token = host_manager.get_api_token(test_hosts[0])
+
+
 time_to_update = 10
 time_to_sync = 20
+
+
+@pytest.fixture(scope="session")
+def get_api_token():
+    global host_manager
+    return host_manager.get_api_token(test_hosts[0])
 
 
 # Functions
@@ -153,7 +160,7 @@ def create_multigroups():
 
 # Tests
 
-def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_not_reloaded(get_api_token, clean_environment, agent_healthcheck, create_multigroups):
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
@@ -180,7 +187,7 @@ def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_m
     agent_groups['wazuh-agent1'][1],
     'default'
 ])
-def test_multigroups_updated(clean_environment, agent_healthcheck, create_multigroups, target_group):
+def test_multigroups_updated(get_api_token, clean_environment, agent_healthcheck, create_multigroups, target_group):
     """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
@@ -226,7 +233,7 @@ def test_multigroups_updated(clean_environment, agent_healthcheck, create_multig
                 assert mtime == host_files[host][file], f"This file changed its modification time in {host}: {file}"
 
 
-def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_deleted(get_api_token, clean_environment, agent_healthcheck, create_multigroups):
     """Check that multigroups are removed when expected.
 
     Unassign an agent from their groups or delete the groups. Check that the associated multigroup disappears
@@ -235,19 +242,19 @@ def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multig
     for agent_name, groups in agent_groups.items():
         # Check that multigroups exists for each agent.
         mg_name = os.path.join(mg_folder_path, calculate_mg_name(groups))
-        agent_id = get_agent_id(token=token, agent_name=agent_name)
+        agent_id = get_agent_id(token=get_api_token, agent_name=agent_name)
 
         for group in groups:
             if group != 'default':
                 if agent_name == 'wazuh-agent1':
                     # Unassign agent.
-                    response = host_manager.make_api_call(host=test_hosts[0], token=token, method='DELETE',
+                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token, method='DELETE',
                                                           endpoint=f"/agents/{agent_id}/group/{group}")
                     assert response['status'] == 200, f"Failed when unassigning {agent_name} agent from " \
                                                       f"group {group}: {response}"
                 else:
                     # Delete group.
-                    response = host_manager.make_api_call(host=test_hosts[0], token=token, method='DELETE',
+                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token, method='DELETE',
                                                           endpoint=f"/groups?groups_list={group}")
                     assert response['status'] == 200, f"Failed to delete {group} group: {response}"
 

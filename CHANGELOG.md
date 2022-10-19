@@ -28,6 +28,10 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+
+- New testing suite for checking analysisd EPS limitation([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
+- Add stress results comparator tool ([#3478](https://github.com/wazuh/wazuh-qa/pull/3478)) \- (Tools)
+- Add E2E tests for demo cases ([#3293](https://github.com/wazuh/wazuh-qa/pull/3293)) \- (Framework + Tests)
 - Add configuration files for Jenkins automation of system/E2E tests ([#3221](https://github.com/wazuh/wazuh-qa/pull/3221)) \- (Framework)
 - New vulnerability Detector integration tests for Ubuntu 22.04 ([#2957](https://github.com/wazuh/wazuh-qa/pull/2957)) \- (Framework + Tests)
 - New vulnerability Detector integration tests for Amazon Linux 2022 ([#2955](https://github.com/wazuh/wazuh-qa/pull/2955)) \- (Framework + Tests)
@@ -49,6 +53,7 @@ Release report: TBD
 
 ### Changed
 
+- Change required version of urllib3 and requests dependencies ([#3315](https://github.com/wazuh/wazuh-qa/pull/3315)) \- (Framework)
 - Skip flaky Logcollector tests ([#3218](https://github.com/wazuh/wazuh-qa/pull/3217)) \- (Tests)
 - Change how 'service_control' collects clusterd and apid pids ([#3140](https://github.com/wazuh/wazuh-qa/pull/3140)) \- (Framework)
 - Change scan test module fixtures to allow use commit instead of branches ([#3134](https://github.com/wazuh/wazuh-qa/issues/3134)) \- (Tests)
@@ -74,17 +79,28 @@ Release report: TBD
 
 ### Fixed
 
+- Fix commit option of the scan module for master case ([#3157](https://github.com/wazuh/wazuh-qa/pull/3157)) \- (Tests)
 - Fix Vulnerability Detector IT: test_validate_feed_content yaml cases had wrong extension. ([#3299](https://github.com/wazuh/wazuh-qa/pull/3299)) \- (Tests)
 - Fix Analysisd IT: test_syscollector_events failure on wait_for_analysisd_startup. ([#3110](https://github.com/wazuh/wazuh-qa/pull/3110)) \- (Tests)
 - Fix GCloud IT: test_max_messages error not received expected messages - ([#3083](https://github.com/wazuh/wazuh-qa/pull/3083)) \- (Tests)
 - Fix Solaris and Macos FIM integration tests failures ([#2976](https://github.com/wazuh/wazuh-qa/pull/2976)) \- (Framework + Tests)
 - Fix the unstable FIM tests that need refactoring ([#2458](https://github.com/wazuh/wazuh-qa/pull/2458)) \- (Framework + Tests)
 - Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454)) \- (Framework)
+- Fix invalid reference for test_api_endpoints_performance.py xfail items ([#3378](https://github.com/wazuh/wazuh-qa/pull/3378)) \- (Tests)
 
 ### Removed
 
 - Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
+
+## [4.3.9] - 13-10-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh-qa/commit/8af0a5083bd69765f4d7878df9d3b785bb239723 \
+Release report: https://github.com/wazuh/wazuh/issues/15090
+
+### Added
+
+- Add a test to check the analysisd socket properties ([#3365](https://github.com/wazuh/wazuh-qa/pull/3365))
 
 ## [4.3.8] - 19-09-2022
 

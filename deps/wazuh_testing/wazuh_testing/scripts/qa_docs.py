@@ -150,7 +150,7 @@ def check_incompatible_parameters(parameters):
         parameters (argparse.Namespace): The parameters that the tool receives.
     """
     default_run = parameters.test_types or parameters.test_components or parameters.test_suites or \
-                  parameters.test_modules
+        parameters.test_modules
     api_run = parameters.index_name or parameters.app_index_name or parameters.launching_index_name
     test_run = parameters.test_exist
 
@@ -257,6 +257,11 @@ def check_incompatible_parameters(parameters):
                                'In the future, with --qa-branch It will also use the tests within the branch in local '
                                'as input',
                                qadocs_logger.error)
+
+    if parameters.check_doc:
+        if not parameters.test_modules:
+            raise QAValueError('The --check-documentation option needs the modules to be checked. You must specify it '
+                               'by  using -m.', qadocs_logger.error)
 
     qadocs_logger.debug('Parameters incompatibilities checked.')
 
