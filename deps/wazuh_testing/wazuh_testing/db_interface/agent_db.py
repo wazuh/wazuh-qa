@@ -53,6 +53,17 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
     query_wdb(query_string)
 
 
+def delete_hotfix(agent_id='000', hotfix='000000'):
+    """Delete a hotfix.
+
+    Args:
+        agent_id (str): Agent ID.
+        hotfix (str): ID of the hotfix value.
+    """
+    query_string = ''
+    query_wdb(query_string)
+
+
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
