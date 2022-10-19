@@ -56,21 +56,18 @@ tags:
 import os
 import tempfile
 import sys
-
 import pytest
+
 import wazuh_testing.logcollector as logcollector
 from wazuh_testing import global_parameters
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX, \
                                                GENERIC_CALLBACK_ERROR_COMMAND_MONITORING
-from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.logcollector import event_monitor as evm
 
 
-# Marks
 pytestmark = [pytest.mark.tier(level=0)]
-
-prefix = LOG_COLLECTOR_PREFIX
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -84,8 +81,13 @@ t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
 LOG_LINE = 'Jan  1 00:00:00 localhost test[0]: line='
+prefix = LOG_COLLECTOR_PREFIX
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': '2'}
 
-# Accepted values test configurations (t1)
+if sys.platform == 'win32':
+    prefix = WINDOWS_AGENT_PREFIX
+
+# Only_future_events values test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
 for index in range(len(t1_configuration_metadata)):
@@ -94,11 +96,6 @@ for index in range(len(t1_configuration_metadata)):
 
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
-
-local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': '2'}
-
-if sys.platform == 'win32':
-    prefix = WINDOWS_AGENT_PREFIX
 
 # Configuration
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
@@ -126,14 +123,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
     '''
     description: Check if the 'only-future-events' option is used properly by the 'wazuh-logcollector' when
                  monitoring a log file. This option allows reading new log content since the logcollector
-                 was stopped. For this purpose, the test will create a testing log file and configure a
-                 'localfile' section to monitor it. Once the logcollector is started, it will verify that
-                 the log file is monitored, add data to it, and verify that the data addition is detected.
-                 Then, the test will stop the 'wazuh-logcollector' daemon, and while it is stopped, add more
-                 data to the log file. After this, it will check if the addition event has been detected or not
-                 (depending on the value of the 'only-future-events' tag). Finally, the test will perform one
-                 aditional verification by adding data one more time to the log file and verifying that event
-                 indicating the data addition is detected.
+                 was stopped.
 
     test_phases:
         - setup:
@@ -145,13 +135,14 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
             - Restart wazuh-manager service to apply configuration changes.
         - test:
             - Start the log monitor and check the log in `ossec.log` that the respective file is being analyzed.
-            - Add 1Kb of information to the log file.
-            - Check that the new information is being read.
-            - Stop logcollector daemon and add 1Kb of information to the log file.
-            - Start logcollector daemon and check if only_future_events tag is set to 'no', that the new information of
-              the file is read, if only_future_events tag is set to 'yes', that logcollector should not detect the log
-              lines written while it was stopped.
-            - Finally, add 1Kb of information to the log file and check that the file is still being read.
+            - Add n log lines corresponding to 1KB.
+            - Check that the last written line has been read by logcollector.
+            - Stop logcollector daemon
+            - Add additional n log lines corresponding to 1KB when logcollector is stopped
+            - Start logcollector daemon
+            - If only_future_events is set to no, check that all written lines have been read.
+            - If only_future_events is set to yes, check that all written lines have not been read.
+            - If only_future_events is set to yes, write new lines and check that they are read when logcollector is on.
         - tierdown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
@@ -202,68 +193,67 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
     expected_output:
         - r'Analyzing file.*'
         - r'Reading syslog message.*'
-
-    tags:
-        - logs
     '''
     log_monitor = setup_log_monitor
-
     global current_line
 
     # Ensure that the file is being analyzed
     evm.check_analyzing_file(file_monitor=log_monitor, file=log_test_path,
                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix)
 
-    # Add one KiB of data to log
+    # Add n log lines corresponding to 1KB
     current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
+    # Check that the last written line has been read by logcollector
     message = f"{LOG_LINE}{current_line}"
     evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                               error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                               timeout=global_parameters.default_timeout, escape=True)
 
+    # Stop logcollector daemon
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
-    # Add another KiB of data to log while logcollector is stopped
+    # Add additional n log lines corresponding to 1KB when logcollector is stopped
     first_line = current_line + 1
     current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
                                              size_kib=1, line_start=first_line, print_line_num=True)
-
+    # Start logcollector daemon
     control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
+    # Logcollector should detect all written lines when logcollector was stopped
     if metadata['only_future_events'] == 'no':
-        # Logcollector should detect the first line written while it was stopped
-        # Check first line
+        # Check first log line
         message = f"{LOG_LINE}{first_line}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                                   timeout=global_parameters.default_timeout, escape=True)
-        # Check last line
+        # Check last log line
         message = f"{LOG_LINE}{current_line}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                                   timeout=global_parameters.default_timeout, escape=True)
+    # if only_future_events yes, logcollector should NOT detect the log lines written while it was stopped
     else:
-        # Logcollector should NOT detect the log lines written while it was stopped
+        # Check that the first written line is not read
         with pytest.raises(TimeoutError):
-            # Check first line
             message = f"{LOG_LINE}{first_line}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                                       timeout=global_parameters.default_timeout, escape=True)
+
+        # Check that the last written line is not read
+        with pytest.raises(TimeoutError):
             # Check last line
             message = f"{LOG_LINE}{current_line}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                                       timeout=global_parameters.default_timeout, escape=True)
 
-    # Add another KiB of data to log (additional check)
-    current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
-                                             size_kib=1, line_start=current_line + 1, print_line_num=True)
-
-    # Check last line
-    message = f"{LOG_LINE}{current_line}"
-    evm.check_syslog_messages(file_monitor=log_monitor, message=message,
-                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                              timeout=global_parameters.default_timeout, escape=True)
+        # Check that if we write new data when the daemon is turned on, it is read normally
+        current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
+                                                 size_kib=1, line_start=current_line + 1, print_line_num=True)
+        message = f"{LOG_LINE}{current_line}"
+        evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                  error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                  timeout=global_parameters.default_timeout, escape=True)
