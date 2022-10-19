@@ -77,7 +77,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-# ------------------------------------------------ TEST_ACCEPTED_VALUES ------------------------------------------------
 # Configuration and cases data
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_only_future_events.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
@@ -102,7 +101,7 @@ if sys.platform == 'win32':
     prefix = WINDOWS_AGENT_PREFIX
 
 # Configuration
-DAEMON_NAME = "wazuh-logcollector"
+LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 current_line = 0
 file_structure = [
     {
@@ -135,6 +134,27 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
                  (depending on the value of the 'only-future-events' tag). Finally, the test will perform one
                  aditional verification by adding data one more time to the log file and verifying that event
                  indicating the data addition is detected.
+
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Create the specified file tree structure.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Start the log monitor and check the log in `ossec.log` that the respective file is being analyzed.
+            - Add 1Kb of information to the log file.
+            - Check that the new information is being read.
+            - Stop logcollector daemon and add 1Kb of information to the log file.
+            - Start logcollector daemon and check if only_future_events tag is set to 'no', that the new information of
+              the file is read, if only_future_events tag is set to 'yes', that logcollector should not detect the log
+              lines written while it was stopped.
+            - Finally, add 1Kb of information to the log file and check that the file is still being read.
+        - tierdown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
     wazuh_min_version: 4.2.0
 
@@ -203,14 +223,14 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
                               error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
                               timeout=global_parameters.default_timeout, escape=True)
 
-    control_service('stop', daemon=DAEMON_NAME)
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
     # Add another KiB of data to log while logcollector is stopped
     first_line = current_line + 1
     current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
                                              size_kib=1, line_start=first_line, print_line_num=True)
 
-    control_service('start', daemon=DAEMON_NAME)
+    control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
     if metadata['only_future_events'] == 'no':
         # Logcollector should detect the first line written while it was stopped
