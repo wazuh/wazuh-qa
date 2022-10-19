@@ -1,7 +1,7 @@
 ---
-name: QA testing request
-about: Request the QA team to perform some type of testing, either manually or automatically.
-labels: status/not-tracked, team/qa, type/qa-testing
+name: DEV testing request
+about: Request the QA team to perform some type of testing related with development and code closure, either manually or automatically.
+labels: status/not-tracked, team/qa, type/dev-testing
 assignees: ''
 
 ---
