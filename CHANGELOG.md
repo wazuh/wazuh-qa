@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- New testing suite for checking analysisd EPS limitation([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
 - Add stress results comparator tool ([#3478](https://github.com/wazuh/wazuh-qa/pull/3478)) \- (Tools)
 - Add E2E tests for demo cases ([#3293](https://github.com/wazuh/wazuh-qa/pull/3293)) \- (Framework + Tests)
 - Add configuration files for Jenkins automation of system/E2E tests ([#3221](https://github.com/wazuh/wazuh-qa/pull/3221)) \- (Framework)
