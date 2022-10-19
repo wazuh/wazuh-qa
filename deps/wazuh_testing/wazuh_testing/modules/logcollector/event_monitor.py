@@ -3,7 +3,7 @@ import re
 from wazuh_testing import T_30
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing import LOG_FILE_PATH
 
 
 def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=False):

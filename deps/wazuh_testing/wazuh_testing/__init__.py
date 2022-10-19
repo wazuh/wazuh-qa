@@ -12,11 +12,13 @@ from collections import defaultdict
 
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
 else:
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
     else:
         WAZUH_PATH = os.path.join("/var", "ossec")
+    LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
 DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
@@ -24,7 +26,6 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 CVE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
-LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
 CPE_HELPER_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'dictionaries', 'cpe_helper.json')
 WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
