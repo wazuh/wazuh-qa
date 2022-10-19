@@ -18,6 +18,9 @@ else:
     else:
         WAZUH_PATH = os.path.join("/var", "ossec")
 
+
+WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
+WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
 DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
@@ -26,12 +29,15 @@ WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
 CVE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'cve.db')
 LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 ALERTS_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'alerts', 'alerts.json')
+ARCHIVES_LOG_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
+ARCHIVES_JSON_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.json')
 CPE_HELPER_PATH = os.path.join(WAZUH_PATH, 'queue', 'vulnerabilities', 'dictionaries', 'cpe_helper.json')
 WAZUH_API_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'api.yaml')
 WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
 API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
+WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
@@ -51,6 +57,10 @@ DB_DAEMON = 'wazuh-db'
 AGENT_DAEMON = 'wazuh-agentd'
 
 API_DAEMONS_REQUIREMENTS = [API_DAEMON, DB_DAEMON, EXEC_DAEMON, ANALYSISD_DAEMON, REMOTE_DAEMON, MODULES_DAEMON]
+
+# Paths
+SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator.py')
+ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 
 # Timeouts
 T_5 = 5
