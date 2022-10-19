@@ -1,4 +1,3 @@
-
 - name: command_killed_by_test
   description: command_killed_by_test
   configuration_parameters:
