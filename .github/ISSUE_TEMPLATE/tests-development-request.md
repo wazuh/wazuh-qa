@@ -1,6 +1,6 @@
 ---
-name: QA tests development request
-about: Requests the QA team to develop and automate new tests.
+name: Tests development request
+about: Request the QA team to develop and automate new tests.
 labels: status/not-tracked, team/qa, type/tests-development
 assignees: ''
 

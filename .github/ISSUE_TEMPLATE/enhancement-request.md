@@ -1,5 +1,5 @@
 ---
-name: QA enhancement request
+name: Enhancement request
 about: 'Request to enhance a repository resource: framework, test, documentation ...'
 labels: status/not-tracked, team/qa, type/enhancement
 assignees: ''
