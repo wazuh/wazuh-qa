@@ -69,9 +69,9 @@ def callback_detect_event(line):
 
 
 def callback_detect_end_scan(line):
-    """ Callback that detects if a line in a log is a scan_end event
+    """ Callback that detects if a line in a log is an end of scheduled scan event
     Args:
-        line (String): string line to be checked by callback. Passed in by File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     msg = CB_FIM_EVENT
     match = re.match(msg, line)
@@ -87,9 +87,9 @@ def callback_detect_end_scan(line):
 
 def callback_num_inotify_watches(line):
     """ Callback that detects if a line contains the folders monitored in realtime event
-    
+
     Args:
-        line (String): string line to be checked by callback. Passed in by File_Monitor.
+        line (String): string line to be checked by callback in File_Monitor.
     """
     match = re.match(CB_REALTIME_MONITORED_FOLDERS, line)
 
@@ -100,7 +100,7 @@ def callback_num_inotify_watches(line):
 def callback_real_time_whodata_started(line):
     """ Callback that detects if a line contains "Whodata engine started" event
     Args:
-        line (String): string line to be checked by callback. Passed in by File_Monitor.
+        line (String): string line to be checked by callback in File_Monitor.
     """
     if CB_REALTIME_WHODATA_ENGINE_STARTED in line:
         return True
