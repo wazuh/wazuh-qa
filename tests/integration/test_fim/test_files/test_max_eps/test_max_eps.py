@@ -163,7 +163,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
     mode = get_configuration['metadata']['fim_mode']
     if sys.platform == 'win32':
         monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA_WINDOWS
-    else:    
+    else:
         monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
 
     result = wazuh_log_monitor.start(timeout=TIMEOUT,
