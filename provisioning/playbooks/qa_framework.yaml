@@ -1,0 +1,3 @@
+- hosts: qa_framework
+  roles:
+    - ../roles/qa_framework

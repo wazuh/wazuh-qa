@@ -105,17 +105,24 @@ class Config():
 
     def __get_test_types(self):
         """Get all the test types within wazuh-qa framework."""
-        for name in os.listdir(self.project_path):
-            if os.path.isdir(os.path.join(self.project_path, name)):
-                self.test_types.append(name)
+        predefined_types = self.predefined_values['type']
+        for type in predefined_types:
+            for folder in self.project_path.split(os.sep):
+                if type == folder and type not in self.test_types:
+                    self.test_types.append(type)
 
     def __get_include_paths(self):
         """Get all the components and suites to include within all the specified types."""
         dir_regex = re.compile("test_.")
+        test_regex = re.compile("^test_.*.py$")
         self.include_paths = []
 
         for type in self.test_types:
-            subset_tests = os.path.join(self.project_path, type)
+            if type not in self.project_path:
+                subset_tests = os.path.join(self.project_path, type)
+            else:
+                subset_tests = self.project_path
+
             if self.test_components:
                 if self.test_suites:
                     if self.test_modules:
@@ -143,6 +150,8 @@ class Config():
                 for name in os.listdir(subset_tests):
                     if os.path.isdir(os.path.join(subset_tests, name)) and dir_regex.match(name):
                         self.include_paths.append(os.path.join(subset_tests, name))
+                    elif test_regex.match(name) and subset_tests not in self.include_paths:
+                        self.include_paths.append(subset_tests)
 
     def __read_schema_file(self, file):
         """Read schema file.
