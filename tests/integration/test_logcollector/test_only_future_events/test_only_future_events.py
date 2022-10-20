@@ -58,8 +58,8 @@ import tempfile
 import sys
 import pytest
 
+from wazuh_testing import T_10, T_20
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing import global_parameters
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX, \
@@ -99,7 +99,7 @@ t1_configurations = load_configuration_template(t1_configurations_path, t1_confi
 
 # Configuration
 LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
-current_line = 0
+
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
@@ -194,8 +194,8 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
         - r'Analyzing file.*'
         - r'Reading syslog message.*'
     '''
+    current_line = 0
     log_monitor = setup_log_monitor
-    global current_line
 
     # Ensure that the file is being analyzed
     evm.check_analyzing_file(file_monitor=log_monitor, file=log_test_path,
@@ -206,54 +206,55 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
     # Check that the last written line has been read by logcollector
-    message = f"{LOG_LINE}{current_line}"
+    last_line = current_line + 1
+    message = f"{LOG_LINE}{last_line}"
     evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                               error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                              timeout=global_parameters.default_timeout, escape=True)
-
+                              timeout=T_10, escape=True)
     # Stop logcollector daemon
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
     # Add additional n log lines corresponding to 1KB when logcollector is stopped
-    first_line = current_line + 1
+    first_next_line = last_line + 1
     current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
-                                             size_kib=1, line_start=first_line, print_line_num=True)
+                                             size_kib=1, line_start=first_next_line, print_line_num=True)
     # Start logcollector daemon
     control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
     # Logcollector should detect all written lines when logcollector was stopped
     if metadata['only_future_events'] == 'no':
         # Check first log line
-        message = f"{LOG_LINE}{first_line}"
+        message = f"{LOG_LINE}{first_next_line}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=global_parameters.default_timeout, escape=True)
+                                  timeout=T_20, escape=True)
         # Check last log line
-        message = f"{LOG_LINE}{current_line}"
+        message = f"{LOG_LINE}{current_line + 1}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=global_parameters.default_timeout, escape=True)
+                                  timeout=T_20, escape=True)
     # if only_future_events yes, logcollector should NOT detect the log lines written while it was stopped
     else:
+        message = f"{LOG_LINE}{first_next_line}"
         # Check that the first written line is not read
         with pytest.raises(TimeoutError):
-            message = f"{LOG_LINE}{first_line}"
+            message = f"{LOG_LINE}{first_next_line}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                      timeout=global_parameters.default_timeout, escape=True)
+                                      timeout=T_10, escape=True)
 
         # Check that the last written line is not read
         with pytest.raises(TimeoutError):
             # Check last line
-            message = f"{LOG_LINE}{current_line}"
+            message = f"{LOG_LINE}{current_line + 1}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                      timeout=global_parameters.default_timeout, escape=True)
+                                      timeout=T_10, escape=True)
 
         # Check that if we write new data when the daemon is turned on, it is read normally
         current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
                                                  size_kib=1, line_start=current_line + 1, print_line_num=True)
-        message = f"{LOG_LINE}{current_line}"
+        message = f"{LOG_LINE}{current_line + 1}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=global_parameters.default_timeout, escape=True)
+                                  timeout=T_10, escape=True)

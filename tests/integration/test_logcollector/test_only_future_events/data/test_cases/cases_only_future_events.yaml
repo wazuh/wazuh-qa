@@ -3,19 +3,23 @@
   configuration_parameters:
     LOCATION: ''
     LOG_FORMAT: syslog
-    ONLY_FUTURE_EVENTS: no
+    ONLY_FUTURE_EVENTS: 'no'
+    MAX_SIZE: 10MB
   metadata:
     location: ''
     log_format: syslog
-    only_future_events: no
+    only_future_events: 'no'
+    max_size: 10MB
 
 - name: rotate_TEMP_TEST_PATH_in_syslog_format
   description: rotate_TEMP_TEST_PATH_in_syslog_format
   configuration_parameters:
     LOCATION: ''
     LOG_FORMAT: syslog
-    ONLY_FUTURE_EVENTS: yes
+    ONLY_FUTURE_EVENTS: 'yes'
+    MAX_SIZE: 10MB
   metadata:
     location: ''
     log_format: syslog
-    only_future_events: yes
+    only_future_events: 'yes'
+    max_size: 10MB
