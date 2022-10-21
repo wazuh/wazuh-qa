@@ -7,7 +7,7 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization will end 
+brief: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization will end
 before the configured `interval` and `max_interval`.
 
 components:
@@ -89,9 +89,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_files_in_folder,
-                      restart_syscheck_function, wait_for_fim_start_function):
+                   restart_syscheck_function, wait_for_fim_start_function):
     '''
-    description: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization 
+    description: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization
                  will end before the configured `interval` and `max_interval`.
 
     test_phases:
@@ -145,17 +145,18 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Wait for new sync and get start time
-    sync_time = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=evm.callback_sync_start_time,
-                            error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
-    
+    sync_time = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                        callback=evm.callback_sync_start_time,
+                                        error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
+
     # Get the time of all the sync state events for the created files
-    results = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=evm.callback_state_event_time,accum_results=3,
-                            error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
-    
+    results = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                      callback=evm.callback_state_event_time,accum_results=3,
+                                      error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
+
     # Calculate timedelta between start of sync and last message.
     delta = (results[-1] - sync_time).total_seconds() +1
-    
+
     # Assert that sync took less time that interval and max_interval
     assert delta <= metadata['interval'], f"Error: Sync took longer than interval: {metadata['interval']}"
     assert delta <= metadata['max_interval'], f"Error: Sync took longer than max_interval: {metadata['max_interval']}"
-    
