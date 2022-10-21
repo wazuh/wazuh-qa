@@ -100,6 +100,9 @@ CB_PATH_MONITORED_WHODATA = r".*Added audit rule for monitoring directory: (.*)"
 CB_PATH_MONITORED_WHODATA_WINDOWS = r".*Setting up SACL for (.*)"
 CB_SYNC_SKIPPED = r".*Sync still in progress. Skipped next sync and increased interval.*'(\d+)s'"
 CB_SYNC_INTERVAL_RESET = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
+CB_SYNC_START_TIME = r".*(\d{2}):(\d{2}):(\d{2}).*fim_send_sync_state.*"
+CB_SYNC_STATE_MESSAGE_TIME = r".*(\d{2}):(\d{2}):(\d{2}).*Sending integrity control message.*state.*"
+
 
 
 # Error message

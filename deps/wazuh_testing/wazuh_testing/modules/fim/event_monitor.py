@@ -14,6 +14,7 @@ from wazuh_testing.modules.fim import (CB_AGENT_CONNECT, CB_INTEGRITY_CONTROL_ME
                                        CB_REALTIME_WHODATA_ENGINE_STARTED, ERR_MSG_SCHEDULED_SCAN_ENDED,
                                        ERR_MSG_REALTIME_FOLDERS_EVENT, ERR_MSG_WHODATA_ENGINE_EVENT, CB_FIM_EVENT)
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import fim
 
 
 # Variables
@@ -95,6 +96,20 @@ def callback_num_inotify_watches(line):
 
     if match:
         return match.group(1)
+
+
+def callback_sync_start_time(line):
+    if fim.callback_detect_synchronization(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
+
+
+def callback_state_event_time(line):
+    if fim.callback_detect_integrity_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
 
 
 def callback_real_time_whodata_started(line):
