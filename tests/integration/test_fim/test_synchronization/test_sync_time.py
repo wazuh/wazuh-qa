@@ -151,11 +151,11 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_
 
     # Get the time of all the sync state events for the created files
     results = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=evm.callback_state_event_time,accum_results=3,
+                                      callback=evm.callback_state_event_time, accum_results=3,
                                       error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     # Calculate timedelta between start of sync and last message.
-    delta = (results[-1] - sync_time).total_seconds() +1
+    delta = (results[-1] - sync_time).total_seconds() + 1
 
     # Assert that sync took less time that interval and max_interval
     assert delta <= metadata['interval'], f"Error: Sync took longer than interval: {metadata['interval']}"
