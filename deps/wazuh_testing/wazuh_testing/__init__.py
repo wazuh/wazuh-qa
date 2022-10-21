@@ -8,6 +8,12 @@ import os
 import yaml
 from collections import defaultdict
 
+
+# Timeouts
+T_5 = 5
+T_20 = 20
+
+# Protocols
 UDP = 'UDP'
 TCP = 'TCP'
 TCP_UDP = 'TCP,UDP'

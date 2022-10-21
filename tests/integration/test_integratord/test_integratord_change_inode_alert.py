@@ -53,7 +53,7 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integratord_read_json_alerts.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_integratord_read_json_alerts.yaml')
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_change_inode_alert.yaml')
 
 # Configurations
@@ -104,7 +104,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     assertions:
         - Verify the expected response with for a given alert is recieved
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_alerts` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*DEBUG: sending new alert'
@@ -131,7 +131,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     # Wait for Inode change to be detected
     # The `integratord` library tries to read alerts from the file every 1 second. So, the test waits 1 second + 1
     # until the file is reloaded.
-    time.sleep(2)
+    time.sleep(integrator.TIME_TO_DETECT_FILE)
 
     # Monitor Inode Changed
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,

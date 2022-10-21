@@ -53,7 +53,7 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integratord_read_json_alerts.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_integratord_read_json_alerts.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_valid_json_alerts.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_json_alerts.yaml')
 
@@ -113,7 +113,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     assertions:
         - Verify the expected response with for a given alert is recieved
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"slack\".*'
@@ -167,7 +167,7 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     assertions:
         - Verify the expected response with for a given alert is recieved
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_invalid_json_alerts` file provides the test cases.
     expected_output:
         - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'

@@ -54,7 +54,7 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integratord_read_json_alerts.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_integratord_read_json_alerts.yaml')
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_file_deleted.yaml')
 
 # Configurations
@@ -62,7 +62,7 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 configuration_parameters[0]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
-local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1'}
+local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1', 'monitord.rotate_log': '0'}
 
 # Variables
 REQUIRED_DAEMONS = integrator.REQUIRED_DAEMONS
@@ -70,17 +70,19 @@ REQUIRED_DAEMONS = integrator.REQUIRED_DAEMONS
 
 # Tests
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('configuration, metadata',
-                         zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
                                             configure_local_internal_options_module, restart_wazuh_function,
                                             wait_for_start_module):
     '''
-    description: Check that if while integratord is reading from the alerts.json file, it is deleted, the expected
-    error message is displayed, and if the file is created again and alerts are inserted, integratord continues
-    working and alerts are read
+    description: Check that integratord reads the alerts.json file and, when the file is deleted, the expected
+                 warning message is shown. Then, the file is created and alerts are inserted, check if integratord
+                 keeps working and alerts are read.
+
     wazuh_min_version: 4.3.5
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -103,26 +105,35 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
-    input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_json_file_deleted` file provides the test cases.
-    expected_output:
-        - r'.*wazuh-integratord.*ERROR.*Could not retrieve information of file.*alerts.json.*No such file.*'
-        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"slack\".*'
 
+    input_description:
+        - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
+        - The `cases_integratord_read_json_file_deleted` file provides the test cases.
+
+    expected_output:
+        - r'.*wazuh-integratord.*WARNING.*Could not retrieve information of file.*'
+        - r'.*wazuh-integratord.*Response [200].*'
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+
     command = f"touch {ALERT_FILE_PATH} && chmod 640 {ALERT_FILE_PATH} && chown wazuh:wazuh {ALERT_FILE_PATH}"
 
+    # Delete alerts.json file
     remove_file(ALERT_FILE_PATH)
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
                             error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
-    # Create file and insert alert. Wait one second so Integrator detects the file before the insertion
+
+    # Create alerts.json file
     run_local_command_returning_output(command)
-    time.sleep(2)
+
+    # Waiting time so Integrator detects the file before the insertion
+    time.sleep(integrator.TIME_TO_DETECT_FILE)
+
+    # Insert alert to the alerts.json
     run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
