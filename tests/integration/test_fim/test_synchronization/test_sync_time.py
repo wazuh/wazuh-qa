@@ -135,8 +135,8 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_
 
     expected_output:
         - r'Initializing FIM Integrity Synchronization check'
-        - r"*Sync still in progress. Skipped next sync and increased interval.*'(\\d+)s'"
-        - r".*Previous sync was successful. Sync interval is reset to: '(\\d+)s'"
+        - r".*Executing FIM sync"
+        - r".*Sending integrity control message.*"
 
     tags:
         - scheduled
