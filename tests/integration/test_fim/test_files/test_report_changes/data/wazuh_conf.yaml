@@ -3,7 +3,8 @@
 - tags:
   - ossec_conf_report
   apply_to_modules:
-  - MODULE_NAME
+  - test_large_changes
+  - test_report_changes_and_diff
   sections:
   - section: sca
     elements:
@@ -40,7 +41,9 @@
 - tags:
   - ossec_conf_diff
   apply_to_modules:
-  - MODULE_NAME
+  - test_file_size_disabled
+  - test_filse_size_values
+  - test_disk_quota_disabled
   sections:
   - section: sca
     elements:
@@ -84,3 +87,40 @@
                 value: DISK_QUOTA_ENABLED
             - limit:
                 value: DISK_QUOTA_LIMIT
+
+# conf 3
+- tags:
+  - ossec_conf_diff_default
+  apply_to_modules:
+  - test_file_size_default
+  sections:
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: active-response
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - frequency:
+        value: 3
+    - directories:
+        value: TEST_DIRECTORIES
+        attributes:
+        - check_all: 'yes'
+        - FIM_MODE
+        - REPORT_CHANGES
