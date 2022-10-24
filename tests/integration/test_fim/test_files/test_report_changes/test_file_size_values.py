@@ -67,9 +67,9 @@ from test_fim.test_files.test_report_changes.common import generate_string, tran
     restore_file_max_size, make_diff_file_path, disable_rt_delay, restore_rt_delay
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file, \
-    check_time_travel, callback_detect_event, modify_file_content, callback_deleted_diff_folder
+                              callback_detect_event, modify_file_content, callback_deleted_diff_folder
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -93,8 +93,7 @@ conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'r
                                                            'TEST_DIRECTORIES': directory_str,
                                                            'FILE_SIZE_ENABLED': 'yes',
                                                            'DISK_QUOTA_ENABLED': 'no',
-                                                           'DISK_QUOTA_LIMIT': '2KB',
-                                                           'MODULE_NAME': __name__},
+                                                           'DISK_QUOTA_LIMIT': '2KB'},
                                              apply_to_all=({'FILE_SIZE_LIMIT': file_size_elem}
                                                            for file_size_elem in file_size_values))
 
@@ -129,14 +128,9 @@ def extra_configuration_after_yield():
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff'}
-])
-@pytest.mark.parametrize('filename, folder', [
-    ('regular_0', testdir1),
-])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
-def test_file_size_values(tags_to_apply, filename, folder, get_configuration, configure_environment, restart_syscheckd,
+@pytest.mark.parametrize('filename, folder', [('regular_0', testdir1)])
+#@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
+def test_file_size_values(filename, folder, get_configuration, configure_environment, restart_syscheckd,
                           wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the monitored file to generate
@@ -147,14 +141,11 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
                  file size limit has been generated, and the compressed file in the 'queue/diff/local'
                  directory does not exist.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - filename:
             type: str
             brief: Name of the testing file to be created.
@@ -191,7 +182,6 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     size_limit = translate_size(get_configuration['metadata']['file_size_limit'])
     diff_file_path = make_diff_file_path(folder=folder, filename=filename)
@@ -200,7 +190,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     to_write = generate_string(int(size_limit / 2), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
-    check_time_travel(scheduled)
+    #check_time_travel(scheduled)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event.')
@@ -212,7 +202,7 @@ def test_file_size_values(tags_to_apply, filename, folder, get_configuration, co
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
 
-    check_time_travel(scheduled)
+    #check_time_travel(scheduled)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_deleted_diff_folder,
                             error_message='Did not receive expected "Folder ... has been deleted." event.')

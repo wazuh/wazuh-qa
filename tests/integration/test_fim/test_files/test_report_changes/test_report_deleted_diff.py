@@ -68,6 +68,7 @@ import sys
 import time
 
 import pytest
+from test_fim.test_files.test_report_changes.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, WAZUH_PATH, callback_detect_event,
                                REGULAR, create_file, generate_params, detect_initial_scan, check_time_travel)
@@ -100,13 +101,9 @@ def change_conf(report_value):
     """"Return a new ossec configuration with a changed report_value"""
     conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': report_value},
                                                                'TEST_DIRECTORIES': directory_str,
-                                                               'NODIFF_FILE': nodiff_file,
-                                                               'MODULE_NAME': __name__})
+                                                               'NODIFF_FILE': nodiff_file})
 
-    return load_wazuh_configurations(configurations_path, __name__,
-                                     params=conf_params,
-                                     metadata=conf_metadata
-                                     )
+    return load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
 configurations = change_conf('yes')
@@ -146,14 +143,13 @@ def wait_for_event(fim_mode):
     fim_mode : str
         FIM mode (scheduled, realtime, whodata)
     """
-    check_time_travel(time_travel=fim_mode == 'scheduled', monitor=wazuh_log_monitor)
-
+    
     # Wait until event is detected
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event')
 
 
-def create_and_check_diff(name, path, fim_mode):
+def create_file_and_check_diff(name, path, fim_mode):
     """Create a file and check if it is duplicated in diff directory.
 
     Parameters
@@ -171,13 +167,11 @@ def create_and_check_diff(name, path, fim_mode):
         String with the duplicated file path (diff)
     """
     create_file(REGULAR, path, name, content='Sample content')
-    wait_for_event(fim_mode)
-    diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-    if sys.platform == 'win32':
-        diff_file = os.path.join(diff_file, 'c')
-        diff_file = os.path.join(diff_file, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', path).group(2), name)
-    else:
-        diff_file = os.path.join(diff_file, path.strip('/'), name)
+    
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+                            error_message='Did not receive expected "Sending FIM event: ..." event')
+    
+    diff_file = make_diff_file_path(path, name)
     assert os.path.exists(diff_file), f'{diff_file} does not exist'
     return diff_file
 
@@ -194,7 +188,7 @@ def disable_report_changes(fim_mode):
 # tests
 
 @pytest.mark.parametrize('path', [testdir_nodiff])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
+
 def test_report_when_deleted_directories(path, get_configuration, configure_environment, restart_syscheckd,
                                          wait_for_fim_start):
     '''
@@ -246,21 +240,20 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
         - time_travel
     '''
     fim_mode = get_configuration['metadata']['fim_mode']
-    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
+    diff_dir = os.path.join(WAZUH_PATH, 'queue', 'diff', 'file')
 
     if sys.platform == 'win32':
         diff_dir = os.path.join(diff_dir, 'c')
         diff_dir = os.path.join(diff_dir, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', path).group(2), FILE_NAME)
     else:
         diff_dir = os.path.join(diff_dir, path.strip('/'), FILE_NAME)
-    create_and_check_diff(FILE_NAME, path, fim_mode)
+    create_file_and_check_diff(FILE_NAME, path, fim_mode)
     shutil.rmtree(path, ignore_errors=True)
     wait_for_event(fim_mode)
     assert not os.path.exists(diff_dir), f'{diff_dir} exists'
 
 
 @pytest.mark.parametrize('path', [testdir_reports])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
 def test_no_report_changes(path, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     '''
@@ -311,7 +304,7 @@ def test_no_report_changes(path, get_configuration, configure_environment,
         - time_travel
     '''
     fim_mode = get_configuration['metadata']['fim_mode']
-    diff_file = create_and_check_diff(FILE_NAME, path, fim_mode)
+    diff_file = create_file_and_check_diff(FILE_NAME, path, fim_mode)
     backup_conf = get_wazuh_conf()
 
     try:
@@ -322,11 +315,11 @@ def test_no_report_changes(path, get_configuration, configure_environment,
         restart_wazuh_with_new_conf(backup_conf)
         detect_fim_scan(wazuh_log_monitor, fim_mode)
 
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
+
 def test_report_changes_after_restart(get_configuration, configure_environment, restart_syscheckd,
                                       wait_for_fim_start):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon deletes the 'diff' folder created in the 'queue/diff/local'
+    description: Check if the 'wazuh-syscheckd' daemon deletes the 'diff' folder created in the 'queue/diff/file'
                  directory when restarting that daemon, and the 'report_changes' option is disabled. For this
                  purpose, the test will monitor a directory and add a testing file inside it. Then, it will check
                  if a 'diff' file is created for the modified testing file. The folders in the 'queue/diff/local'
@@ -336,7 +329,7 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
                  the directories will not be created again. Finally, the test will restore the backed configuration and
                  verify that the initial scan of FIM is made.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -355,9 +348,9 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
-        - Verify that FIM adds the 'diff' file in the 'queue/diff/local' directory
+        - Verify that FIM adds the 'diff' file in the 'queue/diff/file' directory
           when monitoring the corresponding testing file.
-        - Verify that FIM deletes the 'diff' folder in the 'queue/diff/local' directory
+        - Verify that FIM deletes the 'diff' folder in the 'queue/diff/file' directory
           when restarting the disabling the 'report_changes' option is disabled.
 
     input_description: Different test cases are contained in external YAML file (wazuh_conf.yaml) which
@@ -375,7 +368,7 @@ def test_report_changes_after_restart(get_configuration, configure_environment, 
     fim_mode = get_configuration['metadata']['fim_mode']
 
     # Create a file in the monitored path to force the creation of a report in diff
-    diff_file_path = create_and_check_diff(FILE_NAME, testdir_reports, fim_mode)
+    diff_file_path = create_file_and_check_diff(FILE_NAME, testdir_reports, fim_mode)
 
     backup_conf = get_wazuh_conf()
     try:

@@ -1,5 +1,5 @@
 - tags:
-  - ossec_conf_diff_size_limit
+  - 
   apply_to_modules:
   - test_diff_size_limit_configured
   - test_diff_size_limit_default
@@ -12,6 +12,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 3
     - directories:
         value: TEST_DIRECTORIES
         attributes:

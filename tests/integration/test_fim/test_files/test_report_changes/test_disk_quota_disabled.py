@@ -65,10 +65,9 @@ import os
 import pytest
 from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file, \
-    check_time_travel
+from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -91,8 +90,7 @@ conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'r
                                                            'FILE_SIZE_ENABLED': 'no',
                                                            'FILE_SIZE_LIMIT': '1KB',
                                                            'DISK_QUOTA_ENABLED': 'no',
-                                                           'DISK_QUOTA_LIMIT': '2KB',
-                                                           'MODULE_NAME': __name__})
+                                                           'DISK_QUOTA_LIMIT': '2KB'})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
@@ -106,14 +104,10 @@ def get_configuration(request):
 
 
 # Tests
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff'}
-])
 @pytest.mark.parametrize('filename, folder, size', [
     ('regular_0', testdir1, 10000000),
 ])
-def test_disk_quota_disabled(tags_to_apply, filename, folder, size, get_configuration, configure_environment,
+def test_disk_quota_disabled(filename, folder, size, get_configuration, configure_environment,
                              restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used
@@ -123,14 +117,11 @@ def test_disk_quota_disabled(tags_to_apply, filename, folder, size, get_configur
                  'disk_quota' limit. Finally, the test will verify that the FIM event related
                  to the reached disk quota has not been generated.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - filename:
             type: str
             brief: Name of the testing file to be created.
@@ -168,13 +159,8 @@ def test_disk_quota_disabled(tags_to_apply, filename, folder, size, get_configur
         - disk_quota
         - scheduled
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-
     to_write = generate_string(size, '0')
     create_file(REGULAR, folder, filename, content=to_write)
-
-    check_time_travel(scheduled)
 
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_disk_quota_limit_reached)

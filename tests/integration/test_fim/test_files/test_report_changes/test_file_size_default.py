@@ -113,7 +113,7 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
                  reached file size limit has been generated, and the compressed file in the 'queue/diff/local'
                  directory does not exist.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

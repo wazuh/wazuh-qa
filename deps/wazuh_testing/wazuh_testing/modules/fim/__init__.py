@@ -50,7 +50,6 @@ WHODATA_MODE = 'whodata'
 # Yaml Configuration
 YAML_CONF_REGISTRY_RESPONSE = 'wazuh_conf_registry_responses_win32.yaml'
 YAML_CONF_SYNC_WIN32 = 'wazuh_sync_conf_win32.yaml'
-YAML_CONF_DIFF = 'wazuh_conf_diff.yaml'
 YAML_CONF_MAX_EPS_SYNC = 'wazuh_sync_conf_max_eps.yaml'
 
 # Synchronization options

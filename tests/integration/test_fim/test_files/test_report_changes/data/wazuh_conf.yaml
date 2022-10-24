@@ -5,6 +5,7 @@
   apply_to_modules:
   - test_large_changes
   - test_report_changes_and_diff
+  - test_report_deleted_diff
   sections:
   - section: sca
     elements:
@@ -28,6 +29,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 3
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -38,11 +41,11 @@
         value: NODIFF_FILE
 
 # conf 2
-- tags:
+- tags: 
   - ossec_conf_diff
   apply_to_modules:
   - test_file_size_disabled
-  - test_filse_size_values
+  - test_file_size_values
   - test_disk_quota_disabled
   sections:
   - section: sca
@@ -67,6 +70,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 3
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -93,6 +98,7 @@
   - ossec_conf_diff_default
   apply_to_modules:
   - test_file_size_default
+  - test_disk_quota_default
   sections:
   - section: sca
     elements:
