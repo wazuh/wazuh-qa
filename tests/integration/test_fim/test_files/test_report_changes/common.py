@@ -175,13 +175,6 @@ def make_diff_file_path(folder='/testdir1', filename='regular_0'):
     sha_1.update(file_path.encode('utf-8'))
     file_sha1 = sha_1.hexdigest()
     
-    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'file')
-
-    if sys.platform == 'win32':                      ### TODO Fix this for windows
-        folder_components = re.match(r'^([a-zA-Z]):\\{1,2}(\w+)\\{0,2}$', folder)
-        diff_file_path = os.path.join(diff_file_path, folder_components.group(1).lower(),
-                                      folder_components.group(2).lower(), filename, 'last-entry.gz')
-    else:
-        diff_file_path = os.path.join(diff_file_path, file_sha1, 'last-entry.gz')
+    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'file', file_sha1, 'last-entry.gz')
 
     return diff_file_path
