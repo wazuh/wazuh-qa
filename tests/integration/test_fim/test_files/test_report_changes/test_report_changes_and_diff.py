@@ -70,10 +70,11 @@ import re
 import sys
 
 import pytest
+from test_fim.test_files.test_report_changes.common import make_diff_file_path
 from wazuh_testing import global_parameters
-from wazuh_testing.fim import (CHECK_ALL, LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params)
+from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -97,13 +98,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
-                                                           'NODIFF_FILE': nodiff_file,
-                                                           'MODULE_NAME': __name__})
+                                                           'NODIFF_FILE': nodiff_file})
 
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=conf_params,
-                                           metadata=conf_metadata
-                                           )
+configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params,metadata=conf_metadata)
 
 
 # fixtures
@@ -116,17 +113,9 @@ def get_configuration(request):
 
 # tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_report'}
-])
-@pytest.mark.parametrize('folder, checkers', [
-    (testdir_reports, options),
-    (testdir_nodiff, options)
-])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
-def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
-                                 get_configuration, configure_environment,
-                                 restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('folder, checkers', [(testdir_reports, options), (testdir_nodiff, options)])
+def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_environment,restart_syscheckd, 
+                                 wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -136,7 +125,7 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                  'content_changes' field a message indicating that 'diff' is truncated because
                  the 'nodiff' option is used.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -147,9 +136,6 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
         - checkers:
             type: dict
             brief: Syscheck 'check_' fields to be generated.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -183,21 +169,14 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
         - scheduled
         - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
+    
     file_list = ['regular_file']
     is_truncated = folder == testdir_nodiff
 
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
         for file in file_list:
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-            if sys.platform == 'win32':
-                diff_file = os.path.join(diff_file, 'c')
-                diff_file = os.path.join(diff_file, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
-                                         file)
-            else:
-                diff_file = os.path.join(diff_file, folder.strip('/'), file)
+            diff_file = make_diff_file_path(folder, file)
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
             assert event['data'].get('content_changes') is not None, f'content_changes is empty'
 
@@ -211,6 +190,6 @@ def test_reports_file_and_nodiff(folder, checkers, tags_to_apply,
                 f'content_changes is truncated'
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, triggers_event=True,
+                     time_travel=False,
+                     min_timeout=global_parameters.default_timeout*2, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

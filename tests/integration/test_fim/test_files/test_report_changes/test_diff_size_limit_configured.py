@@ -74,7 +74,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.modules.fim import (TEST_DIR_1, YAML_CONF_DIFF, DIFF_LIMIT_VALUE, DIFF_SIZE_LIMIT, FILE_SIZE_LIMIT,
+from wazuh_testing.modules.fim import (TEST_DIR_1, DIFF_LIMIT_VALUE, DIFF_SIZE_LIMIT, FILE_SIZE_LIMIT,
                                        DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT, FILE_SIZE_ENABLED, CB_MAXIMUM_FILE_SIZE,
                                        REPORT_CHANGES, TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
                                        ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
@@ -91,7 +91,7 @@ pytestmark = [pytest.mark.tier(level=1)]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directory = os.path.join(PREFIX, TEST_DIR_1)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
-configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_diff.yaml')
 
 
 # Configurations
