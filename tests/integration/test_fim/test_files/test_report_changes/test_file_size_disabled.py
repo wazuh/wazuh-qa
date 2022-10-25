@@ -66,6 +66,7 @@ import pytest
 from test_fim.test_files.test_report_changes.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -107,7 +108,7 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('filename, folder, size', [('regular_0', testdir1, 1000000)])
 def test_file_size_disabled(filename, folder, size, get_configuration, configure_environment,
-                            restart_syscheckd, wait_for_fim_start):
+                            configure_local_internal_options_module, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the monitored file to generate
                  'diff' information when the 'file_size' option is disabled. For this purpose, the test
@@ -135,6 +136,9 @@ def test_file_size_disabled(filename, folder, size, get_configuration, configure
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.

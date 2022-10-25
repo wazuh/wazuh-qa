@@ -78,6 +78,7 @@ from wazuh_testing.modules.fim import (TEST_DIR_1, DIFF_LIMIT_VALUE, DIFF_SIZE_L
                                        DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT, FILE_SIZE_ENABLED, CB_MAXIMUM_FILE_SIZE,
                                        REPORT_CHANGES, TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
                                        ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.wazuh_variables import DATA, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
@@ -116,8 +117,8 @@ def get_configuration(request):
 
 
 # Tests
-def test_diff_size_limit_configured(configure_local_internal_options_module, get_configuration,
-                                    configure_environment, restart_syscheckd):
+def test_diff_size_limit_configured(configure_local_internal_options_module, get_configuration, configure_environment,
+                                    restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
                  the value set in the 'diff_size_limit' attribute when the global 'file_size' tag is different.
@@ -126,7 +127,7 @@ def test_diff_size_limit_configured(configure_local_internal_options_module, get
                  the test will verify that the value gotten from that FIM event corresponds with the one set
                  in the 'diff_size_limit'.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

@@ -68,6 +68,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_default, genera
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
 
@@ -102,10 +103,9 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_diff_default'}
-])
-def test_disk_quota_default(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+@pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_diff_default'}])
+def test_disk_quota_default(tags_to_apply, get_configuration, configure_environment,
+                            configure_local_internal_options_module, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used to perform
                  the 'diff' operations is stored to the default value. For this purpose, the test will monitor
@@ -113,7 +113,7 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
                  disk quota to store 'diff' information. Finally, the test will verify that the value gotten from
                  that FIM event corresponds with the default value of the 'disk_quota' tag (1GB).
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -127,6 +127,9 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.

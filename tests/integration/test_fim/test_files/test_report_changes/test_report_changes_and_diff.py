@@ -73,6 +73,7 @@ import pytest
 from test_fim.test_files.test_report_changes.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import CHECK_ALL, LOG_FILE_PATH, regular_file_cud, generate_params
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -114,8 +115,8 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.parametrize('folder, checkers', [(testdir_reports, options), (testdir_nodiff, options)])
-def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_environment,restart_syscheckd, 
-                                 wait_for_fim_start):
+def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_environment,
+                                 configure_local_internal_options_module, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -145,6 +146,9 @@ def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - wait_for_fim_start:
             type: fixture
             brief: Wait for realtime start, whodata start, or end of initial FIM scan.
@@ -189,7 +193,6 @@ def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 f'content_changes is truncated'
 
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list,
-                     time_travel=False,
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
                      min_timeout=global_parameters.default_timeout*2, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

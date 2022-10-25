@@ -74,6 +74,7 @@ import pytest
 from test_fim.test_files.test_report_changes.common import generate_string, make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, generate_params
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -135,7 +136,7 @@ def extra_configuration_after_yield():
     ('regular_6', testdir, 70000, 10),
 ])
 def test_large_changes(filename, folder, original_size, modified_size, get_configuration, configure_environment,
-                       restart_syscheckd, wait_for_fim_start):
+                       configure_local_internal_options_module, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the character limit in the file changes is reached
                  showing the 'More changes' tag in the 'content_changes' field of the generated events. For this
@@ -167,6 +168,9 @@ def test_large_changes(filename, folder, original_size, modified_size, get_confi
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
