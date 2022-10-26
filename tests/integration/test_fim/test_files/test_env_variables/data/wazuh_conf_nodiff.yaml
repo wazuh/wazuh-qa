@@ -1,12 +1,14 @@
 - tags:
   - ossec_conf
   apply_to_modules:
-  - MODULE_NAME
+  - test_nodiff
   sections:
   - section: syscheck
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 3
     - nodiff:
         value: TEST_ENV_VARIABLES
     - directories:

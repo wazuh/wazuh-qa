@@ -194,5 +194,5 @@ def test_reports_file_and_nodiff(folder, checkers, get_configuration, configure_
                 f'content_changes is truncated'
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=global_parameters.default_timeout*2, triggers_event=True,
+                     min_timeout=global_parameters.default_timeout*3, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

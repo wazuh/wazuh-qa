@@ -66,6 +66,7 @@ import os
 import sys
 
 import pytest
+from test_fim.test_files.test_report_changes.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, WAZUH_PATH, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, PREFIX
@@ -187,13 +188,7 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
         for file in files:
-            diff_file = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-
-            if sys.platform == 'win32':
-                diff_file = os.path.join(diff_file, 'c')
-
-            striped = directory.strip(os.sep) if sys.platform == 'darwin' else directory.strip(PREFIX)
-            diff_file = os.path.join(diff_file, striped, file)
+            diff_file = make_diff_file_path(directory, file)
 
             assert os.path.exists(diff_file), f'{diff_file} does not exist'
             assert event['data'].get('content_changes') is not None, 'content_changes is empty'
@@ -207,7 +202,6 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 'content_changes is truncated'
 
-    regular_file_cud(directory, wazuh_log_monitor, file_list=files,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=global_parameters.default_timeout, triggers_event=True,
+    regular_file_cud(directory, wazuh_log_monitor, file_list=files, time_travel=False,
+                     min_timeout=global_parameters.default_timeout*2, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])
