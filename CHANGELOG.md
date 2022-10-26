@@ -13,7 +13,7 @@ Release report: TBD
 
 ### Changed
 
-- Fix file_limit and registry_limit tests ([#3280](https://github.com/wazuh/wazuh-qa/pull/3280)) \- (Tests)
+- Update file_limit and registry_limit tests ([#3280](https://github.com/wazuh/wazuh-qa/pull/3280)) \- (Tests)
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
 
