@@ -1,0 +1,26 @@
+- name: several_events_over_long_period
+  description: Check performance while injecting a high number of events (to 1 agent DB) over a long period of time
+  configuration_parameters: null
+  metadata: null
+
+- name: several_events_suddenly
+  description: Check performance while consuming hardware resources with another program and injecting event spikes
+  configuration_parameters: null
+  metadata: null
+
+- name: generate_events_incrementally
+  description: Check performance while injecting an increasing number of events in several agents with different OS
+  configuration_parameters: null
+  metadata: null
+
+- name: generate_events_incrementally
+  description: Check performance while injecting an increasing number of events in several agents with different OS a\
+    nd multiple third parties subscribed to the scan post
+  configuration_parameters: null
+  metadata: null
+
+- name: several_events_incrementally_until_threshold
+  description: Check performance while injecting a high number of events incrementally until a threshold is reached ov\
+    er a long period
+  configuration_parameters: null
+  metadata: null
