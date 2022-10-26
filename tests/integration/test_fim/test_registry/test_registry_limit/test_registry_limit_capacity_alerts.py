@@ -10,7 +10,7 @@ type: integration
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
        generated while the database is close to reaching the limit of entries to monitor set
-       in the 'db_entry_limit'-'registries' tag.
+       in the 'registry_limit'-'entries' tag.
 
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
@@ -61,6 +61,7 @@ from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
     delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
     RegOpenKeyEx, RegCloseKey
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
                                        ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES,
                                        CB_REGISTRY_DB_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL,
@@ -103,8 +104,8 @@ def get_configuration(request):
 
 # Tests
 @pytest.mark.parametrize('percentage', [(80), (90), (0)])
-def test_registry_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
-                                       wait_for_fim_start):
+def test_registry_limit_capacity_alert(percentage, get_configuration, configure_local_internal_options_module,
+                                       configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a key in which
@@ -113,7 +114,7 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                  the total and when the number is less than that percentage. Finally, the test will verify that, in
                  the FIM 'entries' event, the entries number is one unit more than the number of monitored values.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -124,6 +125,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
@@ -144,9 +148,9 @@ def test_registry_limit_capacity_alert(percentage, get_configuration, configure_
                        with the percentages and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Registry database is (\d+)% full."
+        - r".*Registry database is (\\d+)% full."
         - r".*(The registry database status returns to normal)."
-        - r".*Fim registry value entries count: '(\d+)'"
+        - r".*Fim registry value entries count: '(\\d+)'"
 
     tags:
         - scheduled

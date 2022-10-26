@@ -70,6 +70,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGUL
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
                                        ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_FIM_INODE_ENTRIES,
                                        ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
@@ -120,8 +121,8 @@ def extra_configuration_before_yield():
 
 
 # Tests
-
-def test_file_limit_full(get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_full(configure_local_internal_options_module, get_configuration, configure_environment,
+                         restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of files to monitor set in the 'file_limit' tag.
@@ -130,14 +131,14 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
                  when a new testing file is added to the monitored directory. Finally, the test will verify that
                  on the FIM event, inodes and monitored files number match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -158,7 +159,7 @@ def test_file_limit_full(get_configuration, configure_environment, restart_sysch
                        combined with the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*File database is (\d+)% full'
+        - r'.*File database is (\\d+)% full'
         - r'.*The DB is full.*'
         - r'.*Fim inode entries*, path count'
         - r'.*Fim entries' (on Windows systems)

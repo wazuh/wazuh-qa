@@ -9,7 +9,7 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check that after having a
-       limit configured for the 'registries' option for 'db_entry_limit' of syscheck, it will
+       limit configured for the 'entries' option for 'registry_limit' of syscheck, it will
        only monitor values up to the specified limit and any excess will not be monitored.
 
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
@@ -62,6 +62,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
                                REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_VALUE,
                                        ERR_MSG_REGISTRY_LIMIT_VALUES, CB_COUNT_REGISTRY_VALUE_ENTRIES,
                                        ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_FILE_LIMIT_VALUE,
@@ -112,19 +113,23 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_registry_limit_values(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_limit_values(configure_local_internal_options_module, get_configuration, configure_environment,
+                               restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the value of the 'registries' tag, which corresponds to
-                 the maximum number of entries to monitor from the 'db_entry_limit' option of FIM. For this purpose,
+                 the maximum number of entries to monitor from the 'registry_limit' option of FIM. For this purpose,
                  the test will monitor a key in which multiple testing values will be added. Then, it will check if
                  the FIM event 'maximum number of entries' is generated and has the correct value. Finally, the test
                  will verify that, in the FIM 'values entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -144,8 +149,8 @@ def test_registry_limit_values(get_configuration, configure_environment, restart
                        with the limits and the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Maximum number of registry values to be monitored: '(\d+)'"
-        - r".*Fim registry values entries count: '(\d+)'"
+        - r".*Maximum number of registry values to be monitored: '(\\d+)'"
+        - r".*Fim registry values entries count: '(\\d+)'"
 
     tags:
         - scheduled

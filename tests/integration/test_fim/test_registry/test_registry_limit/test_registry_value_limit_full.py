@@ -10,7 +10,7 @@ type: integration
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
        generated while the database is in 'full database alert' mode for reaching the limit
-       of entries to monitor set in the 'db_entry_limit'-'registries' tag.
+       of entries to monitor set in the 'registry_limit'-'entries' tag.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
@@ -58,6 +58,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,\
      REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
                                        ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
                                        CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE, CB_COUNT_REGISTRY_VALUE_ENTRIES,
@@ -112,21 +113,25 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_registry_value_limit_full(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_value_limit_full(configure_local_internal_options_module, get_configuration, configure_environment,
+                                   restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
-                 'full database alert' mode for reaching the limit of entries to monitor set in the 'registres' option
-                 of the 'db_entry_limit' tag.
+                 'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
+                 of the 'registry_limit' tag.
                  For this purpose, the test will monitor a key in which several testing values will be created
                  until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
                  when a new testing value is added to the monitored key. Finally, the test will verify that,
                  in the FIM 'entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -148,9 +153,9 @@ def test_registry_value_limit_full(get_configuration, configure_environment, res
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Registry database is (\d+)% full."
+        - r".*Registry database is (\\d+)% full."
         - r".*Couldn't insert ('.*') entry into DB. The DB is full.*"
-        - r".*Fim registry values entries count: '(\d+)'"
+        - r".*Fim registry values entries count: '(\\d+)'"
 
     tags:
         - scheduled

@@ -61,10 +61,9 @@ from wazuh_testing.fim import (generate_params, create_registry, modify_registry
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.fim.utils import find_value_in_event_list, get_sync_msgs
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.fim_module.fim_variables import (SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE,
-                                                    YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE,
-                                                    MONITORED_KEY)
+from wazuh_testing.modules.fim import (FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, SCHEDULED_MODE, WINDOWS_REGISTRY,
+                                       SYNC_INTERVAL, SYNC_INTERVAL_VALUE, YAML_CONF_REGISTRY_RESPONSE,
+                                       WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START
 
 
@@ -80,7 +79,7 @@ conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITO
 
 
 # configurations
-conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
+conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULED_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 

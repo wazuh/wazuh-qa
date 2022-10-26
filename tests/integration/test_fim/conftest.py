@@ -11,7 +11,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.fim import (create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry,
                                LOG_FILE_PATH, callback_detect_registry_integrity_clear_event)
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.fim_module.fim_variables import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE
+from wazuh_testing.modules.fim import WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE
 from wazuh_testing.wazuh_variables import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP, WAZUH_LOG_MONITOR
 from wazuh_testing.tools.monitoring import FileMonitor
 
