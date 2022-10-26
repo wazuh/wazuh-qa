@@ -166,10 +166,12 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
     analysisd_state = evm.get_analysisd_state()
     events_received = int(analysisd_state['events_received'])
     events_processed = int(analysisd_state['events_processed'])
+    expected_processed_events = metadata['maximum'] * metadata['timeframe']
 
     # Check that the wazuh-manager is receiving events but it is not processing them due to the limitation
     assert events_received > 0, '(1): No events are being received when it is expected'
-    assert events_processed == 0, f"Events are being processed when the limit has been reached. {events_processed} != 0"
+    assert events_processed == expected_processed_events, f"Events are being processed when the limit has been " \
+                                                          f"reached. {events_processed} != {expected_processed_events}"
 
     # Wait until the limited timeframe has elapsed
     time.sleep(metadata['timeframe'] + 1 - waited_simulator_time)  # Offset 1s
@@ -179,7 +181,7 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
     events_processed = int(analysisd_state['events_processed'])
 
     # Check whether events continue to be processed after blocking
-    assert events_processed > 0, f"Event processing has not been continued after blocking"
+    assert events_processed > 0, 'Event processing has not been continued after blocking'
 
     # Wait until syslog simulator ends
     syslog_simulator_thread.join()
@@ -377,12 +379,14 @@ def test_dropping_events_when_queue_is_full(configuration, metadata, load_wazuh_
     events_dropped = float(analysisd_state['events_dropped'])
     events_received = int(analysisd_state['events_received'])
     events_processed = int(analysisd_state['events_processed'])
+    expected_processed_events = metadata['maximum'] * metadata['timeframe']
 
     # Check that events are received, not processed and that they are dropped when the queue is full
     assert events_received > 0, ' No events are being received when it is expected'
-    assert events_processed == 0, 'Events are being processed when they are not expected (due to the limit)'
+    assert events_processed == expected_processed_events, 'Events are being processed when they are' \
+                                                          ' not expected (due to the limit)'
     assert event_queue_usage == 1.0, 'The events queue is not full as expected'
-    assert events_dropped == events_received, 'No events are being dropped even though the queue is full'
+    assert events_dropped > 10000, 'No events are being dropped even though the queue is full'
 
     # Wait until syslog simulator ends
     syslog_simulator_thread.join()
