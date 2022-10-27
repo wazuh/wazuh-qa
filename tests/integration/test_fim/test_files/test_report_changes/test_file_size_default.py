@@ -176,7 +176,7 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_file_size_limit_reached,
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_file_size_limit_reached,
                             error_message='Did not receive expected "File ... is too big for configured maximum '
                                           'size to perform diff operation" event.')
 
