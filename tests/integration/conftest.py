@@ -95,8 +95,7 @@ def restart_wazuh_function(request):
        Args:
             request (fixture): Provide information on the executing test function.
     """
-    # If there is a list of required daemons defined in __init__.py of the module, restart daemons, else restart
-    # all daemons.
+    # If there is a list of required daemons defined in the test module, restart daemons, else restart all daemons.
     try:
         daemons = request.module.REQUIRED_DAEMONS
     except AttributeError:
