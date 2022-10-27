@@ -9,7 +9,7 @@ ANALYSISD_ONE_THREAD_CONFIG = {'analysisd.event_threads': '1', 'analysisd.sysche
                                'analysisd.winevt_threads': '1', 'analysisd.rule_matching_threads': '1',
                                'analysisd.dbsync_threads': '1', 'remoted.worker_pool': '1'}
 # Callback Messages
-CB_ANALYSISD_STARTUP_COMPLETED = fr".*{ANALYSISD_PREFIX}.*DEBUG: Startup completed. Waiting for new messages.*"
+CB_ANALYSISD_STARTUP_COMPLETED = fr"DEBUG: Startup completed. Waiting for new messages.*"
 
 # Error messages
 ERR_MSG_STARTUP_COMPLETED_NOT_FOUND = fr'Did not recieve the expected "{CB_ANALYSISD_STARTUP_COMPLETED}"'
