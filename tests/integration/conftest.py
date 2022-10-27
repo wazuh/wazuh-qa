@@ -328,6 +328,11 @@ def pytest_configure(config):
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
 
+    # Set slack_webhook_url if it is passed through command line args
+    slack_webhook_url = config.getoption("--slack-webhook-url")
+    if slack_webhook_url:
+        global_parameters.slack_webhook_url = slack_webhook_url
+
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
 
