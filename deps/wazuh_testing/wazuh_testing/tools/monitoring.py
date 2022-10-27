@@ -841,6 +841,15 @@ def callback_generator(regex):
     return new_callback
 
 
+def callback_generator(regex):
+    def new_callback(line):
+        match = re.match(regex, line)
+        if match:
+            return line
+
+    return new_callback
+
+
 class HostMonitor:
     """This class has the capability to monitor remote host. This monitoring consists of reading the specified files to
     check that the expected message arrives to them.

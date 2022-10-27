@@ -25,5 +25,5 @@ def wait_for_start_module(request):
                             error_message=integrator.ERR_MSG_SLACK_ENABLED_NOT_FOUND)
     # Wait for analysisd to start successfully (to detect changes in the alerts.json file)
     check_analysisd_event(file_monitor=file_monitor, timeout=T_5,
-                          callback=callback_generator(analysisd.CB_ANALYSISD_STARTUP_COMPLETED),
+                          callback=analysisd.CB_ANALYSISD_STARTUP_COMPLETED,
                           error_message=analysisd.ERR_MSG_STARTUP_COMPLETED_NOT_FOUND)
