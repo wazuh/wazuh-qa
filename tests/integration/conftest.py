@@ -89,25 +89,39 @@ def restart_wazuh(get_configuration, request):
 
 
 @pytest.fixture(scope='function')
-def restart_wazuh_function(daemons=None):
-    """Restarts before starting a test, and stop it after finishing.
+def restart_wazuh_function(request):
+    """Restart before starting a test, and stop it after finishing.
+
        Args:
-            daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
+            request (fixture): Provide information on the executing test function.
     """
-    control_service('restart', daemons)
+    # If there is a list of required daemons defined in the test module, restart daemons, else restart all daemons.
+    try:
+        daemons = request.module.REQUIRED_DAEMONS
+    except AttributeError:
+        daemons = []
+
+    if len(daemons) == 0:
+        logger.debug(f"Restarting all daemon")
+        control_service('restart')
+    else:
+        for daemon in daemons:
+            logger.debug(f"Restarting {daemon}")
+            # Restart daemon instead of starting due to legacy used fixture in the test suite.
+            control_service('restart', daemon=daemon)
+
     yield
-    control_service('stop', daemons)
 
-
-    @pytest.fixture(scope='module')
-    def restart_wazuh_module(daemons=None):
-        """Restarts before starting a test, and stop it after finishing.
-        Args:
-                daemons(List): List of wazuh daemons that need to be restarted. Default restarts al daemons.
-        """
-        control_service('restart', daemons)
-        yield
-        control_service('stop', daemons)
+    # Stop all daemons by default (daemons = None)
+    if len(daemons) == 0:
+        logger.debug(f"Stopping all daemons")
+        control_service('stop')
+    else:
+        # Stop a list daemons in order (as Wazuh does)
+        daemons.reverse()
+        for daemon in daemons:
+            logger.debug(f"Stopping {daemon}")
+            control_service('stop', daemon=daemon)
 
 
 @pytest.fixture(scope='module')
@@ -245,12 +259,12 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
-        "--integration-api-key",
+        "--slack-webhook-url",
         action="store",
-        metavar="integration_api_key",
+        metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass api key required for integratord tests."
+        help="pass webhook url required for integratord tests."
     )
 
 
@@ -306,10 +320,10 @@ def pytest_configure(config):
         mode = ["scheduled", "whodata", "realtime"]
     global_parameters.fim_mode = mode
 
-    # Set integration_api_key if it is passed through command line args
-    integration_api_key = config.getoption("--integration-api-key")
-    if integration_api_key:
-        global_parameters.integration_api_key = integration_api_key
+    # Set slack_webhook_url if it is passed through command line args
+    slack_webhook_url = config.getoption("--slack-webhook-url")
+    if slack_webhook_url:
+        global_parameters.slack_webhook_url = slack_webhook_url
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")

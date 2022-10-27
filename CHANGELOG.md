@@ -25,6 +25,10 @@ Release report: https://github.com/wazuh/wazuh/issues/14827
 - Change required version of urllib3 and requests dependencies \- (Framework)
 - Update wazuh-logtest messages for integration tests \- (Tests)
 
+### Fixed
+
+- Fix Integratord tests. ([#3362](https://github.com/wazuh/wazuh-qa/pull/3362)) \- (Framework + Tests)
+
 ## [4.3.7] - 24-08-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/e2b514bef3d148acd4bcae1a1c7fa8783b82ca3a \
