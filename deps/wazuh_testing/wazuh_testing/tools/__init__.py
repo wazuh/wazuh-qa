@@ -176,7 +176,8 @@ WAZUH_SOCKETS = {
                         MODULESD_CONTROL_SOCKET_PATH,
                         MODULESD_KREQUEST_SOCKET_PATH
                       ],
-    'wazuh-clusterd': [MODULESD_C_INTERNAL_SOCKET_PATH]
+    'wazuh-clusterd': [MODULESD_C_INTERNAL_SOCKET_PATH],
+    'wazuh-integratord': []
 }
 
 # These sockets do not exist with default Wazuh configuration
