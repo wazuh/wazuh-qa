@@ -28,6 +28,7 @@ daemons:
 
 os_platform:
     - linux
+    - windows
 
 os_version:
     - Arch Linux
@@ -48,9 +49,9 @@ references:
 
 pytest_args:
     - tier:
-        0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
-        1: Only level 1 tests are performed, they check functionalities of medium complexity.
-        2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+        0: Basic functionalities and quick to perform.
+        1: Functionalities of medium complexity.
+        2: Advanced functionalities and are slow to perform.
 
 tags:
     - fim_synchronization
@@ -61,12 +62,12 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules import TIER2, AGENT, SERVER
+from wazuh_testing.modules import TIER1, AGENT, SERVER
 from wazuh_testing.modules import fim
 from wazuh_testing.fim import callback_detect_synchronization
 
 # Marks
-pytestmark = [AGENT, SERVER, TIER2]
+pytestmark = [AGENT, SERVER, TIER1]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -110,7 +111,7 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
 
     wazuh_min_version: 4.5.0
 
-    tier: 2
+    tier: 1
 
     parameters:
         - configuration:
