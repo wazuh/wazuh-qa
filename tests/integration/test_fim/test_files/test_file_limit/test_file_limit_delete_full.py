@@ -69,6 +69,7 @@ from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, creat
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
                                        ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED,
                                        ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
@@ -124,7 +125,8 @@ def extra_configuration_before_yield():
 
 
 @pytest.mark.parametrize('folder, file_name', [(testdir1, f'{base_file_name}{1}')])
-def test_file_limit_delete_full(folder, file_name, get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_delete_full(folder, file_name, configure_local_internal_options_module, get_configuration,
+                                configure_environment, restart_syscheckd):
     '''
     description: Check a specific case. If a testing file ('test_file1') is not inserted in the FIM database
                  (because the maximum number of files to be monitored has already been reached), and another
@@ -135,7 +137,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                  no FIM events to be generated (file limit reached). Finally, it will delete 'test_file10'
                  and verify that the 'deleted' FIM event matches that file.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -146,6 +148,9 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - file_name:
             type: str
             brief: Name of the testing file to be created.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -169,7 +174,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                        the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*File database is (\d+)% full'
+        - r'.*File database is (\\d+)% full'
         - r'.*Sending FIM event: (.+)$' ('deleted' event)
 
     tags:

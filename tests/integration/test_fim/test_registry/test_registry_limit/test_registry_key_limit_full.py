@@ -10,7 +10,7 @@ type: integration
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
        when these files are modified. Specifically, these tests will check if FIM events are
        generated while the database is in 'full database alert' mode for reaching the limit
-       of entries to monitor set in the 'db_entry_limit'-'registries' tag.
+       of entries to monitor set in the 'registry_limit'-'registries' tag.
        The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
        configured files for changes to the checksums, permissions, and ownership.
 
@@ -61,9 +61,10 @@ from wazuh_testing.tools import LOG_FILE_PATH
 
 from wazuh_testing.fim import generate_params, registry_parser, KEY_WOW64_64KEY, \
     KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                        CB_REGISTRY_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT,
-                                       ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+                                       ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT, CB_DATABASE_FULL_COULD_NOT_INSERT_KEY,
                                        CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
                                        ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
 from wazuh_testing.modules import WINDOWS, TIER1
@@ -112,18 +113,22 @@ def extra_configuration_before_yield():
 
 
 # Tests
-def test_registry_key_limit_full(get_configuration, configure_environment, restart_syscheckd):
+def test_registry_key_limit_full(configure_local_internal_options_module, get_configuration, configure_environment,
+                                 restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'registries' option
-                 of the 'db_entry_limit' tag.
+                 of the 'registry_limit' tag.
                  For this purpose, the test will set the a limit of keys to monitor, and will monitor a series of keys.
                  Then, it will try to add a new key and it will check if the FIM event 'full' is generated. Finally, the
                  test will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.5.0
 
     parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -145,7 +150,7 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r'.*Registry database is (\d+)% full.'
+        - r'.*Registry database is (\\d+)% full.'
         - r'.*Couldn't insert ('.*') entry into DB. The DB is full.*'
         - r'.*Fim registry entries count:.*'
 
@@ -158,14 +163,15 @@ def test_registry_key_limit_full(get_configuration, configure_environment, resta
 
     assert database_state == EXPECTED_DB_STATE, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL
 
-    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', KEY_WOW64_64KEY)
-    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'_FULL', 0,
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'\\DB_FULL',
+                                 KEY_WOW64_64KEY)
+    reg_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY+'\\DB_FULL', 0,
                               KEY_ALL_ACCESS | KEY_WOW64_64KEY)
 
     RegCloseKey(reg_handle)
 
     wazuh_log_monitor.start(timeout=monitor_timeout, error_message=ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
-                            callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE))
+                            callback=generate_monitoring_callback(CB_DATABASE_FULL_COULD_NOT_INSERT_KEY))
 
     key_entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                           callback=generate_monitoring_callback(CB_COUNT_REGISTRY_ENTRIES),

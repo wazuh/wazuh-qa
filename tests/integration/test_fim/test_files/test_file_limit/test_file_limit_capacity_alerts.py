@@ -51,6 +51,7 @@ references:
 
 pytest_args:
     - fim_mode:
+        scheduled: Monitoring is done after a configured interval
         realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
@@ -72,6 +73,7 @@ from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGU
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT,
                                        ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
                                        ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_CAPACITY, SCHEDULED_MODE)
@@ -118,8 +120,8 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('percentage', [(0), (80), (90)])
-def test_file_limit_capacity_alert(percentage, get_configuration, configure_environment, restart_syscheckd,
-                                   wait_for_fim_start):
+def test_file_limit_capacity_alert(percentage, configure_local_internal_options_module, get_configuration,
+                                   configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events for different capacity thresholds limits when
                  using the 'schedule' monitoring mode. For this purpose, the test will monitor a directory in which
@@ -128,7 +130,7 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
                  the total and when the number is less than that percentage. Finally, the test will verify that
                  on the FIM event, inodes and monitored files number match.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -136,6 +138,9 @@ def test_file_limit_capacity_alert(percentage, get_configuration, configure_envi
         - percentage:
             type: int
             brief: Percentage of testing files to be created.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
