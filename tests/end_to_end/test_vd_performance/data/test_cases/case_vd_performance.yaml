@@ -24,3 +24,8 @@
     er a long period
   configuration_parameters: null
   metadata: null
+
+- name: feed_size_increases
+  description: Check performance while updating the feed several times increasing its size
+  configuration_parameters: null
+  metadata: null
