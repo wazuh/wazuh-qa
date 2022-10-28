@@ -44,6 +44,10 @@ references:
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
 
 pytest_args:
+    - fim_mode:
+        scheduled: monitoring is done at a preconfigured interval.
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
         0: Basic functionalities and quick to perform.
         1: Functionalities of medium complexity.
@@ -77,6 +81,7 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_time
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
+# This assigns the monitored_dir during runtime depending on the OS, cannot be added to yaml
 for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['MONITORED_DIR'] = fim.MONITORED_DIR_1
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
@@ -156,6 +161,7 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_
                                       error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     # Calculate timedelta between start of sync and last message.
+    # Add 1 second to take into account the first second from the scan
     delta = (results[-1] - sync_time).total_seconds() + 1
 
     # Assert that sync took less time that interval and max_interval

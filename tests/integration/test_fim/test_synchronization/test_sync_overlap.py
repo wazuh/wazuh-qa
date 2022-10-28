@@ -42,12 +42,15 @@ os_version:
     - Ubuntu Bionic
     - Windows Server 2019
 
-
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
     - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#synchronization
 
 pytest_args:
+    - fim_mode:
+        scheduled: monitoring is done at a preconfigured interval.
+        realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
+        whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
         0: Basic functionalities and quick to perform.
         1: Functionalities of medium complexity.
@@ -80,6 +83,7 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_over
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
+# This assigns the monitored dir during runtime depending on the OS, cannot be added to yaml
 for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['MONITORED_DIR'] = fim.MONITORED_DIR_1
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
@@ -188,7 +192,10 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
 
     # Check when sync ends sync_interval is returned to normal after response_timeout since last message.
     if not metadata['lower']:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
+        result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
                                 callback=generate_monitoring_callback(fim.CB_SYNC_INTERVAL_RESET),
                                 error_message=fim.ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
                                 update_position=True).result()
+        
+        assert int(result) == int(metadata['interval']), f"Invalid value for interval: {result}, it should be reset to\
+                                                           interval: {metadata['interval']}"
