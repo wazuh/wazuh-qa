@@ -187,15 +187,15 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
                                                                          cannot be more than MAX_INTERVAL:\
                                                                          {metadata['max_interval']}"
         else:
-            assert int(new_interval) <= int(metadata['interval']), f"Invalid value for interval: {new_interval}, cannot\
+            assert int(new_interval) <= int(metadata['interval']), f"Invalid value for interval {new_interval}, cannot\
                                                                      be more than interval: {metadata['interval']}"
 
     # Check when sync ends sync_interval is returned to normal after response_timeout since last message.
     if not metadata['lower']:
         result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
-                                callback=generate_monitoring_callback(fim.CB_SYNC_INTERVAL_RESET),
-                                error_message=fim.ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
-                                update_position=True).result()
-        
+                                         callback=generate_monitoring_callback(fim.CB_SYNC_INTERVAL_RESET),
+                                         error_message=fim.ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
+                                         update_position=True).result()
+
         assert int(result) == int(metadata['interval']), f"Invalid value for interval: {result}, it should be reset to\
                                                            interval: {metadata['interval']}"
