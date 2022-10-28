@@ -102,7 +102,6 @@ CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
 CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
 
 
-
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
 ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive expected "real-time Whodata engine started" event'
